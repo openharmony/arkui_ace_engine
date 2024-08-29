@@ -4231,7 +4231,9 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     record.replacedRange = range;
     record.startOffset = textSelector_.SelectNothing() ? caretPosition_ : textSelector_.GetTextStart();
     record.newPreviewContent = previewTextValue;
+    auto spanCountBefore = spans_.size();
     ProcessInsertValue(previewTextValue, OperationType::IME, false);
+    record.isSpanSplit = spans_.size() - spanCountBefore > 1;
     record.previewContent = record.newPreviewContent;
     auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
     record.endOffset = record.startOffset + length;
@@ -4317,12 +4319,38 @@ const PreviewTextInfo RichEditorPattern::GetPreviewTextInfo() const
     return info;
 }
 
+void RichEditorPattern::MergeAdjacentSpans(int32_t caretPosition)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiNodes = host->GetChildren();
+    auto it = std::find_if(uiNodes.begin(), uiNodes.end(), [caretPosition](const RefPtr<UINode>& uiNode) {
+        auto spanNode = DynamicCast<SpanNode>(uiNode);
+        CHECK_NULL_RETURN(spanNode, false);
+        return spanNode->GetSpanItem()->position == caretPosition;
+    });
+    CHECK_NULL_VOID(it != uiNodes.end());
+    auto beforeSpanNode = DynamicCast<SpanNode>(*it);
+    ++it;
+    CHECK_NULL_VOID(it != uiNodes.end());
+    auto afterSpanNode = DynamicCast<SpanNode>(*it);
+    CHECK_NULL_VOID(beforeSpanNode && afterSpanNode);
+    CHECK_NULL_VOID(beforeSpanNode->GetTag() == V2::SPAN_ETS_TAG && afterSpanNode->GetTag() == V2::SPAN_ETS_TAG);
+    auto beforeSpanItem = beforeSpanNode->GetSpanItem();
+    auto afterSpanItem = afterSpanNode->GetSpanItem();
+    CHECK_NULL_VOID(beforeSpanItem && afterSpanItem);
+    beforeSpanNode->UpdateContent(beforeSpanItem->content + afterSpanItem->content);
+    afterSpanItem->content.clear();
+    RemoveEmptySpans();
+}
+
 void RichEditorPattern::FinishTextPreview()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreview byImf");
     if (previewTextRecord_.previewContent.empty()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewContent is empty");
         RemoveEmptySpans();
+        IF_TRUE(previewTextRecord_.isSpanSplit, MergeAdjacentSpans(caretPosition_));
         previewTextRecord_.Reset();
         return;
     }
