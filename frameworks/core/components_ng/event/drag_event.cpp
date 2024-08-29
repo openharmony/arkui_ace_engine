@@ -462,6 +462,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         TAG_LOGI(AceLogTag::ACE_DRAG, "Tragger pan onReject");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        actuator->ResetResponseRegion();
         if ((hasContextMenuUsingGesture && !actuator->GetIsNotInPreviewState()) || !actuator->GetGatherNode()) {
             return;
         }
@@ -2348,7 +2349,7 @@ void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>&
 
 void DragEventActuator::SetResponseRegionFull()
 {
-    if (!IsNeedGather()) {
+    if (!IsNeedGather() || isResponseRegionFull) {
         return;
     }
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -2380,12 +2381,9 @@ void DragEventActuator::SetResponseRegionFull()
 
 void DragEventActuator::ResetResponseRegion()
 {
-    if (!IsNeedGather()) {
-        return;
-    }
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
     if (isResponseRegionFull) {
+        auto gestureHub = gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
         gestureHub->SetResponseRegion(responseRegion_);
         isResponseRegionFull = false;
     }
