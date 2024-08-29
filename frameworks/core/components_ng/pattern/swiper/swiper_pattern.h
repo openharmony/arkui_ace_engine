@@ -432,6 +432,12 @@ public:
     void StopSpringAnimationImmediately();
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
+    void BuildAxisInfo(std::unique_ptr<JsonValue>& json);
+    void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
+    void BuildIndicatorTypeInfo(std::unique_ptr<JsonValue>& json);
+    void BuildPanDirectionInfo(std::unique_ptr<JsonValue>& json);
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
@@ -596,6 +602,11 @@ public:
     bool IsPropertyAnimationRunning() const
     {
         return usePropertyAnimation_;
+    }
+
+    bool IsTranslateAnimationRunning() const
+    {
+        return translateAnimationIsRunning_;
     }
 
     bool IsTouchDown() const
@@ -818,6 +829,7 @@ private:
 
     void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnScrollDragEndRecursive() override;
 
     /**
      * @brief Notifies the parent component that the scroll has started at the specified position.
@@ -844,6 +856,8 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void HandleTouchBottomLoop();
+    void HandleTouchBottomLoopOnRTL();
+    void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
     std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;

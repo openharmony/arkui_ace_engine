@@ -904,6 +904,8 @@ public:
 
     bool IsTextEditableForStylus() override;
 
+    NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+
 protected:
     bool CanStartAITask() override;
 

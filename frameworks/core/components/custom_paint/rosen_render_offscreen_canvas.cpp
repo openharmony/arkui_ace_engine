@@ -1004,7 +1004,9 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
     tempCanvas.Scale(1.0 / viewScale, 1.0 / viewScale);
     tempCanvas.DrawBitmap(bitmap_, 0.0f, 0.0f);
 
-    auto& skBitmap = tempCache.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
+    auto skiaBitmap = tempCache.GetImpl<Rosen::Drawing::SkiaBitmap>();
+    CHECK_NULL_RETURN(skiaBitmap, UNSUPPORTED);
+    auto& skBitmap = skiaBitmap->ExportSkiaBitmap();
     SkPixmap src;
     bool success = skBitmap.peekPixels(&src);
 #endif

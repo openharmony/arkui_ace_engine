@@ -250,4 +250,25 @@ void LinearIndicatorPattern::DumpInfo()
         std::string("count"), layoutProperty->GetProgressCountValue(theme->GetDefaultProgressCount()));
 }
 
+void LinearIndicatorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<LinearIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<NG::LinearIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    json->Put("indicatorStyle.space", layoutProperty->GetSpaceValue(theme->GetDefaultSpace()).ToString().c_str());
+    json->Put("indicatorStyle.strokeWidth",
+        layoutProperty->GetStrokeWidthValue(theme->GetDefaultStrokeWidth()).ToString().c_str());
+    json->Put("indicatorStyle.strokeRadius",
+        layoutProperty->GetStrokeRadiusValue(theme->GetDefaultStrokeRadius()).ToString().c_str());
+    json->Put("indicatorStyle.trackBackgroundColor",
+        layoutProperty->GetTrackBackgroundColorValue(theme->GetTrackBackgroundColor()).ColorToString().c_str());
+    json->Put("indicatorStyle.trackColor",
+        layoutProperty->GetTrackColorValue(theme->GetTrackColor()).ColorToString().c_str());
+
+    json->Put("indicatorLoop", layoutProperty->GetLoopValue(theme->GetDefaultLoop()) ? "True" : "False");
+    json->Put("count", layoutProperty->GetProgressCountValue(theme->GetDefaultProgressCount()));
+}
 } // namespace OHOS::Ace::NG

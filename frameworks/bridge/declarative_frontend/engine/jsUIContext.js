@@ -604,6 +604,20 @@ class UIContext {
         return windowName
     }
 
+    getWindowWidthBreakpoint() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const breakpoint = getUINativeModule().common.getWindowWidthBreakpoint();
+        __JSScopeUtil__.restoreInstanceId();
+        return breakpoint
+    }
+
+    getWindowHeightBreakpoint() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const breakpoint = getUINativeModule().common.getWindowHeightBreakpoint();
+        __JSScopeUtil__.restoreInstanceId();
+        return breakpoint;
+    }
+
     clearResourceCache() {
         getUINativeModule().resource.clearCache();
     }
@@ -631,6 +645,11 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
             return SwiperDynamicSyncScene.createInstances(nodeRef);
+        }
+        if (dynamicSceneInfo.tag == 'Marquee') {
+            __JSScopeUtil__.restoreInstanceId();
+            let nodeRef = dynamicSceneInfo.nativeRef;
+            return MarqueeDynamicSyncScene.createInstances(nodeRef);
         }
         __JSScopeUtil__.restoreInstanceId();
         return [];
@@ -703,6 +722,35 @@ class SwiperDynamicSyncScene extends DynamicSyncScene {
     setFrameRateRange(frameRateRange) {
         this.frameRateRange = { ...frameRateRange };
         getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
+    }
+}
+
+class MarqueeDynamicSyncScene extends DynamicSyncScene {
+    /**
+     * Create instances of MarqueeDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     * @returns {MarqueeDynamicSyncScene[]} Array of MarqueeDynamicSyncScene instances.
+     */
+    static createInstances(nodeRef) {
+        return [new MarqueeDynamicSyncScene(nodeRef, 1)];
+    }
+
+    /**
+     * Construct new instance of MarqueeDynamicSyncScene.
+     * @param {Object} nodeRef - obtained on the c++ side.
+     */
+    constructor(nodeRef, type) {
+        super(nodeRef, { min: 0, max: 120, expected: 120 });
+        this.type = type;
+    }
+
+    /**
+     * Set the frame rate range.
+     * @param {Object} frameRateRange - The new frame rate range.
+     */
+    setFrameRateRange(frameRateRange) {
+        this.frameRateRange = { ...frameRateRange }; // 确保每个实例有独立的frameRateRange
+        getUINativeModule().setMarqueeFrameRateRange(this.nodePtr, frameRateRange, this.type);
     }
 }
 

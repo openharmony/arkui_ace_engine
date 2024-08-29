@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
+#include <securec.h>
 
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 
 namespace OHOS::Ace::Framework {
+constexpr double DIFF = 1e-10;
+constexpr int32_t PIXEL_SIZE = 4;
 void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
 {
     auto jsCanvasImageData = Referenced::MakeRefPtr<JSCanvasImageData>();
@@ -27,25 +30,65 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     if (args.Length() < 2) {
         return;
     }
-    int32_t width = 0;
-    int32_t height = 0;
+    int32_t finalWidth = 0;
+    int32_t finalHeight = 0;
     int32_t unit = 0;
+
     if (args.GetInt32Arg(3, unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
         jsCanvasImageData->SetUnit(CanvasUnit::PX);
     }
-    if (args[0]->IsNumber() && args[1]->IsNumber()) {
-        JSViewAbstract::ParseJsInteger(args[0], width);
-        JSViewAbstract::ParseJsInteger(args[1], height);
-        double density = jsCanvasImageData->GetDensity();
-        width *= density;
-        height *= density;
-        jsCanvasImageData->width_ = width;
-        jsCanvasImageData->height_ = height;
+    if (!jsCanvasImageData->GetImageDataSize(args, finalWidth, finalHeight)) {
+        return;
     }
+    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    jsCanvasImageData->width_ = finalWidth;
+    jsCanvasImageData->height_ = finalHeight;
 
-    if (args.Length() >= 3 && args[2]->IsUint8ClampedArray()) {
-        jsCanvasImageData->colorArray_ = args[2];
+    if (args.Length() == 2) {
+        JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(result);
+        args.SetSize(static_cast<size_t>(arrayBuffer->ByteLength()));
+        // return the transparent black image
+        auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+        if ((arrayBuffer->ByteLength() != 0) &&
+            (memset_s(buffer, arrayBuffer->ByteLength(), 0, arrayBuffer->ByteLength()))) {
+            return;
+        }
+        jsCanvasImageData->colorArray_ =
+            JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
+    } else if (args.Length() >= 3 && args[2]->IsUint8ClampedArray()) {
+        JSRef<JSUint8ClampedArray> data = JSRef<JSUint8ClampedArray>::Cast(args[2]);
+        auto buffer = data->GetArrayBuffer();
+        args.SetSize(static_cast<size_t>(buffer->ByteLength()));
+        if ((static_cast<CanvasUnit>(unit) == CanvasUnit::PX) && (buffer->ByteLength() != result)) {
+            TAG_LOGE(AceLogTag::ACE_CANVAS,
+                "Failed to construct 'ImageData': The input data length is not equal to (4 * widthPX * heightPX).");
+            return;
+        }
+        jsCanvasImageData->colorArray_ = data;
     }
+}
+
+bool JSCanvasImageData::GetImageDataSize(const JSCallbackInfo& args, int32_t& finalWidth, int32_t& finalHeight)
+{
+    double width = 0.0;
+    double height = 0.0;
+    double density = GetDensity();
+    args.GetDoubleArg(0, width);
+    args.GetDoubleArg(1, height);
+    width *= density;
+    height *= density;
+    if (NonPositive(width) || NonPositive(height)) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS,
+            "Failed to construct 'ImageData': The input 'width' or 'height' is non-positive number or not number.");
+        return false;
+    }
+    // Integer Overflow.
+    if ((width > INT32_MAX) || (height > INT32_MAX) || ((width > 0) && (height > (INT32_MAX / width / PIXEL_SIZE)))) {
+        return false;
+    }
+    finalWidth = static_cast<int32_t>(width + DIFF);
+    finalHeight = static_cast<int32_t>(height + DIFF);
+    return true;
 }
 
 void JSCanvasImageData::Destructor(JSCanvasImageData* controller)

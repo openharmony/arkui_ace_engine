@@ -389,9 +389,8 @@ private:
     void DumpInfo() override;
 
     RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
-    void SetRelatedInfoOnXAxis();
     void UpdateTitlePositionInfo();
-    float GetNavLeftMargin(float parentWidth);
+    float GetNavLeftPadding(float parentWidth);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;

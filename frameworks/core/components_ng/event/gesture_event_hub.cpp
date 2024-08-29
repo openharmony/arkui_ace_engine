@@ -230,6 +230,59 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
     return current;
 }
 
+void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t parallelIndex, const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host)
+{
+    if (current) {
+        recognizers.push_front(current);
+    }
+    if (recognizers.size() > 1) {
+        if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
+            externalParallelRecognizer_.emplace_back(AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
+        } else {
+            externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
+        }
+        externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
+        externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
+        externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+        externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
+        current = externalParallelRecognizer_[parallelIndex];
+        parallelIndex++;
+    } else if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    }
+}
+
+void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t exclusiveIndex, const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority)
+{
+    if (current) {
+        if (priority == GesturePriority::Low) {
+            recognizers.push_front(current);
+        } else {
+            recognizers.push_back(current);
+        }
+    }
+
+    if (recognizers.size() > 1) {
+        if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
+            externalExclusiveRecognizer_.emplace_back(AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
+        } else {
+            externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
+        }
+        externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
+        externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
+        externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+        externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
+        current = externalExclusiveRecognizer_[exclusiveIndex];
+        exclusiveIndex++;
+    } else if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    }
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
@@ -275,50 +328,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto priority = recognizer->GetPriority();
         std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
         if (priority == GesturePriority::Parallel) {
-            if (current) {
-                recognizers.push_front(current);
-            }
-            if (recognizers.size() > 1) {
-                if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
-                    externalParallelRecognizer_.emplace_back(
-                        AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
-                } else {
-                    externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
-                }
-                externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
-                externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-                externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
-                externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
-                current = externalParallelRecognizer_[parallelIndex];
-                parallelIndex++;
-            } else if (recognizers.size() == 1) {
-                current = *recognizers.begin();
-            }
+            ProcessParallelPriorityGesture(current, recognizers, parallelIndex, offset, touchId, targetComponent, host);
         } else {
-            if (current) {
-                if (priority == GesturePriority::Low) {
-                    recognizers.push_front(current);
-                } else {
-                    recognizers.push_back(current);
-                }
-            }
-
-            if (recognizers.size() > 1) {
-                if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
-                    externalExclusiveRecognizer_.emplace_back(
-                        AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
-                } else {
-                    externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
-                }
-                externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
-                externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
-                externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
-                externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
-                current = externalExclusiveRecognizer_[exclusiveIndex];
-                exclusiveIndex++;
-            } else if (recognizers.size() == 1) {
-                current = *recognizers.begin();
-            }
+            ProcessExternalExclusiveRecognizer(
+                current, recognizers, exclusiveIndex, offset, touchId, targetComponent, host, priority);
         }
     }
 
@@ -623,6 +636,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
 RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap)
 {
     float preScale = 1.0f;
+    CHECK_NULL_RETURN(dragEventActuator_, defaultPixelMap);
     RefPtr<PixelMap> preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
     if (preScale == targetScale && preScaledPixelMap != nullptr) {
         return preScaledPixelMap;
@@ -799,6 +813,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     dragDropManager->SetDraggingPressedState(true);
     if (dragPreviewInfo.inspectorId != "") {
         auto dragPreviewPixelMap = GetDragPreviewPixelMap();
+        TAG_LOGI(AceLogTag::ACE_DRAG, "InspectorId exist, get thumbnail.");
         if (dragPreviewPixelMap == nullptr) {
             dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
         }
@@ -810,6 +825,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Non-mouse dragging, get thumbnail.");
                 dragDropInfo.pixelMap = dragPreviewPixelMap_;
                 OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
                 return;
@@ -819,6 +835,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     if (dragPreviewInfo.pixelMap != nullptr) {
         dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+        TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap exist, get thumbnail.");
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
         return;
     } else if (dragPreviewInfo.customNode != nullptr) {
@@ -827,10 +844,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
                             frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
             ContainerScope scope(id);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
             if (pixelMap != nullptr) {
                 dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             }
@@ -851,6 +870,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
 #endif
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropInfo is empty.");
     OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
 }
 
@@ -943,7 +963,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    bool isStartDraggingFromSubWindow = (pipeline != mainPipeline);
+    auto window = SubwindowManager::GetInstance()->ShowPreviewNG(isStartDraggingFromSubWindow);
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);
@@ -1025,6 +1047,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
+    dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
+    dragPreviewPixelMap_ = nullptr;
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());

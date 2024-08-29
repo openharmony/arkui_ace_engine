@@ -196,10 +196,10 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    void DumpTree(int32_t depth);
+    void DumpTree(int32_t depth, bool hasJson = false);
     virtual bool IsContextTransparent();
 
-    bool DumpTreeById(int32_t depth, const std::string& id);
+    bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
 
     const std::string& GetTag() const
     {
@@ -782,7 +782,9 @@ protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {

@@ -251,7 +251,7 @@ export struct SubHeader {
     try {
       let uiContext: UIContext = this.getUIContext();
       let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if(!this.isFollowingSystemFontScale) {
+      if (!this.isFollowingSystemFontScale) {
         return 1;
       }
       return Math.min(systemFontScale, this.appMaxFontScale);
@@ -303,23 +303,7 @@ export struct SubHeader {
         })
         .width('100%')
 
-        Row() {
-          this.rightArea();
-        }
-        .margin({
-          bottom: $r('sys.float.padding_level4'),
-        })
-        .padding({
-          // 'sys.float.margin_left' id,value: 16vp
-          start: LengthMetrics.vp((this.contentMargin ? (this.contentMargin.start? this.contentMargin.start.value: 0) :
-          Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
-          // 'sys.float.margin_right' id,value: 16vp
-          end: this.contentMargin ? this.contentMargin.end : LengthMetrics.vp(Util.getNumberByResource(125830937,
-            LEFT_ICON_SIZE_NUMBER)),
-        })
-        .justifyContent(FlexAlign.Start)
-        .width('100%')
-        .rightAreaClickEvent()
+        this.rightAreaParentAging();
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .padding(this.getAreaPadding())
@@ -329,27 +313,88 @@ export struct SubHeader {
           this.leftArea();
         }
         .margin({
-          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : ''
+          top: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level8') : '',
+          bottom: this.fontSize >= MIN_FONT_SIZE ? $r('sys.float.padding_level4') : '',
         })
         .width('100%')
         .flexShrink(1)
 
-        Row() {
-          this.rightArea();
-        }
-        .justifyContent(FlexAlign.End)
-        .alignItems(VerticalAlign.Bottom)
-        .constraintSize({
-          maxWidth: this.getRightAreaMaxWidth(),
-          minWidth: this.getRightAreaMinWidth(),
-          minHeight: MIN_HOT_AREA_LENGTH,
-        })
-        .flexShrink(0)
-        .rightAreaClickEvent()
+        this.rightAreaParent();
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .margin(this.contentMargin ?? this.subHeaderMargin)
       .padding(this.getAreaPadding())
+    }
+  }
+
+  @Styles
+  private rightAreaParentAgingStyles() {
+    .margin({
+      bottom: $r('sys.float.padding_level4'),
+    })
+    .padding({
+      // 'sys.float.margin_left' id,value: 16vp
+      start: LengthMetrics.vp((this.contentMargin ? (this.contentMargin.start ? this.contentMargin.start.value : 0) :
+      Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
+      // 'sys.float.margin_right' id,value: 16vp
+      end: this.contentMargin ? this.contentMargin.end :
+      LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
+    })
+    .width('100%')
+    .accessibilityLevel(this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW ?
+      'yes' : 'no')
+  }
+
+  @Builder
+  rightAreaParentAging(): void {
+    if (this.operationType === OperationType.BUTTON) {
+      Button({ type: ButtonType.Normal, stateEffect: false }) {
+        this.rightArea();
+      }
+      .align(Alignment.Start)
+      .rightAreaClickEvent()
+      .rightAreaParentAgingStyles()
+      .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+    } else {
+      Row() {
+        this.rightArea();
+      }
+      .justifyContent(FlexAlign.Start)
+      .rightAreaClickEvent()
+      .rightAreaParentAgingStyles()
+    }
+  }
+
+  @Styles
+  private rightAreaParentStyles() {
+    .constraintSize({
+      maxWidth: this.getRightAreaMaxWidth(),
+      minWidth: this.getRightAreaMinWidth(),
+      minHeight: MIN_HOT_AREA_LENGTH,
+    })
+    .flexShrink(0)
+    .accessibilityLevel(this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW ?
+      'yes' : 'no')
+  }
+
+  @Builder
+  rightAreaParent(): void {
+    if (this.operationType === OperationType.BUTTON) {
+      Button({ type: ButtonType.Normal, stateEffect: false }) {
+        this.rightArea();
+      }
+      .align(Alignment.BottomEnd)
+      .rightAreaClickEvent()
+      .rightAreaParentStyles()
+      .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+    } else {
+      Row() {
+        this.rightArea();
+      }
+      .justifyContent(FlexAlign.End)
+      .alignItems(VerticalAlign.Bottom)
+      .rightAreaClickEvent()
+      .rightAreaParentStyles()
     }
   }
 
@@ -916,9 +961,19 @@ struct SingleIconStyle {
 
   private iconResponseRegion(): Rectangle {
     if (this.isSingleIcon) {
-      return { x: SINGLE_ICON_REGION_X, y: ICON_REGION_Y, width: MIN_HOT_AREA_LENGTH, height: MIN_HOT_AREA_LENGTH };
+      return {
+        x: SINGLE_ICON_REGION_X,
+        y: ICON_REGION_Y,
+        width: MIN_HOT_AREA_LENGTH,
+        height: MIN_HOT_AREA_LENGTH
+      };
     }
-    return { x: ICON_REGION_X, y: ICON_REGION_Y, width: MULTI_ICON_REGION_WIDTH, height: MIN_HOT_AREA_LENGTH };
+    return {
+      x: ICON_REGION_X,
+      y: ICON_REGION_Y,
+      width: MULTI_ICON_REGION_WIDTH,
+      height: MIN_HOT_AREA_LENGTH
+    };
   }
 
   private fontSizeValue(item: ContentIconOption): Length {

@@ -304,6 +304,7 @@ public:
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
     float GetSheetTopSafeArea();
+    float UpdateSheetTransitionOffset();
 
     // initial drag gesture event
     void InitPanEvent();
@@ -456,7 +457,7 @@ public:
     {
         return sheetKey_;
     }
-    
+
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -522,6 +523,11 @@ public:
 
     void ProcessColumnRect(float height = 0.0f);
 
+    bool WillSpringBack() const
+    {
+        return isSpringBack_;
+    }
+
     void SetShowState(bool show)
     {
         show_ = show;
@@ -540,6 +546,15 @@ public:
     bool IsDragging() const
     {
         return isDrag_;
+    }
+
+    void UpdateMaskBackgroundColor();
+
+    void UpdateMaskBackgroundColorRender();
+
+    Color GetMaskBackgroundColor() const
+    {
+        return sheetMaskColor_;
     }
 
     void SetFoldStatusChanged(bool isFoldStatusChanged)
@@ -588,6 +603,7 @@ public:
     void GetBuilderInitHeight();
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     // Nestable Scroll
     Axis GetAxis() const override
@@ -600,6 +616,8 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    bool IsScrollOutOfBoundary();
+    RefPtr<FrameNode> GetScrollNode();
 
     bool IsSheetBottomStyle()
     {
@@ -609,7 +627,7 @@ public:
         }
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
-    
+
     uint32_t GetDetentsIndex() const
     {
         return detentsFinalIndex_;
@@ -733,6 +751,7 @@ private:
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
+    bool isSpringBack_ = false; // sheet rebound
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;
@@ -741,6 +760,7 @@ private:
 
     float preDetentsHeight_ = 0.0f;
     float scale_ = 1.0;
+    Color sheetMaskColor_ = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace::NG
 

@@ -211,6 +211,7 @@ void MagnifierController::ChangeMagnifierVisibility(const bool& visible)
 
 void MagnifierController::RemoveMagnifierFrameNode()
 {
+    magnifierNodeExist_ = false;
     if (isShowMagnifier_) {
         removeFrameNode_ = true;
         UpdateShowMagnifier();

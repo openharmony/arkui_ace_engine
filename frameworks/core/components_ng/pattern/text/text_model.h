@@ -41,9 +41,9 @@ struct TextDetectConfig {
     std::string types;
     std::function<void(const std::string&)> onResult;
     Color entityColor;
-    TextDecoration entityDecorationType;
+    TextDecoration entityDecorationType = TextDecoration::UNDERLINE;
     Color entityDecorationColor;
-    TextDecorationStyle entityDecorationStyle;
+    TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
 
     TextDetectConfig()
     {

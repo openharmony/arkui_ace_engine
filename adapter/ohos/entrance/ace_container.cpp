@@ -520,6 +520,17 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             ContainerScope scope(instanceId);
             auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_RETURN(subPipelineContext, false);
+            auto textfieldMgr = DynamicCast<NG::TextFieldManagerNG>(subPipelineContext->GetTextFieldManager());
+            if (textfieldMgr) {
+                auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
+                auto lastRequestKeyboardNode = DynamicCast<NG::FrameNode>(
+                    ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
+                if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
+                    textfieldMgr->OnBackPressed()) {
+                    LOGI("textfield consumed backpressed event");
+                    return true;
+                }
+            }
             auto overlayManager = subPipelineContext->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
             if (overlayManager->RemoveOverlayInSubwindow()) {
@@ -819,6 +830,8 @@ void AceContainer::InitializeCallback()
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
+            } else if (event.IsPenHoverEvent()) {
+                context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
                     context->OnTouchEvent(event, node);

@@ -4835,13 +4835,11 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(accessibilityManager);
     if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
         webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED ||
+               eventType == AccessibilityEventType::CLICK) {
+        webPattern->ClearFocusedAccessibilityId();
+    } else if (eventType == AccessibilityEventType::PAGE_CHANGE || eventType == AccessibilityEventType::SCROLL_END) {
         webPattern->UpdateFocusedAccessibilityId();
-    }
-    if (accessibilityId <= 0) {
-        auto webNode = webPattern->GetHost();
-        CHECK_NULL_VOID(webNode);
-        accessibilityId = webNode->GetAccessibilityId();
     }
     if (eventType == AccessibilityEventType::FOCUS) {
         TextBlurReportByFocusEvent(accessibilityId);
@@ -6658,7 +6656,6 @@ void WebDelegate::SetAccessibilityState(bool state)
                     std::make_shared<AccessibilityEventListenerImpl>();
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             }
         },
@@ -7132,6 +7129,12 @@ void WebDelegate::OnTextSelected()
         OnContextMenuHide("");
         return delegate->nweb_->OnTextSelected();
     }
+}
+
+void WebDelegate::OnDestroyImageAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->OnDestroyImageAnalyzerOverlay();
 }
 
 NG::WebInfoType WebDelegate::GetWebInfoType()

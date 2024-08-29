@@ -829,6 +829,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkTextTimerComponent(node, type);
       })
     }],
+    ['Marquee', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent(node, type);
+      })
+    }],
+    ['TextArea', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent(node, type);
+      })
+    }],
   ]
 )
 

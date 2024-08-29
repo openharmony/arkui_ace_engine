@@ -1307,6 +1307,7 @@ void TitleBarPattern::OnCoordScrollEnd()
         // The finalHeight is bigger than the maxTitleBarHeight_, so animate to max title.
         SpringAnimation(finalHeight - maxTitleBarHeight_, 0);
     }
+
     // update current offsetX after drag finish
     currentTitleOffsetX_ = tempTitleOffsetX_;
     isScrolling_ = false;
@@ -1560,6 +1561,8 @@ void TitleBarPattern::InitSideBarButtonUpdateCallbackIfNeeded()
     CHECK_NULL_VOID(sideBarContainerNode);
     auto sideBarPattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
     CHECK_NULL_VOID(sideBarPattern);
+
+    // this callback will be called when sideBar is changed(position or size).
     auto updateSideBarInfo = [weak = WeakClaim(this)] (const RefPtr<FrameNode>& sideBarContainerNode) {
         auto titleBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(titleBarPattern);
@@ -1569,15 +1572,23 @@ void TitleBarPattern::InitSideBarButtonUpdateCallbackIfNeeded()
         CHECK_NULL_VOID(layoutProperty);
         auto sideBarPattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
         CHECK_NULL_VOID(sideBarPattern);
+        auto titleBarNode = titleBarPattern->GetHost();
+        CHECK_NULL_VOID(titleBarNode);
+        auto titleBarAbsoluteRect = titleBarNode->GetTransformRectRelativeToWindow();
+        auto controlButtonNode = sideBarPattern->GetControlButtonNode();
+        CHECK_NULL_VOID(controlButtonNode);
+        auto controlButtonAbsoluteRect = controlButtonNode->GetTransformRectRelativeToWindow();
         /*
          * conditions that do not need to avoid sideBar:
          * 1. control button is hide
          * 2. control button positon is SideBarPosition::END
          * 3. control button size or position is customed
+         * 4. titleBar is not itersectWith sideBarButton
         */
         if (!layoutProperty->GetShowControlButton().value_or(true) ||
             layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START) == SideBarPosition::END ||
-            sideBarPattern->IsControlButtonCustomed()) {
+            sideBarPattern->IsControlButtonCustomed() ||
+            !titleBarAbsoluteRect.IsIntersectWith(controlButtonAbsoluteRect)) {
             // if needToAvoidSidebar flag changed, reLayout is needed to recover title offsetX
             if (lastNeedToAvoidSideBar) {
                 // update offsetX info After the sideBar position and the needToAvoidSideBar flag change
@@ -1586,16 +1597,6 @@ void TitleBarPattern::InitSideBarButtonUpdateCallbackIfNeeded()
                 CHECK_NULL_VOID(titleBarNode);
                 titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
-            return;
-        }
-        auto titleBarNode = titleBarPattern->GetHost();
-        CHECK_NULL_VOID(titleBarNode);
-        auto titleBarAbsoluteRect = titleBarNode->GetTransformRectRelativeToWindow();
-        auto controlButtonNode = sideBarPattern->GetControlButtonNode();
-        CHECK_NULL_VOID(controlButtonNode);
-        auto controlButtonAbsoluteRect = controlButtonNode->GetTransformRectRelativeToWindow();
-        // if title is not intersectWith sideBar, we don't need to avoid it
-        if (!titleBarAbsoluteRect.IsIntersectWith(controlButtonAbsoluteRect)) {
             return;
         }
 
@@ -1607,7 +1608,7 @@ void TitleBarPattern::InitSideBarButtonUpdateCallbackIfNeeded()
             auto sideBarGeometryNode = sideBarContainerNode->GetGeometryNode();
             CHECK_NULL_VOID(sideBarGeometryNode);
             auto sideBarWidth = sideBarGeometryNode->GetFrameSize().Width();
-            // title offsetX when dragging is the absolute value, so buttonRect info as well need to be the absolute value
+            // title offsetX when dragging is the absolute value, so buttonRect info need to be the absolute value
             buttonOffset.SetX(sideBarWidth - buttonOffset.GetX() - buttonSize.Width());
         }
         titleBarPattern->UpdateSideBarControlButtonInfo(true, buttonOffset, buttonSize);
@@ -1642,41 +1643,14 @@ RefPtr<FrameNode> TitleBarPattern::GetParentSideBarContainerNode(const RefPtr<Ti
     return AceType::DynamicCast<FrameNode>(currentNode);
 }
 
-void TitleBarPattern::SetRelatedInfoOnXAxis()
-{
-    // init the title offsetX info referring to title offsetY
-    defaultTitleOffsetX_ = currentTitleOffsetX_;
-    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(host);
-
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
-    CHECK_NULL_VOID(navBarNode);
-    auto isCustom = navBarNode->GetPrevTitleIsCustomValue(false);
-    auto titleBarNode = navBarNode->GetTitleBarNode();
-    auto frameNode = DynamicCast<FrameNode>(titleBarNode);
-    CHECK_NULL_VOID(frameNode);
-    auto titleWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
-    minTitleOffsetX_ = isCustom ? 0.0f : GetNavLeftMargin(titleWidth);
-    if (needToAvoidSideBar_) {
-        maxTitleOffsetX_ = controlButtonRect_.GetX() + controlButtonRect_.Width() +
-            DISTANCE_FROM_SIDE_BAR_BUTTON.ConvertToPx();
-        moveRatioX_ = (maxTitleOffsetX_ - minTitleOffsetX_) /
-                    (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-        titleMoveDistanceX_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatioX_;
-    } else {
-        maxTitleOffsetX_ = minTitleOffsetX_;
-        moveRatioX_ = 0.0f;
-        titleMoveDistanceX_ = 0.0f;
-    }
-}
-
 void TitleBarPattern::UpdateTitlePositionInfo()
 {
     defaultTitleBarHeight_ = currentTitleBarHeight_;
+
     // init the title offsetY info
     defaultTitleOffsetY_ = currentTitleOffsetY_;
     SetMaxTitleBarHeight();
-    SetTempTitleBarHeight(0);
+    SetTempTitleBarHeight(0.0f);
     minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
     maxTitleOffsetY_ = initialTitleOffsetY_;
     moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
@@ -1695,7 +1669,7 @@ void TitleBarPattern::UpdateTitlePositionInfo()
     auto frameNode = DynamicCast<FrameNode>(titleBarNode);
     CHECK_NULL_VOID(frameNode);
     auto titleWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
-    minTitleOffsetX_ = isCustom ? 0.0f : GetNavLeftMargin(titleWidth);
+    minTitleOffsetX_ = isCustom ? 0.0f : GetNavLeftPadding(titleWidth);
     if (needToAvoidSideBar_) {
         maxTitleOffsetX_ = controlButtonRect_.GetX() + controlButtonRect_.Width() +
             DISTANCE_FROM_SIDE_BAR_BUTTON.ConvertToPx();
@@ -1728,14 +1702,14 @@ void TitleBarPattern::UpdateOffsetXToAvoidSideBar()
     currentTitleOffsetX_ = tempTitleOffsetX_;
 }
 
-float TitleBarPattern::GetNavLeftMargin(float parentWidth)
+float TitleBarPattern::GetNavLeftPadding(float parentWidth)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, 0.0f);
-    auto navLeftMargin = theme->GetMaxPaddingStart().ConvertToPx();
+    auto navLeftPadding = theme->GetMaxPaddingStart().ConvertToPx();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        navLeftMargin = theme->GetMarginLeft().ConvertToPx();
+        navLeftPadding = theme->GetMarginLeft().ConvertToPx();
     }
-    return navLeftMargin;
+    return navLeftPadding;
 }
 } // namespace OHOS::Ace::NG

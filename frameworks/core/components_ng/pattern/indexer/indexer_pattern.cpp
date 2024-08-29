@@ -163,10 +163,11 @@ void IndexerPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
-            if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            TouchType touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
                 indexerPattern->isTouch_ = true;
                 indexerPattern->OnTouchDown(info);
-            } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
                 indexerPattern->isTouch_ = false;
                 indexerPattern->OnTouchUp(info);
             }
@@ -1589,9 +1590,10 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
     auto touchCallback = [weak = WeakClaim(this), index](const TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+        TouchType touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
             indexerPattern->OnListItemClick(index);
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             indexerPattern->ClearClickStatus();
         }
     };

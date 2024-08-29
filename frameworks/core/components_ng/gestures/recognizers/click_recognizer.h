@@ -65,7 +65,7 @@ public:
     void SetDistanceThreshold(double distanceThreshold)
     {
         distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_ < 0) {
+        if (distanceThreshold_ <= 0) {
             distanceThreshold_ = std::numeric_limits<double>::infinity();
         }
     }
@@ -125,6 +125,9 @@ private:
     void InitGlobalValue(SourceType deviceId);
 
     bool CheckNeedReceiveEvent();
+
+    bool IsFormRenderClickRejected(const TouchEvent& event);
+    void TriggerClickAccepted(const TouchEvent& event);
 
     int32_t count_ = 1;
     double distanceThreshold_ = std::numeric_limits<double>::infinity();

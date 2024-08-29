@@ -1227,6 +1227,9 @@ void SwiperPattern::FireAnimationEndEvent(
     CHECK_NULL_VOID(swiperEventHub);
     isInterrupt ? swiperEventHub->FireAnimationEndOnForceEvent(currentIndex, info)
                 : swiperEventHub->FireAnimationEndEvent(currentIndex, info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -2389,12 +2392,11 @@ bool SwiperPattern::CheckOverScroll(float offset)
 
 bool SwiperPattern::SpringOverScroll(float offset)
 {
-    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    bool outOfBounds = IsOutOfBoundary(offset);
     if (!outOfBounds) {
         return false;
     }
     offset = IsHorizontalAndRightToLeft() ? -offset : offset;
-    targetIndex_.reset();
 
     auto visibleSize = CalculateVisibleSize();
     if (LessOrEqual(visibleSize, 0.0)) {
@@ -2486,8 +2488,9 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     }
 
     int32_t preFirstIndex = currentFirstIndex_;
-    auto currentPageStatus = IsHorizontalAndRightToLeft() ? CalcCurrentPageStatusOnRTL(additionalOffset)
-                                                          : CalcCurrentPageStatus(additionalOffset);
+    auto currentPageStatus = (IsHorizontalAndRightToLeft() && GetMaxDisplayCount() > 0)
+                                 ? CalcCurrentPageStatusOnRTL(additionalOffset)
+                                 : CalcCurrentPageStatus(additionalOffset);
     float currentTurnPageRate = currentPageStatus.first;
     currentFirstIndex_ = currentPageStatus.second;
 
@@ -2495,11 +2498,20 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
+    auto isRtl = IsHorizontalAndRightToLeft() && GetMaxDisplayCount() <= 0;
+    isRtl ? CalculateGestureStateOnRTL(additionalOffset, currentTurnPageRate, preFirstIndex)
+          : CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
+    turnPageRate_ = isRtl ? std::abs(turnPageRate_) - 1.0f : turnPageRate_;
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     CheckMarkForIndicatorBoundary();
-    HandleTouchBottomLoop();
+    isRtl ? HandleTouchBottomLoopOnRTL() : HandleTouchBottomLoop();
+
+    if (IsVisibleChildrenSizeLessThanSwiper()) {
+        turnPageRate_ = 0.0f;
+        gestureState_ = GestureState::GESTURE_STATE_NONE;
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    }
 
     if (!indicatorDoingAnimation_) {
         child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2753,6 +2765,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     mainDeltaSum_ += mainDelta;
 
     if (IsAutoLinear() && AutoLinearIsOutOfBoundary(static_cast<float>(mainDelta))) {
+        return;
+    }
+
+    if (usePropertyAnimation_) {
         return;
     }
 
@@ -3591,7 +3607,7 @@ void SwiperPattern::CreateSpringProperty()
 void SwiperPattern::PlaySpringAnimation(double dragVelocity)
 {
     UpdateIgnoreBlankOffsetWithDrag(IsOutOfStart());
-    if (springAnimationIsRunning_) {
+    if (springAnimationIsRunning_ || usePropertyAnimation_) {
         return;
     }
     auto host = GetHost();
@@ -4366,7 +4382,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad)
     if (!useLazyLoad) {
         return;
     }
-    auto cacheCount = GetCachedCount();
+    auto cacheCount = std::min(GetCachedCount(), RealTotalCount());
     std::set<int32_t> forEachIndexSet;
     for (auto count = 1; count <= cacheCount; count++) {
         forEachIndexSet.emplace(GetLoopIndex(currentIndex_ + count));
@@ -4541,7 +4557,6 @@ void SwiperPattern::OnTranslateFinish(
     if (NeedAutoPlay() && isUserFinish_ && !forceStop) {
         PostTranslateTask(delayTime);
     }
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     UpdateItemRenderGroup(false);
 }
 
@@ -4905,6 +4920,18 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     SetIsNestedInterrupt(false);
     childScrolling_ = false;
     InitIndexCanChangeMap();
+}
+
+void SwiperPattern::OnScrollDragEndRecursive()
+{
+    NestableScrollContainer::OnScrollDragEndRecursive();
+    if (IsDisableSwipe()) {
+        return;
+    }
+    // Swiper and child handle drag end event together.
+    if (!DuringTranslateAnimation()) {
+        HandleDragEnd(0.0f);
+    }
 }
 
 void SwiperPattern::NotifyParentScrollEnd()
@@ -5379,6 +5406,35 @@ bool SwiperPattern::CheckSwiperPanEvent(float mainDeltaOrVelocity)
     return ret;
 }
 
+void SwiperPattern::HandleTouchBottomLoopOnRTL()
+{
+    auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
+    auto currentIndex = GetLoopIndex(currentIndex_);
+    bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
+    bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+                                                     gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
+    if (followTouchBottom) {
+        if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
+        return;
+    }
+
+    if (currentFirstIndex == 0 && currentIndex == TotalCount() - 1 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        return;
+    }
+
+    if (currentFirstIndex == TotalCount() - 1 && currentIndex == 0 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        return;
+    }
+}
+
 void SwiperPattern::HandleTouchBottomLoop()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
@@ -5419,6 +5475,46 @@ void SwiperPattern::HandleTouchBottomLoop()
         }
     }
     return;
+}
+
+void SwiperPattern::CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
+{
+    if (GreatNotEqual(additionalOffset, 0.0f)) {
+        gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        needTurn_ = false;
+        return;
+    }
+
+    if (LessNotEqual(additionalOffset, 0.0f)) {
+        gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+        needTurn_ = false;
+        return;
+    }
+
+    auto currentIndex = GetLoopIndex(currentIndex_);
+    auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
+    if (preFirstIndex == 0 && currentFirstIndex == TotalCount() - 1) {
+        needTurn_ = true;
+        if (isTouchDown_ && GreatOrEqual(mainDeltaSum_, 0.0f)) {
+            needTurn_ = false;
+        }
+    } else if (preFirstIndex == TotalCount() - 1 && currentFirstIndex == 0) {
+        needTurn_ = true;
+        if (isTouchDown_ && (LessOrEqual(mainDeltaSum_, 0.0f) || currentIndex == 0)) {
+            needTurn_ = false;
+        }
+    }
+
+    if (!IsLoop()) {
+        needTurn_ = false;
+    }
+
+    if (currentFirstIndex >= currentIndex) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
+        return;
+    }
+
+    gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
 }
 
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
@@ -5827,5 +5923,181 @@ void SwiperPattern::CheckSpecialItemCount() const
     CHECK_NULL_VOID(swiperNode);
     swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
                                     leftCaptureId_.has_value() + rightCaptureId_.has_value());
+}
+
+void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isLastIndicatorFocused", isLastIndicatorFocused_);
+    json->Put("moveDirection", moveDirection_);
+    json->Put("indicatorDoingAnimation", indicatorDoingAnimation_);
+    json->Put("hasVisibleChangeRegistered", hasVisibleChangeRegistered_);
+    json->Put("isVisible", isVisible_);
+    json->Put("isVisibleArea", isVisibleArea_);
+    json->Put("isWindowShow", isWindowShow_);
+    json->Put("IsCustomSize", isCustomSize_);
+    json->Put("indicatorIsBoolean", indicatorIsBoolean_);
+    json->Put("isAtHotRegion", isAtHotRegion_);
+    json->Put("isDragging", isDragging_);
+    json->Put("isTouchDown", isTouchDown_);
+    json->Put("preLoop", preLoop_.has_value() ? std::to_string(preLoop_.value()).c_str() : "null");
+    json->Put("indicatorId", indicatorId_.has_value() ? std::to_string(indicatorId_.value()).c_str() : "null");
+    json->Put("leftButtonId", leftButtonId_.has_value() ? std::to_string(leftButtonId_.value()).c_str() : "null");
+    json->Put("rightButtonId", rightButtonId_.has_value() ? std::to_string(rightButtonId_.value()).c_str() : "null");
+    json->Put("crossMatchChild", crossMatchChild_);
+    json->Put(
+        "uiCastJumpIndex", uiCastJumpIndex_.has_value() ? std::to_string(uiCastJumpIndex_.value()).c_str() : "null");
+    json->Put("jumpIndex", jumpIndex_.has_value() ? std::to_string(jumpIndex_.value()).c_str() : "null");
+    json->Put("targetIndex", targetIndex_.has_value() ? std::to_string(targetIndex_.value()).c_str() : "null");
+    json->Put("preTargetIndex", preTargetIndex_.has_value() ? std::to_string(preTargetIndex_.value()).c_str() : "null");
+    json->Put(
+        "pauseTargetIndex", pauseTargetIndex_.has_value() ? std::to_string(pauseTargetIndex_.value()).c_str() : "null");
+    json->Put("velocity", velocity_.has_value() ? std::to_string(velocity_.value()).c_str() : "null");
+    json->Put("curve", GetCurveIncludeMotion() ? GetCurveIncludeMotion()->ToString().c_str() : "null");
+    json->Put("isFinishAnimation", isFinishAnimation_);
+    json->Put("mainSizeIsMeasured", mainSizeIsMeasured_);
+    json->Put("usePropertyAnimation", usePropertyAnimation_);
+    json->Put("isUserFinish", isUserFinish_);
+    json->Put("isVoluntarilyClear", isVoluntarilyClear_);
+    json->Put("isIndicatorLongPress", isIndicatorLongPress_);
+    json->Put("stopIndicatorAnimation", stopIndicatorAnimation_);
+    json->Put("isTouchPad", isTouchPad_);
+    json->Put("surfaceChangedCallbackId",
+        surfaceChangedCallbackId_.has_value() ? std::to_string(surfaceChangedCallbackId_.value()).c_str() : "null");
+    json->Put("currentIndex", currentIndex_);
+    json->Put("oldIndex", oldIndex_);
+    BuildOffsetInfo(json);
+    BuildIndicatorTypeInfo(json);
+    BuildItemPositionInfo(json);
+    BuildPanDirectionInfo(json);
+    BuildAxisInfo(json);
+}
+
+void SwiperPattern::BuildOffsetInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("currentOffset", std::to_string(currentOffset_).c_str());
+    json->Put("fadeOffset", std::to_string(fadeOffset_).c_str());
+    json->Put("touchBottomRate", std::to_string(touchBottomRate_).c_str());
+    json->Put("currentIndexOffset", std::to_string(currentIndexOffset_).c_str());
+    json->Put("gestureSwipeIndex", gestureSwipeIndex_);
+    json->Put("currentFirstIndex", currentFirstIndex_);
+    json->Put("startMainPos", startMainPos_);
+    json->Put("endMainPos", endMainPos_);
+    json->Put("contentMainSize", contentMainSize_);
+    json->Put("contentCrossSize", contentCrossSize_);
+    json->Put("propertyAnimationIndex", propertyAnimationIndex_);
+    json->Put("mainDeltaSum", mainDeltaSum_);
+}
+
+void SwiperPattern::BuildAxisInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (direction_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void SwiperPattern::BuildItemPositionInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!itemPosition_.empty()) {
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        for (auto item : itemPosition_) {
+            std::unique_ptr<JsonValue> child = JsonUtil::CreateArray(true);
+            child->Put("id", item.first);
+            child->Put("startPos", std::to_string(item.second.startPos).c_str());
+            child->Put("endPos", std::to_string(item.second.endPos).c_str());
+            children->Put(child);
+        }
+        json->Put("itemPosition", children);
+    }
+    if (!itemPositionInAnimation_.empty()) {
+        std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+        for (auto item : itemPositionInAnimation_) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            child->Put("id", item.first);
+            child->Put("startPos", std::to_string(item.second.startPos).c_str());
+            child->Put("endPos", std::to_string(item.second.endPos).c_str());
+            children->Put(child);
+        }
+        json->Put("itemPositionInAnimation", children);
+    }
+}
+
+void SwiperPattern::BuildIndicatorTypeInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (lastSwiperIndicatorType_.has_value()) {
+        switch (lastSwiperIndicatorType_.value()) {
+            case SwiperIndicatorType::DOT: {
+                json->Put("SwiperIndicatorType", "DOT");
+                break;
+            }
+            case SwiperIndicatorType::DIGIT: {
+                json->Put("SwiperIndicatorType", "DIGIT");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        json->Put("lastSwiperIndicatorType", "null");
+    }
+}
+
+void SwiperPattern::BuildPanDirectionInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (panDirection_.type) {
+        case PanDirection::NONE: {
+            json->Put("PanDirection", "NONE");
+            break;
+        }
+        case PanDirection::LEFT: {
+            json->Put("PanDirection", "LEFT");
+            break;
+        }
+        case PanDirection::RIGHT: {
+            json->Put("PanDirection", "RIGHT");
+            break;
+        }
+        case PanDirection::HORIZONTAL: {
+            json->Put("PanDirection", "HORIZONTAL");
+            break;
+        }
+        case PanDirection::UP: {
+            json->Put("PanDirection", "UP");
+            break;
+        }
+        case PanDirection::DOWN: {
+            json->Put("PanDirection", "DOWN");
+            break;
+        }
+        case PanDirection::VERTICAL: {
+            json->Put("PanDirection", "VERTICAL");
+            break;
+        }
+        case PanDirection::ALL: {
+            json->Put("PanDirection", "ALL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

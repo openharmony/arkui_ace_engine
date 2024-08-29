@@ -89,7 +89,7 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
     }
-    if (distanceThreshold_ < 0) {
+    if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
 }
@@ -265,6 +265,35 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 }
 
+bool ClickRecognizer::IsFormRenderClickRejected(const TouchEvent& event)
+{
+    Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
+    if (event.time.time_since_epoch().count() - touchDownTime_.time_since_epoch().count() >
+        DEFAULT_LONGPRESS_DURATION || offset.GetDistance() > MAX_THRESHOLD) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "reject click when up, offset is %{public}f",
+            static_cast<float>(offset.GetDistance()));
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return true;
+    }
+    return false;
+}
+
+void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
+{
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept");
+    time_ = event.time;
+    if (!useCatchMode_) {
+        OnAccepted();
+        return;
+    }
+    auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
+    if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+}
+
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
@@ -272,15 +301,8 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     auto pipeline = PipelineBase::GetCurrentContext();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
-    if (pipeline && pipeline->IsFormRender()) {
-        Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
-        if (event.time.time_since_epoch().count() - touchDownTime_.time_since_epoch().count() >
-            DEFAULT_LONGPRESS_DURATION || offset.GetDistance() > MAX_THRESHOLD) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "reject click when up, offset is %{public}f",
-                static_cast<float>(offset.GetDistance()));
-            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-            return;
-        }
+    if (pipeline && pipeline->IsFormRender() && IsFormRenderClickRejected(event)) {
+        return;
     }
     if (IsRefereeFinished()) {
         return;
@@ -301,31 +323,17 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
-
         if (tappedCount_ == count_) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept");
-            time_ = event.time;
-            if (!useCatchMode_) {
-                OnAccepted();
-                return;
-            }
-            auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
-            if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
-                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-                return;
-            }
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            TriggerClickAccepted(event);
             return;
         }
         equalsToFingers_ = false;
         // waiting for multi-finger lift
         DeadlineTimer(tapDeadlineTimer_, MULTI_TAP_TIMEOUT);
     }
-
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
     }
-
     if (currentTouchPointsNum_ < fingers_ && equalsToFingers_) {
         DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
     }

@@ -87,6 +87,7 @@ constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
+constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -518,6 +519,36 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_FILTERED: skipppedFrameTime=%lld(ms), windowName=%s",
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
+}
+
+void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
+{
+    std::string eventName = "JANK_FRAME_UNFILTERED";
+    const auto& bundleName = info.baseInfo.bundleName;
+    const auto& processName = info.baseInfo.processName;
+    const auto& abilityName = info.baseInfo.abilityName;
+    const auto& pageUrl = info.baseInfo.pageUrl;
+    const auto& versionCode = info.baseInfo.versionCode;
+    const auto& versionName = info.baseInfo.versionName;
+    const auto& pageName = info.baseInfo.pageName;
+    const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& windowName = info.windowName;
+    const auto& filterType = info.filterType;
+    const auto& sceneId = info.sceneId;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
+        EVENT_KEY_FILTER_TYPE, filterType,
+        EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
+    ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
+        static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);
 }
 
 void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,

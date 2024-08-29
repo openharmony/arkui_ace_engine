@@ -571,8 +571,13 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
         keyboardAvoidMode_ == KeyboardAvoidMode::NONE) {
         return;
     }
+    auto childLayoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
     auto childConstraint =
         CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
+    auto dialogHeight = Dimension(dialogChildSize_.Height(), DimensionUnit::PX);
+    auto dialogWidth = Dimension(dialogChildSize_.Width(), DimensionUnit::PX);
+    childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), CalcLength(dialogHeight)));
     child->Measure(childConstraint);
     child->GetGeometryNode()->SetFrameSize(dialogChildSize_);
     auto renderContext = child->GetHostNode()->GetRenderContext();

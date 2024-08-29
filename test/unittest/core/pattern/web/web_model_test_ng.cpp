@@ -228,4 +228,48 @@ HWTEST_F(WebModelTestNg, SetOnLoadIntercept005, TestSize.Level1)
     webModelNG.SetSafeBrowsingCheckResultId(std::move(safeBrowsingCheckResultId));
 #endif
 }
+
+/**
+ * @tc.name: SetCustomScheme001
+ * @tc.desc: SetCustomScheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetCustomScheme001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto webModelNG = std::make_shared<WebModelNG>();
+    webModelNG->SetCustomScheme("");
+    EXPECT_NE(webModelNG, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetOnCommonDialog001
+ * @tc.desc: SetOnCommonDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnCommonDialog001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto webModelNG = std::make_shared<WebModelNG>();
+    auto onCommon = [](const BaseEventInfo* info) -> bool { return true; };
+    webModelNG->SetOnCommonDialog(onCommon, 1);
+    EXPECT_NE(webModelNG, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetOnFullScreenEnter001
+ * @tc.desc: SetOnFullScreenEnter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnFullScreenEnter001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto webModelNG = std::make_shared<WebModelNG>();
+    auto fullScreenEnterEventId = [](const BaseEventInfo* info) {};
+    webModelNG->SetOnFullScreenEnter(fullScreenEnterEventId);
+    EXPECT_NE(webModelNG, nullptr);
+#endif
+}
 } // namespace OHOS::Ace::NG

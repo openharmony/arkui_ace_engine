@@ -636,10 +636,20 @@ void PipelineBase::PrepareCloseImplicitAnimation()
 }
 
 void PipelineBase::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+    const AnimationOption& option,
+    const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     PrepareOpenImplicitAnimation();
+    StartImplicitAnimation(option, curve, finishCallback);
+#endif
+}
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
     auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
     if (IsFormRender()) {
         SetIsFormAnimation(true);

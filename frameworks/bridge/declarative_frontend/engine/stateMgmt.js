@@ -8633,11 +8633,11 @@ class ProviderConsumerUtilV2 {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
+        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
-                const view = weakView.deref();
                 if (!view) {
                     const error = `${this.debugInfo__()}: get() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
                     stateMgmtConsole.error(error);
@@ -8648,7 +8648,6 @@ class ProviderConsumerUtilV2 {
             set(val) {
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
-                const view = weakView.deref();
                 if (!view) {
                     const error = `${this.debugInfo__()}: set() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
                     stateMgmtConsole.error(error);
@@ -8664,6 +8663,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
+        return view[provideVarName];
     }
     static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
@@ -8684,6 +8684,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
+        return consumeView[storeProp];
     }
 }
 ProviderConsumerUtilV2.ALIAS_PREFIX = '___pc_alias_';
@@ -9636,24 +9637,25 @@ const Consumer = (aliasName) => {
         const providerName = (aliasName === undefined || aliasName === null ||
             (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
         let providerInfo;
+        let retVal = this[varName];
         Reflect.defineProperty(proto, varName, {
             get() {
                 if (!providerInfo) {
                     providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
                     if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
                     }
                 }
-                return this[providerName !== null && providerName !== void 0 ? providerName : varName];
+                return retVal;
             },
             set(val) {
                 if (!providerInfo) {
                     providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
                     if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
                     }
                     else {
-                        ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
                     }
                 }
             },

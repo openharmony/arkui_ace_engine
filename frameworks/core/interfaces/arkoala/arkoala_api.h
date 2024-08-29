@@ -738,6 +738,7 @@ enum ArkUINodeType {
     ARKUI_BADGE,
     ARKUI_TEXT_CLOCK,
     ARKUI_TEXT_TIMER,
+    ARKUI_MARQUEE,
 };
 
 enum ArkUIEventCategory {
@@ -3810,6 +3811,13 @@ struct ArkUICalendarPickerModifier {
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
+    void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetCalendarPickerBorderColor)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
+    void (*resetCalendarPickerBorderRadius)(ArkUINodeHandle node);
+    void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
 };
 
 struct ArkUIRatingModifier {
@@ -4076,6 +4084,16 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeOnBounce)(ArkUINodeHandle node);
     void (*setMarqueeOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetMarqueeOnFinish)(ArkUINodeHandle node);
+    void (*setMarqueeSrcValue)(ArkUINodeHandle node, ArkUI_CharPtr src);
+    void (*resetMarqueeSrcValue)(ArkUINodeHandle node);
+    void (*setMarqueePlayerStatus)(ArkUINodeHandle node, ArkUI_Bool start);
+    void (*resetMarqueePlayerStatus)(ArkUINodeHandle node);
+    void (*setMarqueeScrollAmount)(ArkUINodeHandle node, ArkUI_Float64 step);
+    void (*resetMarqueeScrollAmount)(ArkUINodeHandle node);
+    void (*setMarqueeLoop)(ArkUINodeHandle node, ArkUI_Int32 loop);
+    void (*resetMarqueeLoop)(ArkUINodeHandle node);
+    void (*setMarqueeDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
+    void (*resetMarqueeDirection)(ArkUINodeHandle node);
 };
 
 struct ArkUIDatePickerModifier {

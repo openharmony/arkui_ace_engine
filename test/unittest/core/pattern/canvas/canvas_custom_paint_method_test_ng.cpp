@@ -1098,7 +1098,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1106,7 +1106,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, false);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 
     maxWidth = 10.0;
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1114,7 +1114,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 }
 
 /**
@@ -1269,7 +1269,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize
 
 /**
  * @tc.name: CanvasCustomPaintMethodTest033
- * @tc.desc: Test the function 'RestoreMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.desc: Test the function 'RestoreProperties' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
 
@@ -1281,9 +1281,9 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest033, TestSize
      */
     auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
-    paintMethod->SaveMatrix();
-    paintMethod->RestoreMatrix();
-    paintMethod->RestoreMatrix();
+    paintMethod->SaveProperties();
+    paintMethod->RestoreProperties();
+    paintMethod->RestoreProperties();
     EXPECT_TRUE(paintMethod->matrixStates_.empty());
 }
 
@@ -1452,32 +1452,6 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest038, TestSize
     filter.filterType_ = FilterType::HUE_ROTATE;
     paintMethod->SetPaintImage(&pen, &brush);
     EXPECT_FALSE(paintMethod->CheckNumberAndPercentage(filter.filterParam_, true, percentNum));
-}
-
-/**
- * @tc.name: CanvasCustomPaintMethodTest0138
- * @tc.desc: Test the function 'HasImageShadow' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest039, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-
-    Shadow shadow(1.0, Offset(1.0, 1.0), Color::WHITE, ShadowStyle::OuterDefaultXS);
-    paintMethod->imageShadow_ = std::make_unique<Shadow>(std::move(shadow));
-    Offset offset(0, 0);
-    paintMethod->imageShadow_->SetOffset(offset);
-    paintMethod->imageShadow_->blurRadius_ = 0;
-    EXPECT_FALSE(paintMethod->HasImageShadow());
-    paintMethod->imageShadow_->SetOffsetX(1.0);
-    paintMethod->imageShadow_->SetOffsetY(1.0);
-    paintMethod->imageShadow_->blurRadius_ = 1.0;
-    EXPECT_TRUE(paintMethod->HasImageShadow());
 }
 
 /**

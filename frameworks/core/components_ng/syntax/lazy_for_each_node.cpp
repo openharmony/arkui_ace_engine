@@ -79,6 +79,7 @@ void LazyForEachNode::BuildAllChildren()
     auto items = builder_->GetAllChildren();
     for (auto& [index, item] : items) {
         if (item.second) {
+            RemoveDisappearingChild(item.second);
             children_.push_back(item.second);
         }
     }
@@ -170,7 +171,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
 
         if (node) {
             if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+                AddDisappearingChild(node);
             } else {
                 node->DetachFromMainTree();
             }
@@ -197,7 +198,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
@@ -241,7 +242,7 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
@@ -292,19 +293,21 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
     int32_t initialChangedIndex = 0;
     if (builder_) {
         builder_->SetUseNewInterface(true);
-        std::pair<int32_t, std::list<RefPtr<UINode>>> pair = builder_->OnDatasetChange(DataOperations);
+        std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> pair =
+            builder_->OnDatasetChange(DataOperations);
         initialChangedIndex = pair.first;
-        std::list<RefPtr<UINode>> nodeList_ = pair.second;
-        for (auto& node : nodeList_) {
-            if (node == nullptr) {
+        std::list<std::pair<std::string, RefPtr<UINode>>> nodeList = pair.second;
+        for (const auto& node : nodeList) {
+            if (node.second == nullptr) {
                 continue;
             }
-            if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+            if (!node.second->OnRemoveFromParent(true)) {
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
             } else {
-                node->DetachFromMainTree();
+                node.second->DetachFromMainTree();
             }
-            builder_->ProcessOffscreenNode(node, true);
+            builder_->ProcessOffscreenNode(node.second, true);
+            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
     }

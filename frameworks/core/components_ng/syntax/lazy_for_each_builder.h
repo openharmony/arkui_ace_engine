@@ -64,7 +64,12 @@ public:
         return OnGetTotalCount();
     }
 
-    int32_t GetTotalCountOfOriginalDataset(const std::list<V2::Operation>& DataOperations);
+    void UpdateHistoricalTotalCount(int32_t count)
+    {
+        historicalTotalCount_ = count;
+    }
+
+    int32_t GetTotalCountOfOriginalDataset();
 
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
@@ -91,7 +96,8 @@ public:
 
     bool OnDataMoved(size_t from, size_t to);
 
-    std::pair<int32_t, std::list<RefPtr<UINode>>> OnDatasetChange(std::list<V2::Operation> DataOperations);
+    std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> OnDatasetChange(
+        std::list<V2::Operation> DataOperations);
 
     void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
         std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
@@ -224,6 +230,7 @@ public:
     {
         ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
         int32_t count = GetTotalCount();
+        UpdateHistoricalTotalCount(count);
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
             if ((index < count) && ((start <= end && start <= index && end >= index) ||
@@ -360,6 +367,9 @@ public:
         int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
+            if (!DeleteExpiringItemImmediately()) {
+                cache.merge(expiringItem_);
+            }
             return false;
         }
         bool isTimeout = false;
@@ -407,7 +417,6 @@ public:
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         std::set<int32_t>& idleIndexes)
     {
-        std::set<std::string> cacheKeys;
         auto expiringIter = expiringItem_.begin();
         while (expiringIter != expiringItem_.end()) {
             const auto& key = expiringIter->first;
@@ -416,7 +425,7 @@ public:
             if (iter != idleIndexes.end() && node.second) {
                 LoadCacheByIndex(cache, idleIndexes, node, key, iter, expiringIter);
             } else {
-                LoadCacheByKey(cache, idleIndexes, node, key, cacheKeys, expiringIter);
+                LoadCacheByKey(cache, idleIndexes, node, key, expiringIter);
             }
         }
     }
@@ -439,22 +448,17 @@ public:
     }
 
     void LoadCacheByKey(std::unordered_map<std::string, LazyForEachCacheChild>& cache, std::set<int32_t>& idleIndexes,
-        const LazyForEachCacheChild& node, const std::string& key, std::set<std::string>& cacheKeys,
+        const LazyForEachCacheChild& node, const std::string& key,
         std::unordered_map<std::string, LazyForEachCacheChild>::iterator& expiringIter)
     {
         NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
         ProcessOffscreenNode(node.second, true);
         NotifyItemDeleted(RawPtr(node.second), key);
 
-        if (!idleIndexes.empty() && cacheKeys.empty()) {
-            cacheKeys = GetCacheKeys(idleIndexes);
-        }
-
-        if (cacheKeys.find(key) != cacheKeys.end()) {
-            cache.try_emplace(key, node);
-            expiringIter++;
-        } else {
+        if (DeleteExpiringItemImmediately()) {
             expiringIter = expiringItem_.erase(expiringIter);
+        } else {
+            expiringIter++;
         }
     }
 
@@ -549,6 +553,9 @@ public:
             node.second.second->SetJSViewActive(active, true);
         }
         for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
             node.second.second->SetJSViewActive(active, true);
         }
     }
@@ -579,7 +586,10 @@ protected:
 
     virtual void OnItemDeleted(UINode* node, const std::string& key) {};
 
-    virtual std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) = 0;
+    virtual bool DeleteExpiringItemImmediately()
+    {
+        return false;
+    }
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
@@ -624,6 +634,7 @@ private:
     int32_t cacheCount_ = 0;
     int32_t preBuildingIndex_ = -1;
     int32_t totalCountOfOriginalDataset_ = 0;
+    int32_t historicalTotalCount_ = 0;
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;

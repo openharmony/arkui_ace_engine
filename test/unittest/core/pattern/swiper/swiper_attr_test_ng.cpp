@@ -1265,7 +1265,6 @@ HWTEST_F(SwiperAttrTestNg, SetNestedScroll001, TestSize.Level1)
         .backward = NestedScrollMode::SELF_ONLY,
     };
     pattern_->isNestedInterrupt_ = false;
-    pattern_->isFixedNestedScrollMode_ = true;
     pattern_->SetNestedScroll(nestedOpt);
     EXPECT_FALSE(pattern_->isFixedNestedScrollMode_);
     EXPECT_TRUE(pattern_->isNestedInterrupt_);

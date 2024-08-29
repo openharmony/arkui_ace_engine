@@ -1433,9 +1433,9 @@ void SideBarContainerPattern::UpdateControlButtonImageSize()
     }
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
     controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
     controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
+
     // check whether control image size is customed
     if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
         SetControlButtonSizeCustom(true);
@@ -1446,7 +1446,7 @@ void SideBarContainerPattern::UpdateControlButtonImageSize()
 
 void SideBarContainerPattern::UpdateControlButtonImage(std::optional<ImageSourceInfo>& info)
 {
-    CHECK_NULL_VOID(info);
+    CHECK_NULL_VOID(info.has_value());
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto isStartPos = GetSideBarPositionWithRtl(layoutProperty) == SideBarPosition::START;

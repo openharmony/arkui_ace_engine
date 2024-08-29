@@ -200,6 +200,14 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         auto button = weak.Upgrade();
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        auto node = button->GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto message = !button->IsObscured() ? theme->GetHasShowedPassword() : theme->GetHasHiddenPassword();
+        node->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, message);
     };
     auto longPressCallback = [](GestureEvent& info) {
         LOGD("PasswordResponseArea long press");

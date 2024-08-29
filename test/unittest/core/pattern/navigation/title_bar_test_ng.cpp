@@ -523,7 +523,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
     auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    titleBarPattern_->SetRelatedInfoOnXAxis();
+    titleBarPattern_->UpdateTitlePositionInfo();
     titleBarPattern_->ProcessTitleDragUpdate(offset);
     titleBarPattern_->ProcessTitleDragEnd();
     titleBarPattern_->SetTempTitleOffsetY();

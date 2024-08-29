@@ -32,6 +32,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -137,6 +138,10 @@ public:
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
     void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
+    void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
+    void HandlePenHoverOut(const TouchEvent& point) override;
 
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
@@ -778,6 +783,11 @@ public:
     bool CheckNeedDisableUpdateBackgroundImage();
 
     void ChangeDarkModeBrightness() override;
+
+    std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode) override;
+
+    void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
+
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -866,12 +876,15 @@ public:
         return homePageConfig_;
     }
 
+    bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
+
     bool IsWindowFocused() const override
     {
         return isWindowHasFocused_ && GetOnFoucs();
     }
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -957,6 +970,7 @@ private:
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
+    void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
 
     template<typename T>
     struct NodeCompare {

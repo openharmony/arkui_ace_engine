@@ -48,9 +48,9 @@ public:
     void ReleaseChildGroupById(const std::string& id) override;
     void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override;
     void UnregisterDataChangeListener(V2::DataChangeListener* listener) override;
-    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
+    bool DeleteExpiringItemImmediately() override
     {
-        return {};
+        return false;
     }
     void NotifyDataChanged(size_t index, const RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild = true) override {};
     void NotifyDataDeleted(const RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override {};
