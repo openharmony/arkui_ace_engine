@@ -103,7 +103,8 @@ public:
         CHECK_NULL_VOID(host);
         auto prevHeader = header_.Upgrade();
         if (!prevHeader) {
-            host->AddChild(header);
+            host->AddChild(header, 0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         } else {
             if (header != prevHeader) {
                 host->ReplaceChild(prevHeader, header);
@@ -118,8 +119,14 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto prevFooter = footer_.Upgrade();
+        auto prevHeader = header_.Upgrade();
         if (!prevFooter) {
-            host->AddChild(footer);
+            if (prevHeader) {
+                host->AddChildAfter(footer, prevHeader);
+            } else {
+                host->AddChild(footer, 0);
+            }
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         } else {
             if (footer != prevFooter) {
                 host->ReplaceChild(prevFooter, footer);
@@ -136,6 +143,7 @@ public:
         auto prevHeader = header_.Upgrade();
         if (prevHeader) {
             host->RemoveChild(prevHeader);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             header_ = nullptr;
         }
     }
@@ -147,6 +155,7 @@ public:
         auto prevFooter = footer_.Upgrade();
         if (prevFooter) {
             host->RemoveChild(prevFooter);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             footer_ = nullptr;
         }
     }
