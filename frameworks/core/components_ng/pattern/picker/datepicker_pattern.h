@@ -690,6 +690,11 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -779,6 +784,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
+    double curOpacity_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };
