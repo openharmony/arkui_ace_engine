@@ -434,7 +434,7 @@ class ListFilterRow extends ViewPU {
                                     };
                                     this.isBackgroundHoverRow[colIndex] = true;
                                 });
-                            } else if (event.type === TouchType.Up) {
+                            } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                 Context.animateTo({
                                     curve: SHARP_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_100
@@ -810,7 +810,7 @@ class MultiFilterRow extends ViewPU {
                         };
                         this.isArrowBgHoverRow = true;
                     });
-                } else if (event.type === TouchType.Up) {
+                } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -999,7 +999,7 @@ class MultiFilterRow extends ViewPU {
                                     };
                                     this.isBackgroundHoverRow[0] = true;
                                 });
-                            } else if (event.type === TouchType.Up) {
+                            } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                 Context.animateTo({
                                     curve: SHARP_CUBIC_BEZIER,
                                     duration: ANIMATION_DURATION_100
@@ -1158,7 +1158,7 @@ class MultiFilterRow extends ViewPU {
                                             };
                                             this.isBackgroundHoverRow[colIndex] = true;
                                         });
-                                    } else if (event.type === TouchType.Up) {
+                                    } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                         Context.animateTo({
                                             curve: SHARP_CUBIC_BEZIER,
                                             duration: ANIMATION_DURATION_100
@@ -2202,7 +2202,7 @@ export class Filter extends ViewPU {
                                                 this.isAdditionBackgroundHover &&
                                                     (this.isAdditionBackgroundHover[index] = true);
                                             });
-                                        } else if (event.type === TouchType.Up) {
+                                        } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                                             Context.animateTo({
                                                 curve: SHARP_CUBIC_BEZIER,
                                                 duration: ANIMATION_DURATION_100
@@ -2516,7 +2516,7 @@ export class Filter extends ViewPU {
                         };
                         this.isFloatArrowBgHover = true;
                     });
-                } else if (event.type === TouchType.Up) {
+                } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                     Context.animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
