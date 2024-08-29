@@ -416,7 +416,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     AddChild(host, appWindow_, appWindowName_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(callback_);
-    CHECK_EQUAL_VOID(session_->GetSystemConfig().uiType_, "pc");
+    CHECK_EQUAL_VOID(session_->GetSystemConfig().IsPcWindow(), true);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().freeMultiWindowEnable_, true);
     CHECK_EQUAL_VOID(IsWindowSizeEqual(), true);
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);
@@ -581,7 +581,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (surfaceNode) {
         surfaceNode->SetBufferAvailableCallback(callback_);
     }
-    CHECK_EQUAL_RETURN(session_->GetSystemConfig().uiType_, "pc", false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, false);
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
