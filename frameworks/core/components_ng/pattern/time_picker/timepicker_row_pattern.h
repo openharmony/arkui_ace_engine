@@ -594,7 +594,7 @@ private:
     uint32_t showCount_ = 0;
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
-    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    bool hour24_ = SystemProperties::Is24HourClock();
     ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
