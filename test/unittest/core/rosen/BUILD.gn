@@ -55,6 +55,7 @@ ohos_source_set("rosen_render_context_test_mock") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/unittest/core/rosen/mock_animated_image.cpp",
     "$ace_root/test/unittest/core/rosen/mock_pixmap_image.cpp",
   ]
@@ -221,6 +222,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
