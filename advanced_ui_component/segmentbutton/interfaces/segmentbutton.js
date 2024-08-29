@@ -1792,7 +1792,7 @@ export class SegmentButton extends ViewPU {
         this.__zoomScaleArray.aboutToBeDeleted();
         this.__pressArray.aboutToBeDeleted();
         this.__hoverColorArray.aboutToBeDeleted();
-        this.__shouldMirror.aboutToBeDeleted();
+        this.__shouldMirror?.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
