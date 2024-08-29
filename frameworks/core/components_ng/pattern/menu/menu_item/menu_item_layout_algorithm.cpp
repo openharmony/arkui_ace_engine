@@ -23,7 +23,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 0.33;
+// 存在content的情况下，right row宽度最多占比1/3
+constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -231,7 +232,7 @@ std::optional<LayoutConstraintF>& layoutConstraint,PaddingPropertyF padding, Lay
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
     if (!content.empty()) {
-        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() * RIGHT_ROW_MAX_WIDTH_WEIGHT
+        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() / RIGHT_ROW_MAX_WIDTH_WEIGHT
         - padding.right.value_or(horInterval_));
         return;
     }
