@@ -6653,6 +6653,8 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("InputFilter:").append(GetInputFilter()));
     auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
     dumpLog.AddDesc(std::string("lineHeight:").append(std::to_string(lineHeight)));
+    auto maxLines = GreatOrEqual(GetMaxLines(), Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines());
+    dumpLog.AddDesc(std::string("MaxLines:").append(maxLines));
     dumpLog.AddDesc(std::string("TextIndent:").append(GetTextIndent()));
     dumpLog.AddDesc(std::string("showError:").append(GetErrorTextState() ? GetErrorTextString() : "undefined"));
     dumpLog.AddDesc(std::string("CopyOption:").append(GetCopyOptionString()));
