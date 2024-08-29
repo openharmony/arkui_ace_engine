@@ -105,6 +105,7 @@
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_container_span_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
+#include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/node_component3d_modifier.h"
@@ -221,7 +222,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
 #endif
     NodeModifier::GetFlexModifier, // FlexModifier
-    nullptr, // ScrollBarModifier
+    NodeModifier::GetScrollBarModifier, // ScrollBarModifier
     NodeModifier::GetScrollerModifier,
     NodeModifier::GetTabContentModifier,
     nullptr, // TabsControllerModifier
@@ -363,7 +364,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     nullptr,
 #endif
     OHOS::Ace::NG::NodeModifier::GetCJUIFlexModifier, // FlexModifier
-    nullptr, // ScrollBarModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
     OHOS::Ace::NG::NodeModifier::GetCJUIScrollerModifier,
     OHOS::Ace::NG::NodeModifier::GetCJUITabContentModifier,
     nullptr, // TabsControllerModifier
