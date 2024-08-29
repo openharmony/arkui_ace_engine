@@ -42,7 +42,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     auto container = Container::Current();
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
-        receiver_ = rsClient.CreateVSyncReceiver("Form");
+        frameRateLinker_ = Rosen::RSFrameRateLinker::Create();
+        receiver_ = rsClient.CreateVSyncReceiver("Form", frameRateLinker_ != nullptr ? frameRateLinker_->GetId() : 0);
         if (receiver_ == nullptr) {
             LOGE("Form Create VSync receiver failed.");
             return;
@@ -164,6 +165,20 @@ void FormRenderWindow::FlushTasks()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     rsUIDirector_->SendMessages();
+#endif
+}
+
+void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (frameRateLinker_ == nullptr) {
+        return;
+    }
+    decltype(frameRateData_) frameRateData{rate, animatorExpectedFrameRate, rateType};
+    if (frameRateData_ != frameRateData) {
+        frameRateData_ = frameRateData;
+        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType}, animatorExpectedFrameRate);
+    }
 #endif
 }
 } // namespace OHOS::Ace
