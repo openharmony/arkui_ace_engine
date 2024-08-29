@@ -52,6 +52,9 @@ private:
     void UpdateCircleButtonConstraint();
     void FillBlank();
     TextDirection GetTextDirection(LayoutWrapper* layoutWrapper);
+    void UpdatePadding(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper);
+    bool HasCustomPadding(RefPtr<SecurityComponentLayoutProperty>& property);
+    bool IsAging(LayoutWrapper* layoutWrapper);
 
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
