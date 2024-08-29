@@ -197,10 +197,10 @@ public:
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
-    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true);
-    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true);
-    void MoveCaretToContentRect(
-        int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
+    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
+    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
+    void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM,
+        bool isEditorValueChanged = true, bool moveContent = true);
     void MoveCaretAnywhere(const Offset& touchOffset);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;
     void AdjustHandleAtEdge(RectF& handleRect) const;

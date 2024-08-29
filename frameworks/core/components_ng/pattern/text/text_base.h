@@ -65,7 +65,7 @@ class TextGestureSelector : public virtual AceType {
     DECLARE_ACE_TYPE(TextGestureSelector, AceType);
 
 public:
-    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
+    virtual void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
     {
         start_ = start;
         end_ = end;
