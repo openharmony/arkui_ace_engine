@@ -99,13 +99,13 @@ void SvgGradient::SetGradientTransform(const std::string& val, SvgGradientAttrib
 void SvgGradient::SetSpreadMethod(const std::string& val, SvgGradientAttribute& attr)
 {
     if (val == "pad") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::PAD);
+        attr.gradient.SetSpreadMethod(GradientSpreadMethodNG::PAD);
     }
     if (val == "reflect") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::REFLECT);
+        attr.gradient.SetSpreadMethod(GradientSpreadMethodNG::REFLECT);
     }
     if (val == "repeat") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::REPEAT);
+        attr.gradient.SetSpreadMethod(GradientSpreadMethodNG::REPEAT);
     }
 }
 
