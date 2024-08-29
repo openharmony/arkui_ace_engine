@@ -246,7 +246,7 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* node)
 
 int32_t MenuPattern::RegisterHalfFoldHover()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, 0);
     int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
         [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) { // 注册回调函数
