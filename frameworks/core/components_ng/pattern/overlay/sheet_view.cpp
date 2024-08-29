@@ -126,10 +126,14 @@ void SheetView::CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const R
                           sheetStyle.detents[1] == sheetStyle.detents[SHEET_DETENTS_TWO];
     }
 
-    // 1、showDragBar && not single detents
-    // 2、has SystemTitleBar
+    // 1. showDragBar && not single detents && sheet in bottom style (only bottom style can show drag bar)
+    // 2. has SystemTitleBar
     // need set drag bar invisible to occupy place
-    if ((!isSingleDetents && showDragIndicator) || sheetStyle.isTitleBuilder.has_value()) {
+    CHECK_NULL_VOID(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    if ((!isSingleDetents && showDragIndicator && sheetPattern->IsSheetBottomStyle())
+        || sheetStyle.isTitleBuilder.has_value()) {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     } else {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
