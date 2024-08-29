@@ -494,6 +494,8 @@ void MenuLayoutAlgorithm::SetWrapperRect(
     } else {
         wrapperRect_.SetRect(left, top, width - left - right, height - top - bottom);
     }
+}
+
 uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
