@@ -669,8 +669,10 @@ void NavigationPattern::RefreshNavDestination()
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
-    auto focusHub = hostNode->GetFocusHub();
-    if (isChanged_ && focusHub->IsFocusableWholePath()) {
+    RefPtr<FrameNode> targetNode = newTopNavPath.has_value() ? AceType::DynamicCast<FrameNode>(
+            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second)) :
+            AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    if (isChanged_ && GetIsFocusable(targetNode)) {
         InputMethodManager::GetInstance()->CloseKeyboard();
     }
 #endif
@@ -2571,6 +2573,7 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
 
 bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, false);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
     auto focusHub = hostNode->GetFocusHub();
