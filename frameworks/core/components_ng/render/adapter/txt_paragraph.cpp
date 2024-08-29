@@ -1049,7 +1049,10 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
 #else
-    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(GetParagraph());
+    auto paragrah = GetParagraph();
+    CHECK_NULL_VOID(paragrah);
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
+    CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->UpdateColor(from, to, ToRSColor(color));
 #endif
 }
