@@ -572,12 +572,18 @@ void SessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
-void SessionWrapperImpl::NotifyDestroy()
+void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyDestroy, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
-        session_, std::move(destructionCallback_));
+    UIEXT_LOGI("NotifyDestroy, isHandleError = %{public}d, persistentid = %{public}d.",
+        isHandleError, session_->GetPersistentId());
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, std::move(destructionCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, nullptr);
+    }
 }
 
 void SessionWrapperImpl::NotifyConfigurationUpdate() {}
