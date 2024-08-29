@@ -3776,9 +3776,9 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         // white list check
         if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
-            if (nodeInfoWrap->GetMetadata() == HINT_SUCCESS) {
+            if (nodeInfoWrap->GetMetadata() != HINT_SUCCESS) {
                 jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
-            } else {
+            } else { 
                 auto json = JsonUtil::Create(true);
                 json->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_PLACEHOLDER.c_str(), nodeInfoWrap->GetId());
                 json->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
