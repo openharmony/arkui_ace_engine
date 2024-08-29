@@ -842,4 +842,14 @@ const Dimension DatePickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
     return fontSizeValue;
 }
 
+void DatePickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    datePickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
+}
 } // namespace OHOS::Ace::NG

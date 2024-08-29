@@ -71,6 +71,7 @@ public:
     virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
+    virtual void HasUserDefinedOpacity() = 0;
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;

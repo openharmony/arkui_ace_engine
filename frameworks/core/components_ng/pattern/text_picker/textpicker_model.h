@@ -84,6 +84,7 @@ public:
     virtual void SetSingleRange(bool isSingleRange) = 0;
     virtual bool GetSingleRange() = 0;
     virtual void SetDivider(const NG::ItemDivider& divider) {};
+    virtual void HasUserDefinedOpacity() = 0;
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;

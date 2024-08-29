@@ -547,6 +547,11 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -613,6 +618,8 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+
+    double curOpacity_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 

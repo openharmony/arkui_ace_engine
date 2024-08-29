@@ -1216,4 +1216,15 @@ const Dimension TextPickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
     return fontSizeValue;
 }
 
+void TextPickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    textPickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
+}
+
 } // namespace OHOS::Ace::NG
