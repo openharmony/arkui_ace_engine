@@ -1900,17 +1900,12 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(dirty, false);
 
     Size drawSize = Size(1, 1);
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
-        auto geometryNode = dirty->GetGeometryNode();
-        drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
-    } else {
-        auto frameNode = GetHost();
-        CHECK_NULL_RETURN(frameNode, false);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        auto rect = renderContext->GetPaintRectWithoutTransform();
-        drawSize = Size(rect.Width(), rect.Height());
-    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    drawSize = Size(rect.Width(), rect.Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return false;
     }
