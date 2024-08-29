@@ -275,6 +275,8 @@ constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 constexpr char WEB_NODE_URL[] = "url";
 
+const std::string HINT_SUCCESS = "{\"isHint2Type\": true}"
+
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
 class WebAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
@@ -3774,7 +3776,7 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         // white list check
         if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
             std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
-            if (nodeInfoWrap->GetMetadata().empty()) {
+            if (nodeInfoWrap->GetMetadata() == HINT_SUCCESS) {
                 jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
             } else {
                 auto json = JsonUtil::Create(true);
