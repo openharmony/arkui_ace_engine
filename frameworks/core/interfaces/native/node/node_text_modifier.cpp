@@ -46,6 +46,7 @@ constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
 constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
+constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 const std::string EMPTY_STRING = "";
@@ -104,6 +105,15 @@ void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
     TextModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight));
 }
 
+void SetFontWeightWithOption(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weightInfo->weight));
+    TextModelNG::SetVariableFontWeight(frameNode, weightInfo->variableFontWeight);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, weightInfo->enableVariableFontWeight);
+}
+
 void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -144,6 +154,8 @@ void ResetFontWeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, Ace::FontWeight::NORMAL);
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
 }
 
 void SetFontStyle(ArkUINodeHandle node, ArkUI_Uint32 fontStyle)
@@ -634,7 +646,7 @@ void ResetTextLetterSpacing(ArkUINodeHandle node)
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
 
-void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
+void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo)
 {
     CHECK_NULL_VOID(fontInfo);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -652,6 +664,8 @@ void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
     }
     font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
+    TextModelNG::SetVariableFontWeight(frameNode, fontInfo->variableFontWeight);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, fontInfo->enableVariableFontWeight);
 }
 
 void ResetTextFont(ArkUINodeHandle node)
@@ -666,6 +680,8 @@ void ResetTextFont(ArkUINodeHandle node)
     families.emplace_back(DEFAULT_FAMILY);
     font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
 }
 
 void SetWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
@@ -1136,12 +1152,12 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextMaxFontSize, SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption,
         SetTextTextShadow, ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy,
         SetTextTextIndent, ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
-        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr, SetWordBreak, ResetWordBreak,
-        GetFontFamily, GetCopyOption, GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize, GetFont,
-        GetFontSize, GetFontWeight, GetItalicFontStyle, SetEllipsisMode, ResetEllipsisMode, SetTextDetectEnable,
-        ResetTextDetectEnable, GetTextContent, GetTextLineHeight, GetTextDecoration, GetTextTextCase,
-        GetTextLetterSpacing, GetTextMaxLines, GetTextAlign, GetTextTextOverflow, GetTextTextIndent, GetFontColor,
-        GetTextBaselineOffset, GetTextShadowCount, GetTextShadow, GetTextWordBreak, GetTextEllipsisMode,
+        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr, SetFontWeightWithOption, SetWordBreak,
+        ResetWordBreak, GetFontFamily, GetCopyOption, GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize,
+        GetFont, GetFontSize, GetFontWeight, GetItalicFontStyle, SetEllipsisMode, ResetEllipsisMode,
+        SetTextDetectEnable, ResetTextDetectEnable, GetTextContent, GetTextLineHeight, GetTextDecoration,
+        GetTextTextCase, GetTextLetterSpacing, GetTextMaxLines, GetTextAlign, GetTextTextOverflow, GetTextTextIndent,
+        GetFontColor, GetTextBaselineOffset, GetTextShadowCount, GetTextShadow, GetTextWordBreak, GetTextEllipsisMode,
         SetTextFontFeature, ResetTextFontFeature, SetTextLineSpacing, GetTextLineSpacing, ResetTextLineSpacing,
         GetTextFontFeature, GetTextDetectEnable, SetTextDataDetectorConfig, GetTextDataDetectorConfig,
         ResetTextDataDetectorConfig, SetLineBreakStrategy, ResetLineBreakStrategy, GetTextLineBreakStrategy,

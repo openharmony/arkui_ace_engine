@@ -1447,3 +1447,39 @@ class ArkFocusScopePriority {
     return (this.scopeId === another.scopeId) && (this.priority === another.priority);
   }
 }
+
+class ArkTextFont {
+  value: Font;
+  enableVariableFontWeight: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.enableVariableFontWeight = undefined;
+  }
+
+  isEqual(another: ArkTextFont): boolean {
+    return (this.value === another.value && this.enableVariableFontWeight === another.enableVariableFontWeight);
+  }
+
+  checkObjectDiff(another: ArkTextFont): boolean {
+    return !this.isEqual(another);
+  }
+}
+
+class ArkFontWeight {
+  value: number | FontWeight | string;
+  enableVariableFontWeight: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.enableVariableFontWeight = undefined;
+  }
+
+  isEqual(another: ArkTextFont): boolean {
+    return (this.value === another.value && this.enableVariableFontWeight === another.enableVariableFontWeight);
+  }
+
+  checkObjectDiff(another: ArkTextFont): boolean {
+    return !this.isEqual(another);
+  }
+}

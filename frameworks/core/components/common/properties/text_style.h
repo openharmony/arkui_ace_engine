@@ -348,6 +348,25 @@ public:
         fontWeight_ = fontWeight;
     }
 
+    int32_t GetVariableFontWeight() const
+    {
+        return variableFontWeight_;
+    }
+
+    void SetVariableFontWeight(int32_t variableFontWeight)
+    {
+        variableFontWeight_ = variableFontWeight;
+    }
+
+    bool GetEnableVariableFontWeight() const
+    {
+        return enableVariableFontWeight_;
+    }
+
+    void SetEnableVariableFontWeight(bool enableVariableFontWeight)
+    {
+        enableVariableFontWeight_ = enableVariableFontWeight;
+    }
     const Color GetTextColor() const
     {
         return textColor_.ToColor();
@@ -794,11 +813,13 @@ private:
     DynamicColor textColor_ { Color::BLACK };
     DynamicColor textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;
+    int32_t variableFontWeight_ = 0;
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
+    bool enableVariableFontWeight_ = false;
     std::optional<float> minFontScale_;
     std::optional<float> maxFontScale_;
 

@@ -46,11 +46,12 @@ struct Font {
     std::vector<std::string> fontFamilies;
     std::optional<Color> fontColor;
     std::optional<std::vector<std::string>> fontFamiliesNG;
+    std::optional<bool> enableVariableFontWeight;
 
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
-                    fontColor == other.fontColor;
+                    fontColor == other.fontColor && enableVariableFontWeight == other.enableVariableFontWeight;
         if (!flag) {
             return false;
         }

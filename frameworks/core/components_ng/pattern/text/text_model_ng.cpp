@@ -115,6 +115,7 @@ void TextModelNG::SetFont(const Font& value)
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(value.fontStyle.value());
     }
+    SetEnableVariableFontWeight(value.enableVariableFontWeight.value_or(false));
 }
 
 void TextModelNG::SetFontSize(const Dimension& value)
@@ -184,6 +185,16 @@ void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
 }
 
+void TextModelNG::SetVariableFontWeight(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value, frameNode);
+}
+
+void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
+}
+
 void TextModelNG::SetMinFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
@@ -197,6 +208,16 @@ void TextModelNG::SetMaxFontScale(const float value)
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
+}
+
+void TextModelNG::SetVariableFontWeight(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, VariableFontWeight, value);
+}
+
+void TextModelNG::SetEnableVariableFontWeight(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value);
 }
 
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -553,6 +574,7 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(frameNode, value.fontStyle.value());
     }
+    SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight.value_or(false));
 }
 
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)

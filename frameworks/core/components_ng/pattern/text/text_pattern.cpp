@@ -2877,6 +2877,17 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     child->UpdateMaxFontScaleWithoutFlushDirty(textLayoutProp->GetMaxFontScale().value());
                 }
                 break;
+            case PropertyInfo::VARIABLE_FONT_WEIGHT:
+                if (textLayoutProp->HasVariableFontWeight() && !child->GetHasUserFontWeight()) {
+                    child->UpdateVariableFontWeightWithoutFlushDirty(textLayoutProp->GetVariableFontWeight().value());
+                }
+                break;
+            case PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT:
+                if (textLayoutProp->HasEnableVariableFontWeight() && !child->GetHasUserFontWeight()) {
+                    child->UpdateEnableVariableFontWeightWithoutFlushDirty(
+                        textLayoutProp->GetEnableVariableFontWeight().value());
+                }
+                break;
             default:
                 break;
         }
