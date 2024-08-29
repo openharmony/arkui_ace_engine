@@ -6643,23 +6643,26 @@ void WebDelegate::SetAccessibilityState(bool state)
         return;
     }
     accessibilityState_ = state;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), state]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->SetAccessibilityState(state);
-            if (state) {
+    if (state) {
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), state]() {
+                auto delegate = weak.Upgrade();
+                CHECK_NULL_VOID(delegate);
+                CHECK_NULL_VOID(delegate->nweb_);
+                delegate->nweb_->SetAccessibilityState(state);
                 auto accessibilityEventListenerImpl =
                     std::make_shared<AccessibilityEventListenerImpl>();
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+    } else {
+        CHECK_NULL_VOID(nweb_);
+        nweb_->SetAccessibilityState(state);
+    }
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
