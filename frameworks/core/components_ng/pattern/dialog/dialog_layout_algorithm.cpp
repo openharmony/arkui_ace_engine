@@ -572,12 +572,19 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
         return;
     }
     auto childLayoutProperty = child->GetLayoutProperty();
+    auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(childLayoutProperty);
+    CHECK_NULL_VOID(dialogProp);
     auto childConstraint =
         CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
     auto dialogHeight = Dimension(dialogChildSize_.Height(), DimensionUnit::PX);
     auto dialogWidth = Dimension(dialogChildSize_.Width(), DimensionUnit::PX);
-    childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), CalcLength(dialogHeight)));
+    if (dialogProp->GetWidth().has_value()) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
+    }
+    if (dialogProp->GetHeight().has_value()) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
+    }
     child->Measure(childConstraint);
     child->GetGeometryNode()->SetFrameSize(dialogChildSize_);
     auto renderContext = child->GetHostNode()->GetRenderContext();
