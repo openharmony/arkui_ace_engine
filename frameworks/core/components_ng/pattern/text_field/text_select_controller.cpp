@@ -46,7 +46,7 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     secondHandleInfo_.index = newIndex;
 }
 
-RectF TextSelectController::CalculateEmptyValueCaretRect()
+RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
 {
     RectF rect;
     auto pattern = pattern_.Upgrade();
@@ -58,7 +58,11 @@ RectF TextSelectController::CalculateEmptyValueCaretRect()
     rect.SetLeft(contentRect_.Left());
     rect.SetTop(contentRect_.Top());
     rect.SetHeight(textFiled->PreferredLineHeight());
-    rect.SetWidth(caretInfo_.rect.Width());
+    if (LessOrEqual(width, 0.0f)) {
+        rect.SetWidth(caretInfo_.rect.Width());
+    } else {
+        rect.SetWidth(width);
+    }
     auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
     textFiled->CheckTextAlignByDirection(textAlign, direction);
@@ -78,7 +82,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect()
             break;
         case TextAlign::END:
             rect.SetLeft(static_cast<float>(contentRect_.GetX()) + contentRect_.Width() -
-                         static_cast<float>(caretInfo_.rect.Width()));
+                         static_cast<float>(rect.Width()));
             break;
         default:
             break;
@@ -161,11 +165,16 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
     UpdateCaretIndex(index);
+    auto secondHandleWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
+        secondHandleInfo_.rect = caretInfo_.rect;
+        secondHandleInfo_.rect.SetWidth(secondHandleWidth);
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+        AdjustHandleAtEdge(secondHandleInfo_.rect);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
+        secondHandleInfo_.rect = CalculateEmptyValueCaretRect(secondHandleWidth);
     }
 }
 

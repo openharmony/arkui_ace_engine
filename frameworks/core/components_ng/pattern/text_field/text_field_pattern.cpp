@@ -2475,6 +2475,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     }
 
     if (showSelect_) {
+        StopTwinkling();
         SetIsSingleHandle(true);
     }
     if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::DOUBLE_CLICK)) {
@@ -2511,6 +2512,8 @@ void TextFieldPattern::HandleTripleClickEvent(GestureEvent& info)
     if (IsSelected()) {
         StopTwinkling();
         SetIsSingleHandle(false);
+    } else {
+        StartTwinkling();
     }
     if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty() && !IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });

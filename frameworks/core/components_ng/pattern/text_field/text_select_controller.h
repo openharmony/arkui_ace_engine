@@ -208,7 +208,7 @@ public:
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
-    RectF CalculateEmptyValueCaretRect();
+    RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
     bool IsTouchAtLineEnd(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
