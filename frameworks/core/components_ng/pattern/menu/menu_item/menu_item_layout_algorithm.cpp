@@ -219,7 +219,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 }
 
 void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint,
-std::optional<LayoutConstraintF>& layoutConstraint,PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
+    std::optional<LayoutConstraintF>& layoutConstraint, PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
 {
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
