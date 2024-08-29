@@ -236,8 +236,7 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-    auto pipeline =
-        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_.value_or(-1));
