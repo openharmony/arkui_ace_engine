@@ -149,64 +149,9 @@ public:
         return nullptr;
     }
 
-    std::map<int32_t, LazyForEachChild>& GetItems(std::list<std::pair<std::string, RefPtr<UINode>>>& childList)
-    {
-        startIndex_ = -1;
-        endIndex_ = -1;
-        int32_t lastIndex = -1;
-        bool isCertained = false;
+    void Transit(std::list<std::pair<std::string, RefPtr<UINode>>>& childList);
 
-        decltype(cachedItems_) items(std::move(cachedItems_));
-
-        for (auto& [index, node] : items) {
-            if (!node.second) {
-                cachedItems_.try_emplace(index, std::move(node));
-                continue;
-            }
-
-            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
-            if (frameNode && !frameNode->IsActive()) {
-                ACE_SYNTAX_SCOPED_TRACE("LazyForEach not active index[%d]", index);
-                frameNode->SetJSViewActive(false, true);
-                expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
-                continue;
-            }
-            cachedItems_.try_emplace(index, std::move(node));
-            if (startIndex_ == -1) {
-                startIndex_ = index;
-            }
-            if (isLoop_) {
-                if (isCertained) {
-                    continue;
-                }
-                if (lastIndex > -1 && index - lastIndex > 1) {
-                    startIndex_ = index;
-                    endIndex_ = lastIndex;
-                    isCertained = true;
-                } else {
-                    endIndex_ = std::max(endIndex_, index);
-                }
-            } else {
-                endIndex_ = std::max(endIndex_, index);
-            }
-            lastIndex = index;
-        }
-
-        if (needTransition) {
-            for (auto& [key, node] : expiringItem_) {
-                if (!node.second) {
-                    continue;
-                }
-                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
-                if (frameNode && frameNode->IsOnMainTree()) {
-                    childList.emplace_back(key, node.second);
-                }
-            }
-            needTransition = false;
-        }
-
-        return cachedItems_;
-    }
+    std::map<int32_t, LazyForEachChild>& GetItems(std::list<std::pair<std::string, RefPtr<UINode>>>& childList);
 
     void RemoveAllChild()
     {
