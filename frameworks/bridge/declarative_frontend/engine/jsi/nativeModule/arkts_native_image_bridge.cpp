@@ -735,12 +735,11 @@ ArkUINativeModuleValue ImageBridge::SetBorderRadius(ArkUIRuntimeCallInfo* runtim
     CalcDimension bottomRight;
 
     bool isLengthMetrics = false;
-    if (ArkTSUtils::ParseJsLengthMetrics(vm, topLeftArgs, topLeft) ||
-        ArkTSUtils::ParseJsLengthMetrics(vm, topRightArgs, topRight) ||
-        ArkTSUtils::ParseJsLengthMetrics(vm, bottomLeftArgs, bottomLeft) ||
-        ArkTSUtils::ParseJsLengthMetrics(vm, bottomRightArgs, bottomRight)) {
-        isLengthMetrics = true;
-    } else {
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, topLeftArgs, topLeft);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, topRightArgs, topRight);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, bottomLeftArgs, bottomLeft);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, bottomRightArgs, bottomRight);
+    if (!isLengthMetrics) {
         ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
         ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
         ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
