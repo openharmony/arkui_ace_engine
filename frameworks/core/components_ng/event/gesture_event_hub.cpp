@@ -813,6 +813,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     dragDropManager->SetDraggingPressedState(true);
     if (dragPreviewInfo.inspectorId != "") {
         auto dragPreviewPixelMap = GetDragPreviewPixelMap();
+        TAG_LOGI(AceLogTag::ACE_DRAG, "InspectorId exist, get thumbnail.");
         if (dragPreviewPixelMap == nullptr) {
             dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
         }
@@ -824,6 +825,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Non-mouse dragging, get thumbnail.");
                 dragDropInfo.pixelMap = dragPreviewPixelMap_;
                 OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
                 return;
@@ -833,6 +835,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     if (dragPreviewInfo.pixelMap != nullptr) {
         dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+        TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap exist, get thumbnail.");
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
         return;
     } else if (dragPreviewInfo.customNode != nullptr) {
@@ -841,10 +844,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
                             frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
             ContainerScope scope(id);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
             if (pixelMap != nullptr) {
                 dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             }
@@ -865,6 +870,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
 #endif
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropInfo is empty.");
     OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
 }
 
