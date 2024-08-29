@@ -40,6 +40,7 @@
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
+#include "core/components_ng/render/adapter/focus_animation_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
@@ -127,13 +128,13 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false) override;
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    void PaintFocusState(
-        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
+    void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false) override;
 
     void ClearFocusState() override;
 
@@ -614,6 +615,12 @@ protected:
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
     void NotifyHostTransformUpdated(bool changed = true);
 
+    void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
+
+    void InitFocusStateModidifer(const RoundRect&, const Color&, float);
+
+    void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
+
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -644,6 +651,7 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    bool isFocusBoxGlow_ = true;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
@@ -675,6 +683,7 @@ protected:
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
+    RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
     // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
