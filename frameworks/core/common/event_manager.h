@@ -298,7 +298,16 @@ private:
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
+    void CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needAppend);
+    void LogTouchTestResultInfo(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        float viewScale = 1.0f, bool needAppend = false);
     void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
+    void CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        float viewScale = 1.0f, bool needAppend = false);
+    void DispatchTouchEventAndCheck(const TouchEvent& event);
+    void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
