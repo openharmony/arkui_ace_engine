@@ -31,8 +31,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-static const Ark_Boolean ABOOL_TRUE(true);
-static const Ark_Boolean ABOOL_FALSE(false);
+static const Ark_Boolean ABOOL_TRUE(1);
+static const Ark_Boolean ABOOL_FALSE(0);
 static const Ark_Int32 AINT32_POS(1234);
 static const Ark_Int32 AINT32_NEG(INT_MIN);
 static const Ark_Float32 AFLT32_POS(1.234f);
@@ -58,7 +58,13 @@ static const Opt_Length OPT_LEN_PX_NEG = { .tag = ARK_TAG_OBJECT, .value = ALEN_
 static const Opt_Length OPT_LEN_VP_POS = { .tag = ARK_TAG_OBJECT, .value = ALEN_VP_POS };
 static const Opt_Length OPT_LEN_VP_NEG = { .tag = ARK_TAG_OBJECT, .value = ALEN_VP_NEG };
 
-static const Dimension g_swiperDefaultSize(9876, DimensionUnit::VP);
+static const Opt_Boolean OPT_BOOL_UNDEF = { .tag = ARK_TAG_UNDEFINED };
+static const Opt_Boolean OPT_BOOL_TRUE = { .tag = ARK_TAG_OBJECT, .value = ABOOL_TRUE };
+static const Opt_Boolean OPT_BOOL_FALSE = { .tag = ARK_TAG_OBJECT, .value = ABOOL_FALSE };
+
+static const Dimension THEME_SWIPER_INDICATOR_SIZE(9876, DimensionUnit::VP);
+static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
+static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
 inline Ark_Number ArkNum(int src)
 {
@@ -117,7 +123,10 @@ public:
 
         // set test values to Theme Pattern as data for the Theme building
         auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
-        themeStyle->SetAttr("swiper_indicator_size", { .value = g_swiperDefaultSize });
+        themeStyle->SetAttr("swiper_indicator_size", { .value = THEME_SWIPER_INDICATOR_SIZE });
+        themeStyle->SetAttr("indicator_text_font_size", { .value = THEME_SWIPER_FONT_SIZE });
+        themeStyle->SetAttr(ARROW_COLOR_PRIMARY, { .value = THEME_SWIPER_ARROW_COLOR });
+        themeStyle->SetAttr(ARROW_COLOR_COMPONENT_NORMAL, { .value = THEME_SWIPER_ARROW_COLOR });
         MockThemeStyle::GetInstance()->SetAttr("swiper_pattern", { .value = themeStyle });
         themeConstants->LoadTheme(0);
 
@@ -202,13 +211,11 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest3, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_VALUE);
 
-    auto arkBoolTrue = ABOOL_TRUE;
-    modifier_->setAutoPlay(node_, arkBoolTrue);
+    modifier_->setAutoPlay(node_, ABOOL_TRUE);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "true");
 
-    auto arkBoolFalse = ABOOL_FALSE;
-    modifier_->setAutoPlay(node_, arkBoolFalse);
+    modifier_->setAutoPlay(node_, ABOOL_FALSE);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "false");
 }
@@ -305,7 +312,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_size, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
-    static const std::string DEFAULT_SIZE = g_swiperDefaultSize.ToString();
+    static const std::string DEFAULT_SIZE = THEME_SWIPER_INDICATOR_SIZE.ToString();
     static const std::vector<OneTestStep> testPlan = {
     { { ._itemWidth = OPT_LEN_VP_POS, ._itemHeight = OPT_LEN_VP_POS,
         ._selectedItemWidth = OPT_LEN_VP_POS, ._selectedItemHeight = OPT_LEN_VP_POS,
@@ -485,12 +492,13 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsize, TestSize.Level1
 {
     typedef std::tuple<Opt_Dimension, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
-    static const std::string DEFAULT_VALUE("0.00vp");
+    static const std::string DEFAULT_VALUE(THEME_SWIPER_FONT_SIZE.ToString());
     static const std::vector<OneTestStep> testPlan = {
         { OPT_LEN_VP_POS, "1.23vp" },
         { OPT_LEN_PX_POS, "1234.00px" },
         { OPT_LEN_VP_NEG, DEFAULT_VALUE },
         { OPT_LEN_PX_NEG, DEFAULT_VALUE },
+        { { .tag = ARK_TAG_UNDEFINED }, DEFAULT_VALUE },
     };
 
     ASSERT_NE(modifier_->setIndicator, nullptr);
@@ -498,19 +506,18 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsize, TestSize.Level1
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
-    static const std::vector<std::string> keys = { "fontSize", "selectedFontSize" };
     for (const auto &[size, expect]: testPlan) {
         Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1,
-            .value1 = { ._digitFont =  {.tag = ARK_TAG_OBJECT, .value = {.size = size}},
-                ._selectedDigitFont =  {.tag = ARK_TAG_OBJECT, .value = {.size = size}}
+            .value1 = { ._digitFont = {.tag = ARK_TAG_OBJECT, .value = {.size = size}},
+                ._selectedDigitFont = {.tag = ARK_TAG_OBJECT, .value = {.size = size}}
             }
         };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
-        for (const auto &nameKey: keys) {
-            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
-            EXPECT_EQ(checkVal2, expect);
-        }
+        auto checkVal2 = GetStringAttribute(strWithObj, "fontSize");
+        EXPECT_EQ(checkVal2, expect);
+        auto checkVal3 = GetStringAttribute(strWithObj, "selectedFontSize");
+        EXPECT_EQ(checkVal3, expect);
     }
 }
 
@@ -553,7 +560,6 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsweight, TestSize.Lev
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "true");
 
-    static const std::vector<std::string> keys = { "fontWeight", "selectedFontWeight" };
     {
         Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = {
             ._digitFont = {.tag = ARK_TAG_UNDEFINED},
@@ -562,10 +568,10 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsweight, TestSize.Lev
         };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
-        for (const auto &nameKey: keys) {
-            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
-            EXPECT_EQ(checkVal2, DEFAULT_VALUE);
-        }
+        auto checkVal2 = GetStringAttribute(strWithObj, "fontWeight");
+        EXPECT_EQ(checkVal2, DEFAULT_VALUE);
+        auto checkVal3 = GetStringAttribute(strWithObj, "selectedFontWeight");
+        EXPECT_EQ(checkVal3, DEFAULT_VALUE);
     }
     for (const auto &[weight, expect]: testPlan) {
         Type_SwiperAttribute_indicator_Arg0 arkParam = { .selector = 1, .value1 = {
@@ -575,10 +581,10 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_digit_fontsweight, TestSize.Lev
         };
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
-        for (const auto &nameKey: keys) {
-            auto checkVal2 = GetStringAttribute(strWithObj, nameKey);
-            EXPECT_EQ(checkVal2, expect);
-        }
+        auto checkVal2 = GetStringAttribute(strWithObj, "fontWeight");
+        EXPECT_EQ(checkVal2, expect);
+        auto checkVal3 = GetStringAttribute(strWithObj, "selectedFontWeight");
+        EXPECT_EQ(checkVal3, expect);
     }
 }
 
@@ -661,13 +667,247 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_bool, TestSize.Level1)
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "true");
 }
+
 /**
- * @tc.name: SwiperModifierTest6
- * @tc.desc: Check the functionality of SwiperModifier.DisplayArrowImpl
+ * @tc.name: setDisplayArrowTestStyleShowBg
+ * @tc.desc: Check the functionality of SwiperModifier.setDisplayArrow with the Style size subattruibutes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest6, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleShowBg, TestSize.Level1)
 {
+    static const std::string PROP_NAME("showBackground");
+    static const std::string DEFAULT_VALUE = "false";
+
+    ASSERT_NE(modifier_->setDisplayArrow, nullptr);
+
+    auto checkValInit = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkValInit, DEFAULT_VALUE);
+
+    Type_SwiperAttribute_displayArrow_Arg0 arkParam1 = {.selector=0, .value0={.showBackground = OPT_BOOL_TRUE}};
+    modifier_->setDisplayArrow(node_, &arkParam1, nullptr);
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, "true");
+
+    Type_SwiperAttribute_displayArrow_Arg0 arkParam2 = {.selector=0, .value0={.showBackground = OPT_BOOL_FALSE}};
+    modifier_->setDisplayArrow(node_, &arkParam2, nullptr);
+    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal2, "false");
+
+    Type_SwiperAttribute_displayArrow_Arg0 arkParam3 = {.selector=0, .value0={.showBackground = OPT_BOOL_UNDEF}};
+    modifier_->setDisplayArrow(node_, &arkParam3, nullptr);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: setDisplayArrowTestStyleSize
+ * @tc.desc: Check the functionality of SwiperModifier.setDisplayArrow with the Style size subattruibutes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleSize, TestSize.Level1)
+{
+    typedef std::tuple<Ark_ArrowStyle, std::string> OneTestStep;
+    static const std::string PROP_NAME("arrowSize");
+    static const std::string DEFAULT_VALUE_S = SWIPER_ARROW_SMALL_ARROW_SIZE.ToString();
+    static const std::string DEFAULT_VALUE_B = SWIPER_ARROW_BIG_ARROW_SIZE.ToString();
+    static const std::vector<OneTestStep> testPlan = {
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+    };
+
+    ASSERT_NE(modifier_->setDisplayArrow, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, "0.00vp");
+
+    for (const auto &[style, expect]: testPlan) {
+        Type_SwiperAttribute_displayArrow_Arg0 arkParam = {
+            .selector = 0, .value0 = style
+        };
+        modifier_->setDisplayArrow(node_, &arkParam, nullptr);
+        auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+        EXPECT_EQ(checkVal2, expect);
+        auto checkVal3 = GetStringAttribute(node_, "isSidebarMiddle");
+        bool expect3 = (style.isSidebarMiddle.tag != ARK_TAG_UNDEFINED && style.isSidebarMiddle.value != 0);
+        EXPECT_EQ(checkVal3, expect3 ? "true" : "false");
+    }
+}
+
+/**
+ * @tc.name: setDisplayArrowTestStyleBgSize
+ * @tc.desc: Check the functionality of SwiperModifier.setDisplayArrow with the Style, bg size subattruibutes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleBgSize, TestSize.Level1)
+{
+    typedef std::tuple<Ark_ArrowStyle, std::string> OneTestStep;
+    static const std::string PROP_NAME("arrowBackgroundSize");
+    static const std::string DEFAULT_VALUE_S = SWIPER_ARROW_SMALL_ARROW_BACKGROUND_SIZE.ToString();
+    static const std::string DEFAULT_VALUE_B = SWIPER_ARROW_BIG_ARROW_BACKGROUND_SIZE.ToString();
+    static const std::vector<OneTestStep> testPlan = {
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+    };
+
+    ASSERT_NE(modifier_->setDisplayArrow, nullptr);
+
+    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal1, "0.00vp");
+
+    for (const auto &[style, expect]: testPlan) {
+        Type_SwiperAttribute_displayArrow_Arg0 arkParam = {
+            .selector = 0, .value0 = style
+        };
+        modifier_->setDisplayArrow(node_, &arkParam, nullptr);
+        auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+        EXPECT_EQ(checkVal2, expect);
+    }
+}
+
+/**
+ * @tc.name: setDisplayArrowTestStyleColorDefault
+ * @tc.desc: Check the functionality of SwiperModifier.DisplayArrowImpl with Style, the Color's default and init
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColorDefault, TestSize.Level1)
+{
+    static const std::string DEFAULT_VALUE = THEME_SWIPER_ARROW_COLOR.ToString();
+    {
+        auto initArrowColor = GetStringAttribute(node_, "arrowColor");
+        EXPECT_EQ(initArrowColor, Color::TRANSPARENT.ToString());
+        auto initArrowBgColor = GetStringAttribute(node_, "arrowBackgroundColor");
+        EXPECT_EQ(initArrowBgColor, Color::TRANSPARENT.ToString());
+    }
+    {
+        Type_SwiperAttribute_displayArrow_Arg0 arkParam = { .selector = 0, .value0 = {
+            .isSidebarMiddle = OPT_BOOL_FALSE,
+            .arrowColor = {.tag = ARK_TAG_UNDEFINED}, .backgroundColor = {.tag = ARK_TAG_UNDEFINED}
+        } };
+        modifier_->setDisplayArrow(node_, &arkParam, nullptr);
+        auto defaultSmallArrowColor = GetStringAttribute(node_, "arrowColor");
+        EXPECT_EQ(defaultSmallArrowColor, DEFAULT_VALUE);
+        auto defaultSmallArrowBgColor = GetStringAttribute(node_, "arrowBackgroundColor");
+        EXPECT_EQ(defaultSmallArrowBgColor, Color::TRANSPARENT.ToString());
+    }
+    {
+        Type_SwiperAttribute_displayArrow_Arg0 arkParam = { .selector = 0, .value0 = {
+            .isSidebarMiddle = OPT_BOOL_TRUE,
+            .arrowColor = {.tag = ARK_TAG_UNDEFINED}, .backgroundColor = {.tag = ARK_TAG_UNDEFINED}
+        } };
+        modifier_->setDisplayArrow(node_, &arkParam, nullptr);
+        auto defaultBigArrowColor = GetStringAttribute(node_, "arrowColor");
+        EXPECT_EQ(defaultBigArrowColor, DEFAULT_VALUE);
+        auto defaultBigArrowBgColor = GetStringAttribute(node_, "arrowBackgroundColor");
+        EXPECT_EQ(defaultBigArrowBgColor, DEFAULT_VALUE);
+    }
+}
+
+/**
+ * @tc.name: setDisplayArrowTestStyleColor
+ * @tc.desc: Check the functionality of SwiperModifier.DisplayArrowImpl with Style, the Color's subattributes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColor, TestSize.Level1)
+{
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static Ark_String resName = {.chars = "aa.bb.cc"};
+    static const std::vector<OneTestStep> testPlan = {
+        { { .selector = 0, .value0 = 0x12345678 }, "#12345678" },
+        { { .selector = 1, .value1 = {.tag = ARK_TAG_INT32, .i32 = 0x123456} }, "#FF123456" },
+        { { .selector = 1, .value1 = {.tag = ARK_TAG_FLOAT32, .f32 = 0.5f} }, "#00000000" },
+        { { .selector = 2, .value2 = {.chars = "#11223344"} }, "#11223344" },
+        { { .selector = 2, .value2 = {.chars = "65535"} }, "#FF00FFFF" },
+        { { .selector = 3, .value3 = ArkRes(&resName) }, Color::RED.ToString() },// Color::RED is result
+            // of mocked ThemeConstants::GetColorByName
+        { { .selector = 3, .value3 = ArkRes(nullptr, 1234) }, Color::RED.ToString() },
+    };
+
+    ASSERT_NE(modifier_->setDisplayArrow, nullptr);
+
+    for (const auto &[arkResColor, expected]: testPlan) {
+        Type_SwiperAttribute_displayArrow_Arg0 arkParam = { .selector = 0, .value0 = {
+             .arrowColor = {.tag = ARK_TAG_OBJECT, .value = arkResColor},
+             .backgroundColor = {.tag = ARK_TAG_OBJECT, .value = arkResColor}
+        } };
+        modifier_->setDisplayArrow(node_, &arkParam, nullptr);
+        auto checkVal2 = GetStringAttribute(node_, "arrowColor");
+        EXPECT_EQ(checkVal2, expected);
+        auto checkVal3 = GetStringAttribute(node_, "arrowBackgroundColor");
+        EXPECT_EQ(checkVal3, expected);
+    }
+}
+
+/**
+ * @tc.name: setDisplayArrowTestBoolean
+ * @tc.desc: Check the functionality of SwiperModifier.setDisplayArrow with Boolean type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setDisplayArrowTestBoolean, TestSize.Level1)
+{
+    static const std::string PROP_NAME("displayArrow");
+    static const std::string PROP_NAME_EXT("hoverShow");
+    ASSERT_NE(modifier_->setDisplayArrow, nullptr);
+
+    auto isDisplayArrowDefault = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(isDisplayArrowDefault, "false");
+    auto isHoverShowDefault = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(isHoverShowDefault, "false");
+
+    Type_SwiperAttribute_displayArrow_Arg0 boolFalse = {.selector = 1, .value1 = ABOOL_FALSE};
+    modifier_->setDisplayArrow(node_, &boolFalse, nullptr);
+    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal2, "false");
+    auto checkVal2x = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(checkVal2x, "false");
+
+    Type_SwiperAttribute_displayArrow_Arg0 boolIndTrue = {.selector = 1, .value1 = ABOOL_TRUE};
+    modifier_->setDisplayArrow(node_, &boolIndTrue, nullptr);
+    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal3, "true");
+    auto checkVal3x = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(checkVal3x, "false");
+
+    modifier_->setDisplayArrow(node_, &boolIndTrue, &OPT_BOOL_TRUE);
+    auto checkVal4x = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(checkVal4x, "true");
+
+    modifier_->setDisplayArrow(node_, &boolIndTrue, &OPT_BOOL_UNDEF);
+    auto checkVal5x = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(checkVal5x, "true"); // nothing change
+
+    modifier_->setDisplayArrow(node_, &boolIndTrue, &OPT_BOOL_FALSE);
+    auto checkVal6x = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(checkVal6x, "false");
+
+    modifier_->setDisplayArrow(node_, &boolIndTrue, &OPT_BOOL_UNDEF);
+    auto checkVal7x = GetStringAttribute(node_, PROP_NAME_EXT);
+    EXPECT_EQ(checkVal7x, "false"); // nothing change
 }
 /**
  * @tc.name: SwiperModifierTest7

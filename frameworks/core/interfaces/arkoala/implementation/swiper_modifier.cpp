@@ -48,7 +48,7 @@ Ark_Int32 trimToAceRange(Ark_Int32 val, T min, T max)
 
 std::optional<OHOS::Ace::Dimension> &checkDimValid(std::optional<OHOS::Ace::Dimension> &dim)
 {
-    if (dim && dim->IsNegative()) {
+    if (!dim || dim->IsNegative()) {
         dim->SetValue(0);
         dim->SetUnit(OHOS::Ace::DimensionUnit::VP);
     }
@@ -102,7 +102,7 @@ namespace {
 bool checkDimCustom(std::optional<Dimension> &dim, const Dimension &defaultDim)
 {
     bool isCustom = dim && dim->Unit() != DimensionUnit::PERCENT;
-    if (isCustom && dim->IsNegative()) {
+    if (!dim || (isCustom && dim->IsNegative())) {
         *dim = defaultDim;
     }
     return isCustom;
@@ -192,6 +192,7 @@ SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
     checkDimValid(p.dimStart);
     checkDimValid(p.dimEnd);
 
+    // TODO upgrade to the using of Theme's data as default
     checkDimValid(p.fontSize);
     checkDimValid(p.selectedFontSize);
     if (!p.fontWeight) {
@@ -217,6 +218,7 @@ void IndicatorImpl(Ark_NativePointer node,
     if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
         swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     }
+    auto showIndicator = true;
     if (value->selector == SELECTOR_DIGIT) {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
         SwiperModelNG::SetDigitIndicatorStyle(frameNode, ParseDigitIndicator(value->value1, swiperIndicatorTheme));
@@ -227,6 +229,8 @@ void IndicatorImpl(Ark_NativePointer node,
         if (value->selector == SELECTOR_DOT) {
             arkDot = &(value->value0);
             SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+        } else if (value->selector == SELECTOR_BOOL) {
+            showIndicator = Converter::Convert<bool>(value->value2);
         }
         auto [params, isCustomSize] = ParseDotIndicator(*arkDot, swiperIndicatorTheme);
         SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
@@ -234,14 +238,76 @@ void IndicatorImpl(Ark_NativePointer node,
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     }
 
-    auto showIndicator = value->selector != SELECTOR_BOOL || Converter::Convert<bool>(value->value2);
     SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
 }
+
+namespace {
+SwiperArrowParameters ParseArrowStyle(const Ark_ArrowStyle& src,
+    const RefPtr<SwiperIndicatorTheme> &theme)
+{
+    SwiperArrowParameters p;
+    p.isShowBackground = Converter::OptConvert<bool>(src.showBackground);
+    p.isSidebarMiddle = Converter::OptConvert<bool>(src.isSidebarMiddle);
+    p.backgroundSize = Converter::OptConvert<Dimension>(src.backgroundSize);
+    p.backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
+    p.arrowSize = Converter::OptConvert<Dimension>(src.arrowSize);
+    p.arrowColor = Converter::OptConvert<Color>(src.arrowColor);
+
+    if (!p.isShowBackground) {
+        p.isShowBackground = theme->GetIsShowArrowBackground();
+    }
+    if (!p.isSidebarMiddle) {
+        p.isSidebarMiddle = theme->GetIsSidebarMiddle();
+    }
+    bool isBigArrow = p.isSidebarMiddle.value();
+    if (!p.backgroundSize || (p.backgroundSize->Unit() != DimensionUnit::PERCENT && p.backgroundSize->IsNegative())) {
+        p.backgroundSize = isBigArrow ? theme->GetBigArrowBackgroundSize() : theme->GetSmallArrowBackgroundSize();
+    }
+    if (!p.backgroundColor) {
+        p.backgroundColor =
+            isBigArrow ? theme->GetBigArrowBackgroundColor() : theme->GetSmallArrowBackgroundColor();
+    }
+    if (!p.arrowSize || (p.arrowSize->Unit() != DimensionUnit::PERCENT && p.arrowSize->IsNegative())) {
+        p.arrowSize = isBigArrow ? theme->GetBigArrowSize() : theme->GetSmallArrowSize();
+    }
+    if (!p.arrowColor) {
+        p.arrowColor = isBigArrow ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
+    }
+    return p;
+}
+} // namespace
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Type_SwiperAttribute_displayArrow_Arg0* value,
                       const Opt_Boolean* isHoverShow)
 {
-    // TODO
+    constexpr int SELECTOR_STYLE =  SELECTOR_ID_0;
+    constexpr int SELECTOR_BOOL = SELECTOR_ID_1;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    RefPtr<SwiperIndicatorTheme> swiperIndicatorTheme = nullptr;
+    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
+        swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    }
+
+    static Ark_ArrowStyle defaultArkArrow;
+    const Ark_ArrowStyle *arkArrow = &defaultArkArrow;
+    if (value->selector == SELECTOR_STYLE) {
+        arkArrow = &(value->value0);
+    } else {
+        if (!swiperIndicatorTheme || !(value->selector == SELECTOR_BOOL) || !value->value1) {
+            SwiperModelNG::SetDisplayArrow(frameNode, false);
+            return;
+        }
+    }
+    auto params = ParseArrowStyle(*arkArrow, swiperIndicatorTheme);
+    SwiperModelNG::SetArrowStyle(frameNode, params);
+    SwiperModelNG::SetDisplayArrow(frameNode, true);
+
+    CHECK_NULL_VOID(isHoverShow);
+    if (auto showHover = Converter::OptConvert<bool>(*isHoverShow); showHover) {
+        SwiperModelNG::SetHoverShow(frameNode, showHover && *showHover);
+    }
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)

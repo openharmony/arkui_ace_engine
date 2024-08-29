@@ -170,14 +170,14 @@ namespace OHOS::Ace::NG::Converter {
     template<>
     inline Dimension Convert(const Ark_Resource& src)
     {
-        return CalcDimension();
+        return Dimension();
     }
 
     template<>
     inline Dimension Convert(const Ark_Length& src)
     {
         return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
-               CalcDimension() : CalcDimension(src.value, (DimensionUnit)src.unit);
+               Dimension() : Dimension(src.value, static_cast<DimensionUnit>(src.unit));
     }
 
     template<>
