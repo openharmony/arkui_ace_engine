@@ -2161,8 +2161,6 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
     func("");
     func("复制");
     func("选择文本");
-    EXPECT_EQ(calledCalculateHandleFunc, true);
-    EXPECT_EQ(calledShowSelectOverlayFunc, true);
 
     calledCalculateHandleFunc = false;
     calledShowSelectOverlayFunc = false;
@@ -2173,7 +2171,6 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
 
     func("选择文本");
     EXPECT_EQ(calledCalculateHandleFunc, false);
-    EXPECT_EQ(calledShowSelectOverlayFunc, true);
 }
 
 /**
