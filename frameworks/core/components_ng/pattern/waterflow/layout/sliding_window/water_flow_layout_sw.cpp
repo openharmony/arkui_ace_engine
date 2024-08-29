@@ -765,6 +765,11 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
     if (it == info_->idxToLane_.end()) {
         return false;
     }
+    if (it->second >= info_->lanes_[info_->GetSegment(idx)].size()) {
+        TAG_LOGW(ACE_WATERFLOW, "Invalid lane index in map: %{public}zu for section: %{public}d", it->second,
+            info_->GetSegment(idx));
+        return false;
+    }
     auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);
     CHECK_NULL_RETURN(child, false);
     const float mainLen = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
