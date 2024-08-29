@@ -31,7 +31,6 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -447,7 +446,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
         UpdateDividerShadow();
         return;
     }
-
     auto sideBarNode = children.front();
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
     auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
@@ -471,7 +469,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
         }
     }
     host->RebuildRenderContextTree();
-
     CreateAndMountDivider(host);
     CreateAndMountControlButton(host);
     UpdateDividerShadow();
@@ -872,7 +869,10 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto inspectorId = host->GetInspectorId().value_or("");
-        builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetChecked(isShow)
+            .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 }

@@ -467,5 +467,4 @@ bool SheetPresentationLayoutAlgorithm::SheetInSplitWindow() const
     }
     return false;
 }
-
 } // namespace OHOS::Ace::NG

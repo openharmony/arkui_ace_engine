@@ -104,7 +104,7 @@ public:
     int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
     void ClearPreBuildNodeList() override;
     std::vector<std::string> DumpStackInfo() const override;
-        void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
+    void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
         const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated) override;
     void FireNavigationModeChange(NG::NavigationMode mode) override;
     JSRef<JSVal> GetParamByIndex(int32_t index) const;

@@ -527,43 +527,6 @@ void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
     replaceFunc->Call(dataSourceObj_, 1, params);
 }
 
-bool JSNavigationStack::GetAnimatedValue() const
-{
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
-    if (dataSourceObj_->IsEmpty()) {
-        return true;
-    }
-    auto animated = dataSourceObj_->GetProperty("animated");
-    return animated->ToBoolean();
-}
-
-void JSNavigationStack::UpdateAnimatedValue(bool animated)
-{
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    auto setAnimatedFunc = dataSourceObj_->GetProperty("setAnimated");
-    if (!setAnimatedFunc->IsFunction()) {
-        return;
-    }
-    auto animatedFunc = JSRef<JSFunc>::Cast(setAnimatedFunc);
-    JSRef<JSVal> params[1];
-    params[0] = JSRef<JSVal>::Make(ToJSValue(animated));
-    animatedFunc->Call(dataSourceObj_, 1, params);
-}
-
-
-bool JSNavigationStack::GetDisableAnimation() const
-{
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
-    if (dataSourceObj_->IsEmpty()) {
-        return false;
-    }
-    auto disableAllAnimation = dataSourceObj_->GetProperty("disableAllAnimation");
-    return disableAllAnimation->ToBoolean();
-}
-
 std::string JSNavigationStack::GetRouteParam() const
 {
     auto size = GetSize();
@@ -600,7 +563,7 @@ std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param) c
     } else if (param->IsNumber()) {
         double ret = param->ToNumber<double>();
         std::ostringstream oss;
-        oss<< ret;
+        oss << ret;
         return oss.str();
     } else if (param->IsString()) {
         std::string ret = param->ToString();
@@ -640,7 +603,7 @@ void JSNavigationStack::ParseJsObject(
         } else if (value->IsNumber()) {
             double ret = value->ToNumber<double>();
             std::ostringstream oss;
-            oss<< ret;
+            oss << ret;
             json->Put(key, oss.str().c_str());
         } else if (value->IsString()) {
             std::string ret = value->ToString();
@@ -652,6 +615,43 @@ void JSNavigationStack::ParseJsObject(
             json->Put(key, childJson);
         }
     }
+}
+
+bool JSNavigationStack::GetAnimatedValue() const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    if (dataSourceObj_->IsEmpty()) {
+        return true;
+    }
+    auto animated = dataSourceObj_->GetProperty("animated");
+    return animated->ToBoolean();
+}
+
+void JSNavigationStack::UpdateAnimatedValue(bool animated)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto setAnimatedFunc = dataSourceObj_->GetProperty("setAnimated");
+    if (!setAnimatedFunc->IsFunction()) {
+        return;
+    }
+    auto animatedFunc = JSRef<JSFunc>::Cast(setAnimatedFunc);
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(animated));
+    animatedFunc->Call(dataSourceObj_, 1, params);
+}
+
+
+bool JSNavigationStack::GetDisableAnimation() const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto disableAllAnimation = dataSourceObj_->GetProperty("disableAllAnimation");
+    return disableAllAnimation->ToBoolean();
 }
 
 void JSNavigationStack::UpdateOnStateChangedCallback(
@@ -828,6 +828,7 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
         preProxy->SetNavDestinationContext(from);
         params[0] = preObj;
     }
+
     auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
     if (!topDestination) {
         params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
