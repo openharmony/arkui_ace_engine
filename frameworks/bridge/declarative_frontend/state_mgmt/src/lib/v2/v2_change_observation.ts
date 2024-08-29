@@ -75,6 +75,7 @@ class ObserveV2 {
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;
+  public static readonly CONSUMER_PREFIX = '__consumer_';
 
   // used by array Handler to create dependency on artificial 'length'
   // property of array, mark it as changed when array has changed.
@@ -132,6 +133,19 @@ class ObserveV2 {
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
+  }
+
+  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
+    if (!parentObj || typeof parentObj !== 'object') {
+      return false;
+    }
+    const trackedKey = ObserveV2.OB_PREFIX + prop;
+    const consumerKey = ObserveV2.CONSUMER_PREFIX + prop;
+    const computedKey = ComputedV2.COMPUTED_CACHED_PREFIX + prop;
+    if (trackedKey in parentObj || consumerKey in parentObj || computedKey in parentObj) {
+      return true;
+    }
+    return false;
   }
 
   public static getCurrentRecordedId(): number {
