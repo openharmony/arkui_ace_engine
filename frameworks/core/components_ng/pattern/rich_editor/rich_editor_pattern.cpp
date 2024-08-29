@@ -535,6 +535,15 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
     }
 }
 
+void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
+{
+    if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+        previewLongPress_ = false;
+        editingLongPress_ = false;
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+}
+
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(!config.skipMeasure && !dirty->SkipMeasureContent(), false);
@@ -554,11 +563,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
-    if (config.frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
-        previewLongPress_ = false;
-        editingLongPress_ = false;
-        magnifierController_->RemoveMagnifierFrameNode();
-    }
+    UpdateMagnifierStateAfterLayout(config.frameSizeChange);
     if (!isRichEditorInit_) {
         FireOnReady();
     }
