@@ -35,6 +35,7 @@ public:
     void ProcessSelection() override;
     void SearchRequestStartTwinkling();
     void SearchRequestStopTwinkling();
+    void ResetSearchRequestStopTwinkling();
 
 private:
     bool searchRequestStopTwinkling_ = false;
