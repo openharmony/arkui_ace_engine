@@ -320,7 +320,7 @@ ArkUINativeModuleValue ArkUINativeModule::RequireDynamicSyncScene(ArkUIRuntimeCa
     }
 
     auto sceneTag = sceneNode->GetTag();
-    auto nativeRef = NativeUtilsBridge::CreateStrongRef(vm, sceneNode);
+    auto nativeRef = NativeUtilsBridge::CreateWeakRef(vm, sceneNode);
     const char* keys[] = { "nativeRef", "tag" };
     Local<JSValueRef> values[] = { nativeRef, panda::StringRef::NewFromUtf8(vm, sceneTag.c_str()) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
