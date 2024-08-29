@@ -1094,17 +1094,6 @@ HWTEST_F(WaterFlowTestNg, PositionController007, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. test function.
-     * @tc.expected: function ScrollPage is called.
-     */
-    pattern_->SetAxis(Axis::VERTICAL);
-    controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
-    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
-    EXPECT_TRUE(controller->IsAtEnd());
 }
 
 namespace {
@@ -1187,19 +1176,6 @@ HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. Scroll forward and scroll backward
-     * @tc.expected: Will trigger ScrollPage func
-     */
-    accessibilityProperty_->ActActionScrollForward();
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    accessibilityProperty_->ActActionScrollBackward();
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
 namespace {
@@ -1443,6 +1419,25 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
+}
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: Test ScrollPage func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
+    auto controller = pattern_->positionController_;
+    controller->ScrollPage(false, false);
+    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
+    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
+    EXPECT_TRUE(controller->IsAtEnd());
 }
 
 /**
