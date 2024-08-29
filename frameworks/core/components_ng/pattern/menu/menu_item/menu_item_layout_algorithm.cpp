@@ -23,7 +23,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-// 存在content的情况下，right row宽度最多占比1/3
+// The maximum width of the right row is 1/3 of content area width
 constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -164,7 +164,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     CHECK_NULL_VOID(leftRow);
 
     // measure right row
-    SetRightRowLayoutConstraint(childConstraint, layoutConstraint, padding, layoutWrapper);
+    childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / RIGHT_ROW_MAX_WIDTH_WEIGHT);
     float rightRowWidth = 0.0f;
     float rightRowHeight = 0.0f;
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
@@ -216,43 +216,6 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     }
 
     UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
-}
-
-void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint,
-    std::optional<LayoutConstraintF>& layoutConstraint, PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
-{
-    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(leftRow);
-
-    auto menuItemNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuItemNode);
-    auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto itemProperty = pattern->GetLayoutProperty<MenuItemLayoutProperty>();
-    CHECK_NULL_VOID(itemProperty);
-    auto content = itemProperty->GetContent().value_or("");
-    if (!content.empty()) {
-        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() / RIGHT_ROW_MAX_WIDTH_WEIGHT
-        - padding.right.value_or(horInterval_));
-        return;
-    }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
-
-    auto rightRowMaxSize = maxRowWidth_;
-    auto children = leftRow->GetAllChildrenWithBuild();
-    if (!children.empty()) {
-        for (const auto& child : children) {
-            if (child->GetHostTag() == V2::SYMBOL_ETS_TAG || child->GetHostTag() == V2::IMAGE_ETS_TAG) {
-                rightRowMaxSize -= static_cast<float>(iconSize_) + iconContentPadding;
-            }
-        }
-    }
-    childConstraint.maxSize.SetWidth(rightRowMaxSize);
 }
 
 void MenuItemLayoutAlgorithm::MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)

@@ -47,8 +47,6 @@ private:
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
     float GetBordersHeight(LayoutWrapper* layoutWrapper);
     float GetMenuItemVerticalPadding();
-    void SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint,
-        std::optional<LayoutConstraintF>& layoutConstraint, PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
