@@ -3991,9 +3991,7 @@ AceAutoFillType WebPattern::GetFocusedType()
     return type;
 }
 
-bool WebPattern::`AutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
-bool WebPattern::`
-AutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
     viewDataCommon_ = {};
