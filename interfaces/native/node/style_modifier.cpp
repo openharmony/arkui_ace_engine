@@ -4021,8 +4021,8 @@ int32_t SetCaretStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
-        node->uiNodeHandle, item->value[NUM_0].f32, unit, item->value[NUM_0].u32);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaret(
+        node->uiNodeHandle, item->value[NUM_0].f32, unit);
     return ERROR_CODE_NO_ERROR;
 }
 

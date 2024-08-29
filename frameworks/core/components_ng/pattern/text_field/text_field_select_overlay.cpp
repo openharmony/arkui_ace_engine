@@ -117,7 +117,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     }
 }
 
-void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     SetLastSourceType(sourceType);
@@ -290,6 +290,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textFieldPattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
@@ -318,16 +319,12 @@ RectF TextFieldSelectOverlay::GetSelectArea()
     RectF res(pattern->GetCaretRect());
     auto textPaintOffset = host->GetTransformRelativeOffset();
     if (selectRects.empty()) {
-        if (hasTransform_) {
-            GetGlobalRectWithTransform(res);
-        } else {
-            res.SetOffset(res.GetOffset() + textPaintOffset);
-        }
-        return res;
+        res.SetOffset(res.GetOffset() + textPaintOffset);
+    } else {
+        auto contentRect = pattern->GetContentRect();
+        auto textRect = pattern->GetTextRect();
+        res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     }
-    auto contentRect = pattern->GetContentRect();
-    auto textRect = pattern->GetTextRect();
-    res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     auto globalContentRect = GetVisibleContentRect();
     auto intersectRect = res.IntersectRectT(globalContentRect);
     if (hasTransform_) {
@@ -583,9 +580,14 @@ void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
     BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         manager->SetIsHandleLineShow(false);
+        if (!pattern->IsOperation()) {
+            pattern->StartTwinkling();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

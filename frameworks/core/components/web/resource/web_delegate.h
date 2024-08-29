@@ -996,6 +996,7 @@ public:
     void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
 
     void OnTextSelected();
+    void OnDestroyImageAnalyzerOverlay();
 
     void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
     void OnDetachContext();

@@ -1000,20 +1000,6 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
     eventHub->ClearOnDetach();
 }
 
-void ViewAbstract::DisableOnLoad(FrameNode* frameNode)
-{
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->ClearOnLoad();
-}
-
-void ViewAbstract::DisableOnDestroy(FrameNode* frameNode)
-{
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->ClearOnDestroy();
-}
-
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1821,6 +1807,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
+        popupPattern->RegisterPopupStateChangeCallback(param->GetOnStateChange());
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
@@ -3762,22 +3749,6 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onD
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDetach(std::move(onDetach));
-}
-
-void ViewAbstract::SetOnLoad(FrameNode* frameNode, std::function<void(const std::string& xcomponentId)>&& onLoad)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnLoad(std::move(onLoad));
-}
-
-void ViewAbstract::SetOnDestroy(FrameNode* frameNode, std::function<void()>&& onDestroy)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDestroy(std::move(onDestroy));
 }
 
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,

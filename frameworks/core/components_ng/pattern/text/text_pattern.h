@@ -721,6 +721,7 @@ protected:
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
     bool CalculateClickedSpanPosition(const PointF& textOffset);
+    bool CheckAndClick(const RefPtr<SpanItem>& item);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
@@ -734,6 +735,18 @@ protected:
     int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
+    void HandleUrlSpanMouseHoverEvent(const MouseInfo& info);
+    void HandleLeaveUrlSpanHoverEvent(std::vector<RectF>& selectRects, int32_t hostId,
+        PointF& textOffset, std::list<RefPtr<SpanItem>> spans);
+    void HandleUrlSpanSelectHoverEvent(const RefPtr<SpanItem>& item, const std::list<RefPtr<SpanItem>>& spans,
+        int32_t hostId);
+    void HandleUrlSpanMouseOutEvent(int32_t nodeId, bool isHover);
+    void HandleUrlSpanOutEvent();
+    void HandleUrlSpanOnPressEvent(const GestureEvent& info);
+    void HandleUrlSpanOnSelectEvent(const RefPtr<SpanItem>& item, std::list<RefPtr<SpanItem>> spans);
+    void HandleTouchUrlSpanEvent(const TouchEventInfo& info);
+    void HandleSpanTouchRelease(const RefPtr<SpanItem>& item, TouchType touchType);
+    void FlushSpanItemStyle();
 
     virtual bool CanStartAITask();
 
@@ -771,6 +784,7 @@ protected:
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
+    bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
     RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
     bool keyEventInitialized_ = false;
@@ -817,6 +831,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitTouchEvent();
+    void InitUrlHoverEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
@@ -870,6 +885,8 @@ private:
     void ParseOriText(const std::string& currentText);
     bool IsMarqueeOverflow() const;
     virtual void ResetAfterTextChange();
+    bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
+    bool LocalOffsetInSelectedArea(const Offset& localOffset);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -879,6 +896,7 @@ private:
     bool isDoubleClick_ = false;
     bool showSelected_ = false;
     bool isSensitive_ = false;
+    bool isLongPress_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
 
@@ -888,6 +906,8 @@ private:
     OffsetF imageOffset_;
 
     OffsetF contentOffset_;
+    PointF textDownOffset_;
+    PointF textUpOffset_;
     GestureEventFunc onClick_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
@@ -905,6 +925,8 @@ private:
     std::optional<void*> externalParagraph_;
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
+    bool isInArea_ = false;
+    std::vector<RectF> selectRects_;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     WeakPtr<PipelineContext> pipeline_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);

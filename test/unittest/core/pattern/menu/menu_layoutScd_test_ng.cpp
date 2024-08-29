@@ -92,9 +92,6 @@ constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 constexpr float OFFSET_THIRD = 200.0f;
 constexpr float OFFSET_FORTH = 300.0f;
 constexpr float OFFSET_FIFTH = 50.0f;
-constexpr int OFFSET_Y_THIRD = 20;
-constexpr int TOP_LEFT_Y = 18;
-constexpr int PLACEMENT_RIGHT_Y = 29;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float PREVIEW_HEIGHT = 125.0f;
 constexpr float GREATER_WINDOW_MENU_HEIGHT = 1190.0f;
@@ -381,7 +378,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4300, TestSize.Level1)
     auto expectPreviewOffset = OffsetF(x, 0.0f);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(88.062, 88.062));
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(406.031, (OFFSET_Y_THIRD - TOP_LEFT_Y) / 2));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(406.031, CONST_DOUBLE_ZREO));
 }
 
 /**
@@ -979,7 +976,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     auto expectPreviewOffset = OffsetF(305.536, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(88.927, FULL_SCREEN_HEIGHT - POSITION_OFFSET));
-    auto expectMenuOffset = OffsetF(406.464, OFFSET_Y_THIRD * DIP_SCALE - PLACEMENT_RIGHT_Y);
+    auto expectMenuOffset = OffsetF(406.464, CONST_DOUBLE_ZREO);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     /**
@@ -1054,7 +1051,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
     auto expectPreviewOffset = OffsetF(322.481, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(55.0388, 757.333));
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(389.519, OFFSET_Y_THIRD * DIP_SCALE - PLACEMENT_RIGHT_Y));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(389.519, CONST_DOUBLE_ZREO));
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(OFFSET_THIRD / 2, 378.667f));
 
     /**

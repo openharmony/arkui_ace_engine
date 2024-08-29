@@ -887,7 +887,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
+    if (isAllowedDrag) {
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetLastChild());
         CHECK_NULL_VOID(pixelMapNode);
         auto renderContext = pixelMapNode->GetRenderContext();

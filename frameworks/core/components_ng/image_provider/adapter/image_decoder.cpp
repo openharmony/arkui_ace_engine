@@ -25,6 +25,7 @@
 #include "include/core/SkGraphics.h"
 
 #include "base/image/image_source.h"
+#include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -40,6 +41,13 @@
 #include "core/image/image_loader.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string ImageDfxConfigToString(const ImageDfxConfig& imageDfxConfig)
+{
+    return "src = " + imageDfxConfig.imageSrc_ + ", nodeInfo = [" + std::to_string(imageDfxConfig.nodeId_) + "-" +
+           std::to_string(imageDfxConfig.accessibilityId_) + "]";
+}
+} // namespace
 ImageDecoder::ImageDecoder(const RefPtr<ImageObject>& obj, const SizeF& size, bool forceResize)
     : obj_(obj), desiredSize_(size), forceResize_(forceResize)
 {
@@ -77,30 +85,35 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
 {
     CHECK_NULL_RETURN(obj_ && data_, nullptr);
     auto imageDfxConfig = obj_->GetImageDfxConfig();
+    auto nodeId = imageDfxConfig.nodeId_;
+    long long accessId = imageDfxConfig.accessibilityId_;
+    auto src = obj_->GetSourceInfo();
+    auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
     auto source = ImageSource::Create(static_cast<const uint8_t*>(data_->GetData()), data_->GetSize());
     if (!source) {
         TAG_LOGE(AceLogTag::ACE_IMAGE,
-            "ImageSouce Create Fail, id = %{public}d, accessId = %{public}lld, src = %{private}s.",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_),
-            imageDfxConfig.imageSrc_.c_str());
+            "ImageSouce Create Fail, id = %{public}d, accessId = %{public}lld, src = %{private}s.", nodeId, accessId,
+            srcStr.c_str());
         return nullptr;
     }
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
-    auto src = obj_->GetSourceInfo();
-    auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
     ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ], hdr: [%d], quality: [%d]",
         srcStr.c_str(), sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height),
         static_cast<int32_t>(isHdrDecoderNeed), static_cast<int32_t>(imageQuality));
 
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
     if (!pixmap) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE,
-            "PixelMap Create Fail, id = %{public}d-%{public}lld, src = %{private}s.", imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_), imageDfxConfig.imageSrc_.c_str());
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, id = %{public}d-%{public}lld, src = %{private}s.", nodeId,
+            accessId, srcStr.c_str());
         return nullptr;
+    }
+    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image Decode success, Info:[%{public}s]-[%{public}d x %{public}d]",
+            ImageDfxConfigToString(imageDfxConfig).c_str(), pixmap->GetWidth(), pixmap->GetHeight());
+        pixmap->SavePixelMapToFile(std::to_string(nodeId) + "_" + std::to_string(accessId) + "_decode_");
     }
     auto image = PixelMapImage::Create(pixmap);
 

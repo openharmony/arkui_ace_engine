@@ -904,6 +904,8 @@ public:
 
     bool IsTextEditableForStylus() override;
 
+    NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+
 protected:
     bool CanStartAITask() override;
 
@@ -1158,15 +1160,6 @@ private:
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     void SetSubMap(RefPtr<SpanString>& spanString);
-    RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<ImageSpan> ToImageSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<GestureSpan> ToGestureSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<BaselineOffsetSpan> ToBaselineOffsetSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<FontSpan> ToFontSpan(const RefPtr<SpanItem>& spanItem);
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
     void CompleteStyledString(RefPtr<SpanString>& spanString);

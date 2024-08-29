@@ -211,7 +211,7 @@ public:
 private:
     static constexpr uint32_t YEAR_START = 1897; // start year reference with LUNAR_INFO
     static constexpr int32_t LUNAR_INFO_SIZE = 207;
-    static constexpr uint32_t MAX_MONTH = 12;
+    static constexpr uint32_t MAX_MONTH = 13;
     static const uint16_t LUNAR_INFO[];
 };
 

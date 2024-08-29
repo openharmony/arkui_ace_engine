@@ -157,7 +157,9 @@ void MouseInfoToString(const BaseEventInfo& info, std::string& eventParam)
 void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
     const auto& swipeInfo = TypeInfoHelper::DynamicCast<SwipeEventInfo>(&info);
-    eventParam = swipeInfo->ToJsonParamInfo();
+    if (swipeInfo != nullptr) {
+        eventParam = swipeInfo->ToJsonParamInfo();
+    }
 }
 
 } // namespace

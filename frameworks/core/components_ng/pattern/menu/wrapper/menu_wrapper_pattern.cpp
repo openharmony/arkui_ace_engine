@@ -556,6 +556,11 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto frameRect = child->GetGeometryNode()->GetFrameRect();
         // rect is relative to window
+        auto childNode = child->GetHostNode();
+        if (childNode &&
+            (childNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || childNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+            frameRect = childNode->GetPaintRectWithTransform(); // get preview area with scale transform
+        }
         auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
             frameRect.Height());
 
@@ -715,6 +720,7 @@ void MenuWrapperPattern::ClearAllSubMenu()
         auto pattern = frameNode->GetPattern<MenuPattern>();
         if (pattern && pattern->IsSubMenu()) {
             host->RemoveChild(frameNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         }
     }
 }
@@ -724,6 +730,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));
     DumpLog::GetInstance().AddDesc("MenuType: " + std::to_string(dumpInfo_.menuType));
     DumpLog::GetInstance().AddDesc("EnableArrow: " + std::to_string(dumpInfo_.enableArrow));
+    DumpLog::GetInstance().AddDesc("Offset: " + dumpInfo_.offset.ToString());
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());

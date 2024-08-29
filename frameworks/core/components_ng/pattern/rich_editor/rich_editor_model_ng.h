@@ -75,6 +75,9 @@ public:
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
+    static void SetSupportPreviewText(FrameNode* frameNode, bool value);
+    static void SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
+        const OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     void SetDraggable(bool draggable);

@@ -30,8 +30,13 @@ RefPtr<FrameNode> NodeContainerNode::GetOrCreateNodeContainerNode(int32_t nodeId
 
 void NodeContainerNode::OnRecycle()
 {
-    for (const auto& destroyCallback : GetDestroyCallback()) {
+    for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
+    }
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
     }
     GetLayoutProperty()->ResetGeometryTransition();
     GetPattern()->OnRecycle();

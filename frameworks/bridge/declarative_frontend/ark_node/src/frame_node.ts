@@ -789,6 +789,11 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkWaterFlowComponent(node, type);
       })
     }],
+    ['SymbolGlyph', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent(node, type);
+      })
+    }],
     ['FlowItem', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
         return new ArkFlowItemComponent(node, type);
@@ -812,6 +817,26 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     ['GridItem', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
         return new ArkGridItemComponent(node, type);
+      })
+    }],
+    ['TextClock', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
+        return new ArkTextClockComponent(node, type);
+      })
+    }],
+    ['TextTimer', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
+        return new ArkTextTimerComponent(node, type);
+      })
+    }],
+    ['Marquee', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent(node, type);
+      })
+    }],
+    ['TextArea', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent(node, type);
       })
     }],
   ]

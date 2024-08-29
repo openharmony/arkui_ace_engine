@@ -23,6 +23,7 @@
 #define protected public
 #define private public
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -1834,6 +1835,33 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
     scrollPn->Fling(correctVelocity);
     float finalPosition_ = scrollable->finalPosition_;
     EXPECT_EQ(finalPosition_, finalPosition);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test SetFadingEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: SetFadingEdge false
+     * @tc.expected: FadingEdge false
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto paintProperty = scrollPn->GetPaintProperty<ScrollablePaintProperty>();
+    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), false);
+    EXPECT_FALSE(paintProperty->GetFadingEdge().value_or(false));
+    /**
+     * @tc.cases: SetFadingEdge true and SetFadingEdgeLength
+     * @tc.expected: FadingEdge true and FadingEdgeLength is the same as SetFadingEdgeLength
+     */
+    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true);
+    EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(32.0f, DimensionUnit::VP)); // default value;
+    NG::ScrollableModelNG::SetFadingEdge(scroll_.GetRawPtr(), true, Dimension(50.0f, DimensionUnit::PERCENT));
+    EXPECT_TRUE(paintProperty->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty->GetFadingEdgeLength().value(), Dimension(50.0f, DimensionUnit::PERCENT));
 }
 
 /**

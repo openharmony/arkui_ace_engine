@@ -31,6 +31,10 @@ const std::string SENTENCE_BUFFER = "sentenceBuffer";
 const std::string API_VERSION = "apiVersion";
 const std::string RESULT_BUFFER = "resultBuffer";
 const std::string SHEET_DISMISS = "sheetDismiss";
+const std::string PROCESS_ID = "processId";
+const std::string MAX_CONTENT_LENGTH = "maxContentLength";
+const std::string FIRST_HANDLE_RECT = "firstHandleRect";
+const std::string SECOND_HANDLE_RECT = "secondHandleRect";
 
 bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
 {
@@ -54,20 +58,8 @@ void AIWriteAdapter::CloseModalUIExtension()
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     std::function<void(std::vector<uint8_t>&)> resultCallback)
 {
-    std::vector<int> selectBufferVec(info.selectBuffer.size());
-    std::transform(info.selectBuffer.begin(), info.selectBuffer.end(), selectBufferVec.begin(),
-        [](uint8_t x) { return static_cast<int>(x); });
-    std::vector<int> sentenceBufferVec(info.sentenceBuffer.size());
-    std::transform(info.sentenceBuffer.begin(), info.sentenceBuffer.end(), sentenceBufferVec.begin(),
-        [](uint8_t x) { return static_cast<int>(x); });
-    auto apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AAFwk::Want want;
-    want.SetElementName(bundleName_, abilityName_);
-    want.SetParam(UI_ENTENSION_TYPE.first, UI_ENTENSION_TYPE.second);
-    want.SetParam(SELECT_BUFFER, selectBufferVec);
-    want.SetParam(SENTENCE_BUFFER, sentenceBufferVec);
-    want.SetParam(API_VERSION, static_cast<int>(apiVersion));
-
+    SetWantParams(info, want);
     Ace::ModalUIExtensionCallbacks callbacks;
     callbacks.onResult = [](int32_t code, const AAFwk::Want& want) {
         TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onResult, code: %{public}d", code);
@@ -102,6 +94,26 @@ void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     CHECK_NULL_VOID(overlayManager);
     Ace::ModalUIExtensionConfig config;
     sessionId_ = overlayManager->CreateModalUIExtension(want, callbacks, config);
+}
+
+void AIWriteAdapter::SetWantParams(const AIWriteInfo& info, AAFwk::Want& want)
+{
+    std::vector<int> selectBufferVec(info.selectBuffer.size());
+    std::transform(info.selectBuffer.begin(), info.selectBuffer.end(), selectBufferVec.begin(),
+        [](uint8_t x) { return static_cast<int>(x); });
+    std::vector<int> sentenceBufferVec(info.sentenceBuffer.size());
+    std::transform(info.sentenceBuffer.begin(), info.sentenceBuffer.end(), sentenceBufferVec.begin(),
+        [](uint8_t x) { return static_cast<int>(x); });
+    auto apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    want.SetElementName(bundleName_, abilityName_);
+    want.SetParam(UI_ENTENSION_TYPE.first, UI_ENTENSION_TYPE.second);
+    want.SetParam(SELECT_BUFFER, selectBufferVec);
+    want.SetParam(SENTENCE_BUFFER, sentenceBufferVec);
+    want.SetParam(API_VERSION, static_cast<int>(apiVersion));
+    want.SetParam(PROCESS_ID, getpid());
+    want.SetParam(MAX_CONTENT_LENGTH, info.maxLength);
+    want.SetParam(FIRST_HANDLE_RECT, info.firstHandle);
+    want.SetParam(SECOND_HANDLE_RECT, info.secondHandle);
 }
 
 std::vector<uint8_t> AIWriteAdapter::GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams)

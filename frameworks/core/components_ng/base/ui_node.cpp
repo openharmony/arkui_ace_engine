@@ -204,7 +204,7 @@ void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
                 GetTag().c_str(), GetId());
         }
         OHOS::Ace::LogBacktrace();
-        
+
         if (withAbort) {
             abort();
         }
@@ -825,49 +825,82 @@ bool UINode::NeedRequestAutoSave()
     return false;
 }
 
-void UINode::DumpTree(int32_t depth)
+void UINode::DumpTree(int32_t depth, bool hasJson)
 {
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-        DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
-        DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+    if (hasJson) {
+        std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        children->Put("ID", nodeId_);
+        children->Put("Depth", GetDepth());
+        children->Put("InstanceId", instanceId_);
+        children->Put("AccessibilityId", accessibilityId_);
         if (IsDisappearing()) {
-            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+            children->Put("IsDisappearing", IsDisappearing());
         }
-        DumpInfo();
-        DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+        DumpInfo(children);
+        std::string key = isRoot_ ? tag_ : tag_ + std::to_string(nodeId_);
+        json->Put(key.c_str(), children);
+        std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
+        auto prefix = DumpLog::GetInstance().GetPrefix(depth);
+        DumpLog::GetInstance().Append(prefix + jsonstr);
+    } else {
+        if (DumpLog::GetInstance().GetDumpFile()) {
+            DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
+            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+            DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
+            DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+            if (IsDisappearing()) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+            }
+            DumpInfo();
+            DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+        }
     }
     for (const auto& item : GetChildren()) {
-        item->DumpTree(depth + 1);
+        item->DumpTree(depth + 1, hasJson);
     }
     for (const auto& [item, index, branch] : disappearingChildren_) {
-        item->DumpTree(depth + 1);
+        item->DumpTree(depth + 1, hasJson);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
-        frameNode->GetOverlayNode()->DumpTree(depth + 1);
+        frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
     }
 }
 
-bool UINode::DumpTreeById(int32_t depth, const std::string& id)
+bool UINode::DumpTreeById(int32_t depth, const std::string& id, bool hasJson)
 {
-    if (DumpLog::GetInstance().GetDumpFile() &&
-        (id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
-        DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-        DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
-        DumpAdvanceInfo();
-        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
-        return true;
+    if (hasJson) {
+        if ((id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
+            std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+            std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+            children->Put("ID", nodeId_);
+            children->Put("Depth", GetDepth());
+            children->Put("IsDisappearing", IsDisappearing());
+            DumpAdvanceInfo(children);
+            json->Put(tag_.c_str(), children);
+            DumpLog::GetInstance().PrintJson(json->ToString());
+            return true;
+        }
+    } else {
+        if (DumpLog::GetInstance().GetDumpFile() &&
+            (id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
+            DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
+            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+            DumpAdvanceInfo();
+            DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+            return true;
+        }
     }
     for (const auto& item : GetChildren()) {
-        if (item->DumpTreeById(depth + 1, id)) {
+        if (item->DumpTreeById(depth + 1, id, hasJson)) {
             return true;
         }
     }
     for (const auto& [item, index, branch] : disappearingChildren_) {
-        if (item->DumpTreeById(depth + 1, id)) {
+        if (item->DumpTreeById(depth + 1, id, hasJson)) {
             return true;
         }
     }
@@ -1166,15 +1199,15 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
     }
 }
 
-void UINode::TryVisibleChangeOnDescendant(bool isVisible)
+void UINode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
-    UpdateChildrenVisible(isVisible);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
 }
 
-void UINode::UpdateChildrenVisible(bool isVisible) const
+void UINode::UpdateChildrenVisible(VisibleType preVisibility, VisibleType currentVisibility) const
 {
     for (const auto& child : GetChildren()) {
-        child->TryVisibleChangeOnDescendant(isVisible);
+        child->TryVisibleChangeOnDescendant(preVisibility, currentVisibility);
     }
 }
 

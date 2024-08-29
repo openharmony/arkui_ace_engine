@@ -188,6 +188,76 @@ void ResetMarqueeOnFinish(ArkUINodeHandle node)
     MarqueeModelNG::SetOnFinish(frameNode, nullptr);
 }
 
+void SetMarqueeSrcValue(ArkUINodeHandle node, ArkUI_CharPtr src)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    MarqueeModelNG::SetValue(frameNode, std::optional<std::string>(src));
+}
+
+void ResetMarqueeSrcValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetValue(frameNode);
+}
+
+void SetMarqueePlayerStatus(ArkUINodeHandle node, ArkUI_Bool start)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetPlayerStatus(frameNode, std::optional<bool>(start));
+}
+
+void ResetMarqueePlayerStatus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetPlayerStatus(frameNode);
+}
+
+void SetMarqueeScrollAmount(ArkUINodeHandle node, ArkUI_Float64 step)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetScrollAmount(frameNode, std::optional<double>(step));
+}
+
+void ResetMarqueeScrollAmount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetScrollAmount(frameNode);
+}
+
+void SetMarqueeLoop(ArkUINodeHandle node, ArkUI_Int32 loop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetLoop(frameNode, std::optional<int32_t>(loop));
+}
+
+void ResetMarqueeLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetLoop(frameNode);
+}
+
+void SetMarqueeDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetDirection(frameNode, std::optional<MarqueeDirection>(static_cast<MarqueeDirection>(direction)));
+}
+
+void ResetMarqueeDirection(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::ResetDirection(frameNode);
+}
 namespace NodeModifier {
 const ArkUIMarqueeModifier* GetMarqueeModifier()
 {
@@ -196,7 +266,9 @@ const ArkUIMarqueeModifier* GetMarqueeModifier()
         ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
         ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily, SetMarqueeUpdateStrategy,
         ResetMarqueeUpdateStrategy, SetMarqueeOnStart, ResetMarqueeOnStart,
-        SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish };
+        SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish, SetMarqueeSrcValue,
+        ResetMarqueeSrcValue, SetMarqueePlayerStatus, ResetMarqueePlayerStatus, SetMarqueeScrollAmount,
+        ResetMarqueeScrollAmount, SetMarqueeLoop, ResetMarqueeLoop, SetMarqueeDirection, ResetMarqueeDirection };
     return &modifier;
 }
 

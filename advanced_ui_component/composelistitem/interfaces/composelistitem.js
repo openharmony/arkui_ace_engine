@@ -364,7 +364,6 @@ class ContentItemStruct extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
                     Text.pop();
@@ -386,7 +385,6 @@ class ContentItemStruct extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColor));
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
                     Text.pop();
@@ -885,7 +883,6 @@ class OperateItemStruct extends ViewPU {
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
-            Text.focusable(true);
             Text.draggable(false);
             Text.flexShrink(1);
         }, Text);

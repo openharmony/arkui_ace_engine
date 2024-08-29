@@ -220,7 +220,7 @@ void JSSelect::Value(const JSCallbackInfo& info)
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseValueObject(info, info[1]);
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set select value %{public}s", value.c_str());
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "value set by user");
     SelectModel::GetInstance()->SetValue(value);
 }
 

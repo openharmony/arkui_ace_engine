@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
 void ScrollableController::ScrollToIndex(
@@ -132,6 +133,11 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }
+    if (InstanceOf<WaterFlowPattern>(pattern)) {
+        pattern->ScrollPage(reverse, smooth);
+        return;
+    }
+    // todo: remove impl here, all types of ScrollablePattern should call ScrollPage directly
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();

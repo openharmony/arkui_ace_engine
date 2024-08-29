@@ -86,11 +86,6 @@ public:
         color_ = color;
     }
 
-    void ResetColor()
-    {
-        color_ = std::nullopt;
-    }
-
     bool operator==(const IconOptions& info) const
     {
         return color_ == info.color_ && size_ == info.size_ && src_ == info.src_ && bundleName_ == info.bundleName_ &&

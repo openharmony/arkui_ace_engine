@@ -332,6 +332,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && rightArrowIsHidden)) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
+            host->SetActive(false);
             hostFocusHub->SetParentFocusable(false);
             hostFocusHub->LostSelfFocus();
             return;
@@ -345,6 +346,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         visible = true;
     }
     renderContext->SetVisible(visible);
+    host->SetActive(true);
 }
 
 void SwiperArrowPattern::UpdateArrowContent()
@@ -410,5 +412,13 @@ void SwiperArrowPattern::DumpAdvanceInfo()
     isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
     hoverOnClickFlag_ ? DumpLog::GetInstance().AddDesc("hoverOnClickFlag:true")
                       : DumpLog::GetInstance().AddDesc("hoverOnClickFlag:false");
+}
+
+void SwiperArrowPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("index", index_);
+    json->Put("isTouch", isTouch_);
+    json->Put("isHover", isHover_);
+    json->Put("hoverOnClickFlag", hoverOnClickFlag_);
 }
 } // namespace OHOS::Ace::NG

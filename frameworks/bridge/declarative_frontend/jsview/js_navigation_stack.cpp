@@ -64,13 +64,12 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
     // add callback to new JSNavPathStack
     RemoveStack();
     UpdateOnStateChangedCallback(dataSourceObj_, onStateChangedCallback_);
-    auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](
-        const JSRef<JSObject>& info, uint32_t& navDestinationId) -> int32_t {
+    auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](const JSRef<JSObject>& info) -> int32_t {
         auto stack = weakStack.Upgrade();
         if (stack == nullptr) {
             return ERROR_CODE_INTERNAL_ERROR;
         }
-        auto errorCode = stack->CheckNavDestinationExists(info, navDestinationId);
+        auto errorCode = stack->CheckNavDestinationExists(info);
         if (errorCode != ERROR_CODE_NO_ERROR) {
             stack->RemoveInvalidPage(info);
         }
@@ -80,7 +79,7 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
 }
 
 void JSNavigationStack::UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
-    std::function<int32_t(JSRef<JSObject>, uint32_t&)> checkFunc)
+    std::function<int32_t(JSRef<JSObject>)> checkFunc)
 {
     if (obj->IsEmpty()) {
         return;
@@ -324,12 +323,23 @@ void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::stri
     pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
 }
 
+bool JSNavigationStack::CallByPushDestination(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto isPushDestination = pathInfo->GetPropertyValue<bool>("pushDestination", false);
+    return isPushDestination;
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
     auto name = GetNameByIndex(index);
     auto param = GetParamByIndex(index);
     RefPtr<NG::UINode> node;
-    if (GetNodeFromPreBuildList(index, node)) {
+    if (GetNodeFromPreBuildList(index, name, param, node)) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get node from prebuild list");
         return node;
     }
@@ -337,6 +347,9 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
     if (errorCode != ERROR_CODE_NO_ERROR) {
+        if (CallByPushDestination(index)) {
+            return nullptr;
+        }
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
@@ -719,25 +732,16 @@ void JSNavigationStack::SaveNodeToPreBuildList(const std::string& name, const JS
     preBuildNodeList_.emplace_back(name, param, node, GetSize() - 1);
 }
 
-bool JSNavigationStack::GetNodeFromPreBuildList(int32_t index, RefPtr<NG::UINode>& node)
+bool JSNavigationStack::GetNodeFromPreBuildList(int32_t index, const std::string& name,
+    const JSRef<JSVal>& param, RefPtr<NG::UINode>& node)
 {
-    auto navPathInfo = GetJsPathInfo(index);
-    if (navPathInfo->IsEmpty()) {
-        return false;
-    }
-    uint64_t navDestinationId = navPathInfo->GetPropertyValue<uint64_t>("navDestinationId", UINT64_MAX);
+    auto isJsObjEqual = [](const JSRef<JSVal>& objLeft, const JSRef<JSVal>& objRight) {
+        return (objLeft->IsEmpty() && objRight->IsEmpty()) ||
+            (objLeft->GetLocalHandle()->IsStrictEquals(objLeft->GetEcmaVM(), objRight->GetLocalHandle()));
+    };
     for (auto it = preBuildNodeList_.begin(); it != preBuildNodeList_.end(); ++it) {
-        node = it->uiNode;
-        auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
-            NG::NavigationGroupNode::GetNavDestinationNode(node));
-        if (!navDestination) {
-            continue;
-        }
-        auto pattern = navDestination->GetPattern<NG::NavDestinationPattern>();
-        if (!pattern) {
-            continue;
-        }
-        if (pattern->GetNavDestinationId() == navDestinationId) {
+        if (it->name == name && isJsObjEqual(it->param, param) && it->index == index) {
+            node = it->uiNode;
             preBuildNodeList_.erase(it);
             return true;
         }
@@ -750,7 +754,7 @@ void JSNavigationStack::ClearPreBuildNodeList()
     preBuildNodeList_.clear();
 }
 
-int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo, uint32_t& navDestinationId)
+int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo)
 {
     auto pathName = navPathInfo->GetProperty("name");
     auto param = navPathInfo->GetProperty("param");
@@ -773,9 +777,10 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
         auto isEntryVal = navPathInfo->GetProperty("isEntry");
         bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+        pattern->SetName(name);
+        pattern->SetIndex(GetSize() - 1);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
-        navDestinationId = pattern->GetNavDestinationId();
     }
     SaveNodeToPreBuildList(name, param, node);
     return ERROR_CODE_NO_ERROR;

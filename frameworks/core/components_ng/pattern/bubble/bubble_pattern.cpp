@@ -778,7 +778,7 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("targetTag: " + dumpInfo_.targetNode + ", targetID: "
         + std::to_string(dumpInfo_.targetID));
     DumpLog::GetInstance().AddDesc("targetOffset: " + dumpInfo_.targetOffset.ToString());
-    DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetOffset.ToString());
+    DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetSize.ToString());
     DumpLog::GetInstance().AddDesc("touchRegion: " + dumpInfo_.touchRegion.ToString());
     DumpLog::GetInstance().AddDesc("avoid top: " + std::to_string(dumpInfo_.top)
         + ", bottom: " + std::to_string(dumpInfo_.bottom));

@@ -200,7 +200,7 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     CHECK_NULL_VOID(overlayLayoutProperty);
     overlayLayoutProperty->UpdateMeasureType(NG::MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
+    if (NeedUpdateOverlayOffset()) {
         overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()),
                                                 Dimension(padding.Offset().GetY()));
         if (holder_ == ImageAnalyzerHolder::IMAGE) {
@@ -234,10 +234,12 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
         isUIConfigUpdate = UpdateVideoConfig(info);
     } else {
         auto padding = layoutProps->CreatePaddingAndBorder();
-        float paddingWidth = holder_ == ImageAnalyzerHolder::IMAGE ? padding.left.value_or(0) +
-                                                                     padding.right.value_or(0) : 0.0f;
-        float paddingHeight = holder_ == ImageAnalyzerHolder::IMAGE ? padding.top.value_or(0) +
-                                                                      padding.bottom.value_or(0) : 0.0f;
+        float paddingWidth = 0.0f;
+        float paddingHeight = 0.0f;
+        if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::XCOMPONENT) {
+            paddingWidth = padding.left.value_or(0) + padding.right.value_or(0);
+            paddingHeight = padding.top.value_or(0) + padding.bottom.value_or(0);
+        }
         NG::SizeF frameSize = geometryNode->GetFrameSize();
         bool shouldUpdateSize = analyzerUIConfig_.contentWidth != frameSize.Width() - paddingWidth ||
                                 analyzerUIConfig_.contentHeight != frameSize.Height() - paddingHeight;
@@ -379,5 +381,12 @@ void ImageAnalyzerManager::UpdateOverlayActiveStatus(bool status)
 {
     CHECK_NULL_VOID(isAnalyzerOverlayBuild_);
     ImageAnalyzerMgr::GetInstance().UpdateOverlayActiveStatus(&overlayData_, status);
+}
+
+bool ImageAnalyzerManager::NeedUpdateOverlayOffset()
+{
+    return holder_ == ImageAnalyzerHolder::IMAGE ||
+           holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM ||
+           holder_ == ImageAnalyzerHolder::XCOMPONENT;
 }
 } // namespace OHOS::Ace

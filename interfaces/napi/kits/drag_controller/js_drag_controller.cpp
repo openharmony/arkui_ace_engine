@@ -1547,6 +1547,8 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
         NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);
+        delete dragAsyncContext;
+        dragAsyncContext = nullptr;
         return nullptr;
     }
     napi_value result = nullptr;

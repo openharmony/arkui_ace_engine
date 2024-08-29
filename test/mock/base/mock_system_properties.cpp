@@ -190,6 +190,11 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
     return dragStartPanDisThreshold_;
 }
 
+bool SystemProperties::GetAllowWindowOpenMethodEnabled()
+{
+    return false;
+}
+
 bool SystemProperties::IsSmallFoldProduct()
 {
     return false;

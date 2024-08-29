@@ -682,6 +682,7 @@ private:
 
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
+    void SetPreviewFirstShow(const RefPtr<FrameNode>& menu);
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
@@ -848,8 +849,6 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
-
-    std::optional<Color> sheetMaskColor_;
 };
 } // namespace OHOS::Ace::NG
 

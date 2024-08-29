@@ -130,8 +130,10 @@ void IsolatedPattern::FireOnErrorCallbackOnUI(
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto uiTaskExecutor = SingleTaskExecutor::Make(
-        host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this), code, name, msg] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

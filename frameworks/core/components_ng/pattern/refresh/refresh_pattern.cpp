@@ -277,7 +277,7 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(theme);
     loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-    
+
     PaddingProperty textpadding;
     textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
@@ -450,7 +450,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
-            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
+            if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx()))) {
                 UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
@@ -810,7 +810,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         dealSpeed = speed / (targetOffset - scrollOffset_);
     }
     bool recycle = true;
-    if (!isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
+    if (pullToRefresh_ && !isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, GetFollowRatio());
     } else if (NearZero(targetOffset)) {
@@ -833,8 +833,6 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             CHECK_NULL_VOID(pattern);
             if (recycle) {
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
-            } else {
-                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, pattern->GetFollowRatio());
             }
         });
     auto context = PipelineContext::GetCurrentContextSafely();
@@ -1245,5 +1243,10 @@ void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
+}
+
+void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
 }
 } // namespace OHOS::Ace::NG

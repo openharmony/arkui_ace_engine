@@ -271,6 +271,48 @@ class RichEditorEnterKeyTypeModifier extends ModifierWithKey<EnterKeyType> {
   }
 }
 
+class RichEditorEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('richEditorEnableKeyboardOnFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnableKeyboardOnFocus(node);
+    } else {
+      getUINativeModule().richEditor.setEnableKeyboardOnFocus(node, this.value);
+    }
+  }
+}
+
+class RichEditorEnablePreviewTextModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity = Symbol('richEditorEnablePreviewText');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnablePreviewText(node);
+    } else {
+      getUINativeModule().richEditor.setEnablePreviewText(node, this.value);
+    }
+  }
+}
+
+class RichEditorEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEditMenuOptions(node);
+    } else {
+      getUINativeModule().richEditor.setEditMenuOptions(node, this.value);
+    }
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -359,6 +401,18 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   enterKeyType(value: EnterKeyType): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEnterKeyTypeModifier.identity, RichEditorEnterKeyTypeModifier, value);
+    return this;
+  }
+  enableKeyboardOnFocus(value: boolean): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnableKeyboardOnFocusModifier.identity, RichEditorEnableKeyboardOnFocusModifier, value);
+    return this;
+  }
+  enablePreviewText(value: boolean): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnablePreviewTextModifier.identity, RichEditorEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEditMenuOptionsModifier.identity, RichEditorEditMenuOptionsModifier, value);
     return this;
   }
 }

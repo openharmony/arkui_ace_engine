@@ -54,6 +54,7 @@ public:
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
+        magnifierNodeExist_ = true;
         UpdateShowMagnifier(true);
     }
 
@@ -81,6 +82,11 @@ public:
     RefPtr<FrameNode> GetRootNode();
 
     RefPtr<UINode> FindWindowScene(const RefPtr<FrameNode>& targetNode);
+
+    bool GetMagnifierNodeExist() const
+    {
+        return magnifierNodeExist_;
+    }
 private:
     MagnifierParams params_;
     bool visible_ = false;
@@ -91,6 +97,7 @@ private:
     WeakPtr<Pattern> pattern_;
     bool removeFrameNode_ = false;
     bool colorModeChange_ = false;
+    bool magnifierNodeExist_ = false;
     Dimension magnifierNodeWidth_;
     Dimension magnifierNodeHeight_;
 };

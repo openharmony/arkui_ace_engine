@@ -192,8 +192,7 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     canvas.AttachPen(pen);
     float midPosX = offset.GetX() + caretWidth / 2;
     float startPosY = offset.GetY();
-    float endPosY = LessOrEqual(offset.GetY() + caretHeight, contentRect_.value().Bottom())
-                        ? offset.GetY() + caretHeight : contentRect_.value().Bottom();
+    float endPosY = startPosY + caretHeight;
     float roundCapRadius = caretWidth / 2;
     canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius), RSPoint(midPosX, endPosY - roundCapRadius));
     canvas.DetachPen();

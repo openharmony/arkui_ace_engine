@@ -46,6 +46,13 @@ public:
     virtual void UpdateOffset(float delta) = 0;
 
     /**
+     * @brief try calibrating total offset to an accurate value.
+     *
+     * @return amount of adjustment to total offset of content
+     */
+    virtual float CalibrateOffset() = 0;
+
+    /**
      * @brief Get which cross-axis lane the item is in.
      *
      * @param itemIndex

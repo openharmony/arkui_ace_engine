@@ -63,7 +63,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        auto drawDirection = (layoutDirection == TextDirection::RTL);
+        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
         paint->SetScrollBar(GetScrollBar());
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -195,7 +201,7 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
+    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
@@ -392,6 +398,8 @@ private:
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;

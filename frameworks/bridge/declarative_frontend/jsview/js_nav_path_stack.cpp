@@ -60,8 +60,7 @@ std::string ErrorToMessage(int32_t code)
     }
 }
 
-void ProcessPromiseCallback(std::shared_ptr<NavgationAsyncContext> asyncContext, int32_t callbackCode,
-    uint32_t navDestinationId)
+void ProcessPromiseCallback(std::shared_ptr<NavgationAsyncContext> asyncContext, int32_t callbackCode)
 {
     CHECK_NULL_VOID(asyncContext);
     CHECK_NULL_VOID(asyncContext->env);
@@ -74,7 +73,7 @@ void ProcessPromiseCallback(std::shared_ptr<NavgationAsyncContext> asyncContext,
     CHECK_NULL_VOID(scope);
     if (callbackCode == ERROR_CODE_NO_ERROR) {
         napi_value result = nullptr;
-        napi_create_uint32(asyncContext->env, navDestinationId, &result);
+        napi_get_undefined(asyncContext->env, &result);
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result);
     } else {
         napi_value code = nullptr;
@@ -188,20 +187,20 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
     napi_value result = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &result);
     if (info.Length() != ARGC_ONE || !info[0]->IsObject()) {
-        ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR, UINT32_MAX);
+        ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
         ReturnPromise(info, result);
         return;
     }
     asyncContext->navPathInfo = JSRef<JSObject>::Cast(info[0]);
     if (!(asyncContext->navPathInfo->GetProperty("name")->IsString())) {
-        ProcessPromiseCallback(asyncContext, ERROR_CODE_PARAM_INVALID, UINT32_MAX);
+        ProcessPromiseCallback(asyncContext, ERROR_CODE_PARAM_INVALID);
         ReturnPromise(info, result);
         return;
     }
 
     auto context = PipelineContext::GetCurrentContext();
     if (context == nullptr) {
-        ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR, UINT32_MAX);
+        ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
         ReturnPromise(info, result);
         return;
     }
@@ -210,12 +209,11 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
         CHECK_NULL_VOID(asyncContext);
         auto stack = weakStack.Upgrade();
         if (stack == nullptr || stack->checkNavDestinationExistsFunc_ == nullptr) {
-            ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR, UINT32_MAX);
+            ProcessPromiseCallback(asyncContext, ERROR_CODE_INTERNAL_ERROR);
             return;
         }
-        uint32_t navDestinationId = UINT32_MAX;
-        auto errorCode = stack->checkNavDestinationExistsFunc_(asyncContext->navPathInfo, navDestinationId);
-        ProcessPromiseCallback(asyncContext, errorCode, navDestinationId);
+        auto errorCode = stack->checkNavDestinationExistsFunc_(asyncContext->navPathInfo);
+        ProcessPromiseCallback(asyncContext, errorCode);
     };
 
     context->PostAsyncEvent(asyncTask, "ArkUINavigationPushDestination", TaskExecutor::TaskType::JS);

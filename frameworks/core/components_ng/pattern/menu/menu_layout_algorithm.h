@@ -34,6 +34,7 @@ struct MenuDumpInfo {
     uint32_t menuPreviewMode = 0;
     uint32_t menuType = 0;
     bool enableArrow = false;
+    OffsetF offset;
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
@@ -123,6 +124,8 @@ private:
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void SetWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
+    uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
+        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
@@ -212,7 +215,7 @@ private:
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
-    bool CheckPlacement(const SizeF& childSize);
+    bool CheckPlacement(const Rect& rect, const OffsetF& position, const SizeF& childSize);
 
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
@@ -220,6 +223,9 @@ private:
     void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
     void TranslateOptions(LayoutWrapper* layoutWrapper);
+    bool CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern);
+    void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
+        LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

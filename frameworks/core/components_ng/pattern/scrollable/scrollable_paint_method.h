@@ -23,7 +23,9 @@ class ACE_EXPORT ScrollablePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ScrollablePaintMethod, NodePaintMethod)
 public:
     ScrollablePaintMethod() = default;
-    ScrollablePaintMethod(bool vertical) : vertical_(vertical) {}
+    ScrollablePaintMethod(bool vertical, bool isReverse, bool isVerticalReverse = false)
+        : vertical_(vertical), isReverse_(isReverse), isVerticalReverse_(isVerticalReverse)
+    {}
     ~ScrollablePaintMethod() override = default;
 
 
@@ -43,6 +45,8 @@ public:
 
 protected:
     bool vertical_ = false;
+    bool isReverse_ = false;
+    bool isVerticalReverse_ = false;
 
 private:
     RefPtr<RenderContext> overlayRenderContext_;

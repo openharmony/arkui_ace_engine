@@ -124,10 +124,8 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = !IsAtBottom();
-    if (isFadingTop || isFadingBottom) {
-        paint->SetOverlayRenderContext(overlayRenderContext);
-        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
-    }
+    paint->SetOverlayRenderContext(overlayRenderContext);
+    UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
 }
 
 void ScrollablePattern::UpdateFadeInfo(
@@ -570,14 +568,14 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOnScrollSnapCallback(scrollSnap);
 
-    auto calePredictSnapOffsetCallback =
+    auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         std::optional<float> predictSnapOffset;
         CHECK_NULL_RETURN(pattern, predictSnapOffset);
-        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
+        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
     };
-    scrollable->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+    scrollable->SetCalcPredictSnapOffsetCallback(std::move(calcPredictSnapOffsetCallback));
 
     auto needScrollSnapToSideCallback = [weak = WeakClaim(this)](float delta) -> bool {
         auto pattern = weak.Upgrade();
@@ -779,13 +777,13 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->OnScrollEnd();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
-    auto calePredictSnapOffsetCallback =
+    auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
+        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
     };
-    scrollBar_->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
+    scrollBar_->SetCalcPredictSnapOffsetCallback(std::move(calcPredictSnapOffsetCallback));
     auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -896,6 +894,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisappearDelayTask();
+        UpdateScrollBarOffset();
     }
     UpdateBorderRadius();
 }
@@ -1005,11 +1004,11 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollEnd();
     };
-    auto calePredictSnapOffsetCallback =
+    auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
+        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
     };
     auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
         auto pattern = weak.Upgrade();
@@ -1029,7 +1028,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         return pattern->ScrollPage(reverse, smooth);
     };
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
-        std::move(scrollEndCallback), std::move(calePredictSnapOffsetCallback),
+        std::move(scrollEndCallback), std::move(calcPredictSnapOffsetCallback),
         std::move(startScrollSnapMotionCallback), std::move(scrollbarFRcallback), std::move(scrollPageCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
@@ -2512,36 +2511,49 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (scrollStop_) {
-        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
-            AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
-        if (!GetScrollAbort()) {
-            if (host != nullptr) {
-                host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-            }
-            if (onScrollStop) {
-                ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
-                    host->GetTag().c_str());
-                onScrollStop();
-                AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
-                SetScrollSource(SCROLL_FROM_NONE);
-            }
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->ScheduleDisappearDelayTask();
-            }
-            StartScrollBarAnimatorByProxy();
-        } else {
-            ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
-                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        }
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        AceAsyncTraceEnd(
-            0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
-                .c_str());
-        scrollStop_ = false;
-        SetScrollAbort(false);
+    if (!scrollStop_) {
+        return;
     }
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
+    if (!GetScrollAbort()) {
+        if (host != nullptr) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+        if (onScrollStop) {
+            ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
+                host->GetTag().c_str());
+            onScrollStop();
+            AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
+            SetScrollSource(SCROLL_FROM_NONE);
+        }
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->ScheduleDisappearDelayTask();
+        }
+        StartScrollBarAnimatorByProxy();
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetTaskExecutor() && pipeline->GetTHPExtraManager()) {
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            const uint32_t delay = 100; // 100: ms
+            taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+            auto task = [weak = WeakClaim(pipeline)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+            };
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
+        }
+    } else {
+        ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    }
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    AceAsyncTraceEnd(
+        0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
+            .c_str());
+    scrollStop_ = false;
+    SetScrollAbort(false);
 }
 
 float ScrollablePattern::FireOnWillScroll(float offset) const

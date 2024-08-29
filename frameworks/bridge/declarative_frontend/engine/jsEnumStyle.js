@@ -181,11 +181,11 @@ var LineCapStyle;
 
 var ButtonType;
 (function (ButtonType) {
-  ButtonType[ButtonType["Normal"] = 0] = "Normal";
-  ButtonType[ButtonType["Capsule"] = 1] = "Capsule";
-  ButtonType[ButtonType["Circle"] = 2] = "Circle";
-  ButtonType[ButtonType["Arc"] = 4] = "Arc";
-  ButtonType[ButtonType["ROUNDED_RECTANGLE"] = 8] = "ROUNDED_RECTANGLE";
+  ButtonType[ButtonType['Normal'] = 0] = 'Normal';
+  ButtonType[ButtonType['Capsule'] = 1] = 'Capsule';
+  ButtonType[ButtonType['Circle'] = 2] = 'Circle';
+  ButtonType[ButtonType['Arc'] = 4] = 'Arc';
+  ButtonType[ButtonType['ROUNDED_RECTANGLE'] = 8] = 'ROUNDED_RECTANGLE';
 })(ButtonType || (ButtonType = {}));
 
 var DevicePosition;
@@ -1702,6 +1702,12 @@ var TransitionHierarchyStrategy;
   TransitionHierarchyStrategy[TransitionHierarchyStrategy["ADAPTIVE"] = 1] = "ADAPTIVE";
 })(TransitionHierarchyStrategy || (TransitionHierarchyStrategy = {}));
 
+var KeyboardAvoidMode;
+(function (KeyboardAvoidMode) {
+    KeyboardAvoidMode[KeyboardAvoidMode["DEFAULT"] = 0] = "DEFAULT";
+    KeyboardAvoidMode[KeyboardAvoidMode["NONE"] = 1] = "NONE";
+})(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -2180,6 +2186,7 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2213,18 +2220,10 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then((navDestinationId) => {
-      return new Promise((resolve, reject) => {
-        info.navDestinationId = navDestinationId;
-        this.pathArray.push(info);
-        this.nativeStack?.onStateChanged();
-        resolve({code: 0});
-      }).catch((err) => {
-        return new Promise((resolve, reject) => {
-          reject(err);
-        })
-      })
-    })
+    [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = true;
+    this.pathArray.push(info);
+    this.nativeStack?.onStateChanged();
     return promise;
   }
   parseNavigationOptions(param) {
@@ -2276,6 +2275,7 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2295,21 +2295,13 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    promise.then((navDestinationId) => {
-      return new Promise((resolve, reject) => {
-        if (launchMode === LaunchMode.NEW_INSTANCE) {
-          info.needBuildNewInstance = true;
-        }
-        info.navDestinationId = navDestinationId;
-        this.pathArray.push(info);
-        this.nativeStack?.onStateChanged();
-        resolve({code: 0});
-      }).catch((err) => {
-        return new Promise((resolve, reject) => {
-          reject(err);
-        })
-      })
-    })
+    [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    info.pushDestination = true;
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
+    this.pathArray.push(info);
+    this.nativeStack?.onStateChanged();
     return promise;
   }
   replacePath(info, optionParam) {
@@ -2895,6 +2887,9 @@ var SaveDescription;
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
   SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
+  SaveDescription[SaveDescription["EXPORT_TO_GALLERY"] = 9] = "EXPORT_TO_GALLERY";
+  SaveDescription[SaveDescription["QUICK_SAVE_TO_GALLERY"] = 10] = "QUICK_SAVE_TO_GALLERY";
+  SaveDescription[SaveDescription["RESAVE_TO_GALLERY"] = 11] = "RESAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;
@@ -3292,6 +3287,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
   StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
+  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
   StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
@@ -3355,6 +3351,22 @@ var AccessibilityHoverType;
   AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
   AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
 })(AccessibilityHoverType || (AccessibilityHoverType = {}));
+
+let WidthBreakpoint;
+(function (WidthBreakpoint) {
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XS'] = 0] = 'WIDTH_XS';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_SM'] = 1] = 'WIDTH_SM';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_MD'] = 2] = 'WIDTH_MD';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_LG'] = 3] = 'WIDTH_LG';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XL'] = 4] = 'WIDTH_XL';
+})(WidthBreakpoint || (WidthBreakpoint = {}));
+
+let HeightBreakpoint;
+(function (HeightBreakpoint) {
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_SM'] = 0] = 'HEIGHT_SM';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_MD'] = 1] = 'HEIGHT_MD';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
+})(HeightBreakpoint || (HeightBreakpoint = {}));
 
 class ImageAnalyzerController {
   constructor() {

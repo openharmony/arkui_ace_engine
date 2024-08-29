@@ -860,11 +860,11 @@ HWTEST_F(RefreshEventTestNg, VersionTwelveHandleDrag004, TestSize.Level1)
 
     /**
      * @tc.steps: step3. HandleDragUpdate, the delta(Plus previous delta) greater than or equal TRIGGER_REFRESH_DISTANCE
-     * @tc.expected: DRAG, scrollOffset_ is TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: OVER_DRAG, scrollOffset_ is TRIGGER_REFRESH_DISTANCE
      */
     pattern_->HandleDragUpdate(
         (TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
 
     /**

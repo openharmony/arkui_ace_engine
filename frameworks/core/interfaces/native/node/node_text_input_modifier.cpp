@@ -593,10 +593,10 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
         } else {
             fontSize.SetValue(placeholderFont->size->number);
         }
+        fontSize.SetUnit(static_cast<DimensionUnit>(placeholderFont->size->unit));
     }
-    fontSize.SetUnit(static_cast<DimensionUnit>(placeholderFont->size->unit));
     font.fontSize = fontSize;
-    if (placeholderFont->weight != nullptr && std::string(placeholderFont->weight) != "") {
+    if (placeholderFont->weight != nullptr && !std::string(placeholderFont->weight).empty()) {
         font.fontWeight = Framework::ConvertStrToFontWeight(placeholderFont->weight);
     } else if (placeholderFont->weightEnum > -1) {
         font.fontWeight = static_cast<FontWeight>(placeholderFont->weightEnum);
@@ -1755,7 +1755,15 @@ void SetTextInputSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCa
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     }
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
+    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+    } else {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+    }
 }
 
 void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)

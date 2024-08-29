@@ -1508,6 +1508,20 @@ class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> 
   }
 }
 
+class AdvancedBlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('advancedBlendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    } else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
 class BlendModeModifier extends ModifierWithKey<ArkBlendMode> {
   constructor(value: ArkBlendMode) {
     super(value);
@@ -4301,6 +4315,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     arkBlendMode.blendMode = blendMode;
     arkBlendMode.blendApplyType = blendApplyType;
     modifierWithKey(this._modifiersWithKeys, BlendModeModifier.identity, BlendModeModifier, arkBlendMode);
+    return this;
+  }
+
+  advancedBlendMode(blendMode: BlendMode, blendApplyType?: BlendApplyType): this {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, AdvancedBlendModeModifier.identity,
+      AdvancedBlendModeModifier, arkBlendMode);
     return this;
   }
 

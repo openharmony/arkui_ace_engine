@@ -456,10 +456,11 @@ Rosen::Drawing::ImageInfo LayeredDrawableDescriptor::CreateRSImageInfo(
     OptionalPixelMap pixelmap, int32_t width, int32_t height)
 {
     Rosen::Drawing::ColorType colorType =
-        pixelmap.has_value() ? colorType = ImageConverter::PixelFormatToColorType(pixelmap.value()->GetPixelFormat())
-                             : colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
+        pixelmap.has_value() && pixelmap.value()
+            ? colorType = ImageConverter::PixelFormatToColorType(pixelmap.value()->GetPixelFormat())
+            : colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
     Rosen::Drawing::AlphaType alphaType =
-        pixelmap.has_value()
+        pixelmap.has_value() && pixelmap.value()
             ? alphaType = ImageConverter::AlphaTypeToAlphaType(pixelmap.value()->GetAlphaType())
             : alphaType = ImageConverter::AlphaTypeToAlphaType(Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL);
     return Rosen::Drawing::ImageInfo(width, height, colorType, alphaType);

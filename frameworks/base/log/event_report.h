@@ -187,6 +187,7 @@ public:
     static void ReportEventJankFrame(DataBase& data);
     static void ReportJankFrameApp(JankInfo& info);
     static void ReportJankFrameFiltered(JankInfo& info);
+    static void ReportJankFrameUnFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
     static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
@@ -199,6 +200,10 @@ public:
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    static void ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
+        const int64_t maxFrameTime = 0);
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 };
 
 } // namespace OHOS::Ace

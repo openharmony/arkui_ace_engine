@@ -1257,8 +1257,8 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(toastContext, nullptr);
     EXPECT_FALSE(pattern->IsDefaultToast());
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
-    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 360.0);
-    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 1280.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 0.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 0.0);
     /**
      * @tc.steps: step3. PopToast.
      */
@@ -1528,6 +1528,76 @@ HWTEST_F(OverlayTestNg, ToastTest008, TestSize.Level1)
     toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
     showedSelectStatus = toastProperty->GetSelectStatus();
     EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::ON);
+}
+
+/**
+ * @tc.name: ToastTest009
+ * @tc.desc: Test ShowToast hoverModeArea default and enableHoverMode default
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toast and toastNode.
+     */
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
+    ASSERT_NE(toastNode, nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    toastNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
+        .duration = DURATION,
+        .bottom = BOTTOMSTRING,
+        .isRightToLeft = true };
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->ShowToast(toastInfo, nullptr);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step3. Test Toast showMode and hoverModeArea.
+     */
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    EXPECT_TRUE(toastPattern->IsDefaultToast());
+    EXPECT_FALSE(toastPattern->toastInfo_.enableHoverMode);
+    EXPECT_EQ(toastPattern->toastInfo_.hoverModeArea, NG::HoverModeAreaType::BOTTOM_SCREEN);
+}
+
+/**
+ * @tc.name: ToastTest010
+ * @tc.desc: Test ShowToast hoverModeArea TOP_SCREEN and enableHoverMode true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo and update hoverModeArea enableHoverMode.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
+        .duration = DURATION,
+        .bottom = BOTTOMSTRING,
+        .isRightToLeft = true };
+    toastInfo.enableHoverMode = true;
+    toastInfo.hoverModeArea = NG::HoverModeAreaType::TOP_SCREEN;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    /**
+     * @tc.steps: step3. Test Toast showMode and hoverModeArea.
+     */
+    EXPECT_TRUE(toastPattern->IsDefaultToast());
+    EXPECT_TRUE(toastPattern->toastInfo_.enableHoverMode);
+    EXPECT_EQ(toastPattern->toastInfo_.hoverModeArea, NG::HoverModeAreaType::TOP_SCREEN);
 }
 
 /**

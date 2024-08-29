@@ -775,4 +775,44 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachStart001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_TRUE(reached);
 }
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: Test ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    MockAnimationManager::GetInstance().SetTicks(1);
+    pattern_->ScrollPage(false, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->Offset(), -800.0f);
+
+    pattern_->ScrollToIndex(29);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 25), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
+
+    pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_HALF);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 25), 400.0f);
+
+    ScrollableController controller;
+    controller.SetScrollPattern(pattern_);
+    controller.ScrollPage(true, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 17);
+    EXPECT_EQ(info->endIndex_, 21);
+}
 } // namespace OHOS::Ace::NG

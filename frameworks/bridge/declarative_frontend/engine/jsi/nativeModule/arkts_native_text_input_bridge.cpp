@@ -660,6 +660,9 @@ ArkUINativeModuleValue TextInputBridge::SetMaxLength(ArkUIRuntimeCallInfo *runti
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMaxLength(nativeNode);
     } else {
         uint32_t maxLength = secondArg->Uint32Value(vm);
+        if (std::isinf(static_cast<float>(secondArg->ToNumber(vm)->Value()))) {
+            maxLength = INT32_MAX; // Infinity
+        }
         if (GreatOrEqual(maxLength, 0)) {
             GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMaxLength(nativeNode, maxLength);
         } else {

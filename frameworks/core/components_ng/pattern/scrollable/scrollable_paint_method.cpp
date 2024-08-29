@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 
 constexpr double PERCENT_100 = 100.0;
 constexpr float LINEAR_GRADIENT_ANGLE = 90.0f;
+constexpr float LINEAR_GRADIENT_DIRECTION_ANGLE = 270.0f;
 namespace {
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
@@ -34,6 +35,11 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
     CHECK_NULL_VOID(overlayRenderContext_);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    if (isVerticalReverse_) {
+        bool tempFadingValue = isFadingTop_;
+        isFadingTop_ = isFadingBottom_;
+        isFadingBottom_ = tempFadingValue;
+    }
     if (isFadingTop_) {
         gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
         gradient.AddColor(CreatePercentGradientColor(percentFading_, Color::WHITE));
@@ -43,7 +49,9 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
     }
     if (vertical_) {
-        gradient.GetLinearGradient()->angle = CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
+        gradient.GetLinearGradient()->angle = isReverse_
+                                                  ? CalcDimension(LINEAR_GRADIENT_DIRECTION_ANGLE, DimensionUnit::PX)
+                                                  : CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
     }
     renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
     renderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);

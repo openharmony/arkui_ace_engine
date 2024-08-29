@@ -134,6 +134,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void ResetGridItemInfo()
     {

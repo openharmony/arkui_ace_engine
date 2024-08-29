@@ -76,6 +76,8 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
+constexpr int32_t USED_JSON_PARAM = 4;
+constexpr int32_t PARAM_NUM = 2;
 
 #define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
 void CheckThreadSafe(
@@ -787,8 +789,18 @@ void PipelineContext::FlushRequestFocus()
     } else {
         auto focusNodeHub = requestFocusNode->GetFocusHub();
         if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
-                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
+            if (unfocusableParentFocusNode) {
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "Request focus by id on node: %{public}s/%{public}d return false, unfocusable node: "
+                    "%{public}s/%{public}d",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId(),
+                    unfocusableParentFocusNode->GetFrameName().c_str(), unfocusableParentFocusNode->GetFrameId());
+                unfocusableParentFocusNode = nullptr;
+            } else {
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+            }
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
@@ -1856,6 +1868,17 @@ bool PipelineContext::OnBackPressed()
     }
 
     // if has popup, back press would hide popup and not trigger page back
+    auto textfieldMgr = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldMgr) {
+        auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
+        auto lastRequestKeyboardNode = DynamicCast<FrameNode>(
+            ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
+        if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
+            textfieldMgr->OnBackPressed()) {
+            LOGI("textfield consumed backpressed event");
+            return true;
+        }
+    }
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
@@ -2019,6 +2042,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 {
     CHECK_RUN_ON(UI);
 
+    HandlePenHoverOut(point);
+
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -2175,6 +2200,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
+        if (thpExtraMgr_ != nullptr) {
+            const uint32_t delay = 800; // 800: ms
+            taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+            auto task = [weak = WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+            };
+            taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
+        }
     }
 
     eventManager_->DispatchTouchEvent(scalePoint);
@@ -2390,6 +2425,39 @@ void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool
     }
 }
 
+void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+{
+    if (params.size() > 1 && params[1] == "-lastpage") {
+        auto lastPage = stageManager_->GetLastPage();
+        if (hasJson) {
+            if (params.size() < USED_JSON_PARAM && lastPage) {
+                lastPage->DumpTree(0, hasJson);
+                DumpLog::GetInstance().PrintEndDumpInfoNG(true);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+            if (params.size() > USED_JSON_PARAM && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM], true)) {
+                DumpLog::GetInstance().Print(
+                    "There is no id matching the ID in the parameter,please check whether the id is correct");
+            }
+        } else {
+            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
+                lastPage->DumpTree(0, hasJson);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+            if (params.size() > USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM])) {
+                DumpLog::GetInstance().Print(
+                    "There is no id matching the ID in the parameter,please check whether the id is correct");
+            }
+        }
+    } else {
+        rootNode_->DumpTree(0, hasJson);
+        if (hasJson) {
+            DumpLog::GetInstance().PrintEndDumpInfoNG(true);
+        }
+        DumpLog::GetInstance().OutPutBySize();
+    }
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     bool hasJson = params.back() == "-json";
@@ -2405,20 +2473,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     if (params[0] == "-element") {
-        if (params.size() > 1 && params[1] == "-lastpage") {
-            auto lastPage = stageManager_->GetLastPage();
-            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
-                lastPage->DumpTree(0);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() == USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[2])) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        } else {
-            rootNode_->DumpTree(0);
-            DumpLog::GetInstance().OutPutBySize();
-        }
+        DumpElement(params, hasJson);
     } else if (params[0] == "-navigation") {
         auto navigationDumpMgr = GetNavigationManager();
         if (navigationDumpMgr) {
@@ -2639,6 +2694,50 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     RequestFrame();
 }
 
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    auto scaleEvent = point.CreateScalePoint(viewScale_);
+    if (scaleEvent.type != TouchType::MOVE) {
+        eventManager_->GetEventTreeRecord().AddTouchPoint(scaleEvent);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d "
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type,
+            scaleEvent.isInjected);
+    }
+
+    auto targerNode = node ? node : rootNode_;
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = scaleEvent.sourceType;
+    touchRestrict.touchEvent.sourceTool = scaleEvent.sourceTool;
+    touchRestrict.touchEvent.type = scaleEvent.type;
+    touchRestrict.touchEvent.force = scaleEvent.force;
+
+    // use mouse to collect pen hover target
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
+    eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    RequestFrame();
+}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
+{
+    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || NearZero(point.force)) {
+        return;
+    }
+
+    CHECK_RUN_ON(UI);
+    auto oriPoint = point;
+    oriPoint.type = TouchType::PROXIMITY_OUT;
+
+    TouchTestResult testResult;
+    eventManager_->UpdatePenHoverNode(oriPoint, testResult);
+    eventManager_->DispatchPenHoverEventNG(oriPoint);
+}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
@@ -2673,9 +2772,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
 
     auto container = Container::Current();
-    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-            event.action == MouseAction::MOVE) &&
-        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+             event.action == MouseAction::MOVE) &&
+            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
+        event.action == MouseAction::CANCEL) {
         auto touchPoint = event.CreateTouchPoint();
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;
@@ -3100,7 +3200,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        
+
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
     }
@@ -4324,6 +4424,44 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
 }
 
+std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode)
+{
+    std::vector<RectF> responseRegionList;
+    rootNode->GetResponseRegionListByTraversal(responseRegionList);
+    std::string responseRegionStrOrigin;
+    std::string responseRegionStrFilter;
+    for (const auto& rect : responseRegionList) {
+        int32_t x = static_cast<int32_t>(rect.GetX());
+        int32_t y = static_cast<int32_t>(rect.GetY());
+        int32_t width = static_cast<int32_t>(rect.Width());
+        int32_t height = static_cast<int32_t>(rect.Height());
+        std::string rectStr = std::to_string(x) + "," +
+                              std::to_string(y) + "," +
+                              std::to_string(x + width) + "," +
+                              std::to_string(y + height);
+        responseRegionStrOrigin += rectStr + "#";
+        if (thpExtraMgr_ && width <= thpExtraMgr_->GetWidth() && height <= thpExtraMgr_->GetHeight()) {
+            responseRegionStrFilter += rectStr + "#";
+        }
+    }
+    if (!responseRegionStrFilter.empty()) {
+        responseRegionStrFilter.pop_back();
+    }
+    LOGD("THP_UpdateViewsLocation origin responseRegion = %{public}s", responseRegionStrOrigin.c_str());
+    return responseRegionStrFilter;
+}
+
+void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootNode)
+{
+    ACE_FUNCTION_TRACE();
+    if (!thpExtraMgr_) {
+        return;
+    }
+    std::string responseRegion = GetResponseRegion(rootNode);
+    std::string parameters = "thp#Location#" + responseRegion;
+    LOGD("THP_UpdateViewsLocation responseRegion = %{public}s", parameters.c_str());
+    thpExtraMgr_->ThpExtraRunCommand("THP_UpdateViewsLocation", parameters.c_str());
+}
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
@@ -4340,4 +4478,13 @@ bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPi
     return false;
 }
 #endif
+
+bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    CHECK_NULL_RETURN(navigationMgr_, false);
+    if (navigationMgr_->IsInteractive()) {
+        return navigationMgr_->AddInteractiveAnimation(animationCallback);
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

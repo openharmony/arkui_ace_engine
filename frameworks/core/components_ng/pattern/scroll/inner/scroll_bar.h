@@ -285,13 +285,13 @@ public:
     {
         return scrollEndCallback_;
     }
-    void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
+    void SetCalcPredictSnapOffsetCallback(CalcPredictSnapOffsetCallback&& calcPredictSnapOffsetCallback)
     {
-        calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
+        calcPredictSnapOffsetCallback_ = std::move(calcPredictSnapOffsetCallback);
     }
-    const CalePredictSnapOffsetCallback& GetCalePredictSnapOffsetCallback() const
+    const CalcPredictSnapOffsetCallback& GetCalcPredictSnapOffsetCallback() const
     {
-        return calePredictSnapOffsetCallback_;
+        return calcPredictSnapOffsetCallback_;
     }
     void SetStartScrollSnapMotionCallback(StartScrollSnapMotionCallback&& startScrollSnapMotionCallback)
     {
@@ -475,7 +475,7 @@ private:
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
-    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
+    CalcPredictSnapOffsetCallback calcPredictSnapOffsetCallback_;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
     ScrollPageCallback scrollPageCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;

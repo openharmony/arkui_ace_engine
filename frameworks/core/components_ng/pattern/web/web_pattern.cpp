@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <algorithm>
+#include <vector>
 
 #include "display_manager.h"
 #include "file_uri.h"
@@ -81,6 +82,7 @@ constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr float SELECT_MENE_HEIGHT = 140.0f;
+constexpr int32_t RESERVED_DEVICEID = 0xAAAAAAFF;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -256,12 +258,12 @@ constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr double DEFAULT_PINCH_DISTANCE = 6.0;
 constexpr double DEFAULT_PINCH_SCALE = 1.0;
 constexpr double DEFAULT_PINCH_SCALE_MAX = 5.0;
-constexpr double DEFAULT_PINCH_SCALE_MIN = 0.32;
-constexpr int32_t PINCH_INDEX_ONE = 1;
+constexpr double DEFAULT_PINCH_SCALE_MIN = 0.1;
 constexpr int32_t STATUS_ZOOMIN = 1;
 constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
-constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
+constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
+constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
@@ -666,26 +668,29 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->startPinchScale_ = event.GetScale();
-        pattern->preScale_ = event.GetScale();
-        pattern->pinchIndex_ = 0;
-        pattern->zoomOutSwitch_ = false;
-        pattern->zoomStatus_ = 0;
-        pattern->zoomErrorCount_ = 0;
-        TAG_LOGI(AceLogTag::ACE_WEB, "InitPinchEvent StartScale: %{public}f", pattern->startPinchScale_);
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->startPageScale_ = pattern->pageScale_;
+            TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionStartTask startPageScale: %{public}f",
+                pattern->startPageScale_);
 
-        return;
+            pattern->startPinchScale_ = event.GetScale();
+            pattern->preScale_ = pattern->startPinchScale_;
+            pattern->zoomOutSwitch_ = false;
+            pattern->zoomStatus_ = 0;
+            pattern->zoomErrorCount_ = 0;
+            TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionStartTask startPinchScale: %{public}f",
+                pattern->startPinchScale_);
+        }
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         ACE_SCOPED_TRACE("WebPattern::InitPinchEvent actionUpdateTask");
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
         if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ", event.GetScale());
             pattern->HandleScaleGestureChange(event);
-            TAG_LOGD(AceLogTag::ACE_WEB, "InitPinchEvent actionUpdateTask event scale:%{public}f: ",
-                event.GetScale());
         }
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
@@ -702,21 +707,20 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 bool WebPattern::CheckZoomStatus(const double& curScale)
 {
-    int32_t curScaleNew = (int32_t) (curScale * 100);
-    int32_t preScaleNew = (int32_t) (preScale_ * 100);
+    int32_t curScaleNew = (int32_t)(curScale * 100);
+    int32_t preScaleNew = (int32_t)(preScale_ * 100);
 
     // check zoom status
-    if ((zoomStatus_ == STATUS_ZOOMOUT && curScaleNew - preScaleNew < 0)
-            && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
+    if ((zoomStatus_ == STATUS_ZOOMOUT && curScaleNew - preScaleNew < 0) && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
         zoomErrorCount_++;
-        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomout && curScale < preScale,"
-            "ignore date.");
+        TAG_LOGI(AceLogTag::ACE_WEB, "CheckZoomStatus zoomStatus = zoomout && curScale < preScale,"
+                                     "ignore date.");
         return false;
-    } else if ((zoomStatus_ == STATUS_ZOOMIN && curScaleNew - preScaleNew > 0)
-                && zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
+    } else if ((zoomStatus_ == STATUS_ZOOMIN && curScaleNew - preScaleNew > 0) &&
+               zoomErrorCount_ < ZOOM_ERROR_COUNT_MAX) {
         zoomErrorCount_++;
-        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange zoomStatus = zoomin && curScale >= preScale,"
-            "ignore date.");
+        TAG_LOGI(AceLogTag::ACE_WEB, "CheckZoomStatus zoomStatus = zoomin && curScale >= preScale,"
+                                     "ignore date.");
         return false;
     } else {
         // nothing
@@ -730,49 +734,49 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
     int32_t preScaleNew = (int32_t)(preScale_ * 100);
 
     // zoom out
-    if (curScale - preScale_ >= 0) {
-        if (preScale_ >= DEFAULT_PINCH_SCALE) {
-            if (startPinchScale_ >= DEFAULT_PINCH_SCALE) {
-                scale = curScale;
-            } else {
-                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
-            }
+    if (GreatOrEqual(curScale, preScale_)) {
+        if (GreatOrEqual(preScale_, DEFAULT_PINCH_SCALE)) {
+            // start page scale > 1
+            if (GreatOrEqual(curScale, DEFAULT_PINCH_SCALE) && !zoomOutSwitch_) {
+                scale = curScale * startPageScale_;
 
-            // Prevent shaking in index 1
-            if (pinchIndex_ == PINCH_INDEX_ONE) {
-                pageScale_ = scale;
+                TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn curScale * pageScale_= %{public}f", scale);
+            } else {
+                TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn curScale < DEFAULT_PINCH_SCALE");
+                scale = pageScale_ + (curScale - startPinchScale_);
             }
         } else {
             // The scale is from 0.4 to 0.5, the scale conversion should be from 1.0 to 1.1
-            if (pageScale_ < DEFAULT_PINCH_SCALE) {
-                TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange Switch from zoomin to zoomout.");
+            // once
+            if (zoomStatus_ == STATUS_ZOOMIN) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "ZoomOutAndIn Switch from zoomin to zoomout.");
                 // must be page scale form 0.4 to 1
-                scale = DEFAULT_PINCH_SCALE;
+                scale = pageScale_;
                 // reset
                 startPinchScale_ = preScale_;
-                pageScale_ = scale;
                 zoomOutSwitch_ = true;
             } else {
-                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
-                zoomOutSwitch_ = false;
+                TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn zoomStatus_ = STATUS_ZOOMOUT curScale < 1.0");
+                scale = pageScale_ + (curScale - startPinchScale_);
             }
         }
         zoomStatus_ = STATUS_ZOOMOUT;
         // zoom in
     } else {
-        // When zooming in from a scale less than 1,
-        // the current scale must be greater than the previous scale value
-        if (zoomOutSwitch_) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange the current scale must be greater "
-                                         "than the previous scale value, ignore data.");
-            return false;
+        // from zoonout to zoomin
+        if (zoomStatus_ == STATUS_ZOOMOUT) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "ZoomOutAndIn Switch from zoomout to zoomin.");
+            // reset
+            startPinchScale_ = preScale_;
+            zoomOutSwitch_ = false;
         }
 
         if (curScaleNew == preScaleNew) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "ZoomOutAndIn curScaleNew == preScaleNew");
             return false;
         }
 
-        scale = ZOOMIN_SMOOTH_SCALE;
+        scale = curScale;
 
         zoomStatus_ = STATUS_ZOOMIN;
     }
@@ -784,22 +788,29 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(delegate_);
 
     double curScale = event.GetScale();
-    if (std::fabs(curScale - preScale_) <= std::numeric_limits<double>::epsilon()) {
+    if (NearEqual(curScale, preScale_)) {
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange curScale == preScale");
         return;
     }
 
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "HandleScaleGestureChange curScale:%{public}f, preScale: %{public}f, "
+        "zoomStatus: %{public}d, pageScale: %{public}f, startPinchScale: %{public}f, startPageScale: %{public}f",
+        curScale, preScale_, zoomStatus_, pageScale_, startPinchScale_, startPageScale_);
+
     if (!CheckZoomStatus(curScale)) {
         return;
     }
-    zoomErrorCount_ = 0;
 
-    pinchIndex_++;
+    zoomErrorCount_ = 0;
 
     double scale = 0.0;
     if (!ZoomOutAndIn(curScale, scale)) {
         return;
     }
+
+    TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange ZoomOutAndIn return scale:%{public}f", scale);
+
     double newScale = GetNewScale(scale);
 
     double centerX = event.GetPinchCenter().GetX();
@@ -814,27 +825,82 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
-    pageScale_ = scale;
+    if (LessNotEqual(scale, DEFAULT_PINCH_SCALE)) {
+        pageScale_ = DEFAULT_PINCH_SCALE;
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleScaleGestureChange pageScale < DEFAULT_PINCH_SCALE");
+    } else {
+        pageScale_ = scale;
+    }
+}
+
+double WebPattern::getZoomOffset(double& scale) const
+{
+    double offset = DEFAULT_PINCH_SCALE - scale;
+    if (LessOrEqual(offset, 0.0)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "getZoomOffset curScale < preScale");
+        return 0.0;
+    }
+    return offset * ZOOM_CONVERT_NUM * ZOOMIN_PUBLIC_ERRAND;
 }
 
 double WebPattern::GetNewScale(double& scale) const
 {
+    if (GreatOrEqual(scale, DEFAULT_PINCH_SCALE_MAX)) {
+        scale = DEFAULT_PINCH_SCALE_MAX;
+
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale scale > DEFAULT_PINCH_SCALE_MAX");
+        return DEFAULT_PINCH_SCALE;
+    }
+
     double newScale = 0.0;
-    if (scale >= DEFAULT_PINCH_SCALE) {
+    if (GreatOrEqual(scale, DEFAULT_PINCH_SCALE)) {
         // In order to achieve a sequence similar to scale, eg. 1.1, 1.2, 1.3
-        newScale = scale / pageScale_;
+        if (zoomStatus_ == STATUS_ZOOMOUT) {
+            newScale = scale / pageScale_;
+            // scale > 1.0 when scale form zoomout to zoomin
+        } else if (zoomStatus_ == STATUS_ZOOMIN) {
+            scale = startPageScale_ * scale;
+            if (GreatNotEqual(scale, 0.0)) {
+                newScale = scale / pageScale_;
+            } else {
+                newScale = DEFAULT_PINCH_SCALE_MIN;
+                scale = DEFAULT_PINCH_SCALE;
+
+                TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale scale < 0.0");
+            }
+        }
+
         // scale max
-        if (newScale > DEFAULT_PINCH_SCALE_MAX) {
+        if (GreatOrEqual(newScale, DEFAULT_PINCH_SCALE_MAX)) {
             newScale = DEFAULT_PINCH_SCALE_MAX;
             scale = DEFAULT_PINCH_SCALE_MAX;
+
+            TAG_LOGI(AceLogTag::ACE_WEB, "GetNewScale newScale > DEFAULT_PINCH_SCALE_MAX");
         }
     } else {
-        newScale = scale;
-        // scale min
-        if (newScale < DEFAULT_PINCH_SCALE_MIN) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetNewScale getZoomOffset:%{public}f", getZoomOffset(scale));
+
+        scale = startPageScale_ - getZoomOffset(scale);
+        if (GreatNotEqual(scale, 0.0)) {
+            newScale = scale / pageScale_;
+        } else {
             newScale = DEFAULT_PINCH_SCALE_MIN;
-            scale = DEFAULT_PINCH_SCALE_MIN;
+            scale = DEFAULT_PINCH_SCALE;
+
+            TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale scale < 0.0");
         }
+
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "GetNewScale scale: %{public}f, newScale: %{public}f, pageScale: %{public}f, startPageScale: %{public}f",
+            scale, newScale, pageScale_, startPageScale_);
+    }
+
+    // scale min
+    if (LessNotEqual(newScale, DEFAULT_PINCH_SCALE_MIN)) {
+        newScale = DEFAULT_PINCH_SCALE_MIN;
+        scale = DEFAULT_PINCH_SCALE;
+
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale newScale < DEFAULT_PINCH_SCALE_MIN");
     }
 
     return newScale;
@@ -945,6 +1011,9 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
+    if (mouseEventDeviceId_ != info.GetDeviceId()) {
+        mouseEventDeviceId_ = info.GetDeviceId();
+    }
     CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
     if ((mouseHoveredX_ != localLocation.GetX()) ||
@@ -1521,8 +1590,9 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             "DragDrop event WebEventHub onDragDropId, size:%{public}" PRId64 "", aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
-        std::string plain = UdmfClient::GetInstance()->GetSinglePlainTextRecord(aceData);
-        if (!plain.empty()) {
+        std::vector<std::string> plains = UdmfClient::GetInstance()->GetPlainTextRecords(aceData);
+        if (!plains.empty() && !plains[0].empty()) {
+            std::string plain = plains[0];
             delegate_->dragData_->SetFragmentText(plain);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
@@ -2563,7 +2633,9 @@ void WebPattern::OnModifyDone()
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
             renderSurface_->UpdateSurfaceConfig();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
+#if defined(ENABLE_ROSEN_BACKEND)
             delegate_->SetPopupSurface(popupRenderSurface_);
+#endif
             if (renderMode_ == RenderMode::ASYNC_RENDER) {
                 std::string surfaceId = renderSurface_->GetUniqueId();
                 delegate_->SetSurfaceId(surfaceId);
@@ -2889,7 +2961,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
     if (isUpdate) {
         rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
         frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -2942,9 +3014,11 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         if (!overlayCreating_) {
             delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         } else {
-            imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
-            overlayCreating_ = false;
-            delegate_->HandleTouchCancel();
+            if (imageAnalyzerManager_) {
+                imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::UP);
+                overlayCreating_ = false;
+                delegate_->HandleTouchCancel();
+            }
         }
     }
 }
@@ -3556,7 +3630,11 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
-    return selectOverlayProxy_ ? true : false;
+    if (selectOverlayProxy_) {
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
@@ -3925,6 +4003,17 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
+
+    if (isPasswordFill_) {
+        auto offset = GetCoordinatePoint().value_or(OffsetF());
+        for (auto& nodeInfo : pageNodeInfo_) {
+            auto rect = nodeInfo->GetPageNodeRect();
+            NG::RectF rectF;
+            rectF.SetRect(rect.GetX() + offset.GetX(), rect.GetY()+ offset.GetY(), rect.Width(), rect.Height());
+            nodeInfo->SetPageNodeRect(rectF);
+        }
+    }
+
     auto container = Container::Current();
     if (container == nullptr) {
         container = Container::GetActive();
@@ -4087,6 +4176,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+    if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
+        return false;
+    }
     if (isHoverExit_ && type == OHOS::NWeb::CursorType::CT_NONE) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange reciving unexpected hide command");
         return false;
@@ -4935,6 +5028,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
     if (!isVisible_) {
         CloseSelectOverlay();
         SelectCancel();
+        DestroyAnalyzerOverlay();
         isDragEndMenuShow_ = false;
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
@@ -5594,6 +5688,7 @@ bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
 void WebPattern::SetAccessibilityState(bool state)
 {
     CHECK_NULL_VOID(delegate_);
+    focusedAccessibilityId_ = -1;
     if (!state) {
         if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
             || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
@@ -5619,11 +5714,12 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto paintProperty = GetPaintProperty<WebPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
 
+    if (accessibilityId > 0) {
+        focusedAccessibilityId_ = accessibilityId;
+    }
     RectT<int32_t> rect;
-    if (accessibilityId <= 0 || !GetAccessibilityFocusRect(rect, accessibilityId)) {
+    if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
@@ -5631,6 +5727,21 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
 
     renderContext->UpdateAccessibilityFocusRect(rect);
     renderContext->UpdateAccessibilityFocus(true);
+}
+
+void WebPattern::ClearFocusedAccessibilityId()
+{
+    if (!accessibilityState_) {
+        return;
+    }
+
+    focusedAccessibilityId_ = -1;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetAccessibilityFocusRect();
+    renderContext->UpdateAccessibilityFocus(false);
 }
 
 std::shared_ptr<Rosen::RSNode> WebPattern::GetSurfaceRSNode() const
@@ -6115,9 +6226,11 @@ void WebPattern::OnTextSelected()
 
 void WebPattern::DestroyAnalyzerOverlay()
 {
-    if (imageAnalyzerManager_) {
+    if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         imageAnalyzerManager_->DestroyAnalyzerOverlay();
+        delegate_->OnDestroyImageAnalyzerOverlay();
     }
+    overlayCreating_ = false;
 }
 
 bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)

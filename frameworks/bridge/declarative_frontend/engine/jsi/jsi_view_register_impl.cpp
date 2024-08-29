@@ -524,7 +524,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DecorationStyle", JSDecorationSpan::JSBind },
     { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
-    { "GestureSpan", JSGestureSpan::JSBind },
+    { "UrlStyle", JSUrlSpan::JSBind },
+    { "NativeGestureStyle", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
     { "BackgroundColorStyle", JSBackgroundColorSpan::JSBind },
     { "ImageAttachment", JSImageAttachment::JSBind },
@@ -610,7 +611,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DecorationStyle", JSDecorationSpan::JSBind },
     { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
-    { "GestureSpan", JSGestureSpan::JSBind },
+    { "UrlStyle", JSUrlSpan::JSBind },
+    { "NativeGestureStyle", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
     { "BackgroundColorStyle", JSBackgroundColorSpan::JSBind },
     { "ImageAttachment", JSImageAttachment::JSBind },
@@ -1157,6 +1159,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
 }
 

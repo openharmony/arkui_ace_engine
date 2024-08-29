@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
@@ -40,11 +41,14 @@
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -68,6 +72,7 @@
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -85,6 +90,14 @@ ArkUIAPICallbackMethod* callbacks = nullptr;
 void* createTextNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSymbolNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -345,7 +358,7 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 
 void* createCustomNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<CustomPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -514,6 +527,30 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createTextClockNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextTimerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createMarqueeNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -575,11 +612,28 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createTabContentNode,
     createNavigationNode,
     createCustomSpanNode,
+    createSymbolNode,
     createQRcodeNode,
     createBadgeNode,
+    createTextClockNode,
+    createTextTimerNode,
+    createMarqueeNode,
 };
 
-void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
+void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
+{
+    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
+    if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
+        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return createArkUIFrameNodes[tag](nodeId);
+}
+
+void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

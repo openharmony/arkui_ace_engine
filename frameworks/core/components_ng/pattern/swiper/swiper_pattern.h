@@ -432,6 +432,12 @@ public:
     void StopSpringAnimationImmediately();
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
+    void BuildAxisInfo(std::unique_ptr<JsonValue>& json);
+    void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
+    void BuildIndicatorTypeInfo(std::unique_ptr<JsonValue>& json);
+    void BuildPanDirectionInfo(std::unique_ptr<JsonValue>& json);
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
@@ -598,6 +604,11 @@ public:
         return usePropertyAnimation_;
     }
 
+    bool IsTranslateAnimationRunning() const
+    {
+        return translateAnimationIsRunning_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;
@@ -687,7 +698,18 @@ private:
     float GetItemSpace() const;
     float GetPrevMargin() const;
     float GetNextMargin() const;
-    float CalculateVisibleSize() const;
+    float GetPrevMarginWithItemSpace() const
+    {
+        return Positive(GetPrevMargin()) ? GetPrevMargin() + GetItemSpace() : 0.0f;
+    }
+    float GetNextMarginWithItemSpace() const
+    {
+        return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
+    }
+    float CalculateVisibleSize() const
+    {
+        return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
+    }
     float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
@@ -807,6 +829,7 @@ private:
 
     void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnScrollDragEndRecursive() override;
 
     /**
      * @brief Notifies the parent component that the scroll has started at the specified position.
@@ -833,6 +856,8 @@ private:
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
 
     void HandleTouchBottomLoop();
+    void HandleTouchBottomLoopOnRTL();
+    void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
     std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
@@ -914,6 +939,7 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+    void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 

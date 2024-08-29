@@ -55,7 +55,7 @@ public:
     ~ImageSourceInfo() = default;
 
     // static functions
-    static bool IsSVGSource(const std::string& imageSrc, InternalResource::ResourceId resourceId);
+    static bool IsSVGSource(const std::string& imageSrc, SrcType srcType, InternalResource::ResourceId resourceId);
     static bool IsPngSource(const std::string& src, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);

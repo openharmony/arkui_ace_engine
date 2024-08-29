@@ -254,12 +254,10 @@ void SystemWindowScene::RegisterFocusCallback()
 {
     CHECK_NULL_VOID(session_);
 
-    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+    auto requestFocusCallback = [weakThis = WeakClaim(this), frameNode = frameNode_, instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto pattern = weakThis.Upgrade();
-        auto frameNode = pattern ? pattern->GetHost() : nullptr;
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
             auto pipeline = PipelineContext::GetCurrentContext();

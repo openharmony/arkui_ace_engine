@@ -38,6 +38,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Color TEXT_DEFAULT_FONT_COLOR = Color(0xFF007DFF);
+constexpr Color TEXT_DEFAULT_HOVER_BACKGROUND_COLOR = Color(0x0C182431);
+constexpr Color TEXT_DEFAULT_PRESS_BACKGROUND_COLOR = Color(0x19182431);
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -651,9 +654,12 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
 
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    sameSpan->urlOnClick = urlOnClick;
+    sameSpan->urlOnRelease = urlOnRelease;
+    sameSpan->urlOnPress = urlOnPress;
+    sameSpan->urlOnHover = urlOnHover;
     return sameSpan;
 }
-
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -818,6 +824,53 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     int32_t start = std::max(this->interval.first, interval.first);
     int32_t end = std::min(this->interval.second, interval.second);
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
+}
+
+void SpanItem::HandeUrlHoverEvent(bool isHover, int32_t urlId,
+    const RefPtr<SpanItem>& spanItem) const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (isHover) {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = (TEXT_DEFAULT_HOVER_BACKGROUND_COLOR);
+        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
+        spanItem->backgroundStyle = backgroundStyle;
+        pipelineContext->SetMouseStyleHoldNode(urlId);
+        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::HAND_POINTING);
+    } else {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = Color::TRANSPARENT;
+        spanItem->backgroundStyle = backgroundStyle;
+        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::DEFAULT);
+        pipelineContext->FreeMouseStyleHoldNode(urlId);
+    }
+}
+
+void SpanItem::HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const
+{
+    if (isPress) {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
+        backgroundStyle.backgroundColor = (TEXT_DEFAULT_PRESS_BACKGROUND_COLOR);
+        spanItem->backgroundStyle = backgroundStyle;
+    } else {
+        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+        TextBackgroundStyle backgroundStyle;
+        backgroundStyle.backgroundColor = Color::TRANSPARENT;
+        spanItem->backgroundStyle = backgroundStyle;
+    }
+}
+
+void SpanItem::HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const
+{
+    spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
+    TextBackgroundStyle backgroundStyle;
+    backgroundStyle.backgroundColor = Color::TRANSPARENT;
+    spanItem->backgroundStyle = backgroundStyle;
 }
 
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
@@ -1095,5 +1148,40 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;
+}
+
+
+void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Content", std::string(spanItem_->content).c_str());
+    auto textStyle = spanItem_->GetTextStyle();
+    if (!textStyle) {
+        return;
+    }
+    json->Put("FontSize", textStyle->GetFontSize().ToString().c_str());
+    json->Put("LineHeight", textStyle->GetLineHeight().ToString().c_str());
+    json->Put("LineSpacing", textStyle->GetLineSpacing().ToString().c_str());
+    json->Put("BaselineOffset", textStyle->GetBaselineOffset().ToString().c_str());
+    json->Put("WordSpacing", textStyle->GetWordSpacing().ToString().c_str());
+    json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());
+    json->Put("LetterSpacing", textStyle->GetLetterSpacing().ToString().c_str());
+    json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
+    json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
+    json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
+    json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());
+    json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
+    json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());
+    json->Put("TextAlign", StringUtils::ToString(textStyle->GetTextAlign()).c_str());
+    json->Put("WordBreak", StringUtils::ToString(textStyle->GetWordBreak()).c_str());
+    json->Put("TextCase", StringUtils::ToString(textStyle->GetTextCase()).c_str());
+    json->Put("EllipsisMode", StringUtils::ToString(textStyle->GetEllipsisMode()).c_str());
+    json->Put("HalfLeading", std::to_string(textStyle->GetHalfLeading()).c_str());
+    if (GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        json->Put("SymbolColor", spanItem_->SymbolColorToString().c_str());
+        json->Put("RenderStrategy", std::to_string(textStyle->GetRenderStrategy()).c_str());
+        json->Put("EffectStrategy", std::to_string(textStyle->GetEffectStrategy()).c_str());
+        json->Put("SymbolEffect",
+            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

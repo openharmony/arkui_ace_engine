@@ -48,7 +48,7 @@ public:
     void GetLocalPointWithTransform(OffsetF& localPoint);
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
@@ -83,6 +83,7 @@ private:
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
     bool handleIsHidden_ = true;
+    std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

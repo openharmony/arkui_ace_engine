@@ -237,6 +237,41 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+
+    // The function is only used for urlspan
+    void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
+    void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
+    void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
+    GestureEventFunc urlOnClick;
+    std::function<void()> urlOnRelease;
+    std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
+    std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
+    void SetUrlAddress(const std::string& address)
+    {
+        address_ = address;
+    }
+    std::string GetUrlAddress()
+    {
+        return address_;
+    }
+    void SetUrlOnReleaseEvent(std::function<void()>&& urlOnRelease_)
+    {
+        urlOnRelease = std::move(urlOnRelease_);
+    }
+    void SetUrlOnHoverEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem,
+        bool isHover, int32_t urlId)>&& urlOnHover_)
+    {
+        urlOnHover = std::move(urlOnHover_);
+    }
+    void SetUrlOnClickEvent(GestureEventFunc&& urlOnClick_)
+    {
+        urlOnClick = std::move(urlOnClick_);
+    }
+    void SetUrlOnPressEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem, bool isPress)>&& urlOnPress_)
+    {
+        urlOnPress = std::move(urlOnPress_);
+    }
+
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -306,6 +341,8 @@ private:
     bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
+    Dimension radius_ = 2.0_vp;
+    std::string address_;
 };
 
 enum class PropertyInfo {
@@ -535,6 +572,7 @@ public:
 
 protected:
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
