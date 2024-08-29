@@ -130,6 +130,14 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
+    itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
+    auto cacheParam = layoutAlgorithm->GetCacheParam();
+    if (cacheParam) {
+        forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
+        backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
+        layoutAlgorithm->SetCacheParam(std::nullopt);
+        return false;
+    }
     itemPosition_ = layoutAlgorithm->GetItemPosition();
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     lanes_ = layoutAlgorithm->GetLanes();
@@ -139,7 +147,6 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     laneGutter_ = layoutAlgorithm->GetLaneGutter();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
     itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
-    itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
     headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
     footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
     layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
@@ -152,12 +159,6 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto accessibilityProperty = host->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
     if (accessibilityProperty != nullptr) {
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
-    }
-    auto cacheParam = layoutAlgorithm->GetCacheParam();
-    if (cacheParam) {
-        forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
-        backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
-        layoutAlgorithm->SetCacheParam(std::nullopt);
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();

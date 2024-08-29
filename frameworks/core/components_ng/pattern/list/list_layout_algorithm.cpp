@@ -767,10 +767,10 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex = res.first;
             startPos = res.second;
         } else if (scrollSnapAlign == V2::ScrollSnapAlign::END && pattern->GetScrollState() == ScrollState::IDLE) {
-            needLayoutBackward = true;
             auto res = GetSnapEndIndexAndPos();
-            endIndex = res.first;
-            endPos = res.second;
+            needLayoutBackward = res.first != -1;
+            endIndex = needLayoutBackward ? res.first : endIndex;
+            endPos = needLayoutBackward ? res.second : endPos;
         }
         OffScreenLayoutDirection();
         itemPosition_.clear();
@@ -2221,8 +2221,8 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
 
 std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
 {
-    int32_t endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
-    float endPos = itemPosition_.rbegin()->second.endPos;
+    int32_t endIndex = -1;
+    float endPos = 0.0f;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         if (NearEqual(prevContentMainSize_ - pos->second.endPos, prevContentEndOffset_)) {
             endIndex = pos->first;
