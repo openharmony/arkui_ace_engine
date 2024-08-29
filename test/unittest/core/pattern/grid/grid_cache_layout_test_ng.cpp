@@ -214,7 +214,6 @@ HWTEST_F(GridCacheLayoutTestNg, Create001, TestSize.Level1)
     const auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(info.endIndex_, 11);
 
-    std::cout << "start\n";
     pattern_->ScrollToIndex(99, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 89));

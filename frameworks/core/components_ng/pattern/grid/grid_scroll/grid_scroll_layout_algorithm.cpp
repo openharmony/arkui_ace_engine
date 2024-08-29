@@ -1049,13 +1049,9 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
             if (IsEndLineInScreenWithGap(startLine, totalViewHeight, mainSize)) {
                 return;
             }
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-            gridLayoutInfo_.currentOffset_ -= (totalViewHeight - mainSize + gridLayoutInfo_.currentOffset_);
-            for (int32_t i = gridLayoutInfo_.endMainLineIndex_ + 1; i <= startLine; ++i) {
-                gridLayoutInfo_.currentOffset_ -= (mainGap_ + gridLayoutInfo_.lineHeightMap_[i]);
-            }
-            gridLayoutInfo_.ResetPositionFlags();
-            return;
+            // When ScrollAlign::AUTO and startLine is greater than endMainLineIndex, the effect of
+            // ScrollToIndex is the same as ScrollAlign::END.
+            gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
         }
 
         // startLine <= gridLayoutInfo_.startMainLineIndex_
