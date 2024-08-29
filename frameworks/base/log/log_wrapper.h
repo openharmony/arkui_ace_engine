@@ -202,6 +202,7 @@ enum AceLogTag : uint8_t {
     ACE_CLIPBOARD,            // C03954
     ACE_VISUAL_EFFECT,        // C03955
     ACE_SECURITY_COMPONENT,   // C03956
+    ACE_LAYOUT_INSPECTOR,     // C03957
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
