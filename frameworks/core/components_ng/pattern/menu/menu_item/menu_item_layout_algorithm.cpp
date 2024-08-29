@@ -23,6 +23,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 0.33;
+
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -215,8 +217,8 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
 }
 
-void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint,
-    PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
+void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint, 
+    std::optional<LayoutConstraintF>& layoutConstraint,PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
 {
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
@@ -228,27 +230,27 @@ void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& chi
     auto itemProperty = pattern->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
-
     if (!content.empty()) {
-        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() / 3 - padding.right.value_or(horInterval_));
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        auto iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() * RIGHT_ROW_MAX_WIDTH_WEIGHT - padding.right.value_or(horInterval_));
+        return;
+    }
+    
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
 
-        auto rightRowMaxSize = maxRowWidth_;
-        auto children = leftRow->GetAllChildrenWithBuild();
-        if (!children.empty()) {
-            for (const auto& child : children) {
-                if (child->GetHostTag() == V2::SYMBOL_ETS_TAG || child->GetHostTag() == V2::IMAGE_ETS_TAG) {
-                    rightRowMaxSize -= static_cast<float>(iconSize_) + iconContentPadding;
-                }
+    auto rightRowMaxSize = maxRowWidth_;
+    auto children = leftRow->GetAllChildrenWithBuild();
+    if (!children.empty()) {
+        for (const auto& child : children) {
+            if (child->GetHostTag() == V2::SYMBOL_ETS_TAG || child->GetHostTag() == V2::IMAGE_ETS_TAG) {
+                rightRowMaxSize -= static_cast<float>(iconSize_) + iconContentPadding;
             }
         }
-        childConstraint.maxSize.SetWidth(rightRowMaxSize);
     }
+    childConstraint.maxSize.SetWidth(rightRowMaxSize);
 }
 
 void MenuItemLayoutAlgorithm::MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
