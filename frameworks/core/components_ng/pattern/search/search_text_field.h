@@ -36,6 +36,7 @@ public:
     void SearchRequestStartTwinkling();
     void SearchRequestStopTwinkling();
     void ResetSearchRequestStopTwinkling();
+    bool IsSearchTextField() override;
 
 private:
     bool searchRequestStopTwinkling_ = false;

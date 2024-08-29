@@ -388,6 +388,7 @@ TextFieldPattern::~TextFieldPattern()
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
     }
+    RemoveTextFieldInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Pattern Destructor", host->GetId());
@@ -2296,6 +2297,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
 
 void TextFieldPattern::DoProcessAutoFill()
 {
+    CHECK_NULL_VOID(!IsSearchTextField());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup);
@@ -2332,11 +2334,15 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED) {
+    auto isTriggerPassword = IsTriggerAutoFillPassword();
+    if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED && !isTriggerPassword) {
         TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
         return false;
-    } else if (IsAutoFillPasswordType(autoFillType) && !container->IsNeedToCreatePopupWindow(autoFillType)) {
-        return GetAutoFillTriggeredStateByType(autoFillType);
+    } else if (isTriggerPassword) {
+        auto tempAutoFillType = IsAutoFillUserName(autoFillType) ? AceAutoFillType::ACE_USER_NAME : autoFillType;
+        if (!container->IsNeedToCreatePopupWindow(tempAutoFillType)) {
+            return GetAutoFillTriggeredStateByType(autoFillType);
+        }
     }
     return true;
 }
@@ -2345,11 +2351,11 @@ bool TextFieldPattern::GetAutoFillTriggeredStateByType(const AceAutoFillType& au
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
     CHECK_NULL_RETURN(autoFillContainerNode, false);
     auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
     CHECK_NULL_RETURN(stateHolder, false);
-    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
+    if (IsAutoFillUserName(autoFillType) || autoFillType == AceAutoFillType::ACE_PASSWORD) {
         return !stateHolder->IsAutoFillPasswordTriggered();
     }
     if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
@@ -2362,11 +2368,11 @@ void TextFieldPattern::SetAutoFillTriggeredStateByType(const AceAutoFillType& au
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
     CHECK_NULL_VOID(autoFillContainerNode);
     auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
     CHECK_NULL_VOID(stateHolder);
-    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
+    if (IsAutoFillUserName(autoFillType) || autoFillType == AceAutoFillType::ACE_PASSWORD) {
         stateHolder->SetAutoFillPasswordTriggered(true);
     } else if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
         stateHolder->SetAutoFillNewPasswordTriggered(true);
@@ -2383,10 +2389,10 @@ AceAutoFillType TextFieldPattern::GetAutoFillType(bool isNeedToHitType)
     if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
         return aceContentType;
     }
-    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED) {
         return aceInputType;
     }
-    if (isNeedToHitType) {
+    if (isNeedToHitType && !IsTriggerAutoFillPassword()) {
         auto hintToTypeWrap = GetHintType();
         return hintToTypeWrap.autoFillType;
     }
@@ -2405,13 +2411,17 @@ HintToTypeWrap TextFieldPattern::GetAutoFillTypeAndMetaData(bool isNeedToHitType
         hintToTypeWrap.autoFillType = aceContentType;
         return hintToTypeWrap;
     }
-    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED && IsAutoFillPasswordType(aceInputType)) {
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED) {
         hintToTypeWrap.autoFillType = aceInputType;
         return hintToTypeWrap;
     }
-    if (isNeedToHitType) {
+    if (isNeedToHitType && !IsTriggerAutoFillPassword()) {
         hintToTypeWrap = GetHintType();
+        return hintToTypeWrap;
     }
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("type", TextInputTypeToString().c_str());
+    hintToTypeWrap.metadata = jsonValue->ToString();
     return hintToTypeWrap;
 }
 
@@ -2442,6 +2452,9 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     }
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
+    if (IsTriggerAutoFillPassword() && autoFillType == AceAutoFillType::ACE_UNSPECIFIED) {
+        autoFillType = AceAutoFillType::ACE_USER_NAME;
+    }
     return (container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_));
 }
 
@@ -2823,6 +2836,11 @@ void TextFieldPattern::OnModifyDone()
     ProcessScroll();
     ProcessCounter();
     Register2DragDropManager();
+    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
+    if (autoFillContainerNode) {
+        UpdateTextFieldInfo();
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
 }
@@ -3810,7 +3828,8 @@ AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
     static std::unordered_map<TextInputType, AceAutoFillType> convertMap = {
         { TextInputType::VISIBLE_PASSWORD, AceAutoFillType::ACE_PASSWORD },
         { TextInputType::USER_NAME, AceAutoFillType::ACE_USER_NAME },
-        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD } };
+        { TextInputType::NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD },
+        { TextInputType::NUMBER_PASSWORD, AceAutoFillType::ACE_PASSWORD } };
     auto it = convertMap.find(type);
     if (it != convertMap.end()) {
         return it->second;
@@ -5548,6 +5567,10 @@ std::string TextFieldPattern::TextInputTypeToString() const
             return "InputType.USER_NAME";
         case TextInputType::NEW_PASSWORD:
             return "InputType.NEW_PASSWORD";
+        case TextInputType::NUMBER_PASSWORD:
+            return "InputType.NUMBER_PASSWORD";
+        case TextInputType::NUMBER_DECIMAL:
+            return IsTextArea() ? "TextAreaType.NUMBER_DECIMAL" : "InputType.NUMBER_DECIMAL";
         default:
             return isTextInput_ ? "InputType.Normal" : "TextAreaType.NORMAL";
     }
@@ -6872,7 +6895,7 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
         DoProcessAutoFill();
     }
     auto type = GetAutoFillType();
-    bool formOtherAccount = (viewDataWrap->GetOtherAccount() && IsAutoFillPasswordType(type));
+    bool formOtherAccount = (viewDataWrap->GetOtherAccount() && IsTriggerAutoFillPassword());
     if (!(type == AceAutoFillType::ACE_NEW_PASSWORD && type == autoFillType) && !formOtherAccount) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "Set last auto fill text value.");
         lastAutoFillTextValue_ = nodeWrap->GetValue();
@@ -6923,7 +6946,7 @@ void TextFieldPattern::NotifyFillRequestFailed(int32_t errCode, const std::strin
 #if defined(ENABLE_STANDARD_INPUT)
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "fillContent is : %{private}s", fillContent.c_str());
     if (errCode == AUTO_FILL_CANCEL) {
-        if (!fillContent.empty() && IsAutoFillPasswordType(GetAutoFillType())) {
+        if (!fillContent.empty() && IsTriggerAutoFillPassword()) {
             auto jsonObject = JsonUtil::ParseJsonString(fillContent);
             CHECK_NULL_VOID(jsonObject);
             fillContentMap_.clear();
@@ -6951,13 +6974,13 @@ bool TextFieldPattern::CheckAutoSave()
         return false;
     }
     auto autoFillType = GetAutoFillType();
-    if (autoFillType == AceAutoFillType::ACE_USER_NAME) {
+    if (IsAutoFillUserName(autoFillType)) {
         if (!lastAutoFillTextValue_.empty() && contentController_->GetTextValue() != lastAutoFillTextValue_) {
             return true;
         }
     }
     if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_FORMAT_ADDRESS &&
-        autoFillType != AceAutoFillType::ACE_USER_NAME) {
+        !IsAutoFillUserName(autoFillType)) {
         if (contentController_->GetTextValue() != lastAutoFillTextValue_) {
             return true;
         }
@@ -8498,5 +8521,131 @@ void TextFieldPattern::SetDragMovingScrollback()
         pattern->ShowCaretAndStopTwinkling();
     };
     contentScroller_.beforeScrollingCallback = contentScroller_.scrollingCallback;
+}
+
+void TextFieldPattern::OnAttachToMainTree()
+{
+    isDetachFromMainTree_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    CHECK_NULL_VOID(autoFillContainerNode);
+    firstAutoFillContainerNode_ = WeakClaim(RawPtr(autoFillContainerNode));
+    AddTextFieldInfo();
+}
+
+void TextFieldPattern::OnDetachFromMainTree()
+{
+    isDetachFromMainTree_ = true;
+    RemoveTextFieldInfo();
+}
+
+TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
+{
+    TextFieldInfo textFieldInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, textFieldInfo);
+    textFieldInfo.nodeId = host->GetId();
+    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
+    CHECK_NULL_RETURN(autoFillContainerNode, textFieldInfo);
+    textFieldInfo.autoFillContainerNodeId = autoFillContainerNode->GetId();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, textFieldInfo);
+    textFieldInfo.enableAutoFill = layoutProperty->GetEnableAutoFillValue(true);
+    textFieldInfo.inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    textFieldInfo.contentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
+    return textFieldInfo;
+}
+
+void TextFieldPattern::AddTextFieldInfo()
+{
+    CHECK_NULL_VOID(!IsSearchTextField());
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    auto textFieldInfo = GenerateTextFieldInfo();
+    textFieldManager->AddTextFieldInfo(textFieldInfo);
+}
+
+void TextFieldPattern::RemoveTextFieldInfo()
+{
+    CHECK_NULL_VOID(!IsSearchTextField());
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
+    CHECK_NULL_VOID(autoFillContainerNode);
+    auto autoFillContainerNodeId = autoFillContainerNode->GetId();
+    textFieldManager->RemoveTextFieldInfo(autoFillContainerNodeId, nodeId);
+}
+
+void TextFieldPattern::UpdateTextFieldInfo()
+{
+    CHECK_NULL_VOID(!IsSearchTextField());
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    auto textFieldInfo = GenerateTextFieldInfo();
+    textFieldManager->UpdateTextFieldInfo(textFieldInfo);
+}
+
+bool TextFieldPattern::IsAutoFillUserName(const AceAutoFillType& autoFillType)
+{
+    auto isUserName =
+        autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_UNSPECIFIED;
+    return isUserName && HasAutoFillPasswordNode();
+}
+
+bool TextFieldPattern::HasAutoFillPasswordNode()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto nodeId = host->GetId();
+    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
+    CHECK_NULL_RETURN(autoFillContainerNode, false);
+    auto autoFillContainerNodeId = autoFillContainerNode->GetId();
+    return textFieldManager->HasAutoFillPasswordNodeInContainer(autoFillContainerNodeId, nodeId);
+}
+
+bool TextFieldPattern::IsTriggerAutoFillPassword()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto aceContentType =
+        TextContentTypeToAceAutoFillType(layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED));
+    if (aceContentType != AceAutoFillType::ACE_UNSPECIFIED) {
+        if (!IsAutoFillPasswordType(aceContentType)) {
+            return false;
+        } else {
+            if (aceContentType == AceAutoFillType::ACE_PASSWORD ||
+                aceContentType == AceAutoFillType::ACE_NEW_PASSWORD) {
+                return true;
+            }
+            return HasAutoFillPasswordNode();
+        }
+    }
+
+    auto aceInputType = ConvertToAceAutoFillType(layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+    if (aceInputType != AceAutoFillType::ACE_UNSPECIFIED) {
+        if (aceInputType == AceAutoFillType::ACE_PASSWORD || aceInputType == AceAutoFillType::ACE_NEW_PASSWORD) {
+            return true;
+        }
+    }
+    return HasAutoFillPasswordNode();
+}
+
+bool TextFieldPattern::IsSearchTextField()
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG
