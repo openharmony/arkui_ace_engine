@@ -275,6 +275,8 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navN
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navNode);
     if (navDestinationNode) {
+        TAG_LOGI(ACE_KEYBOARD, "navNode id:%{public}d, avoidKeyboardOffset:%{public}f", navNode->GetId(),
+            avoidKeyboardOffset);
         auto pattern = navDestinationNode->GetPattern<NavDestinationPattern>();
         if (pattern) {
             avoidKeyboardOffset = pattern->NeedIgnoreKeyboard() ? 0.0f : avoidKeyboardOffset;
