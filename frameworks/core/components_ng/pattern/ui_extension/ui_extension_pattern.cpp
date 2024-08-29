@@ -368,7 +368,7 @@ void UIExtensionPattern::OnConnect()
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     sessionWrapper_->UpdateSessionViewportConfig();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
