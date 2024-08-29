@@ -639,7 +639,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection001, TestSize.Level1)
 
 /**
  * @tc.name: SetTextSelection002
- * @tc.desc: Test SetTextSelection with setting MenuPolicy::DEFAULT menu policy
+ * @tc.desc: Test SetTextSelection with setting MenuPolicy::SHOW menu policy
  * @tc.type: FUNC
  */
 HWTEST_F(TextAreaMenuTestNg, SetTextSelection002, TestSize.Level1)
@@ -663,7 +663,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection002, TestSize.Level1)
      * @tc.expected: The menu still pop up
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->textFieldController_->SetTextSelection(0, DEFAULT_TEXT.length(), options);
     ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);
@@ -819,7 +819,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection007, TestSize.Level1)
 
 /**
  * @tc.name: SetTextSelection008
- * @tc.desc: Test SetTextSelection in inline mode with setting MenuPolicy::DEFAULT menu policy
+ * @tc.desc: Test SetTextSelection in inline mode with setting MenuPolicy::SHOW menu policy
  * @tc.type: FUNC
  */
 HWTEST_F(TextAreaMenuTestNg, SetTextSelection008, TestSize.Level1)
@@ -851,7 +851,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection008, TestSize.Level1)
      * @tc.expected: Text is selected and the menu still pop up
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->textFieldController_->SetTextSelection(0, DEFAULT_TEXT.length(), options);
     ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);
