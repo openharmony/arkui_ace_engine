@@ -955,7 +955,8 @@ void TextPattern::HandleSpanSingleClickEvent(GestureEvent& info, RectF textConte
     target.area.SetHeight(Dimension(0.0f));
     spanClickinfo.SetTarget(target);
     if (span->urlOnClick) {
-        span->urlOnClick(spanClickinfo);
+        auto address = span->GetUrlAddress();
+        span->urlOnClick(address);
     }
     CHECK_NULL_VOID(span->onClick);
     span->onClick(spanClickinfo);
@@ -1519,7 +1520,8 @@ void TextPattern::HandleSpanTouchRelease(const RefPtr<SpanItem>& item, TouchType
 {
     if (item && item->urlOnRelease) {
         if (touchType == TouchType::UP) {
-            item->urlOnRelease();
+            auto address = item->GetUrlAddress();
+            item->urlOnRelease(address);
             FlushSpanItemStyle();
         }
     }

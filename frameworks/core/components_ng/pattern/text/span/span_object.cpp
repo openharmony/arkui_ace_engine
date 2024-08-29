@@ -885,8 +885,9 @@ RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
 void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     auto address = GetUrlSpanAddress();
+    spanItem->SetUrlAddress(address);
     spanItem->HandleUrlNormalStyle(spanItem);
-    auto urlOnRelease = [address]() {
+    auto urlOnRelease = [](const std::string& address) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HyperlinkStartAbility(address);
@@ -894,7 +895,7 @@ void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
     auto urlOnHover = [](const RefPtr<NG::SpanItem>& spanItem, bool isHover, int32_t urlId) {
         spanItem->HandeUrlHoverEvent(isHover, urlId, spanItem);
     };
-    auto urlOnClick = [address](OHOS::Ace::GestureEvent&) {
+    auto urlOnClick = [](const std::string& address) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HyperlinkStartAbility(address);
