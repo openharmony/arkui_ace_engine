@@ -55,8 +55,13 @@ struct VisibleContentInfo {
 struct ListMainSizeValues {
     float startPos = 0.0f;
     float endPos = 0.0f;
-    float referencePos = 0.0f;
+    std::optional<int32_t> jumpIndexInGroup;
     float prevContentMainSize = 0.0f;
+    ScrollAlign scrollAlign = ScrollAlign::START;
+    std::optional<float> layoutStartMainPos;
+    std::optional<float> layoutEndMainPos;
+    float referencePos = 0.0f;
+    bool forward;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
