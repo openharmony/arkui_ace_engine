@@ -40,6 +40,7 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
@@ -1336,6 +1337,23 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
+    {
+        return "";
+    };
+
+    virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
+    void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
+    {
+        thpExtraMgr_ = thpExtraMgr;
+    }
+
+    const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const
+    {
+        return thpExtraMgr_;
+    }
+
     void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;
     bool IsDestroyed();
@@ -1501,6 +1519,7 @@ protected:
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
     SerializedGesture serializedGesture_;
+    RefPtr<NG::THPExtraManager> thpExtraMgr_;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

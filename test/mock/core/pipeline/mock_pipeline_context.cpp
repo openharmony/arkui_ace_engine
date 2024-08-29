@@ -589,6 +589,13 @@ bool PipelineContext::CheckNeedAvoidInSubWindow()
     return false;
 }
 
+std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
+{
+    return "";
+}
+
+void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}

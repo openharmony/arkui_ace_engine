@@ -2200,6 +2200,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
+        if (thpExtraMgr_ != nullptr) {
+            const uint32_t delay = 800; // 800: ms
+            taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+            auto task = [weak = WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+            };
+            taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
+        }
     }
 
     eventManager_->DispatchTouchEvent(scalePoint);
@@ -4414,6 +4424,44 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
 }
 
+std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode)
+{
+    std::vector<RectF> responseRegionList;
+    rootNode->GetResponseRegionListByTraversal(responseRegionList);
+    std::string responseRegionStrOrigin;
+    std::string responseRegionStrFilter;
+    for (const auto& rect : responseRegionList) {
+        int32_t x = static_cast<int32_t>(rect.GetX());
+        int32_t y = static_cast<int32_t>(rect.GetY());
+        int32_t width = static_cast<int32_t>(rect.Width());
+        int32_t height = static_cast<int32_t>(rect.Height());
+        std::string rectStr = std::to_string(x) + "," +
+                              std::to_string(y) + "," +
+                              std::to_string(x + width) + "," +
+                              std::to_string(y + height);
+        responseRegionStrOrigin += rectStr + "#";
+        if (thpExtraMgr_ && width <= thpExtraMgr_->GetWidth() && height <= thpExtraMgr_->GetHeight()) {
+            responseRegionStrFilter += rectStr + "#";
+        }
+    }
+    if (!responseRegionStrFilter.empty()) {
+        responseRegionStrFilter.pop_back();
+    }
+    LOGD("THP_UpdateViewsLocation origin responseRegion = %{public}s", responseRegionStrOrigin.c_str());
+    return responseRegionStrFilter;
+}
+
+void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootNode)
+{
+    ACE_FUNCTION_TRACE();
+    if (!thpExtraMgr_) {
+        return;
+    }
+    std::string responseRegion = GetResponseRegion(rootNode);
+    std::string parameters = "thp#Location#" + responseRegion;
+    LOGD("THP_UpdateViewsLocation responseRegion = %{public}s", parameters.c_str());
+    thpExtraMgr_->ThpExtraRunCommand("THP_UpdateViewsLocation", parameters.c_str());
+}
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)

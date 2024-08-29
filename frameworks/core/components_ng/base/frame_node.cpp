@@ -2691,6 +2691,63 @@ std::vector<RectF> FrameNode::GetResponseRegionListForRecognizer(int32_t sourceT
     return responseRegionList;
 }
 
+std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
+{
+    ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListForTouch");
+    std::vector<RectF> responseRegionList;
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (!gestureHub) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
+
+    bool isAccessibilityClickable = gestureHub->IsAccessibilityClickable();
+    if (!isAccessibilityClickable) {
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
+    auto offset = GetPositionToScreen();
+    if (gestureHub->GetResponseRegion().empty()) {
+        RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
+        responseRegionList.emplace_back(rectToScreen);
+        ACE_LAYOUT_TRACE_END()
+        return responseRegionList;
+    }
+
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    for (const auto& region : gestureHub->GetResponseRegion()) {
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()),
+            round(width.value()), round(height.value()));
+        responseRegionList.emplace_back(responseRegion);
+    }
+    ACE_LAYOUT_TRACE_END()
+    return responseRegionList;
+}
+
+void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList)
+{
+    ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListByTraversal");
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto rootRegionList = GetResponseRegionListForTouch(origRect);
+    if (!rootRegionList.empty()) {
+        responseRegionList.insert(responseRegionList.end(), rootRegionList.begin(), rootRegionList.end());
+        ACE_LAYOUT_TRACE_END()
+        return;
+    }
+    for (auto childWeak = frameChildren_.rbegin(); childWeak != frameChildren_.rend(); ++childWeak) {
+        const auto& child = childWeak->Upgrade();
+        if (!child) {
+            continue;
+        }
+        child->GetResponseRegionListByTraversal(responseRegionList);
+    }
+    ACE_LAYOUT_TRACE_END()
+}
+
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
 {
     for (const auto& rect : responseRegionList) {

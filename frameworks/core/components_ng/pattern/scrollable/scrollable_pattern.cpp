@@ -2511,36 +2511,49 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (scrollStop_) {
-        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
-            AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
-        if (!GetScrollAbort()) {
-            if (host != nullptr) {
-                host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-            }
-            if (onScrollStop) {
-                ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
-                    host->GetTag().c_str());
-                onScrollStop();
-                AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
-                SetScrollSource(SCROLL_FROM_NONE);
-            }
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->ScheduleDisappearDelayTask();
-            }
-            StartScrollBarAnimatorByProxy();
-        } else {
-            ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
-                static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        }
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        AceAsyncTraceEnd(
-            0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
-                .c_str());
-        scrollStop_ = false;
-        SetScrollAbort(false);
+    if (!scrollStop_) {
+        return;
     }
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
+    if (!GetScrollAbort()) {
+        if (host != nullptr) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        }
+        if (onScrollStop) {
+            ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
+                host->GetTag().c_str());
+            onScrollStop();
+            AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
+            SetScrollSource(SCROLL_FROM_NONE);
+        }
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->ScheduleDisappearDelayTask();
+        }
+        StartScrollBarAnimatorByProxy();
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetTaskExecutor() && pipeline->GetTHPExtraManager()) {
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            const uint32_t delay = 100; // 100: ms
+            taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+            auto task = [weak = WeakClaim(pipeline)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+            };
+            taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
+        }
+    } else {
+        ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    }
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    AceAsyncTraceEnd(
+        0, (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
+            .c_str());
+    scrollStop_ = false;
+    SetScrollAbort(false);
 }
 
 float ScrollablePattern::FireOnWillScroll(float offset) const

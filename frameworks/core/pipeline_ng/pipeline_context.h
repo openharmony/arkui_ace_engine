@@ -32,6 +32,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -782,6 +783,11 @@ public:
     bool CheckNeedDisableUpdateBackgroundImage();
 
     void ChangeDarkModeBrightness() override;
+
+    std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode) override;
+
+    void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
+
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
