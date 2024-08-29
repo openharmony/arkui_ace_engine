@@ -91,7 +91,8 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        for (const auto& panEvent : actuator->panEvents_) {
+        auto copyPanEvents_ = actuator->panEvents_;
+        for (const auto& panEvent : copyPanEvents_) {
             auto actionEnd = panEvent->GetActionEndEventFunc();
             if (actionEnd) {
                 actionEnd(info);
