@@ -197,6 +197,10 @@ void TextFieldManagerNG::AvoidKeyBoardInNavigation()
     }
     auto frameNode = node->GetHost();
     CHECK_NULL_VOID(frameNode);
+    auto preNavNode = weakNavNode_.Upgrade();
+    if (preNavNode) {
+        SetNavContentAvoidKeyboardOffset(preNavNode, 0.0f);
+    }
     auto navNode = FindNavNode(frameNode);
     CHECK_NULL_VOID(navNode);
     weakNavNode_ = navNode;
