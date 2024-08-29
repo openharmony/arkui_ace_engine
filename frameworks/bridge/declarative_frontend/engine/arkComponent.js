@@ -6571,7 +6571,16 @@ class ImageBorderRadiusModifier extends ModifierWithKey {
         getUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        getUINativeModule().image.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        var keys = Object.keys(this.value);
+        if (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
+            keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0) {
+            var localizedBorderRadius = this.value;
+            getUINativeModule().image.setBorderRadius(node, localizedBorderRadius.topStart, localizedBorderRadius.topEnd, localizedBorderRadius.bottomStart, localizedBorderRadius.bottomEnd);
+        }
+        else {
+            var borderRadius = this.value;
+            getUINativeModule().image.setBorderRadius(node, borderRadius.topLeft, borderRadius.topRight, borderRadius.bottomLeft, borderRadius.bottomRight);
+        }
       }
     }
   }
