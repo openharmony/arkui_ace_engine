@@ -67,6 +67,10 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     }
 
     properties.maskRect = textPickerDialog.maskRect;
+    properties.enableHoverMode = textPickerDialog.enableHoverMode;
+    if (textPickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = textPickerDialog.hoverModeArea.value();
+    }
 }
 }
 

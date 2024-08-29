@@ -605,6 +605,7 @@ public:
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 

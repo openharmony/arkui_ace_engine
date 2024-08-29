@@ -228,7 +228,9 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         if (isModalValue->IsBoolean()) {
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
+
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);
+        JSViewAbstract::SetDialogHoverModeProperties(constructorArg, instance->dialogProperties_);
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
     }

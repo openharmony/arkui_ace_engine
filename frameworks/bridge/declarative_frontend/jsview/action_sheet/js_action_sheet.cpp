@@ -440,6 +440,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     // Parse transition.
     properties.transitionEffect = ParseJsTransitionEffect(args);
     JSViewAbstract::SetDialogProperties(obj, properties);
+    JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 }

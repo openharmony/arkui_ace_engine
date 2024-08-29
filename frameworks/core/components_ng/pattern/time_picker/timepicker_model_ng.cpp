@@ -449,6 +449,10 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     properties.maskRect = pickerDialog.maskRect;
+    properties.enableHoverMode = pickerDialog.enableHoverMode;
+    if (pickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = pickerDialog.hoverModeArea.value();
+    }
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (pickerDialog.isSelectedTime == true) {
