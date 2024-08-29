@@ -295,7 +295,13 @@ bool MenuWrapperPattern::HasStackSubMenu()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return host->GetChildren().size() > 1;
+    auto menuCount = 0;
+    for (const auto& child : host->GetChildren()) {
+        if (child && child->GetTag() == V2::MENU_ETS_TAG) {
+            menuCount++;
+        }
+    }
+    return menuCount > 1;
 }
 
 bool MenuWrapperPattern::HasEmbeddedSubMenu()
