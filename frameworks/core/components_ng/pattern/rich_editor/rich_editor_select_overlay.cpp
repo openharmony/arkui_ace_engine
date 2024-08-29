@@ -191,14 +191,14 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     pattern->StartVibratorByIndexChange(currentHandleIndex, preHandleIndex);
     pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
-        pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
+        pattern->HandleSelectionChange(currentHandleIndex, initSelector_.second);
     } else {
         if (IsSingleHandle()) {
             auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
         } else {
-            pattern->HandleSelectionChange(textSelector.baseOffset, currentHandleIndex);
+            pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
     }
 }
@@ -218,6 +218,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     pattern->FireOnSelect(selectStart, selectEnd);
     if (!IsSingleHandle()) {
         pattern->SetCaretPosition(selectEnd);
+        pattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
@@ -408,7 +409,7 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
 }
 
-void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     CHECK_NULL_VOID(IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType));
     if (IsSingleHandle()) {
@@ -477,12 +478,13 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
 void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
 {
     isHandleMoving_ = true;
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
-        auto pattern = GetPattern<RichEditorPattern>();
-        CHECK_NULL_VOID(pattern);
         pattern->ShowCaretWithoutTwinkling();
         manager->SetIsHandleLineShow(false);
     }

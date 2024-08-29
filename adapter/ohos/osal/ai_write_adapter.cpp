@@ -53,6 +53,7 @@ void AIWriteAdapter::CloseModalUIExtension()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseModalUIExtension(sessionId_);
+    SetAIWrite(false);
 }
 
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,

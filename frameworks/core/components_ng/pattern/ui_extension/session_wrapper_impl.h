@@ -63,7 +63,7 @@ public:
     void NotifyCreate() override;
     void NotifyForeground() override;
     void NotifyBackground() override;
-    void NotifyDestroy() override;
+    void NotifyDestroy(bool isHandleError = true) override;
     void NotifyConfigurationUpdate() override;
 
     // The interface for responsing provider

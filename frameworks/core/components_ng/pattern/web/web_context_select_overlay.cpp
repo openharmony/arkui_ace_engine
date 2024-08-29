@@ -147,7 +147,7 @@ void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     pattern->contextMenuResult_->Cancel();
 }
 
-void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);

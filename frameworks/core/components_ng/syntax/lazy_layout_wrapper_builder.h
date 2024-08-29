@@ -81,6 +81,7 @@ private:
     std::list<std::optional<std::string>> nodeIds_;
 
     std::optional<std::string> GetKeyByIndexFromPreNodes(int32_t index);
+    std::pair<RefPtr<UINode>, std::string> GetOrCreateFrameNode(int32_t index, int32_t totalCount);
     RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndexLegacy(int32_t index);
 
     std::list<RefPtr<LayoutWrapper>> childWrappers_;

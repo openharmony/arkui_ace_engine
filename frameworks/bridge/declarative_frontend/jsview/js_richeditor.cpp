@@ -1405,7 +1405,6 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
@@ -1416,7 +1415,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
         !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateFontSize = size;
+        updateSpanStyle.updateSymbolFontSize = size;
         style.SetFontSize(size);
     } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
@@ -1424,15 +1423,13 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         size = theme->GetTextStyle().GetFontSize();
         style.SetFontSize(size);
     }
-    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
-    ParseJsFontFeatureTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         }
-        updateSpanStyle.updateFontWeight = ConvertStrToFontWeight(weight);
+        updateSpanStyle.updateSymbolFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
     JSRef<JSVal> renderingStrategy = styleObject->GetProperty("renderingStrategy");
@@ -1448,7 +1445,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> effectStrategy = styleObject->GetProperty("effectStrategy");
     uint32_t symbolEffectStrategy;
     if (!effectStrategy->IsNull() && JSContainerBase::ParseJsInteger(effectStrategy, symbolEffectStrategy)) {
-        updateSpanStyle.updateSymbolEffectStrategy = symbolEffectStrategy;
+        updateSpanStyle.updateSymbolEffectStrategy = 0;
         style.SetEffectStrategy(0);
     }
 }
@@ -2090,7 +2087,8 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         imageStyle = ParseJsImageSpanAttribute(richEditorImageStyle);
     }
     if (!richEditorSymbolSpanStyle->IsUndefined()) {
-        ParseJsSymbolSpanStyle(richEditorSymbolSpanStyle, textStyle, updateSpanStyle_);
+        TextStyle symbolTextStyle;
+        ParseJsSymbolSpanStyle(richEditorSymbolSpanStyle, symbolTextStyle, updateSpanStyle_);
     }
 
     auto controller = controllerWeak_.Upgrade();

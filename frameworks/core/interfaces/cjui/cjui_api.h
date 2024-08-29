@@ -2269,6 +2269,13 @@ struct CJUICalendarPickerModifier {
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
+    void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetCalendarPickerBorderColor)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
+    void (*resetCalendarPickerBorderRadius)(ArkUINodeHandle node);
+    void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
 };
 
 struct CJUIRatingModifier {

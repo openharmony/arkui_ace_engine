@@ -2042,6 +2042,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 {
     CHECK_RUN_ON(UI);
 
+    HandlePenHoverOut(point);
+
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -2198,6 +2200,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if (scalePoint.type == TouchType::UP) {
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
+        if (thpExtraMgr_ != nullptr) {
+            const uint32_t delay = 800; // 800: ms
+            taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+            auto task = [weak = WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyResponseRegionChanged(pipeline->GetRootElement());
+            };
+            taskExecutor_->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
+        }
     }
 
     eventManager_->DispatchTouchEvent(scalePoint);
@@ -2680,6 +2692,50 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     eventManager_->AccessibilityHoverTest(scaleEvent, targerNode, touchRestrict);
     eventManager_->DispatchAccessibilityHoverEventNG(scaleEvent);
     RequestFrame();
+}
+
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    auto scaleEvent = point.CreateScalePoint(viewScale_);
+    if (scaleEvent.type != TouchType::MOVE) {
+        eventManager_->GetEventTreeRecord().AddTouchPoint(scaleEvent);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d "
+            "type=%{public}d, "
+            "inject=%{public}d",
+            scaleEvent.touchEventId, scaleEvent.id, (int)scaleEvent.type,
+            scaleEvent.isInjected);
+    }
+
+    auto targerNode = node ? node : rootNode_;
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = scaleEvent.sourceType;
+    touchRestrict.touchEvent.sourceTool = scaleEvent.sourceTool;
+    touchRestrict.touchEvent.type = scaleEvent.type;
+    touchRestrict.touchEvent.force = scaleEvent.force;
+
+    // use mouse to collect pen hover target
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    eventManager_->PenHoverTest(scaleEvent, targerNode, touchRestrict);
+    eventManager_->DispatchPenHoverEventNG(scaleEvent);
+    RequestFrame();
+}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
+{
+    if (point.sourceTool != SourceTool::PEN || point.type != TouchType::DOWN || NearZero(point.force)) {
+        return;
+    }
+
+    CHECK_RUN_ON(UI);
+    auto oriPoint = point;
+    oriPoint.type = TouchType::PROXIMITY_OUT;
+
+    TouchTestResult testResult;
+    eventManager_->UpdatePenHoverNode(oriPoint, testResult);
+    eventManager_->DispatchPenHoverEventNG(oriPoint);
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
@@ -4368,6 +4424,44 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
         foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIHalfFoldHoverStatusChange");
 }
 
+std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode)
+{
+    std::vector<RectF> responseRegionList;
+    rootNode->GetResponseRegionListByTraversal(responseRegionList);
+    std::string responseRegionStrOrigin;
+    std::string responseRegionStrFilter;
+    for (const auto& rect : responseRegionList) {
+        int32_t x = static_cast<int32_t>(rect.GetX());
+        int32_t y = static_cast<int32_t>(rect.GetY());
+        int32_t width = static_cast<int32_t>(rect.Width());
+        int32_t height = static_cast<int32_t>(rect.Height());
+        std::string rectStr = std::to_string(x) + "," +
+                              std::to_string(y) + "," +
+                              std::to_string(x + width) + "," +
+                              std::to_string(y + height);
+        responseRegionStrOrigin += rectStr + "#";
+        if (thpExtraMgr_ && width <= thpExtraMgr_->GetWidth() && height <= thpExtraMgr_->GetHeight()) {
+            responseRegionStrFilter += rectStr + "#";
+        }
+    }
+    if (!responseRegionStrFilter.empty()) {
+        responseRegionStrFilter.pop_back();
+    }
+    LOGD("THP_UpdateViewsLocation origin responseRegion = %{public}s", responseRegionStrOrigin.c_str());
+    return responseRegionStrFilter;
+}
+
+void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootNode)
+{
+    ACE_FUNCTION_TRACE();
+    if (!thpExtraMgr_) {
+        return;
+    }
+    std::string responseRegion = GetResponseRegion(rootNode);
+    std::string parameters = "thp#Location#" + responseRegion;
+    LOGD("THP_UpdateViewsLocation responseRegion = %{public}s", parameters.c_str());
+    thpExtraMgr_->ThpExtraRunCommand("THP_UpdateViewsLocation", parameters.c_str());
+}
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
@@ -4384,4 +4478,13 @@ bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPi
     return false;
 }
 #endif
+
+bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    CHECK_NULL_RETURN(navigationMgr_, false);
+    if (navigationMgr_->IsInteractive()) {
+        return navigationMgr_->AddInteractiveAnimation(animationCallback);
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

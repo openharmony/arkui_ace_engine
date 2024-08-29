@@ -184,8 +184,12 @@ RefPtr<FrameNode> BuildPasteButton(
     PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
     buttonWidth = MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    }
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
@@ -1162,7 +1166,7 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
 void SelectOverlayNode::GetFlexibleOptionsParams(
     const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();

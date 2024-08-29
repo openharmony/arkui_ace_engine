@@ -3826,6 +3826,12 @@ void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
     CHECK_NULL_VOID(node);
     if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_FOCUS) {
         node->SetIsFocus(static_cast<bool>(value));
+        AceAutoFillType type = node->GetAutoFillType();
+        if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
+            type == AceAutoFillType::ACE_NEW_PASSWORD) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "The form is login fill form");
+            isPasswordFill_ = true;
+        }
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_X) {
         rect.SetLeft(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_Y) {
@@ -3848,9 +3854,10 @@ void ParseViewDataString(const std::string& key,
     }
 }
 
-HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, const std::string& placeholder)
+HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node)
 {
     HintToTypeWrap hintToTypeWrap;
+    auto placeholder = node->GetPlaceholder();
     if (NWEB_AUTOFILL_TYPE_TO_ACE.count(attribute) != 0) {
         AceAutoFillType type = NWEB_AUTOFILL_TYPE_TO_ACE.at(attribute);
         if (type == AceAutoFillType::ACE_USER_NAME || type == AceAutoFillType::ACE_PASSWORD ||
@@ -3902,7 +3909,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
         }
     }
 
-    HintToTypeWrap hintToTypeWrap = GetHintTypeAndMetadata(attribute, node->GetPlaceholder());
+    HintToTypeWrap hintToTypeWrap = GetHintTypeAndMetadata(attribute, node);
     auto type = hintToTypeWrap.autoFillType;
     if (type != AceAutoFillType::ACE_UNSPECIFIED) {
         node->SetAutoFillType(type);
@@ -3984,7 +3991,9 @@ AceAutoFillType WebPattern::GetFocusedType()
     return type;
 }
 
-bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebPattern::`AutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebPattern::`
+AutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
     viewDataCommon_ = {};

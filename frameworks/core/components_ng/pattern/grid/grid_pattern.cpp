@@ -126,6 +126,7 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 
 void GridPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
 

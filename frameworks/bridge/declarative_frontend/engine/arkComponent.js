@@ -6571,7 +6571,16 @@ class ImageBorderRadiusModifier extends ModifierWithKey {
         getUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        getUINativeModule().image.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        var keys = Object.keys(this.value);
+        if (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
+            keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0) {
+            var localizedBorderRadius = this.value;
+            getUINativeModule().image.setBorderRadius(node, localizedBorderRadius.topStart, localizedBorderRadius.topEnd, localizedBorderRadius.bottomStart, localizedBorderRadius.bottomEnd);
+        }
+        else {
+            var borderRadius = this.value;
+            getUINativeModule().image.setBorderRadius(node, borderRadius.topLeft, borderRadius.topRight, borderRadius.bottomLeft, borderRadius.bottomRight);
+        }
       }
     }
   }
@@ -21704,6 +21713,122 @@ class CalendarPickerBorderModifier extends ModifierWithKey {
   }
 }
 CalendarPickerBorderModifier.identity = Symbol('calendarPickerBorder');
+
+class CalendarPickerHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerHeight(node);
+    }
+    else {
+      getUINativeModule().calendarPicker.setCalendarPickerHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CalendarPickerHeightModifier.identity = Symbol('calendarPickerHeight');
+
+class CalendarPickerBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerBorderRadius(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().calendarPicker.setCalendarPickerBorderRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+          getUINativeModule().calendarPicker.setCalendarPickerBorderRadius(node, this.value.topStart, this.value.topEnd, this.value.bottomStart, this.value.bottomEnd);
+        } else {
+          getUINativeModule().calendarPicker.setCalendarPickerBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+        return !(this.stageValue.topStart === this.value.topStart &&
+          this.stageValue.topEnd === this.value.topEnd &&
+          this.stageValue.bottomStart === this.value.bottomStart &&
+          this.stageValue.bottomEnd === this.value.bottomEnd);
+      }
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+CalendarPickerBorderRadiusModifier.identity = Symbol('calendarPickerBorderRadius');
+
+class CalendarPickerBorderColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerBorderColor(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().calendarPicker.setCalendarPickerBorderColor(node, this.value, this.value, this.value, this.value, false);
+      }
+      else {
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().calendarPicker.setCalendarPickerBorderColor(node, this.value.top, this.value.end, this.value.bottom, this.value.start, true);
+        } else {
+          getUINativeModule().calendarPicker.setCalendarPickerBorderColor(node, this.value.top, this.value.right, this.value.bottom, this.value.left, false);
+        }
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+CalendarPickerBorderColorModifier.identity = Symbol('calendarPickerBorderColor');
+
 class ArkCalendarPickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -21810,6 +21935,18 @@ class ArkCalendarPickerComponent extends ArkComponent {
       }
     }
     modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderModifier.identity, CalendarPickerBorderModifier, arkBorder);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerHeightModifier.identity, CalendarPickerHeightModifier, value);
+    return this;
+  }
+  borderRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderRadiusModifier.identity, CalendarPickerBorderRadiusModifier, value);
+    return this;
+  }
+  borderColor(value) {
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderColorModifier.identity, CalendarPickerBorderColorModifier, value);
     return this;
   }
 }

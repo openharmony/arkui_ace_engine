@@ -66,6 +66,7 @@
 #include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
@@ -1855,6 +1856,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
+    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+    if (thpExtraManager->Init()) {
+        pipeline->SetTHPExtraManager(thpExtraManager);
+    }
     return errorCode;
 }
 

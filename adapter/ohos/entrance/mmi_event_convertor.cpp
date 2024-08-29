@@ -226,6 +226,8 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
     };
     auto typeIter = actionMap.find(orgAction);
     if (typeIter == actionMap.end()) {
@@ -436,6 +438,16 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     } else {
         event.action = KeyAction::UNKNOWN;
     }
+    auto keyItems = keyEvent->GetKeyItems();
+    for (auto item = keyItems.rbegin(); item != keyItems.rend(); item++) {
+        if (item->GetKeyCode() == keyEvent->GetKeyCode()) {
+            event.unicode = item->GetUnicode();
+            break;
+        } else {
+            event.unicode = 0;
+        }
+    }
+
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;

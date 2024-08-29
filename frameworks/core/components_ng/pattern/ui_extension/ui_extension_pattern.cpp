@@ -459,7 +459,7 @@ void UIExtensionPattern::NotifyDestroy()
         state_ != AbilityState::NONE) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
         state_ = AbilityState::DESTRUCTION;
-        sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->NotifyDestroy(false);
         sessionWrapper_->DestroySession();
     }
 }

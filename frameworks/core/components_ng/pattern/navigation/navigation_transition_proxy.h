@@ -205,6 +205,14 @@ public:
         AnimationUtils::ReverseInteractiveAnimation(interactiveAnimation_);
     }
 
+    void AddInteractiveAnimation(const std::function<void()>& callback)
+    {
+        if (!interactive_) {
+            return;
+        }
+        AnimationUtils::AddInteractiveAnimation(interactiveAnimation_, callback);
+    }
+
 private:
     RefPtr<NavDestinationContext> preContext_;
     RefPtr<NavDestinationContext> topContext_;

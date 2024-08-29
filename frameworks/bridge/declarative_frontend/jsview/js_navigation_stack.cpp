@@ -777,6 +777,8 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
         auto isEntryVal = navPathInfo->GetProperty("isEntry");
         bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+        pattern->SetName(name);
+        pattern->SetIndex(GetSize() - 1);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }

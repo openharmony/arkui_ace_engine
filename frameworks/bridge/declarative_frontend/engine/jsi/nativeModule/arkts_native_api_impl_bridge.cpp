@@ -3805,10 +3805,22 @@ void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef>
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerPadding));
     calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerPadding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerPadding));
-        calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorder"),
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorder));
     calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorder));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerHeight));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerHeight));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorderColor));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorderColor));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorderRadius));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorderRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "calendarPicker"), calendarPicker);
 }
 

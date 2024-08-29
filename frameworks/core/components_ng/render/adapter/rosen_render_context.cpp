@@ -510,13 +510,10 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             if (sandBoxCount_ > 0) {
                 return;
             }
-            sandBoxCount_ = 0;
-            CHECK_NULL_VOID(!host->IsRemoving());
-        } else {
-            sandBoxCount_ = 0;
         }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
+        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }

@@ -102,6 +102,7 @@ private:
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
+    void UpdateInfoWithDownEvent(const TouchEvent& event);
 
     void OnResetStatus() override
     {

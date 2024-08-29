@@ -1618,4 +1618,35 @@ HWTEST_F(SheetCoverageTestNg, GetOverlayFromPageAndGetTagFromRootNodeType001, Te
     SheetManager::GetInstance().GetOverlayFromPage(rootNodeId, RootNodeType(100));
     SheetCoverageTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: GetTopAreaInWindow001
+ * @tc.desc: Get the TopArea for landscape and portrait.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetTopAreaInWindow001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    auto deviceOrientation = static_cast<int32_t>(DeviceOrientation::LANDSCAPE);
+    SystemProperties::SetDeviceOrientation(deviceOrientation);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(safeAreaInsets.top_.Length(), sheetPattern->GetBottomSafeArea());
+
+    deviceOrientation = static_cast<int32_t>(DeviceOrientation::PORTRAIT);
+    SystemProperties::SetDeviceOrientation(deviceOrientation);
+    safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
+    EXPECT_EQ(safeAreaInsets.top_.Length(), sheetPattern->GetBottomSafeArea());
+}
 } // namespace OHOS::Ace::NG

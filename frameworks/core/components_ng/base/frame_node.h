@@ -894,6 +894,11 @@ public:
     bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool GetMonopolizeEvents() const;
@@ -1189,6 +1194,9 @@ private:
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
     bool AllowVisibleAreaCheck() const;
+
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

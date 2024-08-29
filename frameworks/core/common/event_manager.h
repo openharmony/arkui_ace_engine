@@ -126,12 +126,15 @@ public:
     void AccessibilityHoverTest(
         const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
     void UpdateAccessibilityHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
+    void PenHoverTest(const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
+    void UpdatePenHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
     void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
     void DispatchHoverEffectEvent(const MouseEvent& event);
     void DispatchAccessibilityHoverEventNG(const TouchEvent& event);
+    void DispatchPenHoverEventNG(const TouchEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
@@ -295,7 +298,16 @@ private:
     void GetTouchTestIds(const TouchEvent& touchPoint, std::vector<std::string>& touchTestIds,
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
+    void CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needAppend);
+    void LogTouchTestResultInfo(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        float viewScale = 1.0f, bool needAppend = false);
     void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
+    void CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+        float viewScale = 1.0f, bool needAppend = false);
+    void DispatchTouchEventAndCheck(const TouchEvent& event);
+    void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
@@ -311,6 +323,8 @@ private:
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;
     HoverTestResult lastAccessibilityHoverResults_;
+    HoverTestResult curPenHoverResults_;
+    HoverTestResult lastPenHoverResults_;
     AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
@@ -323,6 +337,7 @@ private:
     int32_t instanceId_ = 0;
     uint32_t lastHoverDispatchLength_ = 0;
     uint32_t lastAccessibilityHoverDispatchLength_ = 0;
+    uint32_t lastPenHoverDispatchLength_ = 0;
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
     bool isLastMoveBeforeUp_ = false;

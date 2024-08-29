@@ -230,6 +230,11 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
+    UpdateInfoWithDownEvent(event);
+}
+
+void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
+{
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();

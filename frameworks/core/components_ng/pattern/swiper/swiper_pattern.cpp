@@ -425,6 +425,7 @@ int32_t SwiperPattern::CheckUserSetIndex(int32_t index)
 
     if (index < 0 || index >= RealTotalCount()) {
         index = 0;
+        UpdateCurrentIndex(index);
     }
 
     auto childNode = GetCurrentFrameNode(GetLoopIndex(index));
@@ -484,15 +485,12 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StartAutoPlay();
         InitArrow();
     }
-    int32_t maxValidIndex = IsLoop() ? RealTotalCount() : TotalCount() - GetDisplayCount() + 1;
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= maxValidIndex || GetDisplayCount() >= RealTotalCount()) {
+    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= RealTotalCount()) {
         currentIndex_ = 0;
         props->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
-    } else {
-        if (oldIndex != userSetCurrentIndex) {
-            currentIndex_ = userSetCurrentIndex;
-            propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
-        }
+    } else if (oldIndex != userSetCurrentIndex) {
+        currentIndex_ = userSetCurrentIndex;
+        propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
     }
 
     if (IsSwipeByGroup() && needAdjustIndex_) {
@@ -1771,8 +1769,8 @@ void SwiperPattern::ShowPrevious()
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
     auto displayCount = GetDisplayCount();
-    if (RealTotalCount() <= 0 || displayCount == 0 || index < 0 || index >= RealTotalCount()) {
-        return;
+    if (index < 0 || index >= TotalCount()) {
+        index = 0;
     }
     auto itemCount = TotalCount();
     auto loopCount = std::abs(currentIndex_ / itemCount);

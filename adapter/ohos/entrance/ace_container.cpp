@@ -830,6 +830,8 @@ void AceContainer::InitializeCallback()
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
+            } else if (event.IsPenHoverEvent()) {
+                context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
                     context->OnTouchEvent(event, node);
@@ -1500,7 +1502,7 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isEnableArrow = false;
     if (!isNative) {
         // web component will manually destroy the popup
-        customConfig.isAutoCancel = false;
+        customConfig.isAutoCancel = true;
     }
 }
 

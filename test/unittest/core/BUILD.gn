@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,8 @@ group("core_unittest") {
     "common:core_common_unittest",
     "event:core_event_unittest",
     "gestures:gestures_test_ng",
-    "image_file_cache:image_file_cache_test_ng",
-    "image_provider:image_provider_test_ng",
+    "image:image_file_cache_test_ng",
+    "image:image_provider_test_ng",
     "layout:core_layout_unittest",
     "manager:core_manager_unittest",
     "pattern:core_pattern_unittest",

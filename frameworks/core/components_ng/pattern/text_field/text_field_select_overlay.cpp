@@ -117,7 +117,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     }
 }
 
-void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     SetLastSourceType(sourceType);
@@ -290,6 +290,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textFieldPattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
