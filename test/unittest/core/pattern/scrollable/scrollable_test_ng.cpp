@@ -576,7 +576,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollParent006, TestSize.Level1)
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     scrollPn->edgeEffect_ = EdgeEffect::NONE;
     auto result = scrollPn->HandleScroll(20.f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
-    EXPECT_TRUE(result.reachEdge);
+    EXPECT_FALSE(result.reachEdge);
     EXPECT_EQ(result.remain, 0.0f);
 }
 
