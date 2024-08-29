@@ -4171,6 +4171,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         .fontSize = textStyle.GetFontSize().ConvertToPx() };
     paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph, 0.0f);
+    paragraph->PushStyle(textStyle);
     paragraph->AddText(StringUtils::Str8ToStr16(textContent));
     paragraph->Build();
     paragraph->Layout(std::numeric_limits<double>::infinity());
