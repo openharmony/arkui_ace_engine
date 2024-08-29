@@ -2922,9 +2922,13 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrol
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    float position = -GetTotalOffset() + distance;
-    AnimateTo(-position, -1, nullptr, true, false, false);
-    return;
+    if (smooth) {
+        float position = -GetTotalOffset() + distance;
+        AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
 }
 
 void ScrollablePattern::InitScrollBarMouseEvent()
@@ -3283,7 +3287,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(false, false, scrollType);
+        pattern->ScrollPage(false, true, scrollType);
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
@@ -3295,7 +3299,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
-        pattern->ScrollPage(true, false, scrollType);
+        pattern->ScrollPage(true, true, scrollType);
     });
 }
 
