@@ -415,10 +415,10 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     CHECK_NULL_VOID(safeAreaManager);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
-    auto dumpInfo_.bottom = GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern);
-    auto dumpInfo_.top = safeAreaInsets.top_.Length();
-    auto dumpInfo_.left = safeAreaInsets.left_.Length();
-    auto dumpInfo_.right = safeAreaInsets.right_.Length();
+    dumpInfo_.bottom = static_cast<float>(GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern));
+    dumpInfo_.top = static_cast<float>(safeAreaInsets.top_.Length());
+    dumpInfo_.left = static_cast<float>(safeAreaInsets.left_.Length());
+    dumpInfo_.right = static_cast<float>(safeAreaInsets.right_.Length());
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (hierarchicalParameters_) {
