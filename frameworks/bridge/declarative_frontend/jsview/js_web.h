@@ -162,6 +162,7 @@ public:
     static void OnAdsBlocked(const JSCallbackInfo& args);
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
     static void KeyboardAvoidMode(int32_t mode);
+    static void EditMenuOptions(const JSCallbackInfo& info);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

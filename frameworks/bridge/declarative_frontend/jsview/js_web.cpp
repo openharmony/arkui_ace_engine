@@ -1941,6 +1941,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
+    JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5071,4 +5072,13 @@ void JSWeb::KeyboardAvoidMode(int32_t mode)
     WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
     WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
+
+void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
 } // namespace OHOS::Ace::Framework

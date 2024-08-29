@@ -3171,6 +3171,14 @@ void  WebPattern::OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMen
     }
 }
 
+void WebPattern::UpdateEditMenuOptions(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    onCreateMenuCallback_ = std::move(onCreateMenuCallback);
+    onMenuItemClick_ = std::move(onMenuItemClick);
+}
+
 void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle,
@@ -3189,10 +3197,21 @@ void WebPattern::UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
         selectInfo.secondHandle.isShow = IsTouchHandleShow(endTouchHandle);
         selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endTouchHandle);
         QuickMenuIsNeedNewAvoid(selectInfo, params, beginTouchHandle, endTouchHandle);
-        selectInfo.menuOptionItems = menuOptionParam_;
+        if (!(onCreateMenuCallback_ && onMenuItemClick_)) {
+            selectInfo.menuOptionItems = menuOptionParam_;
+        }
     }
     selectInfo.menuInfo.menuIsShow = true;
     selectInfo.handleReverse = false;
+    if (onCreateMenuCallback_ && onMenuItemClick_) {
+        selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
+        selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+        auto textRange = [](int32_t& start, int32_t& end) {
+            start = -1;
+            end = -1;
+        };
+        selectInfo.onCreateCallback.textRangeCallback = textRange;
+    }
 }
 
 void WebPattern::HideHandleAndQuickMenuIfNecessary(bool hide)

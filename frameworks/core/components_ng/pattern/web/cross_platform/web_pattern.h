@@ -422,6 +422,8 @@ public:
         // cross platform is not support now;
         return false;
     }
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     SizeF GetDragPixelMapSize() const;
     bool Backward();
