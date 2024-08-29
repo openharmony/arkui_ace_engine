@@ -2811,6 +2811,9 @@ struct ArkUIGestureModifier {
     ArkUI_Bool (*isGestureRecognizerValid)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*setArkUIGestureRecognizerDisposeNotify)(ArkUIGestureRecognizer* recognizer, void* userData,
         void (*callback)(ArkUIGestureRecognizer* recognizer, void* userData));
+    void (*addGestureToGestureGroupWithRefCountDecrease)(ArkUIGesture* group, ArkUIGesture* child);
+    void (*addGestureToNodeWithRefCountDecrease)(
+        ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
 };
 
 struct ArkUISliderModifier {
