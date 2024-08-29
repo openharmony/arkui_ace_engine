@@ -468,10 +468,11 @@ private:
     virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         int32_t cacheCount, int32_t cached, int32_t& currIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
-        const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
-    void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
-    void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
+    static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint, int64_t deadline,
+        int32_t cached, const ListMainSizeValues& listMainSizeValues);
+    static void PostIdleTaskV2(
+        RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param, ListMainSizeValues listMainSizeValues);
+    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline, ListMainSizeValues listMainSizeValues);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
