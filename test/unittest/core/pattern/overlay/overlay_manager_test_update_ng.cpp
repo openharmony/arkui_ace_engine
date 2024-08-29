@@ -2000,46 +2000,4 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     ASSERT_EQ(iconNode->GetTag(), V2::SYMBOL_ETS_TAG);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
-
-/**
- * @tc.name: OnBindSheet033
- * @tc.desc: Test OverlayManager::OnBindSheet Large test.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet033, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sheet page, get sheet pattern.
-     */
-    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto callback = [](const std::string&) {};
-    SheetStyle style;
-    style.isTitleBuilder = true;
-    style.sheetTitle = MESSAGE;
-    style.sheetSubtitle = MESSAGE;
-    style.sheetMode = SheetMode::LARGE;
-    style.sheetType = SheetType::SHEET_BOTTOM;
-    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
-    ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. test when NoStatusBarAndLANDSCAPE.
-     * @tc.expected: sheetPattern->IsNoStatusBarAndLandscape() = true.
-     */
-    auto deviceOrientation = static_cast<int32_t>(DeviceOrientation::LANDSCAPE);
-    SystemProperties::SetDeviceOrientation(deviceOrientation);
-    auto isNoStatusBarAndLandscape = sheetPattern->IsNoStatusBarAndLandscape();
-    EXPECT_TRUE(isNoStatusBarAndLandscape);
-
-    /**
-     * @tc.steps: step3. test when BottomLarge.
-     * @tc.expected: sheetPattern->IsBottomLarge() = true.
-     */
-
-    auto isBottomLarge = sheetPattern->IsBottomLarge();
-    EXPECT_TRUE(isBottomLarge);
-}
 } // namespace OHOS::Ace::NG
