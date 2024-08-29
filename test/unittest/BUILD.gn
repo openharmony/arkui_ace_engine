@@ -420,6 +420,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
     "$ace_root/frameworks/core/common/event_manager.cpp",
+    "$ace_root/frameworks/core/common/event_manager_pen.cpp",
     "$ace_root/frameworks/core/common/ime/text_editing_value.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_action.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_client.cpp",
