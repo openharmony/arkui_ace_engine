@@ -1166,7 +1166,7 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
 void SelectOverlayNode::GetFlexibleOptionsParams(
     const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
