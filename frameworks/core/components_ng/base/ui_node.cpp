@@ -670,6 +670,14 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
+void UINode::FireCustomDisappear()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        child->FireCustomDisappear();
+    }
+}
+
 void UINode::ProcessOffscreenTask(bool recursive)
 {
     if (useOffscreenProcess_) {

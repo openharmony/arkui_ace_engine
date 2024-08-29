@@ -249,6 +249,11 @@ public:
         return "";
     }
 
+    bool CheckFireOnAppear()
+    {
+        return executeFireOnAppear_;
+    }
+
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
