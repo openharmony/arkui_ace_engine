@@ -1538,6 +1538,7 @@ void OverlayManager::ClearToastInSubwindow()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear toast in subwindow enter");
     SubwindowManager::GetInstance()->ClearToastInSubwindow();
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
 }
 
 void OverlayManager::ClearToast()
