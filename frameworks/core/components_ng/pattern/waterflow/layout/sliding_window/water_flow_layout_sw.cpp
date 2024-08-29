@@ -154,6 +154,21 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     info_->lanes_[0].resize(itemsCrossSize_[0].size());
 }
 
+bool WaterFlowLayoutSW::ItemHeightChanged() const
+{
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
+    for (const auto& section : info_->lanes_) {
+        for (size_t i = 0; i < section.size(); ++i) {
+            for (const auto& item : section[i].items_) {
+                if (!NearEqual(MeasureChild(props, item.idx, i), item.mainSize)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 void WaterFlowLayoutSW::CheckReset()
 {
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
@@ -173,7 +188,8 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+    const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    if (childDirty && ItemHeightChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
         FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
         return;
@@ -586,7 +602,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
     }
 }
 
-float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane)
+float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const
 {
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx));
     CHECK_NULL_RETURN(child, 0.0f);
