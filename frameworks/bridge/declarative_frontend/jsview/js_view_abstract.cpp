@@ -2442,44 +2442,9 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
 }
 
-void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
+void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>& align,
+    std::optional<CalcDimension>& offsetX, std::optional<CalcDimension>& offsetY)
 {
-    if (info.Length() > 0 && (info[0]->IsUndefined())) {
-        ViewAbstractModel::GetInstance()->SetOverlay(
-            "", nullptr, nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
-        return;
-    }
-
-    if (info.Length() <= 0 || (!info[0]->IsString() && !info[0]->IsObject())) {
-        return;
-    }
-    std::optional<Alignment> align;
-    std::optional<CalcDimension> offsetX;
-    std::optional<CalcDimension> offsetY;
-
-    if (info[1]->IsObject()) {
-        JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[1]);
-        JSRef<JSVal> alignVal = optionObj->GetProperty("align");
-        auto value = alignVal->ToNumber<int32_t>();
-        Alignment alignment = ParseAlignment(value);
-        align = alignment;
-
-        JSRef<JSVal> val = optionObj->GetProperty("offset");
-        if (val->IsObject()) {
-            JSRef<JSObject> offsetObj = JSRef<JSObject>::Cast(val);
-            JSRef<JSVal> xVal = offsetObj->GetProperty("x");
-            CalcDimension x;
-            if (ParseJsDimensionVp(xVal, x)) {
-                offsetX = x;
-            }
-            JSRef<JSVal> yVal = offsetObj->GetProperty("y");
-            CalcDimension y;
-            if (ParseJsDimensionVp(yVal, y)) {
-                offsetY = y;
-            }
-        }
-    }
-
     if (info[0]->IsString()) {
         std::string text = info[0]->ToString();
         ViewAbstractModel::GetInstance()->SetOverlay(
@@ -2520,6 +2485,47 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetOverlay(
             "", nullptr, contentNode, align, offsetX, offsetY, NG::OverlayType::COMPONENT_CONTENT);
     }
+}
+
+void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && (info[0]->IsUndefined())) {
+        ViewAbstractModel::GetInstance()->SetOverlay(
+            "", nullptr, nullptr, Alignment::TOP_LEFT, CalcDimension(0), CalcDimension(0), NG::OverlayType::RESET);
+        return;
+    }
+
+    if (info.Length() <= 0 || (!info[0]->IsString() && !info[0]->IsObject())) {
+        return;
+    }
+    std::optional<Alignment> align;
+    std::optional<CalcDimension> offsetX;
+    std::optional<CalcDimension> offsetY;
+
+    if (info[1]->IsObject()) {
+        JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[1]);
+        JSRef<JSVal> alignVal = optionObj->GetProperty("align");
+        auto value = alignVal->ToNumber<int32_t>();
+        Alignment alignment = ParseAlignment(value);
+        align = alignment;
+
+        JSRef<JSVal> val = optionObj->GetProperty("offset");
+        if (val->IsObject()) {
+            JSRef<JSObject> offsetObj = JSRef<JSObject>::Cast(val);
+            JSRef<JSVal> xVal = offsetObj->GetProperty("x");
+            CalcDimension x;
+            if (ParseJsDimensionVp(xVal, x)) {
+                offsetX = x;
+            }
+            JSRef<JSVal> yVal = offsetObj->GetProperty("y");
+            CalcDimension y;
+            if (ParseJsDimensionVp(yVal, y)) {
+                offsetY = y;
+            }
+        }
+    }
+
+    ParseOverlayFirstParam(info, align, offsetX, offsetY);
 }
 
 Alignment JSViewAbstract::ParseAlignment(int32_t align)
@@ -3199,6 +3205,18 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundImageSize(bgImgSize);
 }
 
+void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t align)
+{
+    if (align > 8 || align < 0) {
+        return;
+    }
+    std::vector<std::pair<double, double>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
+        { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
+        { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
+    SetBgImgPosition(
+                DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
+}
+
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -3212,41 +3230,7 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     if (jsVal->IsNumber()) {
         int32_t align = jsVal->ToNumber<int32_t>();
         bgImgPosition.SetIsAlign(true);
-        switch (align) {
-            case 0:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, 0.0, bgImgPosition);
-                break;
-            case 1:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, 0.0, bgImgPosition);
-                break;
-            case 2:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, 0.0, bgImgPosition);
-                break;
-            case 3:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, HALF_DIMENSION, bgImgPosition);
-                break;
-            case 4:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, HALF_DIMENSION, bgImgPosition);
-                break;
-            case 5:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, HALF_DIMENSION, bgImgPosition);
-                break;
-            case 6:
-                SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, FULL_DIMENSION, bgImgPosition);
-                break;
-            case 7:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, HALF_DIMENSION, FULL_DIMENSION, bgImgPosition);
-                break;
-            case 8:
-                SetBgImgPosition(
-                    DimensionUnit::PERCENT, DimensionUnit::PERCENT, FULL_DIMENSION, FULL_DIMENSION, bgImgPosition);
-                break;
-            default:
-                break;
-        }
+        SetBgImgPositionWithAlign(bgImgPosition, align);
     } else {
         CalcDimension x;
         CalcDimension y;
