@@ -364,6 +364,14 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
         } else {
             frameSize.SetHeight(frameSize.Height() + agingPadding);
         }
+        auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
+        CHECK_NULL_RETURN(layoutContraint, false);
+        auto maxHeight = layoutContraint->maxSize.Height();
+        auto minHeight = layoutContraint->minSize.Height();
+        auto actualHeight = frameSize.Height();
+        actualHeight = std::min(actualHeight, maxHeight);
+        actualHeight = std::max(actualHeight, minHeight);
+        frameSize.SetHeight(actualHeight);
         geometryNode->SetFrameSize(frameSize);
     }
     HandleBorderRadius(layoutWrapper);
