@@ -852,6 +852,9 @@ void ListPattern::OnScrollEndCallback()
     if (AnimateStoped()) {
         scrollStop_ = true;
         MarkDirtyNodeSelf();
+        if (chainAnimation_) {
+            chainAnimation_->SetOverDrag(false);
+        }
     }
 }
 
@@ -1898,8 +1901,7 @@ void ListPattern::ProcessDragStart(float startPosition)
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
     CHECK_NULL_VOID(chainAnimation_);
-    if (NearZero(dragOffset) || source == SCROLL_FROM_BAR || source == SCROLL_FROM_AXIS ||
-        source == SCROLL_FROM_BAR_FLING) {
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR_FLING) {
         bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
         chainAnimation_->SetOverDrag(overDrag);
         return;
