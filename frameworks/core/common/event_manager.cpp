@@ -163,8 +163,6 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
         resultInfo.append("{ ")
             .append("tag: ")
             .append(item.second.tag)
-            .append(", inspectorId: ")
-            .append(item.second.inspectorId)
             .append(", frameRect: ")
             .append(item.second.frameRect)
             .append(", depth: ")
@@ -303,8 +301,6 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
             hittedRecognizerTypeInfo.append(" { ")
                 .append("tag: ")
                 .append(nodeInfo.tag)
-                .append(", inspectorId: ")
-                .append(nodeInfo.inspectorId)
                 .append(" };");
         }
     }
