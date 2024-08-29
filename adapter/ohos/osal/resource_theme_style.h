@@ -46,13 +46,13 @@ public:
     void PushBackCheckThemeStyleVector(const std::string& patternName)
     {
         std::unique_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
-        checkThemeStyleVector.push_back(patternName);
+        checkThemeStyleVector_.push_back(patternName);
     }
     bool CheckThemeStyle(const std::string& patternName)
     {
         std::shared_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
-        auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
-        if (it == checkThemeStyleVector.end()) {
+        auto it = std::find(checkThemeStyleVector_.begin(), checkThemeStyleVector_.end(), patternName.c_str());
+        if (it == checkThemeStyleVector_.end()) {
             return false;
         }
         return true;
@@ -67,7 +67,7 @@ private:
     RefPtr<ResourceAdapter> resAdapter_;
     std::promise<void> promise_;
     std::shared_future<void> future_ = promise_.get_future();
-    std::vector<std::string> checkThemeStyleVector; // theme pattern name list for checking the preloaded theme style
+    std::vector<std::string> checkThemeStyleVector_; // theme pattern name list for checking the preloaded theme style
     std::shared_mutex checkThemeStyleVectorMutex_;
 };
 } // namespace OHOS::Ace
