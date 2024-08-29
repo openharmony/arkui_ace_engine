@@ -204,6 +204,7 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
     }
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
     if (autoCancel) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "handle popup touch down event");
         if (!GetInteractiveDismiss()) {
             return;
         }
