@@ -2846,7 +2846,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (window && window->IsUserSetCursor()) {
         return false;
     }
-    if (mouseStyleNodeId_ != nodeId || isByPass) {
+    if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
