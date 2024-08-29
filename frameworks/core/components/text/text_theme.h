@@ -75,6 +75,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
+            theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
         }
     };
 
@@ -100,6 +102,16 @@ public:
         return linearSplitChildMinSize_;
     }
 
+    bool GetIsTextFadeout() const
+    {
+        return isTextFadeout_;
+    }
+
+    const Dimension& GetFadeoutWidth() const
+    {
+        return fadeoutWidth_;
+    }
+
     bool IsShowHandle() const
     {
         return isShowHandle_;
@@ -119,6 +131,8 @@ private:
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
+    bool isTextFadeout_ = false;
+    Dimension fadeoutWidth_;
     bool isShowHandle_ = false;
 };
 
