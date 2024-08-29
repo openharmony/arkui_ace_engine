@@ -413,11 +413,9 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
         int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
-        if (cacheDeadline || Negative(itemHeight)) {
-            auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
-            if (item) {
-                itemHeight = GetMeasuredHeight(item, axis_);
-            }
+        auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
+        if (item) {
+            itemHeight = GetMeasuredHeight(item, axis_);
         }
         info_->RecordItem(i, position, itemHeight);
         if (cacheDeadline && GetSysTimestamp() > *cacheDeadline) {
