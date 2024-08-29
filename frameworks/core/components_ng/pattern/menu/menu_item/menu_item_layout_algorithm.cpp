@@ -217,8 +217,8 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
 }
 
-void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint, 
-    std::optional<LayoutConstraintF>& layoutConstraint,PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
+void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& childConstraint,
+std::optional<LayoutConstraintF>& layoutConstraint,PaddingPropertyF padding, LayoutWrapper* layoutWrapper)
 {
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
@@ -231,10 +231,11 @@ void MenuItemLayoutAlgorithm::SetRightRowLayoutConstraint(LayoutConstraintF& chi
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
     if (!content.empty()) {
-        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() * RIGHT_ROW_MAX_WIDTH_WEIGHT - padding.right.value_or(horInterval_));
+        childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width() * RIGHT_ROW_MAX_WIDTH_WEIGHT
+        - padding.right.value_or(horInterval_));
         return;
     }
-    
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
