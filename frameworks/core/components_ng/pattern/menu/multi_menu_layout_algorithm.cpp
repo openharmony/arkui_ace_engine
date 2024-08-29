@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -43,6 +44,8 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     if (!pattern->IsEmbedded()) {
         MinusPaddingToSize(padding, childConstraint.maxSize);
+    } else {
+        UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
     }
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         // when Menu is set self ideal width, make children node adaptively fill up.
@@ -136,6 +139,44 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+void MultiMenuLayoutAlgorithm::UpdateEmbeddedPercentReference(LayoutWrapper* layoutWrapper,
+    LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
+{
+    // Set percent reference for embedded menu the same as for parent menu item
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(node);
+    auto parentNode = AceType::DynamicCast<FrameNode>(node->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto parentProperty = parentNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(parentProperty);
+    auto parentConstraint = parentProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(parentConstraint);
+    auto parentPercentReference = parentConstraint->percentReference.Height();
+    layoutConstraint->percentReference.SetHeight(parentPercentReference);
+
+    auto props = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(props);
+    const auto& calcConstraint = props->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Height().has_value()) {
+        ScaleProperty scaleProperty;
+        if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
+            scaleProperty = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()->scaleProperty;
+        } else {
+            scaleProperty = layoutConstraint->scaleProperty;
+        }
+        userHeight_ = ConvertToPx(calcConstraint->selfIdealSize.value().Height()->GetDimension(),
+            scaleProperty, layoutConstraint->percentReference.Height()).value_or(0.0f);
+    }
+
+    // Update embedded menu items percent reference dependent of the submenu constraint
+    if (GreatNotEqual(userHeight_, 0.0f)) {
+        childConstraint.percentReference.SetHeight(userHeight_);
+    } else {
+        childConstraint.percentReference.SetHeight(parentPercentReference);
+    }
+}
+
 void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
 {
@@ -158,6 +199,10 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         auto width = layoutConstraint->maxSize.Width();
         idealSize.SetWidth(width);
+        if (pattern->IsEmbedded()) {
+            auto idealHeight = GreatNotEqual(userHeight_, 0.0f) ? userHeight_ : contentHeight;
+            idealSize.SetHeight(idealHeight);
+        }
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     } else if (layoutConstraint->selfIdealSize.Width().has_value()) {
         auto idealWidth = std::max(layoutConstraint->minSize.Width(),
