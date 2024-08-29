@@ -4368,10 +4368,12 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
                 newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
         }
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to foreach change
+        let removedChildElmtIds = [];
         // Set new array on C++ side.
         // C++ returns array of indexes of newly added array items.
         // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates, removedChildElmtIds);
         // Its error if there are duplicate IDs.
         if (idDuplicates.length > 0) {
             idDuplicates.forEach((indx) => {
@@ -4394,6 +4396,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
+        // un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
+        // purging these elmtIds from state mgmt will make sure no more update function on any deleted child will be executed
+        
+        this.purgeDeletedElmtIds();
         
         
         
