@@ -64,6 +64,7 @@ static const Opt_Boolean OPT_BOOL_FALSE = { .tag = ARK_TAG_OBJECT, .value = ABOO
 
 static const Dimension THEME_SWIPER_INDICATOR_SIZE(9876, DimensionUnit::VP);
 static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
+static const Color THEME_SWIPER_INDICATOR_COLOR(Color::BLUE);
 static const Color THEME_SWIPER_ARROW_COLOR(Color::GREEN);
 
 inline Ark_Number ArkNum(int src)
@@ -124,6 +125,8 @@ public:
         // set test values to Theme Pattern as data for the Theme building
         auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
         themeStyle->SetAttr("swiper_indicator_size", { .value = THEME_SWIPER_INDICATOR_SIZE });
+        themeStyle->SetAttr("indicator_color", { .value = THEME_SWIPER_INDICATOR_COLOR });
+        themeStyle->SetAttr("indicator_color_selected", { .value = THEME_SWIPER_INDICATOR_COLOR });
         themeStyle->SetAttr("indicator_text_font_size", { .value = THEME_SWIPER_FONT_SIZE });
         themeStyle->SetAttr(ARROW_COLOR_PRIMARY, { .value = THEME_SWIPER_ARROW_COLOR });
         themeStyle->SetAttr(ARROW_COLOR_COMPONENT_NORMAL, { .value = THEME_SWIPER_ARROW_COLOR });
@@ -382,9 +385,9 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest5_dot_color, TestSize.Level1)
         modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetStringAttribute(node_, PROP_NAME);
         auto checkVal2 = GetStringAttribute(strWithObj, "color");
-        EXPECT_EQ(checkVal2, "#19182431");
+        EXPECT_EQ(checkVal2, THEME_SWIPER_INDICATOR_COLOR.ToString());
         auto checkVal3 = GetStringAttribute(strWithObj, "selectedColor");
-        EXPECT_EQ(checkVal3, "#FF007DFF");
+        EXPECT_EQ(checkVal3, THEME_SWIPER_INDICATOR_COLOR.ToString());
     }
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -680,8 +683,8 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleShowBg, TestSize.Level1)
 
     ASSERT_NE(modifier_->setDisplayArrow, nullptr);
 
-    auto checkValInit = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkValInit, DEFAULT_VALUE);
+    auto checkValInitial = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkValInitial, DEFAULT_VALUE);
 
     Type_SwiperAttribute_displayArrow_Arg0 arkParam1 = {.selector=0, .value0={.showBackground = OPT_BOOL_TRUE}};
     modifier_->setDisplayArrow(node_, &arkParam1, nullptr);
@@ -1234,8 +1237,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest13_ByGroup, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_VALUE);
 
-    Opt_Boolean optBoolTrue = {.tag = ARK_TAG_OBJECT, .value = ABOOL_TRUE};
-    modifier_->setDisplayCount(node_, &aceFakeArg0, &optBoolTrue);
+    modifier_->setDisplayCount(node_, &aceFakeArg0, &OPT_BOOL_TRUE);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "true");
 
@@ -1243,8 +1245,7 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest13_ByGroup, TestSize.Level1)
     auto checkVal2opt = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2opt, "true"); // nothing change if no optional arg
 
-    Opt_Boolean optBoolFalse = {.tag = ARK_TAG_OBJECT, .value = ABOOL_FALSE};
-    modifier_->setDisplayCount(node_, &aceFakeArg0, &optBoolFalse);
+    modifier_->setDisplayCount(node_, &aceFakeArg0, &OPT_BOOL_FALSE);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "false");
 
@@ -1299,13 +1300,11 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest15, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_VALUE);
 
-    auto arkBoolTrue = ABOOL_TRUE;
-    modifier_->setDisableSwipe(node_, arkBoolTrue);
+    modifier_->setDisableSwipe(node_, ABOOL_TRUE);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "true");
 
-    auto arkBoolFalse = ABOOL_FALSE;
-    modifier_->setDisableSwipe(node_, arkBoolFalse);
+    modifier_->setDisableSwipe(node_, ABOOL_FALSE);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "false");
 }
@@ -1326,13 +1325,108 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest17, TestSize.Level1)
 {
 }
 /**
- * @tc.name: SwiperModifierTest18
+ * @tc.name: setIndicatorStyleTest
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest18, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorStyleTest, TestSize.Level1)
 {
+    static const std::string PROP_NAME("indicator");
+    ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
+
+    auto checkValInitial = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkValInitial, "true");
+
+    Opt_IndicatorStyle style = {.tag = ARK_TAG_OBJECT, .value = {
+        .left = OPT_LEN_PX_NEG,
+        .top = OPT_LEN_VP_NEG,
+        .right = OPT_LEN_PX_POS,
+        .bottom = OPT_LEN_VP_POS,
+        .size = OPT_LEN_PX_POS,
+        .mask = OPT_BOOL_TRUE,
+        .color = {.tag = ARK_TAG_OBJECT, .value = { .selector = 0, .value0 = 0x12345678 }},
+        .selectedColor = {.tag = ARK_TAG_OBJECT, .value = { .selector = 2, .value2 = {.chars = "65535"} } },
+    }};
+    modifier_->setIndicatorStyle(node_, &style);
+    auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+    ASSERT_NE(strWithObj, "true");
+    ASSERT_NE(strWithObj, "false");
+
+    auto checkL = GetStringAttribute(strWithObj, "left");
+    EXPECT_EQ(checkL, "0.00vp");
+    auto checkT = GetStringAttribute(strWithObj, "top");
+    EXPECT_EQ(checkT, "0.00vp");
+    auto checkR = GetStringAttribute(strWithObj, "right");
+    EXPECT_EQ(checkR, "1234.00px");
+    auto checkB = GetStringAttribute(strWithObj, "bottom");
+    EXPECT_EQ(checkB, "1.23vp");
+
+    auto checkW = GetStringAttribute(strWithObj, "itemWidth");
+    EXPECT_EQ(checkW, "1234.00px");
+    auto checkH = GetStringAttribute(strWithObj, "itemHeight");
+    EXPECT_EQ(checkH, "1234.00px");
+    auto checkSelW = GetStringAttribute(strWithObj, "selectedItemWidth");
+    EXPECT_EQ(checkSelW, "1234.00px");
+    auto checkSelH = GetStringAttribute(strWithObj, "selectedItemHeight");
+    EXPECT_EQ(checkSelH, "1234.00px");
+
+    auto checkMask = GetStringAttribute(strWithObj, "mask");
+    EXPECT_EQ(checkMask, "true");
+
+    auto checkColor = GetStringAttribute(strWithObj, "color");
+    EXPECT_EQ(checkColor, "#12345678");
+    auto checkSelColor = GetStringAttribute(strWithObj, "selectedColor");
+    EXPECT_EQ(checkSelColor, "#FF00FFFF");
 }
+
+/**
+ * @tc.name: setIndicatorStyleTestInvalid
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorStyleImpl with undefined param
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setIndicatorStyleTestInvalid, TestSize.Level1)
+{
+    static const std::string PROP_NAME("indicator");
+    ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
+
+    auto checkInitial = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInitial, "true");
+
+    Opt_IndicatorStyle styleInvalid = {.tag = ARK_TAG_UNDEFINED };
+    modifier_->setIndicatorStyle(node_, &styleInvalid);
+    auto strWithObj = GetStringAttribute(node_, PROP_NAME);
+    ASSERT_NE(strWithObj, "true");
+    ASSERT_NE(strWithObj, "false");
+
+    auto checkL = GetStringAttribute(strWithObj, "left");
+    EXPECT_EQ(checkL, "0.00vp");
+    auto checkT = GetStringAttribute(strWithObj, "top");
+    EXPECT_EQ(checkT, "0.00vp");
+    auto checkR = GetStringAttribute(strWithObj, "right");
+    EXPECT_EQ(checkR, "0.00vp");
+    auto checkB = GetStringAttribute(strWithObj, "bottom");
+    EXPECT_EQ(checkB, "0.00vp");
+
+    auto checkW = GetStringAttribute(strWithObj, "itemWidth");
+    EXPECT_EQ(checkW, "6.00vp");
+    auto checkH = GetStringAttribute(strWithObj, "itemHeight");
+    EXPECT_EQ(checkH, "6.00vp");
+    auto checkSelW = GetStringAttribute(strWithObj, "selectedItemWidth");
+    EXPECT_EQ(checkSelW, "6.00vp");
+    auto checkSelH = GetStringAttribute(strWithObj, "selectedItemHeight");
+    EXPECT_EQ(checkSelH, "6.00vp");
+
+    auto checkMask = GetStringAttribute(strWithObj, "mask");
+    EXPECT_EQ(checkMask, "false");
+
+    auto checkColor = GetStringAttribute(strWithObj, "color");
+    EXPECT_EQ(checkColor, THEME_SWIPER_INDICATOR_COLOR.ToString());
+    auto checkSelColor = GetStringAttribute(strWithObj, "selectedColor");
+    EXPECT_EQ(checkSelColor, THEME_SWIPER_INDICATOR_COLOR.ToString());
+}
+
 /**
  * @tc.name: SwiperModifierTest19
  * @tc.desc: Check the functionality of SwiperModifier.PrevMarginImpl
@@ -1410,17 +1504,15 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest27, TestSize.Level1)
     static const std::string DEFAULT_VALUE("true");
     ASSERT_NE(modifier_->setIndicatorInteractive, nullptr);
 
-    auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal1, DEFAULT_VALUE);
+    auto checkInitial = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    auto arkBoolFalse = ABOOL_FALSE;
-    modifier_->setIndicatorInteractive(node_, arkBoolFalse);
-    auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal3, "false");
+    modifier_->setIndicatorInteractive(node_, ABOOL_FALSE);
+    auto checkFalse = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkFalse, "false");
 
-    auto arkBoolTrue = ABOOL_TRUE;
-    modifier_->setIndicatorInteractive(node_, arkBoolTrue);
-    auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal2, "true");
+    modifier_->setIndicatorInteractive(node_, ABOOL_TRUE);
+    auto checkTrue = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkTrue, "true");
 }
 } // namespace OHOS::Ace::NG

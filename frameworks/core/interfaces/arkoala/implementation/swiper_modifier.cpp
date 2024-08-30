@@ -107,11 +107,9 @@ bool checkDimCustom(std::optional<Dimension> &dim, const Dimension &defaultDim)
     }
     return isCustom;
 }
-std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src,
-    const RefPtr<SwiperIndicatorTheme> &theme)
+SwiperParameters ParseDotIndicator(const Ark_DotIndicator& src)
 {
     SwiperParameters p;
-    bool isCustom;
     p.dimLeft = Converter::OptConvert<Dimension>(src._left);
     p.dimTop = Converter::OptConvert<Dimension>(src._top);
     p.dimRight = Converter::OptConvert<Dimension>(src._right);
@@ -129,14 +127,11 @@ std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src
     p.colorVal = Converter::OptConvert<Color>(src._color);
     p.selectedColorVal = Converter::OptConvert<Color>(src._selectedColor);
     p.maxDisplayCountVal = Converter::OptConvert<int32_t>(src._maxDisplayCount);
+    return p;
+}
 
-    if (!p.dimStart) {
-        p.dimStart = Dimension(0, DimensionUnit::VP);
-    }
-    if (!p.dimEnd) {
-        p.dimEnd = Dimension(0, DimensionUnit::VP);
-    }
-
+bool CheckSwiperParameters(SwiperParameters& p, const RefPtr<SwiperIndicatorTheme> &theme)
+{
     checkDimValid(p.dimLeft);
     checkDimValid(p.dimTop);
     checkDimValid(p.dimRight);
@@ -144,8 +139,20 @@ std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src
     checkDimValid(p.dimStart);
     checkDimValid(p.dimEnd);
 
-    Dimension defaultSize = theme ? theme->GetSize() : std::move(Dimension(0, DimensionUnit::VP));
-    isCustom = checkDimCustom(p.itemWidth, defaultSize);
+    Dimension defaultSize(0, DimensionUnit::VP);
+    if (theme) {
+        defaultSize = theme->GetSize();
+
+        // the next should be removed for support of the dynamic Theme changes
+        if (!p.colorVal) {
+            p.colorVal = theme->GetColor();
+        }
+        if (!p.selectedColorVal) {
+            p.selectedColorVal = theme->GetSelectedColor();
+        }
+    }
+
+    bool isCustom = checkDimCustom(p.itemWidth, defaultSize);
     isCustom = checkDimCustom(p.itemHeight, defaultSize) || isCustom;
     isCustom = checkDimCustom(p.selectedItemWidth, defaultSize) || isCustom;
     isCustom = checkDimCustom(p.selectedItemHeight, defaultSize) || isCustom;
@@ -153,7 +160,7 @@ std::tuple<SwiperParameters, bool> ParseDotIndicator(const Ark_DotIndicator& src
     if (p.maxDisplayCountVal && *p.maxDisplayCountVal < 0) {
         *p.maxDisplayCountVal = 0;
     }
-    return {p, isCustom};
+    return isCustom;
 }
 
 SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
@@ -178,13 +185,6 @@ SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
     p.fontColor = Converter::OptConvert<Color>(src._fontColor);
     p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
 
-    if (!p.dimStart) {
-        p.dimStart = Dimension(0, DimensionUnit::VP);
-    }
-    if (!p.dimEnd) {
-        p.dimEnd = Dimension(0, DimensionUnit::VP);
-    }
-
     checkDimValid(p.dimLeft);
     checkDimValid(p.dimTop);
     checkDimValid(p.dimRight);
@@ -192,14 +192,11 @@ SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
     checkDimValid(p.dimStart);
     checkDimValid(p.dimEnd);
 
-    // TODO upgrade to the using of Theme's data as default
-    checkDimValid(p.fontSize);
-    checkDimValid(p.selectedFontSize);
-    if (!p.fontWeight) {
-        p.fontWeight = FontWeight::NORMAL;
+    if (p.fontSize && p.fontSize->IsNegative()) {
+        p.fontSize.reset();
     }
-    if (!p.selectedFontWeight) {
-        p.selectedFontWeight = FontWeight::NORMAL;
+    if (p.selectedFontSize && p.selectedFontSize->IsNegative()) {
+        p.selectedFontSize.reset();
     }
     return p;
 }
@@ -232,7 +229,8 @@ void IndicatorImpl(Ark_NativePointer node,
         } else if (value->selector == SELECTOR_BOOL) {
             showIndicator = Converter::Convert<bool>(value->value2);
         }
-        auto [params, isCustomSize] = ParseDotIndicator(*arkDot, swiperIndicatorTheme);
+        auto params = ParseDotIndicator(*arkDot);
+        auto isCustomSize = CheckSwiperParameters(params, swiperIndicatorTheme);
         SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
         SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
@@ -249,9 +247,10 @@ SwiperArrowParameters ParseArrowStyle(const Ark_ArrowStyle& src,
     p.isShowBackground = Converter::OptConvert<bool>(src.showBackground);
     p.isSidebarMiddle = Converter::OptConvert<bool>(src.isSidebarMiddle);
     p.backgroundSize = Converter::OptConvert<Dimension>(src.backgroundSize);
-    p.backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
     p.arrowSize = Converter::OptConvert<Dimension>(src.arrowSize);
+    p.backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
     p.arrowColor = Converter::OptConvert<Color>(src.arrowColor);
+    CHECK_NULL_RETURN(theme, p);
 
     if (!p.isShowBackground) {
         p.isShowBackground = theme->GetIsShowArrowBackground();
@@ -263,12 +262,13 @@ SwiperArrowParameters ParseArrowStyle(const Ark_ArrowStyle& src,
     if (!p.backgroundSize || (p.backgroundSize->Unit() != DimensionUnit::PERCENT && p.backgroundSize->IsNegative())) {
         p.backgroundSize = isBigArrow ? theme->GetBigArrowBackgroundSize() : theme->GetSmallArrowBackgroundSize();
     }
+    if (!p.arrowSize || (p.arrowSize->Unit() != DimensionUnit::PERCENT && p.arrowSize->IsNegative())) {
+        p.arrowSize = isBigArrow ? theme->GetBigArrowSize() : theme->GetSmallArrowSize();
+    }
+    // the next should be removed for support of the dynamic Theme changes
     if (!p.backgroundColor) {
         p.backgroundColor =
             isBigArrow ? theme->GetBigArrowBackgroundColor() : theme->GetSmallArrowBackgroundColor();
-    }
-    if (!p.arrowSize || (p.arrowSize->Unit() != DimensionUnit::PERCENT && p.arrowSize->IsNegative())) {
-        p.arrowSize = isBigArrow ? theme->GetBigArrowSize() : theme->GetSmallArrowSize();
     }
     if (!p.arrowColor) {
         p.arrowColor = isBigArrow ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
@@ -429,7 +429,33 @@ void OnChangeImpl(Ark_NativePointer node,
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_IndicatorStyle* value)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperParameters params;
+    if (value && value->tag != ARK_TAG_UNDEFINED) {
+        const Ark_IndicatorStyle &dotStyle = value->value;
+        Ark_DotIndicator arkDot = {
+            ._left = dotStyle.left,
+            ._top = dotStyle.top,
+            ._right = dotStyle.right,
+            ._bottom = dotStyle.bottom,
+            ._itemWidth = dotStyle.size,
+            ._itemHeight = dotStyle.size,
+            ._selectedItemWidth = dotStyle.size,
+            ._selectedItemHeight = dotStyle.size,
+            ._mask = dotStyle.mask,
+            ._color = dotStyle.color,
+            ._selectedColor = dotStyle.selectedColor,
+        };
+        params = ParseDotIndicator(arkDot);
+    }
+    RefPtr<SwiperIndicatorTheme> swiperIndicatorTheme = nullptr;
+    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
+        swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    }
+    CheckSwiperParameters(params, swiperIndicatorTheme);
+    SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+    SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
 }
 void PrevMarginImpl(Ark_NativePointer node,
                     const Ark_Length* value,
