@@ -170,7 +170,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     if (rightRow) {
         rightRow->Measure(childConstraint);
-        MeasureRightRow(rightRow, childConstraint);
+        MeasureRightRow(rightRow, childConstraint, layoutWrapper);
         rightRowWidth = rightRow->GetGeometryNode()->GetMarginFrameSize().Width();
         rightRowHeight = rightRow->GetGeometryNode()->GetMarginFrameSize().Height();
     }
@@ -251,11 +251,14 @@ void MenuItemLayoutAlgorithm::MeasureLeftRow(const RefPtr<LayoutWrapper>& row, c
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, rowHeight));
 }
 
-void MenuItemLayoutAlgorithm::MeasureRightRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
+void MenuItemLayoutAlgorithm::MeasureRightRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint,
+    LayoutWrapper* layoutWrapper)
 {
     auto children = row->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
