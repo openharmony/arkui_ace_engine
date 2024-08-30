@@ -54,6 +54,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     }
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
+    isFontSizeNonPositive_ = IsFontSizeNonPositive(textStyle);
 
     if (textContent_.empty()) {
         // Used for empty text.
@@ -69,6 +70,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
         return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
     return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+}
+
+bool TextInputLayoutAlgorithm::IsFontSizeNonPositive(const TextStyle& textStyle) const
+{
+    return textStyle.GetFontSize().IsNonPositive();
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
