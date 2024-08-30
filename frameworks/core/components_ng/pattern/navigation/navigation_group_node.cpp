@@ -353,6 +353,10 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         CHECK_NULL_RETURN(navDestination, false);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+        eventHub->SetState(NavDestinationState::ON_BACKPRESS);
+        auto navdestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+            navdestinationPattern, NavDestinationState::ON_BACKPRESS);
         auto isOverride = eventHub->GetOnBackPressedEvent();
         auto result = false;
         if (isOverride) {
