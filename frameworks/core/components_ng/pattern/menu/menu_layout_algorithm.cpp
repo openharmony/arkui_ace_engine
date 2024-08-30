@@ -374,8 +374,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);
     float topSecurity = 0.0f;
     float bottomSecurity = 0.0f;
-    auto hasPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
-    if (hasPreview && SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             topSecurity = static_cast<float>(PORTRAIT_TOP_SECURITY_API12.ConvertToPx());
             bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY_API12.ConvertToPx());
@@ -383,7 +382,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
             topSecurity = static_cast<float>(PORTRAIT_TOP_SECURITY.ConvertToPx());
             bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY.ConvertToPx());
         }
-    } else if (hasPreview) {
+    } else {
         topSecurity = static_cast<float>(LANDSCAPE_TOP_SECURITY.ConvertToPx());
         bottomSecurity = static_cast<float>(LANDSCAPE_BOTTOM_SECURITY.ConvertToPx());
     }
@@ -682,7 +681,7 @@ void MenuLayoutAlgorithm::UpdateChildConstraintByDevice(const RefPtr<MenuPattern
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-
+    
     auto expandDisplay = theme->GetExpandDisplay();
     CHECK_NULL_VOID(expandDisplay);
 
@@ -771,22 +770,22 @@ void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<Layou
     RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage)
 {
     CHECK_NULL_VOID(isShowHoverImage);
-    bool isFlexNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
-    CHECK_NULL_VOID(isFlexNode);
+    bool isColNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(isColNode);
     // flex -> stack -> image index 0 , preview index 1 when hoverScale api in use
     auto stackNode = child->GetChildByIndex(0);
     CHECK_NULL_VOID(stackNode);
-    auto previewLayoutWrapper = stackNode->GetChildByIndex(1);
-    CHECK_NULL_VOID(previewLayoutWrapper);
+    auto childNode = stackNode->GetChildByIndex(1);
+    CHECK_NULL_VOID(childNode);
 
-    auto previewNode = previewLayoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(previewNode);
-    CHECK_NULL_VOID(previewNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || previewNode->GetTag() == V2::IMAGE_ETS_TAG);
+    auto hostChild = childNode->GetHostNode();
+    CHECK_NULL_VOID(hostChild);
+    CHECK_NULL_VOID(hostChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostChild->GetTag() == V2::IMAGE_ETS_TAG);
 
-    auto childGeometryNode = previewLayoutWrapper->GetGeometryNode();
+    auto childGeometryNode = childNode->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
 
-    hostNode = previewNode;
+    hostNode = hostChild;
     geometryNode = childGeometryNode;
 }
 
@@ -2121,7 +2120,6 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
     OffsetF afterOffsetPosition;
     auto originPosition = position;
 
-    // add space between targetNode and menu using default value or user-set offset
     if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f))) {
         afterOffsetPosition = AddTargetSpace(originPosition);
     } else {
@@ -2138,12 +2136,10 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
 
 OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNeedArrow)
 {
-    // add space between arrow and targetNode
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + targetSize_.Height() + targetSpace_);
     OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() - childSize.Height() - targetSpace_);
-    // when failed to find place for menu, put menu above targetNode with center-aligned
     OffsetF defaultPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + (targetSize_.Height() - childSize.Height()) / 2.0);
 
@@ -2340,6 +2336,7 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
+    OffsetF tempPos = position;
     if (state_ != prevState_) {
         if (prevState_ == -1) {
             prevState_ = state_;
@@ -2350,32 +2347,61 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
             preRect_.SetSize(rect.GetSize());
             if (!(x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
                     (y + childSize.Height()) > rect.Bottom())) {
+                preOffset_ = position;
+                preOffset_.SetX(x);
+                preOffset_.SetY(y);
+                preRect_.SetOffset(rect.GetOffset());
+                preRect_.SetSize(rect.GetSize());
                 return true;
             }
             flag_ = true;
             positionOffset_ = { 0.0f, 0.0f };
             return false;
         }
-        return CheckPlacement(rect, position, childSize);
+        return CheckPlacement(childSize);
     }
-    if (x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right() || y < preRect_.Top() ||
-        (y + childSize.Height()) > preRect_.Bottom()) {
+    x = tempPos.GetX();
+    y = tempPos.GetY();
+    if (x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
+        (y + childSize.Height()) > rect.Bottom()) {
+        preOffset_ = position;
+        preOffset_.SetX(x);
+        preOffset_.SetY(y);
+        preRect_.SetOffset(rect.GetOffset());
+        preRect_.SetSize(rect.GetSize());
         return false;
     }
     return true;
 }
 
-bool MenuLayoutAlgorithm::CheckPlacement(const Rect& rect, const OffsetF& position, const SizeF& childSize)
+bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
 {
-    auto x = position.GetX();
-    auto y = position.GetY();
-    prevState_ = state_;
-    preRect_.SetOffset(rect.GetOffset());
-    preRect_.SetSize(rect.GetSize());
-    if (!(x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right() || y < preRect_.Top() ||
-            (y + childSize.Height()) > preRect_.Bottom())) {
-        return true;
+    auto x = preOffset_.GetX();
+    auto y = preOffset_.GetY();
+
+    switch (prevState_) {
+        case static_cast<int>(DirectionState::Bottom_Direction):
+        case static_cast<int>(DirectionState::Top_Direction): {
+            if ((x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right()) &&
+                !(y < preRect_.Top() || (y + childSize.Height()) > preRect_.Bottom())) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        case static_cast<int>(DirectionState::Right_Direction):
+        case static_cast<int>(DirectionState::Left_Direction): {
+            if ((y < preRect_.Top() || (y + childSize.Height()) > preRect_.Bottom()) &&
+                !((x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right()))) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        default:
+            return false;
     }
+
     return false;
 }
 

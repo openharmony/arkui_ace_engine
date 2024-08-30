@@ -293,7 +293,6 @@ HWTEST_F(MenuLayout3TestNg, InitializeParam001, TestSize.Level1)
     ASSERT_NE(menuAlgorithm, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
-    menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
 
     auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
