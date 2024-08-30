@@ -1477,6 +1477,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         node.isFocus = info->GetIsFocus();
         node.value = info->GetValue();
         node.placeholder = info->GetPlaceholder();
+        node.metadata = info->GetMetadata();
         NG::RectF rectF = info->GetPageNodeRect();
         node.rect.left = rectF.GetX();
         node.rect.top = rectF.GetY();
