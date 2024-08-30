@@ -39,6 +39,7 @@ namespace ViewModel {
     Ark_NodeHandle createButtonNode(Ark_Int32 nodeId);
     Ark_NodeHandle createProgressNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCheckBoxNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createCheckBoxGroupNode(Ark_Int32 nodeId);
     Ark_NodeHandle createColumnNode(Ark_Int32 nodeId);
     Ark_NodeHandle createRowNode(Ark_Int32 nodeId);
     Ark_NodeHandle createFlexNode(Ark_Int32 nodeId);
@@ -102,6 +103,7 @@ namespace Bridge {
             case GENERATED_ARKUI_BUTTON: return ViewModel::createButtonNode(id);
             case GENERATED_ARKUI_PROGRESS: return ViewModel::createProgressNode(id);
             case GENERATED_ARKUI_CHECKBOX: return ViewModel::createCheckBoxNode(id);
+            case GENERATED_ARKUI_CHECKBOX_GROUP: return ViewModel::createCheckBoxGroupNode(id);
             case GENERATED_ARKUI_COLUMN: return ViewModel::createColumnNode(id);
             case GENERATED_ARKUI_ROW: return ViewModel::createRowNode(id);
             case GENERATED_ARKUI_FLEX: return ViewModel::createFlexNode(id);
