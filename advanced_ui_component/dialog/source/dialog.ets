@@ -67,6 +67,8 @@ const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
 const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
 // 'sys.float.Body_L'
 const BODY_L = getNumberByResourceId(125830970, 16);
+// 'sys.float.Body_M'
+const BODY_M = getNumberByResourceId(125830971, 14);
 // 'sys.float.Body_S'
 const BODY_S = getNumberByResourceId(125830972, 12);
 // 'sys.float.Title_S'
@@ -76,9 +78,9 @@ const SUBTITLE_S = getNumberByResourceId(125830969, 14);
 // 'sys.float.padding_level8'
 const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 // 'sys.float.dialog_divider_show'
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1);
+const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 // 'sys.float.alert_button_style'
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2);
+const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 
@@ -107,7 +109,7 @@ export struct TipsDialog {
   @State minContentHeight: number = 160;
   updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
     if (this.content) {
-      this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L}fp`);
+      this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
     }
   }
   imageIndex: number = 0;
@@ -171,7 +173,7 @@ export struct TipsDialog {
           .accessibilityLevel('yes')
           .margin({ right: $r('sys.float.padding_level4') })
         Text(this.checkTips)
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -213,7 +215,7 @@ export struct TipsDialog {
         if (this.title !== null) {
           Row() {
             Text(this.title)
-              .fontSize($r('sys.float.Title_S'))
+              .fontSize(`${TITLE_S}fp`)
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
@@ -228,6 +230,9 @@ export struct TipsDialog {
             Text(this.content)
               .focusable(true)
               .defaultFocus(!(this.primaryButton || this.secondaryButton))
+              .focusBox({
+                strokeWidth: LengthMetrics.px(0)
+              })
               .fontSize(this.getContentFontSize())
               .fontWeight(FontWeight.Medium)
               .fontColor(this.fontColorWithTheme)
@@ -408,7 +413,7 @@ export struct SelectDialog {
         if (this.content) {
           Row() {
             Text(this.content)
-              .fontSize($r('sys.float.Body_M'))
+              .fontSize(`${BODY_M}fp`)
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -421,7 +426,7 @@ export struct SelectDialog {
                 Button() {
                   Row() {
                     Text(item.title)
-                      .fontSize($r('sys.float.Body_L'))
+                      .fontSize(`${BODY_L}fp`)
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
@@ -642,7 +647,7 @@ export struct ConfirmDialog {
   checkboxIndex: number = 1;
   updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
     if (this.content) {
-      this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L}fp`);
+      this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
     }
   }
 
@@ -654,7 +659,10 @@ export struct ConfirmDialog {
           Text(this.content)
             .focusable(true)
             .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
-            .fontSize($r('sys.float.Body_L'))
+            .focusBox({
+              strokeWidth: LengthMetrics.px(0)
+            })
+            .fontSize(`${BODY_L}fp`)
             .fontWeight(FontWeight.Medium)
             .fontColor(this.fontColorWithTheme)
             .textAlign(this.textAlign)
@@ -687,7 +695,7 @@ export struct ConfirmDialog {
         .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
 
       Text(this.checkTips)
-        .fontSize($r('sys.float.Body_M'))
+        .fontSize(`${BODY_M}fp`)
         .fontWeight(FontWeight.Medium)
         .fontColor(this.fontColorWithTheme)
         .maxLines(CONTENT_MAX_LINES)
@@ -799,7 +807,10 @@ export struct AlertDialog {
         Text(this.content)
           .focusable(true)
           .defaultFocus(!(this.primaryButton || this.secondaryButton))
-          .fontSize($r('sys.float.Body_L'))
+          .focusBox({
+            strokeWidth: LengthMetrics.px(0)
+          })
+          .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ right: $r('sys.float.padding_level8'), })
@@ -827,7 +838,7 @@ export struct AlertDialog {
   }
 
   private updateTextAlign(maxWidth: number): void {
-    this.textAlign = getTextAlign(maxWidth, this.content, $r('sys.float.Body_L'));
+    this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
   }
 
   private initButtons(): void {
@@ -987,17 +998,19 @@ struct CustomDialogContentComponent {
   @State contentMaxHeight: Length = '100%';
   @Link fontSizeScale: number;
   @State customStyle: boolean | undefined = undefined;
-  @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
+  @State buttonMaxFontSize: Length = `${BODY_L}fp`;
   @State buttonMinFontSize: Length = 9;
-  @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
-  @State primaryTitleMinFontSize: Length = $r('sys.float.Body_L');
-  @State secondaryTitleMaxFontSize: Length = $r('sys.float.Subtitle_S');
-  @State secondaryTitleMinFontSize: Length = $r('sys.float.Body_S');
+  @State primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
+  @State primaryTitleMinFontSize: Length = `${BODY_L}fp`;
+  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
+  @State secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @State titleTextAlign: TextAlign = TextAlign.Center;
   @State isButtonVertical: boolean = false;
   @State titleMinHeight: Length = 0;
+  isFollowingSystemFontScale: boolean = false;
+  appMaxFontScale: number = 3.2;
   titleIndex: number = 0;
   contentIndex: number = 1;
   buttonIndex: number = 2;
@@ -1050,7 +1063,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.updateFontScale();
+    this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     this.titleMinHeight = this.getTitleAreaMinHeight();
@@ -1070,7 +1083,10 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    this.updateFontScale();
+    let uiContext: UIContext = this.getUIContext();
+    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
+    this.appMaxFontScale = uiContext.getMaxFontScale();
+    this.fontSizeScale = this.updateFontScale();
     if (this.controller && this.customStyle === undefined) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
       if (customController.arg_ && customController.arg_.customStyle && customController.arg_.customStyle === true) {
@@ -1091,28 +1107,25 @@ struct CustomDialogContentComponent {
     if (this.fontSizeScale > MAX_FONT_SCALE) {
       this.buttonMaxFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
       this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE * MAX_FONT_SCALE + 'vp';
-      this.primaryTitleMaxFontSize = TITLE_S * MAX_FONT_SCALE + 'vp';
-      this.primaryTitleMinFontSize = BODY_L * MAX_FONT_SCALE + 'vp';
-      this.secondaryTitleMaxFontSize = SUBTITLE_S * MAX_FONT_SCALE + 'vp';
-      this.secondaryTitleMinFontSize = BODY_S * MAX_FONT_SCALE + 'vp';
     } else {
-      this.primaryTitleMaxFontSize = TITLE_S + 'fp';
-      this.primaryTitleMinFontSize = BODY_L + 'fp';
-      this.secondaryTitleMaxFontSize = SUBTITLE_S + 'fp';
-      this.secondaryTitleMinFontSize = BODY_S + 'fp';
       this.buttonMaxFontSize = BODY_L + 'fp';
       this.buttonMinFontSize = BUTTON_MIN_FONT_SIZE + 'fp';
     }
   }
 
-  updateFontScale(): void {
+  updateFontScale(): number {
     try {
-      let context: common.ExtensionContext = this.getUIContext().getHostContext() as common.ExtensionContext;
-      this.fontSizeScale = context.config?.fontSizeScale ?? this.fontSizeScale;
+      let uiContext: UIContext = this.getUIContext();
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      if(!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(systemFontScale, this.appMaxFontScale);
     } catch (exception) {
       let code: number = (exception as BusinessError).code;
       let message: string = (exception as BusinessError).message;
       hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
+      return 1;
     }
   }
 
@@ -1170,6 +1183,7 @@ struct CustomDialogContentComponent {
           .textAlign(this.titleTextAlign)
           .maxFontSize(this.primaryTitleMaxFontSize)
           .minFontSize(this.primaryTitleMinFontSize)
+          .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -1179,8 +1193,7 @@ struct CustomDialogContentComponent {
 
       if (this.primaryTitle && this.secondaryTitle) {
         Row() {
-          Divider().margin($r('sys.float.padding_level1')).color(Color.Transparent)
-        }
+        }.height($r('sys.float.padding_level1'))
       }
 
       Row() {
@@ -1190,6 +1203,7 @@ struct CustomDialogContentComponent {
           .textAlign(this.titleTextAlign)
           .maxFontSize(this.secondaryTitleMaxFontSize)
           .minFontSize(this.secondaryTitleMinFontSize)
+          .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -1463,10 +1477,10 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
  * @param defaultValue default value
  * @returns resource size
  */
-function getNumberByResourceId(resourceId: number, defaultValue: number): number {
+function getNumberByResourceId(resourceId: number, defaultValue: number, allowZero?: boolean): number {
   try {
     let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
-    if (sourceValue > 0) {
+    if (sourceValue > 0 || allowZero) {
       return sourceValue;
     } else {
       return defaultValue;
@@ -1595,13 +1609,16 @@ export struct LoadingDialog {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize($r('sys.float.Body_L'))
+          .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)
           .maxLines(this.fontSizeScale > MAX_FONT_SCALE ? LOADING_MAX_LINES_BIG_FONT : LOADING_MAX_LINES)
           .focusable(true)
           .defaultFocus(true)
+          .focusBox({
+            strokeWidth: LengthMetrics.px(0)
+          })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
