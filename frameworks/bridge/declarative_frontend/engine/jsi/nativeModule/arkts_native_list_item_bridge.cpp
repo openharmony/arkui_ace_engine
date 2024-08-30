@@ -77,14 +77,17 @@ ArkUINativeModuleValue ListItemBridge::SetSwipeAction(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     // 2: argument count.
     if (info.Length() != 2 || !(info[1]->IsObject())) {
-        Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-        auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
         GetArkUINodeModifiers()->getListItemModifier()->resetListItemSwipeAction(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    JSListItem::ParseSwiperAction(Framework::JSRef<Framework::JSObject>::Cast(info[1]), info.GetExecutionContext());
+    JSListItem::ParseSwiperAction(Framework::JSRef<Framework::JSObject>::Cast(info[1]),
+        info.GetExecutionContext(), frameNode);
 
     return panda::JSValueRef::Undefined(vm);
 }
