@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
@@ -1438,6 +1439,9 @@ void ImagePattern::DumpRenderInfo()
     auto needBorderRadius = renderProp->GetNeedBorderRadius().value_or(false);
     needBorderRadius ? DumpLog::GetInstance().AddDesc("needBorderRadius:true")
                      : DumpLog::GetInstance().AddDesc("needBorderRadius:false");
+
+    auto borderRadius = renderProp->GetBorderRadius().value_or(BorderRadiusProperty());
+    DumpLog::GetInstance().AddDesc(borderRadius.ToString());
 
     if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
         DumpLog::GetInstance().AddDesc(
