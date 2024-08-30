@@ -19,6 +19,8 @@ import { ContainersDestination, containersRoute } from './containers';
 import { OperatesDestination, operatesRoute } from './operates';
 import { DisplaysDestination, displaysRoute } from './displays';
 import { PickersDestination, pickersRoute } from './pickers';
+import { InputsDestination, inputsRoute } from './inputs';
+import { KeyboardAvoidMode } from '@kit.ArkUI';
 
 @Styles
 function CardPressedStyle() {
@@ -52,6 +54,8 @@ function Destination(name: string, route: Route) {
     OperatesDestination(name, route)
   } else if (name.startsWith('pickers/')) {
     PickersDestination(name, route)
+  } else if (name.startsWith('inputs/')) {
+    InputsDestination(name, route)
   }
 }
 
@@ -64,6 +68,7 @@ struct Index {
     operatesRoute,
     displaysRoute,
     pickersRoute,
+    inputsRoute,
   ];
   @State selection: string | null = null;
 
@@ -116,6 +121,9 @@ struct Index {
     })
   }
 
+  aboutToAppear(): void{
+    this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+  }
   build() {
     Navigation(this.router) {
       Text('ArkUI 是 OpenHarmony 的控件底座，这是一个 ArkUI 控件检视应用，你可以查阅目前版本的控件能力与默认样式。')
