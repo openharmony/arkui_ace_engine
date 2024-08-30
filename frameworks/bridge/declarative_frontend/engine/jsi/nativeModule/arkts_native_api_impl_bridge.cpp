@@ -1740,6 +1740,22 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnIMEInputComplete));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnIMEInputComplete"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnIMEInputComplete));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnWillChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnWillChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDidChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDidChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDidChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetPlaceholder));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetPlaceholder));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAboutToDelete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetAboutToDelete));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAboutToDelete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetAboutToDelete));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSubmit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnSubmit));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSubmit"),

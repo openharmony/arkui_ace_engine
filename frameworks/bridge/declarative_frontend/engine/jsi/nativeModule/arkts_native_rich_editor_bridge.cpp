@@ -22,6 +22,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -257,103 +258,64 @@ ArkUINativeModuleValue RichEditorBridge::ResetOnIMEInputComplete(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue RichEditorBridge::SetCopyOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+Local<panda::ArrayRef> CreateTextShadowObjectArray(EcmaVM* vm, const TextStyleResult& textStyle)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t CopyOptionsValue = static_cast<uint32_t>(CopyOptions::Distributed);
-    if (secondArg->IsNumber()) {
-        CopyOptionsValue = secondArg->Uint32Value(vm);
-        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorCopyOptions(nativeNode, CopyOptionsValue);
-    } else {
-        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(nativeNode);
+    auto textShadowArray = panda::ArrayRef::New(vm, textStyle.textShadows.size());
+    int32_t index = 0;
+    for (const auto& it : textStyle.textShadows) {
+        const char* keys[] = { "radius", "color", "offsetX", "offsetY" };
+        Local<JSValueRef> values[] = {  panda::NumberRef::New(vm, static_cast<double>(it.GetBlurRadius())),
+            panda::StringRef::NewFromUtf8(vm, it.GetColor().ToString().c_str()),
+            panda::NumberRef::New(vm, static_cast<double>(it.GetOffset().GetX())),
+            panda::NumberRef::New(vm, static_cast<double>(it.GetOffset().GetY())) };
+        auto textShadowObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::ArrayRef::SetValueAt(vm, textShadowArray, index, textShadowObj);
+        index++;
     }
-    return panda::JSValueRef::Undefined(vm);
+    return textShadowArray;
 }
 
-ArkUINativeModuleValue RichEditorBridge::ResetCopyOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+void CreateTextStyleObj(
+    EcmaVM* vm, Local<panda::ObjectRef>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
+    const char* decorationObjKeys[] = { "type", "color", "style" };
+    auto textDecoration = static_cast<int32_t>(spanResult.GetTextDecoration());
+    auto textDecorationStyle = static_cast<int32_t>(spanResult.GetTextDecorationStyle());
+    Local<JSValueRef> decorationObjValues[] = { panda::NumberRef::New(vm, textDecoration),
+        panda::StringRef::NewFromUtf8(vm, spanResult.GetColor().c_str()),
+        panda::NumberRef::New(vm, textDecorationStyle) };
+    auto decorationObj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(decorationObjKeys), decorationObjKeys, decorationObjValues);
+
+    auto textShadowObjectArray = CreateTextShadowObjectArray(vm, spanResult.GetTextStyle());
+
+    const char* textStyleObjKeys[] = { "fontColor", "fontFeature", "fontSize", "lineHeight", "letterSpacing",
+        "fontStyle", "fontWeight", "fontFamily", "decoration", "textShadow" };
+    Local<JSValueRef> textStyleObjValues[] = { panda::StringRef::NewFromUtf8(vm, spanResult.GetFontColor().c_str()),
+        panda::StringRef::NewFromUtf8(vm, UnParseFontFeatureSetting(spanResult.GetFontFeatures()).c_str()),
+        panda::NumberRef::New(vm, static_cast<double>(spanResult.GetFontSize())),
+        panda::NumberRef::New(vm, static_cast<double>(spanResult.GetTextStyle().lineHeight)),
+        panda::NumberRef::New(vm, static_cast<double>(spanResult.GetTextStyle().letterSpacing)),
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(spanResult.GetFontStyle()))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(spanResult.GetFontWeight())),
+        panda::StringRef::NewFromUtf8(vm, spanResult.GetFontFamily().c_str()), decorationObj, textShadowObjectArray };
+    textStyleObj =
+        panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(textStyleObjKeys), textStyleObjKeys, textStyleObjValues);
 }
 
-ArkUINativeModuleValue RichEditorBridge::SetOnSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+void SetTextChangeSpanResult(
+    EcmaVM* vm, panda::Local<panda::ObjectRef>& resultObj, const NG::RichEditorAbstractSpanResult& spanResult)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
-        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnSelectionChange(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo* info)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const auto* changeInfo = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
-        if (!changeInfo) {
-            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richEditor SetOnSelectionChange callback execute failed.");
-            return;
-        }
-        const char* keys[] = { "start", "end" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, changeInfo->start_),
-            panda::NumberRef::New(vm, changeInfo->end_) };
-        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        panda::Local<panda::JSValueRef> params[NUM_1] = { eventObject };
-        func->Call(vm, func.ToLocal(), params, NUM_1);
-    };
-    GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorOnSelectionChange(
-        nativeNode, reinterpret_cast<void*>(&callback));
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue RichEditorBridge::ResetOnSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnSelectionChange(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue RichEditorBridge::SetCaretColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCaretColor(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorCaretColor(nativeNode, color.GetValue());
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue RichEditorBridge::ResetCaretColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCaretColor(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
+    auto textStyleObj = panda::ObjectRef::New(vm);
+    CreateTextStyleObj(vm, textStyleObj, spanResult);
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
+        panda::StringRef::NewFromUtf8(vm, spanResult.GetValue().c_str()));
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewText"),
+        panda::StringRef::NewFromUtf8(vm, spanResult.GetPreviewText().c_str()));
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "textStyle"),
+        textStyleObj);
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"),
+        CreateParagraphStyle(vm, spanResult.GetTextStyle()));
 }
 
 Local<panda::ObjectRef> CreateTextStyleResult(EcmaVM *vm, const TextStyleResult& textStyleResult)
@@ -547,6 +509,593 @@ void CreatSelectEvent(EcmaVM *vm, const BaseEventInfo* info, panda::Local<panda:
     Local<JSValueRef> values[] = { selectionArray, spanObjectArray };
     auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     params[NUM_1] = { eventObject };
+}
+
+void SetSymbolChangeSpanResult(
+    EcmaVM* vm, panda::Local<panda::ObjectRef>& resultObj, const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpanStyle"),
+        CreateSymbolSpanStyleResult(vm, spanResult.GetSymbolSpanStyle()));
+    resultObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "valueResource"), CreateValueResource(vm, spanResult.GetValueResource()));
+    resultObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"), CreateParagraphStyle(vm, spanResult.GetTextStyle()));
+}
+
+void SetImageChangeSpanResult(
+    EcmaVM* vm, panda::Local<panda::ObjectRef>& resultObj, const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    auto valuePixelMap = spanResult.GetValuePixelMap();
+    auto returnWidth = spanResult.GetSizeWidth();
+    auto returnHeight = spanResult.GetSizeHeight();
+    if (valuePixelMap) {
+#ifdef PIXEL_MAP_SUPPORTED
+        if (NearZero(returnWidth) || NearZero(returnHeight)) {
+            returnWidth = valuePixelMap->GetWidth();
+            returnHeight = valuePixelMap->GetHeight();
+        }
+        auto jsPixmap = Framework::ConvertPixmap(valuePixelMap);
+        if (!jsPixmap->IsUndefined()) {
+            resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
+                panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
+        }
+#endif
+    } else {
+        resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResourceStr"),
+            panda::StringRef::NewFromUtf8(vm, spanResult.GetValueResourceStr().c_str()));
+    }
+    ImageStyleResult imageStyleResult;
+    imageStyleResult.size[0] = static_cast<double>(returnWidth);
+    imageStyleResult.size[1] = static_cast<double>(returnHeight);
+    imageStyleResult.verticalAlign = static_cast<int32_t>(spanResult.GetVerticalAlign());
+    imageStyleResult.objectFit = static_cast<int32_t>(spanResult.GetObjectFit());
+    imageStyleResult.borderRadius = spanResult.GetBorderRadius();
+    imageStyleResult.margin = spanResult.GetMargin();
+    resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageStyle"), CreateImageStyleResult(vm, imageStyleResult));
+}
+
+void SetChangeTextSpans(
+    EcmaVM* vm, const std::vector<NG::RichEditorAbstractSpanResult>& spanList, panda::Local<panda::ArrayRef>& jsArray)
+{
+    int32_t index = 0;
+    for (const auto& it : spanList) {
+        auto spanPositionObj = panda::ObjectRef::New(vm);
+        auto spanResultObj = panda::ObjectRef::New(vm);
+        auto spanRangeArray = panda::ArrayRef::New(vm, NUM_2);
+        auto offsetInSpanArray = panda::ArrayRef::New(vm, NUM_2);
+        panda::ArrayRef::SetValueAt(vm, spanRangeArray, NUM_0, panda::NumberRef::New(vm, it.GetSpanRangeStart()));
+        panda::ArrayRef::SetValueAt(vm, spanRangeArray, NUM_1, panda::NumberRef::New(vm, it.GetSpanRangeEnd()));
+        spanPositionObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "spanRange"), spanRangeArray);
+        spanPositionObj->Set(
+            vm, panda::StringRef::NewFromUtf8(vm, "spanIndex"), panda::NumberRef::New(vm, it.GetSpanIndex()));
+        spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "spanPosition"), spanPositionObj);
+        panda::ArrayRef::SetValueAt(vm, offsetInSpanArray, NUM_0, panda::NumberRef::New(vm, it.OffsetInSpan()));
+        panda::ArrayRef::SetValueAt(
+            vm, offsetInSpanArray, NUM_1, panda::NumberRef::New(vm, it.OffsetInSpan() + it.GetEraseLength()));
+        spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "offsetInSpan"), offsetInSpanArray);
+        switch (it.GetType()) {
+            case NG::SpanResultType::TEXT:
+                SetTextChangeSpanResult(vm, spanResultObj, it);
+                break;
+            case NG::SpanResultType::IMAGE:
+                SetImageChangeSpanResult(vm, spanResultObj, it);
+                break;
+            case NG::SpanResultType::SYMBOL:
+                SetSymbolChangeSpanResult(vm, spanResultObj, it);
+                break;
+            default:
+                break;
+        }
+        panda::ArrayRef::SetValueAt(vm, jsArray, index++, spanResultObj);
+    }
+}
+
+panda::Local<panda::ObjectRef> CreateOnWillChange(EcmaVM* vm, const NG::RichEditorChangeValue& changeValue)
+{
+    auto onWillChangeObj = panda::ObjectRef::New(vm);
+    auto rangeBeforeObj = panda::ObjectRef::New(vm);
+    const auto& rangeBefore = changeValue.GetRangeBefore();
+    rangeBeforeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "start"), panda::NumberRef::New(vm, rangeBefore.start));
+    rangeBeforeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "end"), panda::NumberRef::New(vm, rangeBefore.end));
+    onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rangeBefore"), rangeBeforeObj);
+    auto replacedSpansArray = panda::ArrayRef::New(vm);
+    SetChangeTextSpans(vm, changeValue.GetRichEditorReplacedSpans(), replacedSpansArray);
+    onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "replacedSpans"), replacedSpansArray);
+    auto replacedImageSpansArray = panda::ArrayRef::New(vm);
+    SetChangeTextSpans(vm, changeValue.GetRichEditorReplacedImageSpans(), replacedImageSpansArray);
+    onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "replacedImageSpans"), replacedImageSpansArray);
+    auto replacedSymbolSpansArray = panda::ArrayRef::New(vm);
+    SetChangeTextSpans(vm, changeValue.GetRichEditorReplacedSymbolSpans(), replacedSymbolSpansArray);
+    onWillChangeObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "replacedSymbolSpans"), replacedSymbolSpansArray);
+
+    return onWillChangeObj;
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOnWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (!callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnWillChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<bool(const RichEditorChangeValue&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const RichEditorChangeValue& changeValue) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            auto eventObject = CreateOnWillChange(vm, changeValue);
+            panda::Local<panda::JSValueRef> params[NUM_1] = { eventObject };
+            auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
+            if (ret->IsBoolean()) {
+                return ret->ToBoolean(vm)->Value();
+            }
+            return true;
+        };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorOnWillChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOnWillChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnWillChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOnDidChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (!callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnDidChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const RichEditorChangeValue&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const RichEditorChangeValue& changeValue) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+            const auto& rangeBeforeValue = changeValue.GetRangeBefore();
+            const char* keysOfRangeBefore[] = { "start", "end" };
+            Local<JSValueRef> valuesOfRangeBefore[] = { panda::NumberRef::New(vm, rangeBeforeValue.start),
+                panda::NumberRef::New(vm, rangeBeforeValue.end) };
+            auto rangeBeforeObj = panda::ObjectRef::NewWithNamedProperties(
+                vm, ArraySize(keysOfRangeBefore), keysOfRangeBefore, valuesOfRangeBefore);
+
+            const auto& rangeAfterValue = changeValue.GetRangeAfter();
+            const char* keysOfRangeAfter[] = { "start", "end" };
+            Local<JSValueRef> valuesOfRangeAfter[] = { panda::NumberRef::New(vm, rangeAfterValue.start),
+                panda::NumberRef::New(vm, rangeAfterValue.end) };
+            auto rangeAftereObj = panda::ObjectRef::NewWithNamedProperties(
+                vm, ArraySize(keysOfRangeAfter), keysOfRangeAfter, valuesOfRangeAfter);
+
+            panda::Local<panda::JSValueRef> params[NUM_2] = { rangeBeforeObj, rangeAftereObj };
+            auto ret = func->Call(vm, func.ToLocal(), params, NUM_2);
+            if (ret->IsBoolean()) {
+                return ret->ToBoolean(vm)->Value();
+            }
+            return true;
+        };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorOnDidChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOnDidChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnDidChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void CreateImageStyleObj(EcmaVM* vm, Local<panda::ObjectRef>& imageStyleObj, Local<panda::ObjectRef>& spanResultObj,
+    const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    auto imageSizeArray = panda::ArrayRef::New(vm, NUM_2);
+    panda::ArrayRef::SetValueAt(vm, imageSizeArray, NUM_0, panda::NumberRef::New(vm, spanResult.GetSizeWidth()));
+    panda::ArrayRef::SetValueAt(vm, imageSizeArray, NUM_1, panda::NumberRef::New(vm, spanResult.GetSizeHeight()));
+
+    imageStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "size"), imageSizeArray);
+    imageStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "verticalAlign"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(spanResult.GetVerticalAlign())));
+    imageStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "objectFit"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(spanResult.GetObjectFit())));
+    if (spanResult.GetValuePixelMap()) {
+#ifdef PIXEL_MAP_SUPPORTED
+        auto jsPixmap = Framework::ConvertPixmap(spanResult.GetValuePixelMap());
+        if (!jsPixmap->IsUndefined()) {
+            spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valuePixelMap"),
+                panda::StringRef::NewFromUtf8(vm, jsPixmap->ToString().c_str()));
+        }
+#endif
+    } else {
+        spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResourceStr"),
+            panda::StringRef::NewFromUtf8(vm, spanResult.GetValueResourceStr().c_str()));
+    }
+}
+
+void SetDeleteSpan(
+    EcmaVM* vm, panda::Local<panda::ObjectRef>& spanResultObj, const NG::RichEditorAbstractSpanResult& spanResult)
+{
+    CHECK_NULL_VOID(vm);
+    switch (spanResult.GetType()) {
+        case NG::SpanResultType::TEXT: {
+            SetTextChangeSpanResult(vm, spanResultObj, spanResult);
+            break;
+        }
+        case NG::SpanResultType::IMAGE: {
+            auto imageStyleObj = panda::ObjectRef::New(vm);
+            CreateImageStyleObj(vm, imageStyleObj, spanResultObj, spanResult);
+            const char* keys[] = { "borderRadius", "margin" };
+            Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, spanResult.GetBorderRadius().c_str()),
+                panda::StringRef::NewFromUtf8(vm, spanResult.GetMargin().c_str()) };
+            auto layoutStyleObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+            imageStyleObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "layoutStyle"), layoutStyleObj);
+            spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageStyle"), imageStyleObj);
+            break;
+        }
+        case NG::SpanResultType::SYMBOL: {
+            spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
+                panda::StringRef::NewFromUtf8(vm, spanResult.GetValueString().c_str()));
+            spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpanStyle"),
+                CreateSymbolSpanStyleResult(vm, spanResult.GetSymbolSpanStyle()));
+            spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResource"),
+                CreateValueResource(vm, spanResult.GetValueResource()));
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+panda::Local<panda::ObjectRef> CreateDeleteSpans(EcmaVM* vm, const NG::RichEditorDeleteValue& deleteValue)
+{
+    int32_t index = 0;
+    auto list = deleteValue.GetRichEditorDeleteSpans();
+    auto richEditorDeleteSpans = panda::ArrayRef::New(vm, list.size());
+    for (const auto& it : list) {
+        auto spanPositionObj = panda::ObjectRef::New(vm);
+        auto spanResultObj = panda::ObjectRef::New(vm);
+        auto spanRangeArray = panda::ArrayRef::New(vm, NUM_2);
+        auto offsetInSpanArray = panda::ArrayRef::New(vm, NUM_2);
+        panda::ArrayRef::SetValueAt(vm, spanRangeArray, NUM_0, panda::NumberRef::New(vm, it.GetSpanRangeStart()));
+        panda::ArrayRef::SetValueAt(vm, spanRangeArray, NUM_1, panda::NumberRef::New(vm, it.GetSpanRangeEnd()));
+        spanPositionObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "spanRange"), spanRangeArray);
+        spanPositionObj->Set(
+            vm, panda::StringRef::NewFromUtf8(vm, "spanIndex"), panda::NumberRef::New(vm, it.GetSpanIndex()));
+        spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "spanPosition"), spanPositionObj);
+        panda::ArrayRef::SetValueAt(vm, offsetInSpanArray, NUM_0, panda::NumberRef::New(vm, it.OffsetInSpan()));
+        panda::ArrayRef::SetValueAt(
+            vm, offsetInSpanArray, NUM_1, panda::NumberRef::New(vm, it.OffsetInSpan() + it.GetEraseLength()));
+        spanResultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "offsetInSpan"), offsetInSpanArray);
+        SetDeleteSpan(vm, spanResultObj, it);
+        panda::ArrayRef::SetValueAt(vm, richEditorDeleteSpans, index++, spanResultObj);
+    }
+    return richEditorDeleteSpans;
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetAboutToDelete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (!callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorAboutToDelete(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<bool(const RichEditorDeleteValue&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const RichEditorDeleteValue& deleteValue) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            auto deleteSpansObj = CreateDeleteSpans(vm, deleteValue);
+            const char* keys[] = { "offset", "direction", "length", "richEditorDeleteSpans" };
+            Local<JSValueRef> values[] = { panda::NumberRef::New(vm, deleteValue.GetOffset()),
+                panda::NumberRef::New(vm, static_cast<int32_t>(deleteValue.GetRichEditorDeleteDirection())),
+                panda::NumberRef::New(vm, deleteValue.GetLength()), deleteSpansObj };
+            auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+            panda::Local<panda::JSValueRef> params[NUM_1] = { eventObject };
+            auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
+            if (ret->IsBoolean()) {
+                return ret->ToBoolean(vm)->Value();
+            }
+            return true;
+        };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorAboutToDelete(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetAboutToDelete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorAboutToDelete(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void ParseFont(EcmaVM* vm, const panda::Local<panda::ObjectRef>& fontObject, Font& font)
+{
+    if (fontObject->IsUndefined()) {
+        return;
+    }
+    Local<JSValueRef> fontSize = fontObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));
+    CalcDimension size;
+    if (!fontSize->IsNull() && ArkTSUtils::ParseJsDimensionFpNG(vm, fontSize, size) && !size.IsNegative() &&
+        size.Unit() != DimensionUnit::PERCENT) {
+        font.fontSize = size;
+    } else if (size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        size = theme->GetTextStyle().GetFontSize();
+        font.fontSize = size;
+    }
+    Local<JSValueRef> fontStyle = fontObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "style"));
+    if (fontStyle->IsNumber()) {
+        font.fontStyle = static_cast<Ace::FontStyle>(fontStyle->Uint32Value(vm));
+    }
+    Local<JSValueRef> fontWeight = fontObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "weight"));
+    if (!fontWeight->IsNull()) {
+        std::string weight;
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeight, weight);
+        }
+        font.fontWeight = OHOS::Ace::Framework::ConvertStrToFontWeight(weight);
+    }
+    Local<JSValueRef> fontFamily = fontObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "family"));
+    if (!fontFamily->IsNull()) {
+        std::vector<std::string> fontFamilies;
+        if (ArkTSUtils::ParseJsFontFamilies(vm, fontFamily, fontFamilies)) {
+            font.fontFamilies = fontFamilies;
+        }
+    }
+}
+
+void PushDimensionVector(const std::optional<Dimension>& valueDim, std::vector<double>& dimensions)
+{
+    dimensions.push_back(static_cast<double>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        dimensions.push_back(valueDim.value().Value());
+        dimensions.push_back(static_cast<double>(valueDim.value().Unit()));
+    } else {
+        dimensions.push_back(NUM_0);
+        dimensions.push_back(NUM_0);
+    }
+}
+
+std::optional<uint32_t> ParseColorResourceId(const EcmaVM* vm, const Local<JSValueRef>& colorVal)
+{
+    if (!colorVal->IsObject(vm)) {
+        return std::nullopt;
+    }
+    auto colorObj = colorVal->ToObject(vm);
+    ArkTSUtils::CompleteResourceObject(vm, colorObj);
+    Local<JSValueRef> resIdArg = colorObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    if (!resIdArg->IsNumber()) {
+        return std::nullopt;
+    }
+    auto typeValue = -1;
+    auto typeArg = colorObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    if (typeArg->IsNumber()) {
+        typeValue = typeArg->Uint32Value(vm);
+    }
+    if (typeValue != static_cast<uint32_t>(OHOS::Ace::NG::ResourceType::COLOR)) {
+        return std::nullopt;
+    }
+    return resIdArg->ToNumber(vm)->Value();
+}
+
+void ParsePlaceholderStyle(EcmaVM* vm, const Local<JSValueRef>& styleArg, PlaceholderOptions& options,
+    std::optional<Color>& fontColorOpt, std::optional<uint32_t>& colorResourceIdOpt)
+{
+    Font font;
+    if (styleArg->IsObject(vm)) {
+        auto styleObj = styleArg->ToObject(vm);
+        auto fontArg = styleObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "font"));
+        if (fontArg->IsObject(vm)) {
+            auto fontObj = fontArg->ToObject(vm);
+            ParseFont(vm, fontObj, font);
+        }
+        auto fontColorArg = styleObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "fontColor"));
+        Color fontColorParsed;
+        if (!fontColorArg->IsNull() && ArkTSUtils::ParseJsColor(vm, fontColorArg, fontColorParsed)) {
+            fontColorOpt = fontColorParsed;
+            colorResourceIdOpt = ParseColorResourceId(vm, fontColorArg);
+        }
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
+    options.fontSize = font.fontSize.value_or(textStyle.GetFontSize());
+    options.fontFamilies = !font.fontFamilies.empty() ? font.fontFamilies : textStyle.GetFontFamilies();
+    options.fontWeight = font.fontWeight.value_or(textStyle.GetFontWeight());
+    options.fontStyle = font.fontStyle.value_or(textStyle.GetFontStyle());
+    if (!fontColorOpt.has_value()) {
+        Color fontColor;
+        auto richEditorTheme = pipeline->GetTheme<OHOS::Ace::NG::RichEditorTheme>();
+        options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
+    }
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetPlaceholder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    PlaceholderOptions options;
+    std::optional<Color> fontColor = std::nullopt;
+    std::optional<uint32_t> colorResourceId = std::nullopt;
+    std::string placeholderValue;
+    ArkTSUtils::ParseJsString(vm, valueArg, placeholderValue);
+    options.value = placeholderValue;
+    ParsePlaceholderStyle(vm, styleArg, options, fontColor, colorResourceId);
+    colorResourceId = -1;
+    std::vector<ArkUI_CharPtr> stringParameters;
+    stringParameters.push_back(options.value.has_value() ? options.value.value().c_str() : "");
+    if (!options.fontFamilies.empty()) {
+        for (size_t index = 0; index < options.fontFamilies.size(); index++) {
+            stringParameters.push_back(options.fontFamilies[index].c_str());
+        }
+    }
+    std::vector<double> valuesVector;
+    valuesVector.push_back(static_cast<double>(options.fontWeight.has_value()));
+    valuesVector.push_back(options.fontWeight.has_value() ? static_cast<double>(options.fontWeight.value()) : 0.0);
+    valuesVector.push_back(static_cast<double>(options.fontStyle.has_value()));
+    valuesVector.push_back(options.fontStyle.has_value() ? static_cast<double>(options.fontStyle.value()) : 0.0);
+    valuesVector.push_back(static_cast<double>(fontColor.has_value() || options.fontColor.has_value()));
+    auto optionColor = static_cast<double>(options.fontColor.has_value() ? options.fontColor.value().GetValue() : 0.0);
+    valuesVector.push_back(fontColor.has_value() ? static_cast<double>(fontColor.value().GetValue()) : optionColor);
+    valuesVector.push_back(static_cast<double>(colorResourceId.has_value()));
+    valuesVector.push_back(colorResourceId.has_value() ? static_cast<double>(colorResourceId.value()) : 0.0);
+    PushDimensionVector(options.fontSize, valuesVector);
+    GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorPlaceholder(
+        nativeNode, stringParameters.data(), stringParameters.size(), valuesVector.data(), valuesVector.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetPlaceholder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorPlaceholder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetCopyOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t CopyOptionsValue = static_cast<uint32_t>(CopyOptions::Distributed);
+    if (secondArg->IsNumber()) {
+        CopyOptionsValue = secondArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorCopyOptions(nativeNode, CopyOptionsValue);
+    } else {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetCopyOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOnSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnSelectionChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo* info)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        const auto* changeInfo = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        if (!changeInfo) {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "richEditor SetOnSelectionChange callback execute failed.");
+            return;
+        }
+        const char* keys[] = { "start", "end" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, changeInfo->start_),
+            panda::NumberRef::New(vm, changeInfo->end_) };
+        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::Local<panda::JSValueRef> params[NUM_1] = { eventObject };
+        func->Call(vm, func.ToLocal(), params, NUM_1);
+    };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorOnSelectionChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOnSelectionChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorOnSelectionChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetCaretColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCaretColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorCaretColor(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetCaretColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorCaretColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue RichEditorBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCallInfo)

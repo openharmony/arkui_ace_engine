@@ -174,6 +174,14 @@ void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDele
     eventHub->SetAboutToDelete(std::move(func));
 }
 
+void RichEditorModelNG::SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAboutToDelete(std::move(func));
+}
+
 void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -250,6 +258,28 @@ void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
         ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value());
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
+}
+
+void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options)
+{
+    if (options.value.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value(), frameNode);
+    }
+    if (options.fontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontSize, options.fontSize.value(), frameNode);
+    }
+    if (options.fontStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value(), frameNode);
+    }
+    if (options.fontWeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, PlaceholderFontWeight, options.fontWeight.value(), frameNode);
+    }
+    if (options.fontColor.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
 }
 
 void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions)
@@ -398,10 +428,27 @@ void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChang
     eventHub->SetOnWillChange(std::move(func));
 }
 
+
+void RichEditorModelNG::SetOnWillChange(FrameNode* frameNode, std::function<bool(const RichEditorChangeValue&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChange(std::move(func));
+}
+
 void RichEditorModelNG::SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidChange(std::move(func));
+}
+
+void RichEditorModelNG::SetOnDidChange(FrameNode* frameNode, std::function<void(const RichEditorChangeValue&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidChange(std::move(func));
 }

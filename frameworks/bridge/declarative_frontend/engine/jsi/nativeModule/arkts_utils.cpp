@@ -54,19 +54,6 @@ const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
 constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
 constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
-};
 
 uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
 {
@@ -411,7 +398,7 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
     }
 }
 
-void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
+void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}

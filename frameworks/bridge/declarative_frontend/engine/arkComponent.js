@@ -7943,6 +7943,65 @@ class RichEditorOnSelectModifier extends ModifierWithKey {
 }
 RichEditorOnSelectModifier.identity = Symbol('richEditorOnSelect');
 
+class RichEditorOnWillChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnWillChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnWillChange(node, this.value);
+    }
+  }
+}
+RichEditorOnWillChangeModifier.identity = Symbol('richEditorOnWillChange');
+
+class RichEditorOnDidChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnDidChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnDidChange(node, this.value);
+    }
+  }
+}
+RichEditorOnDidChangeModifier.identity = Symbol('richEditorOnDidChange');
+
+class RichEditorPlaceholderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetPlaceholder(node);
+    } else {
+      getUINativeModule().richEditor.setPlaceholder(node, this.value.value, this.value.style);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.stageValue).isEqual(this.value);
+  }
+}
+RichEditorPlaceholderModifier.identity = Symbol('richEditorPlaceholder');
+
+class RichEditorAboutToDeleteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetAboutToDelete(node);
+    } else {
+      getUINativeModule().richEditor.setAboutToDelete(node, this.value);
+    }
+  }
+}
+RichEditorAboutToDeleteModifier.identity = Symbol('richEditorAboutToDelete');
+
 class RichEditorOnReadyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8157,8 +8216,24 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnIMEInputCompleteModifier.identity, RichEditorOnIMEInputCompleteModifier, callback);
     return this;
   }
+  onWillChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnWillChangeModifier.identity, RichEditorOnWillChangeModifier, callback);
+    return this;
+  }
+  onDidChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnDidChangeModifier.identity, RichEditorOnDidChangeModifier, callback);
+    return this;
+  }
+  placeholder(value, style) {
+    let placeholder = new ArkPlaceholder();
+    placeholder.value = value;
+    placeholder.style = style;
+    modifierWithKey(this._modifiersWithKeys, RichEditorPlaceholderModifier.identity, RichEditorPlaceholderModifier, placeholder);
+    return this;
+  }
   aboutToDelete(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToDeleteModifier.identity, RichEditorAboutToDeleteModifier, callback);
+    return this;
   }
   onDeleteComplete(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnDeleteCompleteModifier.identity, RichEditorOnDeleteCompleteModifier, callback);
@@ -15794,6 +15869,17 @@ class ArkGridEdgeEffect {
   isEqual(another) {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+
+class ArkPlaceholder {
+  constructor() {
+    this.value = undefined;
+    this.style = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) &&
+      (this.style === another.style);
   }
 }
 
