@@ -891,6 +891,9 @@ SizeF ListPattern::GetContentSize() const
 
 bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
+    if (itemPosition_.empty()) {
+        return false;
+    }
     auto res = GetOutBoundaryOffset(useCurrentDelta);
     // over scroll in drag update from normal to over scroll.
     return Positive(res.start) || Positive(res.end);
