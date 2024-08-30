@@ -23,6 +23,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+// The maximum width of the right row is 1/3 of content area width
+constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
+
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -159,23 +162,22 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 {
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
-    childConstraint.maxSize.SetWidth(leftRow->GetGeometryNode()->GetFrameSize().Width()
-        // Cannot cover left icon
-        ? maxRowWidth_ - middleSpace_ - static_cast<float>(iconSize_)
-        : maxRowWidth_);
+
     // measure right row
+    childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / RIGHT_ROW_MAX_WIDTH_WEIGHT);
     float rightRowWidth = 0.0f;
     float rightRowHeight = 0.0f;
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     if (rightRow) {
         rightRow->Measure(childConstraint);
+        MeasureRightRow(rightRow, childConstraint, layoutWrapper);
         rightRowWidth = rightRow->GetGeometryNode()->GetMarginFrameSize().Width();
         rightRowHeight = rightRow->GetGeometryNode()->GetMarginFrameSize().Height();
     }
     // measure left row
     auto maxWidth = maxRowWidth_ - rightRowWidth - middleSpace_;
     childConstraint.maxSize.SetWidth(maxWidth);
-    MeasureRow(leftRow, childConstraint);
+    MeasureLeftRow(leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
     float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace_;
@@ -216,7 +218,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     UpdateSelfSize(layoutWrapper, actualWidth, itemHeight, expandableHeight);
 }
 
-void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
+void MenuItemLayoutAlgorithm::MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
 {
     auto children = row->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
@@ -239,6 +241,41 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
             auto contentConstraint = constraint;
             contentConstraint.maxSize.SetWidth(spaceWidth);
             child->Measure(contentConstraint);
+        }
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        spaceWidth -= childSize.Width() + iconContentPadding;
+        rowWidth += childSize.Width() + iconContentPadding;
+        rowHeight = std::max(rowHeight, childSize.Height());
+    }
+    rowWidth -= iconContentPadding;
+    row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, rowHeight));
+}
+
+void MenuItemLayoutAlgorithm::MeasureRightRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint,
+    LayoutWrapper* layoutWrapper)
+{
+    auto children = row->GetAllChildrenWithBuild();
+    CHECK_NULL_VOID(!children.empty());
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+
+    float spaceWidth = constraint.maxSize.Width();
+    float rowWidth = 0.0f;
+    float rowHeight = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ?
+	theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        const auto& child = *it;
+        if (child != children.front()) {
+            child->Measure(constraint);
+        } else {
+            auto labelConstraint = constraint;
+            labelConstraint.maxSize.SetWidth(spaceWidth);
+            child->Measure(labelConstraint);
         }
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         spaceWidth -= childSize.Width() + iconContentPadding;
