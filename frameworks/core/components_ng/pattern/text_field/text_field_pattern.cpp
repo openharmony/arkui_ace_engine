@@ -8219,7 +8219,8 @@ bool TextFieldPattern::IsShowAIWrite()
     auto abilityName = textFieldTheme->GetAIWriteAbilityName();
     aiWriteAdapter_->SetBundleName(bundleName);
     aiWriteAdapter_->SetAbilityName(abilityName);
-    return IsUnspecifiedOrTextType() && !bundleName.empty() && !abilityName.empty();
+    auto isAISupport = aiWriteAdapter_->GetAISupportFromMetadata(bundleName, abilityName);
+    return IsUnspecifiedOrTextType() && isAISupport;
 }
 
 void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
