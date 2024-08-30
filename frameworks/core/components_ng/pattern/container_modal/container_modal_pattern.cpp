@@ -724,6 +724,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
