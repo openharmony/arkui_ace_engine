@@ -142,22 +142,12 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 }
 
 #ifdef OHOS_PLATFORM
-RefPtr<FrameNode> CreatePasteButton(int32_t descriptionId)
-{
-    auto buttonType = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonType = ButtonType::ROUNDED_RECTANGLE;
-    }
-    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(buttonType), true);
-    return pasteButton;
-}
-
 RefPtr<FrameNode> BuildPasteButton(
     const std::function<void()>& callback, int32_t overlayId, float& buttonWidth, bool isSelectAll = false)
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
-    auto pasteButton = CreatePasteButton(descriptionId);
+    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
     auto pipeline = PipelineContext::GetCurrentContext();
