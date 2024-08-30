@@ -461,13 +461,25 @@ void PrevMarginImpl(Ark_NativePointer node,
                     const Ark_Length* value,
                     const Opt_Boolean* ignoreBlank)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optMargin = Converter::OptConvert<Dimension>(*value);
+    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
+    checkDimValid(optMargin);
+    SwiperModelNG::SetPreviousMargin(frameNode, *optMargin, optIgnore);
 }
 void NextMarginImpl(Ark_NativePointer node,
                     const Ark_Length* value,
                     const Opt_Boolean* ignoreBlank)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optMargin = Converter::OptConvert<Dimension>(*value);
+    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
+    checkDimValid(optMargin);
+    SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           Ark_Function event)

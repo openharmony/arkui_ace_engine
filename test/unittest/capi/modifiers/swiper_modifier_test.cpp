@@ -62,6 +62,12 @@ static const Opt_Boolean OPT_BOOL_UNDEF = { .tag = ARK_TAG_UNDEFINED };
 static const Opt_Boolean OPT_BOOL_TRUE = { .tag = ARK_TAG_OBJECT, .value = ABOOL_TRUE };
 static const Opt_Boolean OPT_BOOL_FALSE = { .tag = ARK_TAG_OBJECT, .value = ABOOL_FALSE };
 
+static const std::string EXPECTED_TRUE("true");
+static const std::string EXPECTED_FALSE("false");
+static const std::string EXPECTED_VP_ZERO(Dimension(0, DimensionUnit::VP).ToString());
+static const std::string EXPECTED_PX_POS(Dimension(AINT32_POS, DimensionUnit::PX).ToString());
+static const std::string EXPECTED_VP_POS(Dimension(AFLT32_POS, DimensionUnit::VP).ToString());
+
 static const Dimension THEME_SWIPER_INDICATOR_SIZE(9876, DimensionUnit::VP);
 static const Dimension THEME_SWIPER_FONT_SIZE(321, DimensionUnit::PX);
 static const Color THEME_SWIPER_INDICATOR_COLOR(Color::BLUE);
@@ -1428,20 +1434,84 @@ HWTEST_F(SwiperModifierTest, setIndicatorStyleTestInvalid, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperModifierTest19
+ * @tc.name: setPrevMarginTest
  * @tc.desc: Check the functionality of SwiperModifier.PrevMarginImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest19, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setPrevMarginTest, TestSize.Level1)
 {
+    static const std::string PROP_NAME("prevMargin");
+    static const std::string PROP_NAME_OPT("prevMarginIgnoreBlank");
+    static const std::string &DEFAULT_VALUE(EXPECTED_VP_ZERO);
+    ASSERT_NE(modifier_->setPrevMargin, nullptr);
+
+    // test init state
+    auto checkInit = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInit, DEFAULT_VALUE);
+    auto checkInitOpt = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkInitOpt, EXPECTED_FALSE);
+
+    // test the main arg
+    modifier_->setPrevMargin(node_, &ALEN_PX_POS, nullptr);
+    auto checkPxPos = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkPxPos, EXPECTED_PX_POS);
+    modifier_->setPrevMargin(node_, &ALEN_VP_NEG, nullptr);
+    auto checkVpNeg = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVpNeg, DEFAULT_VALUE);
+
+    // test the optional arg
+    modifier_->setPrevMargin(node_, &ALEN_PX_POS, &OPT_BOOL_TRUE);
+    auto checkOptTrue = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptTrue, EXPECTED_TRUE);
+    modifier_->setPrevMargin(node_, &ALEN_PX_POS, &OPT_BOOL_UNDEF);
+    auto checkOptUndef = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptUndef, EXPECTED_TRUE); // nothing change with the undefined optional param
+    modifier_->setPrevMargin(node_, &ALEN_PX_POS, nullptr);
+    auto checkOptNull = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptNull, EXPECTED_TRUE); // nothing change with no optional param
+    modifier_->setPrevMargin(node_, &ALEN_PX_POS, &OPT_BOOL_FALSE);
+    auto checkOptFalse = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptFalse, EXPECTED_FALSE);
 }
 /**
- * @tc.name: SwiperModifierTest20
+ * @tc.name: setNextMarginTest
  * @tc.desc: Check the functionality of SwiperModifier.NextMarginImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest20, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setNextMarginTest, TestSize.Level1)
 {
+    static const std::string PROP_NAME("nextMargin");
+    static const std::string PROP_NAME_OPT("nextMarginIgnoreBlank");
+    static const std::string &DEFAULT_VALUE(EXPECTED_VP_ZERO);
+    ASSERT_NE(modifier_->setNextMargin, nullptr);
+
+    // test init state
+    auto checkInit = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInit, DEFAULT_VALUE);
+    auto checkInitOpt = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkInitOpt, EXPECTED_FALSE);
+
+    // test the main arg
+    modifier_->setNextMargin(node_, &ALEN_PX_POS, nullptr);
+    auto checkPxPos = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkPxPos, EXPECTED_PX_POS);
+    modifier_->setNextMargin(node_, &ALEN_VP_NEG, nullptr);
+    auto checkVpNeg = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVpNeg, DEFAULT_VALUE);
+
+    // test the optional arg
+    modifier_->setNextMargin(node_, &ALEN_PX_POS, &OPT_BOOL_TRUE);
+    auto checkOptTrue = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptTrue, EXPECTED_TRUE);
+    modifier_->setNextMargin(node_, &ALEN_PX_POS, &OPT_BOOL_UNDEF);
+    auto checkOptUndef = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptUndef, EXPECTED_TRUE); // nothing change with the undefined optional param
+    modifier_->setNextMargin(node_, &ALEN_PX_POS, nullptr);
+    auto checkOptNull = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptNull, EXPECTED_TRUE); // nothing change with no optional param
+    modifier_->setNextMargin(node_, &ALEN_PX_POS, &OPT_BOOL_FALSE);
+    auto checkOptFalse = GetStringAttribute(node_, PROP_NAME_OPT);
+    EXPECT_EQ(checkOptFalse, EXPECTED_FALSE);
 }
 /**
  * @tc.name: SwiperModifierTest21

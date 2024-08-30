@@ -78,8 +78,10 @@ public:
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
-    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
-    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlankn = false);
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
+        const std::optional<bool> &ignoreBlank);
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
+        const std::optional<bool> &ignoreBlank);
     static void SetIndex(FrameNode* frameNode, uint32_t index);
     static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
