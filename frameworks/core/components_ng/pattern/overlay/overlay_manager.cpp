@@ -5978,9 +5978,26 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
     const RectF& aiRect, const RefPtr<FrameNode>& targetNode)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show AI entity menu enter");
+    CHECK_NULL_RETURN(targetNode, false);
     auto menuWrapperNode = CreateAIEntityMenu(menuOptions, targetNode);
     CHECK_NULL_RETURN(menuWrapperNode, false);
     menuWrapperNode->GetOrCreateFocusHub()->SetFocusable(false);
+    auto wrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    wrapperPattern->RegisterMenuAppearCallback(
+        [weak = WeakClaim(this), id = Container::CurrentId(), targetId = targetNode->GetId()] {
+            ContainerScope scope(id);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->aiEntityMenuTargetId_ = targetId;
+    });
+    wrapperPattern->RegisterMenuDisappearCallback(
+        [weak = WeakClaim(this), id = Container::CurrentId()] {
+            ContainerScope scope(id);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->aiEntityMenuTargetId_ = -1;
+    });
     auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -6002,7 +6019,7 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
     return true;
 }
 
-void OverlayManager::CloseAIEntityMenu(int32_t targetId)
+void OverlayManager::CloseAIEntityMenu()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
@@ -6011,11 +6028,11 @@ void OverlayManager::CloseAIEntityMenu(int32_t targetId)
     auto expandDisplay = theme->GetExpandDisplay();
     if (expandDisplay) {
         SubwindowManager::GetInstance()->ClearMenu();
-        SubwindowManager::GetInstance()->ClearMenuNG(Container::CurrentId(), targetId);
+        SubwindowManager::GetInstance()->ClearMenuNG(Container::CurrentId(), aiEntityMenuTargetId_);
     } else {
-        auto menuNode = GetMenuNode(targetId);
+        auto menuNode = GetMenuNode(aiEntityMenuTargetId_);
         CHECK_NULL_VOID(menuNode);
-        HideMenu(menuNode, targetId);
+        HideMenu(menuNode, aiEntityMenuTargetId_);
     }
 }
 
