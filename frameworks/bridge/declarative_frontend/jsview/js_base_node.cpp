@@ -120,8 +120,13 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode = proxyNode;
     }
     if (parent) {
-        parent->ReplaceChild(viewNode_, newNode);
-        newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        if (newNode) {
+            parent->ReplaceChild(viewNode_, newNode);
+            newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        } else {
+            parent->RemoveChild(viewNode_);
+            parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        }
     }
     viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
     CHECK_NULL_VOID(viewNode_);
