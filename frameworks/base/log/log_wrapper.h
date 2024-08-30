@@ -203,6 +203,7 @@ enum AceLogTag : uint8_t {
     ACE_VISUAL_EFFECT,        // C03955
     ACE_SECURITY_COMPONENT,   // C03956
     ACE_LAYOUT_INSPECTOR,     // C03957
+    ACE_STYLUS,               // C03958
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };

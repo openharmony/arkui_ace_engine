@@ -165,6 +165,7 @@ constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
+constexpr int32_t KEYBOARD_DEFAULT_API = 9;
 
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
@@ -318,7 +319,7 @@ void TextFieldPattern::CalculateBoundsRect()
 
 void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
@@ -392,9 +393,9 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    if (PipelineBase::GetCurrentContext() &&
+    if (PipelineBase::GetCurrentContextSafely() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        PipelineBase::GetCurrentContextSafely()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
         needToRequestKeyboardOnFocus_ = true;
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
@@ -880,7 +881,7 @@ Offset TextFieldPattern::GetGlobalOffset() const
     Offset offset;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto globalOffset = host->GetPaintRectOffset() - rootOffset;
@@ -901,7 +902,7 @@ double TextFieldPattern::GetEditingBoxTopY() const
 bool TextFieldPattern::GetEditingBoxModel() const
 {
     bool isDeclarative = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline && pipeline->GetIsDeclarative()) {
         isDeclarative = true;
     }
@@ -1452,7 +1453,7 @@ bool TextFieldPattern::IsShowHandle()
 
 std::string TextFieldPattern::GetCancelButton()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, "");
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, "");
@@ -1461,7 +1462,7 @@ std::string TextFieldPattern::GetCancelButton()
 
 std::string TextFieldPattern::GetCancelImageText()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, "");
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, "");
@@ -1470,7 +1471,7 @@ std::string TextFieldPattern::GetCancelImageText()
 
 std::string TextFieldPattern::GetPasswordIconPromptInformation(bool show)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, "");
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, "");
@@ -2036,7 +2037,7 @@ void TextFieldPattern::InitDragDropCallBack()
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -2470,7 +2471,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     if (isTransparent_) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
 
     if (!context->GetTaskExecutor()) {
@@ -4063,7 +4064,7 @@ void TextFieldPattern::UltralimitShake()
         AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
@@ -4971,7 +4972,7 @@ void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 
 void TextFieldPattern::InitSurfaceChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -4988,7 +4989,7 @@ void TextFieldPattern::InitSurfaceChangedCallback()
 
 void TextFieldPattern::InitSurfacePositionChangedCallback()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfacePositionChangedCallback()) {
         auto callbackId =
@@ -5369,7 +5370,7 @@ void TextFieldPattern::HandleSelectionEnd()
     AfterSelection();
 }
 
-void TextFieldPattern::SetCaretPosition(int32_t position)
+bool TextFieldPattern::SetCaretPosition(int32_t position, bool needNotifyImf)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
@@ -5379,8 +5380,9 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
+    CHECK_NULL_RETURN(tmpHost, false);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
 }
 
 void TextFieldPattern::SetSelectionFlag(
@@ -5427,6 +5429,12 @@ void TextFieldPattern::SetSelectionFlag(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::SetSelection(int32_t start, int32_t end,
+    const std::optional<SelectionOptions>& options = std::nullopt, bool isForward)
+{
+    SetSelectionFlag(start, end, options, isForward);
 }
 
 bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue)
@@ -6752,7 +6760,7 @@ void TextFieldPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
     dumpLog.AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
     dumpLog.AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     auto fontWeightScale = pipeline->GetFontWeightScale();
@@ -6814,7 +6822,7 @@ void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, b
     info->SetPageNodeRect(pageNodeRect);
     info->SetIsFocus(HasFocus());
     viewDataWrap->AddPageNodeInfoWrap(info);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     viewDataWrap->SetPageRect(pipeline->GetRootRect());
 }
@@ -6963,7 +6971,7 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -7037,7 +7045,7 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
 
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -7139,7 +7147,7 @@ void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
     }
 }
 
-int32_t TextFieldPattern::GetLineCount() const
+size_t TextFieldPattern::GetLineCount() const
 {
     return paragraph_ ? paragraph_->GetLineCount() : 0;
 }
@@ -7496,7 +7504,7 @@ void TextFieldPattern::RegisterWindowSizeCallback()
     isOritationListenerRegisted_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
 }
@@ -7597,7 +7605,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "In OnDragMoved, the dragging node is moving in the textField, id:%{public}d",
         host->GetId());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto dragManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragManager);
@@ -8248,6 +8256,35 @@ void TextFieldPattern::OnTextGenstureSelectionEnd()
     }
 }
 
+PositionWithAffinity TextFieldPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    Offset offset(x, y);
+    return paragraph_->GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+}
+
+Offset TextFieldPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffset)
+{
+    return touchOffset - Offset(textRect_.GetX(), textRect_.GetY());
+}
+
+bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
+{
+    // delete or insert space
+    auto wtext = GetWideText();
+    if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        if (wtext[index] == L' ') {
+            Delete(index, index + 1);
+        } else if (index > 0 && wtext[index - 1] == L' ') {
+            Delete(index - 1, index);
+        } else {
+            SetCaretPosition(index);
+            InsertValue(" ");
+        }
+        return true;
+    }
+    return false;
+}
+
 bool TextFieldPattern::IsShowAIWrite()
 {
     auto textFieldTheme = GetTheme();
@@ -8317,7 +8354,7 @@ void TextFieldPattern::HandleOnAIWrite()
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     aiWriteAdapter_->SetPipelineContext(pipeline);
     aiWriteAdapter_->ShowModalUIExtension(info, callback);

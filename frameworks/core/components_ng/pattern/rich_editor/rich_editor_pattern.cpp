@@ -470,7 +470,7 @@ void RichEditorPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Distributed);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     ResetKeyboardIfNeed();
     context->AddOnAreaChangeNode(host->GetId());
@@ -517,7 +517,7 @@ void RichEditorPattern::HandleEnabled()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (IsDisabled()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(richEditorTheme);
@@ -786,7 +786,7 @@ void RichEditorPattern::OnAttachToFrameNode()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameId_ = frameNode->GetId();
-    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
 }
 
 
@@ -1473,7 +1473,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     selectLineHeight = 0.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0, 0));
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, OffsetF(0, 0));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = richTextRect_.GetOffset();
@@ -2354,7 +2354,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
 void RichEditorPattern::ScheduleCaretTwinkling()
 {
     ContainerScope scope(richEditorInstanceId_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
 
     if (!context->GetTaskExecutor()) {
@@ -2861,7 +2861,7 @@ void RichEditorPattern::HandleFocusEvent()
         StartTwinkling();
     }
     bool isFontScaleChanged = false;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     if (pipelineContext) {
         auto currentFontScale = pipelineContext->GetFontScale() * pipelineContext->GetDipScale();
         isFontScaleChanged = !NearEqual(lastFontScale_, currentFontScale);
@@ -2886,7 +2886,7 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
@@ -3435,7 +3435,7 @@ void RichEditorPattern::ClearDragDropEvent()
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
@@ -3951,7 +3951,7 @@ void RichEditorPattern::OnHover(bool isHover)
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
     if (isHover && !scrollBar->IsPressed()) {
@@ -3965,7 +3965,7 @@ void RichEditorPattern::OnHover(bool isHover)
 
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
     if (needShowSoftKeyboard && customKeyboardBuilder_) {
@@ -3996,7 +3996,7 @@ uint32_t RichEditorPattern::GetSCBSystemWindowId()
 
 bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     MiscServices::Configuration configuration;
     configuration.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(
@@ -4086,7 +4086,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
 #else
 bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     if (HasConnection()) {
         connection_->Show(isFocusViewChanged, GetInstanceId());
@@ -4231,7 +4231,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
@@ -4444,7 +4444,7 @@ PreviewTextStyle RichEditorPattern::GetPreviewTextStyle() const
 
 const Color& RichEditorPattern::GetPreviewTextDecorationColor() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, Color::TRANSPARENT);
     auto theme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
@@ -4456,7 +4456,7 @@ const Color& RichEditorPattern::GetPreviewTextDecorationColor() const
 
 float RichEditorPattern::GetPreviewTextUnderlineWidth() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -4708,7 +4708,7 @@ void RichEditorPattern::CreateTextSpanNode(
 
 void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
@@ -6399,7 +6399,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto frameId = tmpHost->GetId();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     if (selectOverlay_->IsHandleShow()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close selectOverlay when handle is showing");
@@ -6748,7 +6748,7 @@ void RichEditorPattern::OnAreaChangedInner()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto parentGlobalOffset = GetPaintRectGlobalOffset(); // offset on screen(with transformation)
     if (parentGlobalOffset != parentGlobalOffset_) {
@@ -6817,7 +6817,7 @@ OffsetF RichEditorPattern::GetGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto richEditorPaintOffset = host->GetPaintRectOffset();
@@ -7110,7 +7110,7 @@ void RichEditorPattern::RefreshSelectOverlay(bool isMousePressed, bool selectedT
 
 bool RichEditorPattern::IsShowHandle()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, false);
@@ -7319,7 +7319,7 @@ RectF RichEditorPattern::GetCaretRect() const
 
 void RichEditorPattern::ScrollToSafeArea() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -7336,7 +7336,7 @@ void RichEditorPattern::InitScrollablePattern()
     SetScrollBar(DisplayMode::AUTO);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(richEditorTheme);
@@ -7357,7 +7357,7 @@ void RichEditorPattern::InitScrollablePattern()
 
 void RichEditorPattern::ProcessInnerPadding()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(theme);
@@ -7453,7 +7453,7 @@ float RichEditorPattern::GetCrossOverHeight() const
     if (!keyboardAvoidance_ || !contentChange_) {
         return 0.0f;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto rootHeight = pipeline->GetRootHeight();
     auto keyboardY = rootHeight - pipeline->GetSafeAreaManager()->GetKeyboardInset().Length();
@@ -7609,7 +7609,7 @@ void RichEditorPattern::OnScrollEndCallback()
 
 bool RichEditorPattern::IsSelectAreaVisible()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
@@ -7744,7 +7744,7 @@ void RichEditorPattern::ScheduleAutoScroll(AutoScrollParam param)
     if (LessNotEqual(param.offset, 0.0f) && IsReachBottom()) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -7981,7 +7981,7 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
 bool RichEditorPattern::IsShowSelectMenuUsingMouse()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto selectOverlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(selectOverlayManager, false);
@@ -8168,7 +8168,7 @@ std::string RichEditorPattern::GetPlaceHolderInJson() const
 std::string RichEditorPattern::GetTextColorInJson(const std::optional<Color>& value) const
 {
     CHECK_NULL_RETURN(!value, value->ColorToString());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, "");
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, "");
@@ -8308,7 +8308,7 @@ DynamicColor RichEditorPattern::GetCaretColor()
     if (caretColor_.has_value()) {
         return caretColor_.value();
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, SYSTEM_CARET_COLOR);
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, SYSTEM_CARET_COLOR);
@@ -8321,7 +8321,7 @@ DynamicColor RichEditorPattern::GetSelectedBackgroundColor()
     if (selectedBackgroundColor_.has_value()) {
         selectedBackgroundColor = selectedBackgroundColor_.value();
     } else {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, SYSTEM_SELECT_BACKGROUND_COLOR);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
         CHECK_NULL_RETURN(richEditorTheme, SYSTEM_SELECT_BACKGROUND_COLOR);
@@ -9312,7 +9312,7 @@ int32_t RichEditorPattern::CalcLineBeginPosition()
 
 float RichEditorPattern::GetTextThemeFontSize()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, 0.0f);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
@@ -9965,6 +9965,24 @@ RectF RichEditorPattern::ExpandDefaultResponseRegion(RectF& rect)
            NG::OffsetF(0, -OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx());
 }
 
+bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
+{
+    // delete or insert space
+    auto wtext = GetWideText();
+    if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        if (wtext[index] == L' ') {
+            DeleteByRange(nullptr, index, index + 1);
+        } else if (index > 0 && wtext[index - 1] == L' ') {
+            DeleteByRange(nullptr, index - 1, index);
+        } else {
+            SetCaretPosition(index);
+            InsertValue(" ");
+        }
+        return true;
+    }
+    return false;
+}
+
 TextStyle RichEditorPattern::GetDefaultTextStyle()
 {
     auto theme = GetTheme<RichEditorTheme>();
@@ -10041,7 +10059,7 @@ void RichEditorPattern::HandleOnAIWrite()
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     aiWriteAdapter_->SetPipelineContext(pipeline);
     aiWriteAdapter_->ShowModalUIExtension(info, callback);

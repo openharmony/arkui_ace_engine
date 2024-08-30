@@ -412,7 +412,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
@@ -466,7 +466,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
-    bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
+    bool SetCaretPosition(int32_t pos, bool needNotifyImf = true) override;
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
@@ -524,7 +524,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
-        bool isForward = false);
+        bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
@@ -907,6 +907,8 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool InsertOrDeleteSpace(int32_t index) override;
+
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
@@ -1018,7 +1020,7 @@ private:
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1027,7 +1029,7 @@ private:
 
     void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
