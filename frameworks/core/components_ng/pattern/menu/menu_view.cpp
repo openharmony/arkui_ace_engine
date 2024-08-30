@@ -477,10 +477,28 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
         CHECK_NULL_VOID(previewPattern);
         previewPattern->SetIsHoverImageScalePlaying(false);
     });
+
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto callback = [weak = AceType::WeakClaim(AceType::RawPtr(menuWrapperPattern)), scaleFrom, scaleTo](float rate) {
+        auto menuWrapperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->SetHoverImageToPreviewRate(rate);
+        menuWrapperPattern->SetHoverImageToPreviewScale((scaleTo - scaleFrom) * rate + scaleFrom);
+    };
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
+    CHECK_NULL_VOID(animateProperty);
+    stackContext->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0);
     AnimationUtils::Animate(
-        scaleOption, [stackContext, scaleTo]() {
+        scaleOption,
+        [stackContext, scaleTo, animateProperty]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
+            CHECK_NULL_VOID(animateProperty);
+            animateProperty->Set(1.0);
         },
         scaleOption.GetOnFinishEvent());
 }
