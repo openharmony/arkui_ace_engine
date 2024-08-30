@@ -32,6 +32,7 @@ public:
     static LineJoinStyle GetLineJoinStyle(const std::string& val);
     static Dimension ParseDimension(const std::string& value, bool useVp = false);
     static double ParseDouble(const std::string& value);
+    static bool CheckColorAlpha(const std::string& colorStr, Color& result);
 };
 
 enum class SvgFeColorMatrixType {

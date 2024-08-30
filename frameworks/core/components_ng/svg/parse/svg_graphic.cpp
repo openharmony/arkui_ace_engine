@@ -83,6 +83,11 @@ void SvgGraphic::SetLinearGradient(const Size& viewPort, OHOS::Ace::Gradient& gr
     const auto& linearGradient = gradient.GetLinearGradient();
     auto gradientInfo = OHOS::Ace::LinearGradientInfo();
 
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        NearEqual(linearGradient.x1, linearGradient.y1) && NearEqual(linearGradient.x2, linearGradient.y2)) {
+        RectifyTargetSize(bounds, width, height);
+    }
+
     gradientInfo.x1 = linearGradient.x1 ? ConvertDimensionToPx(linearGradient.x1.value(), width) : 0.0;
     if (linearGradient.x1 && linearGradient.x1.value().Unit() == DimensionUnit::PERCENT) {
         gradientInfo.x1 += bounds.Left();
@@ -371,5 +376,15 @@ void SvgGraphic::UpdateColorFilter(RSFilter& filter)
         return;
     }
     filter.SetColorFilter(*colorFilterSptrAddr);
+}
+
+void SvgGraphic::RectifyTargetSize(const Rect& bounds, double& width, double& height)
+{
+    if (NearZero(bounds.Height())) {
+        return;
+    }
+    auto scalar = bounds.Width() / bounds.Height();
+    width = 2 * bounds.Height() * sin(std::atan(scalar)) * cos(atan(scalar));  // 2: algorithm parameters
+    height = 2 * bounds.Height() * sin(std::atan(scalar)) * sin(atan(scalar)); // 2: algorithm parameters
 }
 } // namespace OHOS::Ace::NG
