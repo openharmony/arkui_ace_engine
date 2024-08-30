@@ -856,6 +856,8 @@ public:
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
 
+    bool IsTextEditableForStylus() const override;
+
 protected:
     bool CanStartAITask() override;
 

@@ -1412,6 +1412,8 @@ protected:
         return false;
     };
 
+    bool IsTextEditableForStylus() const override;
+
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::string& insertValue, int32_t offset);
