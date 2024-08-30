@@ -1034,6 +1034,8 @@ public:
     bool FocusToHeadOrTailChild(bool isHead);
 
     WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
+
+    bool IsNeedPaintFocusStateSelf();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
