@@ -109,6 +109,7 @@ public:
     // Window color
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;
+    void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) override;
 
     bool NeedSoftKeyboard() override;
 

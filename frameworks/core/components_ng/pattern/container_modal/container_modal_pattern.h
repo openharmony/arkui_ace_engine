@@ -74,6 +74,8 @@ public:
 
     void SetCloseButtonStatus(bool isEnabled);
 
+    virtual void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor);
+
     bool GetIsFocus() const
     {
         return isFocus_;
@@ -207,6 +209,7 @@ protected:
     bool CanShowFloatingTitle();
     bool CanShowCustomTitle();
     void TrimFloatingWindowLayout();
+    Color GetContainerColor(bool isFocus);
 
     WindowMode windowMode_;
     bool customTitleSettedShow_ = true;
@@ -214,6 +217,8 @@ protected:
     std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
     RectF buttonsRect_;
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
+    Color activeColor_;
+    Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
 private:
     void WindowFocus(bool isFocus);
@@ -223,6 +228,7 @@ private:
     void InitTitle();
     void InitContainerEvent();
     void InitLayoutProperty();
+    void InitContainerColor();
 
     void InitButtonsLayoutProperty();
 

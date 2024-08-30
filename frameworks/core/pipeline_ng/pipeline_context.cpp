@@ -3775,6 +3775,20 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
 }
 
+void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("Set app icon failed, Window modal is not container.");
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetWindowContainerColor(activeColor, inactiveColor);
+}
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
 {
     if (fontManager_) {
