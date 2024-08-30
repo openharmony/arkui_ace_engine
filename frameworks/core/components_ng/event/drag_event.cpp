@@ -251,6 +251,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
             return;
         }
+        if (dragDropManager->IsBackPressedCleanLongPressNodes()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Long press image nodes have been cleaned by backpress, stop dragging.");
+            dragDropManager->SetIsBackPressedCleanLongPressNodes(false);
+            return;
+        }
         dragDropManager->SetHasGatherNode(false);
         dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
@@ -355,6 +360,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetOnActionUpdate(actionUpdate);
 
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
@@ -363,13 +369,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (dragDropManager->IsAboutToPreview()) {
             dragDropManager->ResetDragging();
         }
+        dragDropManager->SetIsBackPressedCleanLongPressNodes(false);
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            auto overlayManager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->RemovePixelMap();
+            return;
+        }
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
+        actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
-            actuator->HideEventColumn();
             actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         } else {
@@ -482,6 +494,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         } else {
             manager->RemoveGatherNodeWithAnimation();
         }
+        dragDropManager->SetIsBackPressedCleanLongPressNodes(false);
     };
     panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
