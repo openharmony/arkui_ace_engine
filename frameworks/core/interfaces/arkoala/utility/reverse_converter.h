@@ -24,7 +24,9 @@
 #include <type_traits>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "generated/converter_generated.h"
+
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -79,6 +81,20 @@ namespace OHOS::Ace::NG::Converter {
     inline void AssignArkValue(Ark_Function& dst, const int& src)
     {
         dst.id = src;
+    }
+
+    void AssignArkValue(Ark_Length& dst, const int& src)
+    {
+        dst.type = ARK_TAG_INT32;
+        dst.value = src;
+        dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
+    }
+
+    void AssignArkValue(Ark_Length& dst, const float& src)
+    {
+        dst.type = ARK_TAG_FLOAT32;
+        dst.value = src;
+        dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
     }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
