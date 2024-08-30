@@ -305,9 +305,13 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
         CounterNodeMeasure(contentWidth, layoutWrapper);
     }
 
-    auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
-                      ? paragraph_->GetHeight()
-                      : std::max(preferredHeight_, paragraph_->GetHeight());
+    float height = 0.0f;
+    if (isFontSizeNonPositive_) {
+        height = paragraph_->GetHeight();
+    } else {
+        height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0) ? paragraph_->GetHeight()
+                                                                  : std::max(preferredHeight_, paragraph_->GetHeight());
+    }
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 

@@ -84,7 +84,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect()
             break;
     }
 
-    auto align = Alignment::TOP_CENTER;
+    auto align = textFiled->IsTextArea() ? Alignment::TOP_CENTER : Alignment::CENTER;
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
