@@ -2207,14 +2207,22 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     isFocusedBeforeClick_ = false;
 }
 
+bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
+{
+    if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        // click selected area to switch show/hide state
+        selectOverlay_->ToggleMenu();
+        return true;
+    }
+    return false;
+}
+
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus)
 {
     if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
         return;
     }
-    if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
-        // click selected area to switch show/hide state
-        selectOverlay_->ToggleMenu();
+    if (HandleBetweenSelectedPosition(info)) {
         return;
     }
     auto host = GetHost();
