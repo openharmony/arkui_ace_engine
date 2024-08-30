@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -1010,13 +1011,13 @@ void TitleBarLayoutAlgorithm::InitializeTheme(const RefPtr<TitleBarNode>& titleB
         auto options = titlePattern->GetTitleBarOptions();
         auto paddingStart = options.brOptions.paddingStart;
         if (paddingStart.has_value()) {
-            paddingLeft_ = ParseCalcDimensionToPx(paddingStart, titleBarSize);
+            paddingLeft_ = NavigationTitleUtil::ParseCalcDimensionToPx(paddingStart, titleBarSize.Width());
         } else {
             paddingLeft_ = theme->GetMarginLeft().ConvertToPx();
         }
         auto paddingEnd = options.brOptions.paddingEnd;
         if (paddingEnd.has_value()) {
-            paddingRight_ = ParseCalcDimensionToPx(paddingEnd, titleBarSize);
+            paddingRight_ = NavigationTitleUtil::ParseCalcDimensionToPx(paddingEnd, titleBarSize.Width());
         } else {
             paddingRight_ = theme->GetMarginRight().ConvertToPx();
         }
@@ -1116,18 +1117,6 @@ float TitleBarLayoutAlgorithm::ChangeOffsetByDirection(LayoutWrapper* layoutWrap
         offsetX = parentWidth - offsetX - childGeometryNode->GetFrameSize().Width();
     }
     return offsetX;
-}
-
-float TitleBarLayoutAlgorithm::ParseCalcDimensionToPx(const std::optional<CalcDimension>& value,
-    const SizeF& titleBarSize)
-{
-    float result = 0.0f;
-    if (value.value().Unit() == DimensionUnit::PERCENT) {
-        result = value.value().Value() * titleBarSize.Width();
-    } else {
-        result = value.value().ConvertToPx();
-    }
-    return result;
 }
 
 float TitleBarLayoutAlgorithm::WidthAfterAvoidSideBar(const RefPtr<TitleBarNode>& titleBarNode, float width)

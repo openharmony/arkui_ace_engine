@@ -124,7 +124,6 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
     float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
         const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
-    float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const SizeF& titleBarSize);
 
     // set variables from theme
     void InitializeTheme(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize);

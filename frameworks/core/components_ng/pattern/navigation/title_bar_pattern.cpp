@@ -1707,8 +1707,14 @@ float TitleBarPattern::GetNavLeftPadding(float parentWidth)
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, 0.0f);
     auto navLeftPadding = theme->GetMaxPaddingStart().ConvertToPx();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        navLeftPadding = theme->GetMarginLeft().ConvertToPx();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto options = GetTitleBarOptions();
+        auto paddingStart = options.brOptions.paddingStart;
+        if (paddingStart.has_value()) {
+            navLeftPadding = NavigationTitleUtil::ParseCalcDimensionToPx(paddingStart, parentWidth);
+        } else {
+            navLeftPadding = theme->GetMarginLeft().ConvertToPx();
+        }
     }
     return navLeftPadding;
 }
