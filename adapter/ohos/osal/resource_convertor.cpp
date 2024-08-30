@@ -104,6 +104,8 @@ std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const Resourc
     newResCfg->SetAppColorMode(config.GetColorModeIsSetByApp());
     newResCfg->SetMcc(config.GetMcc());
     newResCfg->SetMnc(config.GetMnc());
+    icu::Locale locale(config.GetPreferredLanguage().c_str(), config.GetPreferredCountry().c_str());
+    newResCfg->SetPreferredLocaleInfo(locale);
     return newResCfg;
 }
 

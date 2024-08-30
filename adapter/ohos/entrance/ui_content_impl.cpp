@@ -148,6 +148,12 @@ void AddResConfigInfo(
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
+    auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
+    if (preferredLocaleInfo != nullptr) {
+        aceResCfg.SetPreferredLanguage(preferredLocaleInfo->getLanguage());
+        aceResCfg.SetPreferredCountry(preferredLocaleInfo->getCountry());
+        aceResCfg.SetPreferredScript(preferredLocaleInfo->getScript());
+    }
 }
 
 void AddSetAppColorModeToResConfig(
