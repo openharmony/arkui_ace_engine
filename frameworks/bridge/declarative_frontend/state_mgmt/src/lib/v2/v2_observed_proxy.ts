@@ -80,6 +80,9 @@ class ObjectProxyHandler {
             }
             return ret.bind(target);
         }
+
+        // function
+        return ret.bind(receiver);
     }
 
     set(target: any, key: string | symbol, value: any): boolean {
@@ -169,7 +172,9 @@ class ArrayProxyHandler {
                 ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                 return result;
             };
-        } else if (this.isMakeObserved_ && key === 'forEach') {
+        } else if (!SendableType.isArray(target)) {
+            return ret.bind(receiver);
+        } else if (key === 'forEach') {
             // to make ForEach Component and its Item can addref
             ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
             return function (callbackFn: (value: any, index: number, array: Array<any>) => void): any {
@@ -184,7 +189,7 @@ class ArrayProxyHandler {
                 return result;
             }
         } else {
-            return ret.bind(this.isMakeObserved_ ? target : receiver);
+            return ret.bind(target); // SendableArray can't be bound -> functions not observed
         }
     }
 
@@ -314,8 +319,10 @@ class SetMapProxyHandler {
                         target.add(val);
                     }
                     return receiver;
-                } : (typeof ret === 'function')
-                    ? ret.bind(target) : ret;
+                } : (typeof ret === 'function') ?
+                    // SendableSet can't be bound -> functions not observed
+                    ret.bind(SendableType.isSet(target) ? target : receiver) : 
+                    ret;
         }
 
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
@@ -343,7 +350,10 @@ class SetMapProxyHandler {
                 };
             }
         }
-        return (typeof ret === 'function') ? ret.bind(this.isMakeObserved_ ? receiver : target) : ret;
+        return (typeof ret === 'function') ? 
+            // SendableMap can't be bound -> functions not observed
+            ret.bind(SendableType.isMap(target) ? target : receiver) : 
+            ret;
     }
 
     set(target: any, key: string | symbol, value: any): boolean {
