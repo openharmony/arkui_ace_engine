@@ -137,8 +137,12 @@ OrderResult DateTimeSequence::GetAmPmTimeOrder(const std::string& locale)
     }
     icu::DateTimePatternGenerator* gen = icu::DateTimePatternGenerator::createInstance(localeObj, status);
     icu::UnicodeString skeleton("h");
+    if (gen == nullptr) {
+        orderResult.amPmTimeOrder = "-1";
+        return orderResult;
+    }
     icu::UnicodeString resultStr = gen->getBestPattern(skeleton, status);
-    if (U_FAILURE(status) || gen == nullptr) {
+    if (U_FAILURE(status)) {
         orderResult.amPmTimeOrder = "-1";
         return orderResult;
     }

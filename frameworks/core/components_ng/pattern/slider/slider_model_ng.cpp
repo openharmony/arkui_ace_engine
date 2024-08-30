@@ -719,6 +719,7 @@ Gradient SliderModelNG::CreateSolidGradient(Color value)
 
 void SliderModelNG::SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
@@ -726,6 +727,7 @@ void SliderModelNG::SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& ma
 
 void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t mode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSliderValue(value, mode);
