@@ -4765,11 +4765,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
         CHECK_NULL_VOID(optionPattern);
         auto optionPaintProperty = option->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
-        if (width > OPTION_MARGIN.ConvertToPx()) {
-            optionPattern->SetHasOptionWidth(true);
-            optionPattern->SetIsWidthModifiedBySelect(true);
-            optionPaintProperty->UpdateSelectModifiedWidth(width - OPTION_MARGIN.ConvertToPx());
-        }
+        optionPaintProperty->SetIdealWidthForWeb(width - OPTION_MARGIN.ConvertToPx());
         optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * dipScale));
         if (selectedIndex == optionIndex) {
             optionPattern->SetFontColor(SELECTED_OPTION_FONT_COLOR);
@@ -4804,24 +4800,6 @@ void WebPattern::InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-
-    int32_t width = params->GetSelectMenuBound() ? params->GetSelectMenuBound()->GetWidth() : 0;
-    if (width > OPTION_MARGIN.ConvertToPx()) {
-        auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
-        CHECK_NULL_VOID(menuLayoutProperty);
-        menuPattern->SetHasOptionWidth(true);
-        menuPattern->SetIsWidthModifiedBySelect(true);
-        menuLayoutProperty->UpdateSelectMenuModifiedWidth(width);
-
-        auto scroll = AceType::DynamicCast<FrameNode>(menu->GetFirstChild());
-        CHECK_NULL_VOID(scroll);
-        auto scrollPattern = scroll->GetPattern<ScrollPattern>();
-        CHECK_NULL_VOID(scrollPattern);
-        scrollPattern->SetIsWidthModifiedBySelect(true);
-        auto scrollLayoutProps = scroll->GetLayoutProperty<ScrollLayoutProperty>();
-        CHECK_NULL_VOID(scrollLayoutProps);
-        scrollLayoutProps->UpdateScrollWidth(width);
-    }
 
     InitSelectPopupMenuViewOption(menuPattern->GetOptions(), callback, params, dipScale);
 }
