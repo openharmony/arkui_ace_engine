@@ -61,7 +61,7 @@ public:
         auto prevHeader = header_;
         if (!prevHeader) {
             host->AddChild(header);
-        } else {
+        } else if (prevHeader != header) {
             host->ReplaceChild(prevHeader, header);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }

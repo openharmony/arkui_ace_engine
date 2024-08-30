@@ -76,6 +76,7 @@ private:
         return a + t * (b - a);
     }
     static float GetNearScale(float pos);
+    float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
 
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;

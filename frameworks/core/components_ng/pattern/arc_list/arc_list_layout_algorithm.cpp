@@ -43,7 +43,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-static constexpr float ARC_LIST_ITEM_SCALE = 0.92f;
 static constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
 static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 145.0_vp;
 static constexpr float FLOAT_TWO = 2.0f;
@@ -64,14 +63,15 @@ float ArcListLayoutAlgorithm::GetNearScale(float pos)
     if (LessOrEqual(pos, centerPos2ScaleMap_.begin()->first)) {
         return centerPos2ScaleMap_.begin()->second;
     }
-    if (GreatOrEqual(pos, (--centerPos2ScaleMap_.end())->first)) {
-        return (--centerPos2ScaleMap_.end())->second;
+    if (GreatOrEqual(pos, centerPos2ScaleMap_.rbegin()->first)) {
+        return centerPos2ScaleMap_.rbegin()->second;
     }
 
     for (auto it = centerPos2ScaleMap_.begin(); it != centerPos2ScaleMap_.end(); ++it) {
         if (GreatNotEqual(it->first, pos)) {
-            float t = std::abs(pos - it->first) / std::abs(it->first - std::prev(it, 1)->first);
-            return GetLerpValue(it->second, std::prev(it, 1)->second, t);
+            auto itPrev = std::prev(it, 1);
+            float t = std::abs(pos - itPrev->first) / std::abs(it->first - itPrev->first);
+            return GetLerpValue(itPrev->second, it->second, t);
         }
     }
 
@@ -300,43 +300,57 @@ void ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     predictSnapEndPos_ = predictEndPos;
 }
 
-void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
+float ArcListLayoutAlgorithm::InitItemOffset(LayoutWrapper* layoutWrapper)
 {
+    float midOffsetScale = 0.0f;
+    int32_t midIndex = GetMidIndex(layoutWrapper, true);
+    auto centerPos = contentMainSize_ / FLOAT_TWO;
     for (auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (wrapper == nullptr) {
             continue;
         }
 
-        auto autoScale = false;
+        auto autoScale = true;
         auto listItemLayoutProperty = AceType::DynamicCast<ArcListItemLayoutProperty>(wrapper->GetLayoutProperty());
         if (listItemLayoutProperty != nullptr) {
             autoScale = listItemLayoutProperty->GetAutoScale().value_or(true);
         }
 
-        float scale = 1.0;
-        auto contentCenterPos = contentMainSize_ / FLOAT_TWO;
-        if (autoScale) {
-            auto itemCenterPos = (pos.second.startPos + pos.second.endPos) / FLOAT_TWO;
-            scale = GetNearScale(itemCenterPos - contentCenterPos) * ARC_LIST_ITEM_SCALE;
+        pos.second.scale = 1.0f;
+        pos.second.offsetY = 0.0f;
+        if (!autoScale) {
+            continue;
         }
 
-        pos.second.scale = scale;
+        auto distance = (pos.second.startPos + pos.second.endPos) / FLOAT_TWO - centerPos;
+        pos.second.scale = GetNearScale(distance);
+        pos.second.offsetY = (pos.second.endPos - pos.second.startPos) * (pos.second.scale - 1);
+        if (midIndex != pos.first) {
+            continue;
+        }
 
-        pos.second.offsetY = (pos.second.endPos - pos.second.startPos) * (scale - 1);
+        auto centerToStart = centerPos - pos.second.startPos;
+        if (GreatNotEqual(centerToStart, 0)) {
+            midOffsetScale = centerToStart / (pos.second.endPos - pos.second.startPos);
+            midOffsetScale = GreatOrEqual(midOffsetScale, 1) ? 1 : midOffsetScale;
+        }
     }
 
+    return midOffsetScale;
+}
+
+void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
+{
+    float midOffsetScale = InitItemOffset(layoutWrapper);
     int32_t midIndex = GetMidIndex(layoutWrapper, true);
 
     auto iter = itemPosition_.find(midIndex);
-    if (iter == itemPosition_.end()) {
-        TAG_LOGE(AceLogTag::ACE_LIST, "No mid element was found in the forward traversal");
-    } else {
-        auto offset = iter->second.offsetY / FLOAT_TWO;
+    if (iter != itemPosition_.end()) {
+        auto offset = iter->second.offsetY * (1 - midOffsetScale);
         for (++iter; iter != itemPosition_.end(); ++iter) {
-            auto bak = offset + iter->second.offsetY / FLOAT_TWO;
             offset += iter->second.offsetY;
-            iter->second.offsetY = bak;
+            iter->second.offsetY = offset - iter->second.offsetY / FLOAT_TWO;
         }
     }
 
@@ -344,15 +358,12 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
     while (riter != itemPosition_.rend() && riter->first != midIndex) {
         ++riter;
     }
-    if (riter == itemPosition_.rend()) {
-        TAG_LOGE(AceLogTag::ACE_LIST, "No mid element was found in the backward traversal");
-    } else {
-        auto offset = riter->second.offsetY / FLOAT_TWO;
-        riter->second.offsetY = 0.0f;
+    if (riter != itemPosition_.rend()) {
+        auto offset = riter->second.offsetY * midOffsetScale;
+        riter->second.offsetY *= 1 / FLOAT_TWO - midOffsetScale;
         for (++riter; riter != itemPosition_.rend(); ++riter) {
-            auto bak = offset + riter->second.offsetY / FLOAT_TWO;
             offset += riter->second.offsetY;
-            riter->second.offsetY = -bak;
+            riter->second.offsetY = -(offset - riter->second.offsetY / FLOAT_TWO);
         }
     }
 }
