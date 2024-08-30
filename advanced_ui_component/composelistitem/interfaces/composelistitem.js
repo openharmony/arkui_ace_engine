@@ -70,8 +70,6 @@ const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
 const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
-const HOVERING_COLOR = '#0d000000';
-const ACTIVED_COLOR = '#1a0a59f7';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
@@ -387,11 +385,11 @@ class ContentItemStruct extends ViewPU {
         else {
             this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
         }
-        this.primaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_secondary_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_secondary_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-        this.descriptionColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        this.primaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.primaryTextColor;
+        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_secondary_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
+        this.descriptionColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.descriptionColor;
     }
-    initIconColor() {
+    getIconFillColor() {
         switch (this.iconStyle) {
             case IconType.BADGE:
                 return { "id": -1, "type": 10001, params: ['sys.color.composeListItem_badge_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
@@ -421,7 +419,7 @@ class ContentItemStruct extends ViewPU {
                                     Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Image.focusable(false);
                                     Image.draggable(false);
-                                    Image.fillColor(this.initIconColor());
+                                    Image.fillColor(this.getIconFillColor());
                                     Image.flexShrink(0);
                                 }, Image);
                             });
@@ -930,7 +928,7 @@ class OperateItemStruct extends ViewPU {
     }
     onFocusChange() {
         this.secondaryTextSize = this.isFocus ? { "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
         this.iconColor = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     }
     onPropChange() {
@@ -955,9 +953,7 @@ class OperateItemStruct extends ViewPU {
         if (IS_CLOSE_CHILD_FOCUS) {
             return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
         }
-        else {
-            return this.isFocus ? OPERATE_ITECOLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-        }
+        return this.isFocus ? OPERATE_ITECOLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
     }
     aboutToAppear() {
         if (this.switch !== null) {
@@ -1095,7 +1091,7 @@ class OperateItemStruct extends ViewPU {
             Text.marqueeOptions({
                 start: this.isFocus,
                 fadeout: true
-            });
+            })
             Text.maxLines(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_maxLines_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value);
             Text.focusable(true);
             Text.draggable(false);
@@ -1183,7 +1179,7 @@ class OperateItemStruct extends ViewPU {
             });
             Radio.hitTestBehavior(HitTestMode.Block);
             Radio.onTouch((event) => {
-                if (event) {
+                if (!event) {
                     return;
                 }
                 if (event.type === TouchType.Down) {
@@ -1266,10 +1262,10 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Row.onTouch((event) => {
-                if (event.type == TouchType.Down) {
+                if (event.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (event.type == TouchType.Up) {
+                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
@@ -1410,7 +1406,7 @@ class OperateItemStruct extends ViewPU {
                         Text.marqueeOptions({
                             start: this.isFocus,
                             fadeout: true
-                        });
+                        })
                         Text.maxLines(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_maxLines_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value);
                         Text.focusable(true);
                         Text.draggable(false);
@@ -1528,7 +1524,7 @@ class OperateItemStruct extends ViewPU {
         this.updateDirtyElements();
     }
 }
-export class ComposeListItem extends ViewPU {
+export class ComposeListItem_hebin extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
@@ -1854,6 +1850,9 @@ export class ComposeListItem extends ViewPU {
     }
     aboutToAppear() {
         this.onPropChange();
+        if (IS_CLOSE_CHILD_FOCUS)
+            return;
+        this.onFontSizeScaleChange();
     }
     calculatedLeftWidth() {
         if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
@@ -1914,9 +1913,9 @@ export class ComposeListItem extends ViewPU {
     setContainerPadding(top, bottom) {
         this.containerPadding = {
             top: LengthMetrics.resource(top),
-            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_padding_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.titlebar_icon_background_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             bottom: LengthMetrics.resource(bottom),
-            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_padding_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.titlebar_icon_background_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         };
     }
     getContainerPadding() {
@@ -1931,6 +1930,9 @@ export class ComposeListItem extends ViewPU {
         }
         else {
             this.containerPadding = undefined;
+            if (IS_CLOSE_CHILD_FOCUS)
+                return;
+            this.setContainerPadding({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_top'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, { "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_bottom'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
         }
     }
     onFontSizeScaleChange() {
@@ -2002,12 +2004,7 @@ export class ComposeListItem extends ViewPU {
             Stack.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_radio'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Stack.onClick(() => {
                 if (!IS_CLOSE_CHILD_FOCUS) {
-                    if (this.operateItem?.radio) {
-                        this.isChecked = true;
-                    }
-                    else {
-                        this.isChecked = !this.isChecked;
-                    }
+                    this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
                     if (this.operateItem?.icon && this.operateItem.icon?.action) {
                         this.operateItem.icon.action();
                     }
@@ -2058,7 +2055,7 @@ export class ComposeListItem extends ViewPU {
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
                 if (!IS_CLOSE_CHILD_FOCUS) {
-                    this.frontColor = isHover ? ({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }) : Color.Transparent.toString();
+                    this.frontColor = isHover ? this.hoveringColor : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
                 }
             });
             Flex.onTouch((event) => {
@@ -2066,10 +2063,10 @@ export class ComposeListItem extends ViewPU {
                     return;
                 }
                 if (event.type === TouchType.Down && this.canTouch) {
-                    this.frontColor = IS_CLOSE_CHILD_FOCUS ? this.touchDownColor : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_press'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+                    this.frontColor = this.touchDownColor;
                 }
                 if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                    this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
+                    this.frontColor = this.isActive ? this.activedColor : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
                 }
             });
             ViewStackProcessor.visualState("focused");

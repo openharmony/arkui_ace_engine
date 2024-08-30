@@ -104,8 +104,6 @@ const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
 const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
-const HOVERING_COLOR = '#0d000000';
-const ACTIVED_COLOR = '#1a0a59f7';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
@@ -167,12 +165,12 @@ struct ContentItemStruct {
     } else {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
     }
-    this.primaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_text_color') : $r('sys.color.composeListItem_normal_left_text_color');
-    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_secondary_text_color') : $r('sys.color.composeListItem_normal_left_secondary_text_color');
-    this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_description_text_color') : $r('sys.color.composeListItem_normal_left_description_text_color');
+    this.primaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_text_color') : this.primaryTextColor;
+    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_secondary_text_color') : this.secondaryTextColor;
+    this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_description_text_color') : this.descriptionColor;
   }
 
-  initIconColor(): ResourceColor {
+  getIconFillColor(): ResourceColor {
     switch (this.iconStyle) {
       case IconType.BADGE:
         return $r('sys.color.composeListItem_badge_color');
@@ -198,7 +196,7 @@ struct ContentItemStruct {
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
           .focusable(false)
           .draggable(false)
-          .fillColor(this.initIconColor())
+          .fillColor(this.getIconFillColor())
           .flexShrink(0)
       } else {
         Image(this.icon)
@@ -336,7 +334,7 @@ struct OperateItemStruct {
 
   onFocusChange() {
     this.secondaryTextSize = this.isFocus ? $r('sys.float.composeListItem_focused_right_text_size') : $r('sys.float.composeListItem_normal_right_text_size');
-    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_right_text_color') : $r('sys.color.composeListItem_normal_right_text_color');
+    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_right_text_color') : this.secondaryTextColor;
     this.iconColor = this.isFocus ? $r('sys.color.composeListItem_focused_right_icon_color') : $r('sys.color.composeListItem_normal_right_icon_color');
   }
 
@@ -362,9 +360,8 @@ struct OperateItemStruct {
   getUnselectedColor(): ResourceColor {
     if (IS_CLOSE_CHILD_FOCUS) {
       return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-    } else {
-      return this.isFocus ? OPERATE_ITECOLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
     }
+    return this.isFocus ? OPERATE_ITECOLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
   }
 
   aboutToAppear() {
@@ -582,7 +579,7 @@ struct OperateItemStruct {
       })
       .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
-        if (event) {
+        if (!event) {
           return;
         }
         if (event.type === TouchType.Down) {
@@ -850,7 +847,7 @@ struct OperateItemStruct {
 }
 
 @Component
-export struct ComposeListItem {
+export struct ComposeListItem_hebin {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
   @Prop @Watch('onPropChange') operateItem: OperateItem | null = null;
   @State frontColor: ResourceColor = $r('sys.color.composeListItem_color_background_normal');
@@ -917,6 +914,8 @@ export struct ComposeListItem {
 
   aboutToAppear() {
     this.onPropChange();
+    if (IS_CLOSE_CHILD_FOCUS) return;
+    this.onFontSizeScaleChange();
   }
 
   calculatedLeftWidth(): string {
@@ -973,9 +972,9 @@ export struct ComposeListItem {
   setContainerPadding(top: Resource, bottom: Resource) {
     this.containerPadding = {
       top: LengthMetrics.resource(top),
-      end: LengthMetrics.resource($r('sys.float.composeListItem_padding_right')),
+      end: LengthMetrics.resource($r('sys.float.titlebar_icon_background_width')),
       bottom: LengthMetrics.resource(bottom),
-      start: LengthMetrics.resource($r('sys.float.composeListItem_padding_left')),
+      start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_width')),
     };
   }
 
@@ -988,6 +987,8 @@ export struct ComposeListItem {
       this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top1'), $r('sys.float.composeListItem_single_line_list_left_text_bottom1'));
     } else {
       this.containerPadding = undefined;
+      if (IS_CLOSE_CHILD_FOCUS) return;
+      this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top'), $r('sys.float.composeListItem_single_line_list_left_text_bottom'))
     }
   }
 
@@ -1131,7 +1132,7 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
         if (!IS_CLOSE_CHILD_FOCUS) {
-          this.frontColor = isHover ? ($r('sys.color.composeListItem_color_hover')) : Color.Transparent.toString();
+          this.frontColor = isHover ? this.hoveringColor : $r('sys.color.composeListItem_color_background_normal');
         }
       })
       .onTouch((event: TouchEvent) => {
@@ -1139,10 +1140,10 @@ export struct ComposeListItem {
           return;
         }
         if (event.type === TouchType.Down && this.canTouch) {
-          this.frontColor = IS_CLOSE_CHILD_FOCUS ? this.touchDownColor : $r('sys.color.composeListItem_color_press');
+          this.frontColor = this.touchDownColor;
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
+          this.frontColor = this.isActive ? this.activedColor : $r('sys.color.composeListItem_color_background_normal');
         }
       })
       .stateStyles({
@@ -1174,11 +1175,7 @@ export struct ComposeListItem {
     .borderRadius($r('sys.float.composeListItem_normal_radio'))
     .onClick(() => {
       if (!IS_CLOSE_CHILD_FOCUS) {
-        if (this.operateItem?.radio) {
-          this.isChecked = true;
-        } else {
-          this.isChecked = !this.isChecked;
-        }
+        this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
         if (this.operateItem?.icon && this.operateItem.icon?.action) {
           this.operateItem.icon.action();
         }
