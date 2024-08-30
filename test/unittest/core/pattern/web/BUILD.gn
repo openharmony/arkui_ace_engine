@@ -626,8 +626,13 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_model_test_ng.cpp",
     "web_paint_method_test.cpp",
     "web_pattern_event_test.cpp",
+    "web_pattern_focus_test_ng.cpp",
+    "web_pattern_keyboard_test_ng.cpp",
+    "web_pattern_select_test_ng.cpp",
     "web_pattern_test.cpp",
     "web_pattern_test_ng.cpp",
+    "web_pattern_touch_test_ng.cpp",
+    "web_pattern_window_test_ng.cpp",
   ]
 
   deps = [
