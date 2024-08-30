@@ -138,6 +138,12 @@ static std::string ResourceToString(Ark_NativePointer node, const Ark_Resource& 
     return src;
 }
 
+template<>
+std::string Convert(const Ark_Resource& resource)
+{
+    return ResourceToString(nullptr, resource);
+}
+
 ImageResource Convert(const Ark_Resource& value)
 {
     ImageResource resource;
@@ -214,5 +220,44 @@ ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Ar
     }
 
     return info;
+}
+
+template<>
+Font Convert(const Ark_Font& src)
+{
+        Font font;
+        // cannot be moved to the ace_engine_types
+        using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
+        auto familiesResStr = OptConvert<UnionStringResource>(src.family);
+        std::string familiesStr;
+        if (familiesResStr) {
+            auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value());
+            if (srcArkStr != nullptr) {
+                auto srcStr = Converter::Convert<std::string>(*srcArkStr);
+                if (!srcStr.empty()) {
+                    familiesStr = srcStr;
+                } else {
+                    LOGE("ARKOALA SearchAttributeModifier.FonFamilyResource not implemented.");
+                }
+            }
+        }
+        std::istringstream families(familiesStr);
+        std::vector<std::string> fontFamilies;
+        for (std::string family; std::getline(families, family, ',');) {
+            StringUtils::TrimStr(family);
+            fontFamilies.push_back(family);
+        }
+        font.fontFamilies = fontFamilies;
+        auto fontSize = OptConvert<Dimension>(src.size);
+        if (fontSize) {
+            if (fontSize->IsNegative()) fontSize.reset();
+            font.fontSize = fontSize;
+        }
+        auto weight = OptConvert<FontWeight>(src.weight);
+        if (weight) {
+            font.fontWeight = weight;
+        }
+        font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
+        return font;
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -47,7 +47,12 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::StrokeWidth(frameNode, Converter::OptConvert<Dimension>(*value));
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::OptConvert<Dimension>(*value);
+    if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
+        optValue.reset();
+    }
+    DividerModelNG::StrokeWidth(frameNode, optValue);
 }
 
 void LineCapImpl(Ark_NativePointer node,

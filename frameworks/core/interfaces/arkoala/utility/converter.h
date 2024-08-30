@@ -30,6 +30,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/image/image_source_info.h"
@@ -47,8 +48,26 @@ namespace OHOS::Ace::NG {
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
+     //Allow conversion for Ark_Xxx type to same Ark_Xxx type
+    template<typename T>
+    void AssignTo(T& dst, const T& src)
+    {
+        dst = src;
+    }
+
+    template<typename T, typename... Types>
+    void AssignTo(std::variant<Types...>& dst, const T& src)
+    {
+        dst = src;
+    }
+
     template<typename To, typename From>
-    To Convert(const From& src) = delete;
+    To Convert(const From& src)
+    {
+        To result;
+        AssignTo(result, src);
+        return result;
+    }
 
     template<typename T, typename P>
     void AssignCast(std::optional<T>& dst, const P& src)
@@ -245,12 +264,6 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    inline CopyOptions Convert(const Ark_CopyOptions& src)
-    {
-        return static_cast<CopyOptions>(src);
-    }
-
-    template<>
     inline std::vector<std::string> Convert(const Ark_Resource& src)
     {
         return {};
@@ -360,6 +373,7 @@ namespace OHOS::Ace::NG::Converter {
 
     ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setImageOptions_Arg0& value);
     ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value);
+    template<> std::string Convert(const Ark_Resource& resource);
     ImageResource Convert(const Ark_Resource& value);
 
     template<>
@@ -388,6 +402,27 @@ namespace OHOS::Ace::NG::Converter {
         };
     }
 
+    template<>
+    inline ArkCaretStyle Convert(const Ark_CaretStyle& src)
+    {
+        ArkCaretStyle caretStyle;
+        caretStyle.color = OptConvert<Color>(src.color);
+        caretStyle.width = OptConvert<Dimension>(src.width);
+        return caretStyle;
+    }
+
+    template<> Font Convert(const Ark_Font& src);
+
+    template<>
+    inline TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
+    {
+        TextDecorationOptions options;
+        options.textDecoration = OptConvert<TextDecoration>(src.type);
+        options.color = OptConvert<Color>(src.color);
+        options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
+        return options;
+    }
+
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
@@ -402,6 +437,14 @@ namespace OHOS::Ace::NG::Converter {
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src);
+    template<> void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType& src);
+    template<> void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src);
+    template<> void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src);
+    template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
+    template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
+    template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
+    template<> void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src);
 
     template<>
     inline ItemDragInfo Convert(const Ark_ItemDragInfo& src)
