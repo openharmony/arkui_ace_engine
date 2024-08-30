@@ -1798,15 +1798,17 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
+        if (moveCaretState_.isMoveCaret && selectController_->GetCaretIndex() != preCaretIndex) {
+            VibratorUtils::StartVibraFeedback("slide");
+        }
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
         if (magnifierController_) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
-    }
-
-    if (selectController_->GetCaretIndex() != preCaretIndex) {
-        VibratorUtils::StartVibraFeedback("slide");
+        if (selectController_->GetCaretIndex() != preCaretIndex) {
+            VibratorUtils::StartVibraFeedback("slide");
+        }
     }
 
     UpdateCaretInfoToController();
