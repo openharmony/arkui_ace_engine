@@ -1524,7 +1524,7 @@ class OperateItemStruct extends ViewPU {
         this.updateDirtyElements();
     }
 }
-export class ComposeListItem_hebin extends ViewPU {
+export class ComposeListItem extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {

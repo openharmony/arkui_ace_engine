@@ -847,7 +847,7 @@ struct OperateItemStruct {
 }
 
 @Component
-export struct ComposeListItem_hebin {
+export struct ComposeListItem {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
   @Prop @Watch('onPropChange') operateItem: OperateItem | null = null;
   @State frontColor: ResourceColor = $r('sys.color.composeListItem_color_background_normal');
