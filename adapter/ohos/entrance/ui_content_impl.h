@@ -35,7 +35,6 @@
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
@@ -358,12 +357,6 @@ private:
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
-    void RenderLayoutBoundary(bool isDebugBoundary);
-    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
@@ -405,7 +398,6 @@ private:
 
     sptr<IRemoteObject> parentToken_ = nullptr;
     sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();
-    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
