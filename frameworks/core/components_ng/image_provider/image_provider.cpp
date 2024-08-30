@@ -281,7 +281,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
 RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
     if (!data) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, src: %{public}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, src: %{private}s",
             src.ToString().c_str());
         return nullptr;
     }

@@ -125,7 +125,8 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "decode to pixmap, src=%{public}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size = "
+            "decode to pixmap, src=%{private}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size "
+            "= "
             "%{public}d x %{public}d",
             obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
             desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
@@ -253,7 +254,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
     CHECK_NULL_RETURN(skiaImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{private}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     auto image = SkImage::MakeFromEncoded(data_);
@@ -262,7 +263,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto rosenImageData = AceType::DynamicCast<DrawingImageData>(cachedData);
     CHECK_NULL_RETURN(rosenImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(rosenImageData->GetRSData());
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{private}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     CHECK_NULL_RETURN(data_, {});
