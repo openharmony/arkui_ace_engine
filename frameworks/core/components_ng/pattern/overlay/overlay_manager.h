@@ -280,6 +280,16 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    bool GetHasDragPixelMap() const
+    {
+        return hasDragPixelMap_;
+    }
+
+    void SetHasDragPixelMap(bool hasDragPixelMap)
+    {
+        hasDragPixelMap_ = hasDragPixelMap;
+    }
+
     bool GetHasGatherNode()
     {
         return hasGatherNode_;
@@ -294,7 +304,11 @@ public:
 
     RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
 
+    RefPtr<FrameNode> GetDragPixelMapContentNode() const;
+
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
+
+    RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;
 
     bool GetHasFilter()
     {
@@ -331,12 +345,14 @@ public:
         filterColumnNodeWeak_ = columnNode;
     }
     void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
+    void MountPixelMapToWindowScene(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap = false);
     void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap = false);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay = false);
+    void RemoveDragPixelMap();
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
     void RemoveFilterAnimation();
@@ -808,10 +824,12 @@ private:
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
     bool hasPixelMap_ { false };
+    bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };
     bool isOnAnimation_ { false };
     WeakPtr<FrameNode> pixmapColumnNodeWeak_;
+    WeakPtr<FrameNode> dragPixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
     bool isContextMenuDragHideFinished_ = false;
