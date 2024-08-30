@@ -131,7 +131,6 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
-    root_->InitStyle(SvgBaseAttribute());
     return true;
 }
 
@@ -151,6 +150,9 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     }
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
     CHECK_NULL_RETURN(node, nullptr);
+    if (AceType::InstanceOf<SvgAnimation>(node)) {
+        isStatic_.store(false);
+    }
     node->SetContext(svgContext_);
     node->SetImagePath(path_);
     ParseAttrs(dom, xmlNode, node);
@@ -271,26 +273,22 @@ void SvgDom::ControlAnimation(bool play)
 
 bool SvgDom::IsStatic()
 {
-    return svgContext_->GetAnimatorCount() == 0;
+    return isStatic_;
 }
 
 void SvgDom::SetAnimationOnFinishCallback(const std::function<void()>& onFinishCallback)
 {
-    if (IsStatic() || !root_) {
-        return;
-    }
-    svgContext_->InitAnimatorNeedFinishCnt();
-    onFinishCallback_ = std::move(onFinishCallback);
-    auto AnimatorOnFinishCallback = [weakSvgDom = AceType::WeakClaim(this)]() {
-        auto svgDom = weakSvgDom.Upgrade();
-        CHECK_NULL_VOID(svgDom);
-        auto svgContext = svgDom->svgContext_;
-        if (svgContext && !svgContext->ReleaseAndGetAnimatorNeedFinishCnt()) {
-            svgDom->onFinishCallback_();
-        }
-    };
+    CHECK_NULL_VOID(svgContext_);
+    svgContext_->SetOnAnimationFinished(onFinishCallback);
+}
 
-    root_->PushAnimatorOnFinishCallback(AnimatorOnFinishCallback);
+void SvgDom::InitStyles()
+{
+    CHECK_NULL_VOID(root_);
+    if (!isStyleInited_) {
+        isStyleInited_ = true;
+        root_->InitStyle(SvgBaseAttribute());
+    }
 }
 
 void SvgDom::DrawImage(
@@ -298,6 +296,7 @@ void SvgDom::DrawImage(
 {
     CHECK_NULL_VOID(root_);
     root_->SetIsRootNode(true);
+    InitStyles();
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
