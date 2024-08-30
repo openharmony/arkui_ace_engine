@@ -678,4 +678,15 @@ void NavigationTitleUtil::InitLongPressEvent(const RefPtr<GestureEventHub>& gest
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
 }
+
+float NavigationTitleUtil::ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth)
+{
+    float result = 0.0f;
+    if (value.value().Unit() == DimensionUnit::PERCENT) {
+        result = value.value().Value() * titleBarWidth;
+    } else {
+        result = value.value().ConvertToPx();
+    }
+    return result;
+}
 } // namespace OHOS::Ace::NG
