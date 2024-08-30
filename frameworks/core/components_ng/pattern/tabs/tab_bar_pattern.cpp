@@ -938,7 +938,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
-        UpdateIndicator(indicator);
+        UpdatePaintIndicator(indicator, true);
     }
     isFirstLayout_ = false;
 
@@ -1098,13 +1098,17 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
-    CHECK_NULL_VOID(swiperController_);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    int32_t indicator = layoutProperty->GetIndicatorValue(0);
+    if (!tabsPattern->GetIsCustomAnimation() && indicator == index) {
+        return;
+    }
     swiperController_->FinishAnimation();
-
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
-        OnCustomContentTransition(indicator_, index);
+        OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
@@ -1465,22 +1469,16 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     CHECK_NULL_VOID(host);
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsFrameNode);
-    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
-    CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    CHECK_NULL_VOID(swiperController_);
-    swiperController_->FinishAnimation();
-    int32_t indicator = swiperPattern->GetCurrentIndex();
     auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
+    int32_t indicator = layoutProperty->GetIndicatorValue(0);
     if (!tabsPattern->GetIsCustomAnimation() && indicator == index) {
         return;
     }
+    swiperController_->FinishAnimation();
     changeByClick_ = true;
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
-
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator, index);
     } else {
@@ -1678,17 +1676,20 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->SetMaskAnimationByCreate(false);
         tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateSubTabBoard(index);
+        tabBarPattern->UpdatePaintIndicator(index, true);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
         if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
+            tabBarLayoutProperty->UpdateIndicator(index);
         }
-        tabBarPattern->UpdateIndicator(index);
+        if (tabBarPattern->GetChangeByClick()) {
+            tabBarPattern->SetChangeByClick(false);
+            return;
+        }
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
             auto duration = tabBarPattern->GetAnimationDuration().value_or(0);
-            if (tabBarPattern->GetChangeByClick()) {
-                tabBarPattern->SetChangeByClick(false);
-            } else if (duration > 0 && tabBarPattern->CanScroll()) {
+            if (duration > 0 && tabBarPattern->CanScroll()) {
                 tabBarPattern->StopTranslateAnimation();
                 tabBarPattern->targetIndex_ = index;
                 tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -2233,7 +2234,11 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     CHECK_NULL_VOID(layoutProperty);
 
     if (NonPositive(indicatorStyle.width.Value())) {
-        indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(indicator_).Width());
+        auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+        if (paintProperty) {
+            RectF rect;
+            indicatorStyle.width = Dimension(paintProperty->GetIndicator().value_or(rect).Width());
+        }
     }
     if ((!isTouchingSwiper_ && !isAnimating_) || axis_ != Axis::HORIZONTAL) {
         return;
