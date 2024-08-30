@@ -273,6 +273,29 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     });
 }
 
+void UpdatePreivewVisibleAreaByFrameWhenDisappear(const RefPtr<RenderContext>& clipContext, 
+    const RefPtr<MenuPreviewPattern>& previewPattern, float value, float radius, float distVal)
+{
+    CHECK_NULL_VOID(previewPattern);
+    CHECK_NULL_VOID(distVal);
+    auto rate = (value - previewPattern->GetClipEndValue()) / distVal;
+
+    auto clipStartWidth = previewPattern->GetStackAfterScaleActualWidth();
+    auto clipStartHeight = previewPattern->GetStackAfterScaleActualHeight();
+    auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
+    auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
+
+    auto curentClipAreaWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
+    auto curentClipAreaHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
+
+    auto clipOffset = previewPattern->GetHoverImageAfterScaleOffset();
+    RoundRect roundRectInstance;
+    roundRectInstance.SetRect(RectF(OffsetF(rate * clipOffset.GetX(), rate * clipOffset.GetY()),
+        SizeF(curentClipAreaWidth, curentClipAreaHeight)));
+    roundRectInstance.SetCornerRadius((1 - rate) * radius);
+    clipContext->ClipWithRoundRect(roundRectInstance);
+}
+
 void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageStackNode,
     const RefPtr<FrameNode>& previewNode)
 {
@@ -280,14 +303,19 @@ void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageSt
     CHECK_NULL_VOID(previewPattern);
 
     // reverse
-    auto clipStartValue = previewPattern->GetIsWidthDistLarger() ?
-        previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
-    auto clipEndValue = previewPattern->GetIsWidthDistLarger() ? previewPattern->GetHoverImageAfterScaleWidth() :
-        previewPattern->GetHoverImageAfterScaleHeight();
+    auto clipStartValue = previewPattern->GetClipEndValue();
+    auto clipEndValue = previewPattern->GetClipStartValue();
+    clipEndValue += NearEqual(clipStartValue, clipEndValue) ? 1.0f : 0;
+    auto dist = clipEndValue - clipStartValue;
 
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, 0,
         [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
-            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
+            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode)),
+            radius = menuTheme->GetPreviewBorderRadius().ConvertToPx(), distVal = dist](float value) {
             auto clipNode = weak.Upgrade();
             CHECK_NULL_VOID(clipNode);
             auto clipContext = clipNode->GetRenderContext();
@@ -297,29 +325,7 @@ void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageSt
             CHECK_NULL_VOID(preview);
             auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
             CHECK_NULL_VOID(previewPattern);
-            auto clipStartWidth = previewPattern->GetCustomPreviewAfterScaleWidth();
-            auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
-            
-            auto clipStartHeight = previewPattern->GetCustomPreviewAfterScaleHeight();
-            auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
-            auto dist = 1.0f;
-            auto rate = 1.0f;
-            auto currentWidth = 0.0f;
-            auto currentHeight = 0.0f;
-            if (previewPattern->GetIsWidthDistLarger()) {
-                dist = NearEqual(clipStartWidth, clipEndWidth) ? 1.0f : clipEndWidth - clipStartWidth;
-                rate = (value - clipStartWidth) / dist;
-                currentWidth = value;
-                currentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
-            } else {
-                dist = NearEqual(clipStartHeight, clipEndHeight) ? 1.0f : clipEndHeight - clipStartHeight;
-                rate = (value - clipStartHeight) / dist;
-                currentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
-                currentHeight = value;
-            }
-            auto imageOffset = previewPattern->GetHoverImageAfterScaleOffset();
-            clipContext->ClipWithRect(RectF(OffsetF(rate * imageOffset.GetX(), rate * imageOffset.GetY()),
-                SizeF(currentWidth, currentHeight)));
+            UpdatePreivewVisibleAreaByFrameWhenDisappear(clipContext, previewPattern, value, radius, distVal);
         });
     AnimationOption option;
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
