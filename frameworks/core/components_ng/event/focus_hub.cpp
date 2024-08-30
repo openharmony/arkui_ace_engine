@@ -326,7 +326,7 @@ void FocusHub::LostFocusToViewRoot()
     auto focusedChild = viewRootScope->lastWeakFocusNode_.Upgrade();
     CHECK_NULL_VOID(focusedChild);
     FocusManager::FocusGuard guard(viewRootScope, SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT);
-    focusedChild->LostFocus();
+    focusedChild->LostFocus(BlurReason::CLEAR_FOCUS);
 }
 
 void FocusHub::LostFocus(BlurReason reason)
