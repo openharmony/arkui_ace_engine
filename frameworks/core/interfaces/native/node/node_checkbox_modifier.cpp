@@ -275,6 +275,20 @@ ArkUI_Int32 GetCheckboxShape(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(CheckBoxModelNG::GetCheckboxStyle(frameNode));
 }
 
+void SetCheckboxName(ArkUINodeHandle node, ArkUI_CharPtr name)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetCheckboxName(frameNode, std::string(name));
+}
+
+void SetCheckboxGroup(ArkUINodeHandle node, ArkUI_CharPtr group)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetCheckboxGroup(frameNode, std::string(group));
+}
+
 namespace NodeModifier {
 const ArkUICheckboxModifier *GetCheckboxModifier()
 {
@@ -284,17 +298,18 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
         ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion,
         GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
-        GetCheckboxShape };
+        GetCheckboxShape, SetCheckboxName, SetCheckboxGroup };
     return &modifier;
 }
 
 const CJUICheckboxModifier* GetCJUICheckboxModifier()
 {
     static const CJUICheckboxModifier modifier = { SetSelect, SetSelectedColor, SetUnSelectedColor, SetCheckboxWidth,
-        SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
-        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape, ResetCheckboxShape,
-        ResetCheckboxPadding, ResetCheckboxResponseRegion, GetSelect, GetSelectedColor, GetUnSelectedColor,
-        GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth, GetCheckboxShape, };
+        SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect,
+        ResetSelectedColor, ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
+        ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion, GetSelect, GetSelectedColor,
+        GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth, GetCheckboxShape, SetCheckboxName,
+        SetCheckboxGroup };
     return &modifier;
 }
 

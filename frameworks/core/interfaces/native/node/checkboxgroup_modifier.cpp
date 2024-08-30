@@ -160,6 +160,13 @@ void ResetCheckboxGroupStyle(ArkUINodeHandle node)
     CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
 }
 
+void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetCheckboxGroupName(frameNode, std::string(group));
+}
+
 namespace NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
@@ -167,7 +174,7 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
         SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
         SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
-        SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
+        SetCheckboxGroupStyle, ResetCheckboxGroupStyle, SetCheckboxGroupName };
     return &modifier;
 }
 
@@ -177,7 +184,7 @@ const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier()
         ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
         SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
         SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
-        SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
+        SetCheckboxGroupStyle, ResetCheckboxGroupStyle, SetCheckboxGroupName };
     return &modifier;
 }
 }

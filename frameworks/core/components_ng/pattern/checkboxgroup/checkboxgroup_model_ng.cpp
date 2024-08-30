@@ -119,6 +119,14 @@ void CheckBoxGroupModelNG::SetResponseRegion(const std::vector<DimensionRect>& r
     pattern->SetIsUserSetResponseRegion(true);
 }
 
+RefPtr<FrameNode> CheckBoxGroupModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
 void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, bool isSelected)
 {
     CHECK_NULL_VOID(frameNode);
@@ -171,6 +179,15 @@ void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxS
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    if (groupName.has_value()) {
+        eventHub->SetGroupName(groupName.value());
+    }
 }
 
 } // namespace OHOS::Ace::NG
