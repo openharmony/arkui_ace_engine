@@ -236,6 +236,10 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 
 void MovingPhotoPattern::UpdateImageNode()
 {
+    if (startAnimationFlag_) {
+        needUpdateImageNode_ = true;
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -993,6 +997,10 @@ void MovingPhotoPattern::StopAnimationCallback()
 {
     Seek(0);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
+    if (needUpdateImageNode_) {
+        UpdateImageNode();
+        needUpdateImageNode_ = false;
+    }
     if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         StartRepeatPlay();
     } else if (autoAndRepeatLevel_ == PlaybackMode::AUTO) {
