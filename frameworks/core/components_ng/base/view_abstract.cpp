@@ -1777,7 +1777,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
                 overlayManager->ErasePopup(id);
                 SubwindowManager::GetInstance()->HideSubWindowNG();
             };
-            targetNode->PushDestroyCallback(destructor);
+            targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
         } else {
             // erase popup in subwindow when target node destroy
             auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
@@ -1788,7 +1788,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
                 overlayManager->ErasePopup(id);
                 SubwindowManager::GetInstance()->HideSubWindowNG();
             };
-            targetNode->PushDestroyCallback(destructor);
+            targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
         }
     } else {
         // use param to update PopupParm
