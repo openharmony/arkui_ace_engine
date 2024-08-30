@@ -500,9 +500,16 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
     auto result = host->InResponseRegionList(localPoint, responseRegion);
     if (!result) {
+        std::string responseInfo = std::string("responseRegionList = ");
+        for (const auto& item : responseRegion) {
+            responseInfo.append(item.ToString()).append("; ");
+        }
         TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s",
-            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str());
+            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s, point = "
+            "%{public}s, frameRect = %{public}s, %{public}s",
+            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),
+            localPoint.ToString().c_str(), host->GetFrameRectWithoutSafeArea().ToString().c_str(),
+            responseInfo.c_str());
     }
     return result;
 }
