@@ -2655,6 +2655,9 @@ std::string TextPattern::GetFontInJson() const
     jsonValue->Put("style", GetFontStyleInJson(textLayoutProp->GetItalicFontStyle()).c_str());
     jsonValue->Put("size", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
     jsonValue->Put("weight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+    jsonValue->Put("variableFontWeight", std::to_string(textLayoutProp->GetVariableFontWeight().value_or(0)).c_str());
+    jsonValue->Put("enableVariableFontWeight",
+                   textLayoutProp->GetEnableVariableFontWeight().value_or(false) ? "true" : "false");
     jsonValue->Put("family", GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str());
     return jsonValue->ToString();
 }
