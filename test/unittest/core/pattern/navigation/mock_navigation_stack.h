@@ -24,20 +24,32 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "test/mock/core/common/mock_container.h"
+
+namespace OHOS::Ace::NG {
 struct MockReplace {
     int32_t isReplace_ = 0;
 };
+constexpr char UNDEFINED_ID[] = "undefined";
 
 struct MockNavPathInfo {
+    int32_t index = -1;
     std::string name = "";
-    std::string navDestinationId = "undefined";
+    std::string navDestinationId = UNDEFINED_ID;
+    bool needBuildNewInstance = false;
 
     explicit MockNavPathInfo(std::string name) : name(std::move(name)) {}
 };
 
-using NavigationInterceptionEvent = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>,
-    const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>, OHOS::Ace::NG::NavigationOperation, bool)>;
-class MockNavigationStack : public OHOS::Ace::NG::NavigationStack {
+enum LaunchMode {
+    STANDARD = 0,
+    MOVE_TO_TOP_SINGLETON,
+    POP_TO_TOP_SINGLETON,
+    NEW_INSTANCE,
+};
+
+using NavigationInterceptionEvent = std::function<void(const RefPtr<NavDestinationContext>,
+    const RefPtr<NavDestinationContext>, NavigationOperation, bool)>;
+class MockNavigationStack : public NavigationStack {
     DECLARE_ACE_TYPE(MockNavigationStack, NavigationStack);
 public:
     void UpdateReplaceValue(int32_t isReplace) const override
@@ -65,7 +77,7 @@ public:
         return onStateChangedCallback_;
     }
 
-        void SetInterceptionBeforeCallback(NavigationInterceptionEvent callback)
+    void SetInterceptionBeforeCallback(NavigationInterceptionEvent callback)
     {
         beforeCallback_ = callback;
     }
@@ -75,112 +87,16 @@ public:
         afterCallback_ = afterCallback;
     }
 
-    void SetInterceptionModeCallback(std::function<void(OHOS::Ace::NG::NavigationMode)> modeCallback)
+    void SetInterceptionModeCallback(std::function<void(NavigationMode)> modeCallback)
     {
         modeCallback_ = modeCallback;
     }
 
-    void FireNavigationModeChange(OHOS::Ace::NG::NavigationMode mode) override
+    void FireNavigationModeChange(NavigationMode mode) override
     {
         if (modeCallback_) {
             modeCallback_(mode);
         }
-    }
-
-    void FireNavigationInterception(bool isBefore, const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>& from,
-        const OHOS::Ace::RefPtr<OHOS::Ace::NG::NavDestinationContext>& to, OHOS::Ace::NG::NavigationOperation operation,
-        bool isAnimated) override
-    {
-        if (isBefore) {
-            if (beforeCallback_) {
-                beforeCallback_(from, to, operation, isAnimated);
-            }
-        } else {
-            if (afterCallback_) {
-                afterCallback_(from, to, operation, isAnimated);
-            }
-        }
-    }
-
-    MOCK_METHOD1(OnAttachToParent, void(OHOS::Ace::RefPtr<OHOS::Ace::NG::NavigationStack>));
-    MOCK_METHOD0(OnDetachFromParent, void());
-
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> CreateNodeByIndex(int32_t index,
-        const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode>& customNode) override
-    {
-        auto* stack = OHOS::Ace::NG::ViewStackProcessor::GetInstance();
-        // navDestination node
-        int32_t nodeId = stack->ClaimNodeId();
-        auto frameNode = OHOS::Ace::NG::NavDestinationGroupNode::GetOrCreateGroupNode(
-            OHOS::Ace::V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() {
-                return OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::NavDestinationPattern>();
-            });
-        EXPECT_NE(frameNode, nullptr);
-        auto name = mockPathArray_[index].name;
-        auto container = OHOS::Ace::MockContainer::Current();
-        auto navigationRoute = container->GetNavigationRoute();
-        if (!navigationRoute) {
-            return nullptr;
-        }
-        if (!navigationRoute->HasLoaded(name)) {
-            int32_t res = navigationRoute->LoadPage(name);
-            if (res != 0) {
-                return frameNode;
-            }
-        }
-        auto pattern = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::NG::NavDestinationPattern>(frameNode->GetPattern());
-        EXPECT_NE(pattern, nullptr);
-        pattern->SetName(name);
-        return frameNode;
-    }
-
-    void Push(const std::string& name, int32_t index) override
-    {
-        mockPathArray_.push_back(MockNavPathInfo(name));
-    }
-
-    void Push(const std::string& name, const OHOS::Ace::RefPtr<OHOS::Ace::NG::RouteInfo>& routeInfo = nullptr) override
-    {
-        mockPathArray_.push_back(MockNavPathInfo(name));
-    }
-
-    std::vector<std::string> GetAllPathName() override
-    {
-        std::vector<std::string> pathNames;
-        for (int32_t i = 0; i < static_cast<int32_t>(mockPathArray_.size()); i++) {
-            pathNames.emplace_back(mockPathArray_[i].name);
-        }
-        return pathNames;
-    }
-
-    std::vector<int32_t> GetAllPathIndex() override
-    {
-        if (mockPathArray_.empty()) {
-            return {};
-        }
-        std::vector<int32_t> pathIndex;
-        for (int32_t i = 0; i < static_cast<int32_t>(mockPathArray_.size()); i++) {
-            pathIndex.emplace_back(i);
-        }
-        return pathIndex;
-    }
-
-    void Clear() override
-    {
-        OHOS::Ace::NG::NavigationStack::Clear();
-        mockPathArray_.clear();
-    }
-
-    void Pop() override
-    {
-        mockPathArray_.pop_back();
-    }
-
-    void PopToIndex(int32_t index)
-    {
-        auto iter = mockPathArray_.begin();
-        std::advance(iter, index + 1);
-        mockPathArray_.erase(iter, mockPathArray_.end());
     }
 
     void SetLifecycleIndex(int8_t index)
@@ -193,31 +109,65 @@ public:
         return lifecycleIndex_;
     }
 
-    OHOS::Ace::NG::NavPathList& GetPathList()
+    NavPathList& GetPathList()
     {
         return navPathList_;
     }
 
-    void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override
-    {
-        if (index < 0 || index >= static_cast<int32_t>(mockPathArray_.size())) {
-            return;
-        }
-        mockPathArray_[index].navDestinationId = navDestinationId;
-    }
-
-    std::string GetNavPathId(int32_t index)
+    std::string GetNavDestinationId(int32_t index)
     {
         return mockPathArray_[index].navDestinationId;
     }
 
+    MOCK_METHOD1(OnAttachToParent, void(RefPtr<NavigationStack>));
+    MOCK_METHOD0(OnDetachFromParent, void());
+
+    void FireNavigationInterception(bool isBefore, const RefPtr<NavDestinationContext>& from,
+        const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) override;
+
+    RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode) override;
+
+    std::vector<std::string> GetAllPathName() override;
+
+    std::vector<int32_t> GetAllPathIndex() override;
+
+    void SetDestinationIdToJsStack(int32_t index, const std::string& navDestinationId) override;
+
+    void InitNavPathIndex(const std::vector<std::string>& pathNames) override;
+
+    bool NeedBuildNewInstance(int32_t index) override;
+
+    void SetNeedBuildNewInstance(int32_t index, bool need) override;
+
+    //  ============================ operation below is for mock NavPathStack in arkTS ============================
+    /**
+     * @brief simply mock push operation of NavPathStack(@arkTS)
+     */
+    void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr) override;
+
+    void Push(const std::string& name, int32_t index) override;
+
+    // pushPath(info: NavPathInfo, animated?: boolean): void
+    // pushPath(info: NavPathInof, options?: NavigationOptions): void
+    void MockPushPath(MockNavPathInfo info, bool animated = true, LaunchMode launchmode = LaunchMode::STANDARD);
+
+    void Clear() override;
+
+    void Pop() override;
+
+    void PopToIndex(int32_t index);
+
+    std::pair<int32_t, std::string> FindInPopArray(const std::string& name);
+    // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;
     std::function<void()> onStateChangedCallback_;
     NavigationInterceptionEvent beforeCallback_;
     NavigationInterceptionEvent afterCallback_;
-    std::function<void(OHOS::Ace::NG::NavigationMode)> modeCallback_;
+    std::function<void(NavigationMode)> modeCallback_;
     MockReplace *mockReplace_ = new MockReplace();
     std::vector<MockNavPathInfo> mockPathArray_;
+    std::vector<MockNavPathInfo> mockPopArray_;
 };
+} // namespace NG
 #endif
