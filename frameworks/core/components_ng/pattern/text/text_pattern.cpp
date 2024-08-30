@@ -590,12 +590,6 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
         context->AddAfterLayoutTask([weak = WeakClaim(this), selectionStart, selectionEnd, eventHub]() {
             auto textPattern = weak.Upgrade();
             CHECK_NULL_VOID(textPattern);
-            auto renderContext = textPattern->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-            bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
-                                  std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-                                      [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
             if (textLayoutProperty->GetCalcLayoutConstraint() &&
@@ -618,7 +612,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
-            if ((!textPattern->GetChildNodes().empty() || !ifHaveObscured) && eventHub->IsEnabled()) {
+            if (!textPattern->IsSetObscured() && eventHub->IsEnabled()) {
                 textPattern->ActSetSelection(selectionStart, selectionEnd);
             }
         });
@@ -2087,11 +2081,10 @@ void TextPattern::OnModifyDone()
     } else {
         copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     }
-    if (GetAllChildren().empty()) {
-        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured && !isSpanStringMode_) {
+
+    const auto& children = host->GetChildren();
+    if (children.empty()) {
+        if (IsSetObscured() && !isSpanStringMode_) {
             CloseSelectOverlay();
             ResetSelection();
             copyOption_ = CopyOptions::None;
@@ -2113,7 +2106,6 @@ void TextPattern::OnModifyDone()
         }
     }
 
-    const auto& children = host->GetChildren();
     if (children.empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
@@ -3669,7 +3661,6 @@ void TextPattern::ProcessSpanString()
     hasSpanStringLongPressEvent_ = false;
 
     // 适配AI&&挂载image节点
-    auto imageChildren = host->GetChildren();
     for (const auto& span : spans_) {
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
@@ -3767,7 +3758,7 @@ bool TextPattern::IsSetObscured()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-    bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+    bool ifHaveObscured = spans_.empty() && std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     return ifHaveObscured;
 }
