@@ -215,10 +215,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
-void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
-
-void PipelineContext::HandlePenHoverOut(const TouchEvent& point) {}
-
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
 void PipelineContext::FlushTouchEvents() {}

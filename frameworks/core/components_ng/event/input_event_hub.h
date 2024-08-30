@@ -147,8 +147,6 @@ public:
     // the return value means prevents event bubbling.
     bool ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
 
-    bool ProcessPenHoverTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
-
     bool ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult);
 
     RefPtr<FrameNode> GetFrameNode() const;
