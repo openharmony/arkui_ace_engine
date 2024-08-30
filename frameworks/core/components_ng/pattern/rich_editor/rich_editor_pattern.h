@@ -1107,6 +1107,7 @@ private:
     bool IsReachedBoundary(float offset);
     void UpdateScrollBarOffset() override;
     void CheckScrollable();
+    void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
     void ScheduleAutoScroll(AutoScrollParam param);
     void OnAutoScroll(AutoScrollParam param);
