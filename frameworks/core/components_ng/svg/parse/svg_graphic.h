@@ -159,6 +159,7 @@ protected:
 
 private:
     void UpdateColorFilter(RSFilter& filter);
+    bool CheckHrefPattern();
 };
 
 } // namespace OHOS::Ace::NG

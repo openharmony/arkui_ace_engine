@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/parse/svg_graphic.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/svg/parse/svg_pattern.h"
 #include "include/core/SkScalar.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
@@ -37,16 +38,45 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optiona
     if (UpdateFillStyle(color)) {
         OnGraphicFill();
     }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        UpdateStrokeGradient(layout);
+        if (UpdateStrokeStyle()) {
+            OnGraphicStroke();
+        }
+        if (!fillState_.GetHref().empty()) {
+            auto svgContext = svgContext_.Upgrade();
+            CHECK_NULL_VOID(svgContext);
+            auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
+            CHECK_NULL_VOID(refSvgNode);
+            refSvgNode->Draw(canvas, layout, color);
+        }
+        return;
+    }
+    if (!fillState_.GetHref().empty()) {
+        auto svgContext = svgContext_.Upgrade();
+        CHECK_NULL_VOID(svgContext);
+        auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
+        CHECK_NULL_VOID(refSvgNode);
+        auto bounds = AsPath(layout).GetBounds();
+        Rect rect = Rect { bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight() };
+        auto svgpattern = AceType::DynamicCast<SvgPattern>(refSvgNode);
+        CHECK_NULL_VOID(svgpattern);
+        svgpattern->SetBoundingBoxRect(rect);
+        refSvgNode->Draw(canvas, layout, color);
+    }
     UpdateStrokeGradient(layout);
     if (UpdateStrokeStyle()) {
         OnGraphicStroke();
     }
-    if (!fillState_.GetHref().empty()) {
-        auto svgContext = svgContext_.Upgrade();
-        auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
-        CHECK_NULL_VOID(refSvgNode);
-        refSvgNode->Draw(canvas, layout, color);
-    }
+}
+
+bool SvgGraphic::CheckHrefPattern()
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_RETURN(svgContext, false);
+    auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
+    CHECK_NULL_RETURN(refSvgNode, false);
+    return AceType::InstanceOf<SvgPattern>(refSvgNode);
 }
 
 void SvgGraphic::SetLinearGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient)
@@ -136,6 +166,11 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
 {
     if (!color && fillState_.GetColor() == Color::TRANSPARENT && !fillState_.GetGradient()) {
         return false;
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (!fillState_.GetHref().empty() && CheckHrefPattern()) {
+            fillState_.SetColor(Color::TRANSPARENT);
+        }
     }
     double curOpacity = fillState_.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
 #ifndef USE_ROSEN_DRAWING
