@@ -210,18 +210,15 @@ void TextFieldPaintMethod::DoTextRaceIfNeed(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textFieldTheme);
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
-
-    if (!(textFieldTheme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity())) {
-        return;
-    }
-    auto paragraph = textFieldPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
-    auto paintContentWidth = paintWrapper->GetContentSize().Width();
-    if (GreatNotEqual(paintContentWidth, 0.0) &&
-        GreatNotEqual(paragraph->GetTextWidth() + textFieldPattern->GetTextParagraphIndent(), paintContentWidth)) {
-        textFieldContentModifier_->SetTextFadeoutEnabled(true);
-    } else {
-        textFieldContentModifier_->SetTextFadeoutEnabled(false);
+    textFieldContentModifier_->SetErrorTipsSpacing(textFieldTheme->GetTextInputAndErrTipsSpacing());
+    if ((textFieldTheme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity())) {
+        auto paragraph = textFieldPattern->GetParagraph();
+        CHECK_NULL_VOID(paragraph);
+        auto paintContentWidth = paintWrapper->GetContentSize().Width();
+        auto textFadeoutEnabled =
+            GreatNotEqual(paintContentWidth, 0.0) &&
+            GreatNotEqual(paragraph->GetTextWidth() + textFieldPattern->GetTextParagraphIndent(), paintContentWidth);
+        textFieldContentModifier_->SetTextFadeoutEnabled(textFadeoutEnabled);
     }
 }
 

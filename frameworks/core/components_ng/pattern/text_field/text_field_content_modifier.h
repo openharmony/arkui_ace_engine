@@ -65,6 +65,7 @@ public:
     void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
     void ContentChange();
     void SetTextFadeoutEnabled(bool enabled);
+    void SetErrorTipsSpacing(const Dimension& errTipsSpacing);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -130,6 +131,7 @@ private:
     RefPtr<PropertyInt> textOverflow_;
 
     bool textFadeoutEnabled_ { false };
+    Dimension errorTipsSpacing_ = 0.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

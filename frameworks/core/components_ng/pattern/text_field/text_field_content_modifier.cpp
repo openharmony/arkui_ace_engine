@@ -44,8 +44,6 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,
     FontWeight::W400,
 };
-constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
-constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
 constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
@@ -82,15 +80,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    auto needTextFadeout =
-        theme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity() && !textFieldPattern->IsInlineMode();
-    if (!needTextFadeout || !textFadeoutEnabled_) {
+    if (textFieldPattern->IsInlineMode() || !textFadeoutEnabled_) {
         DoNormalDraw(context);
     } else {
         DoTextFadeoutDraw(context);
@@ -597,6 +587,11 @@ void TextFieldContentModifier::SetTextFadeoutEnabled(bool enabled)
     textFadeoutEnabled_ = enabled;
 }
 
+void TextFieldContentModifier::SetErrorTipsSpacing(const Dimension& errTipsSpacing)
+{
+    errorTipsSpacing_ = errTipsSpacing;
+}
+
 void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
 {
     auto& canvas = context.canvas;
@@ -606,18 +601,13 @@ void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
     CHECK_NULL_VOID(paragraph);
     auto contentOffset = contentOffset_->Get();
     auto contentRect = textFieldPattern->GetContentRect();
+    auto textRect = textFieldPattern->GetTextRect();
     auto clipRectHeight = 0.0f;
     auto errorMargin = 0.0f;
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowUnderlineValue(false) && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
-    } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
-    } else if (showErrorState_->Get()) {
-        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
+    if (showErrorState_->Get()) {
+        errorMargin = errorTipsSpacing_.ConvertToPx();
     } else {
         errorMargin = 0;
     }
@@ -636,12 +626,12 @@ void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
             std::vector<RSPoint> clipRadius;
             GetFrameRectClip(clipRect, clipRadius);
             canvas.ClipRoundRect(clipRect, clipRadius, true);
-            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
-                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+            paragraph->Paint(
+                canvas, textRect.GetX(), textFieldPattern->IsTextArea() ? textRect.GetY() : contentOffset.GetY());
             canvas.Restore();
         } else {
-            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
-                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+            paragraph->Paint(
+                canvas, textRect.GetX(), textFieldPattern->IsTextArea() ? textRect.GetY() : contentOffset.GetY());
         }
     }
     canvas.Restore();
@@ -660,17 +650,8 @@ void TextFieldContentModifier::DoTextFadeoutDraw(DrawingContext& context)
     auto errorViewHeight = 0.0f;
     auto errorParagraph = textFieldPattern->GetErrorParagraph();
     auto textFrameRect = textFieldPattern->GetFrameRect();
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     if (showErrorState_->Get()) {
-        errorMargin = theme->GetTextInputAndErrTipsSpacing().ConvertToPx();
+        errorMargin = errorTipsSpacing_.ConvertToPx();
     } else {
         errorMargin = 0;
     }

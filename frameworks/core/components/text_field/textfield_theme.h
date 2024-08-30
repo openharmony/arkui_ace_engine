@@ -222,8 +222,14 @@ public:
         {
             std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
             theme->textFadeoutEnabled_ = isTextFadeout == "true";
+            theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
+            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
+            theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
             theme->textInputAndErrTipsSpacing_ =
                 pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
+            theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
+            theme->hoverAndPressBgColorEnabled_ =
+                static_cast<uint32_t>(pattern->GetAttr<int>("textfield_hover_press_bg_color_enabled", 0));
         }
     };
 
@@ -652,9 +658,34 @@ public:
         return textFadeoutEnabled_;
     }
 
+    const Dimension& GetTextInputWidth() const
+    {
+        return textInputBorderWidth_;
+    }
+
+    const Color& GetTextInputColor() const
+    {
+        return textInputBorderColor_;
+    }
+
     const Dimension& GetTextInputAndErrTipsSpacing() const
     {
         return textInputAndErrTipsSpacing_;
+    }
+
+    bool IsShowPasswordIcon() const
+    {
+        return showPasswordIcon_;
+    }
+
+    bool GetHoverAndPressBgColorEnabled() const
+    {
+        return hoverAndPressBgColorEnabled_;
+    }
+
+    const Dimension& GetErrorTextInputBorderWidth() const
+    {
+        return errorTextInputBorderWidth_;
     }
 
 protected:
@@ -757,7 +788,12 @@ private:
     Color previewBoardColor_;
 
     bool textFadeoutEnabled_ = false;
-    Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
+    Dimension textInputBorderWidth_ = 0.0_vp;
+    Dimension textInputAndErrTipsSpacing_ = 8.0_vp;
+    Dimension errorTextInputBorderWidth_ = 1.0_vp;
+    Color textInputBorderColor_;
+    bool showPasswordIcon_ = true;
+    bool hoverAndPressBgColorEnabled_ = false;
 
     std::string cancelButton_;
 

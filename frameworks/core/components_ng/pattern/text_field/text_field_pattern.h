@@ -887,6 +887,11 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void ProcessFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();
@@ -1440,6 +1445,11 @@ public:
         return haveTextFadeoutCapacity_;
     }
 
+    void SetHoverPressBgColorEnabled(bool enabled)
+    {
+        hoverAndPressBgColorEnabled_ = enabled;
+    }
+
     void ShowCaretAndStopTwinkling();
 
     bool IsTextEditableForStylus() override;
@@ -1502,6 +1512,11 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void UpdateHoverStyle(bool isHover);
+    void UpdatePressStyle(bool isPressed);
+    void PlayAnimationHoverAndPress(const Color& color);
+    void UpdateTextFieldBgColor(const Color& color);
+    void InitTextFieldThemeColors(const RefPtr<TextFieldTheme>& theme);
     void ChangeMouseState(
         const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
@@ -1858,6 +1873,15 @@ private:
     bool isDetachFromMainTree_ = false;
 
     bool haveTextFadeoutCapacity_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    Color defaultThemeBgColor_ = Color::TRANSPARENT;
+    Color focusThemeBgColor_ = Color::TRANSPARENT;
+    Color hoverThemeBgColor_ = Color::TRANSPARENT;
+    Color pressThemeBgColor_ = Color::TRANSPARENT;
+    bool hoverAndPressBgColorEnabled_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
