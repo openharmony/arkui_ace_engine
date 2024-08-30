@@ -6505,7 +6505,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
         auto callback = ParseDoubleBindCallback(info, showObj);
-        popupParam->SetOnStateChange(std::move(callback));
+        popupParam->SetDoubleBindCallback(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
     // Set popup to popupParam
