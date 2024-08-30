@@ -2920,8 +2920,8 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
-            textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
-            dataDetectorAdapter_->textForAI_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
+            textForDisplay_.append("    ");
+            dataDetectorAdapter_->textForAI_.append("    ");
             childNodes_.push_back(current.node);
         } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             CollectTextSpanNodes(spanNode, isSpanHasClick);
