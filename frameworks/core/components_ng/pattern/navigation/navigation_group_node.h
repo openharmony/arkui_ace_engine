@@ -222,6 +222,11 @@ public:
         hideNodes_.clear();
     }
 
+    std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> GetHideNodes() const
+    {
+        return hideNodes_;
+    }
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
