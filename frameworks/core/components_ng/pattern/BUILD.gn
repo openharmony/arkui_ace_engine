@@ -293,7 +293,6 @@ build_component_ng("pattern_ng") {
     "overlay/sheet_drag_bar_pattern.cpp",
     "overlay/sheet_manager.cpp",
     "overlay/sheet_presentation_layout_algorithm.cpp",
-    "overlay/sheet_presentation_paint_method.cpp",
     "overlay/sheet_presentation_pattern.cpp",
     "overlay/sheet_view.cpp",
     "overlay/sheet_wrapper_layout_algorithm.cpp",
