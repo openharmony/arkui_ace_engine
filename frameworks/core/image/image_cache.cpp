@@ -99,8 +99,10 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
         return;
     }
     ACE_SCOPED_TRACE("CacheImageData key:%s", key.c_str());
-    std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
+    std::vector<CacheNode<RefPtr<NG::ImageData>>> needErase;
+
+    std::scoped_lock lock(dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     bool inCache = (iter != imageDataCache_.end());
     bool largerHalfSize = dataSize > (dataSizeLimit_ >> 1);
@@ -109,11 +111,12 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
         // if data is longer than half limit, do not cache it.
         // and if the key is in Cache, erase it.
         curDataSize_ -= oldSize;
+        needErase.push_back(*(iter->second));
         dataCacheList_.erase(iter->second);
         imageDataCache_.erase(key);
         TAG_LOGW(AceLogTag::ACE_IMAGE, "data is %{public}d, bigger than half limit %{public}d, do not cache it",
             static_cast<int32_t>(dataSize), static_cast<int32_t>(dataSizeLimit_ >> 1));
-    } else if (!largerHalfSize && !inCache && ProcessImageDataCacheInner(dataSize)) {
+    } else if (!largerHalfSize && !inCache && ProcessImageDataCacheInner(dataSize, needErase)) {
         dataCacheList_.emplace_front(key, imageData);
         imageDataCache_.emplace(key, dataCacheList_.begin());
     } else if (!largerHalfSize && inCache && oldSize >= dataSize) {
@@ -125,19 +128,21 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     } else if (!largerHalfSize && inCache && oldSize < dataSize) {
         // if the image is in the cache, and dataSize > oldSize, we erase the old one, the try to cache the new image.
         curDataSize_ -= oldSize;
+        needErase.push_back(*(iter->second));
         dataCacheList_.erase(iter->second);
         imageDataCache_.erase(key);
-        if (ProcessImageDataCacheInner(dataSize)) {
+        if (ProcessImageDataCacheInner(dataSize, needErase)) {
             dataCacheList_.emplace_front(key, imageData);
             imageDataCache_.emplace(key, dataCacheList_.begin());
         }
     }
 }
 
-bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
+bool ImageCache::ProcessImageDataCacheInner(size_t dataSize, std::vector<CacheNode<RefPtr<NG::ImageData>>>& needErase)
 {
     while (dataSize + curDataSize_ > dataSizeLimit_ && !dataCacheList_.empty()) {
         curDataSize_ -= dataCacheList_.back().cacheObj->GetSize();
+        needErase.push_back(dataCacheList_.back());
         imageDataCache_.erase(dataCacheList_.back().cacheKey);
         dataCacheList_.pop_back();
     }
