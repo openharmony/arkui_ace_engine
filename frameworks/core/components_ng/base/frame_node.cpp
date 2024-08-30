@@ -3474,12 +3474,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first) {
+    if (res.first || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second) {
+    if (res.second || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
