@@ -29,6 +29,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/geometry/offset.h"
 #include "base/error/error_code.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
@@ -223,6 +224,7 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
         return;
     }
     auto want = wantWrapOhos->GetWant();
+    want_ = want.ToString();
     UpdateWant(want);
 }
 
@@ -692,6 +694,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
+    focusState_ = pipeline->IsWindowFocused();
     DispatchPointerEvent(pointerEvent);
     if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
@@ -1047,6 +1050,8 @@ void UIExtensionPattern::InitializeAccessibility()
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto realHostWindowId = ngPipeline->GetRealHostWindowId();
+    realHostWindowId_ = realHostWindowId;
+    focusWindowId_ = ngPipeline->GetFocusWindowId();
     if (accessibilityManager->IsRegister()) {
         accessibilityChildTreeCallback_->OnRegister(
             realHostWindowId, accessibilityManager->GetTreeId());
@@ -1211,6 +1216,27 @@ const char* UIExtensionPattern::ToString(AbilityState state)
         case AbilityState::NONE:
         default:
             return "NONE";
+    }
+}
+
+void UIExtensionPattern::DumpInfo()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
+    DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
+    DumpLog::GetInstance().AddDesc(std::string("want: ").append(std::to_string(want_)));
+    DumpLog::GetInstance().AddDesc(std::string("displayArea: ").append(std::to_string(displayArea_.ToString())));
+    DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
+    DumpLog::GetInstance().AddDesc(std::string("focusStatus: ").append(std::to_string(focusState_)));
+    DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(std::to_string(state_)));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    std::vector<std::string> providerInfo;
+    sessionWrapper_->NotifyUieDump(params, providerInfo);
+    for (std::string info : providerInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("Provider UI Extension info: ").append(info));
     }
 }
 } // namespace OHOS::Ace::NG

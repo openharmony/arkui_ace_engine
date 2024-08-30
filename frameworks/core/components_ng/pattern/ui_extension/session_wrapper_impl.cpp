@@ -727,6 +727,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     int32_t duration = 0;
     if (reason == Rosen::SizeChangeReason::ROTATION) {
@@ -837,4 +838,17 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
     return static_cast<int32_t>(transferCode);
 }
 /************************************************ End: The interface to send the data for ArkTS ***********************/
+
+/************************************************ Begin: The interface for UEC dump **********************************/
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return reason_;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->NotifyDumpInfo(params, info);
+}
+/************************************************ End: The interface for UEC dump **********************************/
 } // namespace OHOS::Ace::NG

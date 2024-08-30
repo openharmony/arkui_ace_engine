@@ -666,6 +666,11 @@ public:
         return registerComponents_;
     }
 
+    std::vector<std::string> GetUieParams() const
+    {
+        return paramUie_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -759,6 +764,9 @@ private:
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+
+    // for Ui Extension dump
+    std::vector<std::string> paramUie_;
 };
 
 } // namespace OHOS::Ace::Platform
