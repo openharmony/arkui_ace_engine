@@ -189,6 +189,14 @@ void JSCalendarPicker::JSBind(BindingTarget globalObj)
     JSClass<JSCalendarPicker>::StaticMethod("height", &JSCalendarPicker::JsHeight);
     JSClass<JSCalendarPicker>::StaticMethod("borderColor", &JSCalendarPicker::JsBorderColor);
     JSClass<JSCalendarPicker>::StaticMethod("borderRadius", &JSCalendarPicker::JsBorderRadius);
+    JSClass<JSCalendarPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSCalendarPicker>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSCalendarPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSCalendarPicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCalendarPicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
+    JSClass<JSCalendarPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCalendarPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
+    JSClass<JSCalendarPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCalendarPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
