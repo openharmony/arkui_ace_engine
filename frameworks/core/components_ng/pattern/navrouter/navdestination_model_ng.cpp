@@ -688,4 +688,151 @@ void NavDestinationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
     CHECK_NULL_VOID(pattern);
     pattern->SetSystemBarStyle(style);
 }
+
+void NavDestinationModelNG::ParseCommonTitle(FrameNode* frameNode, bool hasSubTitle, bool hasMainTitle,
+    const std::string& subtitle, const std::string& title)
+{
+    if (!hasSubTitle && !hasMainTitle) {
+        return;
+    }
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    if (navDestinationNode->GetPrevTitleIsCustomValue(false)) {
+        // remove custom title if any.
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->SetTitle(nullptr);
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        // reset custom title height if any.
+        if (titleBarLayoutProperty->HasTitleHeight()) {
+            titleBarLayoutProperty->ResetTitleHeight();
+        }
+    }
+    navDestinationNode->UpdatePrevTitleIsCustom(false);
+
+    auto theme = NavigationGetTheme();
+    // create or update main title
+    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (hasMainTitle) {
+        if (mainTitle) {
+            // update main title
+            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
+                    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+            }
+            textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
+        } else {
+            // create and init main title
+            mainTitle = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            textLayoutProperty->UpdateContent(title);
+            titleBarPattern->SetNeedResetMainTitleProperty(true);
+            titleBarNode->SetTitle(mainTitle);
+            titleBarNode->AddChild(mainTitle);
+        }
+    } else {
+        // remove main title if any.
+        titleBarNode->RemoveChild(mainTitle);
+        titleBarNode->SetTitle(nullptr);
+    }
+
+    // create or update subtitle
+    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (!hasSubTitle) {
+        // remove subtitle if any.
+        titleBarNode->RemoveChild(subTitle);
+        titleBarNode->SetSubtitle(nullptr);
+        return;
+    }
+    if (subTitle) {
+        // update subtitle
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
+    } else {
+        // create and init subtitle
+        subTitle = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(subtitle);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
+        titleBarNode->SetSubtitle(subTitle);
+        titleBarNode->AddChild(subTitle);
+    }
+    return;
+}
+
+void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (titleBarNode->GetPrevMenuIsCustom().value_or(false)) {
+        titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (titleBarNode->GetMenu()) {
+            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitleBarMenuItems(menuItems);
+    titleBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    titleBarNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavDestinationModelNG::SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto menuItems = titleBarPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).action = action;
+        titleBarPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavDestinationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto menuItems = titleBarPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).iconSymbol = symbol;
+        titleBarPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
 } // namespace OHOS::Ace::NG

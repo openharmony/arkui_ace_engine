@@ -266,6 +266,90 @@ void ResetNavIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
+void SetNavTitle(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
+    ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string mainTitleString = std::string(mainTitle);
+    std::string subTitleString = std::string(subTitle);
+    NavigationModelNG::ParseCommonTitle(frameNode, hasSubTitle, hasMainTitle, subTitleString, mainTitleString);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (options.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(options.colorValue.value);
+    }
+    if (options.blurStyle.isSet) {
+        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+    }
+    if (options.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
+    }
+    if (options.paddingStart.isSet) {
+        finalOptions.brOptions.paddingStart = CalcDimension(static_cast<double>(options.paddingStart.dimension.value),
+            static_cast<DimensionUnit>(options.paddingStart.dimension.units));
+    }
+    if (options.paddingEnd.isSet) {
+        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
+            static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
+    }
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void ResetNavTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ParseCommonTitle(frameNode, false, false, "", "");
+    NavigationTitlebarOptions options;
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(options));
+}
+
+void SetNavMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(items);
+    std::vector<NG::BarItem> menuItems;
+    for (uint32_t i = 0; i < length; i++) {
+        NG::BarItem menuItem;
+        if (items[i].text.isSet) {
+            menuItem.text = items[i].text.value;
+        }
+        if (items[i].icon.isSet) {
+            menuItem.icon = items[i].icon.value;
+        }
+        if (items[i].isEnable.isSet) {
+            menuItem.isEnabled = items[i].isEnable.value;
+        }
+        menuItems.push_back(menuItem);
+    }
+    NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+}
+
+void ResetNavMenus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<NG::BarItem> menuItems;
+    NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+}
+
+void SetNavMenuItemAction(ArkUINodeHandle node, void* action, ArkUI_Uint32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto actionFunc = reinterpret_cast<std::function<void()>*>(action);
+    NavigationModelNG::SetMenuItemAction(frameNode, std::move(*actionFunc), index);
+}
+
+void SetNavMenuItemSymbol(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto iconFunc = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbol);
+    NavigationModelNG::SetMenuItemSymbol(frameNode, std::move(*iconFunc), index);
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -295,7 +379,13 @@ const ArkUINavigationModifier* GetNavigationModifier()
         SetNavBarWidth,
         ResetNavBarWidth,
         SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea
+        ResetNavIgnoreLayoutSafeArea,
+        SetNavTitle,
+        ResetNavTitle,
+        SetNavMenus,
+        ResetNavMenus,
+        SetNavMenuItemAction,
+        SetNavMenuItemSymbol
     };
 
     return &modifier;
