@@ -267,20 +267,11 @@ void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->OnTextOverflowChanged();
 }
 
 void TextModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value, frameNode);
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->OnTextOverflowChanged();
 }
 
 void TextModelNG::SetMaxLines(uint32_t value)

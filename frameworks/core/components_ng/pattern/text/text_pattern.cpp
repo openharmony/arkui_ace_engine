@@ -4131,6 +4131,7 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
 
 void TextPattern::ProcessMarqueeVisibleAreaCallback()
 {
+    OnTextOverflowChanged();
     if (!IsMarqueeOverflow()) {
         return;
     }
