@@ -40,6 +40,23 @@ group("linux_unittest") {
   ]
 }
 
+group("linux_unittest_capi") {
+  testonly = true
+  deps = [ "capi:linux_capi_unittest(${host_toolchain})" ]
+}
+
+action("run_linux_unittest_capi") {
+  testonly = true
+  script = "scripts/run.py"
+  args = [
+    "--path",
+    "capi",
+  ]
+  outputs =
+      [ "$root_out_dir/clang_x64/tests/unittest/ace_engine/test_result.json" ]
+  deps = [ ":linux_unittest_capi" ]
+}
+
 config("ace_coverage_config") {
   cflags = []
   ldflags = []
