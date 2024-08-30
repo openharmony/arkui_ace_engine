@@ -547,6 +547,11 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -589,7 +594,7 @@ private:
     uint32_t showCount_ = 0;
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
-    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    bool hour24_ = SystemProperties::Is24HourClock();
     ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
@@ -613,6 +618,8 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+
+    double curOpacity_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 

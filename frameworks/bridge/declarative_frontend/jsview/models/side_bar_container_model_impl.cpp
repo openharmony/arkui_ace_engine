@@ -182,4 +182,6 @@ void SideBarContainerModelImpl::SetDividerEndMargin(const Dimension& endMargin) 
 void SideBarContainerModelImpl::SetMinContentWidth(const Dimension& minContentWidth) {};
 
 void SideBarContainerModelImpl::MarkNeedInitRealSideBarWidth() {}
+
+void SideBarContainerModelImpl::ResetControlButton() {}
 } // namespace OHOS::Ace::Framework

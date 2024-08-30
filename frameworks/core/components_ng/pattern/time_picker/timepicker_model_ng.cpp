@@ -449,6 +449,10 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     properties.maskRect = pickerDialog.maskRect;
+    properties.enableHoverMode = pickerDialog.enableHoverMode;
+    if (pickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = pickerDialog.hoverModeArea.value();
+    }
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (pickerDialog.isSelectedTime == true) {
@@ -744,4 +748,14 @@ const Dimension TimePickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
     return fontSizeValue;
 }
 
+void TimePickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    timePickerRowPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
+}
 } // namespace OHOS::Ace::NG

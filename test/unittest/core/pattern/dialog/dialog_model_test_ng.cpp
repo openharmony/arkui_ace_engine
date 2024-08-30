@@ -62,6 +62,7 @@ const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
 const Dimension DIMENSION_NEGATIVE(-1.0, DimensionUnit::PX);
 const Dimension DIMENSION_SIZE(100.0, DimensionUnit::PX);
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
+const Rect FOLD_CREASE_RECT = Rect(0.0, 300.0, 720.0, 80.0);
 } // namespace
 
 class DialogModelTestNg : public testing::Test {
@@ -1312,5 +1313,76 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg032, TestSize.Level1)
     EXPECT_EQ(maskRect.value().GetOffset(), offset);
     EXPECT_EQ(maskRect.value().GetWidth(), Dimension(CHILD_SIZE, DimensionUnit::PX));
     EXPECT_EQ(maskRect.value().GetHeight(), Dimension(CHILD_SIZE, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: DialogModelTestNg033
+ * @tc.desc: Test DialogLayoutAlgorithm::UpdateChildMaxSizeHeight function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
+    
+    auto maxSize = CONTAINER_SIZE;
+    SafeAreaInsets::Inset insetLeftAndRight = {};
+    SafeAreaInsets::Inset insetTopAndBottom = { .end = 100.f };
+    SafeAreaInsets SYSTEM_SAFE_AREA_INSET = { insetLeftAndRight, insetTopAndBottom,
+        insetLeftAndRight, insetTopAndBottom };
+    dialogLayoutAlgorithm->foldCreaseRect = FOLD_CREASE_RECT;
+    dialogLayoutAlgorithm->safeAreaInsets_ = SYSTEM_SAFE_AREA_INSET;
+    dialogLayoutAlgorithm->isHoverMode_ = false;
+    dialogLayoutAlgorithm->UpdateChildMaxSizeHeight(maxSize);
+    EXPECT_EQ(maxSize.Height(), 936);
+    dialogLayoutAlgorithm->isHoverMode_ = true;
+    dialogLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    maxSize = CONTAINER_SIZE;
+    dialogLayoutAlgorithm->UpdateChildMaxSizeHeight(maxSize);
+    EXPECT_EQ(maxSize.Height(), 200);
+    dialogLayoutAlgorithm->isKeyBoardShow_ = false;
+    dialogLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    maxSize = CONTAINER_SIZE;
+    dialogLayoutAlgorithm->UpdateChildMaxSizeHeight(maxSize);
+    EXPECT_EQ(maxSize.Height(), 656);
+}
+
+/**
+ * @tc.name: DialogModelTestNg034
+ * @tc.desc: Test DialogLayoutAlgorithm::SetAlignmentSwitch function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    ASSERT_NE(dialogLayoutAlgorithm, nullptr);
+
+    auto maxSize = CONTAINER_SIZE;
+    auto childSize = SizeF(CHILD_SIZE, CHILD_SIZE);
+    dialogLayoutAlgorithm->alignment_ = DialogAlignment::TOP;
+    dialogLayoutAlgorithm->isHoverMode_ = true;
+    dialogLayoutAlgorithm->foldCreaseRect = FOLD_CREASE_RECT;
+    OffsetF topLeftPoint;
+    
+    /**
+     * @tc.steps: step2. call SetAlignmentSwitch function.
+     * @tc.expected: the results are correct.
+     */
+    dialogLayoutAlgorithm->alignBottomScreen_ = true;
+    dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    dialogLayoutAlgorithm->AdjustChildPosition(topLeftPoint, topLeftPoint, childSize, true);
+    EXPECT_EQ(topLeftPoint.GetY(), FOLD_CREASE_RECT.Bottom());
+    dialogLayoutAlgorithm->alignBottomScreen_ = false;
+    dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+    dialogLayoutAlgorithm->AdjustChildPosition(topLeftPoint, topLeftPoint, childSize, true);
+    EXPECT_EQ(topLeftPoint.GetY(), 0);
 }
 } // namespace OHOS::Ace::NG

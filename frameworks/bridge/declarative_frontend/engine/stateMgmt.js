@@ -8087,21 +8087,10 @@ ObserveV2.arrayHandlerDeepObserved = {
             return target[key];
         }
         let refInfo = RefInfo.get(target);
-        if (key === 'size') {
-            ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-            return target.size;
-        }
         let ret = target[key];
         if (typeof (ret) !== 'function') {
-            if (typeof (ret) === 'object') {
-                let wrapper = RefInfo.get(ret);
-                ObserveV2.getObserve().addRef(refInfo, key);
-                return wrapper.proxy;
-            }
-            if (key === 'length') {
-                ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-            }
-            return ret;
+            ObserveV2.getObserve().addRef(refInfo, key === 'length' ? ObserveV2.OB_LENGTH : key);
+            return (typeof (ret) === 'object') ? RefInfo.get(ret).proxy : ret;
         }
         if (ObserveV2.arrayMutatingFunctions.has(key)) {
             return function (...args) {
@@ -8139,7 +8128,14 @@ ObserveV2.arrayHandlerDeepObserved = {
         }
     },
     set(target, key, value) {
-        return ObserveV2.commonHandlerSet(target, key, value);
+        if (typeof key === 'symbol' || target[key] === value) {
+            return true;
+        }
+        const originalLength = target.length;
+        target[key] = value;
+        const arrayLenChanged = target.length !== originalLength;
+        ObserveV2.getObserve().fireChange(RefInfo.get(target), arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString());
+        return true;
     }
 };
 ObserveV2.setMapHandlerDeepObserved = {
@@ -8451,7 +8447,19 @@ ObserveV2.arraySetMapProxy = {
         if (target[key] === value) {
             return true;
         }
-        target[key] = value;
+        if (Array.isArray(target)) {
+            const originalLength = target.length;
+            target[key] = value;
+            if (target.length !== originalLength) {
+                ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
+                // autoProxyObject function adds ref to OB_LENGTH for all arrays that
+                // are not MakeObserved. No need to fire key.toString() separately. Just return.
+                return true;
+            }
+        }
+        else {
+            target[key] = value;
+        }
         ObserveV2.getObserve().fireChange(target, key.toString());
         return true;
     }

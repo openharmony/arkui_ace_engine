@@ -44,6 +44,7 @@ public:
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void IsUserDefinedFontFamily(const std::string& pos);
+    static void JsOpacity(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
@@ -104,6 +105,7 @@ public:
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void DateTimeOptions(const JSCallbackInfo& info);
+    static void JsOpacity(const JSCallbackInfo& info);
 
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);

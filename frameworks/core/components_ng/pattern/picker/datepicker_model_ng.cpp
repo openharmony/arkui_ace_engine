@@ -659,7 +659,10 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.shadow.has_value()) {
         properties.shadow = pickerDialog.shadow.value();
     }
-
+    if (pickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = pickerDialog.hoverModeArea.value();
+    }
+    properties.enableHoverMode = pickerDialog.enableHoverMode;
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -842,4 +845,14 @@ const Dimension DatePickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
     return fontSizeValue;
 }
 
+void DatePickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    datePickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
+}
 } // namespace OHOS::Ace::NG

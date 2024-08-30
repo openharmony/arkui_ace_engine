@@ -30,6 +30,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t FOCUS_MENU_NUM = 2;
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
@@ -295,7 +296,13 @@ bool MenuWrapperPattern::HasStackSubMenu()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return host->GetChildren().size() > 1;
+    auto menuCount = 0;
+    for (const auto& child : host->GetChildren()) {
+        if (child && child->GetTag() == V2::MENU_ETS_TAG) {
+            menuCount++;
+        }
+    }
+    return menuCount > 1;
 }
 
 bool MenuWrapperPattern::HasEmbeddedSubMenu()
@@ -317,7 +324,8 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto iter = host->GetChildren().begin();
-    int32_t focusNodeId = host->GetChildren().size() - 2;
+    int32_t focusNodeId = static_cast<int32_t>(host->GetChildren().size()) - FOCUS_MENU_NUM;
+    CHECK_NULL_RETURN(focusNodeId >= 0, nullptr);
     std::advance(iter, focusNodeId);
     auto focusMenu = DynamicCast<FrameNode>(*iter);
     CHECK_NULL_RETURN(focusMenu, nullptr);

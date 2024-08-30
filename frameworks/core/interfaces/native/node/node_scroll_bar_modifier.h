@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/layout_inspector.h"
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_BAR_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_BAR_MODIFIER_H
 
-namespace OHOS::Ace {
-RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
-void LayoutInspector::SupportInspector() {}
+#include "core/interfaces/native/node/node_api.h"
 
-RsProfilerNodeMountCallback LayoutInspector::GetRsProfilerNodeMountCallback()
-{
-    return rsProfilerNodeMountCallback_;
+namespace OHOS::Ace::NG::NodeModifier {
+    const ArkUIScrollBarModifier* GetScrollBarModifier();
+    const CJUIScrollBarModifier* GetCJUIScrollBarModifier();
 }
-} // namespace OHOS::Ace
+#endif  // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_BAR_MODIFIER_H

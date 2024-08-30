@@ -742,11 +742,11 @@ private:
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
     void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
-        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t parallelIndex, const Offset& offset,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset,
         int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
     
     void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
-        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t exclusiveIndex, const Offset& offset,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset,
         int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
         GesturePriority priority);
 

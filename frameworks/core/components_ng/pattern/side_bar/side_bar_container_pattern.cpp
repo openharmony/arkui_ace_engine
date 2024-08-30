@@ -67,8 +67,10 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 constexpr static int32_t SIDE_BAR_INDEX = 2;
 constexpr static int32_t CONTENT_INDEX = 3;
-Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
-Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_SIZE = 40.0_vp;    // version 13
+constexpr Dimension DEFAULT_CONTROL_BUTTON_FOCUS_LINE_SIZE = 2.0_vp;
 Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
@@ -161,8 +163,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
         return;
     }
 
-    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
-    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
+    UpdateControlButtonImageSize();
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
@@ -216,17 +217,7 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
 void SideBarContainerPattern::GetControlImageSize(Dimension& width, Dimension& height)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
-        DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
-    }
-    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
-    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
-
+    UpdateControlButtonImageSize();
     width = controlImageWidth_;
     height = controlImageHeight_;
 }
@@ -600,6 +591,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
 
 RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<SideBarTheme>& sideBarTheme)
 {
+    CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -607,12 +599,26 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    auto butttonRadius = sideBarTheme->GetControlButtonRadius();
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(butttonRadius));
+    auto buttonRadius = sideBarTheme->GetControlButtonRadius();
+    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DEFAULT_CONTROL_BUTTON_SIZE), CalcLength(DEFAULT_CONTROL_BUTTON_SIZE)));
+        buttonRadius = sideBarTheme->GetControlButtonBackboardRadius();
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
+        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
+        CHECK_NULL_RETURN(buttonPattern, nullptr);
+        buttonPattern->SetBlendColor(sideBarTheme->GetControlButtonBackboardColorPress(),
+            sideBarTheme->GetControlButtonBackboardColorHover());
+        buttonPattern->SetFocusBorderColor(sideBarTheme->GetControlButtonBackboardStrokeColor());
+        buttonPattern->SetFocusBorderWidth(DEFAULT_CONTROL_BUTTON_FOCUS_LINE_SIZE);
+        auto backBoardColor = sideBarTheme->GetControlButtonBackboardColor();
+        buttonRenderContext->UpdateBackgroundColor(backBoardColor);
+    }
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusDependence(FocusDependence::SELF);
@@ -622,6 +628,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
 RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
     const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& parentNode)
 {
+    CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto imgNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -639,7 +646,13 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
     if (!info.has_value()) {
         info = std::make_optional<ImageSourceInfo>();
         info->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
-        Color controlButtonColor = sideBarTheme->GetControlImageColor();
+        Color controlButtonColor;
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            controlButtonColor = sideBarTheme->GetControlButtonIconColor();
+            UpdateControlButtonImage(info);
+        } else {
+            controlButtonColor = sideBarTheme->GetControlImageColor();
+        }
         info->SetFillColor(controlButtonColor);
     }
     imageInfo_ = info.value();
@@ -913,6 +926,9 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     if (!imgSourceInfo.has_value()) {
         imgSourceInfo = std::make_optional<ImageSourceInfo>();
         imgSourceInfo->SetResourceId(InternalResource::ResourceId::SIDE_BAR);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            UpdateControlButtonImage(imgSourceInfo);
+        }
         imgSourceInfo->SetFillColor(controlButtonColor);
     }
     imageInfo_ = imgSourceInfo.value();
@@ -957,6 +973,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    UpdateControlButtonInfo();
     return paddingProperty != nullptr;
 }
 
@@ -1391,5 +1408,54 @@ void SideBarContainerPattern::SetAccessibilityEvent()
     CHECK_NULL_VOID(controlButton);
     // use TEXT_CHANGE event to report information update
     controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
+}
+
+void SideBarContainerPattern::UpdateControlButtonInfo()
+{
+    if (updateCallBack_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        updateCallBack_(host);
+    }
+}
+
+void SideBarContainerPattern::UpdateControlButtonImageSize()
+{
+    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
+    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sideBarTheme = pipeline->GetTheme<SideBarTheme>();
+        CHECK_NULL_VOID(sideBarTheme);
+        controlButtonWidth = sideBarTheme->GetControlButtonWidthSmall();
+        controlButtonHeight = sideBarTheme->GetControlButtonHeightSmall();
+    }
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(controlButtonWidth);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(controlButtonHeight);
+
+    // check whether control image size is customed
+    if (controlImageWidth_ != controlButtonWidth || controlImageHeight_ != controlButtonHeight) {
+        SetControlButtonSizeCustom(true);
+    } else {
+        SetControlButtonSizeCustom(false);
+    }
+}
+
+void SideBarContainerPattern::UpdateControlButtonImage(std::optional<ImageSourceInfo>& info)
+{
+    CHECK_NULL_VOID(info.has_value());
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto isStartPos = GetSideBarPositionWithRtl(layoutProperty) == SideBarPosition::START;
+    if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+        info->SetResourceId(isStartPos ?
+            InternalResource::ResourceId::SIDE_BAR_OPEN : InternalResource::ResourceId::SIDE_BAR_CLOSE);
+    } else {
+        info->SetResourceId(isStartPos ?
+            InternalResource::ResourceId::SIDE_BAR_CLOSE : InternalResource::ResourceId::SIDE_BAR_OPEN);
+    }
 }
 } // namespace OHOS::Ace::NG

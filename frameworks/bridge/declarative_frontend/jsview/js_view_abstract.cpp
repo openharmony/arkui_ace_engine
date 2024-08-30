@@ -115,6 +115,8 @@ const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 } // namespace
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
@@ -10434,6 +10436,23 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     CalcDimension height;
     if (ParseJsDimensionVpNG(heightValue, height, true)) {
         properties.height = height;
+    }
+}
+
+void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto enableHoverModeValue = obj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        properties.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    // Parse hoverModeArea
+    auto hoverModeAreaValue = obj->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            properties.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
     }
 }
 

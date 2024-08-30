@@ -27,10 +27,6 @@ enum class ToastShowMode {
     TOP_MOST = 1,
     SYSTEM_TOP_MOST = 2,
 };
-enum class HoverModeAreaType {
-    TOP_SCREEN = 0,
-    BOTTOM_SCREEN = 1,
-};
 struct ToastInfo {
     std::string message;
     int32_t duration = 0;
