@@ -255,7 +255,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
         CHECK_NULL_VOID(adapter);
         for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
             std::string patternName = PRELOAD_LIST[i];
-            themeStyle->checkThemeStyleVector.push_back(patternName);
+            themeStyle->PushBackCheckThemeStyleVector(patternName);
             auto style = adapter->GetPatternByName(patternName);
             if (style) {
                 ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
