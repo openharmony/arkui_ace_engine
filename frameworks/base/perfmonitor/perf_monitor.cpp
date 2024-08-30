@@ -30,6 +30,24 @@ constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
+// Obtain the last three digits of the full path
+constexpr int32_t PATH_DEPTH = 3;
+
+std::string ParsePageUrl(const std::string& pagePath)
+{
+    std::string res;
+    std::vector<std::string> paths;
+    StringUtils::StringSplitter(pagePath, '/', paths);
+    if (paths.empty() || paths.size() < PATH_DEPTH) {
+        return pagePath;
+    }
+    vector<string>::iterator it = paths.end();
+    for (int i = 0; i < PATH_DEPTH; i++) {
+        it--;
+        res = '/' + *it + res;
+    }
+    return res;
+}
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -366,7 +384,7 @@ void PerfMonitor::ReportJankFrameApp(double jank)
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl)
 {
-    baseInfo.pageUrl = pageUrl;
+    baseInfo.pageUrl = ParsePageUrl(pageUrl);
 }
 
 std::string PerfMonitor::GetPageUrl()
@@ -387,7 +405,8 @@ std::string PerfMonitor::GetPageName()
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName)
 {
-    EventReport::ReportPageShowMsg(pageUrl, bundleName, pageName);
+    std::string parsePageUrl = ParsePageUrl(pageUrl);
+    EventReport::ReportPageShowMsg(parsePageUrl, bundleName, pageName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)
