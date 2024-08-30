@@ -737,14 +737,7 @@ export class ChipComponent extends ViewPU {
         let isSmallChipSize = this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL;
         let focusFontSize = isSmallChipSize ? this.theme.label.smallFocusFontSize :
         this.theme.label.normalFocusFontSize;
-        try {
-            resourceFn.getNumberByName((focusFontSize
-                .params[0]).split('.')[2]);
-            return focusFontSize;
-        }
-        catch (error) {
-            return this.theme.label.defaultFontSize;
-        }
+        return this.verifyResource(focusFontSize);
     }
     getLabelFontSize() {
         if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
@@ -763,13 +756,16 @@ export class ChipComponent extends ViewPU {
         }
     }
     verifyResource(resourceValue) {
-        try {
-            resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
-            return resourceValue;
+        if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) && resourceValue.params.length > 2) {
+            try {
+                resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
+                return resourceValue;
+            }
+            catch (error) {
+                return this.theme.label.defaultFontSize;
+            }
         }
-        catch (error) {
-            return this.theme.label.defaultFontSize;
-        }
+        return this.theme.label.defaultFontSize;
     }
     getActiveFontColor() {
         return this.chipNodeOnFocus ? this.theme.label.focusActiveFontColor : this.theme.label.activatedFontColor;
