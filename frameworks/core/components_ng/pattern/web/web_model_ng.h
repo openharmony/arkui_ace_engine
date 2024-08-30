@@ -163,6 +163,7 @@ public:
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
