@@ -352,7 +352,7 @@ public:
 
     virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
-    virtual void TryVisibleChangeOnDescendant(bool isVisible);
+    virtual void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility);
 
     // call by recycle framework.
     virtual void OnRecycle();
@@ -801,7 +801,7 @@ protected:
     static void RemoveFromParentCleanly(const RefPtr<UINode>& child, const RefPtr<UINode>& parent);
 
     // update visible change signal to children
-    void UpdateChildrenVisible(bool isVisible) const;
+    void UpdateChildrenVisible(VisibleType preVisibility, VisibleType currentVisibility) const;
 
     void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
         std::list<int32_t>& removedElmtId, bool isEntry);
