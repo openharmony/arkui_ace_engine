@@ -16,26 +16,25 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+if (PUV2ViewBase.contextStack === undefined) {
+  Reflect.set(PUV2ViewBase, 'contextStack', []);
+}
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
-const PUBLIC_MORE = {
-  'id': -1,
-  'type': 20000,
-  params: ['sys.media.ohos_ic_public_more'],
-  'bundleName': '__harDefaultBundleName__',
-  'moduleName': '__harDefaultModuleName__'
-};
-const PUBLIC_BACK = {
-  'id': -1,
-  'type': 20000,
-  params: ['sys.media.ohos_ic_back'],
-  'bundleName': '__harDefaultBundleName__',
-  'moduleName': '__harDefaultModuleName__'
-};
+const hilog = requireNapi('hilog');
+const PUBLIC_MORE = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_more'],
+  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const PUBLIC_BACK = { 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_back'],
+  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const TEXT_EDITABLE_DIALOG = '18.3fp';
+const IMAGE_SIZE = '64vp';
+const MAX_DIALOG = '256vp';
+const MIN_DIALOG = '216vp';
+
 export class SelectTitleBar extends ViewPU {
-  constructor(q7, r7, s7, t7 = -1, u7 = undefined, v7) {
-    super(q7, s7, t7, v7);
-    if (typeof u7 === 'function') {
-      this.paramsGenerator_ = u7;
+  constructor(x9, y9, z9, a10 = -1, b10 = undefined, c10) {
+    super(x9, z9, a10, c10);
+    if (typeof b10 === 'function') {
+      this.paramsGenerator_ = b10;
     }
     this.__selected = new ObservedPropertySimplePU(0, this, 'selected');
     this.options = [];
@@ -46,53 +45,59 @@ export class SelectTitleBar extends ViewPU {
     this.onSelected = () => { };
     this.__selectMaxWidth = new ObservedPropertySimplePU(0, this, 'selectMaxWidth');
     this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
-    this.setInitiallyProvidedValue(r7);
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+    this.setInitiallyProvidedValue(y9);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(p7) {
-    if (p7.selected !== undefined) {
-      this.selected = p7.selected;
+  setInitiallyProvidedValue(w9) {
+    if (w9.selected !== undefined) {
+      this.selected = w9.selected;
     }
-    if (p7.options !== undefined) {
-      this.options = p7.options;
+    if (w9.options !== undefined) {
+      this.options = w9.options;
     }
-    if (p7.menuItems !== undefined) {
-      this.menuItems = p7.menuItems;
+    if (w9.menuItems !== undefined) {
+      this.menuItems = w9.menuItems;
     }
-    if (p7.subtitle !== undefined) {
-      this.subtitle = p7.subtitle;
+    if (w9.subtitle !== undefined) {
+      this.subtitle = w9.subtitle;
     }
-    if (p7.badgeValue !== undefined) {
-      this.badgeValue = p7.badgeValue;
+    if (w9.badgeValue !== undefined) {
+      this.badgeValue = w9.badgeValue;
     }
-    if (p7.hidesBackButton !== undefined) {
-      this.hidesBackButton = p7.hidesBackButton;
+    if (w9.hidesBackButton !== undefined) {
+      this.hidesBackButton = w9.hidesBackButton;
     }
-    if (p7.onSelected !== undefined) {
-      this.onSelected = p7.onSelected;
+    if (w9.onSelected !== undefined) {
+      this.onSelected = w9.onSelected;
     }
-    if (p7.selectMaxWidth !== undefined) {
-      this.selectMaxWidth = p7.selectMaxWidth;
+    if (w9.selectMaxWidth !== undefined) {
+      this.selectMaxWidth = w9.selectMaxWidth;
     }
-    if (p7.backActive !== undefined) {
-      this.backActive = p7.backActive;
+    if (w9.backActive !== undefined) {
+      this.backActive = w9.backActive;
+    }
+    if (w9.fontSize !== undefined) {
+      this.fontSize = w9.fontSize;
     }
   }
 
-  updateStateVars(o7) {
+  updateStateVars(v9) {
   }
 
-  purgeVariableDependenciesOnElmtId(n7) {
-    this.__selected.purgeDependencyOnElmtId(n7);
-    this.__selectMaxWidth.purgeDependencyOnElmtId(n7);
-    this.__backActive.purgeDependencyOnElmtId(n7);
+  purgeVariableDependenciesOnElmtId(u9) {
+    this.__selected.purgeDependencyOnElmtId(u9);
+    this.__selectMaxWidth.purgeDependencyOnElmtId(u9);
+    this.__backActive.purgeDependencyOnElmtId(u9);
+    this.__fontSize.purgeDependencyOnElmtId(u9);
   }
 
   aboutToBeDeleted() {
     this.__selected.aboutToBeDeleted();
     this.__selectMaxWidth.aboutToBeDeleted();
     this.__backActive.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -101,104 +106,97 @@ export class SelectTitleBar extends ViewPU {
     return this.__selected.get();
   }
 
-  set selected(m7) {
-    this.__selected.set(m7);
+  set selected(t9) {
+    this.__selected.set(t9);
   }
 
   get selectMaxWidth() {
     return this.__selectMaxWidth.get();
   }
 
-  set selectMaxWidth(l7) {
-    this.__selectMaxWidth.set(l7);
+  set selectMaxWidth(s9) {
+    this.__selectMaxWidth.set(s9);
   }
 
   get backActive() {
     return this.__backActive.get();
   }
 
-  set backActive(k7) {
-    this.__backActive.set(k7);
+  set backActive(r9) {
+    this.__backActive.set(r9);
+  }
+
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+
+  set fontSize(q9) {
+    this.__fontSize.set(q9);
   }
 
   initialRender() {
-    this.observeComponentCreation((d7, e7) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(d7);
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation2((j9, k9) => {
       Flex.create({
         justifyContent: FlexAlign.SpaceBetween,
-        alignItems: ItemAlign.Stretch,
+        alignItems: ItemAlign.Stretch
       });
       Flex.width('100%');
       Flex.height(SelectTitleBar.totalHeight);
       Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'],
         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-      Flex.onAreaChange((g7, h7) => {
-        let i7 = Number(h7.width);
+      Flex.onAreaChange((m9, n9) => {
+        let o9 = Number(n9.width);
         if (!this.hidesBackButton) {
-          i7 -= ImageMenuItem.imageHotZoneWidth;
-          i7 += SelectTitleBar.leftPadding;
-          i7 -= SelectTitleBar.leftPaddingWithBack;
+          o9 -= ImageMenuItem.imageHotZoneWidth;
+          o9 += SelectTitleBar.leftPadding;
+          o9 -= SelectTitleBar.leftPaddingWithBack;
         }
         if (this.menuItems !== undefined) {
-          let j7 = this.menuItems.length;
-          if (j7 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-            i7 -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
-          } else if (j7 > 0) {
-            i7 -= ImageMenuItem.imageHotZoneWidth * j7;
+          let p9 = this.menuItems.length;
+          if (p9 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+            o9 -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
+          } else if (p9 > 0) {
+            o9 -= ImageMenuItem.imageHotZoneWidth * p9;
           }
         }
         if (this.badgeValue) {
-          this.selectMaxWidth = i7 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
+          this.selectMaxWidth = o9 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
           SelectTitleBar.rightPadding - SelectTitleBar.badgePadding;
         } else {
-          this.selectMaxWidth = i7 - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
+          this.selectMaxWidth = o9 - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
         }
       });
-      if (!e7) {
-        Flex.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((b7, c7) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(b7);
+    }, Flex);
+    this.observeComponentCreation2((h9, i9) => {
       Row.create();
-      Row.margin({ left: this.hidesBackButton ? { 'id': -1, 'type': 10002,
-        params: ['sys.float.ohos_id_max_padding_start'], 'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002,
-        params: ['sys.float.ohos_id_default_padding_start'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-      if (!c7) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((n6, o6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(n6);
+      Row.margin({ left: this.hidesBackButton ? {
+        'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_start'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+        { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+      });
+    }, Row);
+    this.observeComponentCreation2((t8, u8) => {
       If.create();
       if (!this.hidesBackButton) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((z6, a7) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(z6);
+          this.observeComponentCreation2((f9, g9) => {
             Navigator.create();
             Navigator.active(this.backActive);
-            if (!a7) {
-              Navigator.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+          }, Navigator);
           Navigator.pop();
           {
-            this.observeComponentCreation((t6, u6) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(t6);
-              if (u6) {
-                let v6 = new ImageMenuItem(this, { item: {
+            this.observeComponentCreation2((z8, a9) => {
+              if (a9) {
+                let b9 = new ImageMenuItem(this, { item: {
                   value: PUBLIC_BACK,
                   isEnabled: true,
                   action: () => this.backActive = true,
-                }, index: -1 }, undefined, t6, () => { },
-                  { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 97 });
-                ViewPU.create(v6);
-                let w6 = () => {
+                }, index: -1 }, undefined, z8, () => { },
+                  { page: 'library/src/main/ets/components/MainPage.ets', line: 73, col: 11 });
+                ViewPU.create(b9);
+                let c9 = () => {
                   return {
                     item: {
                       value: PUBLIC_BACK,
@@ -208,72 +206,50 @@ export class SelectTitleBar extends ViewPU {
                     index: -1,
                   };
                 };
-                v6.paramsGenerator_ = w6;
-              } else {
-                this.updateStateVarsOfChildByElmtId(t6, {});
+                b9.paramsGenerator_ = c9;
               }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
+              else {
+                this.updateStateVarsOfChildByElmtId(z8, {});
+              }
+            }, { name: 'ImageMenuItem' });
           }
         });
       } else {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!o6) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+    }, If);
     If.pop();
-    this.observeComponentCreation((l6, m6) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(l6);
+    this.observeComponentCreation2((r8, s8) => {
       Column.create();
       Column.justifyContent(FlexAlign.Start);
       Column.alignItems(HorizontalAlign.Start);
       Column.constraintSize({ maxWidth: this.selectMaxWidth });
-      if (!m6) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((s5, t5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(s5);
+    }, Column);
+    this.observeComponentCreation2((y7, z7) => {
       If.create();
       if (this.badgeValue) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((j6, k6) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(j6);
+          this.observeComponentCreation2((p8, q8) => {
             Badge.create({
               count: this.badgeValue,
               position: BadgePosition.Right,
               style: {
-                badgeSize: SelectTitleBar.badgeSize,
                 badgeColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'],
                   'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 borderColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'],
                   'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                borderWidth: 0,
-              },
+                borderWidth: 0
+              }
             });
-            if (!k6) {
-              Badge.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((h6, i6) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(h6);
+          }, Badge);
+          this.observeComponentCreation2((n8, o8) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
             Row.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
               'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
-            if (!i6) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((f6, g6) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(f6);
+          }, Row);
+          this.observeComponentCreation2((l8, m8) => {
             Select.create(this.options);
             Select.selected(this.selected);
             Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '');
@@ -288,28 +264,19 @@ export class SelectTitleBar extends ViewPU {
             Select.onSelect(this.onSelected);
             Select.constraintSize({ maxWidth: this.selectMaxWidth });
             Select.offset({ x: -4 });
-            if (!g6) {
-              Select.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+          }, Select);
           Select.pop();
           Row.pop();
           Badge.pop();
         });
-      } else {
+      }
+      else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation((z5, a6) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(z5);
+          this.observeComponentCreation2((f8, g8) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
-            if (!a6) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((x5, y5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(x5);
+          }, Row);
+          this.observeComponentCreation2((d8, e8) => {
             Select.create(this.options);
             Select.selected(this.selected);
             Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '');
@@ -324,38 +291,23 @@ export class SelectTitleBar extends ViewPU {
             Select.onSelect(this.onSelected);
             Select.constraintSize({ maxWidth: this.selectMaxWidth });
             Select.offset({ x: -4 });
-            if (!y5) {
-              Select.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+          }, Select);
           Select.pop();
           Row.pop();
         });
       }
-      if (!t5) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+    }, If);
     If.pop();
-    this.observeComponentCreation((i5, j5) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(i5);
+    this.observeComponentCreation2((o7, p7) => {
       If.create();
       if (this.subtitle !== undefined) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((q5, r5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(q5);
+          this.observeComponentCreation2((w7, x7) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
             Row.margin({ left: SelectTitleBar.subtitleLeftPadding });
-            if (!r5) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((o5, p5) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(o5);
+          }, Row);
+          this.observeComponentCreation2((u7, v7) => {
             Text.create(this.subtitle);
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'],
               'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -365,11 +317,7 @@ export class SelectTitleBar extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.selectMaxWidth });
             Text.offset({ y: -4 });
-            if (!p5) {
-              Text.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+          }, Text);
           Text.pop();
           Row.pop();
         });
@@ -377,56 +325,49 @@ export class SelectTitleBar extends ViewPU {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!j5) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+    }, If);
     If.pop();
     Column.pop();
     Row.pop();
-    this.observeComponentCreation((x4, y4) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(x4);
+    this.observeComponentCreation2((d7, e7) => {
       If.create();
       if (this.menuItems !== undefined && this.menuItems.length > 0) {
         this.ifElseBranchUpdateFunction(0, () => {
           {
-            this.observeComponentCreation((c5, d5) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(c5);
-              if (d5) {
-                let e5 = new CollapsibleMenuSection(this, { menuItems: this.menuItems,
-                  index: 1 + SelectTitleBar.instanceCount++ }, undefined, c5, () => { },
-                  { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 169 });
-                ViewPU.create(e5);
-                let f5 = () => {
+            this.observeComponentCreation2((i7, j7) => {
+              if (j7) {
+                let k7 = new CollapsibleMenuSection(this, { menuItems: this.menuItems,
+                  index: 1 + SelectTitleBar.instanceCount++ }, undefined, i7, () => { },
+                  { page: 'library/src/main/ets/components/MainPage.ets', line: 146, col: 9 });
+                ViewPU.create(k7);
+                let l7 = () => {
                   return {
                     menuItems: this.menuItems,
-                    index: 1 + SelectTitleBar.instanceCount++,
+                    index: 1 + SelectTitleBar.instanceCount++
                   };
                 };
-                e5.paramsGenerator_ = f5;
-              } else {
-                this.updateStateVarsOfChildByElmtId(c5, {});
+                k7.paramsGenerator_ = l7;
               }
-              ViewStackProcessor.StopGetAccessRecording();
-            });
+              else {
+                this.updateStateVarsOfChildByElmtId(i7, {});
+              }
+            }, { name: 'CollapsibleMenuSection' });
           }
         });
       } else {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
-      if (!y4) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+    }, If);
     If.pop();
     Flex.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 
   rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
 SelectTitleBar.badgeSize = 16;
@@ -438,54 +379,120 @@ SelectTitleBar.badgePadding = 16;
 SelectTitleBar.subtitleLeftPadding = 4;
 SelectTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
-  constructor(k4, l4, m4, n4 = -1, o4 = undefined, p4) {
-    super(k4, m4, n4, p4);
-    if (typeof o4 === 'function') {
-      this.paramsGenerator_ = o4;
+  constructor(m6, n6, o6, p6 = -1, q6 = undefined, r6) {
+    super(m6, o6, p6, r6);
+    if (typeof q6 === 'function') {
+      this.paramsGenerator_ = q6;
     }
     this.menuItems = [];
+    this.item = {
+      value: PUBLIC_MORE,
+      label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+    };
     this.index = 0;
+    this.longPressTime = 500;
+    this.minFontSize = 1.75;
+    this.isFollowingSystemFontScale = false;
+    this.maxFontScale = 1;
+    this.systemFontScale = 1;
     this.firstFocusableIndex = -1;
     this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
     this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
     this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
     this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-    this.setInitiallyProvidedValue(l4);
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+    this.dialogController = new CustomDialogController({
+      builder: () => {
+        let s6 = new SelectTitleBarDialog(this, {
+          cancel: () => {
+          },
+          confirm: () => {
+          },
+          SelectTitleDialog: this.item,
+          SelectTitleBarDialog: this.item.label ? this.item.label : '',
+          fontSize: this.fontSize,
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 201, col: 14 });
+        s6.setController(this.dialogController);
+        ViewPU.create(s6);
+        let t6 = () => {
+          return {
+            cancel: () => {
+            },
+            confirm: () => {
+            },
+            SelectTitleDialog: this.item,
+            SelectTitleBarDialog: this.item.label ? this.item.label : '',
+            fontSize: this.fontSize
+          };
+        };
+        s6.paramsGenerator_ = t6;
+      },
+      maskColor: Color.Transparent,
+      isModal: true,
+      customStyle: true
+    }, this);
+    this.setInitiallyProvidedValue(n6);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(j4) {
-    if (j4.menuItems !== undefined) {
-      this.menuItems = j4.menuItems;
+  setInitiallyProvidedValue(l6) {
+    if (l6.menuItems !== undefined) {
+      this.menuItems = l6.menuItems;
     }
-    if (j4.index !== undefined) {
-      this.index = j4.index;
+    if (l6.item !== undefined) {
+      this.item = l6.item;
     }
-    if (j4.firstFocusableIndex !== undefined) {
-      this.firstFocusableIndex = j4.firstFocusableIndex;
+    if (l6.index !== undefined) {
+      this.index = l6.index;
     }
-    if (j4.isPopupShown !== undefined) {
-      this.isPopupShown = j4.isPopupShown;
+    if (l6.longPressTime !== undefined) {
+      this.longPressTime = l6.longPressTime;
     }
-    if (j4.isMoreIconOnFocus !== undefined) {
-      this.isMoreIconOnFocus = j4.isMoreIconOnFocus;
+    if (l6.minFontSize !== undefined) {
+      this.minFontSize = l6.minFontSize;
     }
-    if (j4.isMoreIconOnHover !== undefined) {
-      this.isMoreIconOnHover = j4.isMoreIconOnHover;
+    if (l6.isFollowingSystemFontScale !== undefined) {
+      this.isFollowingSystemFontScale = l6.isFollowingSystemFontScale;
     }
-    if (j4.isMoreIconOnClick !== undefined) {
-      this.isMoreIconOnClick = j4.isMoreIconOnClick;
+    if (l6.maxFontScale !== undefined) {
+      this.maxFontScale = l6.maxFontScale;
+    }
+    if (l6.systemFontScale !== undefined) {
+      this.systemFontScale = l6.systemFontScale;
+    }
+    if (l6.firstFocusableIndex !== undefined) {
+      this.firstFocusableIndex = l6.firstFocusableIndex;
+    }
+    if (l6.isPopupShown !== undefined) {
+      this.isPopupShown = l6.isPopupShown;
+    }
+    if (l6.isMoreIconOnFocus !== undefined) {
+      this.isMoreIconOnFocus = l6.isMoreIconOnFocus;
+    }
+    if (l6.isMoreIconOnHover !== undefined) {
+      this.isMoreIconOnHover = l6.isMoreIconOnHover;
+    }
+    if (l6.isMoreIconOnClick !== undefined) {
+      this.isMoreIconOnClick = l6.isMoreIconOnClick;
+    }
+    if (l6.fontSize !== undefined) {
+      this.fontSize = l6.fontSize;
+    }
+    if (l6.dialogController !== undefined) {
+      this.dialogController = l6.dialogController;
     }
   }
 
-  updateStateVars(i4) {
+  updateStateVars(k6) {
   }
 
-  purgeVariableDependenciesOnElmtId(h4) {
-    this.__isPopupShown.purgeDependencyOnElmtId(h4);
-    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(h4);
-    this.__isMoreIconOnHover.purgeDependencyOnElmtId(h4);
-    this.__isMoreIconOnClick.purgeDependencyOnElmtId(h4);
+  purgeVariableDependenciesOnElmtId(j6) {
+    this.__isPopupShown.purgeDependencyOnElmtId(j6);
+    this.__isMoreIconOnFocus.purgeDependencyOnElmtId(j6);
+    this.__isMoreIconOnHover.purgeDependencyOnElmtId(j6);
+    this.__isMoreIconOnClick.purgeDependencyOnElmtId(j6);
+    this.__fontSize.purgeDependencyOnElmtId(j6);
   }
 
   aboutToBeDeleted() {
@@ -493,6 +500,7 @@ class CollapsibleMenuSection extends ViewPU {
     this.__isMoreIconOnFocus.aboutToBeDeleted();
     this.__isMoreIconOnHover.aboutToBeDeleted();
     this.__isMoreIconOnClick.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -501,32 +509,40 @@ class CollapsibleMenuSection extends ViewPU {
     return this.__isPopupShown.get();
   }
 
-  set isPopupShown(g4) {
-    this.__isPopupShown.set(g4);
+  set isPopupShown(i6) {
+    this.__isPopupShown.set(i6);
   }
 
   get isMoreIconOnFocus() {
     return this.__isMoreIconOnFocus.get();
   }
 
-  set isMoreIconOnFocus(f4) {
-    this.__isMoreIconOnFocus.set(f4);
+  set isMoreIconOnFocus(h6) {
+    this.__isMoreIconOnFocus.set(h6);
   }
 
   get isMoreIconOnHover() {
     return this.__isMoreIconOnHover.get();
   }
 
-  set isMoreIconOnHover(e4) {
-    this.__isMoreIconOnHover.set(e4);
+  set isMoreIconOnHover(g6) {
+    this.__isMoreIconOnHover.set(g6);
   }
 
   get isMoreIconOnClick() {
     return this.__isMoreIconOnClick.get();
   }
 
-  set isMoreIconOnClick(d4) {
-    this.__isMoreIconOnClick.set(d4);
+  set isMoreIconOnClick(f6) {
+    this.__isMoreIconOnClick.set(f6);
+  }
+
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+
+  set fontSize(e6) {
+    this.__fontSize.set(e6);
   }
 
   getMoreIconFgColor() {
@@ -550,111 +566,108 @@ class CollapsibleMenuSection extends ViewPU {
   }
 
   aboutToAppear() {
-    this.menuItems.forEach((b4, c4) => {
-      if (b4.isEnabled && this.firstFocusableIndex === -1 && c4 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + c4 + 1;
+    try {
+      let h = this.getUIContext();
+      this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
+      this.maxFontScale = h.getMaxFontScale();
+    }
+    catch (j9) {
+      let k9 = j9.code;
+      let l9 = j9.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${k9}, message: ${l9}`);
+    }
+    this.menuItems.forEach((c6, d6) => {
+      if (c6.isEnabled && this.firstFocusableIndex == -1 &&
+        d6 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + d6 + 1;
       }
     });
   }
+  decideFontScale() {
+    let m9 = this.getUIContext();
+    this.systemFontScale = m9.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
 
   initialRender() {
-    this.observeComponentCreation((y3, z3) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(y3);
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation2((z5, a6) => {
       Column.create();
       Column.height('100%');
       Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'],
         'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
       Column.justifyContent(FlexAlign.Center);
-      if (!z3) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((w3, x3) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(w3);
+    }, Column);
+    this.observeComponentCreation2((x5, y5) => {
       Row.create();
-      if (!x3) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((y1, z1) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(y1);
+    }, Row);
+    this.observeComponentCreation2((w3, x3) => {
       If.create();
       if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation((i3, j3) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(i3);
+          this.observeComponentCreation2((j5, k5) => {
             ForEach.create();
-            const k3 = (m3, n3) => {
-              const o3 = m3;
+            const l5 = (n5, o5) => {
+              const p5 = n5;
               {
-                this.observeComponentCreation((q3, r3) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(q3);
-                  if (r3) {
-                    let s3 = new ImageMenuItem(this, { item: o3, index: this.index * 1000 + n3 + 1 }, undefined, q3,
-                      () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 244 });
-                    ViewPU.create(s3);
-                    let t3 = () => {
+                this.observeComponentCreation2((r5, s5) => {
+                  if (s5) {
+                    let t5 = new ImageMenuItem(this, { item: p5, index: this.index * 1000 + o5 + 1 }, undefined, r5,
+                      () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 245, col: 13 });
+                    ViewPU.create(t5);
+                    let u5 = () => {
                       return {
-                        item: o3,
-                        index: this.index * 1000 + n3 + 1,
+                        item: p5,
+                        index: this.index * 1000 + o5 + 1
                       };
                     };
-                    s3.paramsGenerator_ = t3;
-                  } else {
-                    this.updateStateVarsOfChildByElmtId(q3, {});
+                    t5.paramsGenerator_ = u5;
                   }
-                  ViewStackProcessor.StopGetAccessRecording();
-                });
+                  else {
+                    this.updateStateVarsOfChildByElmtId(r5, {});
+                  }
+                }, { name: 'ImageMenuItem' });
               }
             };
-            this.forEachUpdateFunction(i3, this.menuItems, k3, undefined, true, false);
-            if (!j3) {
-              ForEach.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+            this.forEachUpdateFunction(j5, this.menuItems, l5, undefined, true, false);
+          }, ForEach);
           ForEach.pop();
         });
-      } else {
+      }
+      else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation((s2, t2) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(s2);
+          this.observeComponentCreation2((t4, u4) => {
             ForEach.create();
-            const u2 = (w2, x2) => {
-              const y2 = w2;
+            const v4 = (x4, y4) => {
+              const z4 = x4;
               {
-                this.observeComponentCreation((a3, b3) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(a3);
-                  if (b3) {
-                    let c3 = new ImageMenuItem(this, { item: y2, index: this.index * 1000 + x2 + 1 }, undefined, a3,
-                      () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 248 });
-                    ViewPU.create(c3);
-                    let d3 = () => {
+                this.observeComponentCreation2((b5, c5) => {
+                  if (c5) {
+                    let d5 = new ImageMenuItem(this, { item: z4, index: this.index * 1000 + y4 + 1 }, undefined, b5,
+                      () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 250, col: 15 });
+                    ViewPU.create(d5);
+                    let e5 = () => {
                       return {
-                        item: y2,
-                        index: this.index * 1000 + x2 + 1,
+                        item: z4,
+                        index: this.index * 1000 + y4 + 1
                       };
                     };
-                    c3.paramsGenerator_ = d3;
-                  } else {
-                    this.updateStateVarsOfChildByElmtId(a3, {});
+                    d5.paramsGenerator_ = e5;
                   }
-                  ViewStackProcessor.StopGetAccessRecording();
-                });
+                  else {
+                    this.updateStateVarsOfChildByElmtId(b5, {});
+                  }
+                }, { name: 'ImageMenuItem' });
               }
             };
-            this.forEachUpdateFunction(s2, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
-              u2, undefined, true, false);
-            if (!t2) {
-              ForEach.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+            this.forEachUpdateFunction(t4, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+              v4, undefined, true, false);
+          }, ForEach);
           ForEach.pop();
-          this.observeComponentCreation((g2, h2) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(g2);
+          this.observeComponentCreation2((e4, f4) => {
             Row.create();
             Row.width(ImageMenuItem.imageHotZoneWidth);
             Row.height(ImageMenuItem.imageHotZoneWidth);
@@ -669,89 +682,87 @@ class CollapsibleMenuSection extends ViewPU {
               width: ImageMenuItem.focusBorderWidth,
               color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              style: BorderStyle.Solid,
+              style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState('normal');
             Row.border({
               radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-              width: 0,
+              width: 0
             });
             ViewStackProcessor.visualState();
             Row.onFocus(() => this.isMoreIconOnFocus = true);
             Row.onBlur(() => this.isMoreIconOnFocus = false);
-            Row.onHover((r2) => this.isMoreIconOnHover = r2);
-            Row.onKeyEvent((q2) => {
-              if (q2.keyCode !== KeyCode.KEYCODE_ENTER && q2.keyCode !== KeyCode.KEYCODE_SPACE) {
+            Row.onHover((s4) => this.isMoreIconOnHover = s4);
+            Row.onKeyEvent((r4) => {
+              if (r4.keyCode !== KeyCode.KEYCODE_ENTER && r4.keyCode !== KeyCode.KEYCODE_SPACE) {
                 return;
               }
-              if (q2.type === KeyType.Down) {
+              if (r4.type === KeyType.Down) {
                 this.isMoreIconOnClick = true;
               }
-              if (q2.type === KeyType.Up) {
+              if (r4.type === KeyType.Up) {
                 this.isMoreIconOnClick = false;
               }
             });
-            Row.onTouch((p2) => {
-              if (p2.type === TouchType.Down) {
+            Row.onTouch((q4) => {
+              if (q4.type === TouchType.Down) {
                 this.isMoreIconOnClick = true;
               }
-              if (p2.type === TouchType.Up) {
+              if (q4.type === TouchType.Up || q4.type === TouchType.Cancel) {
                 this.isMoreIconOnClick = false;
+                if (this.fontSize >= this.minFontSize) {
+                  this.dialogController?.close();
+                }
               }
             });
             Row.onClick(() => this.isPopupShown = true);
+            Gesture.create(GesturePriority.Low);
+            LongPressGesture.create({ repeat: false, duration: this.longPressTime });
+            LongPressGesture.onAction((o4) => {
+              this.fontSize = this.decideFontScale();
+              if (o4) {
+                if (this.fontSize >= this.minFontSize) {
+                  this.dialogController?.open();
+                }
+              }
+            });
+            LongPressGesture.pop();
+            Gesture.pop();
             Row.bindPopup(this.isPopupShown, {
               builder: { builder: this.popupBuilder.bind(this) },
               placement: Placement.Bottom,
               popupColor: Color.White,
               enableArrow: false,
-              onStateChange: (o2) => {
-                this.isPopupShown = o2.isVisible;
-                if (!o2.isVisible) {
+              onStateChange: (n4) => {
+                this.isPopupShown = n4.isVisible;
+                if (!n4.isVisible) {
                   this.isMoreIconOnClick = false;
                 }
-              },
+              }
             });
-            if (!h2) {
-              Row.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
-          this.observeComponentCreation((e2, f2) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e2);
+          }, Row);
+          this.observeComponentCreation2((c4, d4) => {
             Image.create(PUBLIC_MORE);
             Image.width(ImageMenuItem.imageSize);
             Image.height(ImageMenuItem.imageSize);
             Image.focusable(true);
-            Image.fillColor({
-              'id': -1,
-              'type': 10001,
-              params: ['sys.color.icon_primary'],
-              'bundleName': '__harDefaultBundleName__',
-              'moduleName': '__harDefaultModuleName__'
-            });
-            if (!f2) {
-              Image.pop();
-            }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+            Image.draggable(false);
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+          }, Image);
           Row.pop();
         });
       }
-      if (!z1) {
-        If.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+    }, If);
     If.pop();
     Row.pop();
     Column.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 
-  popupBuilder(b1 = null) {
-    this.observeComponentCreation((s1, t1) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(s1);
+  popupBuilder(z2 = null) {
+    this.observeComponentCreation2((q3, r3) => {
       Column.create();
       Column.width(
         ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum
@@ -760,102 +771,159 @@ class CollapsibleMenuSection extends ViewPU {
       Column.onAppear(() => {
         focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
       });
-      if (!t1) {
-        Column.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((e1, f1) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e1);
+    }, Column);
+    this.observeComponentCreation2((c3, d3) => {
       ForEach.create();
-      const g1 = (i1, j1) => {
-        const k1 = i1;
+      const e3 = (g3, h3) => {
+        const i3 = g3;
         {
-          this.observeComponentCreation((m1, n1) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(m1);
-            if (n1) {
-              let o1 = new ImageMenuItem(this, { item: k1,
-                index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + j1 }, undefined, m1,
-                () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 326 });
-              ViewPU.create(o1);
-              let p1 = () => {
+          this.observeComponentCreation2((k3, l3) => {
+            if (l3) {
+              let m3 = new ImageMenuItem(this, { item: i3,
+                index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3, isPopup: true },
+                undefined, k3, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 345, col: 11 });
+              ViewPU.create(m3);
+              let n3 = () => {
                 return {
-                  item: k1,
-                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + j1,
+                  item: i3,
+                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + h3,
+                  isPopup: true
                 };
               };
-              o1.paramsGenerator_ = p1;
-            } else {
-              this.updateStateVarsOfChildByElmtId(m1, {});
+              m3.paramsGenerator_ = n3;
             }
-            ViewStackProcessor.StopGetAccessRecording();
-          });
+            else {
+              this.updateStateVarsOfChildByElmtId(k3, {});
+            }
+          }, { name: 'ImageMenuItem' });
         }
       };
-      this.forEachUpdateFunction(e1, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
-        this.menuItems.length), g1, undefined, true, false);
-      if (!f1) {
-        ForEach.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+      this.forEachUpdateFunction(c3, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+        this.menuItems.length), e3, undefined, true, false);
+    }, ForEach);
     ForEach.pop();
     Column.pop();
   }
 
   rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
 CollapsibleMenuSection.maxCountOfVisibleItems = 3;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
-  constructor(v, w, x, y = -1, z = undefined, a1) {
-    super(v, x, y, a1);
-    if (typeof z === 'function') {
-      this.paramsGenerator_ = z;
+  constructor(p2, q2, r2, s2 = -1, t2 = undefined, u2) {
+    super(p2, r2, s2, u2);
+    if (typeof t2 === 'function') {
+      this.paramsGenerator_ = t2;
     }
     this.item = {};
     this.index = 0;
+    this.longPressTime = 500;
+    this.minFontSize = 1.75;
+    this.isFollowingSystemFontScale = false;
+    this.maxFontScale = 1;
+    this.systemFontScale = 1;
+    this.isPopup = false;
     this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
     this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
     this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-    this.setInitiallyProvidedValue(w);
+    this.__fontSize = new SynchedPropertySimpleOneWayPU(q2.fontSize, this, 'fontSize');
+    this.dialogController = new CustomDialogController({
+      builder: () => {
+        let v2 = new SelectTitleBarDialog(this, {
+          cancel: () => {
+          },
+          confirm: () => {
+          },
+          SelectTitleDialog: this.item,
+          SelectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+          fontSize: this.fontSize,
+        }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 376, col: 14 });
+        v2.setController(this.dialogController);
+        ViewPU.create(v2);
+        let w2 = () => {
+          return {
+            cancel: () => {
+            },
+            confirm: () => {
+            },
+            SelectTitleDialog: this.item,
+            SelectTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
+            fontSize: this.fontSize
+          };
+        };
+        v2.paramsGenerator_ = w2;
+      },
+      maskColor: Color.Transparent,
+      isModal: true,
+      customStyle: true
+    }, this);
+    this.setInitiallyProvidedValue(q2);
     this.finalizeConstruction();
   }
 
-  setInitiallyProvidedValue(u) {
-    if (u.item !== undefined) {
-      this.item = u.item;
+  setInitiallyProvidedValue(o2) {
+    if (o2.item !== undefined) {
+      this.item = o2.item;
     }
-    if (u.index !== undefined) {
-      this.index = u.index;
+    if (o2.index !== undefined) {
+      this.index = o2.index;
     }
-    if (u.isOnFocus !== undefined) {
-      this.isOnFocus = u.isOnFocus;
+    if (o2.longPressTime !== undefined) {
+      this.longPressTime = o2.longPressTime;
     }
-    if (u.isOnHover !== undefined) {
-      this.isOnHover = u.isOnHover;
+    if (o2.minFontSize !== undefined) {
+      this.minFontSize = o2.minFontSize;
     }
-    if (u.isOnClick !== undefined) {
-      this.isOnClick = u.isOnClick;
+    if (o2.isFollowingSystemFontScale !== undefined) {
+      this.isFollowingSystemFontScale = o2.isFollowingSystemFontScale;
+    }
+    if (o2.maxFontScale !== undefined) {
+      this.maxFontScale = o2.maxFontScale;
+    }
+    if (o2.systemFontScale !== undefined) {
+      this.systemFontScale = o2.systemFontScale;
+    }
+    if (o2.isPopup !== undefined) {
+      this.isPopup = o2.isPopup;
+    }
+    if (o2.isOnFocus !== undefined) {
+      this.isOnFocus = o2.isOnFocus;
+    }
+    if (o2.isOnHover !== undefined) {
+      this.isOnHover = o2.isOnHover;
+    }
+    if (o2.isOnClick !== undefined) {
+      this.isOnClick = o2.isOnClick;
+    }
+    if (o2.fontSize === undefined) {
+      this.__fontSize.set(1);
+    }
+    if (o2.dialogController !== undefined) {
+      this.dialogController = o2.dialogController;
     }
   }
 
-  updateStateVars(t) {
+  updateStateVars(n2) {
+    this.__fontSize.reset(n2.fontSize);
   }
 
-  purgeVariableDependenciesOnElmtId(s) {
-    this.__isOnFocus.purgeDependencyOnElmtId(s);
-    this.__isOnHover.purgeDependencyOnElmtId(s);
-    this.__isOnClick.purgeDependencyOnElmtId(s);
+  purgeVariableDependenciesOnElmtId(m2) {
+    this.__isOnFocus.purgeDependencyOnElmtId(m2);
+    this.__isOnHover.purgeDependencyOnElmtId(m2);
+    this.__isOnClick.purgeDependencyOnElmtId(m2);
+    this.__fontSize.purgeDependencyOnElmtId(m2);
   }
 
   aboutToBeDeleted() {
     this.__isOnFocus.aboutToBeDeleted();
     this.__isOnHover.aboutToBeDeleted();
     this.__isOnClick.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -864,24 +932,44 @@ class ImageMenuItem extends ViewPU {
     return this.__isOnFocus.get();
   }
 
-  set isOnFocus(r) {
-    this.__isOnFocus.set(r);
+  set isOnFocus(l2) {
+    this.__isOnFocus.set(l2);
   }
 
   get isOnHover() {
     return this.__isOnHover.get();
   }
 
-  set isOnHover(q) {
-    this.__isOnHover.set(q);
+  set isOnHover(k2) {
+    this.__isOnHover.set(k2);
   }
 
   get isOnClick() {
     return this.__isOnClick.get();
   }
 
-  set isOnClick(p) {
-    this.__isOnClick.set(p);
+  set isOnClick(j2) {
+    this.__isOnClick.set(j2);
+  }
+
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+
+  set fontSize(i2) {
+    this.__fontSize.set(i2);
+  }
+
+  textDialog() {
+    if (this.item.value === PUBLIC_MORE) {
+      return { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    } else if (this.item.value === PUBLIC_BACK) {
+      return { 'id': -1, 'type': 10003, params: ['sys.string.icon_back'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
   }
 
   getFgColor() {
@@ -903,10 +991,30 @@ class ImageMenuItem extends ViewPU {
       return Color.Transparent;
     }
   }
+  aboutToAppear() {
+    try {
+      let h = this.getUIContext();
+      this.isFollowingSystemFontScale = h.isFollowingSystemFontScale();
+      this.maxFontScale = h.getMaxFontScale();
+    }
+    catch (h2) {
+      let i2 = h2.code;
+      let j2 = h2.message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${i2}, message: ${j2}`);
+    }
+  }
+  decideFontScale() {
+    let k2 = this.getUIContext();
+    this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
 
   initialRender() {
-    this.observeComponentCreation((e, f) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(e);
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation2((u1, v1) => {
       Row.create();
       Row.width(ImageMenuItem.imageHotZoneWidth);
       Row.height(ImageMenuItem.imageHotZoneWidth);
@@ -938,67 +1046,72 @@ class ImageMenuItem extends ViewPU {
         this.isOnFocus = true;
       });
       Row.onBlur(() => this.isOnFocus = false);
-      Row.onHover((o) => {
+      Row.onHover((h2) => {
         if (!this.item.isEnabled) {
           return;
         }
-        this.isOnHover = o;
+        this.isOnHover = h2;
       });
-      Row.onKeyEvent((n) => {
+      Row.onKeyEvent((g2) => {
         if (!this.item.isEnabled) {
           return;
         }
-        if (n.keyCode !== KeyCode.KEYCODE_ENTER && n.keyCode !== KeyCode.KEYCODE_SPACE) {
+        if (g2.keyCode !== KeyCode.KEYCODE_ENTER && g2.keyCode !== KeyCode.KEYCODE_SPACE) {
           return;
         }
-        if (n.type === KeyType.Down) {
+        if (g2.type === KeyType.Down) {
           this.isOnClick = true;
         }
-        if (n.type === KeyType.Up) {
+        if (g2.type === KeyType.Up) {
           this.isOnClick = false;
         }
       });
-      Row.onTouch((m) => {
+      Row.onTouch((f2) => {
         if (!this.item.isEnabled) {
           return;
         }
-        if (m.type === TouchType.Down) {
+        if (f2.type === TouchType.Down) {
           this.isOnClick = true;
         }
-        if (m.type === TouchType.Up) {
+        if (f2.type === TouchType.Up || f2.type === TouchType.Cancel) {
           this.isOnClick = false;
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.close();
+          }
         }
       });
       Row.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
-      if (!f) {
-        Row.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    this.observeComponentCreation((c, d) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(c);
+      Gesture.create(GesturePriority.Low);
+      LongPressGesture.create({ repeat: false, duration: this.longPressTime });
+      LongPressGesture.onAction((d2) => {
+        this.fontSize = this.decideFontScale();
+        if (d2) {
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.open();
+          }
+        }
+      });
+      LongPressGesture.pop();
+      Gesture.pop();
+    }, Row);
+    this.observeComponentCreation2((s1, t1) => {
       Image.create(this.item.value);
+      Image.draggable(false);
       Image.width(ImageMenuItem.imageSize);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
       Image.key(ImageMenuItem.focusablePrefix + this.index);
-      Image.fillColor({
-        'id': -1,
-        'type': 10001,
-        params: ['sys.color.icon_primary'],
-        'bundleName': '__harDefaultBundleName__',
-        'moduleName': '__harDefaultModuleName__'
-      });
-      if (!d) {
-        Image.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
+      Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    }, Image);
     Row.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 
   rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
 ImageMenuItem.imageSize = 24;
@@ -1007,6 +1120,235 @@ ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = 0.4;
 ImageMenuItem.focusablePrefix = 'Id-SelectTitleBar-ImageMenuItem-';
+class SelectTitleBarDialog extends ViewPU {
+  constructor(i1, j1, k1, l1 = -1, m1 = undefined, n1) {
+    super(i1, k1, l1, n1);
+    if (typeof m1 === 'function') {
+      this.paramsGenerator_ = m1;
+    }
+    this.SelectTitleDialog = {};
+    this.callbackId = undefined;
+    this.SelectTitleBarDialog = '';
+    this.mainWindowStage = undefined;
+    this.controller = undefined;
+    this.minFontSize = 1.75;
+    this.maxFontSize = 3.2;
+    this.screenWidth = 640;
+    this.verticalScreenLines = 6;
+    this.horizontalsScreenLines = 1;
+    this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
+    this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+    this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
+    this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
+    this.cancel = () => {
+    };
+    this.confirm = () => {
+    };
+    this.setInitiallyProvidedValue(j1);
+    this.finalizeConstruction();
+  }
+
+  setInitiallyProvidedValue(h1) {
+    if (h1.SelectTitleDialog !== undefined) {
+      this.SelectTitleDialog = h1.SelectTitleDialog;
+    }
+    if (h1.callbackId !== undefined) {
+      this.callbackId = h1.callbackId;
+    }
+    if (h1.SelectTitleBarDialog !== undefined) {
+      this.SelectTitleBarDialog = h1.SelectTitleBarDialog;
+    }
+    if (h1.mainWindowStage !== undefined) {
+      this.mainWindowStage = h1.mainWindowStage;
+    }
+    if (h1.controller !== undefined) {
+      this.controller = h1.controller;
+    }
+    if (h1.minFontSize !== undefined) {
+      this.minFontSize = h1.minFontSize;
+    }
+    if (h1.maxFontSize !== undefined) {
+      this.maxFontSize = h1.maxFontSize;
+    }
+    if (h1.screenWidth !== undefined) {
+      this.screenWidth = h1.screenWidth;
+    }
+    if (h1.verticalScreenLines !== undefined) {
+      this.verticalScreenLines = h1.verticalScreenLines;
+    }
+    if (h1.horizontalsScreenLines !== undefined) {
+      this.horizontalsScreenLines = h1.horizontalsScreenLines;
+    }
+    if (h1.fontSize !== undefined) {
+      this.fontSize = h1.fontSize;
+    }
+    if (h1.maxLines !== undefined) {
+      this.maxLines = h1.maxLines;
+    }
+    if (h1.cancel !== undefined) {
+      this.cancel = h1.cancel;
+    }
+    if (h1.confirm !== undefined) {
+      this.confirm = h1.confirm;
+    }
+  }
+
+  updateStateVars(g1) {
+  }
+
+  purgeVariableDependenciesOnElmtId(f1) {
+    this.__mainWindow.purgeDependencyOnElmtId(f1);
+    this.__fontSize.purgeDependencyOnElmtId(f1);
+    this.__maxLines.purgeDependencyOnElmtId(f1);
+    this.__windowStandardHeight.purgeDependencyOnElmtId(f1);
+  }
+
+  aboutToBeDeleted() {
+    this.__mainWindow.aboutToBeDeleted();
+    this.__fontSize.aboutToBeDeleted();
+    this.__maxLines.aboutToBeDeleted();
+    this.__windowStandardHeight.aboutToBeDeleted();
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal();
+  }
+
+  setController(e1) {
+    this.controller = e1;
+  }
+
+  get mainWindow() {
+    return this.__mainWindow.get();
+  }
+
+  set mainWindow(d1) {
+    this.__mainWindow.set(d1);
+  }
+
+  get fontSize() {
+    return this.__fontSize.get();
+  }
+
+  set fontSize(c1) {
+    this.__fontSize.set(c1);
+  }
+
+  get maxLines() {
+    return this.__maxLines.get();
+  }
+
+  set maxLines(b1) {
+    this.__maxLines.set(b1);
+  }
+
+  get windowStandardHeight() {
+    return this.__windowStandardHeight.get();
+  }
+
+  set windowStandardHeight(a1) {
+    this.__windowStandardHeight.set(a1);
+  }
+
+  initialRender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.observeComponentCreation2((e, f) => {
+      If.create();
+      if (this.SelectTitleBarDialog) {
+        this.ifElseBranchUpdateFunction(0, () => {
+          this.observeComponentCreation2((y, z) => {
+            Column.create();
+            Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
+            Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
+            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+          }, Column);
+          this.observeComponentCreation2((w, x) => {
+            Image.create(this.SelectTitleDialog.value);
+            Image.width(IMAGE_SIZE);
+            Image.height(IMAGE_SIZE);
+            Image.margin({
+              top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            });
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+          }, Image);
+          this.observeComponentCreation2((u, v) => {
+            Column.create();
+            Column.width('100%');
+            Column.padding({
+              left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            });
+          }, Column);
+          this.observeComponentCreation2((s, t) => {
+            Text.create(this.SelectTitleBarDialog);
+            Text.fontSize(TEXT_EDITABLE_DIALOG);
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(this.maxLines);
+            Text.width('100%');
+            Text.textAlign(TextAlign.Center);
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+          }, Text);
+          Text.pop();
+          Column.pop();
+          Column.pop();
+        });
+      }
+      else {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation2((l, m) => {
+            Column.create();
+            Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
+            Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
+            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
+            Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Column.justifyContent(FlexAlign.Center);
+          }, Column);
+          this.observeComponentCreation2((j, k) => {
+            Image.create(this.SelectTitleDialog.value);
+            Image.width(IMAGE_SIZE);
+            Image.height(IMAGE_SIZE);
+            Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+          }, Image);
+          Column.pop();
+        });
+      }
+    }, If);
+    If.pop();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+
+  async aboutToAppear() {
+    let a = this.getUIContext().getHostContext();
+    this.mainWindowStage = a.windowStage.getMainWindowSync();
+    let b = this.mainWindowStage.getWindowProperties();
+    let c = b.windowRect;
+    if (px2vp(c.height) > this.screenWidth) {
+      this.maxLines = this.verticalScreenLines;
+    }
+    else {
+      this.maxLines = this.horizontalsScreenLines;
+    }
+  }
+
+  rerender() {
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
+    this.updateDirtyElements();
+    PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+}
 export default {
   SelectTitleBar: SelectTitleBar,
 };
