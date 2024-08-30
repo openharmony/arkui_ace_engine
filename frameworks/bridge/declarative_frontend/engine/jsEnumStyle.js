@@ -2175,6 +2175,7 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2209,6 +2210,7 @@ class NavPathStack {
       })
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = true;
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
@@ -2262,6 +2264,7 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2282,6 +2285,7 @@ class NavPathStack {
       })
     }
     [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    info.pushDestination = true;
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
