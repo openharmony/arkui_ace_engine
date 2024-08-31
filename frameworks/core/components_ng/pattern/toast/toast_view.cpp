@@ -153,6 +153,20 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         toastContext->UpdateOuterBorderColor(outerColorProp);
     }
     auto toastInfo = pattern->GetToastInfo();
+    ToastView::UpdateToastNodeStyle(toastNode);
+}
+
+void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
+{
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(toastContext);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    auto toastInfo = pattern->GetToastInfo();
     toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
