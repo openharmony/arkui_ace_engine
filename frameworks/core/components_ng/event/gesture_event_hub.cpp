@@ -668,7 +668,9 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
         TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
         preScaledPixelMap = defaultPixelMap;
     }
-    preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    if (!NearEqual(targetScale, 1.0f)) {
+        preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    }
 #endif
     return preScaledPixelMap;
 }
@@ -972,10 +974,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         recordsSize = badgeNumber.value();
     }
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
-    float defaultPixelMapScale =
-        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    auto windowScale = dragDropManager->GetWindowScale();
-    float scale = windowScale * defaultPixelMapScale;
     auto dragNodePipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(dragNodePipeline);
     auto overlayManager = dragNodePipeline->GetOverlayManager();
@@ -998,6 +996,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
+    float defaultPixelMapScale =
+        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
+    // use menuPreviewScale only for 1.0f menu scale.
+    if (isMenuShow && NearEqual(menuPreviewScale_, 1.0f)) {
+        defaultPixelMapScale = menuPreviewScale_;
+    }
+    auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * defaultPixelMapScale;
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
