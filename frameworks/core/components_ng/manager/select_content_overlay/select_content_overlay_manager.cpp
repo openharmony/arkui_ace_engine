@@ -479,7 +479,7 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
     for (auto it = slotIt; it != children.end(); ++it) {
         // get keyboard index to put selet_overlay before keyboard node
         if ((*it)->GetTag() == V2::KEYBOARD_ETS_TAG) {
-            slot = index;
+            slot = std::min(slot, index);
             break;
         }
         // keep handle node before menu node
@@ -489,7 +489,7 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
         }
         // keep handle and menu node before magnifier
         if ((*it)->GetTag() == V2::TEXTINPUT_ETS_TAG) {
-            slot = index;
+            slot = std::min(slot, index);
             break;
         }
         index++;
