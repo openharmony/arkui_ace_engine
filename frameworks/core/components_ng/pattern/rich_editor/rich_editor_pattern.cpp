@@ -2228,7 +2228,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(info.GetLocalLocation());
     CHECK_NULL_VOID(info.GetSourceDevice() != SourceType::MOUSE);
-    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect) && isCaretTwinkling) {
+    if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();
     }
 }
@@ -2249,8 +2249,8 @@ bool RichEditorPattern::IsShowSingleHandleByClick(
     auto position = paragraphs_.GetIndex(textOffset);
     CHECK_NULL_RETURN(position == lastCaretPosition, false);
     auto paragraphEndPos = GetParagraphEndPosition(lastCaretPosition);
-    if (lastCaretPosition == paragraphEndPos) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "repeat click paragraphEndPos=%{public}d", paragraphEndPos);
+    if (lastCaretPosition == paragraphEndPos || IsTouchAtLineEnd(lastCaretPosition, textOffset)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "repeat click lineEnd or paragraphEndPos=%{public}d", paragraphEndPos);
         return true;
     }
     return RepeatClickCaret(offset, lastCaretRect);
@@ -7595,12 +7595,19 @@ void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end,
     }
 }
 
-bool RichEditorPattern::IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos) {
+bool RichEditorPattern::IsTouchAtLineEnd(int32_t caretPos, const Offset& textOffset)
+{
+    auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
+    TextAffinity currentAffinity = positionWithAffinity.affinity_;
+    return currentAffinity == TextAffinity::UPSTREAM && !IsTouchBeforeCaret(caretPos, textOffset);
+}
+
+bool RichEditorPattern::IsTouchBeforeCaret(int32_t caretPos, const Offset& textOffset) {
     CHECK_NULL_RETURN(!spans_.empty(), false);
     float selectLineHeight = 0.0f;
     OffsetF caretOffsetUp = paragraphs_.ComputeCursorOffset(caretPos, selectLineHeight);
     auto needAdjustRect = RectF{ 0, caretOffsetUp.GetY(), caretOffsetUp.GetX(), selectLineHeight };
-    return needAdjustRect.IsInRegion(PointF{ touchPos.GetX(), touchPos.GetY() });
+    return needAdjustRect.IsInRegion(PointF{ textOffset.GetX(), textOffset.GetY() });
 }
 
 bool RichEditorPattern::IsClickBoundary(const int32_t position)

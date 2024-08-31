@@ -1063,7 +1063,8 @@ private:
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
-    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos);
+    bool IsTouchAtLineEnd(int32_t caretPos, const Offset& textOffset);
+    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& textOffset);
     bool IsClickBoundary(const int32_t position);
 
     bool IsReachTop()
