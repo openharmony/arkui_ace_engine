@@ -146,6 +146,20 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
     pattern->SetMakeFunction([childNode_two]() -> RefPtr<UINode> { return childNode_two; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_two->GetId());
+
+    /**
+     * @tc.steps: step7.Fire RemakeNode return with nullptr. When oldNode is not null.
+     * @tc.expected: process success without crash.
+     */
+    auto childNode_three = FrameNode::CreateFrameNode(CHILD_NODE, 3, AceType::MakeRefPtr<Pattern>());
+    childNode_three->SetIsRootBuilderNode(false);
+    childNode_three->SetIsArkTsFrameNode(true);
+    pattern->SetMakeFunction([childNode_three]() -> RefPtr<UINode> { return childNode_three; });
+    pattern->RemakeNode();
+    ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_three->GetId());
+    pattern->SetMakeFunction([childNode]() -> RefPtr<UINode> { return nullptr; });
+    pattern->RemakeNode();
+    ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0), nullptr);
 }
 
 /**
