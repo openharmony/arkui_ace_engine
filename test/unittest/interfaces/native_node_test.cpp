@@ -1525,7 +1525,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), nullptr);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), nullptr);
-    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_HALF_LEADING), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_HALF_LEADING), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -4825,7 +4825,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest067, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    int32_t abnormalType = static_cast<int32_t>(ARKUI_NODE_GRID_ITEM) + 1;
+    int32_t abnormalType = static_cast<int32_t>(ARKUI_NODE_CUSTOM_SPAN) + 1;
     EXPECT_EQ(nodeAPI->createNode(static_cast<ArkUI_NodeType>(abnormalType)), nullptr);
     nodeAPI->disposeNode(nullptr);
     EXPECT_EQ(nodeAPI->addChild(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
