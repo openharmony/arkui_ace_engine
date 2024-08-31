@@ -87,8 +87,6 @@ void BubblePattern::OnModifyDone()
     UpdateAgingTextSize();
     Pattern::OnModifyDone();
     InitTouchEvent();
-    RegisterButtonOnHover();
-    RegisterButtonOnTouch();
 }
 
 void BubblePattern::AddPipelineCallBack()
