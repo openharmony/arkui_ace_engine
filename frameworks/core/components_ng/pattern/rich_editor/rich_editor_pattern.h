@@ -154,6 +154,7 @@ public:
         std::string newPreviewContent;
         bool hasDiff = false;
         PreviewRange replacedRange;
+        bool isSpanSplit = false;
 
         std::string ToString() const
         {
@@ -162,6 +163,7 @@ public:
             JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
+            JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
 
             return jsonValue->ToString();
         }
@@ -174,6 +176,7 @@ public:
             isPreviewTextInputting = false;
             hasDiff = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
+            isSpanSplit = false;
         }
 
         bool IsValid() const
@@ -1206,6 +1209,7 @@ private:
     }
 
     OffsetF GetGlobalOffset() const;
+    void MergeAdjacentSpans(int32_t caretPosition);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
