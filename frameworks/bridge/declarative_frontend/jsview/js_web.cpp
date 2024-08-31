@@ -44,9 +44,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {

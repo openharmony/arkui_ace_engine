@@ -25,22 +25,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
-#include "core/components/image/image_component.h"
-#include "core/components/menu/menu_component.h"
 #include "core/components/remote_window/remote_window_component.h"
 #include "core/components/scoring/scoring_component.h"
-#include "core/components/stepper/stepper_item_component_v2.h"
-#include "core/components/text/text_component.h"
 #include "core/components/text_field/text_field_component.h"
-#include "core/components/text_span/text_span_component.h"
 #include "core/components/video/video_component_v2.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_v2/list/list_item_component.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
-#include "core/pipeline/base/component.h"
-#include "core/pipeline/base/multi_composed_component.h"
-#include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace::Framework {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;

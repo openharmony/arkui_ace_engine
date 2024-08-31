@@ -18,7 +18,6 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/swiper/swiper_component.h"
-#include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
 
