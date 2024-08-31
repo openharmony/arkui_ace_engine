@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -180,6 +181,79 @@ void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<R
     });
 }
 } // namespace
+
+void MenuPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    if (outterMenuId_ != 0) {
+        pipelineContext->UnregisterPageChangedCallback(pageId_, outterMenuId_);
+    }
+}
+
+void MenuPattern::SendMenuAccessibilityMessage(bool isShow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(isShow);
+    if (isPageChangeClose_) {
+        isPageChangeClose_ = false;
+        return;
+    }
+    if (isShow) {
+        host->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
+    } else {
+        host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_MENU, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
+    }
+}
+
+void MenuPattern::OnPageChanged(int32_t pageId, bool isOnShow)
+{
+    TAG_LOGD(AceLogTag::ACE_MENU, "On page change, pageId = %{private}d, isOnShow = %{public}d", pageId, isOnShow);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (outterMenuId_ != 0) {
+        host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        isPageChangeClose_ = true;
+    }
+}
+
+void MenuPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    CHECK_NULL_VOID(pagePattern->GetPageInfo());
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    auto menuWarpper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWarpper);
+    auto menuWrapperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto outterMenu = menuWrapperPattern->GetMenu();
+    if (outterMenu->GetId() == host->GetId()) {
+        outterMenuId_ = outterMenu->GetId();
+        pageId_ = pageId;
+        pipelineContext->RegisterPageChangedCallback(pageId, WeakClaim(RawPtr(outterMenu)));
+    }
+}
 
 void MenuPattern::OnAttachToFrameNode()
 {
