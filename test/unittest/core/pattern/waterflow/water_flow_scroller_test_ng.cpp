@@ -17,6 +17,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -510,6 +511,67 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: Refresh001
+ * @tc.desc: Test WaterFlow nested in refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
+{
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "179.37px"); // friction
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+
+    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
 }
 
 /**
