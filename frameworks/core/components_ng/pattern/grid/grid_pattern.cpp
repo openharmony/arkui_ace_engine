@@ -1485,6 +1485,9 @@ void GridPattern::UpdateScrollBarOffset()
         overScroll = gridLayoutInfo_.lastMainSize_ - estimatedHeight + offset;
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
+    if (gridLayoutInfo_.offsetEnd_ && NearZero(overScroll)) {
+        offset = estimatedHeight - gridLayoutInfo_.lastMainSize_;
+    }
     HandleScrollBarOutBoundary(overScroll);
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
