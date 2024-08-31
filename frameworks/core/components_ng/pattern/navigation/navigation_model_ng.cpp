@@ -941,6 +941,7 @@ void NavigationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
     titleBarNode->AddChild(customTitle);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavigationModelNG::SetTitleHeight(const Dimension& height, bool isValid)

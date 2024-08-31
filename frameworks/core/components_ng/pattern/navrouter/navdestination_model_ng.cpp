@@ -447,6 +447,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
     titleBarNode->AddChild(customTitle);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
