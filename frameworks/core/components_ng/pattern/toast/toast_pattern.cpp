@@ -307,6 +307,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
     host->SetNeedCallChildrenUpdate(false);
+    ToastView::UpdateToastNodeStyle(host);
 }
 
 void ToastPattern::OnAttachToFrameNode()
