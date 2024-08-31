@@ -73,7 +73,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/text/text_emoji_processor.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -3281,6 +3280,18 @@ bool RichEditorPattern::AdjustSelectorForSymbol(int32_t& index, HandleType handl
     return false;
 }
 
+EmojiRelation RichEditorPattern::GetEmojiRelation(int index)
+{
+    auto it = GetSpanIter(index);
+    CHECK_NULL_RETURN((it != spans_.end()), EmojiRelation::NO_EMOJI);
+    auto spanItem = *it;
+    CHECK_NULL_RETURN(spanItem, EmojiRelation::NO_EMOJI);
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    return TextEmojiProcessor::GetIndexRelationToEmoji(index - spanItem->rangeStart, spanItem->content,
+        emojiStartIndex, emojiEndIndex);
+}
+
 bool RichEditorPattern::AdjustSelectorForEmoji(int& index, HandleType handleType, SelectorAdjustPolicy policy)
 {
     auto it = GetSpanIter(index);
@@ -3291,17 +3302,35 @@ bool RichEditorPattern::AdjustSelectorForEmoji(int& index, HandleType handleType
     int32_t emojiStartIndex;
     int32_t emojiEndIndex;
     int32_t spanStart = spanItem->rangeStart;
-    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(index - spanStart, spanItem->content,
+    EmojiRelation relation = TextEmojiProcessor::GetIndexRelationToEmoji(index - spanStart, spanItem->content,
         emojiStartIndex, emojiEndIndex);
-    if (isIndexInEmoji) {
-        int32_t indexInSpan = (handleType == HandleType::FIRST) ? emojiStartIndex : emojiEndIndex;
-        index = spanItem->rangeStart + indexInSpan;
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-            "indexInSpan=%{public}d, index=%{public}d, handleType=%{public}d, emojiRange=[%{public}d,%{public}d]",
-            indexInSpan, index, handleType, emojiStartIndex, emojiEndIndex);
-        return true;
+    if (relation != EmojiRelation::IN_EMOJI && relation != EmojiRelation::MIDDLE_EMOJI) {
+        // no need adjusting when index is not warpped in emojis
+        return false;
     }
-    return false;
+    int32_t start = 0;
+    int32_t end = 0;
+    bool isBoundaryGet = paragraphs_.GetWordBoundary(index, start, end); // boundary from engine
+    if (isBoundaryGet) {
+        if (handleType == HandleType::FIRST) {
+            index = start;
+        } else {
+            if (index > start) {
+                // index to emoji, move index to end of emoji, double check "in emoji state"
+                index = end;
+            }
+        }
+    } else {
+        if (relation == EmojiRelation::IN_EMOJI) {
+            int32_t indexInSpan = (handleType == HandleType::FIRST) ? emojiStartIndex : emojiEndIndex;
+            index = spanItem->rangeStart + indexInSpan;
+        }
+    }
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+        "index=%{public}d, handleType=%{public}d, emojiRange=[%{public}d,%{public}d] isBoundaryGet=%{public}d "\
+        "boundary=[%{public}d, %{public}d]",
+        index, handleType, emojiStartIndex, emojiEndIndex, isBoundaryGet, start, end);
+    return true;
 }
 
 std::list<RefPtr<SpanItem>>::iterator RichEditorPattern::GetSpanIter(int32_t index)
@@ -7854,7 +7883,12 @@ bool RichEditorPattern::NeedAiAnalysis(
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary, return!");
         return false;
     }
-
+    EmojiRelation relation = GetEmojiRelation(pos);
+    if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+        relation == EmojiRelation::BEFORE_EMOJI) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis emoji relation=%{public}d, return!", relation);
+        return false;
+    }
     return true;
 }
 
