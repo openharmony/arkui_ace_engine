@@ -200,8 +200,6 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::DeleteText(int32_t nodeId, vo
                 rect.Top - windowRect.Top() + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, startCenterGlobalOffset);
             auto eInd = GetGlyphPositionByGlobalOffset(frameNode, endCenterGlobalOffset);
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture sInd:%{public}lu, eInd:%{public}lu",
-                sInd.position_, eInd.position_);
             auto textBase = frameNode->GetPattern<NG::TextBase>();
             CHECK_NULL_VOID(textBase);
             auto wtextLength = textBase->GetContentWideTextLength();
