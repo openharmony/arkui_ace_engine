@@ -105,7 +105,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
-    int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
+    int32_t updateIdx = GetUpdateIdx(layoutWrapper, layoutInfo_->footerIndex_);
     if (updateIdx != -1) {
         layoutInfo_->Reset(updateIdx);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);

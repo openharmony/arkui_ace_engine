@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/pipeline/base/element_register.h"
 
 #define private public
 #define protected public
@@ -1390,7 +1391,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyDataCountChangedTest001, Te
      * @tc.steps: step3. Invoke NotifyDataCountChanged.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyDataCountChanged(INDEX_0);
+    lazyForEachNode->NotifyChangeWithCount(INDEX_0, 0, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
@@ -2153,7 +2154,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyCountChangeTest001, TestSiz
      * @tc.steps: step3. Invoke NotifyCountChange.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyCountChange(0, 0);
+    lazyForEachNode->NotifyChangeWithCount(0, 0, UINode::NotificationType::END_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
