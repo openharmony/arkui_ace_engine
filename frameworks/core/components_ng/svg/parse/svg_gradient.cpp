@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 

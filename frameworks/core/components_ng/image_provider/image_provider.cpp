@@ -15,12 +15,7 @@
 
 #include "core/components_ng/image_provider/image_provider.h"
 
-#include <cstdint>
-#include <mutex>
-
-#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
@@ -34,8 +29,6 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/image/image_loader.h"
-#include "core/image/sk_image_cache.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

@@ -14,12 +14,8 @@
  */
 #include "safe_area_manager.h"
 
-#include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)

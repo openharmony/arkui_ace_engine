@@ -15,16 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

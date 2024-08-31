@@ -16,11 +16,7 @@
 #include "core/components_ng/svg/parse/svg_node.h"
 
 #include "include/core/SkClipOp.h"
-#include "include/core/SkString.h"
-#include "include/utils/SkParsePath.h"
 
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/common/painter/rosen_svg_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"

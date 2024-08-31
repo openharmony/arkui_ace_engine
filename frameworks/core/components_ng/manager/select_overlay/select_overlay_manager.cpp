@@ -15,14 +15,6 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 
-#include <memory>
-
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(

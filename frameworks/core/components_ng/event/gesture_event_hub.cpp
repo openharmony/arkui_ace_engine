@@ -15,12 +15,6 @@
 
 #include "core/components_ng/event/gesture_event_hub.h"
 
-#include <cstdint>
-#include <list>
-#include <memory>
-#include <string>
-#include "drag_event.h"
-
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -37,20 +31,11 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
-#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
-#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
-#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"

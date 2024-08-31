@@ -15,9 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 
-#include "base/utils/utils.h"
-#include "base/utils/string_utils.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const char LINECAP_ROUND[] = "round";
