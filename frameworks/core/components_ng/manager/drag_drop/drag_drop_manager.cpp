@@ -16,9 +16,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "drag_drop_manager.h"
 
-#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"

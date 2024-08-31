@@ -15,22 +15,9 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
-#include <cinttypes>
-#include <cstdint>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_event_handler.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"

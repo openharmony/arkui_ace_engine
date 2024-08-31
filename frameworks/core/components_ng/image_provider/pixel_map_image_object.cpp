@@ -15,10 +15,8 @@
 
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 
-#include "base/thread/task_executor.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 

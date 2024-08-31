@@ -15,16 +15,6 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
-#include <memory>
-#include <optional>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const static int32_t PLATFORM_VERSION_TEN = 10;

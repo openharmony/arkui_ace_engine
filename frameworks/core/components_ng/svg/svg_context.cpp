@@ -15,7 +15,6 @@
 
 #include "core/components_ng/svg/svg_context.h"
 
-#include "core/common/thread_checker.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {

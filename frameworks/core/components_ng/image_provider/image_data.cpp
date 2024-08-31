@@ -15,8 +15,6 @@
 
 #include "core/components_ng/image_provider/image_data.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 
 size_t PixmapData::GetSize() const

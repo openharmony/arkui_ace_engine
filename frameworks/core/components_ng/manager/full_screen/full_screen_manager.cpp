@@ -15,11 +15,7 @@
 
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)

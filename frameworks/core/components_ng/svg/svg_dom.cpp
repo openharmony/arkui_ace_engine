@@ -15,14 +15,9 @@
 
 #include "frameworks/core/components_ng/svg/svg_dom.h"
 
-#include "include/core/SkClipOp.h"
-
-#include "base/utils/utils.h"
 #include "core/components_ng/svg/parse/svg_fe_blend.h"
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
-#include "core/components_ng/svg/svg_context.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
-#include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
