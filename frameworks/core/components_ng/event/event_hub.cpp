@@ -478,40 +478,4 @@ void EventHub::FireOnDetach()
         onDetach();
     }
 }
-
-void EventHub::SetOnLoad(std::function<void(const std::string& xcomponentId)>&& onLoad)
-{
-    onLoad_ = std::move(onLoad);
-}
-
-void EventHub::ClearOnLoad()
-{
-    onLoad_ = nullptr;
-}
-
-void EventHub::FireOnLoad(const std::string& xcomponentId)
-{
-    if (onLoad_) {
-        auto onLoad = onLoad_;
-        onLoad(xcomponentId);
-    }
-}
-
-void EventHub::SetOnDestroy(std::function<void()>&& onDestroy)
-{
-    onDestroy_ = std::move(onDestroy);
-}
-
-void EventHub::ClearOnDestroy()
-{
-    onDestroy_ = nullptr;
-}
-
-void EventHub::FireOnDestroy()
-{
-    if (onDestroy_) {
-        auto onDestroy = onDestroy_;
-        onDestroy();
-    }
-}
 } // namespace OHOS::Ace::NG
