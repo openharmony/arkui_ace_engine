@@ -66,6 +66,9 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
 
 void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
+    if (IsSingleHandle()) {
+        return;
+    }
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
@@ -85,9 +88,6 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
             selectController->UpdateCaretIndex(selectController->GetFirstHandleIndex());
             selectController->UpdateCaretOffset();
         }
-    }
-    if (IsSingleHandle()) {
-        pattern->StartTwinkling();
     }
 }
 
@@ -178,9 +178,6 @@ RectF TextFieldSelectOverlay::GetSecondHandleLocalPaintRect()
     CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
     CHECK_NULL_RETURN(controller, RectF());
-    if (IsSingleHandle()) {
-        return controller->GetCaretRect();
-    }
     auto handleRect = controller->GetSecondHandleRect();
     auto contentHeight = pattern->GetTextContentRect().Height();
     auto handleHeight = std::min(handleRect.Height(), contentHeight);
