@@ -71,6 +71,12 @@ enum class ScrollAutoType {
     END,
 };
 
+enum class LayoutDirection {
+    NONE = 0,
+    FORWARD,
+    BACKWARD,
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
@@ -125,6 +131,11 @@ public:
     void SetTargetIndex(int32_t index)
     {
         targetIndex_ = index;
+    }
+
+    void SetTargetIndexInGroup(int32_t targetIndexInGroup)
+    {
+        targetIndexInGroup_ = targetIndexInGroup;
     }
 
     std::optional<int32_t> GetTargetIndex() const
@@ -350,7 +361,7 @@ public:
         return laneGutter_;
     }
 
-    void OffScreenLayoutDirection();
+    void OffScreenLayoutDirection(LayoutWrapper* layoutWrapper);
 
     ScrollAutoType GetScrollAutoType() const
     {
@@ -438,6 +449,7 @@ protected:
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
+    LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
     void CheckJumpToIndex();
     void CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
@@ -486,6 +498,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> targetIndexInGroup_;
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
