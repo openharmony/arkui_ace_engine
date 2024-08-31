@@ -111,6 +111,7 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
+    CHECK_NULL_VOID(Container::Current());
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
