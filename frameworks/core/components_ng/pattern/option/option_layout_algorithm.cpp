@@ -15,17 +15,8 @@
 
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 
-#include <optional>
-#include <string>
-
-#include "base/utils/utils.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

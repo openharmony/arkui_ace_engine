@@ -16,7 +16,6 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"

@@ -15,17 +15,6 @@
 
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 
-#include <algorithm>
-#include <optional>
-
-#include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/utils/utils.h"
-#include "core/components/picker/picker_option_component.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/progress/progress_pattern.h"
-
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::GetThemeData()
 {
