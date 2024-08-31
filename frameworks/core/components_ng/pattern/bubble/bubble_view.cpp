@@ -685,9 +685,16 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         scrollProps->UpdateAxis(Axis::VERTICAL);
         scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
         auto buttonFontSize = popupTheme->GetButtonFontSize();
-        scrollProps->UpdateCalcMaxSize(CalcSize(std::nullopt,
-            CalcLength(Dimension(popupMaxHeight) -
-	    GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+        auto fontScale = pipelineContext->GetFontScale();
+        if (fontScale == AGE_SCALE_NUMBER) {
+            scrollProps->UpdateCalcMaxSize(CalcSize(
+                std::nullopt, CalcLength(Dimension(popupMaxHeight) - GetAgeFontSize(buttonFontSize) *
+                AGE_BUTTONS_LAYOUT_HEIGHT_RATE * DOUBLENESS)));
+        } else {
+            scrollProps->UpdateCalcMaxSize(
+                CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) -
+                GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+        }
         scrollNode->MarkModifyDone();
         message->MountToParent(scrollNode);
         scrollNode->MountToParent(columnNode);
@@ -826,6 +833,10 @@ RefPtr<FrameNode> BubbleView::CreateButton(
         buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonProp->UpdateType(ButtonType::CAPSULE);
+    }
+    auto fontScale = pipelineContext->GetFontScale();
+    if (fontScale == AGE_SCALE_NUMBER) {
+        buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
     }
     buttonProp->UpdateAlignment(Alignment::CENTER);
     auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
