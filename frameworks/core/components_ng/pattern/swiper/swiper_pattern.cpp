@@ -58,6 +58,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
@@ -373,6 +374,7 @@ void SwiperPattern::OnModifyDone()
     InitCapture();
     CheckSpecialItemCount();
     SetLazyLoadIsLoop();
+    SetRepeatLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
@@ -4456,6 +4458,18 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     }
 }
 
+void SwiperPattern::SetRepeatLoadIsLoop() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FindRepeatVirtualNode(host);
+    if (targetNode.has_value()) {
+        auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
+        CHECK_NULL_VOID(repeatVirtualScrollNode);
+        repeatVirtualScrollNode->SetIsLoop(IsLoop());
+    }
+}
+
 void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
 {
     if (cachedItems_.empty()) {
@@ -5745,6 +5759,23 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     }
     for (const auto& child : baseNode->GetChildren()) {
         auto targetNode = FindLazyForEachNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<RefPtr<UINode>> SwiperPattern::FindRepeatVirtualNode(RefPtr<UINode> baseNode, bool isSelfNode) const
+{
+    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
+        return baseNode;
+    }
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+    for (const auto& child : baseNode->GetChildren()) {
+        auto targetNode = FindRepeatVirtualNode(child, false);
         if (targetNode.has_value()) {
             return targetNode;
         }
