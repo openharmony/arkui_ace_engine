@@ -242,8 +242,6 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
                 rect.Top - windowRect.Top() + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, startCenterGlobalOffset);
             auto eInd = GetGlyphPositionByGlobalOffset(frameNode, endCenterGlobalOffset);
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture sInd:%{public}lu, eInd:%{public}lu",
-                sInd.position_, eInd.position_);
             auto textBase = frameNode->GetPattern<NG::TextBase>();
             CHECK_NULL_VOID(textBase);
             auto wtextLength = textBase->GetContentWideTextLength();
@@ -283,8 +281,6 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::InsertSpace(int32_t nodeId, v
             Offset centerGlobalOffset = Offset(rect.Left - windowRect.Left() + rect.Width / 2,
                 rect.Top - windowRect.Top() + rect.Height / 2);
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture sInd:%{public}lu, affinity_:%{public}d",
-                sInd.position_, sInd.affinity_);
             auto textInputClient = frameNode->GetPattern<TextInputClient>();
             CHECK_NULL_VOID(textInputClient);
             auto start = static_cast<int32_t>(sInd.position_);
@@ -317,8 +313,6 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::MoveCursor(int32_t nodeId, vo
                 windowRect.Left(), windowRect.Top());
             Offset centerGlobalOffset = Offset(point.x - windowRect.Left(), point.y - windowRect.Top());
             auto sInd = GetGlyphPositionByGlobalOffset(frameNode, centerGlobalOffset);
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture sInd:%{public}lu, affinity_:%{public}d",
-                sInd.position_, sInd.affinity_);
             resultCode = HandleMoveCursor(frameNode, sInd, point.showHandle);
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorSyncStylusAction");
