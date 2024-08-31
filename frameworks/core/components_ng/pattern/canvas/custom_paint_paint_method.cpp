@@ -1939,8 +1939,10 @@ void CustomPaintPaintMethod::ResetStates()
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();
-    // The initial value of the font size in canvas is 14px.
+    // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
+    // The default value of TextAlign is TextAlign::START.
+    SetDefaultTextAlign();
     state_.shadow = Shadow();
     imageBrush_ = RSBrush();
     rsPath_.Reset();
