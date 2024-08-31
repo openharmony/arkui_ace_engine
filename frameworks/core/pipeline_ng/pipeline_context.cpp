@@ -4435,6 +4435,7 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
 
 std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode)
 {
+    CHECK_NULL_RETURN(rootNode, "");
     std::vector<RectF> responseRegionList;
     rootNode->GetResponseRegionListByTraversal(responseRegionList);
     std::string responseRegionStrOrigin;
