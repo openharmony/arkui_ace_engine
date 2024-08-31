@@ -4554,6 +4554,10 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
 }
 
 function attributeModifierFuncWithoutStateStyles(modifier, componentBuilder, modifierBuilder) {
+  if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
