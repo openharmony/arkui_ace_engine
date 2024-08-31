@@ -43,6 +43,10 @@ public:
     static napi_value CreateInt32(napi_env env, int32_t code);
     static napi_value CreateObject(napi_env env);
     static napi_value CreateDouble(napi_env env, double value);
+    static napi_value CreateFunction(napi_env env,
+                                        const char* utf8name, size_t length,
+                                        napi_callback cb,
+                                        void* data);
     static int32_t GetCInt32(napi_env env, napi_value value);
     static napi_value CreateNull(napi_env env);
     static napi_value CreateUndefined(napi_env env);

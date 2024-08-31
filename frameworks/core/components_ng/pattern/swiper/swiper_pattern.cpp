@@ -2825,11 +2825,6 @@ void SwiperPattern::UpdateCurrentFocus()
 
 bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 {
-#ifdef SUPPORT_DIGITAL_CROWN
-    if (IsCrownSpring()) {
-        return false;
-    }
-#endif
     if (IsLoop()) {
         return false;
     }
