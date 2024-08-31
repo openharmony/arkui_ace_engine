@@ -1152,6 +1152,9 @@ void ScrollablePattern::StopAnimate()
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
     }
+    if (scrollBar_) {
+        scrollBar_->StopFlingAnimation();
+    }
 }
 
 void ScrollablePattern::ScrollTo(float position)

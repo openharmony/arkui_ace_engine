@@ -1771,7 +1771,16 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
-        posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        if (pos.groupInfo) {
+            bool groupAtStart = pos.groupInfo.value().atStart;
+            if (groupAtStart) {
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+            } else {
+                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height });
+            }
+        } else {
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
     bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);

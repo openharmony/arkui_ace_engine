@@ -1372,6 +1372,7 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
 std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayoutInfo(
     const RefPtr<LayoutWrapper>& wrapper) const
 {
+    CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto layoutAlgorithmWrapper = wrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, std::nullopt);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -1423,9 +1424,14 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (auto& pos : recycledItemPosition_) {
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
+        if (pos.second.isGroup) {
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+        } else {
+            pos.second.groupInfo.reset();
+        }
     }
-    auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
-    ProcessCacheCount(layoutWrapper, cacheCount);
+    ProcessCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
