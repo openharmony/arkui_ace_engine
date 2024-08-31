@@ -65,12 +65,14 @@ void EventConfig::ParseSwitch(const std::unique_ptr<JsonValue>& jsonObj)
         switches_->emplace(EventCategory::CATEGORY_PAGE, switchVal->GetBool("page", false));
         switches_->emplace(EventCategory::CATEGORY_COMPONENT, switchVal->GetBool("component", false));
         switches_->emplace(EventCategory::CATEGORY_EXPOSURE, switchVal->GetBool("exposure", false));
+        switches_->emplace(EventCategory::CATEGORY_PAGE_PARAM, switchVal->GetBool("pageParam", false));
     }
     auto globalSwitchVal = jsonObj->GetValue("globalSwitch");
     if (globalSwitchVal && globalSwitchVal->IsObject()) {
         EventRecorder::Get().pageEnable_ = globalSwitchVal->GetBool("page", true);
         EventRecorder::Get().componentEnable_ = globalSwitchVal->GetBool("component", true);
         EventRecorder::Get().exposureEnable_ = globalSwitchVal->GetBool("exposure", true);
+        EventRecorder::Get().pageParamEnable_ = globalSwitchVal->GetBool("pageParam", true);
     }
 }
 
