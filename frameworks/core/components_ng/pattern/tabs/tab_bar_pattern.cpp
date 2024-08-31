@@ -650,6 +650,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
+    changeByClick_ = true;
     SetSwiperCurve(DurationCubicCurve);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
