@@ -36,11 +36,10 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-
+    SetIsStopHoverImageAnimation(true);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->HideMenu();
-    SetIsStopHoverImageAnimation(true);
     CallMenuStateChangeCallback("false");
 }
 
@@ -732,6 +731,50 @@ void MenuWrapperPattern::ClearAllSubMenu()
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         }
     }
+}
+
+void MenuWrapperPattern::StopHoverImageToPreviewAnimation()
+{
+    auto menuWrapperNode = GetHost();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
+    auto flexContext = flexNode->GetRenderContext();
+    CHECK_NULL_VOID(flexContext);
+
+    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
+    CHECK_NULL_VOID(stackNode);
+    auto stackContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackContext);
+
+    auto menuChild = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuChild);
+    auto menuPattern = menuChild->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto originPosition = menuPattern->GetPreviewOriginOffset();
+
+    auto geometryNode = flexNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto position = geometryNode->GetFrameOffset();
+
+    auto flexPosition = originPosition;
+    if (Positive(hoverImageToPreviewRate_)) {
+        flexPosition += (position - originPosition) * hoverImageToPreviewRate_;
+    }
+
+    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0),
+        [stackContext, flexContext, flexPosition, scale = hoverImageToPreviewScale_]() {
+            if (flexContext) {
+                flexContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(flexPosition.GetX()), Dimension(flexPosition.GetY())));
+            }
+
+            CHECK_NULL_VOID(stackContext && Positive(scale));
+            stackContext->UpdateTransformScale(VectorF(scale, scale));
+        });
 }
 
 void MenuWrapperPattern::DumpInfo()
