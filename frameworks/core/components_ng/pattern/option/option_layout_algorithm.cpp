@@ -54,6 +54,12 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto minOptionHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
+    auto rowChild = child->GetOrCreateChildByIndex(0);
+    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+        auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
+        CHECK_NULL_VOID(securityLayoutProperty);
+        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
+    }
     UpdateIconMargin(layoutWrapper);
     MeasureRow(child, childConstraint);
 
@@ -73,20 +79,14 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
-
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);
     }
-    auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
         float dividerWidth = static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
         SizeF idealSizePaste(idealSize.Width() - dividerWidth, idealSize.Height() - dividerWidth);
         childConstraint.selfIdealSize.SetSize(idealSizePaste);
-        auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
-        CHECK_NULL_VOID(securityLayoutProperty);
-        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
-        rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         rowChild->Measure(childConstraint);
     }
     LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
