@@ -12,16 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

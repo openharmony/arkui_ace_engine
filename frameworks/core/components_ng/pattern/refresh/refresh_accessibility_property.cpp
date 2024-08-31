@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
 namespace OHOS::Ace::NG {

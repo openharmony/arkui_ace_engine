@@ -14,24 +14,15 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include <string>
 
-#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
-#include "base/perfmonitor/perf_monitor.h"
-#include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/common/manager_interface.h"
-#include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
