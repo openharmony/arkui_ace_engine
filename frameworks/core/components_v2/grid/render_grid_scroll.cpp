@@ -15,16 +15,8 @@
 
 #include "core/components_v2/grid/render_grid_scroll.h"
 
-#include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve_animation.h"
 #include "core/common/text_field_manager.h"
-#include "core/components/grid_layout/grid_layout_component.h"
-#include "core/components/grid_layout/render_grid_layout_item.h"
 #include "core/components_v2/grid/grid_scroll_controller.h"
 #include "core/event/ace_event_helper.h"
 

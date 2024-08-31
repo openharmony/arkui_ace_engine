@@ -15,8 +15,6 @@
 
 #include "core/components_v2/inspector/time_picker_dialog_composed_element.h"
 
-#include <unordered_map>
-
 #include "base/log/dump_log.h"
 #include "core/components/picker/picker_base_element.h"
 #include "core/components_v2/inspector/utils.h"
