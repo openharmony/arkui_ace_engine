@@ -472,6 +472,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+    void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
@@ -997,7 +998,7 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const Offset& offset);
+    void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp();
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
