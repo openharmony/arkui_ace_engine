@@ -8269,7 +8269,7 @@ Offset TextFieldPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffse
 
 bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
 {
-    // delete or insert space
+    // delete or insert space.
     auto wtext = GetWideText();
     if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
         if (wtext[index] == L' ') {
