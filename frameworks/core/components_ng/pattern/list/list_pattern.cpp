@@ -2016,6 +2016,13 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
     chainAnimation_->SetDelta(-dragOffset, overDrag);
+    if (source == SCROLL_FROM_UPDATE && GetCanOverScroll()) {
+        float tempDelta = currentDelta_;
+        currentDelta_ -= dragOffset;
+        bool isAtEdge = IsAtTop() || IsAtBottom();
+        currentDelta_ = tempDelta;
+        SetCanOverScroll(isAtEdge);
+    }
 }
 
 float ListPattern::GetChainDelta(int32_t index) const
