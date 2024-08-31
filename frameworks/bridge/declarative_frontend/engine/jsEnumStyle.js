@@ -3330,6 +3330,14 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
 
+var AccessibilityHoverType;
+(function (AccessibilityHoverType) {
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_ENTER"] = 0] = "HOVER_ENTER";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_MOVE"] = 1] = "HOVER_MOVE";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
+})(AccessibilityHoverType || (AccessibilityHoverType = {}));
+
 class ImageAnalyzerController {
   constructor() {
   }
