@@ -131,15 +131,15 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
         case FilterType::OPACITY:
         case FilterType::BRIGHTNESS:
         case FilterType::CONTRAST: {
-            std::regex contrastRegexExpression(R"((\d+(\.\d+)?%?)|(^$))");
+            std::regex contrastRegexExpression(R"((-?0)|(\d+(\.\d+)?%?)|(^$))");
             return std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|vp|rem)?)|(^$))");
+            std::regex blurRegexExpression(R"((-?0)|(\d+(\.\d+)?(px|vp|rem)?)|(^$))");
             return std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
-            std::regex hueRotateRegexExpression(R"((\d+(\.\d+)?(deg|grad|rad|turn))|(^$))");
+            std::regex hueRotateRegexExpression(R"((-?0)|(-?\d+(\.\d+)?(deg|grad|rad|turn))|(^$))");
             return std::regex_match(filterParam, hueRotateRegexExpression);
         }
         default:
