@@ -277,6 +277,14 @@ bool SafeAreaManager::AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node
     return false;
 }
 
+std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
+{
+    // To isolate set comparator, use vector to collect a copy of nodes
+    std::vector<WeakPtr<FrameNode>> result;
+    std::copy(needExpandNodes_.begin(), needExpandNodes_.end(), std::back_inserter(result));
+    return result;
+}
+
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
 {
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
