@@ -22,12 +22,8 @@
 #include "core/components/font/rosen_font_collection.h"
 #endif
 
-#include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 namespace OHOS::Ace::NG {

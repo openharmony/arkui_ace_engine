@@ -14,11 +14,6 @@
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "core/common/container.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 void AtomicServiceLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {

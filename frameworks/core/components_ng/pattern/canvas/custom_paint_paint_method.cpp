@@ -26,9 +26,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/image/image_cache.h"
 #ifndef ACE_UNITTEST
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"

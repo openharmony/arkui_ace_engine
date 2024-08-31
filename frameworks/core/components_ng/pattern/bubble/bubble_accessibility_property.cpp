@@ -19,9 +19,6 @@
 #include "accessibility_element_info.h"
 #endif
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-
 namespace OHOS::Ace::NG {
 void BubbleAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
 {

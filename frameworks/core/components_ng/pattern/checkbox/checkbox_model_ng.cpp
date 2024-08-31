@@ -15,12 +15,8 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
