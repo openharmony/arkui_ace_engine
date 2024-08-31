@@ -140,11 +140,17 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     container->SetCurPointerEvent(pointerEvent);
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        int32_t toolType = MMI::PointerEvent::TOOL_TYPE_MOUSE;
+        if (!GetPointerEventToolType(pointerEvent, toolType)) {
+            return;
+        }
         // mouse event
         if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
+                pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
             (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
+                pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+            (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
+                pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
             view->ProcessAxisEvent(pointerEvent, node, isInjected);
         } else {
             view->ProcessDragEvent(pointerEvent, node);
