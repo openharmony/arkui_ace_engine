@@ -10000,7 +10000,7 @@ bool RichEditorPattern::IsShowAIWrite()
     auto abilityName = textFieldTheme->GetAIWriteAbilityName();
     aiWriteAdapter_->SetBundleName(bundleName);
     aiWriteAdapter_->SetAbilityName(abilityName);
-    return !bundleName.empty() && !abilityName.empty();
+    return aiWriteAdapter_->GetAISupportFromMetadata(bundleName, abilityName);
 }
 
 void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
