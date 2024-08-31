@@ -329,10 +329,6 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
 void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
     TextSpanType selectType, TextResponseType responseType)
 {
-    auto manager = SelectContentOverlayManager::GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    CHECK_NULL_VOID(manager->IsOpen());
-
     auto pattern = GetPattern<RichEditorPattern>();
     auto menuParams = pattern ? pattern->GetMenuParams(selectType, responseType) : nullptr;
     std::pair<TextSpanType, TextResponseType> selectResponseComb = { selectType, responseType };
