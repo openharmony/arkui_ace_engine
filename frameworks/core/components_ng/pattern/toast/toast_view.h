@@ -27,12 +27,12 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ToastView {
 public:
     static RefPtr<FrameNode> CreateToastNode(const ToastInfo& toastInfo);
+    static void UpdateToastContext(const RefPtr<FrameNode>& toastContext);
 
 private:
     static void UpdateTextLayoutProperty(
         const RefPtr<FrameNode>& textNode, const std::string& message, bool isRightToLeft,
         const std::optional<Color>& textColor);
-    static void UpdateToastContext(const RefPtr<FrameNode>& toastContext);
 };
 } // namespace OHOS::Ace::NG
 
