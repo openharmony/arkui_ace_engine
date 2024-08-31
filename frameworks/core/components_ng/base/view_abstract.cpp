@@ -1728,11 +1728,16 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    // subwindow model needs to use subContainer to get popupInfo
-    if (showInSubWindow) {
+    if (popupInfo.popupNode) {
+        showInSubWindow = false;
+    } else {
+        // subwindow model needs to use subContainer to get popupInfo
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
+        }
+        if (popupInfo.popupNode) {
+            showInSubWindow = true;
         }
     }
 
