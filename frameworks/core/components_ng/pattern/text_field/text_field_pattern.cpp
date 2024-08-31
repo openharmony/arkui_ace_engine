@@ -7605,7 +7605,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "In OnDragMoved, the dragging node is moving in the textField, id:%{public}d",
         host->GetId());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragManager);
