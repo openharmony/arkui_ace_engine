@@ -78,6 +78,12 @@ public:
      */
     void Tick();
 
+    /**
+     * @brief Force update animations by @c delta to simulate velocity animation
+     *
+     */
+    void TickByVelocity(float velocity);
+
     void Reset();
 
 private:

@@ -70,6 +70,19 @@ void MockAnimationManager::Tick()
     }
 }
 
+void MockAnimationManager::TickByVelocity(float velocity)
+{
+    for (auto it = animations_.begin(); it != animations_.end();) {
+        auto&& anim = *it;
+        if (!anim || anim->Finished()) {
+            it = animations_.erase(it);
+        } else {
+            anim->ForceUpdate(velocity);
+            ++it;
+        }
+    }
+}
+
 void MockAnimationManager::Reset()
 {
     propToAnimation_.clear();
