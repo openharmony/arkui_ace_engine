@@ -10157,11 +10157,12 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
     InsertSpanByBackData(spanString);
 }
 
-bool RichEditorPattern::IsTextEditableForStylus()
+bool RichEditorPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
     if (!focusHub->IsFocusable() || !host->IsVisible()) {
         return false;
     }

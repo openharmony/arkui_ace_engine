@@ -912,7 +912,7 @@ public:
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
 
-    bool IsTextEditableForStylus() override;
+    bool IsTextEditableForStylus() const override;
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
 

@@ -1470,7 +1470,7 @@ public:
 
     void ShowCaretAndStopTwinkling();
 
-    bool IsTextEditableForStylus() override;
+    bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()
     {

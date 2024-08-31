@@ -66,13 +66,14 @@ void SearchTextFieldPattern::ApplyNormalTheme()
     }
 }
 
-bool SearchTextFieldPattern::IsTextEditableForStylus()
+bool SearchTextFieldPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parentFrameNode, false);
     auto focusHub = parentFrameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
     if (!focusHub->IsFocusable() || !parentFrameNode->IsVisible()) {
         return false;
     }

@@ -213,7 +213,7 @@ public:
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
 
-    virtual bool IsTextEditableForStylus()
+    virtual bool IsTextEditableForStylus() const
     {
         return false;
     }
