@@ -492,7 +492,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false, GetContext());
+        OnDetachFromMainTree(false, GetContextWithCheck());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
