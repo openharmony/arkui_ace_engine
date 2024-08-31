@@ -1716,6 +1716,7 @@ private:
     void HandleParentGlobalOffsetChange();
     HintToTypeWrap GetHintType();
     HintToTypeWrap GetAutoFillTypeAndMetaData(bool isNeedToHitType = true);
+    PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();

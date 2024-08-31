@@ -7772,6 +7772,30 @@ void TextFieldPattern::SetThemeBorderAttr()
     }
 }
 
+PaddingProperty TextFieldPattern::GetPaddingByUserValue()
+{
+    PaddingProperty padding;
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, padding);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, padding);
+    padding = paintProperty->GetPaddingByUserValue();
+    auto themePadding = IsUnderlineMode() ? theme->GetUnderlinePadding() : theme->GetPadding();
+    if (!padding.top.has_value()) {
+        padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());
+    }
+    if (!padding.bottom.has_value()) {
+        padding.bottom = CalcLength(CalcLength(themePadding.Bottom()).GetDimension());
+    }
+    if (!padding.left.has_value()) {
+        padding.left = CalcLength(CalcLength(themePadding.Left()).GetDimension());
+    }
+    if (!padding.right.has_value()) {
+        padding.right = CalcLength(CalcLength(themePadding.Right()).GetDimension());
+    }
+    return padding;
+}
+
 void TextFieldPattern::SetThemeAttr()
 {
     auto host = GetHost();
@@ -7809,7 +7833,7 @@ void TextFieldPattern::SetThemeAttr()
         padding.right = CalcLength(CalcLength(themePadding.Right()).GetDimension());
         layoutProperty->UpdatePadding(padding);
     } else {
-        layoutProperty->UpdatePadding(paintProperty->GetPaddingByUserValue());
+        layoutProperty->UpdatePadding(GetPaddingByUserValue());
     }
 
     if (!paintProperty->HasTextColorFlagByUser()) {
