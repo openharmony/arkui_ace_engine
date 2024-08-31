@@ -5432,7 +5432,7 @@ void TextFieldPattern::SetSelectionFlag(
 }
 
 void TextFieldPattern::SetSelection(int32_t start, int32_t end,
-    const std::optional<SelectionOptions>& options = std::nullopt, bool isForward)
+    const std::optional<SelectionOptions>& options, bool isForward)
 {
     SetSelectionFlag(start, end, options, isForward);
 }
