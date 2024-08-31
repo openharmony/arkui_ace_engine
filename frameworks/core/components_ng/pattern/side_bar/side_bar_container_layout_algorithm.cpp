@@ -265,7 +265,6 @@ Dimension SideBarContainerLayoutAlgorithm::GetSideBarWidth(
     CHECK_NULL_RETURN(pipelineContext, -1.0_vp);
     auto searchTheme = pipelineContext->GetTheme<SideBarTheme>();
     CHECK_NULL_RETURN(searchTheme, -1.0_vp);
-    LOGI("sideBarTheme %{public}s",searchTheme->GetSideBarWidth().ToString().c_str());
     return searchTheme->GetSideBarWidth();
 }
 
