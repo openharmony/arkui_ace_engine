@@ -166,7 +166,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         algo->SetTargetIndex(targetIndex_.value());
     }
     algo->SetCurrentIndex(currentIndex_);
-    algo->SetContentCrossSize(contentCrossSize_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     algo->SetContentMainSize(contentMainSize_);
     algo->SetCurrentDelta(currentDelta_);
@@ -490,9 +489,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StartAutoPlay();
         InitArrow();
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= RealTotalCount()) {
-        currentIndex_ = 0;
-        props->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
+    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= TotalCount()) {
+        UpdateCurrentIndex(0);
+    } else if (!IsLoop() && userSetCurrentIndex > TotalCount() - GetDisplayCount()) {
+        UpdateCurrentIndex(TotalCount() - GetDisplayCount());
     } else if (oldIndex != userSetCurrentIndex) {
         currentIndex_ = userSetCurrentIndex;
         propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
@@ -1050,7 +1050,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         } else if (!itemPosition_.empty() && SwiperUtils::IsStretch(props)) {
             auto firstItem = GetFirstItemInfoInVisibleArea();
             auto targetPos = firstItem.second.startPos +
-                             (targetIndexValue - firstItem.first) * (placeItemWidth_.value() + GetItemSpace());
+                             (targetIndexValue - firstItem.first) * (placeItemWidth_.value_or(0.0f) + GetItemSpace());
             PlayTranslateAnimation(
                 currentOffset_, currentOffset_ - targetPos, targetIndexValue, false, velocity_.value_or(0.0f));
         } else {
