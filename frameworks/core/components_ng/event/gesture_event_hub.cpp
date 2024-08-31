@@ -2048,4 +2048,16 @@ bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
     }
     return gestureEventHub->IsAllowedDrag(eventHub);
 }
+
+void GestureEventHub::SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode)
+{
+    if (setIsShow) {
+        bindMenuStatus_.isBindCustomMenu = true;
+        bindMenuStatus_.isShow = isShow;
+        bindMenuStatus_.isShowPreviewMode = previewMode;
+    } else {
+        bindMenuStatus_.isBindLongPressMenu = true;
+        bindMenuStatus_.longPressPreviewMode = previewMode;
+    }
+}
 } // namespace OHOS::Ace::NG
