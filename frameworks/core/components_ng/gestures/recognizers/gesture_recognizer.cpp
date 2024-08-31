@@ -187,6 +187,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::END:
             HandleTouchUpEvent(event);
             break;
+        case AxisAction::CANCEL:
+            HandleTouchCancelEvent(event);
+            break;
         default:
             HandleTouchCancelEvent(event);
             break;

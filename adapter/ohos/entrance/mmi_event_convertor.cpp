@@ -379,6 +379,9 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
             event.action = AxisAction::END;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            event.action = AxisAction::CANCEL;
+            break;
         default:
             event.action = AxisAction::NONE;
             break;
@@ -504,6 +507,19 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     if (action == PointerAction::PULL_OUT_WINDOW) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
     }
+}
+
+bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t& toolType)
+{
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "get pointer: %{public}d item failed.", pointerID);
+        return false;
+    }
+    toolType = item.GetToolType();
+    return true;
 }
 
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
