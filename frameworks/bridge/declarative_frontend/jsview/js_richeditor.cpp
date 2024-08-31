@@ -2372,10 +2372,10 @@ void JSRichEditorBaseController::ParseTextDecoration(
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
         }
-    }
-    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
-        updateSpanStyle.updateTextDecorationColor = style.GetDynamicTextColor();
-        style.SetTextDecorationColor(style.GetDynamicTextColor());
+        if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
+            updateSpanStyle.updateTextDecorationColor = style.GetDynamicTextColor();
+            style.SetTextDecorationColor(style.GetDynamicTextColor());
+        }
     }
 }
 
