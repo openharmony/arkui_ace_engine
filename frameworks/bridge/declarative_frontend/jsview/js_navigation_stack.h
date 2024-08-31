@@ -144,6 +144,7 @@ private:
     bool LoadDestinationByBuilder(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node,
         RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetFlagByIndex(int32_t index) const;
+    bool CallByPushDestination(int32_t index);
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     bool GetNodeFromPreBuildList(int32_t index, const std::string& name,
         const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);

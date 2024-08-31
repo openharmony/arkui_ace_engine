@@ -332,6 +332,17 @@ void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::stri
     pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
 }
 
+bool JSNavigationStack::CallByPushDestination(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto isPushDestination = pathInfo->GetPropertyValue<bool>("pushDestination", false);
+    return isPushDestination;
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
     auto name = GetNameByIndex(index);
@@ -345,6 +356,9 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
     if (errorCode != ERROR_CODE_NO_ERROR) {
+        if (CallByPushDestination(index)) {
+            return nullptr;
+        }
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
