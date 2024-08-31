@@ -869,7 +869,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     } else {
         buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
     }
-
+    buttonNode->MarkModifyDone();
     return buttonNode;
 }
 } // namespace OHOS::Ace::NG
