@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 
-#include <cstdint>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {

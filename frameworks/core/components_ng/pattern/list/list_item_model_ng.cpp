@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_item_event_hub.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"

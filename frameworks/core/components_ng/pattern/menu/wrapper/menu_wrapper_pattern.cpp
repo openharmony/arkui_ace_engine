@@ -15,19 +15,8 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
-#include <cstddef>
-
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t FOCUS_MENU_NUM = 2;

@@ -15,20 +15,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/layout_param.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 

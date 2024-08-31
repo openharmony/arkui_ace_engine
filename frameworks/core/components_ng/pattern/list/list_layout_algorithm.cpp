@@ -15,14 +15,8 @@
 
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <unordered_set>
 #include <utility>
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"

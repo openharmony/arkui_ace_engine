@@ -15,13 +15,6 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
 
-#include "base/memory/referenced.h"
-#include "base/mousestyle/mouse_style.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model.h"
-#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

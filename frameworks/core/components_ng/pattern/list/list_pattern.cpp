@@ -16,16 +16,10 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 
 #include <cstdint>
-#include <string>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/bilateral_spring_node.h"
-#include "core/animation/spring_model.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
