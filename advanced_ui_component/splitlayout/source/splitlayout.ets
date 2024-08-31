@@ -15,16 +15,22 @@
 
 import { LengthMetrics } from '@ohos.arkui.node';
 
+const TEXT_MARGIN_TOP_4: number = 4;
+const TEXT_MARGIN_BOTTOM_8: number = 8;
+const TEXT_MARGIN_BOTTOM_24: number = 24;
+const TEXT_MARGIN_LEFT_48: number = 48;
+const TEXT_MARGIN_RIGHT_48: number = 48;
+
 @Component
 export struct SplitLayout {
-  @BuilderParam container: () => void
-  @State sizeValue: string = ''
-  @State areaWidth: number = 0
-  @State imageBackgroundColor: string = "#19000000"
-  @Prop mainImage: Resource
-  @Prop primaryText: string = ""
-  secondaryText?: string = ""
-  tertiaryText?: string = ""
+  @BuilderParam container: () => void;
+  @State sizeValue: string = '';
+  @State areaWidth: number = 0;
+  @State imageBackgroundColor: string = "#19000000";
+  @State mainImage?: Resource = undefined;
+  @Prop primaryText: string = "";
+  secondaryText?: string = "";
+  tertiaryText?: string = "";
 
   build() {
     Column() {
@@ -39,29 +45,35 @@ export struct SplitLayout {
             Column() {
               Stack({ alignContent: Alignment.Bottom }) {
                 Image(this.mainImage)
-                  .height('34%')
+                  .height('100%')
                   .width('100%')
-                Column() {
-                  Text(this.primaryText)
-                    .fontWeight(FontWeight.Medium)
-                    .textAlign(TextAlign.Center)
-                    .fontSize($r('sys.float.ohos_id_text_size_headline7'))
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                  Text(this.secondaryText)
-                    .textAlign(TextAlign.Center)
-                    .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                    .margin({ top: 4, bottom: 8 })
-                  Text(this.tertiaryText)
-                    .textAlign(TextAlign.Center)
-                    .fontSize($r('sys.float.ohos_id_text_size_caption'))
-                    .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                    .margin({ bottom: 24 })
-                }
-                .alignItems(HorizontalAlign.Center)
-                .margin({
-                  left: $r('sys.float.ohos_id_max_padding_start'),
-                  right: $r('sys.float.ohos_id_max_padding_end'), })
+                Scroll() {
+                  Column() {
+                    Text(this.primaryText)
+                      .fontWeight(FontWeight.Medium)
+                      .textAlign(TextAlign.Center)
+                      .fontSize($r('sys.float.Title_M'))
+                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    Text(this.secondaryText)
+                      .textAlign(TextAlign.Center)
+                      .fontSize($r('sys.float.Body_M'))
+                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                      .margin({ top: TEXT_MARGIN_TOP_4, bottom: TEXT_MARGIN_BOTTOM_8 })
+                    Text(this.tertiaryText)
+                      .textAlign(TextAlign.Center)
+                      .fontSize($r('sys.float.Caption_M'))
+                      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+                      .margin({ bottom: TEXT_MARGIN_BOTTOM_24 })
+                  }
+                  .alignItems(HorizontalAlign.Center)
+                  .margin({
+                    left: $r('sys.float.ohos_id_max_padding_start'),
+                    right: $r('sys.float.ohos_id_max_padding_end'), })
+                }.scrollBar(BarState.On)
+                .nestedScroll({
+                  scrollForward: NestedScrollMode.SELF_FIRST,
+                  scrollBackward: NestedScrollMode.SELF_FIRST,
+                })
               }
               .height('34%')
               .width('100%')
@@ -88,22 +100,29 @@ export struct SplitLayout {
                   .margin({ start: LengthMetrics.vp(96), end: LengthMetrics.vp(36) })
                   .height('60%')
                   .width('20%')
-                Column() {
-                  Text(this.primaryText)
-                    .fontWeight(FontWeight.Medium)
-                    .fontSize($r('sys.float.ohos_id_text_size_headline7'))
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                  Text(this.secondaryText)
-                    .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                    .margin({ top: 4, bottom: 8 })
-                  Text(this.tertiaryText)
-                    .fontSize($r('sys.float.ohos_id_text_size_caption'))
-                    .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                }
-                .width('42%')
-                .alignItems(HorizontalAlign.Start)
-                .margin({ end: LengthMetrics.vp(96) })
+                Scroll() {
+                  Column() {
+                    Text(this.primaryText)
+                      .fontWeight(FontWeight.Medium)
+                      .fontSize($r('sys.float.Title_M'))
+                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    Text(this.secondaryText)
+                      .fontSize($r('sys.float.Body_M'))
+                      .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                      .margin({ top: TEXT_MARGIN_TOP_4, bottom: TEXT_MARGIN_BOTTOM_8 })
+                    Text(this.tertiaryText)
+                      .fontSize($r('sys.float.Caption_M'))
+                      .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+                      .margin({ bottom: TEXT_MARGIN_BOTTOM_24})
+                  }
+                  .width('42%')
+                  .alignItems(HorizontalAlign.Start)
+                  .margin({ end: LengthMetrics.vp(96) })
+                }.scrollBar(BarState.On)
+                .nestedScroll({
+                  scrollForward: NestedScrollMode.SELF_FIRST,
+                  scrollBackward: NestedScrollMode.SELF_FIRST,
+                })
               }
               .backgroundColor(this.imageBackgroundColor)
               .height('34%')
@@ -127,33 +146,43 @@ export struct SplitLayout {
           direction: GridRowDirection.Row
         }) {
           GridCol({ span: { xs: 4, sm: 4, md: 4, lg: 4 } }) {
-            Column() {
+            Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center, direction: FlexDirection.Column }) {
               Image(this.mainImage)
                 .height('17%')
                 .width('34%')
                 .margin({ bottom: 36 })
-              Text(this.primaryText)
-                .textAlign(TextAlign.Center)
-                .fontWeight(FontWeight.Medium)
-                .fontSize($r('sys.float.ohos_id_text_size_headline7'))
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                .margin({ left: 48, right: 48 })
-              Text(this.secondaryText)
-                .textAlign(TextAlign.Center)
-                .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                .fontColor($r('sys.color.ohos_id_color_text_primary'))
-                .margin({ top: 4, bottom: 8, left: 48, right: 48 })
-              Text(this.tertiaryText)
-                .textAlign(TextAlign.Center)
-                .fontSize($r('sys.float.ohos_id_text_size_caption'))
-                .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                .margin({ left: 48, right: 48 })
+              Scroll() {
+                Column() {
+                  Text(this.primaryText)
+                    .textAlign(TextAlign.Center)
+                    .fontWeight(FontWeight.Medium)
+                    .fontSize($r('sys.float.Title_M'))
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .margin({ left: TEXT_MARGIN_LEFT_48, right: TEXT_MARGIN_RIGHT_48 })
+                  Text(this.secondaryText)
+                    .textAlign(TextAlign.Center)
+                    .fontSize($r('sys.float.Body_M'))
+                    .fontColor($r('sys.color.ohos_id_color_text_primary'))
+                    .margin({ top: TEXT_MARGIN_TOP_4, bottom: TEXT_MARGIN_BOTTOM_8,
+                      left: TEXT_MARGIN_LEFT_48, right: TEXT_MARGIN_RIGHT_48 })
+                  Text(this.tertiaryText)
+                    .textAlign(TextAlign.Center)
+                    .fontSize($r('sys.float.Caption_M'))
+                    .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+                    .margin({ left: TEXT_MARGIN_LEFT_48, right: TEXT_MARGIN_RIGHT_48, bottom: TEXT_MARGIN_BOTTOM_24 })
+                }.alignItems(HorizontalAlign.Center)
+                .margin({
+                  left: $r('sys.float.ohos_id_max_padding_start'),
+                  right: $r('sys.float.ohos_id_max_padding_end'), })
+              }.scrollBar(BarState.On)
+              .nestedScroll({
+                scrollForward: NestedScrollMode.SELF_FIRST,
+                scrollBackward: NestedScrollMode.SELF_FIRST,
+              })
             }
             .width('100%')
             .height('100%')
             .backgroundColor(this.imageBackgroundColor)
-            .justifyContent(FlexAlign.Center)
-            .alignItems(HorizontalAlign.Center)
           }
           .height('100%')
 
