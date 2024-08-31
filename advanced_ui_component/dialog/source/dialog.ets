@@ -1117,7 +1117,7 @@ struct CustomDialogContentComponent {
     try {
       let uiContext: UIContext = this.getUIContext();
       let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if(!this.isFollowingSystemFontScale) {
+      if (!this.isFollowingSystemFontScale) {
         return 1;
       }
       return Math.min(systemFontScale, this.appMaxFontScale);
