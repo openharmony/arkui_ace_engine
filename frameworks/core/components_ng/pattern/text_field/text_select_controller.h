@@ -197,6 +197,7 @@ public:
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
+    void UpdateSecondHandleOffset(const OffsetF& offset);
     void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
     void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
     void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM,
