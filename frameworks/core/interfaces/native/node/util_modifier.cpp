@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/util_modifier.h"
-#include "base/utils/system_properties.h"
+
 #include "core/common/container.h"
 
 namespace OHOS::Ace::NG {

@@ -14,24 +14,7 @@
  */
 #include "core/interfaces/native/node/render_node_modifier.h"
 
-#include <cstdint>
-#include <optional>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/shape.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -14,7 +14,6 @@
  */
 #include "particle_modifier.h"
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
 
 namespace OHOS::Ace::NG {

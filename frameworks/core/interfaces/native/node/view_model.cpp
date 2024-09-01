@@ -15,12 +15,7 @@
 
 #include "core/interfaces/native/node/view_model.h"
 
-#include <optional>
-
-#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -78,11 +73,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 

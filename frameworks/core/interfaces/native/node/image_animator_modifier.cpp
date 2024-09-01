@@ -14,15 +14,7 @@
  */
 #include "core/interfaces/native/node/image_animator_modifier.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_DURATION = 1000; // ms
