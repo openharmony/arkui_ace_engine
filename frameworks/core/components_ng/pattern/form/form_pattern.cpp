@@ -682,7 +682,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         }, "ArkUIAddFormComponent");
 }
 
-void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtrNG::FrameNode host)
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host)
 {
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
