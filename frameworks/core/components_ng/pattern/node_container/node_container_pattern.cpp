@@ -43,7 +43,11 @@ void NodeContainerPattern::RemakeNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto newNode = FireMakeFunction();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto newNode = FireMakeFunction(instanceId);
     auto oldChild = host->GetChildAtIndex(0);
     if ((!oldChild && !newNode) || (oldChild && oldChild == newNode)) {
         return;
