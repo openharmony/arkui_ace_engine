@@ -52,6 +52,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
     }
@@ -271,6 +272,8 @@ public:
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
+    bool GetTargetNode(
+        int32_t& nodeIdLabel, RefPtr<NG::FrameNode>& targetNode, const CustomPopupUIExtensionConfig& config);
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
@@ -338,6 +341,16 @@ public:
 
     void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
+    void AddDestructCallback(void* key, const std::function<void()>& callback)
+    {
+        destructCallbacks_.emplace(key, callback);
+    }
+
+    void RemoveDestructCallback(void* key)
+    {
+        destructCallbacks_.erase(key);
+    }
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -347,6 +360,7 @@ private:
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
+    void ProcessDestructCallbacks();
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
@@ -411,6 +425,7 @@ private:
     bool isUIExtensionAbilityHost_ = false;
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
+    std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 };
 
 } // namespace OHOS::Ace
