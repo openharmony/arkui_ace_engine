@@ -647,12 +647,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        PostBgTask(
-            [weak = WeakClaim(this), info] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->AddFormComponent(info);
-            }, "ArkUIHandleFormComponent");
+        AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
     }
@@ -680,34 +675,39 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
+    PostBgTask(
+            [weak = WeakClaim(this), info, &host, this] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
 #if OHOS_STANDARD_SYSTEM
-    AppExecFwk::FormInfo formInfo;
-    if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
-        formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
-        isJsCard_ = false;
-    }
+        AppExecFwk::FormInfo formInfo;
+        if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
+            formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
+            pattern->isJsCard_ = false;
+        }
 #endif
 
-    AddFormComponentUI(formInfo.transparencyEnabled, info);
+        pattern->AddFormComponentUI(formInfo.transparencyEnabled, info);
 
-    if (!formManagerBridge_) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
-        return;
-    }
+        if (!pattern->formManagerBridge_) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
+            return;
+        }
 #if OHOS_STANDARD_SYSTEM
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
+        pattern->formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
 #else
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+        pattern->formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
 
-    if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
-        PostUITask([weak = WeakClaim(this), info] {
-            ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->LoadDisableFormStyle(info);
-            }, "ArkUILoadDisableFormStyle");
-    }
+        if (!formInfo.transparencyEnabled && pattern->CheckFormBundleForbidden(info.bundleName)) {
+            PostUITask([weak = WeakClaim(this), info] {
+                ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->LoadDisableFormStyle(info);
+                }, "ArkUILoadDisableFormStyle");
+        }
+    }, "ArkUIHandleFormComponent");
 }
 
 void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
