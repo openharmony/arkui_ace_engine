@@ -60,7 +60,15 @@ public:
     struct AnimationParams {
         AnimationCallbacks callbacks;
         AnimationOperation type = AnimationOperation::PLAY;
+
+        void Reset()
+        {
+            callbacks.finishCb = nullptr;
+            callbacks.repeatCb = nullptr;
+            type = AnimationOperation::CANCEL;
+        }
     };
+
     void SetParams(int32_t duration, AnimationCallbacks&& param)
     {
         params_.callbacks = std::move(param);

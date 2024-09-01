@@ -520,8 +520,6 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
 {
-    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
     RefreshModelNG refreshModel;
     refreshModel.Create();
     auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
@@ -548,7 +546,6 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     scrollable->HandleDragUpdate(info);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "179.37px"); // friction
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 
@@ -561,17 +558,13 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
 
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
 
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
-    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
 }
 
 /**

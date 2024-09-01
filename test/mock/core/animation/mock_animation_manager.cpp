@@ -88,8 +88,7 @@ void MockAnimationManager::Reset()
     propToAnimation_.clear();
     activeProps_.clear();
     animations_.clear();
-    params_.callbacks.finishCb = nullptr;
-    params_.callbacks.repeatCb = nullptr;
+    params_.Reset();
     ticks_ = 1;
     inScope_ = false;
 }

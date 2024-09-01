@@ -892,7 +892,6 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateGridItems(3);
-    model.SetLayoutOptions({});
     CreateDone();
 
     GestureEvent info;
