@@ -15,23 +15,14 @@
 
 #include "base/utils/system_properties.h"
 
-#include <cstdint>
-#include <memory>
-#include <mutex>
 #include <shared_mutex>
-#include <string>
-#include <unistd.h>
 #include <regex>
-
-#include "dm_common.h"
 
 #include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"

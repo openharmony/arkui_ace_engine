@@ -14,7 +14,6 @@
  */
 
 #include "adapter/ohos/capability/environment/environment_impl.h"
-#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
 EnvironmentImpl::EnvironmentImpl(const RefPtr<TaskExecutor>& taskExecutor) : Environment(taskExecutor) {}

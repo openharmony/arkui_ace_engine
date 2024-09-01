@@ -14,7 +14,6 @@
  */
 
 #include "base/log/exception_handler.h"
-#include "base/utils/utils.h"
 
 #include "app_mgr_client.h"
 #include "application_data_manager.h"

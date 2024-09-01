@@ -16,12 +16,8 @@
 #include "mouse_style_ohos.h"
 
 #include "input_manager.h"
-#include "pointer_style.h"
 #include "struct_multimodal.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {

@@ -15,26 +15,9 @@
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
-#include <memory>
-
-#include "input_manager.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/event/axis_event.h"
-#include "core/event/key_event.h"
-#include "core/event/mouse_event.h"
-#include "core/event/pointer_event.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
