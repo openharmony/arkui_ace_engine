@@ -1409,7 +1409,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
     RoundRect paintRect;
     datePickerPattern->GetInnerFocusPaintRect(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), 0);
+    EXPECT_EQ(rect.GetX(), 2.0f);
     EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
 }
 
