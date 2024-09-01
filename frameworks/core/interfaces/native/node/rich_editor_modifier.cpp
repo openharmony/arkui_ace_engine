@@ -490,7 +490,7 @@ void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParamet
         if (SetRichEditorPlaceholderValue(valuesArray, 3, valuesCount, colorResourceId) && // 3: colorResourceId
             GreatOrEqual(colorResourceId, 0.0)) {
             fontColor.SetValue(static_cast<ArkUI_Uint32>(result));
-            options.fontColor = DynamicColor(fontColor, static_cast<ArkUI_Uint32>(colorResourceId));
+            options.fontColor = fontColor;
         } else {
             fontColor.SetValue(static_cast<ArkUI_Uint32>(result));
             options.fontColor = fontColor;
