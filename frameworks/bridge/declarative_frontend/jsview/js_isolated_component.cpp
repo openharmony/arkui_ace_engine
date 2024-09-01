@@ -36,9 +36,6 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 using namespace Commonlibrary::Concurrent::WorkerModule;

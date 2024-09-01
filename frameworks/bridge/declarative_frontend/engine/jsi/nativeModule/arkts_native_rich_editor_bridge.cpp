@@ -21,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 namespace OHOS::Ace::NG {
 namespace {

@@ -27,11 +27,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
-#include "frameworks/core/common/resource/resource_manager.h"
-#include "frameworks/core/common/resource/resource_object.h"
-#include "frameworks/core/common/resource/resource_wrapper.h"
-#include "frameworks/core/components/declaration/common/declaration.h"
-#include "frameworks/core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -18,12 +18,7 @@
 #include "bridge/declarative_frontend/jsview/models/for_each_model_impl.h"
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/foreach/for_each_component.h"
-#include "core/components_part_upd/foreach/foreach_component.h"
-#include "core/components_part_upd/foreach/foreach_element.h"
-#include "core/components_v2/common/element_proxy.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -17,8 +17,6 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/dialog/dialog_component.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

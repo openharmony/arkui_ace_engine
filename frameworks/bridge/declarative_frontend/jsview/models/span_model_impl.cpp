@@ -15,11 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/span_model_impl.h"
 
-#include <utility>
-
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
 void SpanModelImpl::Create(const std::string& content)

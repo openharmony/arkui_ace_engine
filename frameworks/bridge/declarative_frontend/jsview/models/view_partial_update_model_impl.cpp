@@ -15,14 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/grid_layout/grid_layout_item_element.h"
 #include "core/components/ifelse/if_else_element.h"
-#include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_v2/common/element_proxy.h"
-#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace::Framework {
 
