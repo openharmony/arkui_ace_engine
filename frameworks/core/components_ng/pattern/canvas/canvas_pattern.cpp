@@ -1166,6 +1166,14 @@ void CanvasPattern::Reset()
     SetTextDirection(TextDirection::INHERIT);
 }
 
+void CanvasPattern::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    auto task = [pattern, transform](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetTransform(pattern, transform);
+    };
+    paintMethod_->PushTask(task);
+}
+
 void CanvasPattern::OnLanguageConfigurationUpdate()
 {
     UpdateTextDefaultDirection();

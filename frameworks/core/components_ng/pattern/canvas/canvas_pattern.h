@@ -158,6 +158,7 @@ public:
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
     void SetDensity(double density);
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
 
     void SaveLayer();
     void RestoreLayer();

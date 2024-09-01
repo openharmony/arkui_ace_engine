@@ -2155,4 +2155,14 @@ void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
     shadowParagraph_ = shadowBuilder->CreateTypography();
 #endif
 }
+
+void CustomPaintPaintMethod::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    pattern->SetScaleX(transform.scaleX);
+    pattern->SetScaleY(transform.scaleY);
+    pattern->SetSkewX(transform.skewX);
+    pattern->SetSkewY(transform.skewY);
+    pattern->SetTranslateX(transform.translateX);
+    pattern->SetTranslateY(transform.translateY);
+}
 } // namespace OHOS::Ace::NG
