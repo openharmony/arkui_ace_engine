@@ -15,15 +15,11 @@
 
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 
-#include "core/components_ng/base/frame_node.h"
-
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 constexpr int32_t MAX_TEXTURE_SIZE = 500000;
 constexpr int32_t MAX_SURFACE_SIZE = 8000;

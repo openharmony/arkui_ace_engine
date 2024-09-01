@@ -15,19 +15,12 @@
 
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 
-#include <sys/stat.h>
-#include <sys/statfs.h>
-
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
-#include "core/common/dynamic_component_renderer.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/event/key_event.h"
-#include "core/event/pointer_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
-#include "session/host/include/session.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

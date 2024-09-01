@@ -16,11 +16,6 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include <cstdint>
 
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/render/drawing_forward.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)

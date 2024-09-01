@@ -14,8 +14,6 @@
  */
 #include "window_event_process.h"
 
-#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
-#include "frameworks/core/event/ace_events.h"
 #include "pointer_event.h"
 
 namespace OHOS::Ace::NG {

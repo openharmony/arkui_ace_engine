@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
-#include "transaction/rs_sync_transaction_controller.h"
-#include "ui/rs_surface_node.h"
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"

@@ -23,7 +23,6 @@
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
-#include "ui/rs_surface_node.h"
 #include "want_params.h"
 #include "wm/wm_common.h"
 

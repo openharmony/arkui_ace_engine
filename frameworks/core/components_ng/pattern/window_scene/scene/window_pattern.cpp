@@ -19,7 +19,6 @@
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/image_provider/image_utils.h"
