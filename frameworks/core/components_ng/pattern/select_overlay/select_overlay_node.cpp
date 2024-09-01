@@ -658,6 +658,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
         };
         params.emplace_back(GetItemContent(item.id, item.content.value_or("")), "", callback);
         params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
+        params.back().disableSystemClick = true;
         itemNum++;
     }
     return params;
