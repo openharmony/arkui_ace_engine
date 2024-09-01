@@ -1066,6 +1066,46 @@ HWTEST_F(OverlayManagerTestOneNG, HidePopupWithoutAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HideAllPopups001
+ * @tc.desc: Test function of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, HideAllPopups001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    ASSERT_NE(popupNode, nullptr);
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    EXPECT_NE(popupPattern, nullptr);
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = false;
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->popupMap_[targetNode->GetId()] = popupInfo;
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateShowInSubWindow(true);
+    popupNode->MountToParent(rootNode);
+    overlayManager->HideAllPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetNode->GetId()].markNeedUpdate);
+}
+
+/**
  * @tc.name: HideCustomPopups001
  * @tc.desc: Test function of OverlayManager.
  * @tc.type: FUNC
