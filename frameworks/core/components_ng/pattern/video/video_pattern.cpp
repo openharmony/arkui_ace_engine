@@ -75,6 +75,7 @@ constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
+constexpr int32_t MEDIA_TYPE_AUD = 0;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -768,7 +769,12 @@ void VideoPattern::UpdateMuted()
         platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            mediaPlayer->SetVolume(videoVolume, videoVolume);
+            if (NearZero(videoVolume)) {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+            } else {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
+                mediaPlayer->SetVolume(videoVolume, videoVolume);
+            }
         }, "ArkUIVideoUpdateMuted");
     }
 }
