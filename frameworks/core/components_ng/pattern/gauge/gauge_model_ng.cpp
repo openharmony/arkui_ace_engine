@@ -15,12 +15,8 @@
 
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
-#include "core/components_ng/pattern/gauge/gauge_theme.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void GaugeModelNG::Create(float value, float min, float max)

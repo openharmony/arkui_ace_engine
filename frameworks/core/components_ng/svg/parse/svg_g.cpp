@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_g.h"
 
-#include "include/pathops/SkPathOps.h"
-
 namespace OHOS::Ace::NG {
 
 SvgG::SvgG() : SvgGroup() {}

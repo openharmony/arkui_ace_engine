@@ -1452,6 +1452,26 @@ const __creatorMap__ = new Map([
                 return new ArkTextTimerComponent(node, type);
             });
         }],
+    ['Marquee', (context) => {
+            return new TypedFrameNode(context, 'Marquee', (node, type) => {
+                return new ArkMarqueeComponent(node, type);
+            });
+        }],
+    ['TextArea', (context) => {
+            return new TypedFrameNode(context, 'TextArea', (node, type) => {
+                return new ArkTextAreaComponent(node, type);
+            });
+        }],
+    ['Checkbox', (context) => {
+            return new TypedFrameNode(context, 'Checkbox', (node, type) => {
+                return new ArkCheckboxComponent(node, type);
+            });
+        }],
+    ['CheckboxGroup', (context) => {
+            return new TypedFrameNode(context, 'CheckboxGroup', (node, type) => {
+                return new ArkCheckboxGroupComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {
@@ -1910,10 +1930,10 @@ class RenderNode {
     }
     set lengthMetricsUnit(unit) {
         if (unit === undefined || unit == null) {
-            this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+            this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
         }
         else {
-            this.lengthMetricsUnit = unit;
+            this.lengthMetricsUnitValue = unit;
         }
     }
     set markNodeGroup(isNodeGroup) {

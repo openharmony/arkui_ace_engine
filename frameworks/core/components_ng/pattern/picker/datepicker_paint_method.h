@@ -39,7 +39,6 @@ public:
     }
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-    void PaintDisable(RSCanvas& canvas, double X, double Y);
 
     void SetEnabled(bool enabled)
     {

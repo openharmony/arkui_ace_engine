@@ -86,8 +86,7 @@ public:
     virtual void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode,
-        bool addModalUiextension = false);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -196,10 +195,10 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    void DumpTree(int32_t depth);
+    void DumpTree(int32_t depth, bool hasJson = false);
     virtual bool IsContextTransparent();
 
-    bool DumpTreeById(int32_t depth, const std::string& id);
+    bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
 
     const std::string& GetTag() const
     {
@@ -782,7 +781,9 @@ protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual bool CheckAutoSave()
     {

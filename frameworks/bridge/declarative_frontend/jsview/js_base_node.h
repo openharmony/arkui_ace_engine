@@ -52,6 +52,7 @@ public:
     }
 
 private:
+    TouchEvent InitTouchEvent(const JSCallbackInfo& info);
     RefPtr<NG::FrameNode> viewNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;

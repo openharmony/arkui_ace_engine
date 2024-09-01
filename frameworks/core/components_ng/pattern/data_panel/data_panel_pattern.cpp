@@ -14,12 +14,6 @@
  */
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
-#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
-#include "core/components_ng/render/animation_utils.h"
-
 namespace OHOS::Ace::NG {
 
 void DataPanelPattern::OnAttachToFrameNode() {}

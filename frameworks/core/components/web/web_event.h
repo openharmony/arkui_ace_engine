@@ -35,9 +35,7 @@ enum class NativeEmbedStatus {
     UPDATE = 1,
     DESTROY = 2,
     ENTER_BFCACHE = 3,
-    LEAVE_BFCACHE = 4,
-    VISIBLE = 5,
-    HIDDEN = 6
+    LEAVE_BFCACHE = 4
 };
 
 enum class NavigationType {
@@ -1876,6 +1874,30 @@ private:
     std::string surfaceId_ = "";
     std::string embedId_ = "";
     EmbedInfo embedInfo_;
+};
+
+class ACE_EXPORT NativeEmbedVisibilityInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbedVisibilityInfo, BaseEventInfo)
+
+public:
+    NativeEmbedVisibilityInfo(bool visibility, const std::string& embed_id)
+        : BaseEventInfo("NativeEmbedVisibilityInfo"), visibility_(visibility),
+        embed_id_(embed_id) {}
+    ~NativeEmbedVisibilityInfo() = default;
+
+    bool GetVisibility() const
+    {
+        return visibility_;
+    }
+
+    const std::string& GetEmbedId() const
+    {
+        return embed_id_;
+    }
+
+private:
+    bool visibility_;
+    std::string embed_id_ = "";
 };
 
 class ACE_EXPORT RenderProcessNotRespondingEvent : public BaseEventInfo {

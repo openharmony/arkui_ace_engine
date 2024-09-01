@@ -14,14 +14,8 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
-#include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {

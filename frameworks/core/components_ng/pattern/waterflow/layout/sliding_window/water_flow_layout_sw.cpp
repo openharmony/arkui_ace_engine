@@ -23,10 +23,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -261,7 +258,7 @@ void PrepareStartPosQueue(StartPosQ& q, const Lanes& lanes, float mainGap, float
     for (size_t i = 0; i < lanes.size(); ++i) {
         const float nextPos = lanes[i].startPos - (lanes[i].items_.empty() ? 0.0f : mainGap);
         if (GreatNotEqual(nextPos, viewportBound)) {
-            q.push({ lanes[i].startPos, i });
+            q.push({ nextPos, i });
         }
     }
 }
@@ -271,7 +268,7 @@ void PrepareEndPosQueue(EndPosQ& q, const Lanes& lanes, float mainGap, float vie
     for (size_t i = 0; i < lanes.size(); ++i) {
         const float nextPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
         if (LessNotEqual(nextPos, viewportBound)) {
-            q.push({ lanes[i].endPos, i });
+            q.push({ nextPos, i });
         }
     }
 }
@@ -357,7 +354,7 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
         info_->idxToLane_[idx] = laneIdx;
         const float mainLen = MeasureChild(props, idx, laneIdx);
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
-        if (GreatNotEqual(startPos - mainGaps_[secIdx], viewportBound)) {
+        if (GreatNotEqual(startPos, viewportBound)) {
             q.push({ startPos, laneIdx });
         }
     }
@@ -373,7 +370,7 @@ float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneI
         lane.endPos -= mainGaps_[secIdx];
     }
     lane.items_.push_back({ idx, itemLen });
-    return lane.endPos;
+    return lane.endPos + mainGaps_[secIdx];
 }
 
 float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx)
@@ -385,7 +382,7 @@ float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t lane
         lane.startPos += mainGaps_[secIdx];
     }
     lane.items_.push_front({ idx, itemLen });
-    return lane.startPos;
+    return lane.startPos - mainGaps_[secIdx];
 }
 
 void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx)
@@ -405,7 +402,7 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
         size_t laneIdx = info_->idxToLane_.at(idx);
         const float mainLen = MeasureChild(props, idx, laneIdx);
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
-        if (GreatOrEqual(endPos + mainGaps_[secIdx], viewportBound)) {
+        if (GreatOrEqual(endPos, viewportBound)) {
             lanes.erase(laneIdx);
         }
         if (OverDue(cacheDeadline_)) {
@@ -473,7 +470,11 @@ void WaterFlowLayoutSW::ClearFront()
         }
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
-        float itemEndPos = lane.startPos + lane.items_.front().mainSize;
+        const float& itemLen = lane.items_.front().mainSize;
+        if (NearZero(itemLen) && NearZero(lane.startPos)) {
+            break;
+        }
+        const float itemEndPos = lane.startPos + itemLen;
         if (Positive(itemEndPos)) {
             break;
         }
@@ -652,7 +653,7 @@ void WaterFlowLayoutSW::LayoutSection(
     size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl)
 {
     const auto& margin = info_->margins_[idx];
-    float crossPos = rtl ? selfCrossLen + mainGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
+    float crossPos = rtl ? selfCrossLen + crossGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
     for (size_t i = 0; i < info_->lanes_[idx].size(); ++i) {
         if (rtl) {
             crossPos -= itemsCrossSize_[idx][i] + crossGaps_[idx];
@@ -759,6 +760,11 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
 {
     auto it = info_->idxToLane_.find(idx);
     if (it == info_->idxToLane_.end()) {
+        return false;
+    }
+    if (it->second >= info_->lanes_[info_->GetSegment(idx)].size()) {
+        TAG_LOGW(ACE_WATERFLOW, "Invalid lane index in map: %{public}zu for section: %{public}d", it->second,
+            info_->GetSegment(idx));
         return false;
     }
     auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);

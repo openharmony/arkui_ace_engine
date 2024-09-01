@@ -126,6 +126,7 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 
 void GridPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
 
@@ -1484,6 +1485,9 @@ void GridPattern::UpdateScrollBarOffset()
         overScroll = gridLayoutInfo_.lastMainSize_ - estimatedHeight + offset;
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
+    if (gridLayoutInfo_.offsetEnd_ && NearZero(overScroll)) {
+        offset = estimatedHeight - gridLayoutInfo_.lastMainSize_;
+    }
     HandleScrollBarOutBoundary(overScroll);
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
@@ -2037,5 +2041,118 @@ bool GridPattern::IsReverse() const
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, false);
     return gridLayoutProperty->IsReverse();
+}
+
+void GridPattern::BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (gridLayoutInfo_.scrollAlign_) {
+        case ScrollAlign::NONE: {
+            json->Put("ScrollAlign", "NONE");
+            break;
+        }
+        case ScrollAlign::CENTER: {
+            json->Put("ScrollAlign", "CENTER");
+            break;
+        }
+        case ScrollAlign::END: {
+            json->Put("ScrollAlign", "END");
+            break;
+        }
+        case ScrollAlign::START: {
+            json->Put("ScrollAlign", "START");
+            break;
+        }
+        case ScrollAlign::AUTO: {
+            json->Put("ScrollAlign", "AUTO");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void GridPattern::BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!gridLayoutInfo_.gridMatrix_.empty()) {
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        std::string res = std::string("");
+        for (auto item : gridLayoutInfo_.gridMatrix_) {
+            for (auto index : item.second) {
+                res.append("[")
+                    .append(std::to_string(index.first))
+                    .append(",")
+                    .append(std::to_string(index.second))
+                    .append("] ");
+            }
+            children->Put(std::to_string(item.first).c_str(), res.c_str());
+            res.clear();
+        }
+        children->Put("gridMatrix", children);
+    }
+    if (!gridLayoutInfo_.lineHeightMap_.empty()) {
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        for (auto item : gridLayoutInfo_.lineHeightMap_) {
+            children->Put(std::to_string(item.first).c_str(), std::to_string(item.second).c_str());
+        }
+        children->Put("lineHeightMap", children);
+    }
+    if (!gridLayoutInfo_.irregularItemsPosition_.empty()) {
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        for (auto item : gridLayoutInfo_.irregularItemsPosition_) {
+            children->Put(std::to_string(item.first).c_str(), std::to_string(item.second).c_str());
+        }
+        children->Put("irregularItemsPosition_", children);
+    }
+}
+
+void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    ScrollablePattern::DumpAdvanceInfo(json);
+    json->Put("GridLayoutOptions", property->HasLayoutOptions() ? GetIrregularIndexesString().c_str() : "null");
+    json->Put("supportAnimation", supportAnimation_);
+    json->Put("isConfigScrollable", isConfigScrollable_);
+    json->Put("lastCrossCount", gridLayoutInfo_.lastCrossCount_.has_value()
+                                    ? std::to_string(gridLayoutInfo_.lastCrossCount_.value()).c_str()
+                                    : "null");
+    json->Put("reachEnd", gridLayoutInfo_.reachEnd_);
+    json->Put("reachStart", gridLayoutInfo_.reachStart_);
+    json->Put("offsetEnd", gridLayoutInfo_.offsetEnd_);
+    json->Put("hasBigItem", gridLayoutInfo_.hasBigItem_);
+    json->Put("synced", gridLayoutInfo_.synced_);
+    json->Put("scrollStop", std::to_string(scrollStop_).c_str());
+    json->Put("prevHeight", gridLayoutInfo_.prevHeight_);
+    json->Put("currentHeight", gridLayoutInfo_.currentHeight_);
+    json->Put("endHeight", endHeight_);
+    json->Put("currentOffset", std::to_string(gridLayoutInfo_.currentOffset_).c_str());
+    json->Put("prevOffset", std::to_string(gridLayoutInfo_.prevOffset_).c_str());
+    json->Put("lastMainSize", std::to_string(gridLayoutInfo_.lastMainSize_).c_str());
+    json->Put("totalHeightOfItemsInView", std::to_string(gridLayoutInfo_.totalHeightOfItemsInView_).c_str());
+    json->Put("startIndex", gridLayoutInfo_.startIndex_);
+    json->Put("endIndex", gridLayoutInfo_.endIndex_);
+    json->Put("jumpIndex", gridLayoutInfo_.jumpIndex_);
+    json->Put("crossCount", gridLayoutInfo_.crossCount_);
+    json->Put("childrenCount", gridLayoutInfo_.childrenCount_);
+    json->Put("RowsTemplate", property->GetRowsTemplate()->c_str());
+    json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
+    json->Put("CachedCount",
+        property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
+    json->Put("MaxCount",
+        property->GetMaxCount().has_value() ? std::to_string(property->GetMaxCount().value()).c_str() : "null");
+    json->Put("MinCount",
+        property->GetMinCount().has_value() ? std::to_string(property->GetMinCount().value()).c_str() : "null");
+    json->Put("CellLength",
+        property->GetCellLength().has_value() ? std::to_string(property->GetCellLength().value()).c_str() : "null");
+    json->Put("Editable",
+        property->GetEditable().has_value() ? std::to_string(property->GetEditable().value()).c_str() : "null");
+    json->Put("ScrollEnabled", property->GetScrollEnabled().has_value()
+                                   ? std::to_string(property->GetScrollEnabled().value()).c_str()
+                                   : "null");
+
+    json->Put("AlignItems", property->GetAlignItems() ? "GridItemAlignment.STRETCH" : "GridItemAlignment.DEFAULT");
+    BuildScrollAlignInfo(json);
+    BuildGridLayoutInfo(json);
 }
 } // namespace OHOS::Ace::NG

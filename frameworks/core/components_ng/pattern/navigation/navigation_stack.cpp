@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
-#include <utility>
-
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {

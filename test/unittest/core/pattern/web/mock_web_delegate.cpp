@@ -1465,6 +1465,9 @@ void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth,
 void WebDelegate::OnTextSelected()
 {
 }
+void WebDelegate::OnDestroyImageAnalyzerOverlay()
+{
+}
 NG::WebInfoType WebDelegate::GetWebInfoType()
 {
 return NG::WebInfoType::TYPE_UNKNOWN;

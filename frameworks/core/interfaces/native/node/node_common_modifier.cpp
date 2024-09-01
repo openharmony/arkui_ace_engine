@@ -14,20 +14,8 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "interfaces/native/native_type.h"
 #include "interfaces/native/node/node_model.h"
-#include "securec.h"
 
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/shape.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -748,11 +736,7 @@ void SetBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const Ar
     borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
     borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
     borderRadius.multiValued = true;
-    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
-        ImageSpanView::SetBorderRadius(frameNode, borderRadius);
-    } else {
-        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
-    }
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
 }
 
 void ResetBorderRadius(ArkUINodeHandle node)
@@ -760,11 +744,7 @@ void ResetBorderRadius(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
-    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
-        ImageSpanView::ResetBorderRadius(frameNode);
-    } else {
-        ViewAbstract::SetBorderRadius(frameNode, reset);
-    }
+    ViewAbstract::SetBorderRadius(frameNode, reset);
 }
 
 /**
@@ -2645,6 +2625,9 @@ void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, focusable);
+    if (frameNode->GetTag() == "Custom") {
+        ViewAbstract::SetFocusType(frameNode, focusable ? FocusType::SCOPE : FocusType::DISABLE);
+    }
 }
 
 void ResetFocusable(ArkUINodeHandle node)

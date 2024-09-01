@@ -102,6 +102,7 @@ constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
 constexpr uint32_t DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX = 3;
 constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
+constexpr uint32_t DRAW_REGION_FOREGROUND_MODIFIER_INDEX = 6;
 constexpr int32_t RIGHT_ANGLE = 90;
 constexpr int32_t STRAIGHT_ANGLE = 180;
 constexpr int32_t REFLEX_ANGLE = 270;
@@ -509,13 +510,10 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             if (sandBoxCount_ > 0) {
                 return;
             }
-            sandBoxCount_ = 0;
-            CHECK_NULL_VOID(!host->IsRemoving());
-        } else {
-            sandBoxCount_ = 0;
         }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
+        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
@@ -2264,6 +2262,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -2601,6 +2600,11 @@ void RosenRenderContext::PaintAccessibilityFocus()
         RectF globalRect = frameRect.GetRect();
         globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
             localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+        globalRect = globalRect.Constrain(frameRect.GetRect());
+        if (globalRect.IsEmpty()) {
+            ClearAccessibilityFocus();
+            return;
+        }
         frameRect.SetRect(globalRect);
     }
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
@@ -2631,7 +2635,7 @@ void RosenRenderContext::UpdateAccessibilityRoundRect()
     frameRect.SetRect(RectF(lineWidth - borderPaddingPx - paintWidthPx / 2,
         lineWidth - borderPaddingPx - paintWidthPx / 2,
         noGreenBorderWidth + 2 * borderPaddingPx + paintWidthPx,
-        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx));
+        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx)); // 2: framenode to graphic specification
     modifier->SetRoundRect(frameRect, paintWidthPx);
 }
 void RosenRenderContext::ClearAccessibilityFocus()
@@ -2662,22 +2666,6 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto lpxScale = pipeline->GetLogicScale();
 
     CHECK_NULL_VOID(bdImage_);
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> image;
-    if (InstanceOf<SkiaImage>(bdImage_)) {
-        image = DynamicCast<SkiaImage>(bdImage_)->GetImage();
-    } else if (InstanceOf<PixelMapImage>(bdImage_)) {
-        auto pixmap = DynamicCast<PixelMapImage>(bdImage_)->GetPixelMap();
-        CHECK_NULL_VOID(pixmap);
-        image = SkiaImage::MakeSkImageFromPixmap(pixmap);
-    } else {
-        return;
-    }
-    CHECK_NULL_VOID(image);
-    RSImage rsImage(&image);
-    BorderImagePainter borderImagePainter(
-        *GetBdImage(), widthProp, paintRect.GetSize(), rsImage, { dipScale, lpxScale });
-#else
     std::shared_ptr<RSImage> image;
     if (InstanceOf<DrawingImage>(bdImage_)) {
         image = DynamicCast<DrawingImage>(bdImage_)->GetImage();
@@ -2691,7 +2679,12 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     CHECK_NULL_VOID(image);
     BorderImagePainter borderImagePainter(
         *GetBdImage(), widthProp, paintRect.GetSize(), *image, { dipScale, lpxScale });
-#endif
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto rect = borderImagePainter.GetDrawRect(OffsetF(0.0, 0.0));
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        UpdateDrawRegion(DRAW_REGION_FOREGROUND_MODIFIER_INDEX, drawRect);
+    }
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
 
@@ -4414,6 +4407,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
     }
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::CleanTransition()
@@ -4689,8 +4683,12 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
 
 void RosenRenderContext::RemoveClipWithRRect()
 {
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipRRect(nullptr);
+    std::weak_ptr<Rosen::RSNode> weakRsNode = rsNode_;
+    AnimationUtils::ExecuteWithoutAnimation([weakRsNode]() {
+        auto rsNode = weakRsNode.lock();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetClipRRect(nullptr);
+    });
     RequestNextFrame();
 }
 
@@ -5288,10 +5286,6 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
-        std::string backgroundFilter = rsNode_->GetBackgroundFilterDescription();
-        DumpLog::GetInstance().AddDesc(
-        std::string("backgroundFilter:").append(backgroundFilter));
-
         const auto& groupProperty = GetOrCreateBackground();
         if (groupProperty->propEffectOption.has_value()) {
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
@@ -5430,7 +5424,7 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(std::string("anchorX :")
                 .append(anchor->GetX().ToString().c_str())
                 .append(std::string(",anchorY :"))
-                .append(anchor->GetX().ToString().c_str()));
+                .append(anchor->GetY().ToString().c_str()));
         }
     }
 }
@@ -6367,5 +6361,250 @@ PipelineContext* RosenRenderContext::GetPipelineContext() const
         return host->GetContextWithCheck();
     }
     return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+}
+
+void RosenRenderContext::BuildShadowInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetY())) {
+        json->Put("ShadowOffsetY", rsNode_->GetStagingProperties().GetShadowOffsetY());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetShadowAlpha())) {
+        json->Put("ShadowAlpha", rsNode_->GetStagingProperties().GetShadowAlpha());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetShadowElevation())) {
+        json->Put("ShadowElevation", rsNode_->GetStagingProperties().GetShadowElevation());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetShadowRadius())) {
+        json->Put("ShadowRadius", rsNode_->GetStagingProperties().GetShadowRadius());
+    }
+}
+
+void RosenRenderContext::BuildStagingInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!NearZero(rsNode_->GetStagingProperties().GetPivotZ())) {
+        json->Put("PivotZ", rsNode_->GetStagingProperties().GetPivotZ());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetRotation())) {
+        json->Put("Rotation", rsNode_->GetStagingProperties().GetRotation());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetRotationX())) {
+        json->Put("RotationX", rsNode_->GetStagingProperties().GetRotationX());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetRotationY())) {
+        json->Put("RotationY", rsNode_->GetStagingProperties().GetRotationY());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
+        json->Put("CameraDistance", rsNode_->GetStagingProperties().GetCameraDistance());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetTranslateZ())) {
+        json->Put("TranslateZ", rsNode_->GetStagingProperties().GetTranslateZ());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetBgImageWidth())) {
+        json->Put("BgImageWidth", rsNode_->GetStagingProperties().GetBgImageWidth());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetBgImageHeight())) {
+        json->Put("BgImageHeight", rsNode_->GetStagingProperties().GetBgImageHeight());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetBgImagePositionX())) {
+        json->Put("BgImagePositionX", rsNode_->GetStagingProperties().GetBgImagePositionX());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetBgImagePositionY())) {
+        json->Put("BgImagePositionY", rsNode_->GetStagingProperties().GetBgImagePositionY());
+    }
+    BuildShadowInfo(json);
+    if (!NearZero(rsNode_->GetStagingProperties().GetSpherizeDegree())) {
+        json->Put("SpherizeDegree", rsNode_->GetStagingProperties().GetSpherizeDegree());
+    }
+    if (!NearZero(rsNode_->GetStagingProperties().GetLightUpEffectDegree())) {
+        json->Put("LightUpEffectDegree", rsNode_->GetStagingProperties().GetLightUpEffectDegree());
+    }
+    if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
+        json->Put("Alpha", rsNode_->GetStagingProperties().GetAlpha());
+    }
+}
+
+void RosenRenderContext::BuildPositionInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("rsNode", rsNode_->DumpNode(0).c_str());
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    if (!NearEqual(center[0], 0.5) || !NearEqual(center[1], 0.5)) {
+        auto child = JsonUtil::Create(true);
+        child->Put("x", center[0]);
+        child->Put("y", center[1]);
+        json->Put("Center", child);
+    }
+    BuildStagingInfo(json);
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    if (!(NearZero(translate[0]) && NearZero(translate[1]))) {
+        auto child = JsonUtil::Create(true);
+        child->Put("x", translate[0]);
+        child->Put("y", translate[1]);
+        json->Put("translate", child);
+    }
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    if (!(NearEqual(scale[0], 1) && NearEqual(scale[1], 1))) {
+        auto child = JsonUtil::Create(true);
+        child->Put("x", scale[0]);
+        child->Put("y", scale[1]);
+        json->Put("scale", child);
+    }
+    auto rect = GetPaintRectWithoutTransform();
+    if (HasTransformTranslate()) {
+        auto translateArk = GetTransformTranslate().value();
+        auto arkTranslateX = translateArk.x.ConvertToPxWithSize(rect.Width());
+        auto arkTranslateY = translateArk.y.ConvertToPxWithSize(rect.Height());
+        if (!NearEqual(arkTranslateX, translate[0])) {
+            json->Put("TranlateX has difference,arkui", std::to_string(arkTranslateX).c_str());
+        }
+        if (!NearEqual(arkTranslateY, translate[1])) {
+            json->Put("TranlateY has difference,arkui", std::to_string(arkTranslateY).c_str());
+        }
+    }
+    if (HasTransformScale()) {
+        auto arkTransformScale = GetTransformScale().value();
+        if (!NearEqual(arkTransformScale.x, scale[0])) {
+            json->Put("scaleX has difference,arkui", std::to_string(arkTransformScale.x).c_str());
+        }
+        if (!NearEqual(arkTransformScale.y, scale[1])) {
+            json->Put("scaleY has difference,arkui", std::to_string(arkTransformScale.y).c_str());
+        }
+    }
+}
+
+void RosenRenderContext::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (rsNode_) {
+        auto children = JsonUtil::Create(true);
+        BuildPositionInfo(children);
+        if (HasOpacity()) {
+            auto arkAlpha = GetOpacity();
+            if (!NearEqual(arkAlpha.value(), rsNode_->GetStagingProperties().GetAlpha())) {
+                children->Put("Alpha has difference,arkui", std::to_string(arkAlpha.value()).c_str());
+            }
+        }
+        if (HasPosition()) {
+            auto position = GetPosition();
+            children->Put("PositionX", position->GetX().ToString().c_str());
+            children->Put("PositionY", position->GetY().ToString().c_str());
+        }
+        if (HasOffset()) {
+            auto offset = GetOffset();
+            children->Put("OffsetX", offset->GetX().ToString().c_str());
+            children->Put("OffsetY", offset->GetY().ToString().c_str());
+        }
+        if (HasPositionEdges()) {
+            auto positionEdges = GetPositionEdges();
+            children->Put("positionEdges", positionEdges->ToString().c_str());
+        }
+        if (HasOffsetEdges()) {
+            auto offsetEdges = GetOffsetEdges();
+            children->Put("offsetEdges", offsetEdges->ToString().c_str());
+        }
+        if (HasAnchor()) {
+            auto anchor = GetAnchor();
+            children->Put("anchorX", anchor->GetX().ToString().c_str());
+            children->Put("anchorY", anchor->GetY().ToString().c_str());
+        }
+        json->Put("rsNode", children);
+    }
+}
+
+void RosenRenderContext::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (GetBackgroundAlign().has_value()) {
+        json->Put("BackgroundAlign", GetBackgroundAlign().value().ToString().c_str());
+    }
+    if (GetBackgroundImage().has_value()) {
+        json->Put("BackgroundImage", GetBackgroundImage().value().ToString().c_str());
+    }
+    if (GetSphericalEffect().has_value()) {
+        json->Put("SphericalEffect", std::to_string(GetSphericalEffect().value()).c_str());
+    }
+    if (GetPixelStretchEffect().has_value()) {
+        json->Put("PixelStretchEffect", GetPixelStretchEffect().value().ToString().c_str());
+    }
+    if (GetLightUpEffect().has_value()) {
+        json->Put("LightUpEffect", std::to_string(GetLightUpEffect().value()).c_str());
+    }
+    if (GetBorderColor().has_value()) {
+        json->Put("BorderColor", GetBorderColor().value().ToString().c_str());
+    }
+    if (GetBorderWidth().has_value()) {
+        json->Put("BorderWidth", GetBorderWidth().value().ToString().c_str());
+    }
+    if (GetOuterBorderRadius().has_value()) {
+        json->Put("OuterBorderRadius", GetOuterBorderRadius().value().ToString().c_str());
+    }
+    if (GetOuterBorderColor().has_value()) {
+        json->Put("OuterBorderColor", GetOuterBorderColor().value().ToString().c_str());
+    }
+    if (GetOuterBorderWidth().has_value()) {
+        json->Put("OuterBorderWidth", GetOuterBorderWidth().value().ToString().c_str());
+    }
+    if (GetDynamicLightUpRate().has_value()) {
+        json->Put("DynamicLightUpRate", std::to_string(GetDynamicLightUpRate().value()).c_str());
+    }
+    if (GetDynamicLightUpDegree().has_value()) {
+        json->Put("DynamicLightUpDegree", std::to_string(GetDynamicLightUpDegree().value()).c_str());
+    }
+    if (GetBackBlendMode().has_value()) {
+        json->Put("BlendMode", static_cast<int>(GetBackBlendMode().value()));
+    }
+    if (GetLinearGradient().has_value()) {
+        json->Put("LinearGradient", GetLinearGradient().value().ToString().c_str());
+    }
+    if (GetSweepGradient().has_value()) {
+        json->Put("SweepGradient", GetSweepGradient().value().ToString().c_str());
+    }
+    SetAdvanceInfo(json);
+}
+
+void RosenRenderContext::SetAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (GetRadialGradient().has_value()) {
+        json->Put("RadialGradient", GetRadialGradient().value().ToString().c_str());
+    }
+    if (GetFrontBrightness().has_value()) {
+        json->Put("FrontBrightness", GetFrontBrightness().value().ToString().c_str());
+    }
+    if (GetFrontGrayScale().has_value()) {
+        json->Put("FrontGrayScale", GetFrontGrayScale().value().ToString().c_str());
+    }
+    if (GetFrontContrast().has_value()) {
+        json->Put("FrontContrast", GetFrontContrast().value().ToString().c_str());
+    }
+    if (GetFrontSaturate().has_value()) {
+        json->Put("FrontSaturate", GetFrontSaturate().value().ToString().c_str());
+    }
+    if (GetFrontSepia().has_value()) {
+        json->Put("FrontSepia", GetFrontSepia().value().ToString().c_str());
+    }
+    if (GetFrontHueRotate().has_value()) {
+        json->Put("FrontHueRotate", std::to_string(GetFrontHueRotate().value()).c_str());
+    }
+    if (GetFrontColorBlend().has_value()) {
+        json->Put("FrontColorBlend", GetFrontColorBlend().value().ColorToString().c_str());
+    }
+    if (GetBorderImageSource().has_value()) {
+        json->Put("BorderImageSource", GetBorderImageSource().value().ToString().c_str());
+    }
+    if (GetBorderImageGradient().has_value()) {
+        json->Put("BorderImageGradient", GetBorderImageGradient().value().ToString().c_str());
+    }
+    if (GetForegroundColor().has_value()) {
+        json->Put("ForegroundColor", GetForegroundColor().value().ColorToString().c_str());
+    }
+    if (GetLightIntensity().has_value()) {
+        json->Put("LightIntensity", std::to_string(GetLightIntensity().value()).c_str());
+    }
+    if (GetLightIlluminated().has_value()) {
+        json->Put("LightIlluminated", std::to_string(GetLightIlluminated().value()).c_str());
+    }
+    if (GetIlluminatedBorderWidth().has_value()) {
+        json->Put("IlluminatedBorderWidth", GetIlluminatedBorderWidth().value().ToString().c_str());
+    }
+    if (GetBloom().has_value()) {
+        json->Put("Bloom", std::to_string(GetBloom().value()).c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

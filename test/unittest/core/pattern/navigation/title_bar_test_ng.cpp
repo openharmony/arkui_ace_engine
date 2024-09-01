@@ -191,6 +191,18 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTempTitleOffsetX001
+ * @tc.desc: Test GetTempTitleOffsetX interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetX001, TestSize.Level1)
+{
+    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    auto ret = titleBarPattern->GetTempTitleOffsetX();
+    EXPECT_EQ(ret, RET_VALUE);
+}
+
+/**
  * @tc.name: GetTempSubTitleOffsetY001
  * @tc.desc: Test GetTempSubTitleOffsetY interface.
  * @tc.type: FUNC
@@ -199,6 +211,18 @@ HWTEST_F(TitleBarTestNg, GetTempSubTitleOffsetY001, TestSize.Level1)
 {
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     auto ret = titleBarPattern->GetTempSubTitleOffsetY();
+    EXPECT_EQ(ret, RET_VALUE);
+}
+
+/**
+ * @tc.name: GetTempSubTitleOffsetX001
+ * @tc.desc: Test GetTempSubTitleOffsetX interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempSubTitleOffsetX001, TestSize.Level1)
+{
+    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    auto ret = titleBarPattern->GetTempSubTitleOffsetX();
     EXPECT_EQ(ret, RET_VALUE);
 }
 
@@ -484,6 +508,30 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+}
+
+/**
+ * @tc.name: TitleBarPattern006
+ * @tc.desc: Test ProcessTittleDragUpdate function in x Axis.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
+{
+    constexpr float offset = 190.0f;
+    InitTitleBarTestNg();
+    frameNode_->GetSubtitle();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    titleBarPattern_->UpdateTitlePositionInfo();
+    titleBarPattern_->ProcessTitleDragUpdate(offset);
+    titleBarPattern_->ProcessTitleDragEnd();
+    titleBarPattern_->SetTempTitleOffsetY();
+    titleBarPattern_->SetTempTitleOffsetX();
+    EXPECT_EQ(titleBarPattern_->GetTempTitleOffsetX(), titleBarPattern_->maxTitleOffsetX_);
+    titleBarPattern_->SetTempSubTitleOffsetY();
+    titleBarPattern_->SetTempSubTitleOffsetX();
+    EXPECT_EQ(titleBarPattern_->GetTempSubTitleOffsetX(), titleBarPattern_->maxTitleOffsetX_);
 }
 
 /**
@@ -1243,6 +1291,21 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
     ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
     titleBarPattern_->OnCoordScrollStart();
     ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: GetSideBarButtonInfoTest001
+ * @tc.desc: get the empty info of sideBarButton when the sideBarButton is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetSideBarButtonInfoTest001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    bool hasSideBar = titleBarPattern_->IsNecessaryToAvoidSideBar();
+    EXPECT_EQ(hasSideBar, false);
+    RectF buttonRect = titleBarPattern_->GetControlButtonInfo();
+    EXPECT_EQ(buttonRect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    DestroyTitleBarObject();
 }
 
 /**

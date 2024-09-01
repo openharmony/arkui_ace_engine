@@ -113,6 +113,7 @@ public:
     // node operation related
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
     void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     RefPtr<UINode> backButton_;

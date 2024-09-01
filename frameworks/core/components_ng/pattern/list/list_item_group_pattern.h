@@ -55,8 +55,13 @@ struct VisibleContentInfo {
 struct ListMainSizeValues {
     float startPos = 0.0f;
     float endPos = 0.0f;
-    float referencePos = 0.0f;
+    std::optional<int32_t> jumpIndexInGroup;
     float prevContentMainSize = 0.0f;
+    ScrollAlign scrollAlign = ScrollAlign::START;
+    std::optional<float> layoutStartMainPos;
+    std::optional<float> layoutEndMainPos;
+    float referencePos = 0.0f;
+    bool forward;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
@@ -70,6 +75,7 @@ public:
     ~ListItemGroupPattern() override = default;
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     bool IsAtomicNode() const override
     {
         return false;
@@ -138,10 +144,10 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto prevFooter = header_.Upgrade();
+        auto prevFooter = footer_.Upgrade();
         if (prevFooter) {
             host->RemoveChild(prevFooter);
-            header_ = nullptr;
+            footer_ = nullptr;
         }
     }
 

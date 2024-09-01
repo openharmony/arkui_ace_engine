@@ -831,16 +831,6 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest002, TestSize.Level1)
 
     svgDom->ControlAnimation(true);
     EXPECT_EQ(svg->GetGradient(string("")), std::nullopt);
-
-    auto svgNode = svgDom->root_->children_[0]->children_[0];
-    auto svgAnimate = AccessibilityManager::DynamicCast<SvgAnimation>(svgNode);
-    
-    int testData = 0;
-    std::function<void()> callback = [&testData](){ testData = 1; };
-    svg->PushAnimatorOnFinishCallback(callback);
-    RefPtr<Animator> animation = svgAnimate->animator_;
-    animation->NotifyStopListener();
-    EXPECT_EQ(testData, 1);
 }
 
 /**

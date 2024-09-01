@@ -129,10 +129,9 @@ protected:
 
     void OnItemDeleted(UINode* node, const std::string& key) override;
 
-    // used in ArkTS side.
-    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
+    bool DeleteExpiringItemImmediately() override
     {
-        return {};
+        return true;
     }
 
     // used in ArkTS side for tabs.

@@ -16,7 +16,6 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
-#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 namespace OHOS::Ace::NG {
 void NodeContainerModelNG::Create()

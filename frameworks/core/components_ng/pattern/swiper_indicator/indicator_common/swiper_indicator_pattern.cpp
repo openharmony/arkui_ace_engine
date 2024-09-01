@@ -908,7 +908,8 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     }
 
     auto isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
-    auto isSwiperAnimationRunning = swiperPattern->IsPropertyAnimationRunning();
+    auto isSwiperAnimationRunning =
+        swiperPattern->IsPropertyAnimationRunning() || swiperPattern->IsTranslateAnimationRunning();
     auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
                       !changeIndexWithAnimation_;
 
@@ -941,5 +942,26 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();
     startIndex_.reset();
+}
+
+void SwiperIndicatorPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isHover", isHover_);
+    json->Put("isPressed", isPressed_);
+    json->Put("isClicked", isClicked_);
+    json->Put("isRepeatClicked", isRepeatClicked_);
+    switch (swiperIndicatorType_) {
+        case SwiperIndicatorType::DOT: {
+            json->Put("SwiperIndicatorType", "DOT");
+            break;
+        }
+        case SwiperIndicatorType::DIGIT: {
+            json->Put("SwiperIndicatorType", "DIGIT");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

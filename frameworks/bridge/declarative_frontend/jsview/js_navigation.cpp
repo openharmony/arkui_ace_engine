@@ -145,9 +145,10 @@ void JSNavigation::ParseBarItems(
         }
         auto itemObject = JSRef<JSObject>::Cast(item);
         NG::BarItem toolBarItem;
+        std::string value;
         auto itemValueObject = itemObject->GetProperty("value");
-        if (itemValueObject->IsString()) {
-            toolBarItem.text = itemValueObject->ToString();
+        if (ParseJsString(itemValueObject, value)) {
+            toolBarItem.text = value;
         }
 
         auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
@@ -156,9 +157,10 @@ void JSNavigation::ParseBarItems(
             SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
             toolBarItem.iconSymbol = iconSymbol;
         }
+        std::string icon;
         auto itemIconObject = itemObject->GetProperty("icon");
-        if (itemIconObject->IsString()) {
-            toolBarItem.icon = itemIconObject->ToString();
+        if (ParseJsMedia(itemIconObject, icon)) {
+            toolBarItem.icon = icon;
         }
 
         auto itemEnabledObject = itemObject->GetProperty("isEnabled");
@@ -258,11 +260,13 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     JSRef<JSVal> title = jsObj->GetProperty("main");
-    bool hasSub = subtitle->IsString();
-    bool hasMain = title->IsString();
+    std::string mainTitle;
+    std::string subTitle;
+    bool hasSub = ParseJsString(subtitle, subTitle);
+    bool hasMain = ParseJsString(title, mainTitle);
     if (hasSub || hasMain) {
         return NavigationModel::GetInstance()->ParseCommonTitle(
-            hasSub, hasMain, subtitle->ToString(), title->ToString());
+            hasSub, hasMain, subTitle, mainTitle);
     }
     return false;
 }

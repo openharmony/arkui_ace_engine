@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
-#include "base/resource/internal_resource.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -724,6 +718,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));

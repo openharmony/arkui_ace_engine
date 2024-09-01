@@ -65,6 +65,7 @@ public:
     virtual void SetDividerEndMargin(const Dimension& endMargin);
     virtual void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent);
     virtual void SetMinContentWidth(const Dimension& minContentWidth);
+    virtual void ResetControlButton();
 
 private:
     static std::unique_ptr<SideBarContainerModel> instance_;

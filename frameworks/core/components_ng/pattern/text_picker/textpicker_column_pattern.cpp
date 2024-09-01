@@ -31,10 +31,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
-#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
-#include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1371,6 +1367,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistance()
 {
+    CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
     bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     for (int32_t i = 0; i < itemCounts; i++) {

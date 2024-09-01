@@ -15,15 +15,7 @@
 
 #include "core/components_ng/event/state_style_manager.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/event/touch_event.h"

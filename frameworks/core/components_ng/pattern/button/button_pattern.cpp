@@ -15,17 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/mouse_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

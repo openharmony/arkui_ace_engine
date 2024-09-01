@@ -15,14 +15,6 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
-#include <cstdint>
-#include <functional>
-#include <utility>
-
-#include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -70,70 +62,45 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
     totalCount_ = totalCount;
 }
 
-
-void RepeatVirtualScrollNode::DoSetActiveChildRange(
-    int32_t start, int32_t end,
-    int32_t cacheStart, int32_t cacheEnd)
+void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT,
-        "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
-        "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
-        GetId(), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
-
     ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
         start, end, cacheStart, cacheEnd);
-
-    // memorize active range
     caches_.SetLastActiveRange(start - cacheStart, end + cacheEnd);
     // notify TS side
     onSetActiveRange_(start, end);
-
     bool needSync = caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](
         int32_t index, const RefPtr<UINode>& node) -> bool {
         if (node == nullptr) {
             return false;
         }
-
-        // Get the first child of FrameNode.
         auto frameNode = AceType::DynamicCast<FrameNode>(node->GetFrameChildByIndex(0, true));
         if (!frameNode) {
             return false;
         }
-
         if (((start <= index) && (index <= end)) || ((end < start) && (index <= end || start <= index))) {
-            // SetActive(True) makes Rosen generate a RenderNode
-            // only nodes in start ... index .. end range should be active
-            // pre-render items in ranges start-cacheStart and end .. cacheEnd not active
-            TAG_LOGD(AceLogTag::ACE_REPEAT, "  ... in range: index %{public}d -> nodeId  %{public}d: SetActive(True)",
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "...in range: index %{public}d -> nodeId %{public}d: SetActive(true)",
                 index, static_cast<int32_t>(frameNode->GetId()));
             frameNode->SetActive(true);
         } else {
-            TAG_LOGD(AceLogTag::ACE_REPEAT,
-                "  ... out of range: index %{public}d -> nodeId  %{public}d: SetActive(false)", index,
-                frameNode->GetId());
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "...out of range: index %{public}d -> nodeId %{public}d: SetActive(false)",
+                index, frameNode->GetId());
             frameNode->SetActive(false);
         }
-
         if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
             ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
             // keep in Repeat L1
-            TAG_LOGD(AceLogTag::ACE_REPEAT,
-                "  ... in visible + pre-render range: index %{public}d -> nodeId  %{public}d: keep in Repeat L1",
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d -> nodeId %{public}d: keep in Repeat L1",
                 static_cast<int32_t>(index), frameNode->GetId());
             return true;
         }
-
-        TAG_LOGD(AceLogTag::ACE_REPEAT,
-            "  ... out of visible + pre-render range: index %{public}d -> nodeId  %{public}d: SetActive(false), "
-            "detach, move to spare items L2",
-            index, frameNode->GetId());
-
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d -> nodeId %{public}d: SetActive(false), "
+            "detach, move to spare items L2", index, frameNode->GetId());
         // move active node into L2 cached. check transition flag.
         if (node->OnRemoveFromParent(true)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(node);
         } else {
-            // else move child into disappearing children, skip syncing render tree
             AddDisappearingChild(node);
         }
         return false;
@@ -141,7 +108,6 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
     if (needSync) {
         UINode::MarkNeedSyncRenderTree(false);
         children_.clear();
-        // re-assemble children_
         PostIdleTask();
     }
 }

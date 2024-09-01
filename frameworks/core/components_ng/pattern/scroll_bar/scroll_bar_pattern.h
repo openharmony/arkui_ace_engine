@@ -316,6 +316,21 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    RefPtr<ScrollBarProxy> GetScrollBarProxy()
+    {
+        return scrollBarProxy_;
+    }
+
+    void SetEnableNestedSorll(bool enableNestedSorll)
+    {
+        enableNestedSorll_ = enableNestedSorll;
+    }
+
+    bool GetEnableNestedSorll() const
+    {
+        return enableNestedSorll_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -372,6 +387,7 @@ private:
 
     // dump info
     std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
+    bool enableNestedSorll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

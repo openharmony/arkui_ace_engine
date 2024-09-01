@@ -749,10 +749,6 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
             linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
             linearLayoutProperty->SetIsVertical(true);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-            if (!tabBarPattern->GetBottomTabLabelStyle(index).fontSize.has_value() &&
-                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabTextSize());
-            }
         } else {
             linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
             linearLayoutProperty->UpdateSpace(tabTheme->GetHorizontalBottomTabBarSpace());
@@ -760,10 +756,13 @@ void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float 
             linearLayoutProperty->UpdateCrossAxisAlign(bottomTabBarStyle.verticalAlign);
             linearLayoutProperty->SetIsVertical(false);
             textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
-            if (!tabBarPattern->GetBottomTabLabelStyle(index).fontSize.has_value() &&
-                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateFontSize(tabTheme->GetBottomTabHorizontalTextSize());
-            }
+        }
+        auto childNode = childWrapper->GetHostNode();
+        CHECK_NULL_VOID(childNode);
+        if (!tabBarPattern->GetBottomTabLabelStyle(childNode->GetId()).fontSize.has_value() &&
+            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            textLayoutProperty->UpdateFontSize(
+                isVertical ? tabTheme->GetBottomTabTextSize() : tabTheme->GetBottomTabHorizontalTextSize());
         }
     }
 }

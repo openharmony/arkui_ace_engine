@@ -247,27 +247,13 @@ float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(
 void SubMenuLayoutAlgorithm::ModifySubMenuWrapper(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto theme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto mainMenuPattern = menuPattern->GetMainMenuPattern();
-    auto isContextMenu = false;
-    if (mainMenuPattern) {
-        isContextMenu = mainMenuPattern->IsContextMenu();
-    }
-    if (isContextMenu && !expandDisplay) {
+    if (!hierarchicalParameters_) {
         wrapperSize_ = SizeF(windowGlobalRect.Width(), windowGlobalRect.Height() - bottom);
     } else {
         wrapperSize_ = SizeF(wrapperSize_.Width(), wrapperSize_.Height());

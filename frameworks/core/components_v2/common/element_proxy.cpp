@@ -15,28 +15,15 @@
 
 #include "core/components_v2/common/element_proxy.h"
 
-#include <map>
-#include <unordered_map>
-
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
-#include "core/common/container.h"
-#include "core/components/box/box_element.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
-#include "core/components/grid_layout/grid_layout_item_element.h"
 #include "core/components/ifelse/if_else_component.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/list/list_item_component.h"
 #include "core/components_v2/tabs/tabs_helper.h"
-#include "core/pipeline/base/component.h"
-#include "core/pipeline/base/composed_component.h"
 #include "frameworks/core//components_part_upd/foreach/foreach_component.h"
 #include "frameworks/core//components_part_upd/foreach/foreach_element.h"
-#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::V2 {
 namespace {

@@ -15,7 +15,6 @@
 
 #include <dlfcn.h>
 
-#include "base/utils/utils.h"
 #include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {

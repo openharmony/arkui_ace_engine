@@ -15,8 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
 
-#include "core/gestures/gesture_group.h"
-#include "core/gestures/gesture_processor.h"
 #include "core/gestures/long_press_gesture.h"
 #include "core/gestures/rotation_gesture.h"
 #include "core/gestures/pan_gesture.h"

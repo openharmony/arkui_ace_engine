@@ -15,17 +15,8 @@
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/radio/radio_paint_property.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

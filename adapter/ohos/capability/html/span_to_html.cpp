@@ -15,14 +15,10 @@
 
 #include "span_to_html.h"
 
-#include <cstdint>
-#include <string>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "base/image/file_uri_helper.h"
 #include "base/image/image_packer.h"
-#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 const constexpr char* CONVERT_PNG_FORMAT = "image/png";

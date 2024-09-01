@@ -83,25 +83,25 @@ bool SvgGradientDeclaration::SetSpecializedValue(const std::pair<std::string, st
         { DOM_SVG_SRC_SPREAD_METHOD,
             [](const std::string& val, SvgGradientDeclaration& declaration) {
                 if (val == "pad") {
-                    declaration.SetSpreadMethod(SpreadMethod::PAD);
+                    declaration.SetSpreadMethod(GradientSpreadMethodNG::PAD);
                 }
                 if (val == "reflect") {
-                    declaration.SetSpreadMethod(SpreadMethod::REFLECT);
+                    declaration.SetSpreadMethod(GradientSpreadMethodNG::REFLECT);
                 }
                 if (val == "repeat") {
-                    declaration.SetSpreadMethod(SpreadMethod::REPEAT);
+                    declaration.SetSpreadMethod(GradientSpreadMethodNG::REPEAT);
                 }
             } },
         { DOM_SVG_SPREAD_METHOD,
             [](const std::string& val, SvgGradientDeclaration& declaration) {
                 if (val == "pad") {
-                    declaration.SetSpreadMethod(SpreadMethod::PAD);
+                    declaration.SetSpreadMethod(GradientSpreadMethodNG::PAD);
                 }
                 if (val == "reflect") {
-                    declaration.SetSpreadMethod(SpreadMethod::REFLECT);
+                    declaration.SetSpreadMethod(GradientSpreadMethodNG::REFLECT);
                 }
                 if (val == "repeat") {
-                    declaration.SetSpreadMethod(SpreadMethod::REPEAT);
+                    declaration.SetSpreadMethod(GradientSpreadMethodNG::REPEAT);
                 }
             } },
         { DOM_SVG_X1,

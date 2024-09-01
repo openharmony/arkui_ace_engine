@@ -391,6 +391,7 @@ public:
     void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo();
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
+    void StopFlingAnimation();
 
 protected:
     void InitTheme();

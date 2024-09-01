@@ -16,10 +16,8 @@
 #include "bridge/declarative_frontend/jsview/models/row_model_impl.h"
 
 #include "base/memory/referenced.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/wrap/wrap_component.h"
 #include "core/components_ng/pattern/flex/flex_model.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

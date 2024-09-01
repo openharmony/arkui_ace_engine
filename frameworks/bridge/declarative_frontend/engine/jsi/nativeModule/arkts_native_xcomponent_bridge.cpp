@@ -20,7 +20,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
-#include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
 namespace OHOS::Ace::NG {

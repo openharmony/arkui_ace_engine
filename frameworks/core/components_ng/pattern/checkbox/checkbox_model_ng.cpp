@@ -15,12 +15,8 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
@@ -203,6 +199,24 @@ void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<
 void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
+}
+
+void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    if (name.has_value()) {
+        eventHub->SetName(name.value());
+    }
+}
+
+void CheckBoxModelNG::SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    if (groupName.has_value()) {
+        eventHub->SetGroupName(groupName.value());
+    }
 }
 
 bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)

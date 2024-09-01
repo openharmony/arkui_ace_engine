@@ -15,7 +15,6 @@
 
 #include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

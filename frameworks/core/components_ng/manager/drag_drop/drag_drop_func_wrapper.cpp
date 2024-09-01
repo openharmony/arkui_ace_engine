@@ -15,17 +15,11 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
-#include <mutex>
-
-#include "base/image/pixel_map.h"
-#include "base/json/json_util.h"
 #include "core/common/ace_engine.h"
-#include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {

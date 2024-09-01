@@ -19,12 +19,7 @@
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_loader.h"
-#include "bridge/declarative_frontend/ng/entry_page_info.h"
-#include "bridge/js_frontend/frontend_delegate.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace::NG;
 

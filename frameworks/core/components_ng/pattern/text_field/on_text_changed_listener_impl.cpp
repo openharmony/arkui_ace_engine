@@ -18,13 +18,8 @@
 #include "base/input_manager/input_manager.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/ime/text_input_client.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/event/key_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
@@ -143,6 +138,25 @@ void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardS
     // this keyboard status means shown or hidden but attachment is not closed, should be distinguished from
     // imeAttached_
     HandleKeyboardStatus(keyboardStatus);
+}
+
+void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
+{
+    auto task = [textField = pattern_, height] {
+        ACE_SCOPED_TRACE("NotifyKeyboardHeight");
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(manager);
+        manager->SetkeyboardHeightConsideringUIExtension(height);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->CloseAIEntityMenu();
+    };
+    PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
 }
 
 void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey& functionKey)

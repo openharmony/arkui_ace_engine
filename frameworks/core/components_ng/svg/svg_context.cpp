@@ -15,7 +15,6 @@
 
 #include "core/components_ng/svg/svg_context.h"
 
-#include "core/common/thread_checker.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -55,7 +54,6 @@ const AttrMap& SvgContext::GetAttrMap(const std::string& key) const
 
 void SvgContext::AddAnimator(int32_t key, const RefPtr<Animator>& animator)
 {
-    ++animatorSumCnt_;
     animators_[key] = animator;
 }
 
@@ -82,15 +80,20 @@ void SvgContext::ControlAnimators(bool play)
     }
 }
 
+void SvgContext::SetOnAnimationFinished(const std::function<void()>& onFinishCallback)
+{
+    onFinishCallback_ = std::move(onFinishCallback);
+}
+
+void SvgContext::OnAnimationFinished()
+{
+    onFinishCallback_();
+}
+
 void SvgContext::SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
 {
     CHECK_NULL_VOID(funcAnimateFlush);
     animateCallbacks_[imagePtr] = funcAnimateFlush;
-}
-
-size_t SvgContext::GetAnimatorCount()
-{
-    return animators_.size();
 }
 
 void SvgContext::AnimateFlush()

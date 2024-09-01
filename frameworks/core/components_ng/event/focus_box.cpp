@@ -14,8 +14,6 @@
  */
 #include "focus_box.h"
 
-#include "core/components_ng/render/render_context.h"
-
 namespace OHOS::Ace::NG {
 void FocusBox::SetStyle(const FocusBoxStyle& style)
 {

@@ -15,18 +15,6 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
-#include "base/perf/socperf_client.h"
-#include "base/thread/frame_trace_adapter.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -399,6 +387,9 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
         curr->priorityMask_ != priorityMask_) {
+        if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
+            SendCancelMsg();
+        }
         ResetStatus();
         return false;
     }

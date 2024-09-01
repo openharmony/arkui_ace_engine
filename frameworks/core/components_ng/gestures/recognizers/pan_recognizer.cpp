@@ -15,16 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/event/axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -761,6 +752,9 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     }
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
+            SendCancelMsg();
+        }
         ResetStatus();
         return false;
     }

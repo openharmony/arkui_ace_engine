@@ -142,22 +142,12 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 }
 
 #ifdef OHOS_PLATFORM
-RefPtr<FrameNode> CreatePasteButton(int32_t descriptionId)
-{
-    auto buttonType = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonType = ButtonType::ROUNDED_RECTANGLE;
-    }
-    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(buttonType), true);
-    return pasteButton;
-}
-
 RefPtr<FrameNode> BuildPasteButton(
     const std::function<void()>& callback, int32_t overlayId, float& buttonWidth, bool isSelectAll = false)
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
-    auto pasteButton = CreatePasteButton(descriptionId);
+    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -184,8 +174,12 @@ RefPtr<FrameNode> BuildPasteButton(
     PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
     buttonWidth = MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    }
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
@@ -224,7 +218,7 @@ RefPtr<FrameNode> CreatePasteButtonForCreateMenu(
             menuItem.end = end;
             result = onCreateCallback.onMenuItemClick(menuItem);
         }
-        if (!result) {
+        if (!result && onPaste) {
             onPaste();
         }
     };
@@ -1162,7 +1156,7 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
 void SelectOverlayNode::GetFlexibleOptionsParams(
     const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -1437,6 +1431,11 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto curWindowRect = pipeline->GetCurrentWindowRect();
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+    }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 

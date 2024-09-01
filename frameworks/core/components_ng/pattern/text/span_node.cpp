@@ -1149,4 +1149,39 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;
 }
+
+
+void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Content", std::string(spanItem_->content).c_str());
+    auto textStyle = spanItem_->GetTextStyle();
+    if (!textStyle) {
+        return;
+    }
+    json->Put("FontSize", textStyle->GetFontSize().ToString().c_str());
+    json->Put("LineHeight", textStyle->GetLineHeight().ToString().c_str());
+    json->Put("LineSpacing", textStyle->GetLineSpacing().ToString().c_str());
+    json->Put("BaselineOffset", textStyle->GetBaselineOffset().ToString().c_str());
+    json->Put("WordSpacing", textStyle->GetWordSpacing().ToString().c_str());
+    json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());
+    json->Put("LetterSpacing", textStyle->GetLetterSpacing().ToString().c_str());
+    json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
+    json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
+    json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
+    json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());
+    json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
+    json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());
+    json->Put("TextAlign", StringUtils::ToString(textStyle->GetTextAlign()).c_str());
+    json->Put("WordBreak", StringUtils::ToString(textStyle->GetWordBreak()).c_str());
+    json->Put("TextCase", StringUtils::ToString(textStyle->GetTextCase()).c_str());
+    json->Put("EllipsisMode", StringUtils::ToString(textStyle->GetEllipsisMode()).c_str());
+    json->Put("HalfLeading", std::to_string(textStyle->GetHalfLeading()).c_str());
+    if (GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        json->Put("SymbolColor", spanItem_->SymbolColorToString().c_str());
+        json->Put("RenderStrategy", std::to_string(textStyle->GetRenderStrategy()).c_str());
+        json->Put("EffectStrategy", std::to_string(textStyle->GetEffectStrategy()).c_str());
+        json->Put("SymbolEffect",
+            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
+    }
+}
 } // namespace OHOS::Ace::NG

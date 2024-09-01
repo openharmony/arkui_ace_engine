@@ -25,6 +25,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
@@ -557,6 +558,7 @@ public:
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon);
     AceAutoFillType GetFocusedType();
+    HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
@@ -617,6 +619,7 @@ public:
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
+    void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnPopupShow(bool show);
@@ -844,6 +847,10 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    void OnSelectHandleStart(bool isFirst);
+    void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
+    void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
+
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
 
@@ -1030,6 +1037,7 @@ private:
     int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;
+    int32_t mouseEventDeviceId_ = -1;
     int64_t tooltipTimestamp_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
@@ -1095,6 +1103,7 @@ private:
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
+    int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;

@@ -62,7 +62,7 @@ public:
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleIsHidden() override;
     void OnHandleMoveStart(bool isFirst) override;
 
@@ -88,6 +88,10 @@ public:
     }
 
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst);
+    bool IsClipHandleWithViewPort() override
+    {
+        return !HasRenderTransform();
+    }
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

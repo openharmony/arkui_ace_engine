@@ -14,14 +14,7 @@
  */
 #include "core/interfaces/native/node/select_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/select/select_theme.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/pattern/select/select_model.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {

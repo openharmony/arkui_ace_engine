@@ -19,14 +19,7 @@
 #include "frameworks/base/utils/string_utils.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components/common/properties/shadow.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {

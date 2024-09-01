@@ -48,13 +48,8 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
-#include "core/components_v2/inspector/utils.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
@@ -1405,7 +1400,6 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
@@ -1416,7 +1410,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
         !FontSizeRangeIsNegative(size) && size.Unit() != DimensionUnit::PERCENT) {
-        updateSpanStyle.updateFontSize = size;
+        updateSpanStyle.updateSymbolFontSize = size;
         style.SetFontSize(size);
     } else if (FontSizeRangeIsNegative(size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
@@ -1424,15 +1418,13 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         size = theme->GetTextStyle().GetFontSize();
         style.SetFontSize(size);
     }
-    ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
-    ParseJsFontFeatureTextStyle(styleObject, style, updateSpanStyle);
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
     if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         }
-        updateSpanStyle.updateFontWeight = ConvertStrToFontWeight(weight);
+        updateSpanStyle.updateSymbolFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
     JSRef<JSVal> renderingStrategy = styleObject->GetProperty("renderingStrategy");
@@ -1448,7 +1440,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> effectStrategy = styleObject->GetProperty("effectStrategy");
     uint32_t symbolEffectStrategy;
     if (!effectStrategy->IsNull() && JSContainerBase::ParseJsInteger(effectStrategy, symbolEffectStrategy)) {
-        updateSpanStyle.updateSymbolEffectStrategy = symbolEffectStrategy;
+        updateSpanStyle.updateSymbolEffectStrategy = 0;
         style.SetEffectStrategy(0);
     }
 }
@@ -2090,7 +2082,8 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         imageStyle = ParseJsImageSpanAttribute(richEditorImageStyle);
     }
     if (!richEditorSymbolSpanStyle->IsUndefined()) {
-        ParseJsSymbolSpanStyle(richEditorSymbolSpanStyle, textStyle, updateSpanStyle_);
+        TextStyle symbolTextStyle;
+        ParseJsSymbolSpanStyle(richEditorSymbolSpanStyle, symbolTextStyle, updateSpanStyle_);
     }
 
     auto controller = controllerWeak_.Upgrade();
@@ -2374,10 +2367,10 @@ void JSRichEditorBaseController::ParseTextDecoration(
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
         }
-    }
-    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
-        updateSpanStyle.updateTextDecorationColor = style.GetDynamicTextColor();
-        style.SetTextDecorationColor(style.GetDynamicTextColor());
+        if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
+            updateSpanStyle.updateTextDecorationColor = style.GetDynamicTextColor();
+            style.SetTextDecorationColor(style.GetDynamicTextColor());
+        }
     }
 }
 

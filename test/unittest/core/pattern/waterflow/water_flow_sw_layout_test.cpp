@@ -902,6 +902,32 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateLanesIndex001
+ * @tc.desc: Test the limit of UpdateLanesIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, UpdateLanesIndex001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    CreateDone();
+
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 13);
+    EXPECT_EQ(info_->endIndex_, 17);
+    info_->newStartIndex_ = 15;
+    info_->BeginUpdate();
+    info_->UpdateLanesIndex(17);
+    EXPECT_EQ(info_->StartIndex(), 15);
+    EXPECT_EQ(info_->EndIndex(), 19);
+    EXPECT_FALSE(info_->idxToLane_.count(13));
+}
+
+/**
  * @tc.name: NotifyDataChange002
  * @tc.desc: Test the return value of NotifyDataChange when updating the section in segment layout.
  * @tc.type: FUNC
@@ -914,7 +940,6 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     CreateWaterFlowItems(45);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     UpdateCurrentOffset(-1000.0f);

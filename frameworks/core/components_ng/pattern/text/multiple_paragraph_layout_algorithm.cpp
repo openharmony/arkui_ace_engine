@@ -16,20 +16,15 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 #include "text_layout_adapter.h"
-
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/i18n/localization.h"
-#include "base/utils/utils.h"
 #include "core/common/font_manager.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/font_collection.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

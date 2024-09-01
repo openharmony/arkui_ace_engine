@@ -13,19 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_area_modifier.h"
-#include <cstdint>
+
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "interfaces/native/node/node_model.h"
 
@@ -1617,7 +1608,15 @@ void SetTextAreaSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCal
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     }
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
+    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+    } else {
+        TextFieldModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+    }
 }
 
 void ResetTextAreaSelectionMenuOptions(ArkUINodeHandle node)

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -53,6 +51,20 @@ void TitleBarNode::MarkIsInitialTitle(bool isInitialTitle)
 {
     auto pattern = GetPattern<TitleBarPattern>();
     pattern->MarkIsInitialTitle(isInitialTitle);
+}
+
+void TitleBarNode::OnAttachToMainTree(bool recursive)
+{
+    FrameNode::OnAttachToMainTree(recursive);
+    auto layoutProperty = GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) &&
+        layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
+        auto pattern = GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(pattern);
+        // register sideBar button info update callback
+        pattern->InitSideBarButtonUpdateCallbackIfNeeded();
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -915,6 +915,7 @@ export class PopupComponent extends ViewPU {
                                     Button.height(this.getCloseButtonHeight());
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
+                                    Button.flexShrink(0);
                                     Button.onHover((i27) => {
                                         if (i27) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1122,6 +1123,7 @@ export class PopupComponent extends ViewPU {
                                     Button.height(this.getCloseButtonHeight());
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
+                                    Button.flexShrink(0);
                                     Button.onHover((o24) => {
                                         if (o24) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();

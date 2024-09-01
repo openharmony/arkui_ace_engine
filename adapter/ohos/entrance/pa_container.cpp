@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/pa_container.h"
 
-#include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
@@ -29,8 +28,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/platform_window.h"
-#include "core/common/text_field_manager.h"
-#include "core/common/window.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

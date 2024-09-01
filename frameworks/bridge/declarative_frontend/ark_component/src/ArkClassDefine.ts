@@ -1187,6 +1187,19 @@ class ArkGridEdgeEffect {
   }
 }
 
+class ArkPlaceholder {
+  value: ResourceStr | undefined;
+  style?: PlaceholderStyle | undefined;
+  constructor() {
+    this.value = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: ArkPlaceholder): boolean {
+    return (this.value === another.value) &&
+      (this.style === another.style);
+  }
+}
+
 class ArkMesh {
   value: Array<any> | undefined;
   column: number | undefined;
@@ -1494,5 +1507,18 @@ class ArkFontWeight {
 
   checkObjectDiff(another: ArkTextFont): boolean {
     return !this.isEqual(another);
+  }
+}
+
+class ArkNavigationTitle {
+  value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined;
+  navigationTitleOptions?: NavigationTitleOptions | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.navigationTitleOptions = undefined;
+  }
+  isEqual(another: ArkNavigationTitle): boolean {
+    return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
   }
 }
