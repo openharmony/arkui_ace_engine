@@ -676,41 +676,46 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     }
     isJsCard_ = true;
     PostBgTask(
-        [weak = WeakClaim(this), info, host, this] {
+        [weak = WeakClaim(this), info, host] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-#if OHOS_STANDARD_SYSTEM
-            AppExecFwk::FormInfo formInfo;
-            if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
-                formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
-                pattern->isJsCard_ = false;
-            }
-#endif
-
-            pattern->AddFormComponentUI(formInfo.transparencyEnabled, info);
-
-            if (!pattern->formManagerBridge_) {
-                TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
-                return;
-            }
-#if OHOS_STANDARD_SYSTEM
-            pattern->formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
-#else
-            pattern->formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
-#endif
-
-            if (!formInfo.transparencyEnabled && pattern->CheckFormBundleForbidden(info.bundleName)) {
-                PostUITask(
-                    [weak = WeakClaim(this), info] {
-                        ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
-                        auto pattern = weak.Upgrade();
-                        CHECK_NULL_VOID(pattern);
-                        pattern->LoadDisableFormStyle(info);
-                    },
-                    "ArkUILoadDisableFormStyle");
-            }
+            pattern->AddFormComponentTask(info, host);
         },
         "ArkUIAddFormComponent");
+}
+
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtrNG::FrameNode host)
+{
+#if OHOS_STANDARD_SYSTEM
+    AppExecFwk::FormInfo formInfo;
+    if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
+        formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
+        isJsCard_ = false;
+    }
+#endif
+
+    AddFormComponentUI(formInfo.transparencyEnabled, info);
+
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "Form manager delegate is nullptr.");
+        return;
+    }
+#if OHOS_STANDARD_SYSTEM
+    formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
+#else
+    formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+#endif
+
+    if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
+        PostUITask(
+            [weak = WeakClaim(this), info] {
+                ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->LoadDisableFormStyle(info);
+            },
+            "ArkUILoadDisableFormStyle");
+    }
 }
 
 void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
