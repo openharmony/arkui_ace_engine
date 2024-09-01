@@ -2760,6 +2760,7 @@ void TextPattern::ProcessOverlayAfterLayout()
         showSelected_ = false;
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
+        selectOverlay_->UpdateViewPort();
     }
 }
 
