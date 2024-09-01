@@ -15,10 +15,7 @@
 
 #include "core/components_ng/syntax/for_each_node.h"
 
-#include "base/log/ace_trace.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

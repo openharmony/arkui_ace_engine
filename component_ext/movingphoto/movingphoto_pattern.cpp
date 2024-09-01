@@ -16,17 +16,10 @@
 #include <unistd.h>
 
 #include "movingphoto_pattern.h"
-#include "movingphoto_layout_property.h"
 #include "movingphoto_node.h"
 #include "movingphoto_utils.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

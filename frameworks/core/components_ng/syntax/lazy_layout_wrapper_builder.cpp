@@ -15,22 +15,6 @@
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
-#include <cstdint>
-#include <iterator>
-#include <list>
-#include <map>
-#include <optional>
-#include <string>
-#include <unordered_map>
-
-#include "base/log/ace_trace.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
-
 namespace OHOS::Ace::NG {
 
 LazyLayoutWrapperBuilder::LazyLayoutWrapperBuilder(
