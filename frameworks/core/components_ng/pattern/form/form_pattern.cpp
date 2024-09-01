@@ -675,13 +675,11 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
-    PostBgTask(
-        [weak = WeakClaim(this), info, host] {
+    PostBgTask([weak = WeakClaim(this), info, host] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->AddFormComponentTask(info, host);
-        },
-        "ArkUIAddFormComponent");
+        }, "ArkUIAddFormComponent");
 }
 
 void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtrNG::FrameNode host)
@@ -707,14 +705,12 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtrNG::Fr
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
-        PostUITask(
-            [weak = WeakClaim(this), info] {
-                ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->LoadDisableFormStyle(info);
-            },
-            "ArkUILoadDisableFormStyle");
+        PostUITask([weak = WeakClaim(this), info] {
+            ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->LoadDisableFormStyle(info);
+            }, "ArkUILoadDisableFormStyle");
     }
 }
 
