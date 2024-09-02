@@ -620,7 +620,7 @@ struct OperateItemStruct {
     Checkbox()
       .borderRadius(IS_CLOSE_CHILD_FOCUS ? UNUSUAL : OPERATE_ITEM_RADIUS)
       .unselectedColor(this.getUnselectedColor())
-      .backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString())
+      .backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
@@ -666,7 +666,7 @@ struct OperateItemStruct {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .borderRadius(IS_CLOSE_CHILD_FOCUS ? UNUSUAL : OPERATE_ITEM_RADIUS)
-        .backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString())
+        .backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
         .switchPointColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus && !this.switchState ? OPERATE_ITECOLOR : UNUSUAL)
         .onChange((isCheck: boolean) => {
           this.switchState = isCheck;
@@ -925,7 +925,9 @@ export struct ComposeListItem {
 
   aboutToAppear() {
     this.onPropChange();
-    if (IS_CLOSE_CHILD_FOCUS) return;
+    if (IS_CLOSE_CHILD_FOCUS) {
+      return;
+    }
     this.onFontSizeScaleChange();
   }
 
@@ -998,7 +1000,9 @@ export struct ComposeListItem {
       this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top1'), $r('sys.float.composeListItem_single_line_list_left_text_bottom1'));
     } else {
       this.containerPadding = undefined;
-      if (IS_CLOSE_CHILD_FOCUS) return;
+      if (IS_CLOSE_CHILD_FOCUS) {
+        return;
+      }
       this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top'), $r('sys.float.composeListItem_single_line_list_left_text_bottom'))
     }
   }

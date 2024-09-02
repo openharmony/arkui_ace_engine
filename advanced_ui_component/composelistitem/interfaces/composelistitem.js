@@ -1220,7 +1220,7 @@ class OperateItemStruct extends ViewPU {
             Checkbox.create();
             Checkbox.borderRadius(IS_CLOSE_CHILD_FOCUS ? UNUSUAL : OPERATE_ITEM_RADIUS);
             Checkbox.unselectedColor(this.getUnselectedColor());
-            Checkbox.backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString());
+            Checkbox.backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent);
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
             Checkbox.onChange((isCheck) => {
@@ -1297,7 +1297,7 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
             Toggle.borderRadius(IS_CLOSE_CHILD_FOCUS ? UNUSUAL : OPERATE_ITEM_RADIUS);
-            Toggle.backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString());
+            Toggle.backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent);
             Toggle.switchPointColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus && !this.switchState ? OPERATE_ITECOLOR : UNUSUAL);
             Toggle.onChange((isCheck) => {
                 this.switchState = isCheck;
@@ -1861,8 +1861,9 @@ export class ComposeListItem extends ViewPU {
     }
     aboutToAppear() {
         this.onPropChange();
-        if (IS_CLOSE_CHILD_FOCUS)
+        if (IS_CLOSE_CHILD_FOCUS) {
             return;
+        }
         this.onFontSizeScaleChange();
     }
     calculatedLeftWidth() {
@@ -1941,8 +1942,9 @@ export class ComposeListItem extends ViewPU {
         }
         else {
             this.containerPadding = undefined;
-            if (IS_CLOSE_CHILD_FOCUS)
+            if (IS_CLOSE_CHILD_FOCUS) {
                 return;
+            }
             this.setContainerPadding({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_top'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, { "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_bottom'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
         }
     }
