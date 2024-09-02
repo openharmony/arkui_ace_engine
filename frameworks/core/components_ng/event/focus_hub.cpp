@@ -15,22 +15,9 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
-#include <cinttypes>
-#include <cstdint>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_event_handler.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -44,6 +31,44 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
+constexpr uint32_t FOCUS_PADDING = 5;
+namespace {
+float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode,
+    const RefPtr<FrameNode>& curFrameNode, bool isVertical)
+{
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, false);
+    auto parentFrameSize = parentGeometryNode->GetFrameSize();
+    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
+    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto curGeometry = curFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(curGeometry, false);
+    auto curFrameSize = curGeometry->GetFrameSize();
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
+        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
+        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
+        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
+        offsetToTarFrame.GetY());
+
+    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
+    if (NearZero(diffToTarFrame)) {
+        return false;
+    }
+    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
+    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
+    float moveOffset = 0.0;
+    float focusPadding = PipelineBase::Vp2PxWithCurrentDensity(FOCUS_PADDING);
+    if (LessNotEqual(diffToTarFrame - focusPadding, 0)) {
+        moveOffset = -diffToTarFrame + focusPadding;
+    } else if (GreatNotEqual(diffToTarFrame + curFrameLength + focusPadding, parentFrameLength)) {
+        moveOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusPadding;
+    }
+    return moveOffset;
+}
+}
 
 RefPtr<FocusManager> FocusHub::GetFocusManager() const
 {
@@ -326,7 +351,7 @@ void FocusHub::LostFocusToViewRoot()
     auto focusedChild = viewRootScope->lastWeakFocusNode_.Upgrade();
     CHECK_NULL_VOID(focusedChild);
     FocusManager::FocusGuard guard(viewRootScope, SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT);
-    focusedChild->LostFocus();
+    focusedChild->LostFocus(BlurReason::CLEAR_FOCUS);
 }
 
 void FocusHub::LostFocus(BlurReason reason)
@@ -513,8 +538,10 @@ bool FocusHub::IsEnabled() const
 void FocusHub::SetEnabled(bool enabled)
 {
     if (!enabled) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be disabled",
-            GetFrameName().c_str(), GetFrameId());
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be disabled", GetFrameName().c_str(),
+                GetFrameId());
+        }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -534,8 +561,10 @@ bool FocusHub::IsShow() const
 void FocusHub::SetShow(bool show)
 {
     if (!show) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unShown",
-            GetFrameName().c_str(), GetFrameId());
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unShown", GetFrameName().c_str(),
+                GetFrameId());
+        }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -1967,35 +1996,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(parentGeometryNode, false);
-    auto parentFrameSize = parentGeometryNode->GetFrameSize();
-    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
-    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
-    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
-    auto curGeometry = curFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(curGeometry, false);
-    auto curFrameSize = curGeometry->GetFrameSize();
-    TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
-        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
-        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
-        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
-        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
-        offsetToTarFrame.GetY());
-
-    float diffToTarFrame = scrollAxis == Axis::VERTICAL ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
-    if (NearZero(diffToTarFrame)) {
-        return false;
-    }
-    float curFrameLength = scrollAxis == Axis::VERTICAL ? curFrameSize.Height() : curFrameSize.Width();
-    float parentFrameLength = scrollAxis == Axis::VERTICAL ? parentFrameSize.Height() : parentFrameSize.Width();
-    float moveOffset = 0.0;
-    if (LessNotEqual(diffToTarFrame, 0)) {
-        moveOffset = -diffToTarFrame;
-    } else if (GreatNotEqual(diffToTarFrame + curFrameLength, parentFrameLength)) {
-        moveOffset = parentFrameLength - diffToTarFrame - curFrameLength;
-    }
+    auto moveOffset = GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);

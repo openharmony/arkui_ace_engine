@@ -16,11 +16,7 @@
 #include "core/components_ng/svg/parse/svg_node.h"
 
 #include "include/core/SkClipOp.h"
-#include "include/core/SkString.h"
-#include "include/utils/SkParsePath.h"
 
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/common/painter/rosen_svg_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
@@ -28,6 +24,7 @@
 #include "core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -473,7 +470,16 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
     CHECK_NULL_VOID(svgContext);
     auto refMask = svgContext->GetSvgNodeById(hrefMaskId_);
     CHECK_NULL_VOID(refMask);
-    refMask->Draw(canvas, viewPort, std::nullopt);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto mask = AceType::DynamicCast<SvgMask>(refMask);
+        CHECK_NULL_VOID(mask);
+        auto bounds = AsPath(viewPort).GetBounds();
+        std::optional<RectF> opt = RectF { bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight() };
+        mask->SetBoundingBoxRectOpt(opt);
+        mask->Draw(canvas, viewPort, std::nullopt);
+    } else {
+        refMask->Draw(canvas, viewPort, std::nullopt);
+    }
     return;
 }
 

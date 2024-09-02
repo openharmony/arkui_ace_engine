@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "core/common/ace_engine.h"
-#include "core/common/container_scope.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 
 void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -247,27 +240,13 @@ float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(
 void SubMenuLayoutAlgorithm::ModifySubMenuWrapper(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto theme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto mainMenuPattern = menuPattern->GetMainMenuPattern();
-    auto isContextMenu = false;
-    if (mainMenuPattern) {
-        isContextMenu = mainMenuPattern->IsContextMenu();
-    }
-    if (isContextMenu && !expandDisplay) {
+    if (!hierarchicalParameters_) {
         wrapperSize_ = SizeF(windowGlobalRect.Width(), windowGlobalRect.Height() - bottom);
     } else {
         wrapperSize_ = SizeF(wrapperSize_.Width(), wrapperSize_.Height());

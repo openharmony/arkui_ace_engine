@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

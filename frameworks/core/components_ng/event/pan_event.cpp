@@ -15,10 +15,7 @@
 
 #include "core/components_ng/event/pan_event.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
 namespace OHOS::Ace::NG {
 

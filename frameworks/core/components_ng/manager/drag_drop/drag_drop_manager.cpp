@@ -16,9 +16,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "drag_drop_manager.h"
 
-#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
@@ -212,6 +210,7 @@ void DragDropManager::HideDragPreviewOverlay()
     CHECK_NULL_VOID(manager);
     manager->RemovePixelMap();
     manager->RemoveGatherNode();
+    manager->RemoveDragPixelMap();
     SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
@@ -221,6 +220,7 @@ void DragDropManager::HideDragPreviewWindow(int32_t containerId)
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveGatherNode();
+    overlayManager->RemoveDragPixelMap();
     SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
@@ -583,7 +583,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     menuWrapperNode_ = nullptr;
     auto overlayManager = GetDragAnimationOverlayManager(windowContainerId);
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->RemovePixelMap();
+    overlayManager->RemoveDragPixelMap();
     overlayManager->RemoveGatherNode();
     SubwindowManager::GetInstance()->HidePreviewNG();
     info_.scale = -1.0;
@@ -1542,12 +1542,12 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
     DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (!overlayManager->GetHasPixelMap()) {
+    if (!overlayManager->GetHasDragPixelMap()) {
         return false;
     }
-    auto imageNode = overlayManager->GetPixelMapContentNode();
+    auto imageNode = overlayManager->GetDragPixelMapContentNode();
     CHECK_NULL_RETURN(imageNode, false);
-    auto badgeNode = overlayManager->GetPixelMapBadgeNode();
+    auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
@@ -1564,6 +1564,11 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
 
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
+    }
+    auto menuPreviewScale = gestureHub->GetMenuPreviewScale();
+    // use menuPreviewScale only for 1.0f menu scale.
+    if (isDragWithContextMenu_ && NearEqual(menuPreviewScale, 1.0f)) {
+        dragPreviewInfo.scale = menuPreviewScale;
     }
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
     dragPreviewInfo.width = static_cast<double>(width);

@@ -15,10 +15,7 @@
 
 #include "core/components_v2/ability_component/render_ability_component.h"
 
-#include "base/memory/ace_type.h"
-#include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components_v2/ability_component/ability_component.h"
 
 namespace OHOS::Ace::V2 {
 

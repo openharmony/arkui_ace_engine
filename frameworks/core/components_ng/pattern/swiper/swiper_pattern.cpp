@@ -38,30 +38,17 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
-#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
-#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
-#include "core/components_ng/pattern/tabs/tabs_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -166,7 +153,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         algo->SetTargetIndex(targetIndex_.value());
     }
     algo->SetCurrentIndex(currentIndex_);
-    algo->SetContentCrossSize(contentCrossSize_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     algo->SetContentMainSize(contentMainSize_);
     algo->SetCurrentDelta(currentDelta_);
@@ -299,6 +285,18 @@ void SwiperPattern::InitCapture()
     hasCachedCapture_ = hasCachedCapture;
 }
 
+void SwiperPattern::SetLazyForEachFlag() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void SwiperPattern::ResetOnForceMeasure()
 {
     StopPropertyTranslateAnimation(isFinishAnimation_, false, true);
@@ -313,14 +311,7 @@ void SwiperPattern::ResetOnForceMeasure()
     isVoluntarilyClear_ = true;
     jumpIndex_ = currentIndex_;
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto targetNode = FindLazyForEachNode(host);
-    if (targetNode.has_value()) {
-        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        CHECK_NULL_VOID(lazyForEachNode);
-        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-    }
+    SetLazyForEachFlag();
 }
 
 void SwiperPattern::UpdateTabBarIndicatorCurve()
@@ -485,9 +476,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StartAutoPlay();
         InitArrow();
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= RealTotalCount()) {
-        currentIndex_ = 0;
-        props->UpdateIndexWithoutMeasure(GetLoopIndex(currentIndex_));
+    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= TotalCount()) {
+        UpdateCurrentIndex(0);
+    } else if (!IsLoop() && userSetCurrentIndex > TotalCount() - GetDisplayCount()) {
+        UpdateCurrentIndex(TotalCount() - GetDisplayCount());
     } else if (oldIndex != userSetCurrentIndex) {
         currentIndex_ = userSetCurrentIndex;
         propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
@@ -649,6 +641,10 @@ void SwiperPattern::InitSurfaceChangedCallback()
                     swiper->targetIndex_.has_value() ? swiper->targetIndex_.value() : swiper->currentIndex_;
 
                 swiper->needFireCustomAnimationEvent_ = swiper->translateAnimationIsRunning_;
+                if (swiper->SupportSwiperCustomAnimation() && swiper->needFireCustomAnimationEvent_) {
+                    swiper->indexsInAnimation_.insert(swiper->GetLoopIndex(currentIndex));
+                }
+
                 swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimationImmediately();
@@ -665,14 +661,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->jumpIndex_ = currentIndex;
                 swiper->SetIndicatorJumpIndex(currentIndex);
                 swiper->MarkDirtyNodeSelf();
-                auto swiperNode = swiper->GetHost();
-                CHECK_NULL_VOID(swiperNode);
-                auto targetNode = swiper->FindLazyForEachNode(swiperNode);
-                if (targetNode.has_value()) {
-                    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-                    CHECK_NULL_VOID(lazyForEachNode);
-                    lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-                }
+                swiper->SetLazyForEachFlag();
             });
         UpdateSurfaceChangedCallbackId(callbackId);
     }
@@ -889,6 +878,21 @@ void SwiperPattern::AdjustCurrentFocusIndex()
     currentFocusIndex_ = currentIndex_;
 }
 
+void SwiperPattern::CheckAndFireCustomAnimation()
+{
+    if (!SupportSwiperCustomAnimation() || !needFireCustomAnimationEvent_) {
+        return;
+    }
+
+    itemPositionInAnimation_.clear();
+    for (const auto& item : itemPosition_) {
+        auto index = GetLoopIndex(item.first);
+        itemPositionInAnimation_[index] = item.second;
+    }
+    FireSwiperCustomAnimationEvent();
+    itemPositionInAnimation_.clear();
+}
+
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!isDragging_ || isInit_) {
@@ -924,7 +928,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     autoLinearReachBoundary = false;
-    bool isJump = false;
     startMainPos_ = algo->GetStartPosition();
     endMainPos_ = algo->GetEndPosition();
     startIndex_ = algo->GetStartIndex();
@@ -967,7 +970,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
             });
         }
-        isJump = true;
         UpdateCurrentIndex(algo->GetCurrentIndex());
         AdjustCurrentFocusIndex();
         auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentFocusIndex_));
@@ -988,11 +990,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             PostTranslateTask(delayTime);
         }
 
-        if (SupportSwiperCustomAnimation() && needFireCustomAnimationEvent_) {
-            itemPositionInAnimation_ = itemPosition_;
-            FireSwiperCustomAnimationEvent();
-            itemPositionInAnimation_.clear();
-        }
+        CheckAndFireCustomAnimation();
     } else if (targetIndex_) {
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
@@ -1039,7 +1037,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         } else if (!itemPosition_.empty() && SwiperUtils::IsStretch(props)) {
             auto firstItem = GetFirstItemInfoInVisibleArea();
             auto targetPos = firstItem.second.startPos +
-                             (targetIndexValue - firstItem.first) * (placeItemWidth_.value() + GetItemSpace());
+                             (targetIndexValue - firstItem.first) * (placeItemWidth_.value_or(0.0f) + GetItemSpace());
             PlayTranslateAnimation(
                 currentOffset_, currentOffset_ - targetPos, targetIndexValue, false, velocity_.value_or(0.0f));
         } else {
@@ -1062,6 +1060,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
         windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    }
+
+    if (onContentDidScroll_) {
+        indexsInAnimation_.clear();
     }
 
     const auto& paddingProperty = props->GetPaddingProperty();
@@ -1468,7 +1470,6 @@ void SwiperPattern::FireContentDidScrollEvent()
         auto position = offset / mainAxisLength;
         event(selectedIndex, item.first, position, mainAxisLength);
     }
-    indexsInAnimation_.clear();
 }
 
 void SwiperPattern::OnSwiperCustomAnimationFinish(

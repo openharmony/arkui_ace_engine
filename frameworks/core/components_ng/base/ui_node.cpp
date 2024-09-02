@@ -14,24 +14,10 @@
  */
 #include "core/components_ng/base/ui_node.h"
 
-#include <memory>
-
-#include "base/geometry/ng/point_t.h"
 #include "base/log/ace_checker.h"
-#include "base/log/ace_performance_check.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

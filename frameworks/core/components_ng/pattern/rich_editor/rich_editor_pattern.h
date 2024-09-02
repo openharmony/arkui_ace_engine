@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/text/text_emoji_processor.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -154,6 +155,7 @@ public:
         std::string newPreviewContent;
         bool hasDiff = false;
         PreviewRange replacedRange;
+        bool isSpanSplit = false;
 
         std::string ToString() const
         {
@@ -162,6 +164,7 @@ public:
             JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
+            JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
 
             return jsonValue->ToString();
         }
@@ -174,6 +177,7 @@ public:
             isPreviewTextInputting = false;
             hasDiff = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
+            isSpanSplit = false;
         }
 
         bool IsValid() const
@@ -418,7 +422,10 @@ public:
         CHECK_NULL_VOID(windowManager);
 
         // lost focus in floating window mode
-        if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowMode = windowManager->GetWindowMode();
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed windowMode = %{public}d", windowMode);
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -466,6 +473,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+    void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
@@ -776,19 +784,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const DynamicColor& caretColor)
+    void SetCaretColor(const Color& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    DynamicColor GetCaretColor();
+    Color GetCaretColor();
 
-    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    DynamicColor GetSelectedBackgroundColor();
+    Color GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void StopEditing();
@@ -855,6 +863,7 @@ public:
     void AdjustSelector(int32_t& start, int32_t& end, SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
     bool AdjustSelectorForSymbol(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
+    EmojiRelation GetEmojiRelation(int index);
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
@@ -991,7 +1000,7 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const Offset& offset);
+    void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp();
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
@@ -1141,7 +1150,8 @@ private:
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
-    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos);
+    bool IsTouchAtLineEnd(int32_t caretPos, const Offset& textOffset);
+    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& textOffset);
     bool IsClickBoundary(const int32_t position);
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
@@ -1203,6 +1213,7 @@ private:
     }
 
     OffsetF GetGlobalOffset() const;
+    void MergeAdjacentSpans(int32_t caretPosition);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1258,8 +1269,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<DynamicColor> caretColor_;
-    std::optional<DynamicColor> selectedBackgroundColor_;
+    std::optional<Color> caretColor_;
+    std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;

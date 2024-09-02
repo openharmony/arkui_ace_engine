@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {

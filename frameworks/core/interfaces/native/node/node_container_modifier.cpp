@@ -14,9 +14,7 @@
  */
 #include "core/interfaces/native/node/node_container_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void Rebuild(int32_t nodeId)

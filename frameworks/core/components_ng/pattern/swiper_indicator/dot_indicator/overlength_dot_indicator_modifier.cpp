@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "base/utils/utils.h"
-#include "core/components/swiper/swiper_indicator_theme.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 namespace {

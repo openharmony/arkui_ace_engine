@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 
-#include <map>
-
 #include "core/components_ng/render/adapter/rosen_particle_context.h"
 
 namespace OHOS::Ace::NG {

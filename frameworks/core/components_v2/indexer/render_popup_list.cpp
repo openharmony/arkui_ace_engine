@@ -15,14 +15,7 @@
 
 #include "core/components_v2/indexer/render_popup_list.h"
 
-#include "base/log/log.h"
-#include "core/animation/bilateral_spring_node.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
-#include "core/components/scroll/scroll_spring_effect.h"
-#include "core/components_v2/indexer/popup_list_component.h"
-#include "core/components_v2/indexer/popup_list_item_component.h"
 
 namespace OHOS::Ace::V2 {
 constexpr double VIEW_PORT_SCALE = 3.0;

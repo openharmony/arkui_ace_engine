@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

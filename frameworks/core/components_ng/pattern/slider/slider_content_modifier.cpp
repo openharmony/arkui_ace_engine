@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/animation/curves.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/slider/slider_theme.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/path_painter.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

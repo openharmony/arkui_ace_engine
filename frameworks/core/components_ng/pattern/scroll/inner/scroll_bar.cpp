@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
-#include <cmath>
-
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/curves.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -544,11 +538,16 @@ void ScrollBar::InitPanRecognizer()
     });
 }
 
-void ScrollBar::HandleDragStart(const GestureEvent& info)
+void ScrollBar::StopFlingAnimation()
 {
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
     }
+}
+
+void ScrollBar::HandleDragStart(const GestureEvent& info)
+{
+    StopFlingAnimation();
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {

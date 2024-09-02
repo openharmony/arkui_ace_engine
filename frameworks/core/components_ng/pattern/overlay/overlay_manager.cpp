@@ -61,39 +61,21 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
-#include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
-#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline/pipeline_context.h"
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -273,6 +255,29 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     });
 }
 
+void UpdatePreivewVisibleAreaByFrameWhenDisappear(const RefPtr<RenderContext>& clipContext, 
+    const RefPtr<MenuPreviewPattern>& previewPattern, float value, float radius, float distVal)
+{
+    CHECK_NULL_VOID(previewPattern);
+    CHECK_NULL_VOID(distVal);
+    auto rate = (value - previewPattern->GetClipEndValue()) / distVal;
+
+    auto clipStartWidth = previewPattern->GetStackAfterScaleActualWidth();
+    auto clipStartHeight = previewPattern->GetStackAfterScaleActualHeight();
+    auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
+    auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
+
+    auto curentClipAreaWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
+    auto curentClipAreaHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
+
+    auto clipOffset = previewPattern->GetHoverImageAfterScaleOffset();
+    RoundRect roundRectInstance;
+    roundRectInstance.SetRect(RectF(OffsetF(rate * clipOffset.GetX(), rate * clipOffset.GetY()),
+        SizeF(curentClipAreaWidth, curentClipAreaHeight)));
+    roundRectInstance.SetCornerRadius((1 - rate) * radius);
+    clipContext->ClipWithRoundRect(roundRectInstance);
+}
+
 void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageStackNode,
     const RefPtr<FrameNode>& previewNode)
 {
@@ -280,14 +285,19 @@ void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageSt
     CHECK_NULL_VOID(previewPattern);
 
     // reverse
-    auto clipStartValue = previewPattern->GetIsWidthDistLarger() ?
-        previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
-    auto clipEndValue = previewPattern->GetIsWidthDistLarger() ? previewPattern->GetHoverImageAfterScaleWidth() :
-        previewPattern->GetHoverImageAfterScaleHeight();
+    auto clipStartValue = previewPattern->GetClipEndValue();
+    auto clipEndValue = previewPattern->GetClipStartValue();
+    clipEndValue += NearEqual(clipStartValue, clipEndValue) ? 1.0f : 0;
+    auto dist = clipEndValue - clipStartValue;
 
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, 0,
         [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
-            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
+            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode)),
+            radius = menuTheme->GetPreviewBorderRadius().ConvertToPx(), distVal = dist](float value) {
             auto clipNode = weak.Upgrade();
             CHECK_NULL_VOID(clipNode);
             auto clipContext = clipNode->GetRenderContext();
@@ -297,29 +307,7 @@ void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageSt
             CHECK_NULL_VOID(preview);
             auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
             CHECK_NULL_VOID(previewPattern);
-            auto clipStartWidth = previewPattern->GetCustomPreviewAfterScaleWidth();
-            auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
-            
-            auto clipStartHeight = previewPattern->GetCustomPreviewAfterScaleHeight();
-            auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
-            auto dist = 1.0f;
-            auto rate = 1.0f;
-            auto currentWidth = 0.0f;
-            auto currentHeight = 0.0f;
-            if (previewPattern->GetIsWidthDistLarger()) {
-                dist = NearEqual(clipStartWidth, clipEndWidth) ? 1.0f : clipEndWidth - clipStartWidth;
-                rate = (value - clipStartWidth) / dist;
-                currentWidth = value;
-                currentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
-            } else {
-                dist = NearEqual(clipStartHeight, clipEndHeight) ? 1.0f : clipEndHeight - clipStartHeight;
-                rate = (value - clipStartHeight) / dist;
-                currentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
-                currentHeight = value;
-            }
-            auto imageOffset = previewPattern->GetHoverImageAfterScaleOffset();
-            clipContext->ClipWithRect(RectF(OffsetF(rate * imageOffset.GetX(), rate * imageOffset.GetY()),
-                SizeF(currentWidth, currentHeight)));
+            UpdatePreivewVisibleAreaByFrameWhenDisappear(clipContext, previewPattern, value, radius, distVal);
         });
     AnimationOption option;
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
@@ -360,6 +348,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(menuPattern);
     auto previewPosition = menuPattern->GetPreviewOriginOffset();
 
+    menuWrapperPattern->StopHoverImageToPreviewAnimation();
     AnimationOption option = AnimationOption();
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
     AnimationUtils::Animate(
@@ -389,9 +378,13 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
 
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
+    if (previewPattern->IsHoverImageAnimationPlaying()) {
+        menuWrapperPattern->SetIsStopHoverImageAnimation(true);
+        previewPattern->SetIsHoverImageAnimationPlaying(false);
+    } else {
+        UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
+    }
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
-    CHECK_NULL_VOID(!previewPattern->IsHoverImageAnimationPlaying());
-    UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
 }
 
 void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset,
@@ -3027,7 +3020,7 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
-bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
+bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove dragPreview enter");
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
@@ -3036,6 +3029,14 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
     }
     RemovePixelMap();
     RemoveGatherNode();
+
+    if (isBackPressed) {
+        auto mainPipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_RETURN(mainPipeline, false);
+        auto dragDropManager = mainPipeline->GetDragDropManager();
+        CHECK_NULL_RETURN(dragDropManager, true);
+        dragDropManager->SetIsBackPressedCleanLongPressNodes(true);
+    }
     return true;
 }
 
@@ -3096,10 +3097,11 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
+        RemoveDragPreview(overlay, isBackPressed);
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<LinearLayoutPattern>(pattern)) {
-        return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
+        return RemoveDragPreview(overlay, isBackPressed) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
 }
@@ -5452,14 +5454,26 @@ void OverlayManager::MountFilterToWindowScene(const RefPtr<FrameNode>& columnNod
     hasFilter_ = true;
 }
 
-void OverlayManager::MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
+/**
+ * Mount pixelMap to wndow scene for lifting or for drag moving.
+ * When isDragPixelMap is true, the pixelMap is saved by dragPixmapColumnNodeWeak_ used for moving with drag finger or
+ * mouse, etc.
+ * When isDragPixelMap is false, the pixelMap is saved by pixmapColumnNodeWeak_ used for lifting.
+ */
+void OverlayManager::MountPixelMapToWindowScene(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap)
 {
     CHECK_NULL_VOID(windowScene);
     columnNode->MountToParent(windowScene);
     columnNode->OnMountToParentDone();
     windowScene->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    pixmapColumnNodeWeak_ = columnNode;
-    hasPixelMap_ = true;
+    if (isDragPixelMap) {
+        dragPixmapColumnNodeWeak_ = columnNode;
+        hasDragPixelMap_ = true;
+    } else {
+        pixmapColumnNodeWeak_ = columnNode;
+        hasPixelMap_ = true;
+    }
 }
 
 void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
@@ -5471,15 +5485,26 @@ void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode
     hasEvent_ = true;
 }
 
-void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode)
+/**
+ * Mount pixelMap to root node for lifting or for drag moving.
+ * When isDragPixelMap is true, the pixelMap is saved by dragPixmapColumnNodeWeak_ used for moving with drag finger or
+ * mouse, etc.
+ * When isDragPixelMap is false, the pixelMap is saved by pixmapColumnNodeWeak_ used for lifting.
+ */
+void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    pixmapColumnNodeWeak_ = columnNode;
-    hasPixelMap_ = true;
+    if (isDragPixelMap) {
+        dragPixmapColumnNodeWeak_ = columnNode;
+        hasDragPixelMap_ = true;
+    } else {
+        pixmapColumnNodeWeak_ = columnNode;
+        hasPixelMap_ = true;
+    }
 }
 
 void OverlayManager::MountEventToRootNode(const RefPtr<FrameNode>& columnNode)
@@ -5612,6 +5637,25 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
         },
         scaleOption.GetOnFinishEvent());
     isOnAnimation_ = true;
+}
+
+void OverlayManager::RemoveDragPixelMap()
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "remove drag pixelMap enter");
+    if (!hasDragPixelMap_) {
+        return;
+    }
+    auto columnNode = dragPixmapColumnNodeWeak_.Upgrade();
+    if (!columnNode) {
+        hasDragPixelMap_ = false;
+        return;
+    }
+    auto rootNode = columnNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(columnNode);
+    rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    hasDragPixelMap_ = false;
 }
 
 void OverlayManager::UpdatePixelMapScale(float& scale)
@@ -6324,7 +6368,7 @@ void OverlayManager::RemoveGatherNode()
 {
     CHECK_EQUAL_VOID(hasGatherNode_, false);
     auto frameNode = gatherNodeWeak_.Upgrade();
-    if (frameNode) {
+    if (!frameNode) {
         hasGatherNode_ = false;
         gatherNodeWeak_ = nullptr;
         gatherNodeChildrenInfo_.clear();
@@ -6454,9 +6498,26 @@ void OverlayManager::UpdatePixelMapPosition(bool isSubwindowOverlay)
     imageContext->OnModifyDone();
 }
 
+RefPtr<FrameNode> OverlayManager::GetDragPixelMapContentNode() const
+{
+    auto column = dragPixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+    return imageNode;
+}
+
 RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const
 {
     auto column = pixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    return textNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
+{
+    auto column = dragPixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(column, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);

@@ -27,27 +27,12 @@
 #include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "core/common/form_manager.h"
-#include "core/common/frontend.h"
-#include "core/common/resource/resource_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
-#include "core/components/form/sub_container.h"
-#include "core/components_ng/pattern/form/form_event_hub.h"
-#include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/form/form_node.h"
-#include "core/components_ng/pattern/form/form_theme.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -619,6 +604,10 @@ void FormPattern::OnModifyDone()
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
+
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -662,12 +651,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        PostBgTask(
-            [weak = WeakClaim(this), info] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->AddFormComponent(info);
-            }, "ArkUIHandleFormComponent");
+        AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
     }
@@ -695,6 +679,15 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
+    PostBgTask([weak = WeakClaim(this), info, host] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddFormComponentTask(info, host);
+        }, "ArkUIAddFormComponent");
+}
+
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host)
+{
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
     if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&

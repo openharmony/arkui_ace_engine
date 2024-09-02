@@ -1779,7 +1779,15 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
             context->GetSafeAreaManager()->GetKeyboardOffset();
 
-        if (!manager->GetOnFocusTextField().Upgrade()) {
+        auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+        float adjust = 0.0f;
+        if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+            auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
+            adjust = adjustRect.Top();
+        }
+        currentPos += adjust;
+
+        if (!onFocusField) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
         } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
@@ -1824,8 +1832,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
-            "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
-            keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
+            "rootSize.Height() %{public}f adjust: %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, height, rootSize.Height(), adjust,
+            context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
         // layout before scrolling textfield to safeArea, because of getting correct position
@@ -2544,7 +2553,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        rootNode_->DumpTree(0);
+        rootNode_->DumpTree(0, true);
         DumpLog::GetInstance().OutPutDefault();
     }
     return true;
@@ -2846,7 +2855,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (window && window->IsUserSetCursor()) {
         return false;
     }
-    if (mouseStyleNodeId_ != nodeId || isByPass) {
+    if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -3057,7 +3066,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
-    } else if (isBeforeDragHandleAxis_ && event.action == AxisAction::END) {
+    } else if (isBeforeDragHandleAxis_ && (event.action == AxisAction::END || event.action == AxisAction::CANCEL)) {
         eventManager_->DispatchTouchEvent(scaleEvent);
         isBeforeDragHandleAxis_ = false;
     }
@@ -4426,6 +4435,7 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
 
 std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode)
 {
+    CHECK_NULL_RETURN(rootNode, "");
     std::vector<RectF> responseRegionList;
     rootNode->GetResponseRegionListByTraversal(responseRegionList);
     std::string responseRegionStrOrigin;

@@ -15,13 +15,6 @@
 
 #include "core/components_ng/animation/geometry_transition.h"
 
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

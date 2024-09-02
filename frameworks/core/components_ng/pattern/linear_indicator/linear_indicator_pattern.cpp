@@ -14,12 +14,7 @@
  */
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_pattern.h"
 
-#include <algorithm>
-
 #include "base/log/dump_log.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/linear_indicator/linear_indicator_layout_property.h"
-#include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

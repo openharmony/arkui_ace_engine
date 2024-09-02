@@ -32,8 +32,14 @@ public:
     void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
+    void SetBoundingBoxRect(const Rect& boundingBoxRect)
+    {
+        boundingBoxRect_ = boundingBoxRect;
+    }
+
 private:
     SvgPatternAttribute patternAttr_;
+    Rect boundingBoxRect_;
 };
 
 } // namespace OHOS::Ace::NG

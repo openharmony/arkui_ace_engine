@@ -16,15 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/animation/animator.h"
-#include "core/common/container.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
 
@@ -260,7 +252,7 @@ void PagePattern::OnShow()
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
-            param = entryPageInfo->GetPageParams();
+            param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
         Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);

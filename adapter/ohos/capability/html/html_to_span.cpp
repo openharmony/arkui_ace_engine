@@ -15,11 +15,6 @@
 
 #include "html_to_span.h"
 
-#include <iterator>
-#include <ostream>
-#include <string>
-#include <utility>
-
 #include "base/geometry/dimension.h"
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"

@@ -137,6 +137,8 @@ public:
         needExpandNodes_.insert(node);
     }
 
+    std::vector<WeakPtr<FrameNode>> GetExpandNodeSet();
+
     bool AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
 
     void ClearNeedExpandNode()

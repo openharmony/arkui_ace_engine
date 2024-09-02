@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/menu/preview/menu_preview_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/declaration/common/declaration_constants.h"
-#include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/menu_paint_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 void MenuPreviewLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

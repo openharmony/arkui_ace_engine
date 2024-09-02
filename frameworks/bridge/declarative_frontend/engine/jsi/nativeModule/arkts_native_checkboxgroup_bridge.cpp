@@ -279,4 +279,20 @@ ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupStyle(ArkUIRuntime
     GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ArkUI_CharPtr group = "";
+    if (!groupArg.IsNull() && groupArg->IsString(vm)) {
+        group = groupArg->ToString(vm)->ToString(vm).c_str();
+    }
+
+    GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupName(nativeNode, group);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,11 @@ class ImageModelImpl : public OHOS::Ace::ImageModel {
 public:
     void SetAlt(const ImageSourceInfo& src) override;
     void SetBorder(const Border& border) override;
+    void SetBorderRadius(const Dimension& value) override {};
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override
+    {}
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {}
     void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;

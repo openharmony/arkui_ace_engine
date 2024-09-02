@@ -15,11 +15,8 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
 

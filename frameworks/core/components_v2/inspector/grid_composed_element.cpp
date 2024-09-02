@@ -16,8 +16,6 @@
 #include "core/components_v2/inspector/grid_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
 #include "core/components_v2/inspector/utils.h"
 

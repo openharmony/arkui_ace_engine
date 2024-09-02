@@ -18,12 +18,8 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"

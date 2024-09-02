@@ -17,7 +17,6 @@
 
 #include "background_mode.h"
 #include "background_task_mgr_helper.h"
-#include "continuous_task_callback_info.h"
 
 #include "core/common/ace_application_info.h"
 

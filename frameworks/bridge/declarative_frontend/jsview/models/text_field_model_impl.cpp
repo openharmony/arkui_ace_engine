@@ -15,18 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/text_field/text_field_component.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

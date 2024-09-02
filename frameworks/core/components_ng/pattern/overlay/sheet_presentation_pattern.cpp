@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
-#include "sheet_presentation_property.h"
-
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"

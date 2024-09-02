@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 
@@ -99,13 +98,13 @@ void SvgGradient::SetGradientTransform(const std::string& val, SvgGradientAttrib
 void SvgGradient::SetSpreadMethod(const std::string& val, SvgGradientAttribute& attr)
 {
     if (val == "pad") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::PAD);
+        attr.gradient.SetSpreadMethod(GradientSpreadMethodNG::PAD);
     }
     if (val == "reflect") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::REFLECT);
+        attr.gradient.SetSpreadMethod(GradientSpreadMethodNG::REFLECT);
     }
     if (val == "repeat") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::REPEAT);
+        attr.gradient.SetSpreadMethod(GradientSpreadMethodNG::REPEAT);
     }
 }
 

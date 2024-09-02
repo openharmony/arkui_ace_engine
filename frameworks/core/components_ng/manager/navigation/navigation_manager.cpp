@@ -15,13 +15,8 @@
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 
-#include <string>
-
 #include "base/log/dump_log.h"
-#include "base/thread/task_executor.h"
-#include "core/common/thread_checker.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
 
 
 namespace OHOS::Ace::NG {

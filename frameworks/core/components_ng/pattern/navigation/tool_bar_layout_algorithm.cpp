@@ -17,7 +17,6 @@
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 

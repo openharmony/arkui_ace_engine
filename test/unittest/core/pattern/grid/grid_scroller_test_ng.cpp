@@ -989,7 +989,7 @@ HWTEST_F(GridScrollerTestNg, PositionController006, TestSize.Level1)
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_007 = 100.f;
 constexpr float OFFSET_TIME_007 = 100.f;
-constexpr int32_t TIME_CHANGED_COUNTS_007 = 20;
+constexpr int32_t TIME_CHANGED_COUNTS_007 = 21;
 } // namespace
 /**
  * @tc.name: PositionController007

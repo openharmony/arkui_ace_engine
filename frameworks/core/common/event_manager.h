@@ -356,6 +356,7 @@ private:
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
     int32_t lastDownFingerNumber_ = 0;
+    SourceTool lastSourceTool_ = SourceTool::UNKNOWN;
     // used to pseudo cancel event.
     TouchEvent lastTouchEvent_;
 };

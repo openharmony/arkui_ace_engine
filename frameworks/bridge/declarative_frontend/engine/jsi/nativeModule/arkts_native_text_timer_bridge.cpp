@@ -21,7 +21,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
 namespace OHOS::Ace::NG {

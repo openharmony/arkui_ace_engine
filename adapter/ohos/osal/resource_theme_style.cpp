@@ -17,7 +17,6 @@
 
 #include <regex>
 #include <set>
-#include <string>
 
 namespace OHOS::Ace {
 namespace {

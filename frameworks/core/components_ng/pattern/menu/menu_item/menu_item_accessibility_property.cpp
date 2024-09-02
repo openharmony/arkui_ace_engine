@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {

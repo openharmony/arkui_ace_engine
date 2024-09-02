@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {

@@ -15,14 +15,7 @@
 
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
-#include "frameworks/base/utils/utils.h"
-#include "frameworks/core/common/container.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "frameworks/core/components_ng/property/measure_property.h"
-#include "frameworks/core/components_ng/property/measure_utils.h"
-#include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

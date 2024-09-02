@@ -55,6 +55,7 @@
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/background_task_executor.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -85,12 +86,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "core/event/axis_event.h"
-#include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -105,6 +100,11 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
+const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
+const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
+const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
@@ -321,6 +321,7 @@ void AceContainer::Destroy()
 {
     LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
+    RemoveWatchSystemParameter();
 
     ReleaseResourceAdapter();
     if (pipelineContext_ && taskExecutor_) {
@@ -3211,5 +3212,48 @@ void AceContainer::NotifyDirectionUpdate()
         ConfigurationChange configurationChange { .directionUpdate = true };
         pipelineContext_->FlushReload(configurationChange, fullUpdate);
     }
+}
+
+void AceContainer::RenderLayoutBoundary(bool isDebugBoundary)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(renderBoundaryManager_);
+    renderBoundaryManager_->PostTaskRenderBoundary(isDebugBoundary, container);
+}
+
+void AceContainer::AddWatchSystemParameter()
+{
+    auto task = [weak = WeakClaim(this)] {
+        auto weakPtr = weak.Upgrade();
+        CHECK_NULL_VOID(weakPtr);
+        auto container = static_cast<void*>(weakPtr.GetRawPtr());
+        CHECK_NULL_VOID(container);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_TRACE_LAYOUT_KEY, container, SystemProperties::EnableSystemParameterTraceLayoutCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_TRACE_INPUTEVENT_KEY, container, SystemProperties::EnableSystemParameterTraceInputEventCallback);
+        SystemProperties::AddWatchSystemParameter(ENABLE_SECURITY_DEVELOPERMODE_KEY, container,
+            SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_DEBUG_STATEMGR_KEY, container, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_DEBUG_BOUNDARY_KEY, container, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
+}
+
+void AceContainer::RemoveWatchSystemParameter()
+{
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_LAYOUT_KEY, this, SystemProperties::EnableSystemParameterTraceLayoutCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, SystemProperties::EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_SECURITY_DEVELOPERMODE_KEY, this, SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_DEBUG_STATEMGR_KEY, this, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
 }
 } // namespace OHOS::Ace::Platform

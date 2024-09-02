@@ -15,8 +15,6 @@
 #include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "base/error/error_code.h"
 
-#include <mutex>
-
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 

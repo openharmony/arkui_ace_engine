@@ -756,6 +756,7 @@ private:
     void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
+    void SetLazyForEachFlag() const;
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
@@ -947,6 +948,7 @@ private:
     void UpdateIndicatorOnChildChange();
 
     void CheckSpecialItemCount() const;
+    void CheckAndFireCustomAnimation();
 
     friend class SwiperHelper;
 

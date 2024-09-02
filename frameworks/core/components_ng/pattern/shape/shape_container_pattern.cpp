@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 
-#include <algorithm>
-
-#include "base/geometry/ng/rect_t.h"
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)

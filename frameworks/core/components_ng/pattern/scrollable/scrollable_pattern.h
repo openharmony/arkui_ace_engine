@@ -665,6 +665,14 @@ public:
 
     void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
 
+    bool GetNestedScrolling() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetNestedScrolling();
+    }
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -752,6 +760,9 @@ protected:
         return scrollOriginChild_.Upgrade();
     }
 
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -819,9 +830,6 @@ private:
     bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
-
-    void SetCanOverScroll(bool val);
-    bool GetCanOverScroll() const;
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);

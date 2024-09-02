@@ -744,6 +744,7 @@ enum ArkUINodeType {
     ARKUI_TEXT_CLOCK,
     ARKUI_TEXT_TIMER,
     ARKUI_MARQUEE,
+    ARKUI_CHECK_BOX_GROUP,
 };
 
 enum ArkUIEventCategory {
@@ -2194,6 +2195,7 @@ struct ArkUIImageModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageBorderRadius)(ArkUINodeHandle node);
     void (*setImageBorder)(ArkUINodeHandle node);
+    void (*setImageBorderWithValues)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetImageBorder)(ArkUINodeHandle node);
     void (*setImageOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetImageOpacity)(ArkUINodeHandle node);
@@ -3430,6 +3432,8 @@ struct ArkUICheckboxModifier {
     ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
+    void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
+    void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -3449,6 +3453,7 @@ struct ArkUICheckboxGroupModifier {
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct ArkUIImageSpanModifier {

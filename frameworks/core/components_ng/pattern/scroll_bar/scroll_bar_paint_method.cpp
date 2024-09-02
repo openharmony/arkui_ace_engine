@@ -15,12 +15,6 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_method.h"
 
-#include "base/geometry/rect.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/pipeline/base/constants.h"
-
 namespace OHOS::Ace::NG {
 
 void ScrollBarPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)

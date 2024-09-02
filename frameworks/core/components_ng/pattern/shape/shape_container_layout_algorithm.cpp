@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
