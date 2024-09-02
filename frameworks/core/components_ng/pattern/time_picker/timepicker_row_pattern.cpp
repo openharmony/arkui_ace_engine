@@ -46,6 +46,7 @@ const int32_t CHILD_INDEX_SECOND = 1;
 const int32_t CHILD_INDEX_THIRD = 2;
 const int32_t CHILD_INDEX_FOURTH = 3;
 constexpr float DISABLE_ALPHA = 0.6f;
+const int32_t FOCUS_PADDING_COUNT = 2;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -1137,7 +1138,11 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
     if (piantRectWidth > columnWidth) {
         piantRectWidth = columnWidth;
-        centerX = leftTotalColumnWith;
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            centerX = leftTotalColumnWith - PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
+        } else {
+            centerX = leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
+        }
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
