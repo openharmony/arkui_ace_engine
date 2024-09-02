@@ -3203,11 +3203,12 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
 {
 #ifdef WEB_SUPPORTED
     RefPtr<NG::FrameNode> webNode;
-    FindWebNode(overlay, webNode);
+    bool isNavDestination = false;
+    FindWebNode(overlay, webNode, isNavDestination);
     if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
         auto webPattern = DynamicCast<WebPattern>(webNode->GetPattern());
         CHECK_NULL_RETURN(webPattern, OVERLAY_EXISTS);
-        if (webPattern->Backward()) {
+        if (webPattern->Backward() && !isNavDestination) {
             return OVERLAY_REMOVE;
         }
     }
@@ -3215,10 +3216,11 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
     return OVERLAY_NOTHING;
 }
 
-void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode)
+void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode,
+    bool& isNavDestination)
 {
     CHECK_NULL_VOID(node);
-
+    
     if (webNode) {
         return;
     }
@@ -3229,9 +3231,14 @@ void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::Fram
         return;
     }
 
+    if (frameNode && frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG && !isNavDestination) {
+        isNavDestination = true;
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "find NavDestination node.");
+    }
+
     if (!node->GetChildren().empty()) {
         for (const auto& child : node->GetChildren()) {
-            FindWebNode(child, webNode);
+            FindWebNode(child, webNode, isNavDestination);
         }
     }
 }

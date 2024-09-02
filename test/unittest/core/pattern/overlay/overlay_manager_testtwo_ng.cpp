@@ -872,15 +872,16 @@ HWTEST_F(OverlayManagerTwoTestNg, FindWebNode001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
 
     RefPtr<NG::FrameNode> webNode;
-    overlayManager->FindWebNode(nullptr, webNode);
-    overlayManager->FindWebNode(rootNode, rootNode);
-    overlayManager->FindWebNode(rootNode, webNode);
+    bool isNavDestination = false;
+    overlayManager->FindWebNode(nullptr, webNode, isNavDestination);
+    overlayManager->FindWebNode(rootNode, rootNode, isNavDestination);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
 
     rootNode->isInternal_ = true;
-    overlayManager->FindWebNode(rootNode, webNode);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
 
     rootNode->isInternal_ = false;
-    overlayManager->FindWebNode(rootNode, webNode);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
     EXPECT_FALSE(webNode);
 }
 
@@ -982,14 +983,15 @@ HWTEST_F(OverlayManagerTwoTestNg, FindWebNode002, TestSize.Level1)
     auto framenode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
 
     RefPtr<NG::FrameNode> webNode;
-    overlayManager->FindWebNode(TestNode::CreateTestNode(3), webNode);
+    bool isNavDestination = false;
+    overlayManager->FindWebNode(TestNode::CreateTestNode(3), webNode, isNavDestination);
     framenode->isInternal_ = false;
-    overlayManager->FindWebNode(framenode, webNode);
+    overlayManager->FindWebNode(framenode, webNode, isNavDestination);
 
     webNode = nullptr;
     rootNode->AddChild(framenode);
     framenode->isInternal_ = false;
-    overlayManager->FindWebNode(rootNode, webNode);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
 
     EXPECT_EQ(webNode, framenode);
 }
