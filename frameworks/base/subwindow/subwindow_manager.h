@@ -94,14 +94,6 @@ public:
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
-    int32_t GetDialogSubWindowId()
-    {
-        return dialogSubWindowId_;
-    }
-    void SetDialogSubWindowId(int32_t dialogSubWindowId)
-    {
-        dialogSubWindowId_ = dialogSubWindowId;
-    }
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
@@ -161,7 +153,6 @@ private:
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
     SubwindowMap subwindowMap_;
-    int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
 
     RefPtr<Subwindow> currentSubwindow_;
