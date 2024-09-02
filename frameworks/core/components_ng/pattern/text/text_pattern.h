@@ -665,7 +665,7 @@ public:
 
     void DumpRecord(const std::string& record)
     {
-        frameRecord_.append(record);
+        frameRecord_ = record;
     }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
