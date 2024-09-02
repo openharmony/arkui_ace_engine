@@ -71,6 +71,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTabContentPop();
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBar(const char* content);
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBarWithIcon(const char* icon, const char* text);
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBarWithComponent(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkTabContentPUCreate(void (*callback)());
 }
 
 #endif
