@@ -647,8 +647,8 @@ private:
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
 
-    // UX::insert cursor offset up by 8vp
-    Dimension insertCursorOffset_ = 8.0_vp;
+    // UX::insert cursor offset up by 32vp
+    Dimension insertCursorOffset_ = 32.0_vp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 
