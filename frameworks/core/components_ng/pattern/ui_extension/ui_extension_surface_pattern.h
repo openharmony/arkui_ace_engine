@@ -31,6 +31,19 @@ public:
     {
         return MakeRefPtr<UIExtensionLayoutAlgorithm>();
     }
+
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        bool isDisappearing = renderContext->IsDisappearing();
+        auto paintRect = renderContext->GetPaintRectWithoutTransform();
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExtensionSurface: isDisappearing = %{public}d, paintRect = %{public}s.",
+                isDisappearing, paintRect.ToString().c_str());
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UIEXTENSION_SURFACE_PATTERN_H
