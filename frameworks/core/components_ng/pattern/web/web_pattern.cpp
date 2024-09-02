@@ -3944,7 +3944,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
             isPasswordFill_ = true;
         }
         hintToTypeWrap.autoFillType = type;
-    } else if (attribute.empty() && !placeholder.empty()) {
+    } else if (!placeholder.empty()) {
         // try hint2Type
         auto host = GetHost();
         CHECK_NULL_RETURN(host, hintToTypeWrap);
