@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 
-#include "core/components/common/properties/placement.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {

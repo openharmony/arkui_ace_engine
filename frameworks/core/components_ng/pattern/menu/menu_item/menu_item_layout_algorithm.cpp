@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 // The maximum width of the right row is 1/3 of content area width

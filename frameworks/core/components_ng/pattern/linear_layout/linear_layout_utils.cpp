@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
-#include <cstdint>
-#include <optional>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {

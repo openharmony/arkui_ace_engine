@@ -15,12 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
 
 bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const

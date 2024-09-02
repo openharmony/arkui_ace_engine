@@ -15,16 +15,10 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {

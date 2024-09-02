@@ -14,9 +14,6 @@
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
-#include <numeric>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
