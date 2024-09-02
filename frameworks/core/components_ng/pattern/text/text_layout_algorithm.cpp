@@ -418,9 +418,7 @@ bool TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::strin
     double minFontSize = 0.0;
     GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize(); // Get stepSize
-    auto adaptUnit = maxFontSizeDimension.GetAdaptDimensionUnit(textStyle.GetAdaptMinFontSize());
-    Dimension step(1.0f, adaptUnit);
+    Dimension step(1.0f, DimensionUnit::PX);
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
