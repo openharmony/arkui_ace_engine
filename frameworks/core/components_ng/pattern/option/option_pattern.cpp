@@ -315,6 +315,7 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
     auto nextNode = parent->GetChildAtIndex(index_ + 1);
     if (nextNode) {
         auto pattern = DynamicCast<FrameNode>(nextNode)->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
         if (pattern->IsSelected()) {
             return;
         }
