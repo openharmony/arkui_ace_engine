@@ -211,6 +211,7 @@ private:
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
+    void ReDispatchDisplayArea();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -250,6 +251,10 @@ private:
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
+    // StartUIExtension should after mountToParent
+    bool hasMountToParent_ = false;
+    bool needReNotifyForeground_ = false;
+    bool needReDispatchDisplayArea_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
