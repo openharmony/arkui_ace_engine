@@ -9949,7 +9949,7 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     textSelector_.Update(start, end);
-    if (info.GetSourceTool() == SourceTool::FINGER) {
+    if (info.GetSourceTool() == SourceTool::FINGER || info.GetSourceTool() == SourceTool::UNKNOWN) {
         showSelect_ = true;
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
@@ -9959,7 +9959,7 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
     }
-    if (info.GetSourceTool() == SourceTool::FINGER && start == end) {
+    if ((info.GetSourceTool() == SourceTool::FINGER || info.GetSourceTool() == SourceTool::UNKNOWN) && start == end) {
         selectOverlay_->SetIsSingleHandle(true);
     }
     if (textSelector_.SelectNothing()) {
