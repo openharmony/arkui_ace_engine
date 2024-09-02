@@ -99,7 +99,9 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->HideMenu();
+    if (!blockClick_) {
+        menuPattern->HideMenu();
+    }
 }
 
 void OptionPattern::PlayBgColorAnimation(bool isHoverChange)
