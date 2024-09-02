@@ -222,8 +222,8 @@ public:
                 } else {
                     napi_delete_reference(listener->env_, *iter);
                 }
+                listener->cbList_.erase(iter);
             }
-            listener->cbList_.erase(iter);
         }
         return nullptr;
     }
