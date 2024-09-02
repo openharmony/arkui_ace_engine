@@ -528,4 +528,20 @@ void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCr
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
+
+void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const MenuParam& menuParam)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
+
+void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
+    std::function<void()>& buildFunc, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
 } // namespace OHOS::Ace::NG

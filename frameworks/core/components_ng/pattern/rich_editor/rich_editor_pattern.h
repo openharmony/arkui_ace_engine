@@ -521,8 +521,6 @@ public:
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
-    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
-    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -925,6 +923,13 @@ public:
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
 
+    void SetImagePreviewMenuParam(std::function<void()>& builder, const MenuParam& menuParam)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenuParam");
+        imagePreviewMenuBuilder_ = builder;
+        imagePreviewMenuParam_ = menuParam;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -1216,6 +1221,12 @@ private:
 
     OffsetF GetGlobalOffset() const;
     void MergeAdjacentSpans(int32_t caretPosition);
+    void EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable);
+    void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void SetImageSelfResponseEvent(bool isEnable);
+    void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1328,6 +1339,9 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
+    std::function<void()> imagePreviewMenuBuilder_;
+    std::optional<MenuParam> imagePreviewMenuParam_ = std::nullopt;
+    bool isImageSelfResponseEvent_ = true;
 };
 } // namespace OHOS::Ace::NG
 

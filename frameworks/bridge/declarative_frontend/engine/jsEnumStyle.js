@@ -1064,6 +1064,12 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+var MenuType;
+(function (MenuType) {
+  MenuType[MenuType["SELECTION_MENU"] = 0] = "SELECTION_MENU";
+  MenuType[MenuType["PREVIEW_MENU"] = 1] = "PREVIEW_MENU";
+})(MenuType || (MenuType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
