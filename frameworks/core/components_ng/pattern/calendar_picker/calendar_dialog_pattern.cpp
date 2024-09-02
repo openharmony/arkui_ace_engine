@@ -1172,13 +1172,20 @@ void CalendarDialogPattern::HandleEntryLayoutChange()
     CHECK_NULL_VOID(wrapperNode);
     auto dialogNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetParent());
     CHECK_NULL_VOID(dialogNode);
-    auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
-    CHECK_NULL_VOID(dialogLayoutProp);
-    auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
-    CHECK_NULL_VOID(pattern);
-    dialogLayoutProp->UpdateDialogOffset(DimensionOffset(pattern->CalculateDialogOffset()));
-    dialogOffset_ = pattern->CalculateDialogOffset();
-    dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->AddAfterRenderTask([weak = WeakClaim(this), entryNode, dialogNode]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
+            CHECK_NULL_VOID(pattern);
+            node->dialogOffset_ = pattern->CalculateDialogOffset();
+            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+            CHECK_NULL_VOID(dialogLayoutProp);
+            dialogLayoutProp->UpdateDialogOffset(DimensionOffset(node->dialogOffset_));
+            dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        });
+    }
     isFirstAddhotZoneRect_ = false;
 }
 
