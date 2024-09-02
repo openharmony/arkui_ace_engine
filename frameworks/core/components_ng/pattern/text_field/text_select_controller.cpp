@@ -377,6 +377,7 @@ void TextSelectController::CalculateHandleOffset()
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
+        secondHandleInfo_.rect = CalculateEmptyValueCaretRect(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
         return;
     }
     CaretMetricsF secondHandleMetrics;
@@ -500,7 +501,7 @@ void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
     }
 }
 
-void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
+void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle, bool moveContent)
 {
     CaretMetricsF firstHandleMetrics;
     firstHandleInfo_.index = index;
@@ -510,7 +511,11 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool move
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), firstHandleMetrics.height });
-    MoveHandleToContentRect(firstHandle);
+    if (moveContent) {
+        MoveHandleToContentRect(firstHandle);
+    } else {
+        AdjustHandleAtEdge(firstHandle);
+    }
     firstHandleInfo_.rect = firstHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
@@ -518,7 +523,7 @@ void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool move
     UpdateSecondHandleOffset();
 }
 
-void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool moveHandle)
+void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool moveHandle, bool moveContent)
 {
     CaretMetricsF secondHandleMetrics;
     secondHandleInfo_.index = index;
@@ -528,7 +533,11 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool mov
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), secondHandleMetrics.height });
-    MoveHandleToContentRect(secondHandle);
+    if (moveContent) {
+        MoveHandleToContentRect(secondHandle);
+    } else {
+        AdjustHandleAtEdge(secondHandle);
+    }
     secondHandleInfo_.rect = secondHandle;
 
     caretInfo_.index = std::max(firstHandleInfo_.index, secondHandleInfo_.index);
@@ -536,7 +545,8 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index, bool mov
     UpdateFirstHandleOffset();
 }
 
-void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity, bool isEditorValueChanged)
+void TextSelectController::MoveCaretToContentRect(
+    int32_t index, TextAffinity textAffinity, bool isEditorValueChanged, bool moveContent)
 {
     if (isEditorValueChanged) {
         textAffinity_ = textAffinity;
@@ -548,6 +558,7 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
     secondHandleInfo_.index = index;
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
+        secondHandleInfo_.rect = CalculateEmptyValueCaretRect(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
         return;
     }
     CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, textAffinity_);
@@ -574,8 +585,14 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
             }
         }
     }
-
-    MoveHandleToContentRect(caretRect, boundaryAdjustment);
+    secondHandleInfo_.rect = caretRect;
+    secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
+    if (moveContent) {
+        MoveHandleToContentRect(caretRect, boundaryAdjustment);
+    } else {
+        AdjustHandleAtEdge(caretRect);
+    }
+    AdjustHandleAtEdge(secondHandleInfo_.rect);
     caretInfo_.rect = caretRect;
     caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
 }
@@ -586,6 +603,7 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
 
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
+        secondHandleInfo_.rect = CalculateEmptyValueCaretRect(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
         return;
     }
     FitCaretMetricsToTouchPoint(CaretMetrics, touchOffset);
@@ -601,7 +619,10 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
 
     // Adjusts one character width.
     float boundaryAdjustment = 0.0f;
+    secondHandleInfo_.rect = caretRect;
+    secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
+    AdjustHandleAtEdge(secondHandleInfo_.rect);
     caretInfo_.rect = caretRect;
     auto index = ConvertTouchOffsetToPosition(touchOffset);
     AdjustCursorPosition(index, touchOffset);
@@ -633,6 +654,7 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     textAffinity_ = textAffinity;
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
+        secondHandleInfo_.rect = CalculateEmptyValueCaretRect(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
         return;
     }
     CaretMetricsF caretMetrics;
@@ -647,14 +669,21 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
         LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
     caretInfo_.rect = caretRect;
+    secondHandleInfo_.rect = caretRect;
+    secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     if (moveHandle) {
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
     }
+    AdjustHandleAtEdge(secondHandleInfo_.rect);
 }
 
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 {
     caretInfo_.rect.SetOffset(offset);
+}
+
+void TextSelectController::UpdateSecondHandleOffset(const OffsetF& offset)
+{
     secondHandleInfo_.UpdateOffset(offset);
 }
 

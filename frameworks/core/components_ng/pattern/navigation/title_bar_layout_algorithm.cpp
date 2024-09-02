@@ -15,13 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/measure_util.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"

@@ -15,17 +15,7 @@
 
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/button/toggle_button_paint_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

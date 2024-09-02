@@ -15,14 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 
-
-#include <algorithm>
-#include <optional>
-
-#include "base/utils/utils.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 
@@ -217,8 +209,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
     pattern->FireOnSelect(selectStart, selectEnd);
     if (!IsSingleHandle()) {
-        pattern->SetCaretPosition(selectEnd);
-        pattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+        pattern->SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
@@ -330,10 +321,6 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
 void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
     TextSpanType selectType, TextResponseType responseType)
 {
-    auto manager = SelectContentOverlayManager::GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    CHECK_NULL_VOID(manager->IsOpen());
-
     auto pattern = GetPattern<RichEditorPattern>();
     auto menuParams = pattern ? pattern->GetMenuParams(selectType, responseType) : nullptr;
     std::pair<TextSpanType, TextResponseType> selectResponseComb = { selectType, responseType };

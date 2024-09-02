@@ -15,15 +15,10 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
-#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/render/paragraph.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)

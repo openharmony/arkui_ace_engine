@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 
-#include "base/utils/macros.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 void NavigatorPattern::OnModifyDone()
 {

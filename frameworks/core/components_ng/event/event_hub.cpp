@@ -15,8 +15,6 @@
 
 #include "core/components_ng/event/event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

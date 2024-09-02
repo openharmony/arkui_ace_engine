@@ -15,11 +15,7 @@
 
 #include "core/common/ai/data_detector_adapter.h"
 
-#include "iremote_object.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
-#include "base/log/log_wrapper.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

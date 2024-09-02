@@ -17,11 +17,6 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
-#include "include/core/SkScalar.h"
-#include "include/effects/SkDashPathEffect.h"
-#include "include/effects/SkGradientShader.h"
-
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)

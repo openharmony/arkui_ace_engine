@@ -103,7 +103,7 @@ private:
     std::map<WeakPtr<CanvasImage>, FuncAnimateFlush> animateCallbacks_;
     Rect rootViewBox_;
     Size viewPort_;
-    std::function<void()> onFinishCallback_;
+    std::list<std::function<void()>> onFinishCallbacks_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG

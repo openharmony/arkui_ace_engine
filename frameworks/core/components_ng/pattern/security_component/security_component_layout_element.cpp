@@ -14,9 +14,6 @@
  */
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 
-#include "base/log/ace_scoring_log.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"

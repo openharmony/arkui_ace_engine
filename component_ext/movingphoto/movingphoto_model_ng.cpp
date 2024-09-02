@@ -15,10 +15,7 @@
 
 #include "movingphoto_model_ng.h"
 #include "movingphoto_node.h"
-#include "movingphoto_layout_property.h"
-#include "movingphoto_pattern.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
@@ -70,6 +67,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     CHECK_NULL_VOID(dataProvider);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(movingPhotoPattern);
+    bool updateVideo = true;
     if (layoutProperty->HasMovingPhotoUri()) {
         auto movingPhotoUri = layoutProperty->GetMovingPhotoUri().value();
         int64_t dateModified = dataProvider->GetMovingPhotoDateModified(value);
@@ -81,6 +79,7 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
             return;
         }
+        updateVideo = false;
         movingPhotoPattern->UpdateCurrentDateModified(dateModified);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, MovingPhotoUri, value);
@@ -91,6 +90,9 @@ void MovingPhotoModelNG::SetImageSrc(const std::string& value)
     src.SetSrc(imageSrc);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src);
 
+    if (!updateVideo) {
+        return;
+    }
     int32_t fd = dataProvider->ReadMovingPhotoVideo(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd);
 }

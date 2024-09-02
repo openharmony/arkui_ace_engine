@@ -26,14 +26,6 @@
 #include "core/image/sk_image_cache.h"
 #endif
 
-#include "base/i18n/localization.h"
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/image_provider/image_object.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
-#include "core/components_ng/render/drawing.h"
-
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)

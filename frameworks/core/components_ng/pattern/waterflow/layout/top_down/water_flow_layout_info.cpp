@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
-#include <algorithm>
-
-#include "core/components_ng/property/measure_property.h"
-
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {

@@ -39,13 +39,10 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_child_touch_test_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
@@ -54,61 +51,27 @@
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
-#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_animatable_arithmetic.h"
-#include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "canvas_napi/js_canvas.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
-#include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_object.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/layout/screen_system_manager.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/border_image.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/invert.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/focus_box.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/overlay/modal_style.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/property/grid_property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/gestures/gesture_info.h"
-#include "core/image/image_source_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
 #include "interfaces/native/node/resource.h"
 
 #include "core/common/card_scope.h"
-#include "core/common/container.h"
 #include "core/common/resource/resource_configuration.h"
-#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -5500,6 +5463,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
+        result.SetResourceId(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;

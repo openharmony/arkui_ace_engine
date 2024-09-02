@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
 
-#include <string>
-
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {

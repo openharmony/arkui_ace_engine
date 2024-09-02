@@ -16,7 +16,6 @@
 #include "drawing_lattice_ohos.h"
 
 #include "base/utils/utils.h"
-#include "draw/core_canvas.h"
 #include "lattice_napi/js_lattice.h"
 
 namespace OHOS::Ace {

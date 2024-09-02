@@ -15,12 +15,7 @@
 
 #include "js_backend_timer_module.h"
 
-#include <atomic>
-#include <string>
-#include <vector>
-
 #include "base/log/log.h"
-#include "js_runtime.h"
 #include "js_runtime_utils.h"
 
 #ifdef SUPPORT_GRAPHICS

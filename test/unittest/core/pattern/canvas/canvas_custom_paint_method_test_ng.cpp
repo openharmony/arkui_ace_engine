@@ -72,11 +72,11 @@ void CanvasCustomPaintMethodTestNg::TearDownTestCase()
 }
 
 /**
- * @tc.name: CanvasCustomPaintMethodTest001
+ * @tc.name: CanvasCustomPaintMethodTest0011
  * @tc.desc: Test the function 'CheckFilterProperty' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest0011, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -88,6 +88,8 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
      * @tc.steps2: When FilterType is GRAYSCALE, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "10%"));
@@ -98,6 +100,8 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
      * @tc.steps3: When FilterType is SEPIA, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10%"));
@@ -105,19 +109,50 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SEPIA, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10px"));
     /**
-     * @tc.steps4: When FilterType is INVERT, call the function CheckFilterProperty.
+     * @tc.steps4: When FilterType is SATURATE, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "-0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10.5"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10%"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10.5%"));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SATURATE, " "));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10px"));
+    /**
+     * @tc.steps5: When FilterType is INVERT, call the function CheckFilterProperty.
+     * @tc.expected: return value are as expected.
+     */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10%"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10.5%"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::INVERT, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10px"));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest0012
+ * @tc.desc: Test the function 'CheckFilterProperty' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest0012, TestSize.Level1)
+{
     /**
-     * @tc.steps5: When FilterType is OPACITY, call the function CheckFilterProperty.
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: When FilterType is OPACITY, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10%"));
@@ -125,9 +160,11 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::OPACITY, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10px"));
     /**
-     * @tc.steps5: When FilterType is BRIGHTNESS, call the function CheckFilterProperty.
+     * @tc.steps3: When FilterType is BRIGHTNESS, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10%"));
@@ -135,9 +172,11 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10px"));
     /**
-     * @tc.steps6: When FilterType is CONTRAST, call the function CheckFilterProperty.
+     * @tc.steps4: When FilterType is CONTRAST, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "10%"));
@@ -163,25 +202,46 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest002, TestSize
      * @tc.steps2: When FilterType is BLUR, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10px"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5px"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10vp"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5vp"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10rem"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5rem"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
+
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%px"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%rem"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5%px"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5%rem"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, " "));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
     /**
      * @tc.steps3: When FilterType is HUE_ROTATE, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10deg"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5deg"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10rad"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5rad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "2turn"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "0.5turn"));
+
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10deg"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10.5deg"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10rad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10.5rad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10.5grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-2turn"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-0.5turn"));
+
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10%deg"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10%rad"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5%deg"));
@@ -389,10 +449,12 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest009, TestSize
      * @tc.expected: return value are as expected.
      */
     std::string str1 = "10.0";
-    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 0.0);
+    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
     str1 = "aaa";
     EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 0.0);
     str1 = "10.0px";
+    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
+    str1 = "10.0VP";
     EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
     str1 = "20.0rem";
     EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 300.0);

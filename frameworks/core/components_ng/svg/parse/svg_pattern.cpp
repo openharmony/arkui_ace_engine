@@ -15,9 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 
-#include "base/geometry/rect.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

@@ -14,19 +14,9 @@
  */
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
-#include <algorithm>
 
 #include "base/geometry/arc.h"
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
-#include "core/components_ng/pattern/refresh/refresh_animation_state.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

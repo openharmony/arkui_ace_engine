@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"

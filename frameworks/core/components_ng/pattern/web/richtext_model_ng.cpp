@@ -16,9 +16,6 @@
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
 
 #include "core/components_ng/base/node_flag.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/web/web_event_hub.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else

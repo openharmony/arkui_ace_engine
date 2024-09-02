@@ -15,14 +15,8 @@
 
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {

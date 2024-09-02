@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"

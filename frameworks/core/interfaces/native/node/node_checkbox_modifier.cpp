@@ -14,12 +14,8 @@
  */
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {

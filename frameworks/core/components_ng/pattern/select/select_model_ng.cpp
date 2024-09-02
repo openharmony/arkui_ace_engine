@@ -15,16 +15,7 @@
 
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/pattern/select/select_properties.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

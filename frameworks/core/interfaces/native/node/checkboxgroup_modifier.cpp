@@ -14,12 +14,7 @@
  */
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
-#include "frameworks/core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;

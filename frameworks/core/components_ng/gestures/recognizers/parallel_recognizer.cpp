@@ -15,14 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 
-#include <vector>
-
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {
 

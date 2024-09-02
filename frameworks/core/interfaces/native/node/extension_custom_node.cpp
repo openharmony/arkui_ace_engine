@@ -14,7 +14,6 @@
  */
 
 #include "core/interfaces/native/node/extension_custom_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 void ExtensionCustomNode::OnMeasure(const ExtensionLayoutConstraint& layoutConstraint)

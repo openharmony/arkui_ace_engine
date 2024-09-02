@@ -252,7 +252,8 @@ constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
-constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 4;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE = 5;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 int64_t last_height_ = 0L;
 int64_t last_width_ = 0L;
@@ -1910,17 +1911,12 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     CHECK_NULL_RETURN(dirty, false);
 
     Size drawSize = Size(1, 1);
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
-        auto geometryNode = dirty->GetGeometryNode();
-        drawSize = Size(geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height());
-    } else {
-        auto frameNode = GetHost();
-        CHECK_NULL_RETURN(frameNode, false);
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        auto rect = renderContext->GetPaintRectWithoutTransform();
-        drawSize = Size(rect.Width(), rect.Height());
-    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    drawSize = Size(rect.Width(), rect.Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return false;
     }
@@ -2627,11 +2623,11 @@ void WebPattern::OnModifyDone()
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
             } else {
                 renderSurface_->SetIsTexture(false);
-                renderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
+                renderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             }
             popupRenderSurface_->SetIsTexture(false);
-            popupRenderSurface_->SetSurfaceQueueSize(ASYNC_SURFACE_QUEUE_SIZE);
+            popupRenderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
             popupRenderSurface_->SetRenderContext(renderContextForPopupSurface_);
             renderContext->AddChild(renderContextForSurface_, 0);
             renderContext->AddChild(renderContextForPopupSurface_, 1);
@@ -6481,4 +6477,9 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_);
 }
 
+int32_t WebPattern::GetBufferSizeByDeviceType()
+{
+    return (SystemProperties::GetDeviceType() == DeviceType::PHONE) ? ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE :
+        ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS;
+}
 } // namespace OHOS::Ace::NG

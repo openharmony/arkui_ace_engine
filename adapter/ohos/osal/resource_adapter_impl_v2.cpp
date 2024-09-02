@@ -22,9 +22,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/device_config.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/pipeline_ng/pipeline_context.h"

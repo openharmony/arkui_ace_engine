@@ -15,19 +15,7 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
-#include <optional>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
-#include "base/utils/utils.h"
-#include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

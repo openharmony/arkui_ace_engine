@@ -16,7 +16,6 @@
 #include "core/components_v2/indexer/indexer_item_component.h"
 
 #include "core/components/transform/transform_component.h"
-#include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_v2/indexer/render_indexer_item.h"
 
 namespace OHOS::Ace::V2 {

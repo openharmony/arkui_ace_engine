@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 
-#include <unordered_map>
-
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

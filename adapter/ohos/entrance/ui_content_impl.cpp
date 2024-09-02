@@ -101,9 +101,6 @@
 #ifdef NG_BUILD
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #endif
-#include "pipeline/rs_node_map.h"
-#include "transaction/rs_transaction_data.h"
-#include "ui/rs_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "screen_session_manager_client.h"
@@ -117,6 +114,36 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr int32_t AVOID_DELAY_TIME = 20;
+
+#define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
+#define UICONTENT_IMPL_PTR(name) _##name->uiContent_
+#define UICONTENT_IMPL_HELPER_GUARD(name, ifInvalid...) \
+    std::lock_guard lg(*_##name->mutex_);               \
+    if (!*_##name->isValid_) {                          \
+        ifInvalid;                                      \
+    }
+
+struct UIContentImplHelper {
+    explicit UIContentImplHelper(UIContentImpl* uiContent) : uiContent_(uiContent)
+    {
+        uiContent_->AddDestructCallback(this, [mutex = mutex_, isValid = isValid_] {
+            std::lock_guard lg(*mutex);
+            *isValid = false;
+        });
+    }
+    ~UIContentImplHelper()
+    {
+        std::lock_guard lg(*mutex_);
+        if (*isValid_) {
+            uiContent_->RemoveDestructCallback(this);
+        }
+    }
+    UIContentImpl* uiContent_;
+    std::shared_ptr<std::mutex> mutex_ = std::make_shared<std::mutex>();
+    std::shared_ptr<bool> isValid_ = std::make_shared<bool>(true);
+    UIContentImplHelper(const UIContentImplHelper& rhs) = delete;
+    UIContentImplHelper& operator=(const UIContentImplHelper& rhs) = delete;
+};
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -3204,6 +3231,23 @@ void UIContentImpl::SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExte
     popupUIExtensionRecords_[nodeId] = popupId;
 }
 
+bool UIContentImpl::GetTargetNode(
+    int32_t& nodeIdLabel, RefPtr<NG::FrameNode>& targetNode, const CustomPopupUIExtensionConfig& config)
+{
+    if (config.nodeId > -1) {
+        nodeIdLabel = config.nodeId;
+        targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeIdLabel);
+        CHECK_NULL_RETURN(targetNode, false);
+    } else if (!config.inspectorId.empty()) {
+        targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
+        CHECK_NULL_RETURN(targetNode, false);
+        nodeIdLabel = targetNode->GetId();
+    } else {
+        CHECK_NULL_RETURN(targetNode, false);
+    }
+    return true;
+}
+
 int32_t UIContentImpl::CreateCustomPopupUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
 {
@@ -3215,16 +3259,8 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
         [want, &nodeId, callbacks = callbacks, config = config, this]() {
             int32_t nodeIdLabel = -1;
             RefPtr<NG::FrameNode> targetNode = nullptr;
-            if (config.nodeId > -1) {
-                nodeIdLabel = config.nodeId;
-                targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeIdLabel);
-                CHECK_NULL_VOID(targetNode);
-            } else if (!config.inspectorId.empty()) {
-                targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
-                CHECK_NULL_VOID(targetNode);
-                nodeIdLabel = targetNode->GetId();
-            } else {
-                CHECK_NULL_VOID(targetNode);
+            if (!GetTargetNode(nodeIdLabel, targetNode, config)) {
+                return;
             }
             if (customPopupConfigMap_.find(nodeIdLabel) != customPopupConfigMap_.end()) {
                 LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", nodeIdLabel);
@@ -3248,8 +3284,10 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             uiExtNode->MarkModifyDone();
             nodeId = nodeIdLabel;
-            popupParam->SetOnStateChange(
-                [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
+            popupParam->SetOnStateChange([config, nodeId, UICONTENT_IMPL_HELPER(content)](const std::string& event) {
+                UICONTENT_IMPL_HELPER_GUARD(content, return);
+                UICONTENT_IMPL_PTR(content)->OnPopupStateChange(event, config, nodeId);
+            });
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
             SetCustomPopupConfig(nodeId, config, uiExtNode->GetId());
         },
@@ -3276,14 +3314,15 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
     }
     auto config = popupConfig->second;
     taskExecutor->PostTask(
-        [container, nodeId, config, this]() {
+        [container, nodeId, config, UICONTENT_IMPL_HELPER(content)]() {
+            UICONTENT_IMPL_HELPER_GUARD(content, return);
             auto targetNode =
                 AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
             CHECK_NULL_VOID(targetNode);
-            auto popupParam = CreateCustomPopupParam(false, config);
+            auto popupParam = UICONTENT_IMPL_PTR(content)->CreateCustomPopupParam(false, config);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
-            customPopupConfigMap_.erase(nodeId);
-            popupUIExtensionRecords_.erase(nodeId);
+            UICONTENT_IMPL_PTR(content)->customPopupConfigMap_.erase(nodeId);
+            UICONTENT_IMPL_PTR(content)->popupUIExtensionRecords_.erase(nodeId);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestroyCustomPopup");
 }
@@ -3317,8 +3356,9 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 auto createConfig = popupConfig->second;
                 popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
                 popupParam->SetOnStateChange(
-                    [createConfig, targetId, this](const std::string& event) {
-                        this->OnPopupStateChange(event, createConfig, targetId);
+                    [createConfig, targetId, UICONTENT_IMPL_HELPER(content)](const std::string& event) {
+                        UICONTENT_IMPL_HELPER_GUARD(content, return);
+                        UICONTENT_IMPL_PTR(content)->OnPopupStateChange(event, createConfig, targetId);
                     });
             }
             auto targetNode =
@@ -3597,5 +3637,12 @@ void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppE
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
         TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+}
+
+void UIContentImpl::ProcessDestructCallbacks()
+{
+    for (auto& [_, callback] : destructCallbacks_) {
+        callback();
+    }
 }
 } // namespace OHOS::Ace

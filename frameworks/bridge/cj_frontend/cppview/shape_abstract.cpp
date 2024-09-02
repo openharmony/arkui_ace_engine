@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 
-#include <cinttypes>
-
 namespace OHOS::Ace::Framework {
 
 NativeShapeAbstract::NativeShapeAbstract() : FFIData()

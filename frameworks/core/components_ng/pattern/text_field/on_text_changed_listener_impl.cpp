@@ -18,13 +18,8 @@
 #include "base/input_manager/input_manager.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/ime/text_input_client.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/event/key_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";

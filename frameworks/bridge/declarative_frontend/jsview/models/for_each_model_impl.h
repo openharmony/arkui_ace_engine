@@ -38,6 +38,7 @@ public:
     void CreateNewChildStart(const std::string& id) override;
     void CreateNewChildFinish(const std::string& id) override;
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override {};
+    void SetRemovedElmtIds(std::list<int32_t>& removedElmtId) override {};
 };
 }  // namespace OHOS::Ace::Framework
 

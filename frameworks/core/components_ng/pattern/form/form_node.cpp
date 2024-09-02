@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/form/form_node.h"
 
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_pattern.h"

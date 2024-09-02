@@ -15,7 +15,6 @@
 #include "core/components_ng/pattern/animator/animator_model_ng.h"
 
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"

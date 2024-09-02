@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 
-#include "base/utils/utils.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
 namespace OHOS::Ace::NG {

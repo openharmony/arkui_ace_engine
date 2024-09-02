@@ -35,10 +35,8 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
-#include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
 

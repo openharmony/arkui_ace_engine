@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/model/model_touch_handler.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 

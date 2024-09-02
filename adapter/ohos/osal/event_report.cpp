@@ -15,15 +15,10 @@
 
 #include "base/log/event_report.h"
 
-#include <ctime>
-#include <string>
 #include <unistd.h>
 
 #include "hisysevent.h"
 
-#include "base/log/ace_trace.h"
-#include "base/json/json_util.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"

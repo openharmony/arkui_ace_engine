@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/syntax/node_content.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 

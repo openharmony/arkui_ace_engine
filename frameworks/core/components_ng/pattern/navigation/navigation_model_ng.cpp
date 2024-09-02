@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 
-#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -59,13 +58,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {

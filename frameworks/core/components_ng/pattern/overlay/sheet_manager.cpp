@@ -16,14 +16,10 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 
 #include "base/error/error_code.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

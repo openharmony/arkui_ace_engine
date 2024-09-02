@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
-#include <algorithm>
-
 #include "base/i18n/localization.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"

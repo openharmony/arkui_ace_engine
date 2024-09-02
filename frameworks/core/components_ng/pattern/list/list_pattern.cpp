@@ -16,16 +16,10 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 
 #include <cstdint>
-#include <string>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/bilateral_spring_node.h"
-#include "core/animation/spring_model.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -1771,7 +1765,16 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
-        posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        if (pos.groupInfo) {
+            bool groupAtStart = pos.groupInfo.value().atStart;
+            if (groupAtStart) {
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+            } else {
+                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height });
+            }
+        } else {
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
     bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);
@@ -2007,6 +2010,13 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
     chainAnimation_->SetDelta(-dragOffset, overDrag);
+    if (source == SCROLL_FROM_UPDATE && GetCanOverScroll()) {
+        float tempDelta = currentDelta_;
+        currentDelta_ -= dragOffset;
+        bool isAtEdge = IsAtTop() || IsAtBottom();
+        currentDelta_ = tempDelta;
+        SetCanOverScroll(isAtEdge);
+    }
 }
 
 float ListPattern::GetChainDelta(int32_t index) const

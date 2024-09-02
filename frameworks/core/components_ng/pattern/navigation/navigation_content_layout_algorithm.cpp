@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

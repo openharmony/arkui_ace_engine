@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
-#include "base/utils/string_utils.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/inspector_filter.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MINFONTSCALE = 0.85f;

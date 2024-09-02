@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 
-#include "core/common/container.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 

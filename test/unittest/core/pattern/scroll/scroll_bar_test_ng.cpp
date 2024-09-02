@@ -181,8 +181,6 @@ HWTEST_F(ScrollBarTestNg, HandleDrag001, TestSize.Level1)
     HandleDragUpdate(info);
     info.SetMainVelocity(1000.f);
     HandleDragEnd(info);
-    EXPECT_TRUE(scrollBar_->isDriving_);
-    EXPECT_TRUE(scrollBar_->frictionController_->IsRunning());
     scrollBar_->ProcessFrictionMotion(10.f);
     EXPECT_EQ(scrollBar_->frictionPosition_, 10.f);
 

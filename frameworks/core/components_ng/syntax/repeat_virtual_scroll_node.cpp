@@ -15,14 +15,6 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
-#include <cstdint>
-#include <functional>
-#include <utility>
-
-#include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -72,8 +64,15 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
 
 void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
+        "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
+        GetId(), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
+
     ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
         start, end, cacheStart, cacheEnd);
+
+    // memorize active range
     caches_.SetLastActiveRange(start - cacheStart, end + cacheEnd);
     // notify TS side
     onSetActiveRange_(start, end);

@@ -15,33 +15,11 @@
 
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/device_config.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/paragraph.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/constants.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {

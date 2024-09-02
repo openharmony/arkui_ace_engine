@@ -14,17 +14,7 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
-#include <string>
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(

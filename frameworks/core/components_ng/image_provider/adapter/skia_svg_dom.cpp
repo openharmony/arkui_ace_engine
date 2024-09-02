@@ -15,10 +15,7 @@
 
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 
-#include "draw/canvas.h"
-#include "include/core/SkColor.h"
 #include "skia_adapter/skia_canvas.h"
-#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 

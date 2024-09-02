@@ -496,7 +496,7 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
         Rosen::Drawing::Rect srcRect(
             0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
         image.BuildFromBitmap(*mask);
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
             Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
@@ -557,7 +557,7 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::
         bitmapCanvas.DetachBrush();
     }
     if (mask) {
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();

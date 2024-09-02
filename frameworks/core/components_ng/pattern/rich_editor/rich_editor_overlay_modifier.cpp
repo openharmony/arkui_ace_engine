@@ -21,8 +21,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,

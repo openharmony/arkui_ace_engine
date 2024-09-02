@@ -21,13 +21,9 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
-#include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace::NG {
