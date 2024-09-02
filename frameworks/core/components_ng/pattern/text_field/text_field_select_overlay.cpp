@@ -96,9 +96,12 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     CHECK_NULL_VOID(latestReqeust_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     if (latestReqeust_->hideHandle) {
         manager->HideHandle();
     }
+    pattern->StopTwinkling();
     manager->MarkInfoChange(DIRTY_SELECT_TEXT);
     latestReqeust_.reset();
 }

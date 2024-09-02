@@ -2452,7 +2452,6 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
     }
 
     if (showSelect_) {
-        StopTwinkling();
         SetIsSingleHandle(true);
     }
     if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::DOUBLE_CLICK)) {
@@ -7184,23 +7183,20 @@ int32_t TextFieldPattern::GetLineCount() const
 
 void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
 {
-    if (SelectOverlayIsOn()) {
+    if (SelectOverlayIsOn() && !selectOverlay_->IsSingleHandle()) {
+        selectController_->UpdateFirstHandleOffset();
         selectController_->UpdateSecondHandleOffset();
-        if (!selectOverlay_->IsSingleHandle()) {
-            selectController_->UpdateFirstHandleOffset();
-            selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
-            selectOverlay_->UpdateAllHandlesOffset();
-        } else {
-            auto carectOffset = selectController_->GetCaretRect().GetOffset() +
-                                (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
-            selectController_->UpdateCaretOffset(carectOffset);
-            selectOverlay_->UpdateSecondHandleOffset();
-        }
-    } else {
-        auto caretOffset = selectController_->GetCaretRect().GetOffset() +
-                           (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
-        selectController_->UpdateCaretOffset(caretOffset);
+        selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
+        selectOverlay_->UpdateAllHandlesOffset();
+        return;
     }
+    // 修改光标和单手柄位置
+    auto moveOffset = IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f);
+    auto caretOffset = selectController_->GetCaretRect().GetOffset() + moveOffset;
+    auto secondHandleOffset = selectController_->GetSecondHandleOffset() + moveOffset;
+    selectController_->UpdateCaretOffset(caretOffset);
+    selectController_->UpdateSecondHandleOffset(secondHandleOffset);
+    selectOverlay_->UpdateSecondHandleOffset();
 }
 
 void TextFieldPattern::CloseHandleAndSelect()
