@@ -93,14 +93,6 @@ void OH_ArkUI_DestoryAccessibilityEventInfo(ArkUI_AccessibilityEventInfo* eventI
     delete eventInfo;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoPageId(
-    ArkUI_AccessibilityElementInfo* elementInfo, int32_t pageId)
-{
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    elementInfo->SetPageId(pageId);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
-}
-
 int32_t OH_ArkUI_SetAccessibilityElementInfoElementId(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t elementId)
 {
@@ -482,14 +474,6 @@ int32_t OH_ArkUI_SetAccessibilityEventEventType(
 {
     CHECK_NULL_RETURN(eventInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
     eventInfo->SetEventType(eventType);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
-}
-
-int32_t OH_ArkUI_SetAccessibilityEventPageId(
-    ArkUI_AccessibilityEventInfo* eventInfo, int32_t pageId)
-{
-    CHECK_NULL_RETURN(eventInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    eventInfo->SetPageId(pageId);
     return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
 }
 
