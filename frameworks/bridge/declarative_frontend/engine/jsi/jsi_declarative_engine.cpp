@@ -269,49 +269,27 @@ inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const sha
     return global->SetProperty(runtime, "requireNativeModule", runtime->NewFunction(RequireNativeModule));
 }
 
-/**
- * The old version of the SDK will not generate the ohmUrl field, so we need to build it ourselves
- * for forward compatibility. The basic ohmUrl formats are as follows:
- *
- * 1. @bundle:{bundleName}/{moduleName}/ets/{pagePath}
- * examples as follow:
- *   @bundle:com.example.app/entry/ets/pages/Index
- *   @bundle:com.example.app/hsp/ets/pages/Second
- *
- * 2. @bundle:{bundleName}/{moduleName}@{harModuleName}/ets/{pagePath}
- * examples as follow:
- *   @bundle:com.example.app/entry@har/ets/pages/Index
- *   @bundle:com.example.app/hsp@har/ets/pages/Second
- * In this case, since the compiler did not generate the harModuleName field and pagePath is a relative path during
- * compilation, wee need to split the harModuleName and normal pathPath fields from the original pagePath.
- * for example:
- *    original pagePath: "../../../../har/src/main/ets/pages/harPageTwo"
- *     -> harModuleName: "har"
- *     -> result pagePath: "pages/harPageTwo"
- *
- * For any other situation, currently only format 1 ohmUrl can be returned.
- */
-std::string BuildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
+std::string buildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
 {
     LOGE("It is necessary to build ohmUrl for forward compatibility");
     std::string tempUrl = OHMURL_START_TAG + bundleName + "/" + moduleName;
-    std::string ohmUrl = tempUrl + "/ets/" + pagePath;
     auto pos = pagePath.rfind("../");
     if (pos == std::string::npos) {
-        return ohmUrl;
+        tempUrl = tempUrl + "/ets/" + pagePath;
+    } else {
+        /**
+         * In the scenario where HAP references HAR, pagePath starts with the relative path at compile time,
+         * so we need to remove "../", and moduleName of ohmUrl consists of hap's module + @ + har's modsule.
+         */
+        std::string newPagePath = pagePath.substr(pos + 3);
+        pos = newPagePath.find("/");
+        std::string harModuleName = newPagePath.substr(0, pos);
+        pos = newPagePath.find("ets");
+        newPagePath = newPagePath.substr(pos);
+        tempUrl = tempUrl + "@" + harModuleName + "/" + newPagePath;
     }
-    std::string newPagePath = pagePath.substr(pos + 3);
-    pos = newPagePath.find("/");
-    if (pos == std::string::npos) {
-        return ohmUrl;
-    }
-    std::string harModuleName = newPagePath.substr(0, pos);
-    pos = newPagePath.find("ets");
-    if (pos == std::string::npos) {
-        return ohmUrl;
-    }
-    newPagePath = newPagePath.substr(pos);
-    return tempUrl + "@" + harModuleName + "/" + newPagePath;
+
+    return tempUrl;
 }
 
 bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
@@ -340,7 +318,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
         }
     }
     if (!ohmUrlValid) {
-        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
+        ohmUrl = buildOhmUrl(bundleName, moduleName, pagePath);
     }
 
     std::string integratedHspName = "false";
