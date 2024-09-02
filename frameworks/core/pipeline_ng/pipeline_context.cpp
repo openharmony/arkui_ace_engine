@@ -2553,7 +2553,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        rootNode_->DumpTree(0);
+        rootNode_->DumpTree(0, true);
         DumpLog::GetInstance().OutPutDefault();
     }
     return true;
