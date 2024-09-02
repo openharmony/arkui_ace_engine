@@ -103,6 +103,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
         } else {
             AddDisappearingChild(node);
         }
+
         return false;
     });
     if (needSync) {
@@ -168,6 +169,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
             } else {
                 AddDisappearingChild(node);
             }
+
             return false;
         });
     if (needSync) {
@@ -238,7 +240,6 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
                      "addToRenderTree[%d]",
         index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
 
-    // It will get or create new key.
     const auto& key = caches_.GetKey4Index(index, true);
     if (!key) {
         TAG_LOGE(AceLogTag::ACE_REPEAT, "fail to get key for %{public}d", index);
@@ -320,6 +321,7 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
         InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
     }
 
+    // this is new node or node from L2 cache
     if (childNode) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d, its child is %{public}d, returning child.",
             static_cast<int32_t>(index), static_cast<int32_t>(childNode->GetId()));
