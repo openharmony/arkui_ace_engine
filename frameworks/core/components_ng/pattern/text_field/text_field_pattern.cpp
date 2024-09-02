@@ -1649,9 +1649,11 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    PreviewText previewText;
-    previewText.offset = GetPreviewTextStart();
-    previewText.value = GetPreviewTextValue();
+    PreviewText previewText {.offset = -1, .value = ""};
+    if (GetIsPreviewText()) {
+        previewText.offset = GetPreviewTextStart();
+        previewText.value = GetPreviewTextValue();
+    }
     eventHub->FireOnChange(text, previewText);
 }
 
@@ -2950,9 +2952,11 @@ void TextFieldPattern::AddTextFireOnChange()
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
-        PreviewText previewText;
-        previewText.offset = pattern->GetPreviewTextStart();
-        previewText.value = pattern->GetPreviewTextValue();
+        PreviewText previewText {.offset = -1, .value = ""};
+        if (pattern->GetIsPreviewText()) {
+            previewText.offset = pattern->GetPreviewTextStart();
+            previewText.value = pattern->GetPreviewTextValue();
+        }
         layoutProperty->UpdatePreviewText(previewText);
         eventHub->FireOnChange(pattern->GetBodyTextValue(), previewText);
     });
