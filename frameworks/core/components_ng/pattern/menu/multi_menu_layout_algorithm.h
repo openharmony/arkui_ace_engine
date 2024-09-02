@@ -34,6 +34,8 @@ public:
         const RefPtr<LayoutWrapper>& child, const LayoutConstraintF& layoutConstraint);
 
 private:
+    void UpdateEmbeddedPercentReference(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+        std::optional<LayoutConstraintF>& layoutConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint);
     void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
@@ -42,6 +44,8 @@ private:
         LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
         bool idealSizeHasVal);
 
+    float userHeight_ = 0.0f;
+    
     ACE_DISALLOW_COPY_AND_MOVE(MultiMenuLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
