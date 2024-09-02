@@ -201,11 +201,6 @@ void AddSetAppColorModeToResConfig(
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
-const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
-const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
-const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
-const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
-const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
 constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
@@ -724,8 +719,9 @@ void UIContentImpl::RunFormPage()
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
 {
+    auto errorCode = InitializeInner(window, url, storage, false);
     AddWatchSystemParameter();
-    return InitializeInner(window, url, storage, false);
+    return errorCode;
 }
 
 UIContentErrorCode UIContentImpl::Initialize(
@@ -755,8 +751,9 @@ UIContentErrorCode UIContentImpl::Initialize(
 UIContentErrorCode UIContentImpl::InitializeByName(
     OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
+    auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
-    return InitializeInner(window, name, storage, true);
+    return errorCode;
 }
 
 void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath,
@@ -2014,16 +2011,6 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window destroy", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
-    SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
-    SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
-    SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
-    SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -3467,62 +3454,11 @@ void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
         TaskExecutor::TaskType::UI, "ArkUISetWindowScale");
 }
 
-void UIContentImpl::RenderLayoutBoundary(bool isDebugBoundary)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    CHECK_NULL_VOID(renderBoundaryManager_);
-    renderBoundaryManager_->PostTaskRenderBoundary(isDebugBoundary, container);
-}
-
-void UIContentImpl::EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context)
-{
-    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-        SystemProperties::SetLayoutTraceEnabled(strcmp(value, "true") == 0);
-    }
-}
-
-void UIContentImpl::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
-{
-    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-        SystemProperties::SetInputEventTraceEnabled(strcmp(value, "true") == 0);
-    }
-}
-
-void UIContentImpl::EnableSystemParameterSecurityDevelopermodeCallback(
-    const char* key, const char* value, void* context)
-{
-    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-        SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(strcmp(value, "true") == 0);
-    }
-}
-
-void UIContentImpl::EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context)
-{
-    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-        SystemProperties::SetStateManagerEnabled(strcmp(value, "true") == 0);
-    }
-}
-
-void UIContentImpl::EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
-{
-    bool isDebugBoundary = strcmp(value, "true") == 0;
-    SystemProperties::SetDebugBoundaryEnabled(isDebugBoundary);
-    auto that = reinterpret_cast<UIContentImpl*>(context);
-    that->RenderLayoutBoundary(isDebugBoundary);
-}
-
 void UIContentImpl::AddWatchSystemParameter()
 {
-    SystemProperties::AddWatchSystemParameter(ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
-    SystemProperties::AddWatchSystemParameter(
-        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
-    SystemProperties::AddWatchSystemParameter(
-        ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
-    SystemProperties::AddWatchSystemParameter(
-        ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
-    SystemProperties::AddWatchSystemParameter(
-        ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->AddWatchSystemParameter();
 }
 
 std::vector<Ace::RectF> UIContentImpl::GetOverlayNodePositions() const
