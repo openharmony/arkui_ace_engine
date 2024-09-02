@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <algorithm>
+#include <string_ex.h>
 #include <vector>
 
 #include "display_manager.h"
@@ -4407,11 +4408,12 @@ void WebPattern::OnTooltip(const std::string& tooltip)
         overlayManager->RemoveIndexerPopupById(tooltipId_);
         tooltipId_ = -1;
     }
-
-    if (tooltip == "" || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
+    auto tooltipText = tooltip;
+    OHOS::Ace::StringUtils::TrimStrLeadingAndTrailing(tooltipText);
+    if (tooltipText == "" || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
         return;
     }
-    ShowTooltip(tooltip, tooltipTimestamp);
+    ShowTooltip(tooltipText, tooltipTimestamp);
 }
 
 void WebPattern::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height)
@@ -4489,7 +4491,7 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
         CalcLength(TOOLTIP_PADDING), CalcLength(TOOLTIP_PADDING), CalcLength(TOOLTIP_PADDING) });
     textLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(Dimension(
         pipeline->GetCurrentRootWidth() * TOOLTIP_MAX_PORTION)), std::nullopt));
-    textRenderContext->UpdateBackgroundColor(Color::WHITE);
+    UpdateTooltipContentColor(tooltipNode);
 
     OffsetF tooltipOffset;
     CalculateTooltipOffset(tooltipNode, tooltipOffset);
@@ -4500,6 +4502,23 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     borderColor.SetColor(Color::BLACK);
     textRenderContext->UpdateBorderColor(borderColor);
     overlayManager->ShowIndexerPopup(tooltipId_, tooltipNode);
+}
+
+void WebPattern::UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    if (Color::BLACK == GetSystemColor()) {
+        textLayoutProperty->UpdateTextColor(Color::WHITE);
+        textRenderContext->UpdateBackgroundColor(Color::BLACK);
+    } else {
+        textLayoutProperty->UpdateTextColor(Color::BLACK);
+        textRenderContext->UpdateBackgroundColor(Color::WHITE);
+    }
 }
 
 void WebPattern::ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
