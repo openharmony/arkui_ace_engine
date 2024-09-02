@@ -485,10 +485,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         } while (false);
     }
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
-    if (!needToRefreshSelectOverlay_ ||
-        (NearEqual(paragraphWidth, paragraphWidth_) && NearEqual(textRect.GetSize(), textRect_.GetSize()))) {
-        needToRefreshSelectOverlay_ = false;
-    }
+    auto isSameSizeMouseMenu = NearEqual(paragraphWidth, paragraphWidth_) &&
+                                    NearEqual(textRect.GetSize(), textRect_.GetSize()) && IsUsingMouse();
+    needToRefreshSelectOverlay_ = needToRefreshSelectOverlay_ && !isSameSizeMouseMenu;
     paragraphWidth_ = paragraphWidth;
     HandleContentSizeChange(textRect);
     textRect_ = textRect;
