@@ -766,7 +766,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             endIndex = needLayoutBackward ? res.first : endIndex;
             endPos = needLayoutBackward ? res.second : endPos;
         }
-        OffScreenLayoutDirection();
+        OffScreenLayoutDirection(layoutWrapper);
         itemPosition_.clear();
     }
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO &&
@@ -792,12 +792,13 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
         needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
-        if (startIndex < targetIndex_.value()) {
+        auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, startIndex);
+        if (layoutDirection == LayoutDirection::FORWARD) {
             LayoutForward(layoutWrapper, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
-        } else if (startIndex >= targetIndex_.value()) {
+        } else if (layoutDirection == LayoutDirection::BACKWARD) {
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
@@ -848,6 +849,34 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     }
     RecycleGroupItem(layoutWrapper);
+}
+
+LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex)
+{
+    CHECK_NULL_RETURN(targetIndex_, LayoutDirection::NONE);
+    if (startIndex < targetIndex_.value()) {
+        return LayoutDirection::FORWARD;
+    } else if (startIndex > targetIndex_.value()) {
+        return LayoutDirection::BACKWARD;
+    } else if (targetIndexInGroup_.has_value()) {
+        auto groupWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
+        CHECK_NULL_RETURN(groupWrapper, LayoutDirection::NONE);
+        auto groupHost = groupWrapper->GetHostNode();
+        CHECK_NULL_RETURN(groupHost, LayoutDirection::NONE);
+        auto groupPattern = groupHost->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_RETURN(groupPattern, LayoutDirection::NONE);
+        auto startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+        auto endIndexInGroup = groupPattern->GetDisplayEndIndexInGroup();
+        auto isTargetGroupEmpty = groupPattern->GetItemPosition().empty();
+        auto targetGroupPosition = itemPosition_[targetIndex_.value()].startPos;
+        if (targetIndexInGroup_.value() < startIndexInGroup || (isTargetGroupEmpty && Negative(targetGroupPosition))) {
+            return LayoutDirection::BACKWARD;
+        } else if (targetIndexInGroup_.value() > endIndexInGroup ||
+                   (isTargetGroupEmpty && !Negative(targetGroupPosition))) {
+            return LayoutDirection::FORWARD;
+        }
+    }
+    return LayoutDirection::NONE;
 }
 
 void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
@@ -1622,17 +1651,18 @@ void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWra
     }
 }
 
-void ListLayoutAlgorithm::OffScreenLayoutDirection()
+void ListLayoutAlgorithm::OffScreenLayoutDirection(LayoutWrapper* layoutWrapper)
 {
     if (!targetIndex_ || itemPosition_.empty()) {
         forwardFeature_ = false;
         backwardFeature_ = false;
         return;
     }
-    if (targetIndex_.value() > GetStartIndex()) {
+    auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, GetStartIndex());
+    if (layoutDirection == LayoutDirection::FORWARD) {
         forwardFeature_ = true;
         backwardFeature_ = false;
-    } else {
+    } else if (layoutDirection == LayoutDirection::BACKWARD) {
         forwardFeature_ = false;
         backwardFeature_ = true;
     }
