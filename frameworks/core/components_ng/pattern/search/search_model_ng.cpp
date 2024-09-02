@@ -216,6 +216,7 @@ void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
 void SearchModelNG::SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->SetSearchIconSymbol(iconSymbol);
@@ -274,6 +275,7 @@ void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
 void SearchModelNG::SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->SetCancelIconSymbol(iconSymbol);
