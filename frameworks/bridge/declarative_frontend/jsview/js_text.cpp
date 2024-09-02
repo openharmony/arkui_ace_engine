@@ -891,7 +891,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     if (!tmpInfo->IsBoolean()) {
         return;
     }
-    TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
+    ViewAbstractModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
