@@ -230,7 +230,7 @@ struct ContentItemStruct {
       Text(this.primaryText)
         .fontSize(this.primaryTextSize)
         .fontColor(this.primaryTextColors)
-        .maxLines(TEXT_MAX_LINE)
+        .maxLines(IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? -TEXT_MAX_LINE : TEXT_MAX_LINE)
         .textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
           TextOverflow.Ellipsis })
         .fontWeight(FontWeight.Medium)
@@ -240,7 +240,7 @@ struct ContentItemStruct {
         Text(this.secondaryText)
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.secondaryTextColors)
-          .maxLines(TEXT_MAX_LINE)
+          .maxLines(IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? -TEXT_MAX_LINE : TEXT_MAX_LINE)
           .textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
             TextOverflow.Ellipsis })
           .focusable(true)
@@ -250,7 +250,7 @@ struct ContentItemStruct {
         Text(this.description)
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.descriptionColors)
-          .maxLines(TEXT_MAX_LINE)
+          .maxLines(IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? -TEXT_MAX_LINE : TEXT_MAX_LINE)
           .textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
             TextOverflow.Ellipsis })
           .focusable(true)

@@ -476,7 +476,7 @@ class ContentItemStruct extends ViewPU {
             Text.create(this.primaryText);
             Text.fontSize(ObservedObject.GetRawObject(this.primaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColors));
-            Text.maxLines(TEXT_MAX_LINE);
+            Text.maxLines(IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? -TEXT_MAX_LINE : TEXT_MAX_LINE);
             Text.textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
             TextOverflow.Ellipsis });
             Text.fontWeight(FontWeight.Medium);
@@ -492,7 +492,7 @@ class ContentItemStruct extends ViewPU {
                         Text.create(this.secondaryText);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
-                        Text.maxLines(TEXT_MAX_LINE);
+                        Text.maxLines(IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? -TEXT_MAX_LINE : TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
                         TextOverflow.Ellipsis });
                         Text.focusable(true);
@@ -515,7 +515,7 @@ class ContentItemStruct extends ViewPU {
                         Text.create(this.description);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColors));
-                        Text.maxLines(TEXT_MAX_LINE);
+                        Text.maxLines(IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? -TEXT_MAX_LINE : TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
                         TextOverflow.Ellipsis });
                         Text.focusable(true);
