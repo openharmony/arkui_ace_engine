@@ -26,11 +26,7 @@ const EnvironmentCallback = requireNapi('EnvironmentCallback');
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
-
 const resourceFn = resourceManager.getSystemResourceManager();
-const shadowRange = 6;
-const fontWeightMin = 100;
-const fontWeightMax = 900;
 export var ChipSize;
 (function (ChipSize) {
     ChipSize["NORMAL"] = "NORMAL";
@@ -47,19 +43,15 @@ var BreakPointsType;
     BreakPointsType["MD"] = "MD";
     BreakPointsType["LG"] = "LG";
 })(BreakPointsType || (BreakPointsType = {}));
-function getShadowStyle(resourceNum) {
-    let index = LengthMetrics.resource(resourceNum).value;
-    return index < shadowRange ? index : undefined;
-}
 export const defaultTheme = {
     prefixIcon: {
         normalSize: {
-            width: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-            height: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         smallSize: {
-            width: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-            height: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_small_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_small_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -69,38 +61,35 @@ export const defaultTheme = {
     label: {
         normalFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_font_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_font_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        normalFocusFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_focused_fontsize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        smallFocusFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_focused_fontsize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusActiveFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_activated_fontcolor'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_font_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        activatedFontWeight: { "id": -1, "type": 10002, params: ['sys.float.chip_activated_fontweight'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_fontcolor'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontFamily: "HarmonyOS Sans",
         normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
         smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
         defaultFontSize: 14,
         localizedNormalMargin: {
-            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             top: LengthMetrics.vp(0),
             bottom: LengthMetrics.vp(0)
         },
         localizedSmallMargin: {
-            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_margin_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_margin_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_margin'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_margin'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             top: LengthMetrics.vp(0),
             bottom: LengthMetrics.vp(0),
         }
     },
     suffixIcon: {
         normalSize: {
-            width: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-            height: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         smallSize: {
-            width: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-            height: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_small_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_small_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -112,8 +101,8 @@ export const defaultTheme = {
     defaultSymbol: {
         normalFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
         activatedFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
-        normalFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        smallFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        normalFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        smallFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         defaultEffect: -1,
     },
     chipNode: {
@@ -127,34 +116,32 @@ export const defaultTheme = {
         activatedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_background_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusOutlineColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         borderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        normalBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        smallBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_small_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        defaultBorderWidth: { "id": -1, "type": 10002, params: ['sys.float.chip_border_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedBorderColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_border_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         normalBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_small_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         borderWidth: 2,
-        focusBtnScaleX: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale_x'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        focusBtnScaleY: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale_y'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        focusBtnScaleX: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        focusBtnScaleY: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         localizedNormalPadding: {
-            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_padding_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_padding_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_padding'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_padding'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             top: LengthMetrics.vp(4),
             bottom: LengthMetrics.vp(4)
         },
         localizedSmallPadding: {
-            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_padding_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_padding_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_padding'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_padding'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             top: LengthMetrics.vp(4),
             bottom: LengthMetrics.vp(4)
         },
-        hoverAndPressedBlendColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_picker_press_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         hoverBlendColor: { "id": -1, "type": 10001, params: ['sys.color.chip_hover_fg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         pressedBlendColor: { "id": -1, "type": 10001, params: ['sys.color.chip_press_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusBgColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusActivatedBgColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_activated_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
-        normalShadowStyle: getShadowStyle({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_shadow_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        smallShadowStyle: getShadowStyle({ "id": -1, "type": 10002, params: ['sys.float.chip_small_shadow_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+        normalShadowStyle: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_shadow_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        smallShadowStyle: { "id": -1, "type": 10002, params: ['sys.float.chip_small_shadow_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         breakPointConstraintWidth: {
             breakPointMinWidth: 128,
             breakPointSmMaxWidth: 156,
@@ -186,7 +173,7 @@ export function Chip(options, parent = null) {
                     chipDirection: options.direction,
                     onClose: options.onClose,
                     onClicked: options.onClicked,
-                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip_hebin.ets", line: 322, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 305, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -245,9 +232,9 @@ export class ChipComponent extends ViewPU {
         this.__suffixIcon = new SynchedPropertyObjectOneWayPU(params.suffixIcon, this, "suffixIcon");
         this.__suffixSymbol = new SynchedPropertyObjectOneWayPU(params.suffixSymbol, this, "suffixSymbol");
         this.__chipNodeBackgroundColor = new SynchedPropertyObjectOneWayPU(params.chipNodeBackgroundColor, this, "chipNodeBackgroundColor");
-        this.__isHaveBg = new ObservedPropertySimplePU(false, this, "isHaveBg");
+        this.__isSetBg = new ObservedPropertySimplePU(false, this, "isSetBg");
         this.__chipNodeActivatedBackgroundColor = new SynchedPropertyObjectOneWayPU(params.chipNodeActivatedBackgroundColor, this, "chipNodeActivatedBackgroundColor");
-        this.__isHaveActiveBg = new ObservedPropertySimplePU(false, this, "isHaveActiveBg");
+        this.__isSetActiveBg = new ObservedPropertySimplePU(false, this, "isSetActiveBg");
         this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(params.chipNodeRadius, this, "chipNodeRadius");
         this.__chipEnabled = new SynchedPropertySimpleOneWayPU(params.chipEnabled, this, "chipEnabled");
         this.__chipActivated = new SynchedPropertySimpleOneWayPU(params.chipActivated, this, "chipActivated");
@@ -307,11 +294,11 @@ export class ChipComponent extends ViewPU {
         if (params.suffixIcon === undefined) {
             this.__suffixIcon.set({ src: "" });
         }
-        if (params.isHaveBg !== undefined) {
-            this.isHaveBg = params.isHaveBg;
+        if (params.isSetBg !== undefined) {
+            this.isSetBg = params.isSetBg;
         }
-        if (params.isHaveActiveBg !== undefined) {
-            this.isHaveActiveBg = params.isHaveActiveBg;
+        if (params.isSetActiveBg !== undefined) {
+            this.isSetActiveBg = params.isSetActiveBg;
         }
         if (params.chipNodeRadius === undefined) {
             this.__chipNodeRadius.set(void (0));
@@ -423,9 +410,9 @@ export class ChipComponent extends ViewPU {
         this.__suffixIcon.purgeDependencyOnElmtId(rmElmtId);
         this.__suffixSymbol.purgeDependencyOnElmtId(rmElmtId);
         this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
-        this.__isHaveBg.purgeDependencyOnElmtId(rmElmtId);
+        this.__isSetBg.purgeDependencyOnElmtId(rmElmtId);
         this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
-        this.__isHaveActiveBg.purgeDependencyOnElmtId(rmElmtId);
+        this.__isSetActiveBg.purgeDependencyOnElmtId(rmElmtId);
         this.__chipNodeRadius.purgeDependencyOnElmtId(rmElmtId);
         this.__chipEnabled.purgeDependencyOnElmtId(rmElmtId);
         this.__chipActivated.purgeDependencyOnElmtId(rmElmtId);
@@ -457,9 +444,9 @@ export class ChipComponent extends ViewPU {
         this.__suffixIcon.aboutToBeDeleted();
         this.__suffixSymbol.aboutToBeDeleted();
         this.__chipNodeBackgroundColor.aboutToBeDeleted();
-        this.__isHaveBg.aboutToBeDeleted();
+        this.__isSetBg.aboutToBeDeleted();
         this.__chipNodeActivatedBackgroundColor.aboutToBeDeleted();
-        this.__isHaveActiveBg.aboutToBeDeleted();
+        this.__isSetActiveBg.aboutToBeDeleted();
         this.__chipNodeRadius.aboutToBeDeleted();
         this.__chipEnabled.aboutToBeDeleted();
         this.__chipActivated.aboutToBeDeleted();
@@ -537,11 +524,11 @@ export class ChipComponent extends ViewPU {
     set chipNodeBackgroundColor(newValue) {
         this.__chipNodeBackgroundColor.set(newValue);
     }
-    get isHaveBg() {
-        return this.__isHaveBg.get();
+    get isSetBg() {
+        return this.__isSetBg.get();
     }
-    set isHaveBg(newValue) {
-        this.__isHaveBg.set(newValue);
+    set isSetBg(newValue) {
+        this.__isSetBg.set(newValue);
     }
     get chipNodeActivatedBackgroundColor() {
         return this.__chipNodeActivatedBackgroundColor.get();
@@ -549,11 +536,11 @@ export class ChipComponent extends ViewPU {
     set chipNodeActivatedBackgroundColor(newValue) {
         this.__chipNodeActivatedBackgroundColor.set(newValue);
     }
-    get isHaveActiveBg() {
-        return this.__isHaveActiveBg.get();
+    get isSetActiveBg() {
+        return this.__isSetActiveBg.get();
     }
-    set isHaveActiveBg(newValue) {
-        this.__isHaveActiveBg.set(newValue);
+    set isSetActiveBg(newValue) {
+        this.__isSetActiveBg.set(newValue);
     }
     get chipNodeRadius() {
         return this.__chipNodeRadius.get();
@@ -678,7 +665,21 @@ export class ChipComponent extends ViewPU {
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }
-    getIconSizeWidth() {
+    getLabelFontSize() {
+        if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
+            return this.label.fontSize;
+        }
+        let size = this.theme.label.smallFontSize;
+        let defaultSize = this.theme.label.defaultFontSize;
+        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+            return this.verifyResource(size, defaultSize);
+        }
+        else {
+            size = this.theme.label.normalFontSize;
+            return this.verifyResource(size, defaultSize);
+        }
+    }
+    getIconSize() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
             return this.theme.prefixIcon.smallSize.width;
         }
@@ -694,67 +695,22 @@ export class ChipComponent extends ViewPU {
             return this.theme.defaultSymbol.normalFontSize;
         }
     }
-    getIconSizeHeight() {
-        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-            return this.theme.prefixIcon.smallSize.height;
-        }
-        else {
-            return this.theme.prefixIcon.normalSize.height;
-        }
-    }
     sizeToVp(sizeResource) {
-        let getUIContext = this.getUIContext();
         let metrics = LengthMetrics.resource(sizeResource);
-        let value = metrics.value;
-        let unit = metrics.unit;
-        if (unit === LengthUnit.PX) {
-            return getUIContext.px2vp(value);
-        }
-        else if (unit === LengthUnit.VP) {
-            return value;
-        }
-        else if (unit === LengthUnit.FP) {
-            return getUIContext.px2vp(getUIContext.fp2px(value));
-        }
-        else if (unit === LengthUnit.LPX) {
-            return getUIContext.px2vp(getUIContext.lpx2px((value)));
-        }
-        return value;
+        return this.lengthMetricsToVp(metrics);
     }
-    getFocusFontSize() {
-        let isSmallChipSize = this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL;
-        let focusFontSize = isSmallChipSize ? this.theme.label.smallFocusFontSize :
-        this.theme.label.normalFocusFontSize;
-        return this.verifyResource(focusFontSize);
-    }
-    getLabelFontSize() {
-        if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
-            return this.label.fontSize;
-        }
-        if (this.chipNodeOnFocus) {
-            return this.getFocusFontSize();
-        }
-        let size = this.theme.label.smallFontSize;
-        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-            return this.verifyResource(size);
-        }
-        else {
-            size = this.theme.label.normalFontSize;
-            return this.verifyResource(size);
-        }
-    }
-    verifyResource(resourceValue) {
+    verifyResource(resourceValue, defaultValue) {
         if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) &&
-            resourceValue.params.length > 2) {
+            (resourceValue.params[0]).split('.').length > 2 && resourceValue.params[0].inc) {
             try {
-                resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
-                return resourceValue;
+                let getNum = resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
+                return getNum;
             }
             catch (error) {
-                return this.theme.label.defaultFontSize;
+                return defaultValue;
             }
         }
-        return this.theme.label.defaultFontSize;
+        return defaultValue;
     }
     getActiveFontColor() {
         return this.chipNodeOnFocus ? this.theme.label.focusActiveFontColor : this.theme.label.activatedFontColor;
@@ -773,9 +729,7 @@ export class ChipComponent extends ViewPU {
     }
     getLabelFontWeight() {
         if (this.getChipActive()) {
-            let index = LengthMetrics.resource(this.theme.label.activatedFontWeight).value;
-            return (index >= fontWeightMin && index <= fontWeightMax) ?
-                index : FontWeight.Medium;
+            return FontWeight.Medium;
         }
         return FontWeight.Regular;
     }
@@ -844,11 +798,8 @@ export class ChipComponent extends ViewPU {
         }
     }
     getChipNodeBorderWidth() {
-        if (this.chipSize === ChipSize.NORMAL && !this.isSetbackgroundColor()) {
-            return this.sizeToVp(this.theme.chipNode.normalBorderWidth);
-        }
-        else if (this.chipSize === ChipSize.SMALL && !this.isSetbackgroundColor()) {
-            return this.sizeToVp(this.theme.chipNode.smallBorderWidth);
+        if (!this.isSetbackgroundColor()) {
+            return this.sizeToVp(this.theme.chipNode.defaultBorderWidth);
         }
         else {
             return 0;
@@ -950,14 +901,14 @@ export class ChipComponent extends ViewPU {
         }
         else {
             suffixIconSize.width = this.getSuffixIconSrc() ?
-            this.sizeToVp(this.getIconSizeWidth()) : 0;
+            this.sizeToVp(this.getIconSize()) : 0;
         }
         if (this.suffixIcon?.size?.height !== void (0) && this.toVp(this.suffixIcon?.size?.height) >= 0) {
             suffixIconSize.height = this.suffixIcon?.size?.height;
         }
         else {
             suffixIconSize.height = this.getSuffixIconSrc() ?
-            this.sizeToVp(this.getIconSizeHeight()) : 0;
+            this.sizeToVp(this.getIconSize()) : 0;
         }
         return suffixIconSize;
     }
@@ -968,7 +919,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.prefixIcon?.src) {
-                prefixIconSize.width = this.sizeToVp(this.getIconSizeWidth());
+                prefixIconSize.width = this.sizeToVp(this.getIconSize());
             }
             else {
                 prefixIconSize.width = 0;
@@ -979,7 +930,7 @@ export class ChipComponent extends ViewPU {
         }
         else {
             if (this.prefixIcon?.src) {
-                prefixIconSize.height = this.getIconSizeHeight();
+                prefixIconSize.height = this.getIconSize();
             }
             else {
                 prefixIconSize.height = 0;
@@ -1076,14 +1027,6 @@ export class ChipComponent extends ViewPU {
     getChipNodeBackGroundColor() {
         let themeChipNode = this.theme.chipNode;
         let currentColor;
-        let sourceColor;
-        try {
-            sourceColor = ColorMetrics.resourceColor(currentColor);
-        }
-        catch (err) {
-            hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-            sourceColor = ColorMetrics.resourceColor(Color.Transparent);
-        }
         if (this.chipNodeOnFocus && !this.isSetbackgroundColor()) {
             currentColor = this.getChipActive() ? themeChipNode.focusActivatedBgColor :
             themeChipNode.focusBgColor;
@@ -1095,17 +1038,25 @@ export class ChipComponent extends ViewPU {
         else {
             currentColor = this.chipNodeBackgroundColor ?? themeChipNode.backgroundColor;
         }
+        let sourceColor;
+        try {
+            sourceColor = ColorMetrics.resourceColor(currentColor);
+        }
+        catch (err) {
+            hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
+            sourceColor = ColorMetrics.resourceColor(Color.Transparent);
+        }
         if (this.isShowPressedBackGroundColor) {
             this.isHovering = false;
             return sourceColor
                 .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
-                themeChipNode.hoverAndPressedBlendColor : themeChipNode.pressedBlendColor))
+                Color.Transparent : themeChipNode.pressedBlendColor))
                 .color;
         }
         if (this.isHovering) {
             return sourceColor
                 .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
-                themeChipNode.hoverAndPressedBlendColor : themeChipNode.hoverBlendColor))
+                Color.Transparent : themeChipNode.hoverBlendColor))
                 .color;
         }
         return currentColor;
@@ -1163,7 +1114,7 @@ export class ChipComponent extends ViewPU {
             return this.getSuffixIconSize().width;
         }
         else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
-            return this.sizeToVp(this.defaultSymbolFontsize());
+            return this.allowCloseSymbolWidth;
         }
         else {
             return 0;
@@ -1238,8 +1189,8 @@ export class ChipComponent extends ViewPU {
     }
     focusBtnChipNodeAnimate() {
         this.chipScale = {
-            x: LengthMetrics.resource(this.theme.chipNode.focusBtnScaleX).value,
-            y: LengthMetrics.resource(this.theme.chipNode.focusBtnScaleY).value,
+            x: this.verifyResource(this.theme.chipNode.focusBtnScaleX, 1),
+            y: this.verifyResource(this.theme.chipNode.focusBtnScaleY, 1),
         };
     }
     blurBtnChipNodeAnimate() {
@@ -1343,17 +1294,17 @@ export class ChipComponent extends ViewPU {
     }
     aboutToAppear() {
         if (this.chipNodeBackgroundColor) {
-            this.isHaveBg = true;
+            this.isSetBg = true;
         }
         else {
-            this.isHaveBg = false;
+            this.isSetBg = false;
             this.chipNodeBackgroundColor = this.theme.chipNode.backgroundColor;
         }
         if (this.chipNodeActivatedBackgroundColor && this.chipActivated) {
-            this.isHaveActiveBg = true;
+            this.isSetActiveBg = true;
         }
         else {
-            this.isHaveActiveBg = false;
+            this.isSetActiveBg = false;
             this.chipNodeActivatedBackgroundColor = this.theme.chipNode.activatedBackgroundColor;
         }
         this.smListener.on("change", (mediaQueryResult) => {
@@ -1385,14 +1336,18 @@ export class ChipComponent extends ViewPU {
         }
     }
     isSetbackgroundColor() {
-        return this.isHaveBg || this.isHaveActiveBg;
+        return this.isSetBg || this.isSetActiveBg;
     }
     getShadowStyles() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-            return this.theme.chipNode.smallShadowStyle;
+            let smallShadow = this.theme.chipNode.smallShadowStyle;
+            let smallShadowType = this.verifyResource(smallShadow, -1);
+            return smallShadowType;
         }
         else {
-            return this.theme.chipNode.normalShadowStyle;
+            let normalShadow = this.theme.chipNode.normalShadowStyle;
+            let normalShadowType = this.verifyResource(normalShadow, -1);
+            return normalShadowType;
         }
     }
     aboutToDisappear() {
