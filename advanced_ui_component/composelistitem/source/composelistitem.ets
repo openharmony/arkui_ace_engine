@@ -572,7 +572,7 @@ struct OperateItemStruct {
       .radioStyle({
         uncheckedBorderColor: this.getUnselectedColor()
       })
-      .backgroundColor(this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString())
+      .backgroundColor(this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
         this.radioState = isCheck;

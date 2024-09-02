@@ -1172,7 +1172,7 @@ class OperateItemStruct extends ViewPU {
             Radio.radioStyle({
                 uncheckedBorderColor: this.getUnselectedColor()
             });
-            Radio.backgroundColor(this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent.toString());
+            Radio.backgroundColor(this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent);
             Radio.borderRadius(OPERATE_ITEM_RADIUS);
             Radio.onChange((isCheck) => {
                 this.radioState = isCheck;
