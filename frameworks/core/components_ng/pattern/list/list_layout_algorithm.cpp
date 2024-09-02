@@ -1380,6 +1380,24 @@ std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayo
     return itemGroup->GetLayoutInfo();
 }
 
+void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
+{
+    for (auto& pos : recycledItemPosition_) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (wrapperFrameNode) {
+            wrapperFrameNode->ResetLayoutAlgorithm();
+        }
+        pos.second.startPos -= currentOffset_;
+        pos.second.endPos -= currentOffset_;
+        if (pos.second.isGroup) {
+            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+        } else {
+            pos.second.groupInfo.reset();
+        }
+    }
+}
+
 void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -1421,16 +1439,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             frameNode->MarkAndCheckNewOpIncNode();
         }
     }
-    for (auto& pos : recycledItemPosition_) {
-        pos.second.startPos -= currentOffset_;
-        pos.second.endPos -= currentOffset_;
-        if (pos.second.isGroup) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
-            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
-        } else {
-            pos.second.groupInfo.reset();
-        }
-    }
+    ResetLayoutItem(layoutWrapper);
     ProcessCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
 }
 

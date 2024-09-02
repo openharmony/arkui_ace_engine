@@ -37,6 +37,8 @@ struct ListItemGroupLayoutInfo {
     bool atStart = false;
     bool atEnd = false;
     float averageHeight = -1;
+    float headerSize = 0.0f;
+    float footerSize = 0.0f;
 };
 
 struct ListItemInfo {
@@ -384,6 +386,8 @@ public:
     {
         posMap_ = posMap;
     }
+
+    void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 

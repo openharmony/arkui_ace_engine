@@ -221,8 +221,9 @@ public:
         return footerMainSize_;
     }
 
-    float GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const;
-    float GetEstimateHeight(float& averageHeight) const;
+    float GetEstimateOffset(float height, const std::pair<float, float>& targetPos,
+        float headerMainSize, float footerMainSize) const;
+    float GetEstimateHeight(float& averageHeight, float headerMainSize, float footerMainSize) const;
     bool HasLayoutedItem() const
     {
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
@@ -235,6 +236,13 @@ public:
         } else {
             pressedItem_.erase(id);
         }
+    }
+
+    void ResetLayoutedInfo()
+    {
+        layouted_ = false;
+        layoutedItemInfo_.reset();
+        itemPosition_.clear();
     }
 
     void SetListItemGroupStyle(V2::ListItemGroupStyle style);
