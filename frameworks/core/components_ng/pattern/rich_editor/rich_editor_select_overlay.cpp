@@ -459,7 +459,22 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     if (IsAncestorNodeGeometryChange(flag)) {
         UpdateAllHandlesOffset();
     }
-    BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    FrameNodeChangeInfoFlag changeFlag = flag;
+    if (IsAncestorNodeStartScroll(host->GetChangeInfoFlag()) || IsAncestorNodeEndScroll(host->GetChangeInfoFlag())) {
+        auto parent = host->GetAncestorNodeOfFrame(true);
+        changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
+        while (parent) {
+            if (parent->GetChangeInfoFlag() != FRAME_NODE_CHANGE_INFO_NONE) {
+                changeFlag = changeFlag | parent->GetChangeInfoFlag();
+            }
+            parent = parent->GetAncestorNodeOfFrame(true);
+        }
+    }
+    BaseTextSelectOverlay::OnAncestorNodeChanged(changeFlag);
 }
 
 void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
