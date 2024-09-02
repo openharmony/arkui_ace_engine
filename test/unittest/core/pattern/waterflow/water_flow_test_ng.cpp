@@ -51,6 +51,8 @@ void WaterFlowTestNg::SetUpTestSuite()
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
 #endif
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
