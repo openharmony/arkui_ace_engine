@@ -264,6 +264,7 @@ void ComponentSnapshot::Create(
         node = stackNode;
     }
     FrameNode::ProcessOffscreenNode(node);
+    node->SetActive();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s "
         "enableInspector=%{public}d",
@@ -326,8 +327,10 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Begin to take surfaceCapture for ui, rootId=%{public}d param=%{public}s imageCount=%{public}d",
-        node->GetId(), param.ToString().c_str(), imageCount);
+        "Begin to take surfaceCapture for ui, rootId=%{public}d param=%{public}s imageCount=%{public}d "
+        "size=%{public}s",
+        node->GetId(), param.ToString().c_str(), imageCount,
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str());
     rsInterface.TakeSurfaceCaptureForUI(
         rsNode,
         std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
