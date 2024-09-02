@@ -948,6 +948,7 @@ private:
     void UpdateIndicatorOnChildChange();
 
     void CheckSpecialItemCount() const;
+    int32_t CheckIndexRange(int32_t index) const;
     void CheckAndFireCustomAnimation();
 
     friend class SwiperHelper;

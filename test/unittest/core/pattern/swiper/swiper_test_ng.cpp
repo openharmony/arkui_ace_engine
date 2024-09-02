@@ -1511,8 +1511,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
     EXPECT_FALSE(pattern_->needAdjustIndex_);
 
     layoutProperty_->UpdateIndex(5);
+    pattern_->needAdjustIndex_ = true;
     pattern_->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 3);
 
     layoutProperty_->UpdateIndex(6);
     pattern_->needAdjustIndex_ = true;
@@ -1525,6 +1526,12 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
     EXPECT_EQ(layoutProperty_->GetIndex().value(), 3);
 
     layoutProperty_->UpdateDisplayCount(6);
+    layoutProperty_->UpdateIndex(3);
+    pattern_->needAdjustIndex_ = true;
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(layoutProperty_->GetIndex().value(), 0);
+
+    layoutProperty_->UpdateDisplayCount(10);
     layoutProperty_->UpdateIndex(3);
     pattern_->needAdjustIndex_ = true;
     pattern_->BeforeCreateLayoutWrapper();
