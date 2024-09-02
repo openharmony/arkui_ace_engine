@@ -5212,6 +5212,7 @@ bool RichEditorPattern::CursorMoveDown()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         float leadingMarginOffset = 0.0f;
+        float caretHeightEnd = 0.0f;
         CaretOffsetInfo caretInfo;
         int32_t caretPositionEnd;
         caretInfo = GetCaretOffsetInfoByPosition();
@@ -5222,16 +5223,13 @@ bool RichEditorPattern::CursorMoveDown()
         auto caretOffsetWidth = overlayMod->GetCaretWidth();
         bool cursorNotAtLineStart =
             NearEqual(caretOffsetOverlay.GetX(), caretInfo.caretOffsetUp.GetX(), caretOffsetWidth);
-        bool isEnter = NearZero(caretOffsetOverlay.GetX() - richTextRect_.GetX(), leadingMarginOffset);
+        bool isEnter = NearZero(caretInfo.caretOffsetUp.GetX() - richTextRect_.GetX(), leadingMarginOffset);
         caretPositionEnd = std::clamp(caretPositionEnd, 0, static_cast<int32_t>(GetTextContentLength()));
-        if (caretPositionEnd <= caretPosition_) {
-            float caretHeightEnd = 0.0f;
-            OffsetF caretOffsetEnd = CalcCursorOffsetByPosition(GetTextContentLength(), caretHeightEnd);
-            if (NearEqual(caretOffsetEnd.GetY(), caretOffsetOverlay.GetY())) {
-                caretPositionEnd = GetTextContentLength();
-            } else {
-                caretPositionEnd += 1;
-            }
+        OffsetF caretOffsetEnd = CalcCursorOffsetByPosition(GetTextContentLength(), caretHeightEnd);
+        auto currentLineInfo = CalcLineInfoByPosition();
+        if (caretPositionEnd <= caretPosition_ &&
+            !NearEqual(caretOffsetEnd.GetY() - GetTextRect().GetY(), currentLineInfo.GetY(), 0.5f)) {
+            caretPositionEnd += 1;
         }
         SetCaretPosition(caretPositionEnd);
         if (cursorNotAtLineStart && caretPosition_ != 0 && !isEnter) {
