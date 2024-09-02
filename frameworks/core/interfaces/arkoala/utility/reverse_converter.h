@@ -86,6 +86,13 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Int32>(src);
     }
 
+    // Passthrough version
+    template<typename T>
+    void AssignArkValue(T &dst, const T& src)
+    {
+        dst = src;
+    }
+
     // Handle optional types
     template<typename To, typename From, typename = std::void_t<decltype(To().tag), decltype(To().value)>>
     void AssignArkValue(To& dst, From&& src)
@@ -101,13 +108,6 @@ namespace OHOS::Ace::NG::Converter {
                 dst.tag = ARK_TAG_UNDEFINED;
             }
         }
-    }
-
-    // Passthrough version
-    template<typename T>
-    void AssignArkValue(T &dst, const T& src)
-    {
-        dst = src;
     }
 
     /**
