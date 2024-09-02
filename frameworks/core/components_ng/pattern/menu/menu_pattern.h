@@ -479,19 +479,14 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void SetFold(bool enableFold)
+    void SetHoverMode(bool enableFold)
     {
-        this->enableFold = enableFold;
+        this->enableFold_ = enableFold;
     }
 
-    bool GetFold()
+    bool GetHoverMode() const
     {
-        return enableFold.value_or(true);
-    }
-
-    bool HasFoldDisplayModeChangedCallbackId()
-    {
-        return halfFoldHoverCallbackId_.has_value();
+        return enableFold_.value_or(false);
     }
 
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
@@ -544,7 +539,7 @@ protected:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
-    int32_t RegisterHalfFoldHover();
+    int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -613,7 +608,7 @@ private:
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
     OffsetF statusOriginOffset_;
-    std::optional<bool> enableFold;
+    std::optional<bool> enableFold_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;

@@ -198,7 +198,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    halfFoldHoverCallbackId_ = RegisterHalfFoldHover();
+    halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
                                               const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -232,24 +232,33 @@ void MenuPattern::OnAttachToFrameNode()
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
-void MenuPattern::OnDetachFromFrameNode(FrameNode* node)
+void MenuPattern::OnDetachFromFrameNode(FrameNode* menuNode)
 {
-    auto containerId = Container::CurrentId();
-    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-    auto pipeline =
-        parentContainerId < 0 ? PipelineContext::GetCurrentContext() : PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(menuNode);
+    auto containerId = menuNode->GetInstanceId();
+    RefPtr<PipelineContext> pipeline;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        pipeline = DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    } else {
+        pipeline = PipelineContext::GetCurrentContext();
+    }
     CHECK_NULL_VOID(pipeline);
-    if (HasFoldDisplayModeChangedCallbackId()) {
+    if (halfFoldHoverCallbackId_.has_value()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_.value_or(-1));
     }
 }
 
-int32_t MenuPattern::RegisterHalfFoldHover()
+int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    // register when hoverMode enabled
+    CHECK_NULL_VOID(menuNode);
+    auto pipelineContext = menuNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, 0);
     int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
-        [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) { // 注册回调函数
+        [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();

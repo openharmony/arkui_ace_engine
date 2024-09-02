@@ -45,8 +45,6 @@ struct MenuDumpInfo {
     float bottom = 0.0f;
     float left = 0.0f;
     float right = 0.0f;
-    double width = 0.0f;
-    double height = 0.0f;
     OffsetF globalLocation;
     std::string originPlacement;
     OffsetF finalPosition;
@@ -123,7 +121,7 @@ private:
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
-    void SetWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
+    void UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -260,6 +258,14 @@ private:
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
     float optionPadding_ = 0.0f;
+
+    double top_ = 0.0;
+    double bottom_ = 0.0;
+    double left_ = 0.0;
+    double right_ = 0.0;
+    double width_ = 0.0;
+    double height_ = 0.0;
+
     OffsetF targetCenterOffset_;
     OffsetF previewOriginOffset_;
     OffsetF previewOffset_;
