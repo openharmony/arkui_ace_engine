@@ -721,7 +721,7 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
         ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = GetHost();
+        auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         pattern->CreateCardContainer();
         if (host->IsDraggable()) {
