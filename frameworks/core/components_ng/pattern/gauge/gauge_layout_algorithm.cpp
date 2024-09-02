@@ -269,6 +269,7 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
+    CHECK_NULL_VOID(layoutGeometryNode->GetPadding());
     auto paddingSize = layoutGeometryNode->GetPaddingSize();
     auto left = layoutGeometryNode->GetPadding()->left.value_or(0.0f);
     auto top = layoutGeometryNode->GetPadding()->top.value_or(0.0f);
