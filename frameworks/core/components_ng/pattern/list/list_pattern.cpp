@@ -105,10 +105,11 @@ void ListPattern::ChangeAxis(RefPtr<UINode> node)
             auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
             if (listItemPattern) {
                 listItemPattern->ChangeAxis(GetAxis());
-                return;
+                continue;
             }
             auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
             if (listItemGroupPattern) {
+                listItemGroupPattern->ResetLayoutedInfo();
                 frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 ChangeAxis(child);
             }

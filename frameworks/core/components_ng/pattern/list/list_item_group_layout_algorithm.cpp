@@ -1181,6 +1181,8 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
 ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
 {
     ListItemGroupLayoutInfo info;
+    info.headerSize = headerMainSize_;
+    info.footerSize = footerMainSize_;
     if (totalItemCount_ == 0 || childrenSize_) {
         info.atStart = true;
         info.atEnd = true;
