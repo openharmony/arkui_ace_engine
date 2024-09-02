@@ -457,7 +457,8 @@ export struct ChipComponent {
   }
 
   private verifyResource(resourceValue: Resource): Dimension {
-    if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) && resourceValue.params.length > 2) {
+    if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) &&
+      resourceValue.params.length > 2) {
       try {
         resourceFn.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
         return resourceValue;

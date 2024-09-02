@@ -744,7 +744,8 @@ export class ChipComponent extends ViewPU {
         }
     }
     verifyResource(resourceValue) {
-        if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) && resourceValue.params.length > 2) {
+        if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) &&
+            resourceValue.params.length > 2) {
             try {
                 resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
                 return resourceValue;
