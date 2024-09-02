@@ -65,6 +65,9 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     minResponse_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     blockType_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isPress_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isFocus_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -94,6 +97,9 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(sliderInteractionMode_);
     AttachProperty(minResponse_);
     AttachProperty(blockType_);
+    AttachProperty(isHover_);
+    AttachProperty(isPress_);
+    AttachProperty(isFocus_);
 
     InitializeShapeProperty();
 }
@@ -160,12 +166,20 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto trackBorderRadius = trackBorderRadius_->Get();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    scaleValue_ = theme->GetScaleValue();
     std::vector<GradientColor> gradientColors = GetTrackBackgroundColor();
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    if (sliderMode_->Get() != static_cast<int32_t>(SliderModel::SliderMode::INSET)) {
+        isEnlarge_ = isPress_->Get() || isHover_->Get() || isFocus_->Get();
     }
     RSRect trackRect = GetTrackRect();
     auto direction = static_cast<Axis>(directionAxis_->Get());
@@ -192,7 +206,8 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 #endif
     }
     canvas.AttachBrush(brush);
-    RSRoundRect roundRect(trackRect, trackBorderRadius, trackBorderRadius);
+    RSRoundRect roundRect(trackRect, isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius,
+        isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.Save();
@@ -235,14 +250,14 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
 
     if (reverse_) {
         while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
-            canvas.DrawCircle(RSPoint(endX, endY), stepSize * HALF);
+            canvas.DrawCircle(RSPoint(endX, endY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
             stepPointVec_.emplace_back(PointF(endX, endY));
             endX -= stepsLengthX;
             endY -= stepsLengthY;
         }
     } else {
         while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
-            canvas.DrawCircle(RSPoint(startX, startY), stepSize * HALF);
+            canvas.DrawCircle(RSPoint(startX, startY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
             stepPointVec_.emplace_back(PointF(startX, startY));
             startX += stepsLengthX;
             startY += stepsLengthY;
@@ -316,7 +331,8 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
         pen.SetColor(ToRSColor(blockBorderColor_->Get()));
         canvas.AttachPen(pen);
     }
-    canvas.DrawCircle(ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), radius);
+    canvas.DrawCircle(
+        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isEnlarge_ ? radius * scaleValue_ : radius);
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
@@ -342,7 +358,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     float diameter = std::min(blockSize.Width(), blockSize.Height());
     auto penRadius = (diameter + hotCircleShadowWidth_) * HALF;
     auto blockCenter = GetBlockCenter();
-    canvas.DrawCircle(ToRSPoint(blockCenter), penRadius);
+    canvas.DrawCircle(ToRSPoint(blockCenter), isEnlarge_ ? penRadius * scaleValue_ : penRadius);
     canvas.DetachPen();
 }
 
@@ -401,6 +417,7 @@ void SliderContentModifier::UpdateData(const Parameters& parameters)
     mouseHoverFlag_ = parameters.mouseHoverFlag_;
     mousePressedFlag_ = parameters.mousePressedFlag_;
     hotCircleShadowWidth_ = parameters.hotCircleShadowWidth;
+    SetIsHover(mouseHoverFlag_);
 }
 
 void SliderContentModifier::JudgeNeedAnimate(bool reverse)
@@ -511,6 +528,7 @@ RSRect SliderContentModifier::GetTrackRect()
         stepSize = trackThickness;
     }
     RSRect rect;
+    auto calculatedThickness = isEnlarge_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF;
     if (direction == Axis::HORIZONTAL) {
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
             rect.SetLeft(backStart.GetX() - stepSize * HALF);
@@ -522,11 +540,11 @@ RSRect SliderContentModifier::GetTrackRect()
             rect.SetLeft(backStart.GetX());
             rect.SetRight(backEnd.GetX());
         }
-        rect.SetTop(backStart.GetY() - trackThickness * HALF);
-        rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+        rect.SetTop(backStart.GetY() - calculatedThickness);
+        rect.SetBottom(backEnd.GetY() + calculatedThickness);
     } else {
-        rect.SetLeft(backStart.GetX() - trackThickness * HALF);
-        rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        rect.SetLeft(backStart.GetX() - calculatedThickness);
+        rect.SetRight(backEnd.GetX() + calculatedThickness);
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
             rect.SetTop(backStart.GetY() - stepSize * HALF);
             rect.SetBottom(backEnd.GetY() + stepSize * HALF);

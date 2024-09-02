@@ -257,6 +257,27 @@ public:
         isVisible_ = isVisible;
     }
 
+    void SetIsPress(bool isPress)
+    {
+        if (isPress_) {
+            isPress_->Set(isPress);
+        }
+    }
+
+    void SetIsHover(bool isHover)
+    {
+        if (isHover_) {
+            isHover_->Set(isHover);
+        }
+    }
+
+    void SetIsFocused(bool isFocus)
+    {
+        if (isFocus_) {
+            isFocus_->Set(isFocus);
+        }
+    }
+
     bool GetVisible() const
     {
         return isVisible_;
@@ -339,6 +360,9 @@ private:
     RefPtr<PropertyFloat> minResponse_;
     RefPtr<PropertyInt> blockType_;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyBool> isPress_;
+    RefPtr<PropertyBool> isFocus_;
 
     // others
     struct MarkerPenAndPath {
@@ -352,6 +376,8 @@ private:
     bool isVisible_ = true;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    bool isEnlarge_ = false;
+    float scaleValue_ = 1.0f;
     bool reverse_ = false;
     SliderStatus animatorStatus_ = SliderStatus::DEFAULT; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
