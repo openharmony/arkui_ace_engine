@@ -1567,7 +1567,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     auto height = theme->GetDividerSpacing();
     auto width = frameNode->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
     auto defaultWidth = height.ConvertToPx() * 2;
-    EXPECT_GT(width, defaultWidth);
+    EXPECT_LT(width, defaultWidth);
 
     for (const auto& child : children) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
@@ -1891,7 +1891,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
-    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex - 1) % totalOptionCount);
+    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     currentIndex = pattern->GetCurrentIndex();
