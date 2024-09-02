@@ -10076,7 +10076,7 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     info.secondHandle = textSelector_.secondHandle.ToString();
     info.selectStart = textSelector_.GetTextStart();
     info.selectEnd = textSelector_.GetTextEnd();
-
+    info.selectLength = info.selectEnd - info.selectStart;
     // serialize the sentenced-level text
     auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     RefPtr<SpanString> spanString = ToStyledString(0, textSize);
@@ -10095,6 +10095,8 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
             break;
         }
     }
+    info.start = info.selectStart - sentenceStart;
+    info.end = info.selectEnd - sentenceStart;
     spanString = ToStyledString(sentenceStart, sentenceEnd);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
