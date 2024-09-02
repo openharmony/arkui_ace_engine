@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/stepper/stepper_layout_algorithm.h"
 
-#include <optional>
-
-#include "base/utils/utils.h"
-#include "core/components/stepper/stepper_theme.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

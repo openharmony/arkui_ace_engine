@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 
-#include <valarray>
-
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/swiper/render_swiper.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "core/components_ng/render/paint_property.h"
-#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator

@@ -17,9 +17,6 @@
 
 #include "include/utils/SkParsePath.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/render/drawing.h"
