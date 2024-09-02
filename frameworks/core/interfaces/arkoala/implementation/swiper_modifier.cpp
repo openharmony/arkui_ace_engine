@@ -14,11 +14,12 @@
  */
 
 #include "base/utils/string_utils.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 
 namespace {
 
@@ -424,7 +425,13 @@ void CurveImpl(Ark_NativePointer node,
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](int32_t index) {
+        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onChange(frameNode->GetId(), arkIndex);
+    };
+    SwiperModelNG::SetOnChange(frameNode, onEvent);
 }
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_IndicatorStyle* value)
@@ -484,17 +491,57 @@ void NextMarginImpl(Ark_NativePointer node,
 void OnAnimationStartImpl(Ark_NativePointer node,
                           Ark_Function event)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        auto arkTargetIndex = Converter::ArkValue<Ark_Number>(targetIndex);
+        Ark_SwiperAnimationEvent arkExtraInfo = {
+            .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
+            .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
+            .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
+        };
+        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onAnimationStart(
+            frameNode->GetId(), arkIndex, arkTargetIndex, arkExtraInfo
+        );
+    };
+    SwiperModelNG::SetOnAnimationStart(frameNode, onEvent);
 }
 void OnAnimationEndImpl(Ark_NativePointer node,
                         Ark_Function event)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
+        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        Ark_SwiperAnimationEvent arkExtraInfo = {
+            .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
+            .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
+            .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
+        };
+        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onAnimationEnd(
+            frameNode->GetId(), arkIndex, arkExtraInfo
+        );
+    };
+    SwiperModelNG::SetOnAnimationEnd(frameNode, onEvent);
 }
 void OnGestureSwipeImpl(Ark_NativePointer node,
                         Ark_Function event)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](int32_t index, const AnimationCallbackInfo& info) {
+        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        Ark_SwiperAnimationEvent arkExtraInfo = {
+            .currentOffset = Converter::ArkValue<Ark_Number>(info.currentOffset.value_or(0.0f)),
+            .targetOffset = Converter::ArkValue<Ark_Number>(info.targetOffset.value_or(0.0f)),
+            .velocity = Converter::ArkValue<Ark_Number>(info.velocity.value_or(0.0f)),
+        };
+        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onGestureSwipe(
+            frameNode->GetId(), arkIndex, arkExtraInfo
+        );
+    };
+    SwiperModelNG::SetOnGestureSwipe(frameNode, onEvent);
 }
 
 void NestedScrollImpl(Ark_NativePointer node,
@@ -560,5 +607,4 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
     };
     return &ArkUISwiperModifierImpl;
 }
-
 }

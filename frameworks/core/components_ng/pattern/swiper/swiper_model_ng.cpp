@@ -636,6 +636,15 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
     });
 }
 
+void SwiperModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateChangeEvent(std::move(onChange));
+}
+
+
 void SwiperModelNG::SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart)
 {
     CHECK_NULL_VOID(frameNode);

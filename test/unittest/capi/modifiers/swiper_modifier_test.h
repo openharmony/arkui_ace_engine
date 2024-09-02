@@ -17,19 +17,19 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const float& src)
+inline void AssignArkValue(Ark_CustomObject& dst, const float& src)
 {
     dst.id = ARK_TAG_FLOAT32;
     *dst.floats = src;
 }
 
-void AssignArkValue(Ark_CustomObject& dst, const int& src)
+inline void AssignArkValue(Ark_CustomObject& dst, const int& src)
 {
     dst.id = ARK_TAG_INT32;
     *dst.ints = src;
 }
 
-void AssignArkValue(Ark_SwiperAutoFill& dst, const Ark_VP& src)
+inline void AssignArkValue(Ark_SwiperAutoFill& dst, const Ark_VP& src)
 {
     dst.minSize = src;
 }

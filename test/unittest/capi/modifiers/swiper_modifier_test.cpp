@@ -18,6 +18,7 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "node_api.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 #include "core/components/common/layout/constants.h"
@@ -109,6 +110,15 @@ std::string GetStringAttribute(const std::string &strWithJson, const std::string
     return GetStringAttribute(jsonVal, name);
 }
 
+struct EventsTracker {
+    static inline GENERATED_ArkUISwiperEventsReceiver swiperEventReceiver {};
+
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+        .getSwiperEventsReceiver = [] () -> const GENERATED_ArkUISwiperEventsReceiver* {
+            return &swiperEventReceiver;
+        }
+    };
+}; // EventsTracker
 } // namespace
 
 class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
@@ -148,6 +158,9 @@ public:
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+        // setup the test event handler
+        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 
     static void TearDownTestCase()
@@ -926,8 +939,7 @@ HWTEST_F(SwiperModifierTest, setLoopTest, TestSize.Level1)
 HWTEST_F(SwiperModifierTest, setDurationTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("duration");
-    static const std::string DEFAULT_VALUE("400"); // corrrsponds to
-    // DEFAULT_SWIPER_ANIMATION_DURATION in frameworks/core/components/declaration/swiper/swiper_declaration.h
+    static const std::string DEFAULT_VALUE(std::to_string(static_cast<int32_t>(DEFAULT_SWIPER_ANIMATION_DURATION)));
     ASSERT_NE(modifier_->setDuration, nullptr);
 
     auto checkInitial = GetStringAttribute(node_, PROP_NAME);
@@ -1301,12 +1313,39 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest16, TestSize.Level1)
 {
 }
 /**
- * @tc.name: SwiperModifierTest17
+ * @tc.name: setOnChangeTest
  * @tc.desc: Check the functionality of SwiperModifier.OnChangeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest17, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t index;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::swiperEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Number index)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .index = Converter::Convert<Ark_Int32>(index)
+        };
+    };
+
+    ASSERT_NE(modifier_->setOnChange, nullptr);
+
+    modifier_->setOnChange(node_, {});
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireChangeEvent(0, 123);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 123);
 }
 /**
  * @tc.name: setIndicatorStyleTest
@@ -1492,28 +1531,154 @@ HWTEST_F(SwiperModifierTest, setNextMarginTest, TestSize.Level1)
     EXPECT_EQ(checkOptFalse, EXPECTED_FALSE);
 }
 /**
- * @tc.name: SwiperModifierTest21
+ * @tc.name: setOnAnimationStartTest
  * @tc.desc: Check the functionality of SwiperModifier.OnAnimationStartImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest21, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnAnimationStartTest, TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t index;
+        int32_t targetIndex;
+        AnimationCallbackInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::swiperEventReceiver.onAnimationStart = []
+    (Ark_Int32 nodeId, const Ark_Number index, const Ark_Number targetIndex, const Ark_SwiperAnimationEvent extraInfo)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .index = Converter::Convert<Ark_Int32>(index),
+            .targetIndex = Converter::Convert<Ark_Int32>(targetIndex),
+            .info = {
+                .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
+                .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
+                .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
+            }
+        };
+    };
+
+    ASSERT_NE(modifier_->setOnAnimationStart, nullptr);
+
+    modifier_->setOnAnimationStart(node_, {});
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireAnimationStartEvent(123, 456, {
+        .currentOffset = 1.23f,
+        .targetOffset = -4.56f,
+        .velocity = 78.9f,
+    });
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 123);
+    EXPECT_EQ(checkEvent->targetIndex, 456);
+    EXPECT_EQ(checkEvent->info.currentOffset, 1.23f);
+    EXPECT_EQ(checkEvent->info.targetOffset, -4.56f);
+    EXPECT_EQ(checkEvent->info.velocity, 78.9f);
 }
 /**
- * @tc.name: SwiperModifierTest22
+ * @tc.name: setOnAnimationEndTest
  * @tc.desc: Check the functionality of SwiperModifier.OnAnimationEndImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest22, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t index;
+        AnimationCallbackInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::swiperEventReceiver.onAnimationEnd = []
+    (Ark_Int32 nodeId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .index = Converter::Convert<Ark_Int32>(index),
+            .info = {
+                .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
+                .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
+                .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
+            }
+        };
+    };
+
+    ASSERT_NE(modifier_->setOnAnimationEnd, nullptr);
+
+    modifier_->setOnAnimationEnd(node_, {});
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireAnimationEndEvent(123, {
+        .currentOffset = 1.23f,
+        .targetOffset = -4.56f,
+        .velocity = 78.9f,
+    });
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 123);
+    EXPECT_EQ(checkEvent->info.currentOffset, 1.23f);
+    EXPECT_EQ(checkEvent->info.targetOffset, -4.56f);
+    EXPECT_EQ(checkEvent->info.velocity, 78.9f);
 }
 /**
- * @tc.name: SwiperModifierTest23
+ * @tc.name: setOnGestureSwipeTest
  * @tc.desc: Check the functionality of SwiperModifier.OnGestureSwipeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest23, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t index;
+        AnimationCallbackInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::swiperEventReceiver.onGestureSwipe = []
+    (Ark_Int32 nodeId, const Ark_Number index, const Ark_SwiperAnimationEvent extraInfo)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .index = Converter::Convert<Ark_Int32>(index),
+            .info = {
+                .currentOffset = Converter::Convert<Ark_Float32>(extraInfo.currentOffset),
+                .targetOffset = Converter::Convert<Ark_Float32>(extraInfo.targetOffset),
+                .velocity = Converter::Convert<Ark_Float32>(extraInfo.velocity),
+            }
+        };
+    };
+
+    ASSERT_NE(modifier_->setOnGestureSwipe, nullptr);
+
+    modifier_->setOnGestureSwipe(node_, {});
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    eventHub->FireGestureSwipeEvent(123, {
+        .currentOffset = 1.23f,
+        .targetOffset = -4.56f,
+        .velocity = 78.9f,
+    });
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->index, 123);
+    EXPECT_EQ(checkEvent->info.currentOffset, 1.23f);
+    EXPECT_EQ(checkEvent->info.targetOffset, -4.56f);
+    EXPECT_EQ(checkEvent->info.velocity, 78.9f);
 }
 /**
  * @tc.name: SwiperModifierTest24

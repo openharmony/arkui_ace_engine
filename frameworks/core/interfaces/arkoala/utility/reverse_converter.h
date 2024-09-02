@@ -83,14 +83,14 @@ namespace OHOS::Ace::NG::Converter {
         dst.id = src;
     }
 
-    void AssignArkValue(Ark_Length& dst, const int& src)
+    inline void AssignArkValue(Ark_Length& dst, const int& src)
     {
         dst.type = ARK_TAG_INT32;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
     }
 
-    void AssignArkValue(Ark_Length& dst, const float& src)
+    inline void AssignArkValue(Ark_Length& dst, const float& src)
     {
         dst.type = ARK_TAG_FLOAT32;
         dst.value = src;

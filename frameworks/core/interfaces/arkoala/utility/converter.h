@@ -303,7 +303,7 @@ namespace OHOS::Ace::NG::Converter {
     {
         return Color::FromString(src.chars);
     }
-    
+
     bool ParseColorFromArkResource(const Ark_Resource &res, Color &result);
 
     template<>
@@ -396,7 +396,7 @@ namespace OHOS::Ace::NG::Converter {
         PaddingProperty padding;
         return padding;
     }
-    
+
     struct ImageResource {
         uint32_t type;
         std::string bundleName;
