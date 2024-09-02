@@ -217,7 +217,7 @@ struct CollapsibleMenuSection {
     }
   }
 
-  decideFontScale(): number {
+  decideFontScale(): number{
     try {
       let uiContent: UIContext = this.getUIContext();
       this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
