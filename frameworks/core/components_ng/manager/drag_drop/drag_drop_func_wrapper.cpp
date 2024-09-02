@@ -53,12 +53,14 @@ static bool CheckInternalDragging(const RefPtr<Container>& container)
 void GetShadowInfoArray(
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::vector<ShadowInfoCore>& shadowInfos)
 {
-    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(dragAction->instanceId);
+    auto maxDiagnal = NG::DragDropFuncWrapper::GetScaleWidth();
+
     for (auto& pixelMap : dragAction->pixelMapList) {
+        NG::RectF pixelRect(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
         double scale = 1.0;
         if (pixelMap.GetRawPtr()) {
-            if (pixelMap->GetWidth() > minScaleWidth && dragAction->previewOption.isScaleEnabled) {
-                scale = minScaleWidth / pixelMap->GetWidth();
+            if (pixelRect.Diagnal() > maxDiagnal && dragAction->previewOption.isScaleEnabled) {
+                scale = maxDiagnal / pixelRect.Diagnal();
             }
             auto pixelMapScale = dragAction->windowScale * scale;
             pixelMap->Scale(pixelMapScale, pixelMapScale, AceAntiAliasingOption::HIGH);
@@ -472,11 +474,9 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     return std::optional<EffectOption>(bgEffection);
 }
 
-[[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth(int32_t containerId)
+[[maybe_unused]] double DragDropFuncWrapper::GetScaleWidth()
 {
-    auto pipeline = Container::GetContainer(containerId)->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, -1.0f);
-    return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
+    return DragDropManager::GetMaxDiagnalBaseOnScreen();
 }
 
 void DragDropFuncWrapper::SetExtraInfo(int32_t containerId, std::string extraInfo)

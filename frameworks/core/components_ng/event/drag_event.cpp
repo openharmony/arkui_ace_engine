@@ -986,7 +986,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
 {
-    if (imageNode->IsPreviewNeedScale()) {
+    if (!NearEqual(DragDropManager::GetPreviewNodeScale(*imageNode), 1.0f)) {
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdateTransformScale({ 1.0f, 1.0f });

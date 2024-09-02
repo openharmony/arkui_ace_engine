@@ -45,7 +45,7 @@ public:
     static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
     static float RadiusToSigma(float radius);
     static std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
-    [[maybe_unused]] static double GetScaleWidth(int32_t containerId);
+    [[maybe_unused]] static double GetScaleWidth();
     static void SetExtraInfo(int32_t containerId, std::string extraInfo);
 };
 } // namespace OHOS::Ace::NG

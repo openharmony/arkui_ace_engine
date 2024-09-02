@@ -516,6 +516,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_mgr.cpp",
+    "$ace_root/test/mock/core/common/mock_display_info_utils.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/mock/core/common/mock_frame_report.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_adapter.cpp",

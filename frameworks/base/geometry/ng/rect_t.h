@@ -130,6 +130,11 @@ public:
         return height_;
     }
 
+    T Diagnal() const
+    {
+        return std::sqrt(width_ * width_ + height_ * height_);
+    }
+
     T MainSize(Axis axis) const
     {
         return axis == Axis::HORIZONTAL ? width_ : height_;
