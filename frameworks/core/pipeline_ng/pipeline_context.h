@@ -971,7 +971,7 @@ private:
     void DumpFocus(bool hasJson) const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
-
+    void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const

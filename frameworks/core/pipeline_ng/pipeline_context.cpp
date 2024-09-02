@@ -2434,36 +2434,31 @@ void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool
     }
 }
 
-void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+void PipelineContext::DumpData(
+    const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
-    if (params.size() > 1 && params[1] == "-lastpage") {
-        auto lastPage = stageManager_->GetLastPage();
-        if (hasJson) {
-            if (params.size() < USED_JSON_PARAM && lastPage) {
-                lastPage->DumpTree(0, hasJson);
-                DumpLog::GetInstance().PrintEndDumpInfoNG(true);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() > USED_JSON_PARAM && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM], true)) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        } else {
-            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
-                lastPage->DumpTree(0, hasJson);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() > USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM])) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        }
-    } else {
-        rootNode_->DumpTree(0, hasJson);
+    CHECK_NULL_VOID(node);
+    int32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
+    if (params.size() < used_id_flag) {
+        node->DumpTree(0, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
+    }
+    if (params.size() == used_id_flag && !node->DumpTreeById(0, params[PARAM_NUM], hasJson)) {
+        DumpLog::GetInstance().Print(
+            "There is no id matching the ID in the parameter,please check whether the id is correct");
+    }
+}
+
+void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+{
+    if (params.size() > 1 && params[1] == "-lastpage") {
+        auto lastPage = stageManager_->GetLastPage();
+        DumpData(lastPage, params, hasJson);
+    } else {
+        DumpData(rootNode_, params, hasJson);
     }
 }
 
