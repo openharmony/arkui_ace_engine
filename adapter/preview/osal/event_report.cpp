@@ -82,4 +82,8 @@ void EventReport::ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool
 
 void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName) {}
+
+void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
+    const std::string& abilityName, const std::string& moduleName, int32_t dimension)
+{}
 } // namespace OHOS::Ace
