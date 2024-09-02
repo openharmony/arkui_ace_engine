@@ -334,6 +334,11 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
 void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    BindDragWithContextMenuParams(targetNode, menuParam);
+}
+
+void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, const NG::MenuParam& menuParam)
+{
     CHECK_NULL_VOID(targetNode);
 
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
@@ -349,6 +354,7 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
 }
+
 void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
 {
     auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
