@@ -1586,12 +1586,13 @@ void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end, bool i
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(isForced || HasFocus());
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], caretTwinkling_=%{public}d",
-        start, end, caretTwinkling_);
+    bool isSingleHandle = selectOverlay_->IsSingleHandle();
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d],isTwinkling=%{public}d,isSingleHandle=%{public}d",
+        start, end, caretTwinkling_, isSingleHandle);
     if (start < 0 || end < 0) {
         return;
     }
-    if (start == end && !caretTwinkling_) {
+    if (start == end && !caretTwinkling_ && !isSingleHandle) {
         return;
     }
     if (start > end) {
@@ -3171,7 +3172,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     if (isShowSelectOverlay) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
         StopTwinkling();
-    } else if (selectStart == selectEnd) {
+    } else if (selectStart == selectEnd && isDoubleClickByMouse) {
         StartTwinkling();
     } else {
         StopTwinkling();
@@ -6152,14 +6153,11 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     auto selectEnd = textSelector_.GetTextEnd();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after long press textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
         selectStart, selectEnd, isEditing_);
-    if (!isEditing_ && !IsSelected()) {
-        HandleOnEditChanged(true);
-        RequestKeyboard(false, true, true);
-    }
     FireOnSelect(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     CalculateHandleOffsetAndShowOverlay();
     selectOverlay_->ProcessOverlay({ .animation = true });
+    FireOnSelectionChange(selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
@@ -7082,21 +7080,12 @@ void RichEditorPattern::AdjustSelectionExcludeSymbol(int32_t& start, int32_t& en
 
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
-    auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(pos);
-    positionWithAffinity.position_ = (GetTextContentLength() == 0) ? 0 : positionWithAffinity.position_;
-    auto currentPosition = static_cast<int32_t>(positionWithAffinity.position_);
-    switch (JudgeSelectType(positionWithAffinity)) {
+    auto [currentPosition, selectType] = JudgeSelectType(pos);
+    switch (selectType) {
         case SelectType::SELECT_NOTHING:
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select nothing currentPos=%{public}d", currentPosition);
             textSelector_.Update(currentPosition, currentPosition);
             return;
-        case SelectType::SELECT_ABOVE_LINE: {
-            int32_t aboveLineEnd = std::max(0, currentPosition - 1);
-            SetCaretPosition(aboveLineEnd);
-            int32_t aboveLineBegin = CalcLineBeginPosition();
-            textSelector_.Update(aboveLineBegin, aboveLineEnd);
-            return;
-        }
         case SelectType::SELECT_BACKWARD:
             currentPosition = std::max(0, currentPosition - 1);
             break;
@@ -7113,39 +7102,67 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     AdjustSelector(currentPosition, nextPosition);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "init select [%{public}d--%{public}d]", currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
-    auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
-    bool isSelectEmpty = selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
-    if (isSelectEmpty) {
+    if (IsSelectEmpty(currentPosition, nextPosition)) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "select rect is empty, select nothing");
         textSelector_.Update(currentPosition, currentPosition);
     }
 }
 
-SelectType RichEditorPattern::JudgeSelectType(const PositionWithAffinity& positionWithAffinity)
+std::pair<int32_t, SelectType> RichEditorPattern::JudgeSelectType(const Offset& pos)
 {
-    CHECK_NULL_RETURN(GetTextContentLength() != 0, SelectType::SELECT_NOTHING);
-    auto currentPosition = static_cast<int32_t>(positionWithAffinity.position_);
+    auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(pos);
+    auto currentPosition = (GetTextContentLength() == 0) ? 0 : static_cast<int32_t>(positionWithAffinity.position_);
+    auto selectType = SelectType::SELECT_NOTHING;
+    CHECK_NULL_RETURN(GetTextContentLength() != 0, std::make_pair(currentPosition, selectType));
+    bool isNeedSkipLineSeparator = !editingLongPress_ && IsSelectEmpty(currentPosition, currentPosition + 1);
+    if (isNeedSkipLineSeparator && AdjustIndexSkipLineSeparator(currentPosition)) {
+        return std::make_pair(currentPosition, SelectType::SELECT_BACKWARD);
+    }
+    auto height = paragraphs_.GetHeight();
+    if (GreatNotEqual(pos.GetY(), height)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "touchPosY[%{public}f] > paragraphsHeight[%{public}f]", pos.GetY(), height);
+        IF_TRUE(!editingLongPress_, selectType = SelectType::SELECT_BACKWARD);
+        return std::make_pair(GetTextContentLength(), selectType);
+    }
     TextAffinity currentAffinity = positionWithAffinity.affinity_;
-    if (previewLongPress_) {
-        caretPosition_ = currentPosition;
-        int32_t lineBeginPosition = CalcLineBeginPosition();
-        int32_t lineEndPosition = CalcLineEndPosition();
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Line: begin|end=%{public}d|%{public}d, currentPosition=%{public}d",
-            lineBeginPosition, lineEndPosition, currentPosition);
-        bool touchAtEmptyLine = (lineBeginPosition == lineEndPosition) && (currentPosition == lineEndPosition);
-        CHECK_NULL_RETURN(!touchAtEmptyLine, SelectType::SELECT_ABOVE_LINE);
-    } else if (editingLongPress_) {
-        auto paragraphEndPos = GetParagraphEndPosition(currentPosition);
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "paragraphEndPos=%{public}d, currentPosition=%{public}d",
-            paragraphEndPos, currentPosition);
-        bool touchAtParagraphEnd = currentPosition == paragraphEndPos;
-        CHECK_NULL_RETURN(!touchAtParagraphEnd, SelectType::SELECT_NOTHING);
+    bool isTouchLineEnd = currentAffinity == TextAffinity::UPSTREAM && !IsTouchBeforeCaret(currentPosition, pos);
+    if (editingLongPress_ && isTouchLineEnd) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "touchLineEnd select nothing currentAffinity=%{public}d", currentAffinity);
+        return std::make_pair(currentPosition, selectType);
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "currentPosition=%{public}d, currentAffinity=%{public}d",
         currentPosition, currentAffinity);
-    SelectType selectType =
-        (currentAffinity == TextAffinity::UPSTREAM) ? SelectType::SELECT_BACKWARD : SelectType::SELECT_FORWARD;
-    return selectType;
+    selectType = (currentAffinity == TextAffinity::UPSTREAM) ? SelectType::SELECT_BACKWARD : SelectType::SELECT_FORWARD;
+    return std::make_pair(currentPosition, selectType);
+}
+
+bool RichEditorPattern::IsSelectEmpty(int32_t start, int32_t end)
+{
+    auto selectedRects = paragraphs_.GetRects(start, end);
+    return selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
+}
+
+bool RichEditorPattern::AdjustIndexSkipLineSeparator(int32_t& currentPosition)
+{
+    std::wstringstream wss;
+    for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
+        auto span = *iter;
+        auto content = StringUtils::ToWstring(span->content);
+        wss << content;
+        CHECK_NULL_BREAK(currentPosition > span->position);
+    }
+    auto contentText = wss.str();
+    auto index = currentPosition - 1;
+    while (index > 0) {
+        CHECK_NULL_BREAK(contentText[index] == L'\n');
+        index--;
+    }
+    if (index != currentPosition - 1) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "skip lineSeparator %{public}d->%{public}d", currentPosition, index + 1);
+        currentPosition = index + 1;
+        return true;
+    }
+    return false;
 }
 
 void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& options)
@@ -9897,22 +9914,20 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     MoveCaretToContentRect();
+    int32_t currentPosition = GreatNotEqual(textOffset.GetY(), paragraphs_.GetHeight())
+                                ? GetTextContentLength()
+                                : caretPosition_;
     auto localOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
-    if (magnifierController_) {
+    if (magnifierController_ && GetTextContentLength() > 0) {
         magnifierController_->SetLocalOffset(localOffset);
     }
     auto [initSelectStart, initSelectEnd] = initSelector_;
-    int32_t start = std::min(initSelectStart, caretPosition_);
-    int32_t end = std::max(initSelectEnd, caretPosition_);
+    int32_t start = std::min(initSelectStart, currentPosition);
+    int32_t end = std::max(initSelectEnd, currentPosition);
     if (start == textSelector_.GetTextStart()) {
         StartVibratorByIndexChange(end, textSelector_.GetTextEnd());
     } else {
         StartVibratorByIndexChange(start, textSelector_.GetTextStart());
-    }
-    bool needResumeTwinkling = isEditing_ && !caretTwinkling_ && (start == end);
-    if (needResumeTwinkling) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Resume twinking when select nothing");
-        StartTwinkling();
     }
     HandleSelectionChange(start, end);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

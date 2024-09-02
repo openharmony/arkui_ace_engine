@@ -484,13 +484,12 @@ HWTEST_F(RichEditorPatternTestOneNg, JudgeSelectType001, TestSize.Level1)
     richEditorPattern->previewLongPress_ = true;
     auto offset = Offset(50.0, -80.0);
     AddSpan("hello1");
-    PositionWithAffinity position = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(offset);
-    SelectType type = richEditorPattern->JudgeSelectType(position);
-    EXPECT_NE(type, SelectType::SELECT_FORWARD);
+    auto selectType = richEditorPattern->JudgeSelectType(offset).second;
+    EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->editingLongPress_ = true;
-    type = richEditorPattern->JudgeSelectType(position);
-    EXPECT_NE(type, SelectType::SELECT_FORWARD);
+    selectType = richEditorPattern->JudgeSelectType(offset).second;
+    EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
 }
 
 /**
