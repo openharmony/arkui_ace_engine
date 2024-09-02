@@ -476,10 +476,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StartAutoPlay();
         InitArrow();
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= TotalCount()) {
-        UpdateCurrentIndex(0);
-    } else if (!IsLoop() && userSetCurrentIndex > TotalCount() - GetDisplayCount()) {
-        UpdateCurrentIndex(TotalCount() - GetDisplayCount());
+    auto index = CheckIndexRange(userSetCurrentIndex);
+    if (index != userSetCurrentIndex) {
+        UpdateCurrentIndex(index);
     } else if (oldIndex != userSetCurrentIndex) {
         currentIndex_ = userSetCurrentIndex;
         propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
@@ -1769,12 +1768,10 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
-    auto displayCount = GetDisplayCount();
-    if (index < 0 || index >= TotalCount()) {
-        index = 0;
-    }
+    index = CheckIndexRange(index);
     auto itemCount = TotalCount();
-    auto loopCount = std::abs(currentIndex_ / itemCount);
+    auto displayCount = GetDisplayCount();
+    auto loopCount = itemCount == 0 ? 0 : std::abs(currentIndex_ / itemCount);
     auto targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
     if (targetIndex_.has_value() && targetIndex_.value() == targetIndex) {
@@ -5922,6 +5919,18 @@ void SwiperPattern::CheckSpecialItemCount() const
     CHECK_NULL_VOID(swiperNode);
     swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
                                     leftCaptureId_.has_value() + rightCaptureId_.has_value());
+}
+
+int32_t SwiperPattern::CheckIndexRange(int32_t index) const
+{
+    auto itemCount = TotalCount();
+    auto displayCount = GetDisplayCount();
+    if (index < 0 || index >= itemCount || displayCount >= itemCount) {
+        index = 0;
+    } else if (!IsLoop() && index > itemCount - displayCount) {
+        index = itemCount - displayCount;
+    }
+    return index;
 }
 
 void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
