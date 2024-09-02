@@ -67,7 +67,6 @@ constexpr char BUTTON_PASTE[] = "textoverlay.paste";
 constexpr char BUTTON_SHARE[] = "textoverlay.share";
 constexpr char BUTTON_TRANSLATE[] = "textoverlay.translate";
 constexpr char BUTTON_SEARCH[] = "textoverlay.search";
-constexpr char BUTTON_AI_WRITE[] = "textoverlay.ai_write";
 
 constexpr int32_t OPTION_INDEX_CUT = 0;
 constexpr int32_t OPTION_INDEX_COPY = 1;
@@ -143,22 +142,12 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 }
 
 #ifdef OHOS_PLATFORM
-RefPtr<FrameNode> CreatePasteButton(int32_t descriptionId)
-{
-    auto buttonType = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonType = ButtonType::ROUNDED_RECTANGLE;
-    }
-    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(buttonType), true);
-    return pasteButton;
-}
-
 RefPtr<FrameNode> BuildPasteButton(
     const std::function<void()>& callback, int32_t overlayId, float& buttonWidth, bool isSelectAll = false)
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
-    auto pasteButton = CreatePasteButton(descriptionId);
+    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -185,8 +174,12 @@ RefPtr<FrameNode> BuildPasteButton(
     PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
     buttonWidth = MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    }
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
@@ -225,7 +218,7 @@ RefPtr<FrameNode> CreatePasteButtonForCreateMenu(
             menuItem.end = end;
             result = onCreateCallback.onMenuItemClick(menuItem);
         }
-        if (!result) {
+        if (!result && onPaste) {
             onPaste();
         }
     };
@@ -550,7 +543,6 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_AI_WRITE), info->menuCallback.onAIWrite);
     return params;
 }
 
@@ -615,7 +607,7 @@ std::string GetItemContent(const std::string& id, const std::string& content)
         return Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE);
     }
     if (id == OH_DEFAULT_AI_WRITE) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_AI_WRITE);
+        return textOverlayTheme->GetAIWrite();
     }
     if (id == OH_DEFAULT_CAMERA_INPUT) {
         return textOverlayTheme->GetCameraInput();
@@ -1157,19 +1149,14 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath, defaultOptionCallback);
     }
-    GetCameraInputParams(info, params);
-    if (!isShowInDefaultMenu_[OPTION_INDEX_AI_WRITE]) {
-        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG) : "";
-        params.emplace_back(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_AI_WRITE), iconPath, info->menuCallback.onAIWrite);
-    }
+    GetFlexibleOptionsParams(info, params);
     return params;
 }
 
-void SelectOverlayNode::GetCameraInputParams(
+void SelectOverlayNode::GetFlexibleOptionsParams(
     const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -1177,6 +1164,11 @@ void SelectOverlayNode::GetCameraInputParams(
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG) : "";
         auto iconName = textOverlayTheme ? textOverlayTheme->GetCameraInput() : "";
         params.emplace_back(iconName, iconPath, info->menuCallback.onCameraInput);
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_AI_WRITE]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG) : "";
+        auto iconName = textOverlayTheme ? textOverlayTheme->GetAIWrite() : "";
+        params.emplace_back(iconName, iconPath, info->menuCallback.onAIWrite);
     }
 }
 
@@ -1439,6 +1431,11 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto curWindowRect = pipeline->GetCurrentWindowRect();
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+    }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 
@@ -1557,8 +1554,11 @@ void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::s
     if (info->menuInfo.showAIWrite) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_AI_WRITE),
-            info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_VOID(theme);
+        auto button = BuildButton(theme->GetAIWrite(), info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
         if (maxWidth - allocatedSize >= buttonWidth) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
@@ -1747,21 +1747,23 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         systemItemParams.emplace_back(param);
     }
 
-    if (info->menuInfo.showAIWrite || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_AI_WRITE, BUTTON_AI_WRITE);
-        systemItemParams.emplace_back(param);
-    }
-
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, systemItemParams);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, systemItemParams);
     if (info->menuInfo.showCameraInput) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_CAMERA_INPUT;
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, systemItemParams);
-        auto theme = pipeline->GetTheme<TextOverlayTheme>();
-        CHECK_NULL_RETURN(theme, systemItemParams);
-        auto content = theme->GetCameraInput();
         menuOptionsParam.content = theme->GetCameraInput();
+        param.menuOptionsParam = menuOptionsParam;
+        systemItemParams.emplace_back(param);
+    }
+    if (info->menuInfo.showAIWrite) {
+        MenuItemParam param;
+        MenuOptionsParam menuOptionsParam;
+        menuOptionsParam.id = OH_DEFAULT_AI_WRITE;
+        menuOptionsParam.content = theme->GetAIWrite();
         param.menuOptionsParam = menuOptionsParam;
         systemItemParams.emplace_back(param);
     }

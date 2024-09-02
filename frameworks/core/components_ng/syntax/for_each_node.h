@@ -46,6 +46,8 @@ public:
 
     void CreateTempItems();
 
+    void CollectRemovingIds(std::list<int32_t>& removedElmtId);
+
     void CompareAndUpdateChildren();
 
     void FlushUpdateAndMarkDirty() override;
@@ -79,6 +81,10 @@ private:
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
     std::list<RefPtr<UINode>> tempChildren_;
+    std::unordered_set<std::string> tempOldIdsSet_;
+
+    // create map id -> Node
+    std::map<std::string, RefPtr<UINode>> oldNodeByIdMap_;
 
     // RepeatNode only
     std::vector<RefPtr<UINode>> tempChildrenOfRepeat_;

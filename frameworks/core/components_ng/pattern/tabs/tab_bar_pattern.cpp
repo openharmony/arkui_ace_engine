@@ -646,10 +646,11 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    
+
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
+    changeByClick_ = true;
     SetSwiperCurve(DurationCubicCurve);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
@@ -938,7 +939,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
 
     if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
-        UpdateIndicator(indicator);
+        UpdatePaintIndicator(indicator, true);
     }
     isFirstLayout_ = false;
 
@@ -1098,13 +1099,17 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
-    CHECK_NULL_VOID(swiperController_);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    int32_t indicator = layoutProperty->GetIndicatorValue(0);
+    if (!tabsPattern->GetIsCustomAnimation() && indicator == index) {
+        return;
+    }
     swiperController_->FinishAnimation();
-
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
-        OnCustomContentTransition(indicator_, index);
+        OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
@@ -1465,22 +1470,16 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     CHECK_NULL_VOID(host);
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsFrameNode);
-    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
-    CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    CHECK_NULL_VOID(swiperController_);
-    swiperController_->FinishAnimation();
-    int32_t indicator = swiperPattern->GetCurrentIndex();
     auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
+    int32_t indicator = layoutProperty->GetIndicatorValue(0);
     if (!tabsPattern->GetIsCustomAnimation() && indicator == index) {
         return;
     }
+    swiperController_->FinishAnimation();
     changeByClick_ = true;
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
-
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator, index);
     } else {
@@ -1526,7 +1525,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     if (totalCount < 0) {
         return;
     }
-   
+
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
         touchingIndex_ = index;
@@ -1678,17 +1677,20 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->SetMaskAnimationByCreate(false);
         tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateSubTabBoard(index);
+        tabBarPattern->UpdatePaintIndicator(index, true);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
         if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
+            tabBarLayoutProperty->UpdateIndicator(index);
         }
-        tabBarPattern->UpdateIndicator(index);
+        if (tabBarPattern->GetChangeByClick()) {
+            tabBarPattern->SetChangeByClick(false);
+            return;
+        }
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             tabBarPattern->UpdateAnimationDuration();
             auto duration = tabBarPattern->GetAnimationDuration().value_or(0);
-            if (tabBarPattern->GetChangeByClick()) {
-                tabBarPattern->SetChangeByClick(false);
-            } else if (duration > 0 && tabBarPattern->CanScroll()) {
+            if (duration > 0 && tabBarPattern->CanScroll()) {
                 tabBarPattern->StopTranslateAnimation();
                 tabBarPattern->targetIndex_ = index;
                 tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -1777,8 +1779,13 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
-        auto iter = tabBarType_.find(columnNode->GetId());
+        auto columnId = columnNode->GetId();
+        auto iter = tabBarType_.find(columnId);
         if (iter != tabBarType_.end() && iter->second) {
+            index++;
+            continue;
+        }
+        if (labelStyles_.find(columnId) == labelStyles_.end()) {
             index++;
             continue;
         }
@@ -1786,37 +1793,25 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto isSelected = columnNode->GetId() == selectedColumnId;
-        if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
-            if (isSelected) {
-                auto selectColor = selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL ?
-                    tabTheme->GetSubTabBoardTextOnColor() : tabTheme->GetSubTabTextOnColor();
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
-                    labelStyles_[index].selectedColor.value() : selectColor);
-            } else {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value() ?
-                    labelStyles_[index].unselectedColor.value() : tabTheme->GetSubTabTextOffColor());
-            }
+        auto isSelected = columnId == selectedColumnId;
+        if (isSelected) {
+            auto selectedColor = index < static_cast<int32_t>(selectedModes_.size()) &&
+                                         selectedModes_[index] == SelectedMode::BOARD && axis == Axis::HORIZONTAL
+                                     ? tabTheme->GetSubTabBoardTextOnColor()
+                                     : tabTheme->GetSubTabTextOnColor();
+            textLayoutProperty->UpdateTextColor(labelStyles_[columnId].selectedColor.value_or(selectedColor));
+        } else {
+            textLayoutProperty->UpdateTextColor(
+                labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
         }
-        if (IsNeedUpdateFontWeight(index)) {
+        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE &&
+            !labelStyles_[columnId].fontWeight.has_value()) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
         index++;
     }
-}
-
-bool TabBarPattern::IsNeedUpdateFontWeight(int32_t index)
-{
-    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE) {
-        return false;
-    }
-    if (index >= static_cast<int32_t>(labelStyles_.size()) || labelStyles_[index].fontWeight.has_value()) {
-        return false;
-    }
-    return true;
 }
 
 void TabBarPattern::UpdateImageColor(int32_t indicator)
@@ -2240,7 +2235,11 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     CHECK_NULL_VOID(layoutProperty);
 
     if (NonPositive(indicatorStyle.width.Value())) {
-        indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(indicator_).Width());
+        auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+        if (paintProperty) {
+            RectF rect;
+            indicatorStyle.width = Dimension(paintProperty->GetIndicator().value_or(rect).Width());
+        }
     }
     if ((!isTouchingSwiper_ && !isAnimating_) || axis_ != Axis::HORIZONTAL) {
         return;
@@ -2932,5 +2931,52 @@ bool TabBarPattern::IsValidIndex(int32_t index)
         return false;
     }
     return true;
+}
+
+void TabBarPattern::SetRegionInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::string regionString = "";
+    for (auto item : gradientRegions_) {
+        item ? regionString.append("true ") : regionString.append("false ");
+    }
+    json->Put("region", regionString.c_str());
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isRTL", isRTL_);
+    json->Put("touching", touching_);
+    json->Put("isMaskAnimationByCreate", isMaskAnimationByCreate_);
+    json->Put("animationDuration",
+        animationDuration_.has_value() ? std::to_string(animationDuration_.value()).c_str() : "null");
+    json->Put("isFirstFocus", isFirstFocus_);
+    json->Put("isTouchingSwiper", isTouchingSwiper_);
+    json->Put("isAnimating", isAnimating_);
+    json->Put("changeByClick", changeByClick_);
+    json->Put("indicator", indicator_);
+    json->Put("swiperStartIndex", swiperStartIndex_);
+    json->Put("scrollMargin", scrollMargin_);
+    SetRegionInfo(json);
 }
 } // namespace OHOS::Ace::NG

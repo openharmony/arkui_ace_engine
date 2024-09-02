@@ -14,13 +14,8 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include <optional>
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
@@ -59,6 +54,19 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
     }
     return frameNode;
+}
+
+void XComponentModelNG::InitXComponent(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::Claim(frameNode);
+    auto type = GetTypeImpl(node);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->InitXComponent();
 }
 
 std::optional<std::string> XComponentModelNG::GetLibraryName()
@@ -120,6 +128,14 @@ void XComponentModelNG::SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad)
     auto node = AceType::Claim(frameNode);
     auto type = GetTypeImpl(node);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    if (xcPattern->NeedTriggerLoadEventImmediately()) {
+        if (onLoad) {
+            onLoad(xcPattern->GetId());
+        }
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -271,15 +287,15 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     auto type = params->type;
     auto libraryName = params->libraryName;
     auto controller = params->controller;
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller));
+
+    auto frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller, 0.0, 0.0, true));
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (layoutProperty) {
         layoutProperty->UpdateXComponentType(type);
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, nullptr);
-    xcPattern->SetIsTypeNode(true);
     xcPattern->SetImageAIOptions(params->aiOptions);
     return frameNode;
 }

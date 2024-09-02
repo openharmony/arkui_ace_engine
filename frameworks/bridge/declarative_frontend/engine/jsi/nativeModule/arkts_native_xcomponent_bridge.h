@@ -30,10 +30,6 @@ public:
     static void SetControllerOnDestroyed(ArkUIRuntimeCallInfo* runtimeCallInfo, FrameNode* frameNode);
     static ArkUINativeModuleValue SetXComponentInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetXComponentInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -82,8 +78,8 @@ public:
 private:
     static XComponentType ConvertToXComponentType(const std::string& type);
     static void SetControllerCallback(ArkUIRuntimeCallInfo *runtimeCallInfo);
-    static void HandlerImageAIOptions(ArkUIRuntimeCallInfo *runtimeCallInfo);
-    static void HandlerDetachCallback(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static void HandleImageAIOptions(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static void HandleDetachCallback(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 }
 

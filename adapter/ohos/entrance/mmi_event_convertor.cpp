@@ -15,18 +15,10 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-#include <memory>
-
 #include "input_manager.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/event/ace_events.h"
-#include "core/event/key_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -212,54 +204,33 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 
 void SetTouchEventType(int32_t orgAction, TouchEvent& event)
 {
-    switch (orgAction) {
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
-            event.type = TouchType::CANCEL;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN:
-            event.type = TouchType::DOWN;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
-            event.type = TouchType::MOVE;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_UP:
-            event.type = TouchType::UP;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
-            event.type = TouchType::PULL_DOWN;
-            event.pullType = TouchType::PULL_DOWN;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
-            event.type = TouchType::PULL_MOVE;
-            event.pullType = TouchType::PULL_MOVE;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
-            event.type = TouchType::PULL_UP;
-            event.pullType = TouchType::PULL_UP;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW:
-            event.type = TouchType::PULL_IN_WINDOW;
-            event.pullType = TouchType::PULL_IN_WINDOW;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW:
-            event.type = TouchType::PULL_OUT_WINDOW;
-            event.pullType = TouchType::PULL_OUT_WINDOW;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER:
-            event.type = TouchType::HOVER_ENTER;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE:
-            event.type = TouchType::HOVER_MOVE;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT:
-            event.type = TouchType::HOVER_EXIT;
-            return;
-        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL:
-            event.type = TouchType::HOVER_CANCEL;
-            return;
-        default:
-            LOGW("unknown type");
-            return;
+    std::map<int32_t, TouchType> actionMap = {
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL, TouchType::CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN, TouchType::DOWN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE, TouchType::MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_UP, TouchType::UP },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN, TouchType::PULL_DOWN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE, TouchType::PULL_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP, TouchType::PULL_UP },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW, TouchType::PULL_IN_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW, TouchType::PULL_OUT_WINDOW },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_ENTER, TouchType::HOVER_ENTER },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
+    };
+    auto typeIter = actionMap.find(orgAction);
+    if (typeIter == actionMap.end()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "unknown touch type");
+        return;
+    }
+    event.type = typeIter->second;
+    if (typeIter->second == TouchType::PULL_DOWN || typeIter->second == TouchType::PULL_MOVE ||
+        typeIter->second == TouchType::PULL_UP || typeIter->second == TouchType::PULL_IN_WINDOW ||
+        typeIter->second == TouchType::PULL_OUT_WINDOW) {
+        event.pullType = typeIter->second;
     }
 }
 
@@ -301,6 +272,9 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             events.action = MouseAction::RELEASE;
             events.pullAction = MouseAction::PULL_UP;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            events.action = MouseAction::CANCEL;
+            break;
         default:
             events.action = MouseAction::NONE;
             break;
@@ -331,8 +305,8 @@ void GetMouseEventButton(int32_t button, MouseEvent& events)
     }
 }
 
-void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    MouseEvent& events, bool isScenceBoardWindow)
+void ConvertMouseEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events, bool isScenceBoardWindow)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
@@ -397,6 +371,9 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
             event.action = AxisAction::END;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            event.action = AxisAction::CANCEL;
+            break;
         default:
             event.action = AxisAction::NONE;
             break;
@@ -456,6 +433,16 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     } else {
         event.action = KeyAction::UNKNOWN;
     }
+    auto keyItems = keyEvent->GetKeyItems();
+    for (auto item = keyItems.rbegin(); item != keyItems.rend(); item++) {
+        if (item->GetKeyCode() == keyEvent->GetKeyCode()) {
+            event.unicode = item->GetUnicode();
+            break;
+        } else {
+            event.unicode = 0;
+        }
+    }
+
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
@@ -471,7 +458,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     }
 }
 
-void GetPointerEventAction(int32_t action,  PointerEvent& event)
+void GetPointerEventAction(int32_t action, PointerEvent& event)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
@@ -512,6 +499,19 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     if (action == PointerAction::PULL_OUT_WINDOW) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
     }
+}
+
+bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t& toolType)
+{
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "get pointer: %{public}d item failed.", pointerID);
+        return false;
+    }
+    toolType = item.GetToolType();
+    return true;
 }
 
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)

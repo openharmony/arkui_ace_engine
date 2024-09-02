@@ -15,15 +15,6 @@
 
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 
-#include <algorithm>
-#include <iterator>
-#include <vector>
-
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {

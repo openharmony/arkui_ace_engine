@@ -330,7 +330,7 @@ HWTEST_F(GridScrollerTestNg, DISABLED_ScrollToIndex011, TestSize.Level1)
 HWTEST_F(GridScrollerTestNg, ScrollToIndex012, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:10, text ScrollAlign::AUTO
+     * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:5, text ScrollAlign::AUTO
      * @tc.expected: Each test scroll the correct distance
      */
     GridModelNG model = CreateGrid();
@@ -341,7 +341,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex012, TestSize.Level1)
     int32_t index = 5;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT));
     /**
-     * @tc.cases: use ScrollTo to make item 10 in the last line, ScrollTo index:10, text ScrollAlign::AUTO
+     * @tc.cases: use ScrollTo to make item 5 in the last line, ScrollTo index:5, text ScrollAlign::AUTO
      * @tc.expected: scrollToIndex don't change grid offset
      */
     auto autoPosition = ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT + ITEM_HEIGHT;

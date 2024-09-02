@@ -76,6 +76,9 @@ protected:
     double arcWidth_ = 0.0;
 
     double shadowWidth_ = 0.0;
+
+private:
+    double GetDistance(const Point& point) const;
 }; // class RenderArc
 
 } // namespace OHOS::Ace

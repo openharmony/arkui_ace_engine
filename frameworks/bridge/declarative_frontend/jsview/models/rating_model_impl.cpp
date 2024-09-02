@@ -15,9 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/rating_model_impl.h"
 
-#include "core/components/box/box_component.h"
 #include "core/components/rating/rating_component.h"
-#include "core/components/rating/rating_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

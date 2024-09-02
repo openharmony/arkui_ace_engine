@@ -532,7 +532,6 @@ HWTEST_F(RichEditorClickTestNg, RichEditorController018, TestSize.Level1)
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateLineHeight = LINE_HEIGHT_VALUE_2;
     updateSpanStyle.updateLetterSpacing = LETTER_SPACING_2;
-    updateSpanStyle.isSymbolStyle = true;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
 
     ImageSpanAttribute imageStyle;

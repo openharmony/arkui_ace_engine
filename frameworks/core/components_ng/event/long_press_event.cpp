@@ -15,10 +15,6 @@
 
 #include "core/components_ng/event/long_press_event.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

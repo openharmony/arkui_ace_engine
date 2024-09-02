@@ -16,11 +16,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 

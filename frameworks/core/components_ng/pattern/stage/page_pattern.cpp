@@ -225,7 +225,7 @@ void PagePattern::OnShow()
         return;
     }
     std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
+    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), bundleName);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -242,7 +242,7 @@ void PagePattern::OnShow()
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 #endif
-    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
+    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetFullPath());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
@@ -260,7 +260,7 @@ void PagePattern::OnShow()
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
-            param = entryPageInfo->GetPageParams();
+            param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
         Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);

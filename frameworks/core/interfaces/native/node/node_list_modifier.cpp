@@ -14,21 +14,13 @@
  */
 #include "core/interfaces/native/node/node_list_modifier.h"
 
-#include <cstdint>
-
 #include "interfaces/native/node/list_option.h"
 #include "interfaces/native/node/node_model.h"
 
-#include "base/error/error_code.h"
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/list/list_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -395,6 +395,27 @@ public:
         return isCurTopNewInstance_;
     }
 
+    const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
+    {
+        return currentProxy_;
+    }
+
+    const std::vector<std::pair<std::string, WeakPtr<UINode>>>& GetAllNavDestinationNodesPrev()
+    {
+        return navigationStack_->GetAllNavDestinationNodesPrev();
+    }
+
+    void DialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
+
+    bool IsLastStdChange();
+    void ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination);
+    void TransitionWithDialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+    void FollowStdNavdestinationAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);

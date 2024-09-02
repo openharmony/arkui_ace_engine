@@ -843,6 +843,36 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest013, TestSize.Level1)
         IsEqual(pattern_->GetItemRect(1), Rect(WATER_FLOW_WIDTH / 2, 0, WATER_FLOW_WIDTH / 2, BIG_ITEM_MAIN_SIZE)));
 }
 
+/**
+ * @tc.name: WaterFlowTest014
+ * @tc.desc: Test direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow with the RTL direction.
+     * @tc.expected: layout from right to left.
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetLayoutDirection(TextDirection::RTL);
+    ViewAbstract::SetWidth(CalcLength(620));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    model.SetColumnsGap(Dimension(10));
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+}
+
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_005 = 400.f;
 constexpr float OFFSET_TIME_005 = 100.f;
@@ -1193,8 +1223,12 @@ HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
      * @tc.expected: Will trigger ScrollPage func
      */
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
@@ -1432,8 +1466,12 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
@@ -1923,5 +1961,32 @@ HWTEST_F(WaterFlowTestNg, Reverse001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 3), 200.0f);
     EXPECT_EQ(GetChildY(frameNode_, 4), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 5), -100.0f);
+}
+
+/**
+ * @tc.name: MarginPadding001
+ * @tc.desc: Test margin/padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
+{
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    auto colNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(4);
+    CreateDone(colNode);
+
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdateMargin(margin);
+    layoutProperty_->UpdatePadding(padding);
+    auto itemLayoutProperty = GetChildLayoutProperty<WaterFlowItemLayoutProperty>(frameNode_, 2);
+    itemLayoutProperty->UpdateMargin(margin);
+    itemLayoutProperty->UpdatePadding(padding);
+    FlushLayoutTask(colNode, true);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 237, 100)));
 }
 } // namespace OHOS::Ace::NG

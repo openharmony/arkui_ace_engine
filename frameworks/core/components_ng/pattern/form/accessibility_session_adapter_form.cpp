@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/form/accessibility_session_adapter_form.h"
 
-#include <cinttypes>
-#include "base/log/log.h"
-#include "core/accessibility/accessibility_constants.h"
 #include "core/components/form/resource/form_manager_delegate.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 bool AccessibilitySessionAdapterForm::IgnoreHostNode() const

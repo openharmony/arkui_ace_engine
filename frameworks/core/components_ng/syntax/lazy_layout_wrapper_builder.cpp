@@ -15,22 +15,6 @@
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
-#include <cstdint>
-#include <iterator>
-#include <list>
-#include <map>
-#include <optional>
-#include <string>
-#include <unordered_map>
-
-#include "base/log/ace_trace.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
-
 namespace OHOS::Ace::NG {
 
 LazyLayoutWrapperBuilder::LazyLayoutWrapperBuilder(
@@ -74,27 +58,8 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
     return OnGetOrCreateWrapperByIndexLegacy(index);
 }
 
-RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegacy(int32_t index)
+std::pair<RefPtr<UINode>, std::string> LazyLayoutWrapperBuilder::GetOrCreateFrameNode(int32_t index, int32_t totalCount)
 {
-    auto totalCount = GetTotalCount();
-    // The first time get the item, do not do the range check, and the subsequent get the item
-    // needs to check whether it is in the upper and lower bounds (-1, +1) of the existing index.
-    if (!startIndex_) {
-        startIndex_ = index;
-        endIndex_ = index;
-    } else {
-        if ((index >= startIndex_.value()) && (index <= endIndex_.value())) {
-            auto iter = childWrappers_.begin();
-            std::advance(iter, index - startIndex_.value());
-            return *iter;
-        }
-        if ((index < (startIndex_.value() - 1)) || (index > (endIndex_.value() + 1))) {
-            LOGE("need to obtain the item node in order and by step one: %{public}d", index);
-            return nullptr;
-        }
-    }
-
-    CHECK_NULL_RETURN(builder_, nullptr);
     RefPtr<UINode> uiNode;
     std::string id;
     // get frame node from previous cached.
@@ -121,6 +86,33 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegac
         id = itemInfo.first;
         uiNode = itemInfo.second;
     }
+    return std::pair(uiNode, id);
+}
+
+RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegacy(int32_t index)
+{
+    int32_t totalCount = GetTotalCount();
+    // The first time get the item, do not do the range check, and the subsequent get the item
+    // needs to check whether it is in the upper and lower bounds (-1, +1) of the existing index.
+    if (!startIndex_) {
+        startIndex_ = index;
+        endIndex_ = index;
+    } else {
+        if ((index >= startIndex_.value()) && (index <= endIndex_.value())) {
+            auto iter = childWrappers_.begin();
+            std::advance(iter, index - startIndex_.value());
+            return *iter;
+        }
+        if ((index < (startIndex_.value() - 1)) || (index > (endIndex_.value() + 1))) {
+            LOGE("need to obtain the item node in order and by step one: %{public}d", index);
+            return nullptr;
+        }
+    }
+
+    CHECK_NULL_RETURN(builder_, nullptr);
+    const std::pair<RefPtr<UINode>, std::string>& pair = GetOrCreateFrameNode(index, totalCount);
+    RefPtr<UINode> uiNode = pair.first;
+    std::string id = pair.second;
     CHECK_NULL_RETURN(uiNode, nullptr);
     RefPtr<LayoutWrapper> wrapper;
     auto frameNode = DynamicCast<FrameNode>(uiNode);

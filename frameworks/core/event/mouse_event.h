@@ -48,7 +48,8 @@ enum class MouseAction : int32_t {
     HOVER_EXIT,
     PULL_DOWN,
     PULL_MOVE,
-    PULL_UP
+    PULL_UP,
+    CANCEL
 };
 
 enum class AccessibilityHoverAction : int32_t {
@@ -188,6 +189,8 @@ struct MouseEvent final {
             type = TouchType::UP;
         } else if (action == MouseAction::MOVE) {
             type = TouchType::MOVE;
+        } else if (action == MouseAction::CANCEL) {
+            type = TouchType::CANCEL;
         } else {
             type = TouchType::UNKNOWN;
         }
@@ -195,10 +198,7 @@ struct MouseEvent final {
         if (sourceType == SourceType::MOUSE) {
             pointId = GetPointerId(pointId);
         }
-        auto pointOriginalId = originalId;
-        if (sourceType == SourceType::MOUSE) {
-            pointOriginalId = GetId();
-        }
+        auto pointOriginalId = sourceType == SourceType::MOUSE ? GetId() : originalId;
         TouchPoint point { .id = pointId,
             .x = x,
             .y = y,
@@ -502,13 +502,25 @@ public:
         onAccessibilityHoverCallback_ = onAccessibilityHoverCallback;
     }
 
+    void SetPenHoverCallback(const OnHoverFunc& onPenHoverEventCallback)
+    {
+        onPenHoverEventCallback_ = onPenHoverEventCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered, const MouseEvent& event);
 
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
+    bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
     bool IsAccessibilityHoverTarget()
     {
         return onAccessibilityHoverCallback_ != nullptr;
+    }
+
+    bool IsPenHoverTarget() const
+    {
+        return onPenHoverEventCallback_ != nullptr;
     }
 
     bool HandleHoverEvent(bool isHovered)
@@ -535,6 +547,7 @@ private:
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;
+    OnHoverFunc onPenHoverEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

@@ -15,11 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/base/view_full_update_model.h"
-
 namespace OHOS::Ace::Framework {
 
 RefPtr<AceType> ViewFullUpdateModelImpl::CreateNode(NodeInfo&& info)

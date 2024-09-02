@@ -93,7 +93,8 @@ void SwiperLayoutAlgorithm::IndicatorAndArrowMeasure(LayoutWrapper* layoutWrappe
     }
 }
 
-void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<SwiperLayoutProperty>& property)
+void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
+    const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
     currentOffset_ = currentDelta_;
     startMainPos_ = currentOffset_;
@@ -101,6 +102,7 @@ void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<Swi
     if (SwiperUtils::IsStretch(property)) {
         prevMargin_ = property->GetCalculatedPrevMargin();
         nextMargin_ = property->GetCalculatedNextMargin();
+        placeItemWidth_ = layoutConstraint.selfIdealSize.MainSize(axis);
     }
     if (!NearZero(prevMargin_)) {
         if (!NearZero(nextMargin_)) {
@@ -195,7 +197,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     spaceWidth_ = itemSpace > (contentMainSize_ + paddingBeforeContent_ + paddingAfterContent_) ? 0.0f : itemSpace;
     if (totalItemCount_ > 0) {
-        UpdateLayoutInfoBeforeMeasureSwiper(swiperLayoutProperty);
+        UpdateLayoutInfoBeforeMeasureSwiper(swiperLayoutProperty, childLayoutConstraint, axis);
         MeasureSwiper(layoutWrapper, childLayoutConstraint, axis);
     } else {
         itemPosition_.clear();
@@ -203,11 +205,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto crossSize = contentIdealSize.CrossSize(axis);
     if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
-        contentCrossSize_ = GetChildMaxSize(layoutWrapper, axis, false) == 0.0f
-                                ? contentCrossSize_
-                                : GetChildMaxSize(layoutWrapper, axis, false);
+        contentCrossSize_ = GetChildMaxSize(layoutWrapper, axis, false);
         contentIdealSize.SetCrossSize(contentCrossSize_, axis);
         crossMatchChild_ = true;
+    } else {
+        contentCrossSize_ = crossSize.value();
     }
 
     if (!mainSizeIsDefined_ && isSingleCase) {
@@ -472,34 +474,26 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         }
         currentIndex_ = jumpIndex_.value();
     } else if (hasCachedCapture_) {
-        if (targetIndex_.has_value()) {
-            auto firstItemIndex = prevItemPosition_.begin()->first;
-            // Swipe to the left, layout forward from (targetIndex - 1)
-            if (targetIndex_.value() > firstItemIndex) {
-                LayoutForward(layoutWrapper, layoutConstraint, axis, targetIndex_.value() - 1,
-                    prevItemPosition_[targetIndex_.value() - 1].startPos);
-                // Swipe to the right, layout backward from (endIndex - 1)
-            } else if (targetIndex_.value() < firstItemIndex) {
-                auto basicItem = ++prevItemPosition_.rbegin();
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, basicItem->first, basicItem->second.endPos);
-                // captures need not to be updated
-            } else {
-                itemPosition_ = prevItemPosition_;
+        for (auto it = prevItemPosition_.rbegin(); it != prevItemPosition_.rend(); ++it) {
+            auto pos = Positive(prevMargin_) ? it->second.startPos + prevMargin_ : it->second.startPos;
+            // search for last item in visible window as endIndex
+            if (LessNotEqual(pos, contentMainSize_)) {
+                endIndex = it->first;
+                endPos = it->second.endPos;
+                break;
             }
-            // captures need to be updated, swap capture to avoid flickering of disappearing real node's position
-            if (itemPosition_.begin()->first != prevItemPosition_.begin()->first) {
-                isCaptureReverse_ = !isCaptureReverse_;
-            }
+        }
+        if ((targetIndex_.has_value() && targetIndex_.value() >= startIndexInVisibleWindow)
+            || (!targetIndex_.has_value() && Negative(currentOffset_))) {
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
         } else {
-            if (NonNegative(currentOffset_)) {
-                // Swipe to the left
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
-                LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
-            } else {
-                // Swipe to the right
-                LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
-            }
+            LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
+        }
+        // captures need to be updated, swap capture to avoid flickering of disappearing real node's position
+        if (targetIndex_.has_value() && itemPosition_.begin()->first != prevItemPosition_.begin()->first) {
+            isCaptureReverse_ = !isCaptureReverse_;
         }
     } else if (targetIndex_.has_value()) {
         // isMeasureOneMoreItem_ param is used to ensure item continuity when play property animation.
@@ -583,6 +577,9 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty, axis);
+    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
+        mainAxisSize = placeItemWidth_.value_or(mainAxisSize);
+    }
     endPos = startPos + mainAxisSize;
     itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };
     return true;
@@ -625,6 +622,9 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     measuredItems_.insert(measureIndex);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty, axis);
+    if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
+        mainAxisSize = placeItemWidth_.value_or(mainAxisSize);
+    }
     startPos = endPos - mainAxisSize;
     if (!itemPositionIsFull) {
         itemPosition_[currentIndex] = { startPos, endPos, wrapper->GetHostNode() };

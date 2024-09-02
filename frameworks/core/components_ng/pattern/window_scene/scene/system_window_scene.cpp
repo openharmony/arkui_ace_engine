@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
-#include "ui/rs_canvas_node.h"
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
@@ -254,12 +253,10 @@ void SystemWindowScene::RegisterFocusCallback()
 {
     CHECK_NULL_VOID(session_);
 
-    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+    auto requestFocusCallback = [weakThis = WeakClaim(this), frameNode = frameNode_, instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto pattern = weakThis.Upgrade();
-        auto frameNode = pattern ? pattern->GetHost() : nullptr;
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
             auto pipeline = PipelineContext::GetCurrentContext();

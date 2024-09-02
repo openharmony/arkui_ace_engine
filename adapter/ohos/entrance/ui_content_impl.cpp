@@ -66,6 +66,7 @@
 #include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
@@ -100,9 +101,6 @@
 #ifdef NG_BUILD
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #endif
-#include "pipeline/rs_node_map.h"
-#include "transaction/rs_transaction_data.h"
-#include "ui/rs_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "screen_session_manager_client.h"
@@ -116,6 +114,36 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr int32_t AVOID_DELAY_TIME = 20;
+
+#define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
+#define UICONTENT_IMPL_PTR(name) _##name->uiContent_
+#define UICONTENT_IMPL_HELPER_GUARD(name, ifInvalid...) \
+    std::lock_guard lg(*_##name->mutex_);               \
+    if (!*_##name->isValid_) {                          \
+        ifInvalid;                                      \
+    }
+
+struct UIContentImplHelper {
+    explicit UIContentImplHelper(UIContentImpl* uiContent) : uiContent_(uiContent)
+    {
+        uiContent_->AddDestructCallback(this, [mutex = mutex_, isValid = isValid_] {
+            std::lock_guard lg(*mutex);
+            *isValid = false;
+        });
+    }
+    ~UIContentImplHelper()
+    {
+        std::lock_guard lg(*mutex_);
+        if (*isValid_) {
+            uiContent_->RemoveDestructCallback(this);
+        }
+    }
+    UIContentImpl* uiContent_;
+    std::shared_ptr<std::mutex> mutex_ = std::make_shared<std::mutex>();
+    std::shared_ptr<bool> isValid_ = std::make_shared<bool>(true);
+    UIContentImplHelper(const UIContentImplHelper& rhs) = delete;
+    UIContentImplHelper& operator=(const UIContentImplHelper& rhs) = delete;
+};
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -574,6 +602,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto hapModuleInfo = context->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    StoreConfiguration(context->GetConfiguration());
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -599,6 +628,9 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
+    auto context = context_.lock();
+    CHECK_NULL_VOID(context);
+    StoreConfiguration(context->GetConfiguration());
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1249,16 +1281,8 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         return;
     }
 
-    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    if (!colorMode.empty()) {
-        if (colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
-    }
 
     if (!deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -1273,6 +1297,39 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         if (!language.empty() || !script.empty() || !region.empty()) {
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
+    }
+    StoreConfiguration(config);
+}
+
+void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (!config) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
+    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorMode.empty()) {
+        if (colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    auto string2float = [](const std::string& str) {
+        try {
+            return std::stof(str);
+        } catch (...) {
+            return 1.0f;
+        }
+    };
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        SystemProperties::SetFontScale(string2float(fontScale));
+    }
+    auto fontWeightScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    if (!fontWeightScale.empty()) {
+        SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
 }
 
@@ -1826,6 +1883,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
+    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+    if (thpExtraManager->Init()) {
+        pipeline->SetTHPExtraManager(thpExtraManager);
+    }
     return errorCode;
 }
 
@@ -2154,6 +2215,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         return;
     }
 
+    StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
@@ -3169,6 +3231,23 @@ void UIContentImpl::SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExte
     popupUIExtensionRecords_[nodeId] = popupId;
 }
 
+bool UIContentImpl::GetTargetNode(
+    int32_t& nodeIdLabel, RefPtr<NG::FrameNode>& targetNode, const CustomPopupUIExtensionConfig& config)
+{
+    if (config.nodeId > -1) {
+        nodeIdLabel = config.nodeId;
+        targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeIdLabel);
+        CHECK_NULL_RETURN(targetNode, false);
+    } else if (!config.inspectorId.empty()) {
+        targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
+        CHECK_NULL_RETURN(targetNode, false);
+        nodeIdLabel = targetNode->GetId();
+    } else {
+        CHECK_NULL_RETURN(targetNode, false);
+    }
+    return true;
+}
+
 int32_t UIContentImpl::CreateCustomPopupUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
 {
@@ -3180,16 +3259,8 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
         [want, &nodeId, callbacks = callbacks, config = config, this]() {
             int32_t nodeIdLabel = -1;
             RefPtr<NG::FrameNode> targetNode = nullptr;
-            if (config.nodeId > -1) {
-                nodeIdLabel = config.nodeId;
-                targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(nodeIdLabel);
-                CHECK_NULL_VOID(targetNode);
-            } else if (!config.inspectorId.empty()) {
-                targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
-                CHECK_NULL_VOID(targetNode);
-                nodeIdLabel = targetNode->GetId();
-            } else {
-                CHECK_NULL_VOID(targetNode);
+            if (!GetTargetNode(nodeIdLabel, targetNode, config)) {
+                return;
             }
             if (customPopupConfigMap_.find(nodeIdLabel) != customPopupConfigMap_.end()) {
                 LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", nodeIdLabel);
@@ -3213,8 +3284,10 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             uiExtNode->MarkModifyDone();
             nodeId = nodeIdLabel;
-            popupParam->SetOnStateChange(
-                [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
+            popupParam->SetOnStateChange([config, nodeId, UICONTENT_IMPL_HELPER(content)](const std::string& event) {
+                UICONTENT_IMPL_HELPER_GUARD(content, return);
+                UICONTENT_IMPL_PTR(content)->OnPopupStateChange(event, config, nodeId);
+            });
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
             SetCustomPopupConfig(nodeId, config, uiExtNode->GetId());
         },
@@ -3241,14 +3314,15 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
     }
     auto config = popupConfig->second;
     taskExecutor->PostTask(
-        [container, nodeId, config, this]() {
+        [container, nodeId, config, UICONTENT_IMPL_HELPER(content)]() {
+            UICONTENT_IMPL_HELPER_GUARD(content, return);
             auto targetNode =
                 AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
             CHECK_NULL_VOID(targetNode);
-            auto popupParam = CreateCustomPopupParam(false, config);
+            auto popupParam = UICONTENT_IMPL_PTR(content)->CreateCustomPopupParam(false, config);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
-            customPopupConfigMap_.erase(nodeId);
-            popupUIExtensionRecords_.erase(nodeId);
+            UICONTENT_IMPL_PTR(content)->customPopupConfigMap_.erase(nodeId);
+            UICONTENT_IMPL_PTR(content)->popupUIExtensionRecords_.erase(nodeId);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestroyCustomPopup");
 }
@@ -3282,8 +3356,9 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 auto createConfig = popupConfig->second;
                 popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
                 popupParam->SetOnStateChange(
-                    [createConfig, targetId, this](const std::string& event) {
-                        this->OnPopupStateChange(event, createConfig, targetId);
+                    [createConfig, targetId, UICONTENT_IMPL_HELPER(content)](const std::string& event) {
+                        UICONTENT_IMPL_HELPER_GUARD(content, return);
+                        UICONTENT_IMPL_PTR(content)->OnPopupStateChange(event, createConfig, targetId);
                     });
             }
             auto targetNode =
@@ -3562,5 +3637,12 @@ void UIContentImpl::UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppE
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
         TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+}
+
+void UIContentImpl::ProcessDestructCallbacks()
+{
+    for (auto& [_, callback] : destructCallbacks_) {
+        callback();
+    }
 }
 } // namespace OHOS::Ace

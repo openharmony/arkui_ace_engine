@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TIME_PICKER_MODIFIER_H
 
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 

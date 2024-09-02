@@ -685,7 +685,7 @@ void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector
     for (const auto& box : boxes) {
         auto rect = Constants::ConvertSkRect(box.rect);
         RectF selectionRect(static_cast<float>(rect.Left()), static_cast<float>(rect.Top()),
-            static_cast<float>(rect.Width()), static_cast<float>(rect.Height()));
+            static_cast<float>(std::abs(rect.Width())), static_cast<float>(rect.Height()));
         selectedRects.emplace_back(selectionRect);
     }
 }

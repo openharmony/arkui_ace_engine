@@ -14,24 +14,11 @@
  */
 #include "core/components_ng/pattern/option/option_view.h"
 
-#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/option/option_event_hub.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {

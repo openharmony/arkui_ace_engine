@@ -15,16 +15,7 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_caches.h"
 
-#include <cstdint>
-#include <optional>
-#include <unordered_map>
-#include <unordered_set>
-
-#include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -533,6 +524,9 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UINodeHasBeenUpdated(
     const std::string& ttype, const std::string& fromKey, const std::string& forKey)
 {
     // 1. update fromKey -> forKey in node4key4ttype_
+    for (auto& node4KeyIter : node4key4ttype_) {
+        node4KeyIter.second.erase(forKey);
+    }
     const auto nodesIter = node4key4ttype_.find(ttype);
     if (nodesIter != node4key4ttype_.end()) {
         auto& node4key = nodesIter->second;

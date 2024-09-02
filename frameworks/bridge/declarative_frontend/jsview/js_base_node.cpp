@@ -51,6 +51,7 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 constexpr int32_t INFO_LENGTH_LIMIT = 2;
 constexpr int32_t BUILD_PARAM_INDEX_TWO = 2;
 constexpr int32_t BUILD_PARAM_INDEX_THREE = 3;
+constexpr int32_t BUILD_PARAM_INDEX_FOUR = 4;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -107,6 +108,14 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
 
+    bool isSupportLazyBuild = false;
+    if (infoLen >= BUILD_PARAM_INDEX_FOUR + 1) {
+        auto jsLazyBuildSupported = info[BUILD_PARAM_INDEX_FOUR];
+        if (jsLazyBuildSupported->IsBoolean()) {
+            isSupportLazyBuild = jsLazyBuildSupported->ToBoolean();
+        }
+    }
+
     // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
     auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
@@ -120,12 +129,17 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode = proxyNode;
     }
     if (parent) {
-        parent->ReplaceChild(viewNode_, newNode);
-        newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        if (newNode) {
+            parent->ReplaceChild(viewNode_, newNode);
+            newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        } else {
+            parent->RemoveChild(viewNode_);
+            parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        }
     }
     viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
     CHECK_NULL_VOID(viewNode_);
-    ProccessNode(isSupportExportTexture);
+    ProccessNode(isSupportExportTexture, isSupportLazyBuild);
     UpdateEnd(info);
     CHECK_NULL_VOID(viewNode_);
     JSRef<JSObject> thisObj = info.This();
@@ -142,7 +156,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     });
 }
 
-void JSBaseNode::ProccessNode(bool isSupportExportTexture)
+void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild)
 {
     CHECK_NULL_VOID(viewNode_);
     viewNode_->SetIsRootBuilderNode(true);
@@ -153,7 +167,9 @@ void JSBaseNode::ProccessNode(bool isSupportExportTexture)
         exportTextureInfo->SetSurfaceId(surfaceId_);
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
-    viewNode_->Build(nullptr);
+    if (!isSupportLazyBuild) {
+        viewNode_->Build(nullptr);
+    }
 }
 
 void JSBaseNode::Create(const JSCallbackInfo& info)
@@ -221,6 +237,23 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
+    TouchEvent touchEvent = InitTouchEvent(info);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto result = postEventManager->PostEvent(viewNode_, touchEvent);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+TouchEvent JSBaseNode::InitTouchEvent(const JSCallbackInfo& info)
+{   
     TouchEvent touchEvent;
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto typeJsVal = obj->GetProperty("type");
@@ -285,12 +318,12 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         JSRef<JSArray> changedTouchesArray = JSRef<JSArray>::Cast(changedTouchesJsVal);
         if (static_cast<int32_t>(changedTouchesArray->Length()) <= 0) {
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-            return;
+            return touchEvent;
         }
         JSRef<JSVal> item = changedTouchesArray->GetValueAt(0);
         if (!item->IsObject()) {
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-            return;
+            return touchEvent;
         }
         JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
         touchEvent.id = itemObj->GetPropertyValue<int32_t>("id", 0);
@@ -300,18 +333,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
         touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto postEventManager = pipelineContext->GetPostEventManager();
-    if (!postEventManager) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto result = postEventManager->PostEvent(viewNode_, touchEvent);
-    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    return touchEvent;
 }
 
 void JSBaseNode::UpdateStart(const JSCallbackInfo& info)

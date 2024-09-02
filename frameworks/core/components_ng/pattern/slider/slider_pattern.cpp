@@ -44,7 +44,8 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double STEP_OFFSET = 50.0;
-constexpr int32_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
+constexpr uint64_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
+const std::string STR_ACCESSIBILITY_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -1365,8 +1366,7 @@ void SliderPattern::SendAccessibilityValueEvent(int32_t mode)
             CHECK_NULL_VOID(host);
             host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
         },
-        TaskExecutor::TaskType::UI, ACCESSIBILITY_SENDEVENT_TIMESTAMP, "ArkUISliderSendAccessibilityValueEvent"
-    );
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_SENDEVENT_TIMESTAMP, STR_ACCESSIBILITY_SENDEVENT);
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)

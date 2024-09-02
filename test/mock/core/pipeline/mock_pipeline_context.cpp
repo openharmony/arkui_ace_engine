@@ -215,6 +215,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
 void PipelineContext::FlushTouchEvents() {}
@@ -585,6 +589,13 @@ bool PipelineContext::CheckNeedAvoidInSubWindow()
     return false;
 }
 
+std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
+{
+    return "";
+}
+
+void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}
@@ -894,6 +905,11 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
+}
+
+bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    return false;
 }
 
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}

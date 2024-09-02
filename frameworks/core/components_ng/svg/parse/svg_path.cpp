@@ -15,9 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_path.h"
 
-#include "include/utils/SkParsePath.h"
-
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 

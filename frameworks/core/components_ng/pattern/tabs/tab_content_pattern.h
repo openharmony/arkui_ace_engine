@@ -333,6 +333,23 @@ public:
         return customStyleNode_;
     }
 
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override
+    {
+        switch (selectedMode_) {
+            case SelectedMode::INDICATOR: {
+                json->Put("SelectedMode", "INDICATOR");
+                break;
+            }
+            case SelectedMode::BOARD: {
+                json->Put("SelectedMode", "BOARD");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;

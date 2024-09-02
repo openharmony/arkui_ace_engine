@@ -885,6 +885,8 @@ private:
     void ParseOriText(const std::string& currentText);
     bool IsMarqueeOverflow() const;
     virtual void ResetAfterTextChange();
+    bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
+    bool LocalOffsetInSelectedArea(const Offset& localOffset);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

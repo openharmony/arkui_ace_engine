@@ -187,6 +187,11 @@ public:
         return !isUIExtension_;
     }
 
+    bool TriggerAutoSaveWhenInvisible() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;

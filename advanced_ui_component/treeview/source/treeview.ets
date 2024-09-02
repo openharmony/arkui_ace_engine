@@ -18,42 +18,44 @@ import { LengthMetrics } from '@ohos.arkui.node';
 import { common } from '@kit.AbilityKit';
 import resourceManager from '@ohos.resourceManager';
 
-const IMAGE_NODE_HEIGHT: number = 24
-const IMAGE_NODE_WIDTH: number = 24
-const ITEM_WIDTH: number = 0
-const ITEM_HEIGHT: number = 48
-const ITEM_HEIGHT_INPUT: number = 32
-const BORDER_WIDTH_HAS: number = 2
-const BORDER_WIDTH_NONE: number = 0
-const NODE_HEIGHT: number = 48
-const LIST_ITEM_HEIGHT_NONE: number = 0
-const LIST_ITEM_HEIGHT: number = 48
-const SHADOW_OFFSETY: number = 10
-const FLAG_NUMBER: number = 2
-const DRAG_OPACITY: number = 0.4
-const DRAG_OPACITY_NONE: number = 1
-const MIN_FONT_SCALE: number = 1
-const MAX_FONT_SCALE: number = 2
-const FLAG_LINE_HEIGHT: string = '1.0vp'
-const X_OFF_SET: string = '0vp'
-const Y_OFF_SET: string = '2.75vp'
-const Y_BOTTOM_OFF_SET: string = '-1.25vp'
-const Y_BASE_PLATE_OFF_SET: string = '1.5vp'
-const COLOR_IMAGE_EDIT: string = '#FFFFFF'
-const COLOR_IMAGE_ROW: string = '#00000000'
-const COLOR_SELECT: string = '#1A0A59F7'
-const SHADOW_COLOR: string = '#00001E'
-const GRAG_POP_UP_HEIGHT: string = '48'
-const FLOOR_MIN_WIDTH: string = '128vp'
-const FLOOR_MAX_WIDTH: string = '208vp'
-const TEXT_MIN_WIDTH: string = '80vp'
-const TEXT_MAX_WIDTH: string = '160vp'
-const MIN_WIDTH: string = '112vp'
-const MAX_WIDTH: string = '192vp'
-const TRANS_COLOR: string = '#00FFFFFF'
+const IMAGE_NODE_HEIGHT: number = 24;
+const IMAGE_NODE_WIDTH: number = 24;
+const ITEM_WIDTH: number = 0;
+const ITEM_HEIGHT: number = 48;
+const ITEM_HEIGHT_INPUT: number = 32;
+const BORDER_WIDTH_HAS: number = 2;
+const BORDER_WIDTH_NONE: number = 0;
+const NODE_HEIGHT: number = 48;
+const LIST_ITEM_HEIGHT_NONE: number = 0;
+const LIST_ITEM_HEIGHT: number = 48;
+const SHADOW_OFFSETY: number = 10;
+const FLAG_NUMBER: number = 2;
+const DRAG_OPACITY: number = 0.4;
+const DRAG_OPACITY_NONE: number = 1;
+const MIN_FONT_SCALE: number = 1;
+const MAX_FONT_SCALE: number = 2;
+const FLAG_LINE_HEIGHT: string = '1.0vp';
+const X_OFF_SET: string = '0vp';
+const Y_OFF_SET: string = '2.75vp';
+const Y_BOTTOM_OFF_SET: string = '-1.25vp';
+const Y_BASE_PLATE_OFF_SET: string = '1.5vp';
+const COLOR_IMAGE_EDIT: string = '#FFFFFF';
+const COLOR_IMAGE_ROW: string = '#00000000';
+const COLOR_SELECT: string = '#1A0A59F7';
+const SHADOW_COLOR: string = '#00001E';
+const GRAG_POP_UP_HEIGHT: string = '48';
+const FLOOR_MIN_WIDTH: string = '128vp';
+const FLOOR_MAX_WIDTH: string = '208vp';
+const TEXT_MIN_WIDTH: string = '80vp';
+const TEXT_MAX_WIDTH: string = '160vp';
+const MIN_WIDTH: string = '112vp';
+const MAX_WIDTH: string = '192vp';
+const TRANS_COLOR: string = '#00FFFFFF';
 const DELAY_TIME: number = 100;
 const LEVEL_MARGIN: number = 12;
 const MARGIN_OFFSET: number = 8;
+const TAG: string = 'TreeView';
+const LOG_CODE: number = 0x3900;
 
 const ARROW_DOWN: Resource | string = $r('sys.media.ohos_ic_public_arrow_down');
 
@@ -1184,7 +1186,7 @@ export struct TreeView {
         .align(Alignment.Start)
         .onDragStart((event: DragEvent, extraParams: string) => {
           if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
-            hilog.error(0x3900, 'TreeView', 'drag error, a item has been dragged');
+            hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
             return;
           }
           this.dropSelectedIndex = JSON.parse(extraParams).selectedIndex;
@@ -1193,7 +1195,7 @@ export struct TreeView {
           let currentItemNodeId: number = itemInner.getNodeCurrentNodeId();
           /* handle the situation of drag error, currentNodeIndex is not found in onDragStart. */
           if (currentNodeIndex >= this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
-            hilog.error(0x3900, 'TreeView', 'drag error, currentNodeIndex is not found in onDragStart');
+            hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found in onDragStart');
             return;
           }
 
@@ -1213,7 +1215,7 @@ export struct TreeView {
            * OH has Solved on real machine.
            */
           if (currentItemNodeId !== currentNodeInfo?.getNodeCurrentNodeId()) {
-            hilog.error(0x3900, 'TreeView', 'drag is too fast, it attribute a fault to OH');
+            hilog.error(LOG_CODE, TAG, 'drag is too fast, it attribute a fault to OH');
             this.listNodeDataSource.setIsDrag(false);
             return;
           }
@@ -1226,7 +1228,7 @@ export struct TreeView {
     /* Move the dragged node. */
     .onDragMove((event: DragEvent, extraParams: string) => {
       if (this.isMultiPress) {
-        hilog.error(0x3900, 'TreeView', 'drag error, a item has been dragged');
+        hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
         return;
       }
       let nodeHeight: number = LIST_ITEM_HEIGHT;
@@ -1313,13 +1315,13 @@ export struct TreeView {
       let currentNodeIndex: number = this.dropSelectedIndex;
 
       if (currentNodeIndex - 1 > this.listNodeDataSource.totalCount() || currentNodeIndex === undefined) {
-        hilog.error(0x3900, 'TreeView', 'drag error, currentNodeIndex is not found');
+        hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
         this.listNodeDataSource.setIsDrag(false);
         return;
       }
 
       if (insertNodeIndex === this.listNodeDataSource.totalCount()) {
-        hilog.info(0x3900, 'TreeView', 'need to insert into the position of the last line');
+        hilog.info(LOG_CODE, TAG, 'need to insert into the position of the last line');
         insertNodeIndex -= 1;
       }
 
@@ -1996,7 +1998,7 @@ function updateParentChildNumHandler(parentNodeId: number, nodeIdNodeItemMap: Ma
         isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
       tmpParentNodeId = parent.parentNodeId;
     } else {
-      hilog.error(0x3900, 'TreeView', 'updateParentChildNumHandler: parent node not found');
+      hilog.error(LOG_CODE, TAG, 'updateParentChildNumHandler: parent node not found');
       break;
     }
   }
@@ -2116,7 +2118,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   private checkIndex(index: number): boolean {
     if (index < 0 || index >= this.listNode.length) {
-      hilog.error(0x3900, 'TreeView', 'check index fail');
+      hilog.error(LOG_CODE, TAG, 'check index fail');
       return false;
     }
     return true;
@@ -2191,7 +2193,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   private changeNodeStatus(clickIndex: number): void {
     if (clickIndex >= this.listNode.length) {
-      hilog.error(0x3900, 'TreeView', 'changeNodeStatus clickIndex error.');
+      hilog.error(LOG_CODE, TAG, 'changeNodeStatus clickIndex error.');
       return;
     }
     let thisIndex: number = clickIndex;
@@ -2211,7 +2213,7 @@ class ListNodeDataSource extends BasicDataSource {
 
   private handleExpandAndCollapse(clickIndex: number, isRefreshList: boolean): void {
     if (clickIndex >= this.listNode.length) {
-      hilog.error(0x3900, 'TreeView', 'handleExpandAndCollapse clickIndex error.');
+      hilog.error(LOG_CODE, TAG, 'handleExpandAndCollapse clickIndex error.');
       return;
     }
     let thisIndex: number = clickIndex;
@@ -2287,7 +2289,7 @@ class ListNodeDataSource extends BasicDataSource {
         return false;
       }, this._root, startLevel, endLevel);
     } catch (err) {
-      hilog.error(0x3900, 'TreeView', 'traverseSectionNodeDF function callbacks error.');
+      hilog.error(LOG_CODE, TAG, 'traverseSectionNodeDF function callbacks error.');
       this.resetData(listNode);
     }
   }
@@ -3444,7 +3446,7 @@ class ListNodeDataSource extends BasicDataSource {
           isAdd ? parent.getChildNodeInfo().allChildNum + count : parent.getChildNodeInfo().allChildNum - count;
         parentNodeId = parent.parentNodeId;
       } else {
-        hilog.error(0x3900, 'TreeView', 'updateParentChildNum: parent node not found.');
+        hilog.error(LOG_CODE, TAG, 'updateParentChildNum: parent node not found.');
         break;
       }
     }
@@ -3485,7 +3487,7 @@ class ListNodeDataSource extends BasicDataSource {
       let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
       let currentNode: NodeItem = new NodeItem(data);
       if (parent.nodeLevel > this.maxNodeLevel) {
-        hilog.error(0x3900, 'TreeView', 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
+        hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
         return false;
       }
       currentNode.nodeLevel = parent.nodeLevel + 1;
@@ -3509,7 +3511,7 @@ class ListNodeDataSource extends BasicDataSource {
       this.nodeIdNodeItemMap.set(currentNodeId, currentNode);
       return true;
     } else {
-      hilog.error(0x3900, 'TreeView', 'ListDataSource[addNode]: Parent node not found.');
+      hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: Parent node not found.');
       return false;
     }
   }
@@ -3544,7 +3546,7 @@ class ListNodeDataSource extends BasicDataSource {
       let index: number = current.indexOfParent;
       let deleteNodeAllChildNum: number = 0;
       if (index < 0) {
-        hilog.error(0x3900, 'TreeView', 'node does not exist.');
+        hilog.error(LOG_CODE, TAG, 'node does not exist.');
         return [];
       } else {
         deleteNodeAllChildNum = parent.children[index].getChildNodeInfo().allChildNum + 1;
@@ -3568,18 +3570,18 @@ class ListNodeDataSource extends BasicDataSource {
       delayUpdateParentChildNum(false, deleteNodeAllChildNum, this.nodeIdNodeItemMap, updateNodeIdList);
       return removeNodeIdList;
     } else {
-      hilog.error(0x3900, 'TreeView', 'parent does not exist.');
+      hilog.error(LOG_CODE, TAG, 'parent does not exist.');
       return [];
     }
   }
 
   private getNodeInfoByNodeItem(nodeItem: NodeItem): NodeInfo {
     if (nodeItem?.currentNodeId === undefined) {
-      hilog.error(0x3900, 'TreeView', 'getNodeInfoByNodeItem: currentId is undefined');
+      hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: currentId is undefined');
       return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
     }
     if (!this.nodeIdAndNodeIndexMap.has(nodeItem.currentNodeId)) {
-      hilog.error(0x3900, 'TreeView', 'getNodeInfoByNodeItem: not has nodeItem.');
+      hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: not has nodeItem.');
       return new NodeInfo(new NodeItem(emptyNodeInfo), emptyNodeInfo);
     }
     let index: number = this.nodeIdAndNodeIndexMap.get(nodeItem.currentNodeId) as number;
@@ -3758,7 +3760,7 @@ class ListNodeDataSource extends BasicDataSource {
       let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
       let currentNode: NodeItem = new NodeItem(data);
       if (parent.nodeLevel > this.maxNodeLevel) {
-        hilog.error(0x3900, 'TreeView', 'addDragNode: The level of the tree view cannot exceed 50.');
+        hilog.error(LOG_CODE, TAG, 'addDragNode: The level of the tree view cannot exceed 50.');
         return false;
       }
       currentNode.nodeLevel = parent.nodeLevel + 1;
@@ -3795,7 +3797,7 @@ class ListNodeDataSource extends BasicDataSource {
       this.nodeIdNodeParamMap.set(currentNodeId, data);
       return true;
     } else {
-      hilog.error(0x3900, 'TreeView', 'addDragNode: Parent node not found.');
+      hilog.error(LOG_CODE, TAG, 'addDragNode: Parent node not found.');
       return false;
     }
   }
@@ -3832,7 +3834,7 @@ export struct TreeViewInner {
     right: $r('sys.float.padding_level0'),
     top: $r('sys.float.padding_level0'),
     bottom: $r('sys.float.padding_level0') };
-  private inputFontSize: number = getContext().resourceManager.getNumberByName('ohos_id_text_size_body1');
+    private inputFontSize: number = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
 
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {
@@ -3855,6 +3857,16 @@ export struct TreeViewInner {
   getInputTextMaxFontSize() {
     let inputTextMaxFontSize = this.decideFontScale() * this.inputFontSize + 'vp';
     return inputTextMaxFontSize;
+  }
+
+  getLeftIconColor(): ResourceColor {
+    if (this.item.getIsModify()) {
+      return $r('sys.color.icon_on_primary');
+    } else if (this.item.getIsSelected()) {
+      return this.treeViewTheme.leftIconActiveColor;
+    } else {
+      return this.treeViewTheme.leftIconColor;
+    }
   }
 
   private checkInvalidPattern(title: string): boolean {
@@ -3914,8 +3926,7 @@ export struct TreeViewInner {
                     .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                       this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
                     .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
-                    .fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                    this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor)
+                    .fillColor(this.getLeftIconColor())
                     .matchTextDirection((this.item.getNodeItem()
                       .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
                       .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)

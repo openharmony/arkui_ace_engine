@@ -415,6 +415,16 @@ public:
         isDragWithContextMenu_ = isDragWithContextMenu;
     }
 
+    bool IsBackPressedCleanLongPressNodes() const
+    {
+        return isBackPressedCleanLongPressNodes_;
+    }
+
+    void SetIsBackPressedCleanLongPressNodes(bool isBackPressedCleanLongPressNodes)
+    {
+        isBackPressedCleanLongPressNodes_ = isBackPressedCleanLongPressNodes;
+    }
+
     void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
 
     void ResetContextMenuDragPosition();
@@ -557,6 +567,7 @@ private:
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
+    bool isBackPressedCleanLongPressNodes_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);

@@ -272,6 +272,8 @@ public:
     static PaddingProperty GetPadding(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
+    static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -15,8 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/shape_model_impl.h"
 
-#include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/jsview/models/shape_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/shape/shape_container_component.h"
 

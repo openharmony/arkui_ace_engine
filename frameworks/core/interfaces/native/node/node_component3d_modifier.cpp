@@ -14,13 +14,6 @@
  */
 #include "core/interfaces/native/node/node_component3d_modifier.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components_ng/pattern/model/model_view_ng.h"
 
 namespace OHOS::Ace::NG {

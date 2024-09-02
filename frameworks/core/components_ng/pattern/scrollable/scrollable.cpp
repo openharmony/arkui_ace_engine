@@ -443,9 +443,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 
     lastPos_ = GetDragOffset();
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
-    if (dragEndCallback_) {
-        dragEndCallback_();
-    }
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     mainPosition = Round(mainPosition);
     ACE_SCOPED_TRACE("HandleDragEnd, mainPosition:%f, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
@@ -479,6 +476,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         StartScrollAnimation(mainPosition, currentVelocity_);
     }
     SetDelayedTask();
+    if (dragEndCallback_) {
+        dragEndCallback_();
+    }
     isTouching_ = false;
 }
 

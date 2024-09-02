@@ -17,7 +17,6 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/custom_paint/custom_paint_component.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
 RefPtr<AceType> CanvasModelImpl::Create()

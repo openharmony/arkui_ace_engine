@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "core/components/rating/rating_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 

@@ -189,6 +189,25 @@ struct TouchAndMoveCaretState {
     Dimension minDinstance = 5.0_vp;
 };
 
+struct ContentScroller {
+    CancelableCallback<void()> autoScrollTask;
+    std::function<void(const Offset&)> scrollingCallback;
+    std::function<void(const Offset&)> beforeScrollingCallback;
+    bool isScrolling = false;
+    float scrollInterval = 15;
+    float stepOffset = 0.0f;
+    Offset localOffset;
+    std::optional<Offset> hotAreaOffset;
+    float updateMagniferEpsilon = 0.5f;
+
+    void OnBeforeScrollingCallback(const Offset& localOffset)
+    {
+        if (beforeScrollingCallback && !isScrolling) {
+            beforeScrollingCallback(localOffset);
+        }
+    }
+};
+
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
@@ -275,6 +294,7 @@ public:
 
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void InsertValueOperation(const SourceAndValueInfo& info);
+    void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     void UpdateCounterMargin();
     void CleanCounterNode();
@@ -319,6 +339,16 @@ public:
     const RefPtr<TextFieldController>& GetTextFieldController()
     {
         return textFieldController_;
+    }
+
+    void SetJSTextEditableController(const RefPtr<Referenced>& jsController)
+    {
+        jsTextEditableController_ = jsController;
+    }
+
+    RefPtr<Referenced> GetJSTextEditableController()
+    {
+        return jsTextEditableController_.Upgrade();
     }
 
     void SetTextEditController(const RefPtr<TextEditController>& textEditController)
@@ -609,7 +639,7 @@ public:
     bool CursorMoveDown();
     bool CursorMoveUpOperation();
     bool CursorMoveDownOperation();
-    void SetCaretPosition(int32_t position);
+    void SetCaretPosition(int32_t position, bool moveContent = true);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
@@ -917,6 +947,7 @@ public:
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
+    bool HandleBetweenSelectedPosition(const GestureEvent& info);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -955,6 +986,7 @@ public:
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
+    std::string GetCancelImageText();
     std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
@@ -1254,9 +1286,6 @@ public:
 
     void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
 
-    void HandleOnDragStatusCallback(
-        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     OffsetF GetTextPaintOffset() const override;
@@ -1459,6 +1488,16 @@ public:
 
     bool IsTextEditableForStylus() override;
     bool IsHandleDragging();
+    bool IsLTRLayout()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, true);
+        return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
+
+    virtual void ProcessSelection();
+    void AfterLayoutProcessCleanResponse(
+        const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
 
 protected:
     virtual void InitDragEvent();
@@ -1477,9 +1516,27 @@ protected:
         return false;
     }
 
+    bool SelectOverlayIsOn()
+    {
+        return selectOverlay_->SelectOverlayIsOn();
+    }
+
+    void SetIsSingleHandle(bool isSingleHandle)
+    {
+        selectOverlay_->SetIsSingleHandle(isSingleHandle);
+    }
+
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
+    void UpdateSelection(int32_t both);
+    void UpdateSelection(int32_t start, int32_t end);
+
+    RefPtr<ContentController> contentController_;
+    RefPtr<TextSelectController> selectController_;
+    bool needToRefreshSelectOverlay_ = false;
+    bool isTextChangedAtCreation_ = false;
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1502,12 +1559,10 @@ private:
     bool ProcessFocusIndexAction();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
+    std::string GetDragStyledText();
     void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
-    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool HasStateStyle(UIState state) const;
 
     void OnTextInputScroll(float offset);
@@ -1538,11 +1593,6 @@ private:
     void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
-    bool SelectOverlayIsOn()
-    {
-        return selectOverlay_->SelectOverlayIsOn();
-    }
-
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -1560,8 +1610,6 @@ private:
 
     void FilterInitializeText();
 
-    void UpdateSelection(int32_t both);
-    void UpdateSelection(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);
@@ -1642,10 +1690,6 @@ private:
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
-    void SetIsSingleHandle(bool isSingleHandle)
-    {
-        selectOverlay_->SetIsSingleHandle(isSingleHandle);
-    }
     void NotifyOnEditChanged(bool isChanged);
     void ProcessResponseArea();
     bool HasInputOperation();
@@ -1672,6 +1716,7 @@ private:
     void HandleParentGlobalOffsetChange();
     HintToTypeWrap GetHintType();
     HintToTypeWrap GetAutoFillTypeAndMetaData(bool isNeedToHitType = true);
+    PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
@@ -1698,10 +1743,20 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
-    bool IsShowMenu(const std::optional<SelectionOptions>& options);
+    bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
     bool IsContentRectNonPositive();
     void ReportEvent();
     void ResetPreviewTextState();
+    void CalculateBoundsRect();
+
+    void UpdateContentScroller(const Offset& localOffset);
+    void StopContentScroll();
+    void PauseContentScroll();
+    void ScheduleContentScroll(float delay);
+    void UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset);
+    std::optional<float> CalcAutoScrollStepOffset(const Offset& localOffset);
+    void SetDragMovingScrollback();
+    float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1742,14 +1797,12 @@ private:
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
     bool isOnHover_ = false;
-    bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
     bool contChange_ = false;
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
-    bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1781,6 +1834,7 @@ private:
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
 
     RefPtr<TextFieldController> textFieldController_;
+    WeakPtr<Referenced> jsTextEditableController_;
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     // controls redraw of overlay modifier, update when need to redraw
@@ -1840,8 +1894,6 @@ private:
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;
-    RefPtr<ContentController> contentController_;
-    RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
@@ -1884,11 +1936,12 @@ private:
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
     bool isCaretTwinkling_ = false;
-    bool isTextChangedAtCreation_ = false;
     bool isPasswordSymbol_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
+    int32_t longPressFingerNum_ = 0;
+    ContentScroller contentScroller_;
 };
 } // namespace OHOS::Ace::NG
 

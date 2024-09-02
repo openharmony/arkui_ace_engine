@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
-#include "base/error/error_code.h"
-#include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

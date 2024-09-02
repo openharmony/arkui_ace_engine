@@ -15,12 +15,7 @@
 
 #include "core/components_v2/grid/grid_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
-#include "core/components/grid_layout/render_grid_layout.h"
-#include "core/components/proxy/render_item_proxy.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
 
 namespace OHOS::Ace::V2 {

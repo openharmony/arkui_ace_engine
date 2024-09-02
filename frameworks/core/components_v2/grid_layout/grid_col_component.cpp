@@ -15,9 +15,6 @@
 
 #include "core/components_v2/grid_layout/grid_col_component.h"
 
-#include "core/components_v2/grid_layout/grid_col_element.h"
-#include "core/components_v2/grid_layout/render_grid_col.h"
-
 namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> GridColComponent::CreateRenderNode()
 {

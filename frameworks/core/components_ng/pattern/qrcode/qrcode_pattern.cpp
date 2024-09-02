@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 
 namespace OHOS::Ace::NG {
 

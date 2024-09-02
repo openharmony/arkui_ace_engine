@@ -17,7 +17,6 @@
 
 #include "core/components/badge/badge_component.h"
 #include "core/components/badge/badge_theme.h"
-#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

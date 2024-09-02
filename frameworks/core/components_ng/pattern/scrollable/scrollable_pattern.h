@@ -69,7 +69,7 @@ public:
     {
         UnRegister2DragDropManager();
         if (scrollBarProxy_) {
-            scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+            scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
         }
     }
 
@@ -145,6 +145,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -360,7 +362,7 @@ public:
     virtual void AnimateTo(
         float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true);
-    bool CanOverScroll(int32_t source)
+    virtual bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
             IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
@@ -644,6 +646,32 @@ public:
         ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
+    RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
+    {
+        return scrollBarProxy_;
+    }
+
+    virtual void OnAttachToMainTree() override;
+
+    void AddNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
+    void SetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern);
+
+    void SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& node);
+
+    void UnsetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern);
+
+    void SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>& node);
+
+    void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
+    bool GetNestedScrolling() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetNestedScrolling();
+    }
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -655,10 +683,6 @@ protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
-    }
-    RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
-    {
-        return scrollBarProxy_;
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
@@ -703,6 +727,9 @@ protected:
     OffsetF mouseStartOffset_;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
+    bool animateOverScroll_ = false;
+    bool animateCanOverScroll_ = false;
+    bool lastCanOverScroll_ = false;
 
     RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
     {
@@ -732,6 +759,9 @@ protected:
     {
         return scrollOriginChild_.Upgrade();
     }
+
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -801,9 +831,6 @@ private:
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
-    void SetCanOverScroll(bool val);
-    bool GetCanOverScroll() const;
-
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
@@ -847,6 +874,7 @@ private:
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
+    std::list<WeakPtr<NG::ScrollBarProxy>> nestScrollBarProxy_;
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
@@ -860,9 +888,7 @@ private:
     // scroller
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
-    bool animateOverScroll_ = false;
     bool isAnimateOverScroll_ = false;
-    bool animateCanOverScroll_ = false;
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
@@ -914,7 +940,6 @@ private:
     void AddHotZoneSenceInterface(SceneStatus scene);
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
-    bool lastCanOverScroll_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
     WeakPtr<NestableScrollContainer> scrollOriginChild_;

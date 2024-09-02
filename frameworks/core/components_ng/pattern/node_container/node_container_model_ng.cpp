@@ -16,7 +16,6 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
-#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 namespace OHOS::Ace::NG {
 void NodeContainerModelNG::Create()
@@ -29,7 +28,7 @@ void NodeContainerModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 }
 
-void NodeContainerModelNG::SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)
+void NodeContainerModelNG::SetMakeFunction(std::function<RefPtr<UINode>(int32_t)>&& makeFunc)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

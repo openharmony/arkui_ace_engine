@@ -62,6 +62,7 @@ void JSScrollBar::JSBind(BindingTarget globalObj)
     JSClass<JSScrollBar>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSScrollBar>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSScrollBar>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSScrollBar>::StaticMethod("enableNestedScroll", &JSScrollBar::JsSetEnableNestedScroll);
 
     JSClass<JSScrollBar>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -99,4 +100,15 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
 
     ScrollBarModel::GetInstance()->Create(proxy, infoflag, proxyFlag, directionNum, stateNum);
 }
+
+void JSScrollBar::JsSetEnableNestedScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        ScrollBarModel::GetInstance()->SetEnableNestedScroll(false);
+        return;
+    }
+
+    ScrollBarModel::GetInstance()->SetEnableNestedScroll(args[0]->ToBoolean());
+}
+
 } // namespace OHOS::Ace::Framework

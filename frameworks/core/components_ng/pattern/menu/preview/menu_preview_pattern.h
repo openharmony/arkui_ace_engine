@@ -22,6 +22,8 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -80,14 +82,44 @@ public:
         return hoverImageAfterScaleHeight_;
     }
 
-    void SetStackCenterOffset(const OffsetF& offset)
+    void SetClipStartWidth(float width)
     {
-        stackCenterOffset_ = offset;
+        clipStartWidth_ = width;
     }
 
-    OffsetF GetStackCenterOffset() const
+    float GetClipStartWidth() const
     {
-        return stackCenterOffset_;
+        return clipStartWidth_;
+    }
+
+    void SetClipStartHeight(float height)
+    {
+        clipStartHeight_ = height;
+    }
+
+    float GetClipStartHeight() const
+    {
+        return clipStartHeight_;
+    }
+
+    void SetClipStartValue(float value)
+    {
+        clipStartVal_ = value;
+    }
+
+    float GetClipStartValue() const
+    {
+        return clipStartVal_;
+    }
+
+    void SetClipEndValue(float value)
+    {
+        clipEndVal_ = value;
+    }
+
+    float GetClipEndValue() const
+    {
+        return clipEndVal_;
     }
 
     void SetHoverImageAfterScaleOffset(const OffsetF& offset)
@@ -138,6 +170,26 @@ public:
     float GetCustomPreviewAfterScaleHeight() const
     {
         return customPreviewAfterScaleHeight_;
+    }
+
+    void SetStackAfterScaleActualWidth(float width)
+    {
+        stackAfterScaleActualWidth_ = width;
+    }
+
+    float GetStackAfterScaleActualWidth() const
+    {
+        return stackAfterScaleActualWidth_;
+    }
+
+    void SetStackAfterScaleActualHeight(float height)
+    {
+        stackAfterScaleActualHeight_ = height;
+    }
+
+    float GetStackAfterScaleActualHeight() const
+    {
+        return stackAfterScaleActualHeight_;
     }
 
     void SetIsWidthDistLarger(bool widthDistLarger)
@@ -217,6 +269,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
+    void UpdateShowScale(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
+        const RefPtr<MenuPattern>& menuPattern);
     bool isFirstShow_ = false;
     bool hasPreviewTransitionEffect_ = false;
 
@@ -225,14 +279,19 @@ private:
     bool isHoverImageAnimationPlaying_ = false;
     bool isWidthDistLarge_ = false;
     bool isHoverImageScalePlaying_ = false;
-    OffsetF stackCenterOffset_;
     OffsetF hoverImageAfterScaleOffset_;
     float hoverImageAfterScaleWidth_ = 0.0f;
     float hoverImageAfterScaleHeight_ = 0.0f;
+    float clipStartWidth_ = 0.0f;
+    float clipStartHeight_ = 0.0f;
+    float clipStartVal_ = 0.0f;
+    float clipEndVal_ = 0.0f;
     float customPreviewWidth_ = 0.0f;
     float customPreviewHeight_ = 0.0f;
     float customPreviewAfterScaleWidth_ = 0.0f;
     float customPreviewAfterScaleHeight_ = 0.0f;
+    float stackAfterScaleActualWidth_ = 0.0f;
+    float stackAfterScaleActualHeight_ = 0.0f;
     float hoverImageScaleFrom_ = 1.0f;
     float hoverImageScaleTo_ = 1.0f;
     float customPreviewScaleTo_ = 1.0f;

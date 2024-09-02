@@ -25,7 +25,10 @@ public:
     RefPtr<ScrollProxy> GetScrollBarProxy(const  RefPtr<ScrollProxy>& scrollProxy) override;
     void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
         int directionValue, int stateValue) override;
-
+    void SetEnableNestedScroll(bool enableNestedSroll) override;
+    static void SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll);
+    static void SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);
+    static void UnSetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_BAR_SCROLL_BAR_MODEL_NG_H

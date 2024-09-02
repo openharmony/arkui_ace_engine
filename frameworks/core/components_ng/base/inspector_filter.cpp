@@ -15,10 +15,6 @@
 
 #include "core/components_ng/base/inspector_filter.h"
 
-#include <algorithm>
-#include <map>
-#include <string>
-
 namespace OHOS::Ace::NG {
 
 bool InspectorFilter::CheckFixedAttr(const FixedAttrBit attrBit) const
