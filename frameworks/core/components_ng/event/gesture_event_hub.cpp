@@ -660,6 +660,8 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
     if (!NearEqual(targetScale, 1.0f)) {
         preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
     }
+#else
+    preScaledPixelMap = defaultPixelMap;
 #endif
     return preScaledPixelMap;
 }
@@ -1065,6 +1067,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
     dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
     dragPreviewPixelMap_ = nullptr;
+    CHECK_NULL_VOID(pixelMapDuplicated);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());

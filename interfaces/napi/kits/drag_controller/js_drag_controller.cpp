@@ -875,6 +875,7 @@ void OnComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 
 void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
+    CHECK_NULL_VOID(asyncCtx);
     {
         std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
         if (asyncCtx->dragState == DragState::SENDING) {
@@ -891,6 +892,7 @@ void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSize,
     std::string& udKey, std::map<std::string, int64_t>& summary)
 {
+    CHECK_NULL_VOID(asyncCtx);
     if (asyncCtx->unifiedData) {
         int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
