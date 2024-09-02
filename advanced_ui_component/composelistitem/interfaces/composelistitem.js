@@ -92,8 +92,8 @@ const OPERATE_ITEM_RADIUS = 50;
 const OPERATE_ITEM_BACKGROUND_COLOR = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_switch_outline_off'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 const OPERATE_ITECOLOR = '#99000000';
-const MARQUEE = 1;
-const isMARQUEE = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_right_textOverflow'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value;
+const MARQUEE_OR_ELLIPSIS = 1;
+const IS_MARQUEE_OR_ELLIPSIS = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_right_textOverflow'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value;
 const UNUSUAL = -1;
 const FOCUSED_BG = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_backboard'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 const NORMAL_BG = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
@@ -477,7 +477,8 @@ class ContentItemStruct extends ViewPU {
             Text.fontSize(ObservedObject.GetRawObject(this.primaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColors));
             Text.maxLines(TEXT_MAX_LINE);
-            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
+            TextOverflow.Ellipsis });
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
@@ -492,7 +493,8 @@ class ContentItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
                         Text.maxLines(TEXT_MAX_LINE);
-                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
+                        TextOverflow.Ellipsis });
                         Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
@@ -514,7 +516,8 @@ class ContentItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColors));
                         Text.maxLines(TEXT_MAX_LINE);
-                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
+                        TextOverflow.Ellipsis });
                         Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
@@ -1093,7 +1096,8 @@ class OperateItemStruct extends ViewPU {
             Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
             Text.textOverflow({
-                overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+                overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.MARQUEE :
+                TextOverflow.None
             });
             Text.marqueeOptions({
                 start: this.isFocus,
@@ -1407,7 +1411,8 @@ class OperateItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
                         Text.textOverflow({
-                            overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+                            overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.MARQUEE :
+                            TextOverflow.None
                         });
                         Text.marqueeOptions({
                             start: this.isFocus,
@@ -2094,7 +2099,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new ContentItemStruct(this, {}, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1070, col: 11 });
+                                let componentCall = new ContentItemStruct(this, {}, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1075, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -2133,7 +2138,7 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1073, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1078, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2215,7 +2220,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.__containerDirection,
                                     isFocus: this.__isFocus,
                                     isChecked: this.__isChecked,
-                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1088, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1093, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

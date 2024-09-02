@@ -126,8 +126,8 @@ const OPERATE_ITEM_RADIUS = 50;
 const OPERATE_ITEM_BACKGROUND_COLOR = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = $r('sys.color.ohos_id_color_switch_outline_off');
 const OPERATE_ITECOLOR = '#99000000';
-const MARQUEE = 1;
-const isMARQUEE = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
+const MARQUEE_OR_ELLIPSIS = 1;
+const IS_MARQUEE_OR_ELLIPSIS = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
 const UNUSUAL = -1;
 const FOCUSED_BG = $r('sys.color.composeListItem_focused_backboard');
 const NORMAL_BG = $r('sys.color.composeListItem_color_background_normal');
@@ -231,7 +231,8 @@ struct ContentItemStruct {
         .fontSize(this.primaryTextSize)
         .fontColor(this.primaryTextColors)
         .maxLines(TEXT_MAX_LINE)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
+          TextOverflow.Ellipsis })
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
@@ -240,7 +241,8 @@ struct ContentItemStruct {
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.secondaryTextColors)
           .maxLines(TEXT_MAX_LINE)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
+            TextOverflow.Ellipsis })
           .focusable(true)
           .draggable(false)
       }
@@ -249,7 +251,8 @@ struct ContentItemStruct {
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.descriptionColors)
           .maxLines(TEXT_MAX_LINE)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textOverflow({ overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.None :
+            TextOverflow.Ellipsis })
           .focusable(true)
           .draggable(false)
       }
@@ -496,7 +499,8 @@ struct OperateItemStruct {
       .fontSize(this.secondaryTextSize)
       .fontColor(this.secondaryTextColors)
       .textOverflow({
-        overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+        overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.MARQUEE :
+          TextOverflow.None
       })
       .marqueeOptions({
         start: this.isFocus,
@@ -735,7 +739,8 @@ struct OperateItemStruct {
             .fontSize(this.secondaryTextSize)
             .fontColor(this.secondaryTextColors)
             .textOverflow({
-              overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+              overflow: IS_MARQUEE_OR_ELLIPSIS === MARQUEE_OR_ELLIPSIS ? TextOverflow.MARQUEE :
+                TextOverflow.None
             })
             .marqueeOptions({
               start: this.isFocus,
