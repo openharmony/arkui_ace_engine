@@ -980,6 +980,24 @@ RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(c
     return nullptr;
 }
 
+void SubwindowManager::SetRect(const NG::RectF& rect, int32_t instanceId)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set subwindow rect enter");
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+
+    if (subwindow) {
+        subwindow->SetRect(rect);
+    } else {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not get subwindow, set rect failed");
+    }
+}
+
 bool SubwindowManager::IsFreeMultiWindow(int32_t instanceId) const
 {
     auto parentContainerId = instanceId >= MIN_SUBCONTAINER_ID

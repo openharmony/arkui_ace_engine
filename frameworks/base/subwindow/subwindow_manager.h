@@ -145,6 +145,8 @@ public:
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
+    void SetRect(const NG::RectF& rect, int32_t instanceId);
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();

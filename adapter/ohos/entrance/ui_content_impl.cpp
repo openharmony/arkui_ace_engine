@@ -2259,6 +2259,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        SubwindowManager::GetInstance()->SetRect(NG::RectF(config.Left(), config.Top(),
+            config.Width(), config.Height()), instanceId_);
+    }
     // The density of sub windows related to dialog needs to be consistent with the main window.
     auto modifyConfig = config;
     if (instanceId_ >= MIN_SUBCONTAINER_ID) {
