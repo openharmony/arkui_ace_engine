@@ -375,21 +375,25 @@ void DatePickerPattern::PaintFocusState()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void DatePickerPattern::CalcLeftTotalColumnWith(
-    const RefPtr<FrameNode>& host, float& leftTotalColumnWith, float childSize)
+void DatePickerPattern::CalcLeftTotalColumnWidth(
+    const RefPtr<FrameNode>& host, float& leftTotalColumnWidth, float childSize)
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (isRtl) {
         for (int32_t index = childSize - 1; index > focusKeyID_; --index) {
             auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
             CHECK_NULL_VOID(stackChild);
-            leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+            auto geometryNode = stackChild->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            leftTotalColumnWidth += geometryNode->GetFrameSize().Width();
         }
     } else {
         for (int32_t index = 0; index < focusKeyID_; ++index) {
             auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
             CHECK_NULL_VOID(stackChild);
-            leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+            auto geometryNode = stackChild->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            leftTotalColumnWidth += geometryNode->GetFrameSize().Width();
         }
     }
 }
@@ -402,8 +406,8 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (!ShowMonthDays()) {
         childSize = static_cast<float>(host->GetChildren().size());
     }
-    auto leftTotalColumnWith = 0.0f;
-    CalcLeftTotalColumnWith(host, leftTotalColumnWith, childSize);
+    auto leftTotalColumnWidth = 0.0f;
+    CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -418,7 +422,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;
 
-    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
@@ -426,9 +430,9 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (piantRectWidth > columnWidth) {
         piantRectWidth = columnWidth;
         if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            centerX = leftTotalColumnWith - PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
+            centerX = leftTotalColumnWidth - PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
         } else {
-            centerX = leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
+            centerX = leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
         }
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
@@ -490,11 +494,7 @@ bool DatePickerPattern::ParseDirectionKey(
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {
-        if (isRtl) {
-            focusKeyID_ += 1;
-        } else {
-            focusKeyID_ -= 1;
-        }
+        focusKeyID_ = isRtl ? (focusKeyID_ + 1) : (focusKeyID_ - 1);
         if (!CheckFocusID(childSize)) {
             return false;
         }
@@ -502,11 +502,7 @@ bool DatePickerPattern::ParseDirectionKey(
         return true;
     }
     if (code == KeyCode::KEY_DPAD_RIGHT) {
-        if (isRtl) {
-            focusKeyID_ -= 1;
-        } else {
-            focusKeyID_ += 1;
-        }
+        focusKeyID_ = isRtl ? (focusKeyID_ - 1) : (focusKeyID_ + 1);
         if (ShowMonthDays()) {
             childSize = 1;
         }
