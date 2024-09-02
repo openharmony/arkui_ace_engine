@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import os
+import sys
 import time
 import json
 import stat
@@ -81,17 +82,22 @@ def run_single_test(tests_path, test_suite_name):
         print("TestSuite {} did not compile successfully.".format(test_suite_name))
 
 
-def run_tests_parallel(test_directory):
+def run_tests_parallel(test_directory, path):
     """
     Run all gtest test binaries in parallel.
     """
     test_binaries = []
-    for root, _, files in os.walk(test_directory):
+    search_dir = os.path.join(test_directory, path) if path else test_directory
+    for root, _, files in os.walk(search_dir):
         for file in files:
             test_suite_path = os.path.join(root, file)
             name, ext = os.path.splitext(file)
             if ext == "":
                 test_binaries.append(test_suite_path)
+    for test_binary in test_binaries:
+        xml_file_path = "{}.xml".format(test_binary)
+        if os.path.exists(xml_file_path):
+            os.remove(xml_file_path)
     start = time.time()
     with multiprocessing.Pool(processes=64) as pool:
         pool.map(run_command, iter(test_binaries))
@@ -126,13 +132,14 @@ def run_tests_parallel(test_directory):
         json.dump(test_result, json_file, indent=2)
 
     print("The test results have been generated, path is {}".format(json_file_path))
+    return failed_tests_count + len(test_result["unavailable"])
 
 
 def get_tests_out_path():
     """
     Obtain the output directory of test cases
     """
-    code_path = os.getcwd()
+    code_path = os.path.dirname(os.path.realpath(__file__))
     for _ in range(6):
         code_path = os.path.dirname(code_path)
     code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
@@ -145,6 +152,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
+    parser.add_argument("-p", "--path", type=str, default=None)
     tests_out_path = get_tests_out_path()
     args = parser.parse_args()
     targets = args.target
@@ -152,8 +160,8 @@ def main():
         for target in targets:
             run_single_test(tests_out_path, target)
     else:
-        run_tests_parallel(tests_out_path)
+        return run_tests_parallel(tests_out_path, args.path)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
