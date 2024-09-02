@@ -163,7 +163,7 @@ void JsThirdProviderInteractionOperation::SetSearchElementInfoByAccessibilityIdR
 
 void JsThirdProviderInteractionOperation::SearchElementInfosByText(
     const int64_t elementId, const std::string& text, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback)
+    Accessibility::AccessibilityElementOperatorCallback& callback)
 {
     // 1. Get real elementId
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
@@ -228,7 +228,7 @@ void JsThirdProviderInteractionOperation::SetSearchElementInfoByTextResult(
 
 void JsThirdProviderInteractionOperation::FindFocusedElementInfo(
     const int64_t elementId, const int32_t focusType, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback)
+    Accessibility::AccessibilityElementOperatorCallback& callback)
 {
     // 1. Get real elementId
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;

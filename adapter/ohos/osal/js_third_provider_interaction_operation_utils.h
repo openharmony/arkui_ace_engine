@@ -36,19 +36,19 @@ void TransformAccessbilityElementInfo(
     accessibilityElementInfo.SetDescriptionInfo(nativeInfo.GetAccessibilityDescription());
 
     auto nodeList = nativeInfo.GetChildNodeIds();
-    for (const auto& node : nodeList){
+    for (const auto& node : nodeList) {
         accessibilityElementInfo.AddChild(node);
     }
 
     auto actionList = nativeInfo.GetOperationActions();
-    for (const auto& actionItem : actionList){
+    for (const auto& actionItem : actionList) {
         auto action = OHOS::Accessibility::AccessibleAction(
             static_cast<OHOS::Accessibility::ActionType>(actionItem.actionType),
             actionItem.description);
         accessibilityElementInfo.AddAction(action);
     }
 
-    auto rect=nativeInfo.GetScreenRect();
+    auto rect = nativeInfo.GetScreenRect();
     auto transformedRect = OHOS::Accessibility::Rect(
         rect.leftTopX, rect.leftTopY, rect.rightBottomX, rect.rightBottomY);
     accessibilityElementInfo.SetRectInScreen(transformedRect);
@@ -67,16 +67,16 @@ void TransformAccessbilityElementInfo(
     accessibilityElementInfo.SetEditable(nativeInfo.IsEditable());
     accessibilityElementInfo.SetHinting(nativeInfo.IsHint());
 
-    auto range=nativeInfo.GetRangeInfo();
+    auto range = nativeInfo.GetRangeInfo();
     auto transformedRange = OHOS::Accessibility::RangeInfo(range.min, range.max, range.current);
     accessibilityElementInfo.SetRange(transformedRange);
 
-    auto grid=nativeInfo.GetGridInfo();
+    auto grid = nativeInfo.GetGridInfo();
     auto transformedGrid = OHOS::Accessibility::GridInfo(
         grid.rowCount, grid.columnCount, grid.selectionMode);
     accessibilityElementInfo.SetGrid(transformedGrid);
 
-    auto girdItem=nativeInfo.GetGridItemInfo();
+    auto girdItem = nativeInfo.GetGridItemInfo();
     auto transformedGirdItemInfo = OHOS::Accessibility::GridItemInfo(
         girdItem.rowIndex, girdItem.rowSpan, girdItem.columnIndex,
         girdItem.columnSpan, girdItem.heading, girdItem.selected);
