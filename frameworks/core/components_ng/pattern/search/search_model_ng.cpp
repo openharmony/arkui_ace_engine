@@ -1183,7 +1183,7 @@ void SearchModelNG::SetTextFont(FrameNode* frameNode, const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdatePlaceholderFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
+        textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
