@@ -167,7 +167,6 @@ private:
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
     static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
-    static void UpdateTextFieldFontValue(const RefPtr<FrameNode>& frameNode);
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
 };
 

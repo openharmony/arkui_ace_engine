@@ -772,8 +772,6 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(borderRadius);
     pattern->SetEnableTouchAndHoverEffect(true);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    UpdateTextFieldFontValue(frameNode);
 }
 
 void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
@@ -1789,20 +1787,5 @@ const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
-}
-
-void SearchModelNG::UpdateTextFieldFontValue(const RefPtr<FrameNode>& frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(textFieldTheme);
-
-    Dimension fontSize = textFieldTheme->GetFontSize();
-
-    textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(fontSize));
 }
 } // namespace OHOS::Ace::NG
