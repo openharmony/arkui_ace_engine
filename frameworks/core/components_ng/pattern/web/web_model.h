@@ -157,7 +157,7 @@ public:
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
-
+    virtual void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) {}
@@ -189,6 +189,8 @@ public:
     virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
+    virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

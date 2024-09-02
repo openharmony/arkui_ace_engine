@@ -25,9 +25,6 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -298,7 +295,8 @@ inline float GetMeasuredHeight(const RefPtr<LayoutWrapper>& item, Axis axis)
 
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
-    const bool forward = LessOrEqual(info_->currentOffset_, info_->prevOffset_) || info_->endIndex_ == -1;
+    const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
+    const bool forward = LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
     if (forward) {
         Fill(info_->endIndex_ + 1);
     }
@@ -412,11 +410,9 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
         int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
-        if (cacheDeadline || Negative(itemHeight)) {
-            auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
-            if (item) {
-                itemHeight = GetMeasuredHeight(item, axis_);
-            }
+        auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
+        if (item) {
+            itemHeight = GetMeasuredHeight(item, axis_);
         }
         info_->RecordItem(i, position, itemHeight);
         if (cacheDeadline && GetSysTimestamp() > *cacheDeadline) {

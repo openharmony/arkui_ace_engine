@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
 
-#include "base/utils/utils.h"
 #include "core/components/divider/divider_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -53,6 +51,7 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
                                     : constrainStrokeWidth_;
         constrainSize = SizeF(dividerLength_, constrainStrokeWidth_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+        dividerLength_ = constrainSize.Width();
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                     : contentConstraint.percentReference.Height();
@@ -64,6 +63,7 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
                                     : constrainStrokeWidth_;
         constrainSize = SizeF(constrainStrokeWidth_, dividerLength_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+        dividerLength_ = constrainSize.Height();
     }
     return constrainSize;
 }

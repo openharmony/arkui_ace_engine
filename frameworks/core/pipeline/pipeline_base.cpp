@@ -235,7 +235,7 @@ void PipelineBase::SetFontScale(float fontScale)
     const static float CARD_MAX_FONT_SCALE = 1.3f;
     if (!NearEqual(fontScale_, fontScale)) {
         fontScale_ = fontScale;
-        if ((isJsCard_ || isFormRender_) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
+        if ((isJsCard_ || (isFormRender_ && !isDynamicRender_)) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -636,10 +636,20 @@ void PipelineBase::PrepareCloseImplicitAnimation()
 }
 
 void PipelineBase::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+    const AnimationOption& option,
+    const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     PrepareOpenImplicitAnimation();
+    StartImplicitAnimation(option, curve, finishCallback);
+#endif
+}
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
     auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
     if (IsFormRender()) {
         SetIsFormAnimation(true);

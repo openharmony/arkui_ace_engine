@@ -82,6 +82,8 @@ public:
     void UpdateColorMode(ColorMode colorMode) override;
     ColorMode GetResourceColorMode() const override;
     void SetAppHasDarkRes(bool hasDarkRes);
+    RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
+        const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;

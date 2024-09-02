@@ -14,12 +14,8 @@
  */
 #include "core/interfaces/native/node/qrcode_modifier.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/qrcode/qrcode_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_BG_COLOR = 0xffffffff;
@@ -75,11 +71,19 @@ void ResetContentOpacity(ArkUINodeHandle node)
     QRCodeModelNG::SetContentOpacity(frameNode, DEFAULT_OPACITY);
 }
 
+void SetQRValue(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    QRCodeModelNG::SetQRCodeValue(frameNode, std::string(value));
+}
+
 namespace NodeModifier {
 const ArkUIQRCodeModifier* GetQRCodeModifier()
 {
     static const ArkUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
-        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity };
+        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity, SetQRValue };
 
     return &modifier;
 }

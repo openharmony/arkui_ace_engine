@@ -1540,7 +1540,6 @@ HWTEST_F(SearchTestTwoNg, SetTextFont, TestSize.Level1)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     Font otherfont;
     searchModelInstance.SetTextFont(otherfont);
-    EXPECT_EQ(textFieldLayoutProperty->GetPreferredPlaceholderLineHeightNeedToUpdate(), true);
     Font font;
     font.fontSize = Dimension(2);
     font.fontStyle = Ace::FontStyle::NORMAL;

@@ -563,6 +563,7 @@ export struct PopupComponent {
               .height(this.getCloseButtonHeight())
               .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
+              .flexShrink(0)
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -711,6 +712,7 @@ export struct PopupComponent {
               .height(this.getCloseButtonHeight())
               .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
+              .flexShrink(0)
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()

@@ -31,6 +31,7 @@ template("ace_core_interfaces_native_node") {
     # add common source file needed by all product platform here
     sources = [
       "node/alphabet_indexer_modifier.cpp",
+      "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
       "node/calendar_picker_modifier.cpp",
@@ -86,6 +87,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
       "node/node_relative_container_modifier.cpp",
+      "node/node_scroll_bar_modifier.cpp",
       "node/node_scroll_modifier.cpp",
       "node/node_slider_modifier.cpp",
       "node/node_span_modifier.cpp",

@@ -1423,6 +1423,77 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanStringTest011
+ * @tc.desc: Test basic function of BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString011, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 7, 9));
+    auto firstSpans = spanString->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 0);
+    auto backgroundColorSpan = AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle);
+    EXPECT_NE(backgroundColorSpan, nullptr);
+    EXPECT_EQ(backgroundColorSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundColorSpan->GetEndIndex(), 0);
+
+    auto secondSpans = spanString->GetSpans(1, 1);
+    EXPECT_EQ(secondSpans.size(), 0);
+
+    auto thirdSpans = spanString->GetSpans(0, 1);
+    EXPECT_EQ(thirdSpans.size(), 0);
+
+    auto fourthSpans = spanString->GetSpans(3, 1);
+    EXPECT_EQ(fourthSpans.size(), 0);
+
+    auto fifthSpans = spanString->GetSpans(0, 9);
+    EXPECT_EQ(fifthSpans.size(), 1);
+}
+
+/**
+ * @tc.name: SpanStringTest012
+ * @tc.desc: Test basic function of BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString012, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 8, 10));
+    auto subSpanString = spanString->GetSubSpanString(0, 10);
+    EXPECT_TRUE(subSpanString->IsEqualToSpanString(spanString));
+
+    auto firstSpans = spanString->GetSpans(8, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto backgroundColorSpan = AceType::DynamicCast<BackgroundColorSpan>(firstSpans[0]);
+    EXPECT_NE(backgroundColorSpan, nullptr);
+    EXPECT_EQ(backgroundColorSpan->GetStartIndex(), 8);
+    EXPECT_EQ(backgroundColorSpan->GetEndIndex(), 9);
+    EXPECT_TRUE(backgroundColorSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
  * @tc.name: Tlv001
  * @tc.desc: Test basic function of TLV
  * @tc.type: FUNC

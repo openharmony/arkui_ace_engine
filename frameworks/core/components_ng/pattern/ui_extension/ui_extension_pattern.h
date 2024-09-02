@@ -70,6 +70,15 @@ class RSTransaction;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
+
+struct SessionViewportConfig {
+    bool isDensityFollowHost_ = false;
+    float density_ = 1.0f;
+    uint64_t displayId_ = 0;
+    int32_t orientation_ = 0;
+    uint32_t transform_ = 0;
+};
+
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
@@ -124,8 +133,6 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
-    void DispatchFollowHostDensity(bool densityDpi);
-    void OnDpiConfigurationUpdate() override;
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
     bool IsCompatibleOldVersion();
@@ -161,6 +168,26 @@ public:
     void OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+    void SetViewportConfigChanged(bool ViewportConfigChanged)
+    {
+        viewportConfigChanged_ = ViewportConfigChanged;
+    }
+    bool IsViewportConfigChanged() const
+    {
+        return viewportConfigChanged_;
+    }
+    bool IsForeground() const
+    {
+        return state_ == AbilityState::FOREGROUND;
+    }
+    void SetSessionViewportConfig(const SessionViewportConfig& config)
+    {
+        sessionViewportConfig_ = config;
+    }
+    const SessionViewportConfig& GetSessionViewportConfig() const
+    {
+        return sessionViewportConfig_;
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -212,6 +239,7 @@ private:
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
+    void ReDispatchDisplayArea();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -244,6 +272,9 @@ private:
     bool isAsyncModalBinding_ = false;
     bool isShowPlaceholder_ = false;
     bool densityDpi_ = false;
+    SessionViewportConfig sessionViewportConfig_;
+    bool viewportConfigChanged_ = false;
+    bool displayAreaChanged_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
@@ -254,7 +285,9 @@ private:
     // StartUIExtension should after mountToParent
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
+    bool needReDispatchDisplayArea_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

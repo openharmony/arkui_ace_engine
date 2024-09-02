@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_item_event_hub.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
@@ -80,11 +74,13 @@ RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId)
 
 // use SetDeleteArea to update builder function
 void ListItemModelNG::SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
-    OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
+    OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect, NG::FrameNode* node)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    if (!node) {
+        node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
@@ -141,13 +137,15 @@ void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
 
 void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea)
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    if (!node) {
+        node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_VOID(node);
+    auto eventHub = node->GetEventHub<ListItemEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    auto pattern = node->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(pattern);
     if (isStartArea) {
         RefPtr<NG::UINode> startNode;

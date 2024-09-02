@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 
-#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -317,16 +316,22 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto leftIndex = 0;
-    auto rightIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
-    if (swiperPattern->IsHorizontalAndRightToLeft()) {
-        leftIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
-        rightIndex = 0;
+
+    auto displaycount = swiperPattern->GetDisplayCount();
+    bool leftArrowIsHidden = (index_ == 0);
+    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displaycount);
+    if (swiperPattern->IsSwipeByGroup()) {
+        leftArrowIsHidden = (index_ < displaycount);
+        rightArrowIsHidden = (index_ == (swiperPattern->DisplayIndicatorTotalCount() - 1) * displaycount);
     }
-    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && index_ == leftIndex) ||
-        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == rightIndex)) {
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
+        std::swap(leftArrowIsHidden, rightArrowIsHidden);
+    }
+    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && leftArrowIsHidden) ||
+        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && rightArrowIsHidden)) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
+            host->SetActive(false);
             hostFocusHub->SetParentFocusable(false);
             hostFocusHub->LostSelfFocus();
             return;
@@ -340,6 +345,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         visible = true;
     }
     renderContext->SetVisible(visible);
+    host->SetActive(true);
 }
 
 void SwiperArrowPattern::UpdateArrowContent()
@@ -405,5 +411,13 @@ void SwiperArrowPattern::DumpAdvanceInfo()
     isHover_ ? DumpLog::GetInstance().AddDesc("isHover:true") : DumpLog::GetInstance().AddDesc("isHover:false");
     hoverOnClickFlag_ ? DumpLog::GetInstance().AddDesc("hoverOnClickFlag:true")
                       : DumpLog::GetInstance().AddDesc("hoverOnClickFlag:false");
+}
+
+void SwiperArrowPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("index", index_);
+    json->Put("isTouch", isTouch_);
+    json->Put("isHover", isHover_);
+    json->Put("hoverOnClickFlag", hoverOnClickFlag_);
 }
 } // namespace OHOS::Ace::NG

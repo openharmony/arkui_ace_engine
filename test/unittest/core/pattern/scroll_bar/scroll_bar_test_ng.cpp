@@ -15,6 +15,10 @@
 
 #include "scroll_bar_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
@@ -210,27 +214,26 @@ HWTEST_F(ScrollBarTestNg, ScrollBarProxy001, TestSize.Level1)
 {
     ScrollBarModelNG scrollBarModel;
     auto proxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    CHECK_NULL_VOID(proxy);
     auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
+    CHECK_NULL_VOID(scrollBarProxy);
     ScrollableNodeInfo nodeInfo;
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
-    scrollBarProxy->RegisterScrollableNode(nodeInfo);
-    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    ASSERT_NE(scrollBarProxy, nullptr);
     scrollBarProxy->RegisterScrollBar(nullptr);
     scrollBarProxy->RegisterScrollBar(nullptr);
-    EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 1);
-    scrollBarProxy->UnRegisterScrollableNode(nullptr);
-    scrollBarProxy->UnRegisterScrollableNode(nullptr);
-    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 0);
+    scrollBarProxy->RegisterNestScrollableNode(nodeInfo);
+    ASSERT_EQ(scrollBarProxy->scrollBars_.size(), 1);
     scrollBarProxy->UnRegisterScrollBar(nullptr);
     scrollBarProxy->UnRegisterScrollBar(nullptr);
-    EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 0);
+    ASSERT_EQ(scrollBarProxy->scrollBars_.size(), 0);
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy->RegisterScrollBar(nullptr);
     scrollBarProxy->NotifyScrollableNode(0, 1, nullptr);
     scrollBarProxy->NotifyScrollBarNode(0, 1);
     scrollBarProxy->NotifyScrollStart();
     scrollBarProxy->NotifyScrollStop();
-    scrollBarProxy->NotifyScrollBar(nullptr);
+    scrollBarProxy->NotifyScrollBar();
     scrollBarProxy->StartScrollBarAnimator();
     scrollBarProxy->StopScrollBarAnimator();
     scrollBarProxy->NotifySnapScroll(0, 0, 0, 0);

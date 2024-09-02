@@ -18,12 +18,10 @@
 #include <dirent.h>
 
 #include "drawable_descriptor.h"
+#include "resource_adapter_impl_v2.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/device_config.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -254,7 +252,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
         CHECK_NULL_VOID(adapter);
         for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
             std::string patternName = PRELOAD_LIST[i];
-            themeStyle->checkThemeStyleVector.push_back(patternName);
+            themeStyle->PushBackCheckThemeStyleVector(patternName);
             auto style = adapter->GetPatternByName(patternName);
             if (style) {
                 ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
@@ -849,5 +847,23 @@ ColorMode ResourceAdapterImplV2::GetResourceColorMode() const
 void ResourceAdapterImplV2::SetAppHasDarkRes(bool hasDarkRes)
 {
     appHasDarkRes_ = hasDarkRes;
+}
+
+RefPtr<ResourceAdapter> ResourceAdapterImplV2::GetOverrideResourceAdapter(
+    const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
+{
+    std::shared_ptr<Global::Resource::ResConfig> overrideResConfig(Global::Resource::CreateResConfig());
+    sysResourceManager_->GetOverrideResConfig(*overrideResConfig);
+    if (configurationChange.colorModeUpdate) {
+        overrideResConfig->SetColorMode(ConvertColorModeToGlobal(config.GetColorMode()));
+    }
+    if (configurationChange.directionUpdate) {
+        overrideResConfig->SetDirection(ConvertDirectionToGlobal(config.GetOrientation()));
+    }
+    if (configurationChange.dpiUpdate) {
+        overrideResConfig->SetScreenDensity(config.GetDensity());
+    }
+    auto overrideResMgr = sysResourceManager_->GetOverrideResourceManager(overrideResConfig);
+    return AceType::MakeRefPtr<ResourceAdapterImplV2>(overrideResMgr);
 }
 } // namespace OHOS::Ace

@@ -15,40 +15,16 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include <atomic>
-#include <regex>
-#include <string>
-
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/utils/measure_util.h"
-#include "base/utils/utils.h"
-#include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/ng/page_router_manager.h"
-#include "bridge/js_frontend/js_ace_page.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/platform_bridge.h"
-#include "core/common/thread_checker.h"
-#include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "engine/jsi/jsi_types.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
 
@@ -1732,6 +1708,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .onLanguageChange = dialogAttr.onLanguageChange,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
     };
 #if defined(PREVIEW)
@@ -1755,6 +1732,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
@@ -1806,6 +1786,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .customBuilder = dialogAttr.customBuilder,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
@@ -1819,7 +1800,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear };
+        .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -1832,6 +1814,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         dialogProperties.isSysBlurStyle = false;

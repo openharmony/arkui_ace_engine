@@ -13,39 +13,23 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <cstdlib>
-#include <map>
-#include <memory>
-
 #ifndef TEST_SEGMENTED_WATER_FLOW
 #include "test/mock/base/mock_system_properties.h"
 #endif
+
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+#include "water_flow_test_ng.h"
 
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
 #include "test/mock/core/animation/mock_animation_manager.h"
@@ -67,6 +51,8 @@ void WaterFlowTestNg::SetUpTestSuite()
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
 #endif
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
@@ -859,6 +845,36 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest013, TestSize.Level1)
         IsEqual(pattern_->GetItemRect(1), Rect(WATER_FLOW_WIDTH / 2, 0, WATER_FLOW_WIDTH / 2, BIG_ITEM_MAIN_SIZE)));
 }
 
+/**
+ * @tc.name: WaterFlowTest014
+ * @tc.desc: Test direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow with the RTL direction.
+     * @tc.expected: layout from right to left.
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetLayoutDirection(TextDirection::RTL);
+    ViewAbstract::SetWidth(CalcLength(620));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    model.SetColumnsGap(Dimension(10));
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+}
+
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_005 = 400.f;
 constexpr float OFFSET_TIME_005 = 100.f;
@@ -1110,17 +1126,6 @@ HWTEST_F(WaterFlowTestNg, PositionController007, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. test function.
-     * @tc.expected: function ScrollPage is called.
-     */
-    pattern_->SetAxis(Axis::VERTICAL);
-    controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
-    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
-    EXPECT_TRUE(controller->IsAtEnd());
 }
 
 namespace {
@@ -1203,15 +1208,6 @@ HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. Scroll forward and scroll backward
-     * @tc.expected: Will trigger ScrollPage func
-     */
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
 namespace {
@@ -1448,9 +1444,32 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
+}
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: Test ScrollPage func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
+    auto controller = pattern_->positionController_;
+    controller->ScrollPage(false, false);
+    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
+    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
+    EXPECT_TRUE(controller->IsAtEnd());
 }
 
 /**
@@ -1765,6 +1784,33 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowGetItemIndexTest001
+ * @tc.desc: Test WaterFlow GetItemIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemIndexTest001, TestSize.Level1)
+{
+    float colNumber = 4;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * colNumber);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get invalid WaterFlowItem index.
+     * @tc.expected: Return -1 when input invalid x and y coordinate.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1000000, -1000000), -1));
+
+    /**
+     * @tc.steps: step2. Get valid WaterFlowItem index.
+     * @tc.expected: Return actual index when input valid x and y coordinate.
+     */
+    float itemWidth = WATER_FLOW_WIDTH / colNumber;
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(itemWidth / 2, ITEM_MAIN_SIZE / 2), 0));
+}
+
+/**
  * @tc.name: MeasureForAnimation001
  * @tc.desc: Test WaterFlow MeasureForAnimation function.
  * @tc.type: FUNC
@@ -1912,5 +1958,32 @@ HWTEST_F(WaterFlowTestNg, Reverse001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 3), 200.0f);
     EXPECT_EQ(GetChildY(frameNode_, 4), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 5), -100.0f);
+}
+
+/**
+ * @tc.name: MarginPadding001
+ * @tc.desc: Test margin/padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
+{
+    ColumnModelNG colModel;
+    colModel.Create(Dimension(0), nullptr, "");
+    auto colNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(4);
+    CreateDone(colNode);
+
+    MarginProperty margin = { CalcLength(1), CalcLength(3), CalcLength(5), CalcLength(7) };
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdateMargin(margin);
+    layoutProperty_->UpdatePadding(padding);
+    auto itemLayoutProperty = GetChildLayoutProperty<WaterFlowItemLayoutProperty>(frameNode_, 2);
+    itemLayoutProperty->UpdateMargin(margin);
+    itemLayoutProperty->UpdatePadding(padding);
+    FlushLayoutTask(colNode, true);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 237, 100)));
 }
 } // namespace OHOS::Ace::NG

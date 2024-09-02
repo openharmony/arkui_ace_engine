@@ -24,8 +24,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 CanvasPattern::~CanvasPattern()
@@ -846,7 +844,7 @@ void CanvasPattern::Save()
 #else
     paintMethod_->PushTask<SaveOp>();
 #endif
-    paintMethod_->SaveMatrix();
+    paintMethod_->SaveProperties();
 }
 
 void CanvasPattern::Restore()
@@ -859,7 +857,7 @@ void CanvasPattern::Restore()
 #else
     paintMethod_->PushTask<RestoreOp>();
 #endif
-    paintMethod_->RestoreMatrix();
+    paintMethod_->RestoreProperties();
 }
 
 void CanvasPattern::Scale(double x, double y)
@@ -1164,6 +1162,7 @@ void CanvasPattern::Reset()
     paintMethod_->PushTask<ResetCanvasOp>();
 #endif
     paintMethod_->ResetTransformMatrix();
+    paintMethod_->ResetLineDash();
     SetTextDirection(TextDirection::INHERIT);
 }
 
@@ -1174,6 +1173,7 @@ void CanvasPattern::OnLanguageConfigurationUpdate()
 
 void CanvasPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     UpdateTextDefaultDirection();
 }
 
@@ -1188,5 +1188,13 @@ void CanvasPattern::UpdateTextDefaultDirection()
 void CanvasPattern::SetDensity(double density)
 {
     paintMethod_->SetDensity(density);
+}
+
+void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
+    CHECK_NULL_VOID(contentModifier_);
+    json->Put("CanvasModifier", contentModifier_->GetDumpInfo().c_str());
 }
 } // namespace OHOS::Ace::NG

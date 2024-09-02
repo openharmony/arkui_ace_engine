@@ -98,7 +98,11 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
-  
+
+    // common
+    "src/lib/common/gesture_span.ts",
+    "src/lib/common/gesture_span_native.d.ts",
+
     // init
     "src/index.ts",
   ],

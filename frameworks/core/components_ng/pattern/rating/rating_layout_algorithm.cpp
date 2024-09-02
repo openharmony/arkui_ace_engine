@@ -14,11 +14,7 @@
  */
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rating/rating_layout_property.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(

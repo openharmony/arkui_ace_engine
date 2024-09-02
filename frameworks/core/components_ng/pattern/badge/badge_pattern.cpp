@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
 #include "core/components/badge/badge_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -138,5 +134,31 @@ void BadgePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("badgeTextColor: ").append(badgeTextColor.value().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("circleSize: ").append(std::to_string(circleSize->ConvertToPx())));
     DumpLog::GetInstance().AddDesc(std::string("badgeFontSize: ").append(badgeFontSize.value().ToString()));
+}
+
+void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    auto badgeCount = layoutProperty->GetBadgeCount();
+    auto badgeValue = layoutProperty->GetBadgeValue();
+    auto circleSize = layoutProperty->GetBadgeCircleSize();
+    auto badgeTextColor = layoutProperty->GetBadgeTextColor();
+    auto badgeFontSize = layoutProperty->GetBadgeFontSize();
+    if (badgeCount.has_value()) {
+        const int32_t maxCountNum = 99;
+        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
+        json->Put("badgeCount", std::to_string(badgeCount.value()).c_str());
+        json->Put("badgeMaxCount", std::to_string(badgeMaxCount).c_str());
+    }
+    if (badgeValue.has_value()) {
+        if (badgeValue.value().empty()) {
+            json->Put("badgeValue", "");
+        } else {
+            json->Put("badgeValue", badgeValue.value().c_str());
+        }
+    }
+    json->Put("badgeTextColor", badgeTextColor.value().ToString().c_str());
+    json->Put("circleSize", std::to_string(circleSize->ConvertToPx()).c_str());
+    json->Put("badgeFontSize", badgeFontSize.value().ToString().c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -854,6 +854,8 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     void OnTooltip(const std::string& tooltip);
+    void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void OnPopupShow(bool show);
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
@@ -892,6 +894,7 @@ public:
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
+    void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
@@ -916,8 +919,11 @@ public:
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
+    void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
     sptr<Surface> surface_ = nullptr;
+    sptr<Surface> popupSurface_ = nullptr;
     RefPtr<NG::RosenRenderSurface> renderSurface_ = nullptr;
+    RefPtr<NG::RosenRenderSurface> popupRenderSurface_ = nullptr;
 #endif
 #ifdef OHOS_STANDARD_SYSTEM
     void SetWebRendeGlobalPos(const Offset& pos)
@@ -991,6 +997,7 @@ public:
     void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
 
     void OnTextSelected();
+    void OnDestroyImageAnalyzerOverlay();
 
     void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
     void OnDetachContext();
@@ -1013,6 +1020,8 @@ public:
             keyboardHandler_->Close();
         }
     }
+
+    void StartVibraFeedback(const std::string& vibratorType);
 
 private:
     void InitWebEvent();
@@ -1155,6 +1164,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
     EventCallbackV2 OnNativeEmbedAllDestoryV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
+    EventCallbackV2 OnNativeEmbedVisibilityChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;

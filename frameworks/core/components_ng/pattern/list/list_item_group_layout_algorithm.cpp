@@ -15,13 +15,9 @@
 
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
-#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -130,6 +126,12 @@ float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
     auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
     auto parentWidth = parentIdealSize.CrossSize(axis_).value() + layoutProperty->CreatePaddingAndBorder().Width();
     auto maxWidth = std::min(parentWidth, maxGridWidth);
+    if (LessNotEqual(maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width())) {
+        TAG_LOGI(AceLogTag::ACE_LIST,
+            "ListItemGroup reset to parentWidth since grid_col width:%{public}f, border:%{public}f",
+            maxGridWidth, layoutProperty->CreatePaddingAndBorder().Width());
+        maxWidth = parentWidth;
+    }
     return maxWidth;
 }
 
@@ -436,10 +438,12 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     } else if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
         CheckJumpForwardForBigOffset(startIndex, startPos);
+        startPos = childrenSize_ ? posMap_->GetPos(startIndex) : startPos;
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
         endIndex = GetLanesCeil(endIndex);
         CheckJumpBackwardForBigOffset(endIndex, endPos);
+        endPos = childrenSize_ ? posMap_->GetPos(endIndex) + posMap_->GetRowHeight(endIndex) : endPos;
         MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
     }
 }
@@ -768,7 +772,7 @@ void ListItemGroupLayoutAlgorithm::CheckJumpBackwardForBigOffset(int32_t& endInd
 void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos)
 {
-    float currentEndPos = childrenSize_ ? posMap_->GetPos(startIndex) : startPos;
+    float currentEndPos = startPos;
     float currentStartPos = 0.0f;
     int32_t currentIndex = startIndex - 1;
     while (LessOrEqual(currentEndPos, endPos_ - referencePos_)) {
@@ -788,8 +792,8 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
         }
     }
 
-    currentStartPos = GetStartPosition();
-    currentIndex = GetStartIndex();
+    currentStartPos = startPos - spaceWidth_;
+    currentIndex = startIndex;
     float th = std::max(startPos_ - referencePos_, headerMainSize_);
     while (currentIndex > 0  && GreatNotEqual(currentStartPos, th)) {
         currentEndPos = currentStartPos;
@@ -807,7 +811,7 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
 void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos)
 {
-    float currentStartPos = childrenSize_ ? posMap_->GetPos(endIndex) + posMap_->GetRowHeight(endIndex) : endPos;
+    float currentStartPos = endPos;
     float currentEndPos = 0.0f;
     auto currentIndex = endIndex + 1;
     while (GreatOrEqual(currentStartPos, startPos_ - (referencePos_ - totalMainSize_))) {
@@ -826,8 +830,8 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
             targetIndex_.reset();
         }
     }
-    currentIndex = GetEndIndex();
-    currentEndPos = GetEndPosition();
+    currentIndex = endIndex;
+    currentEndPos = endPos + spaceWidth_;
     while (childrenSize_ && LessOrEqual(currentEndPos, endPos_ - (referencePos_ - totalMainSize_))) {
         currentStartPos = currentEndPos;
         int32_t count = MeasureALineForward(layoutWrapper, layoutConstraint, currentIndex,
@@ -887,6 +891,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos += delta;
         }
         totalMainSize_ = std::max(totalMainSize_ + delta, GetEndPosition() + footerMainSize_);
+        adjustReferenceDelta_ = -delta;
     } else if (GetStartIndex() == 0 && currentStartPos > headerMainSize_) {
         auto delta = currentStartPos - headerMainSize_;
         for (auto& pos : itemPosition_) {
@@ -894,6 +899,7 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
             pos.second.endPos -= delta;
         }
         totalMainSize_ -= delta;
+        adjustReferenceDelta_ = delta;
     }
     if (GetEndIndex() == totalItemCount_ - 1) {
         totalMainSize_ = GetEndPosition() + footerMainSize_;
@@ -1175,6 +1181,8 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
 ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
 {
     ListItemGroupLayoutInfo info;
+    info.headerSize = headerMainSize_;
+    info.footerSize = footerMainSize_;
     if (totalItemCount_ == 0 || childrenSize_) {
         info.atStart = true;
         info.atEnd = true;
@@ -1216,9 +1224,6 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             if (!frameNode->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
-            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
-            }
             if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
                 break;
             }
@@ -1238,9 +1243,6 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             }
             if (!frameNode->CheckNeedForceMeasureAndLayout()) {
                 continue;
-            }
-            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
             }
             if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
                 break;

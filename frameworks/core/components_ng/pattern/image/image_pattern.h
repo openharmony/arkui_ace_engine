@@ -90,7 +90,11 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        } else {
+            return { FocusType::NODE, false };
+        }
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -206,9 +210,13 @@ public:
     void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpLayoutInfo();
+    void DumpLayoutInfo(std::unique_ptr<JsonValue>& json);
     void DumpRenderInfo();
+    void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {

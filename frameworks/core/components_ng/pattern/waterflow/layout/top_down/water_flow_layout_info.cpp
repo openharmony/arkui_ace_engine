@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
-#include <algorithm>
-
-#include "core/components_ng/property/measure_property.h"
-
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
@@ -363,11 +359,13 @@ int32_t WaterFlowLayoutInfo::FastSolveEndIndex(float mainSize) const
         return -1;
     }
 
-    auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), mainSize - currentOffset_,
+    const float endBound = mainSize - currentOffset_;
+    auto it = std::lower_bound(itemInfos_.begin(), itemInfos_.end(), endBound,
         [](const ItemInfo& info, float value) { return LessNotEqual(info.mainOffset, value); });
 
-    if (it == itemInfos_.end()) {
-        return static_cast<int32_t>(itemInfos_.size()) - 1;
+    // The last flowItem with the height of 0 should be regarded as endIndex_ when reach end.
+    while (it != itemInfos_.end() && NearZero(it->mainSize) && NearEqual(it->mainOffset, endBound)) {
+        ++it;
     }
     int32_t res = std::distance(itemInfos_.begin(), it) - 1;
     return std::max(res, 0);
@@ -551,7 +549,6 @@ void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
 
 void WaterFlowLayoutInfo::UpdateOffset(float delta)
 {
-    prevOffset_ = currentOffset_;
     currentOffset_ += delta;
 }
 
@@ -564,6 +561,10 @@ bool WaterFlowLayoutInfo::OutOfBounds() const
 {
     bool outOfStart = itemStart_ && Positive(currentOffset_);
     bool outOfEnd = offsetEnd_ && LessNotEqual(currentOffset_ + maxHeight_, lastMainSize_);
+    // not outOfEnd when content size < mainSize but currentOffset_ == 0
+    if (LessNotEqual(maxHeight_, lastMainSize_)) {
+        outOfEnd &= Negative(currentOffset_);
+    }
     return outOfStart || outOfEnd;
 }
 
@@ -583,13 +584,13 @@ float WaterFlowLayoutInfo::EstimateContentHeight() const
 {
     auto childCount = 0;
     if (!itemInfos_.empty()) {
-        //in segmented layout
+        // in segmented layout
         childCount = static_cast<int32_t>(itemInfos_.size());
     } else if (maxHeight_) {
-        //in original layout, already reach end.
+        // in original layout, already reach end.
         return maxHeight_;
     } else {
-        //in original layout
+        // in original layout
         for (const auto& item : items_[0]) {
             childCount += static_cast<int32_t>(item.second.size());
         }

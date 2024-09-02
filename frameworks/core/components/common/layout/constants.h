@@ -37,6 +37,27 @@ enum class ButtonType {
     DOWNLOAD,
     ICON,
     CUSTOM,
+    ROUNDED_RECTANGLE,
+};
+
+enum class RectWidthStyle {
+    TIGHT,
+    MAX,
+};
+
+enum class RectHeightStyle {
+    TIGHT,
+    MAX,
+    INCLUDE_LINE_SPACE_MIDDLE,
+    INCLUDE_LINE_SPACE_TOP,
+    INCLUDE_LINE_SPACE_BOTTOM,
+    STRUT,
+};
+
+// Type of hover mode area.
+enum class HoverModeAreaType {
+    TOP_SCREEN = 0,
+    BOTTOM_SCREEN = 1,
 };
 
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
@@ -600,6 +621,10 @@ enum class VerticalAlign {
 enum class SwiperDynamicSyncSceneType {
     GESTURE = 0,
     ANIMATE,
+};
+
+enum class MarqueeDynamicSyncSceneType {
+    ANIMATE = 1,
 };
 
 namespace StringUtils {

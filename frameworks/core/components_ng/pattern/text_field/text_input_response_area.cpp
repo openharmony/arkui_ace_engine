@@ -25,14 +25,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/mouse_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -67,13 +62,17 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
 OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
     auto offset = Alignment::GetAlignPosition(parentSize, childSize, Alignment::CENTER);
-    auto textFieldPattern = hostPattern_.Upgrade();
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, OffsetF(0, 0));
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, OffsetF(0, 0));
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
-        return OffsetF(nodeWidth, offset.GetY());
+        auto textFieldLeftOffset = textFieldPattern->GetPaddingLeft() + textFieldPattern->GetBorderLeft();
+        return OffsetF(nodeWidth + textFieldLeftOffset, offset.GetY());
     } else {
-        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, offset.GetY());
+        auto textFieldRightOffset = textFieldPattern->GetPaddingRight() + textFieldPattern->GetBorderRight();
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth - textFieldRightOffset, offset.GetY());
     }
 }
 
@@ -200,6 +199,14 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         auto button = weak.Upgrade();
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        auto node = button->GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto message = !button->IsObscured() ? theme->GetHasShowedPassword() : theme->GetHasHiddenPassword();
+        node->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, message);
     };
     auto longPressCallback = [](GestureEvent& info) {
         LOGD("PasswordResponseArea long press");
@@ -680,14 +687,29 @@ void CleanNodeResponseArea::LoadingImageProperty()
     if (textFieldLayoutProperty->HasIconSrc()) {
         iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
     }
-    if (textFieldLayoutProperty->HasIconColor()) {
-        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
-    }
+    LoadingCancelButtonColor();
     if (textFieldLayoutProperty->HasBundleName()) {
         bundleName_ = textFieldLayoutProperty->GetBundleNameValue();
     }
     if (textFieldLayoutProperty->HasModuleName()) {
         moduleName_ = textFieldLayoutProperty->GetModuleNameValue();
+    }
+}
+
+void CleanNodeResponseArea::LoadingCancelButtonColor()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->GetIsDisabledValue(false)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        iconColor_ = theme->GetTextColorDisable();
+    } else if (textFieldLayoutProperty->HasIconColor()) {
+        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
     }
 }
 

@@ -585,7 +585,7 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
     return this;
   }
-  maintainVisibleContentPosition(value: any): this {
+  maintainVisibleContentPosition(value: boolean | undefined): this {
     modifierWithKey(this._modifiersWithKeys, ListMaintainVisibleContentPositionModifier.identity,
       ListMaintainVisibleContentPositionModifier, value);
     return this;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -38,8 +39,20 @@ enum class ResolutionType : int32_t {
     RESOLUTION_XXXHDPI = 640,
 };
 
+enum class FoldScreenType: int32_t {
+    UNKNOWN = 0,
+    BIG_FOLDER = 1,
+    SMALL_FOLDER = 2,
+    OUTER_FOLDER = 3,
+};
+
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
+extern const char ENABLE_DEBUG_BOUNDARY_KEY[];
+extern const char ENABLE_TRACE_LAYOUT_KEY[];
+extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
+extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
+extern const char ENABLE_DEBUG_STATEMGR_KEY[];
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -70,6 +83,11 @@ public:
      * Init device type according to system property.
      */
     static void InitDeviceTypeBySystemProperty();
+
+    /**
+     * Init fold screen type according to system property.
+     */
+    static void InitFoldScreenTypeBySystemProperty();
 
     /*
      * Get type of current device.
@@ -156,10 +174,24 @@ public:
      */
     static float GetFontWeightScale();
 
+    static void SetFontWeightScale(const float fontWeightScale)
+    {
+        if (fontWeightScale_ != fontWeightScale) {
+            fontWeightScale_ = fontWeightScale;
+        }
+    }
+
     /*
      * Get size scale of device.
      */
     static float GetFontScale();
+
+    static void SetFontScale(const float fontScale)
+    {
+        if (fontScale != fontScale_) {
+            fontScale_ = fontScale;
+        }
+    }
 
     /*
      * Get density of default display.
@@ -250,7 +282,7 @@ public:
 
     static bool GetDebugBoundaryEnabled()
     {
-        return debugBoundaryEnabled_;
+        return debugBoundaryEnabled_.load();
     }
 
     static bool GetDebugOffsetLogEnabled()
@@ -275,7 +307,7 @@ public:
 
     static bool GetLayoutTraceEnabled()
     {
-        return layoutTraceEnable_;
+        return layoutTraceEnable_.load();
     }
 
     static bool GetSyncDebugTraceEnabled()
@@ -305,17 +337,17 @@ public:
 
     static bool GetTraceInputEventEnabled()
     {
-        return traceInputEventEnable_;
+        return traceInputEventEnable_.load();
     }
 
     static bool GetStateManagerEnabled()
     {
-        return stateManagerEnable_;
+        return stateManagerEnable_.load();
     }
 
     static void SetStateManagerEnabled(bool stateManagerEnable)
     {
-        stateManagerEnable_ = stateManagerEnable;
+        stateManagerEnable_.store(stateManagerEnable);
     }
 
     static void SetFaultInjectEnabled(bool faultInjectEnable)
@@ -514,7 +546,11 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
+    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -548,12 +584,14 @@ public:
 
     static float GetDragStartPanDistanceThreshold();
 
+    static bool IsSmallFoldProduct();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
-    static bool layoutTraceEnable_;
-    static bool traceInputEventEnable_;
+    static std::atomic<bool> layoutTraceEnable_;
+    static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
@@ -589,7 +627,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool layoutDetectEnabled_;
-    static bool debugBoundaryEnabled_;
+    static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
@@ -607,7 +645,7 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
-    static bool stateManagerEnable_;
+    static std::atomic<bool> stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
@@ -615,6 +653,9 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static float fontScale_;
+    static float fontWeightScale_;
+    static FoldScreenType foldScreenType_;
 };
 
 } // namespace OHOS::Ace

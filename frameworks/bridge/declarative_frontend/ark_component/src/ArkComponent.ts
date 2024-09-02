@@ -1508,6 +1508,20 @@ class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> 
   }
 }
 
+class AdvancedBlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('advancedBlendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    } else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
 class BlendModeModifier extends ModifierWithKey<ArkBlendMode> {
   constructor(value: ArkBlendMode) {
     super(value);
@@ -3172,6 +3186,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (this._gestureEvent !== null) {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
+      this._gestureEvent.setWeakNodePtr(this._weakPtr);
     }
     return this._gestureEvent;
   }
@@ -4303,6 +4318,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  advancedBlendMode(blendMode: BlendMode, blendApplyType?: BlendApplyType): this {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, AdvancedBlendModeModifier.identity,
+      AdvancedBlendModeModifier, arkBlendMode);
+    return this;
+  }
+
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ClipModifier.identity, ClipModifier, value);
     return this;
@@ -4549,6 +4573,7 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
   if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -4584,6 +4609,10 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
@@ -4615,10 +4644,17 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
 
 class UIGestureEvent {
   private _nodePtr: Object | null;
+  private _weakNodePtr: JsPointerClass;
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
+  setWeakNodePtr(weakNodePtr: JsPointerClass): void {
+    this._weakNodePtr = weakNodePtr;
+  }
   addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
@@ -4679,9 +4715,15 @@ class UIGestureEvent {
     this.addGesture(gesture, GesturePriority.PARALLEL, mask);
   }
   removeGestureByTag(tag: string): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
   }
   clearGestures(): void {
+    if (this._weakNodePtr.invalid()) {
+      return;
+    }
     getUINativeModule().common.clearGestures(this._nodePtr);
   }
 }
@@ -4752,11 +4794,31 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
   }
 }
 
+globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (globalThis.__mapOfModifier__.size === 0) {
+    __modifierElmtDeleteCallback__();
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = new ArkComponent(nativeNode);
-  applyGesture(modifier, component);
+  if (globalThis.__mapOfModifier__.get(elmtId)) {
+    let component = globalThis.__mapOfModifier__.get(elmtId);
+    applyGesture(modifier, component);
+  } else {
+    let component = new ArkComponent(nativeNode);
+    globalThis.__mapOfModifier__.set(elmtId, component);
+    applyGesture(modifier, component);
+  }
+}
+
+declare class UINodeRegisterProxy {
+  public static registerModifierElmtDeleteCallback(): void;
+}
+
+function __modifierElmtDeleteCallback__() {
+  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
+    globalThis.__mapOfModifier__.delete(elmtId);
+  });
 }
 
 const __elementIdToCustomProperties__ = new Map();

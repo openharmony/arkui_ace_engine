@@ -31,13 +31,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const int32_t SECOND_DIVEDER_NODE_INDEX = 3;
 const int32_t THIRD_DIVEDER_NODE_INDEX = 5;
@@ -53,9 +49,9 @@ constexpr size_t FORWAED_BUTTON_INDEX = 3;
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 uint32_t dialogNodePage = 0;
 uint32_t totalPageNum_ = 0;
-Dimension TextPickerDialogView::selectedTextStyleFont_ = 40.0_vp;
-Dimension TextPickerDialogView::normalTextStyleFont_ = 32.0_vp;
-Dimension TextPickerDialogView::disappearTextStyleFont_ = 28.0_vp;
+Dimension TextPickerDialogView::selectedTextStyleFont_ = 40.0_fp;
+Dimension TextPickerDialogView::normalTextStyleFont_ = 32.0_fp;
+Dimension TextPickerDialogView::disappearTextStyleFont_ = 28.0_fp;
 
 RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogProperties,
     const TextPickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -496,7 +492,11 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -844,7 +844,11 @@ void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
@@ -867,7 +871,11 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonForwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonForwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonForwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonForwardLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonForwardLayoutProperty->UpdateUserDefinedIdealSize(
@@ -891,7 +899,11 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonBackwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.prev"));
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        buttonBackwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     buttonBackwardLayoutProperty->UpdateFlexShrink(1.0);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonBackwardLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1489,31 +1501,41 @@ const Dimension TextPickerDialogView::ConvertFontScaleValue(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
     float fontSizeScale = pipeline->GetFontScale();
-    Dimension fontSizeValueResult = fontSizeValue;
+    Dimension fontSizeValueResult = 0.0_fp;
+    Dimension fontSizeValueResultVp = 0.0_vp;
+
+    if (fontSizeValue.Unit() == DimensionUnit::VP) {
+        Dimension fontSizeValueVp(fontSizeLimit.Value(), DimensionUnit::VP);
+        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeValueVp.ConvertToPx())) {
+            fontSizeValueResultVp = fontSizeValueVp;
+        } else {
+            fontSizeValueResultVp = fontSizeValue;
+        }
+        return fontSizeValueResultVp;
+    } else {
+        fontSizeValueResult = fontSizeValue;
+    }
 
     if (NeedAdaptForAging()) {
-        if (fontSizeValue.Unit() == DimensionUnit::VP) {
-            if (isUserSetFont) {
-                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
+        if (isUserSetFont) {
+            if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
+                fontSizeLimit.ConvertToPx()) && (!NearZero(fontSizeScale))) {
+                fontSizeValueResult = fontSizeLimit / fontSizeScale;
+            } else {
+                fontSizeValueResult = fontSizeValue;
             }
-            fontSizeValueResult = AdjustFontSizeScale(fontSizeValueResult, fontSizeScale);
         } else {
             if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxThirdFontScale())) {
                 fontSizeScale = pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale();
                 fontSizeValueResult = fontSizeValue * fontSizeScale;
             }
-            if (isUserSetFont) {
-                fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
-            }
         }
     } else {
         if (isUserSetFont) {
-            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValue, fontSizeLimit, isUserSetFont);
-        }
-
-        if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
-            fontSizeValueResult.Unit() != DimensionUnit::VP) {
-            if (!NearZero(fontSizeScale)) {
+            fontSizeValueResult = ConvertFontSizeLimit(fontSizeValueResult, fontSizeLimit, isUserSetFont);
+        } else {
+            if (GreatOrEqualCustomPrecision(fontSizeScale, pickerTheme->GetMaxOneFontScale()) &&
+                 (!NearZero(fontSizeScale))) {
                 fontSizeValueResult = fontSizeValueResult / fontSizeScale;
             }
         }
@@ -1527,21 +1549,18 @@ const Dimension TextPickerDialogView::ConvertFontSizeLimit(
     if (isUserSetFont == false) {
         return fontSizeValue;
     }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto fontScale = pipeline->GetFontScale();
+
     Dimension fontSizeValueResult = fontSizeValue;
-    if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx() / MARGIN_HALF)) {
-            fontSizeValueResult = fontSizeLimit / MARGIN_HALF;
-        } else {
-            fontSizeValueResult = fontSizeValue;
+    if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontScale, fontSizeLimit.ConvertToPx())) {
+        if (!NearZero(fontScale)) {
+            fontSizeValueResult = fontSizeLimit / fontScale;
         }
     } else {
-        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx())) {
-            fontSizeValueResult = fontSizeLimit;
-        } else {
-            fontSizeValueResult = fontSizeValue;
-        }
+        fontSizeValueResult = fontSizeValue;
     }
-
     return fontSizeValueResult;
 }
 

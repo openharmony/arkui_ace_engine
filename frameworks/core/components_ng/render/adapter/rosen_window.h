@@ -119,6 +119,9 @@ public:
     
     void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
+    uint32_t GetStatusBarHeight() const override;
+
+    void NotifyExtensionTimeout(int32_t errorCode) override;
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

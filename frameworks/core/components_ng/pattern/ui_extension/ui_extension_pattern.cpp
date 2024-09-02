@@ -39,7 +39,9 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
@@ -279,13 +281,14 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(contentNode_);
+        host->RemoveChildAtIndex(0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
+    usage_ = uIExtensionUsage;
     UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
@@ -333,8 +336,8 @@ void UIExtensionPattern::OnConnect()
     CHECK_NULL_VOID(sessionWrapper_);
     UIEXT_LOGI("The session is connected and the current state is '%{public}s'.", ToString(state_));
     ContainerScope scope(instanceId_);
-    contentNode_ = FrameNode::CreateFrameNode(
-        V2::UI_EXTENSION_SURFACE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    contentNode_ = FrameNode::CreateFrameNode(V2::UI_EXTENSION_SURFACE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<UIExtensionSurfacePattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
@@ -356,24 +359,25 @@ void UIExtensionPattern::OnConnect()
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
-    surfaceNode->SetForeground(isModal_);
+    surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
-    if (isModal_ && focusHub) {
+    if ((usage_ == UIExtensionUsage::MODAL) && focusHub) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
-    DispatchFollowHostDensity(GetDensityDpi());
+    sessionWrapper_->UpdateSessionViewportConfig();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
-    if (isFocused || isModal_) {
+    if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
     InitializeAccessibility();
+    ReDispatchDisplayArea();
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
@@ -397,13 +401,28 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     UIEXT_LOGI("The session is disconnected and the current state is '%{public}s'.", ToString(state_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChild(contentNode_);
+    host->RemoveChildAtIndex(0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
+    if (needReNotifyForeground_) {
+        needReNotifyForeground_ = false;
+        UIEXT_LOGI("NotifyForeground onSyncGeometryNode first.");
+        NotifyForeground();
+        needReDispatchDisplayArea_ = true;
+    }
     DispatchDisplayArea(true);
+}
+
+void UIExtensionPattern::ReDispatchDisplayArea()
+{
+    if (needReDispatchDisplayArea_) {
+        UIEXT_LOGI("ReDispatchDisplayArea.");
+        DispatchDisplayArea(true);
+        needReDispatchDisplayArea_ = false;
+    }
 }
 
 void UIExtensionPattern::OnWindowShow()
@@ -435,6 +454,10 @@ void UIExtensionPattern::NotifyForeground()
         UIEXT_LOGI("The state is changing from '%{public}s' to 'FOREGROUND'.", ToString(state_));
         state_ = AbilityState::FOREGROUND;
         sessionWrapper_->NotifyForeground();
+        if (displayAreaChanged_) {
+            sessionWrapper_->NotifyDisplayArea(displayArea_);
+            displayAreaChanged_ = false;
+        }
     }
 }
 
@@ -453,7 +476,7 @@ void UIExtensionPattern::NotifyDestroy()
         state_ != AbilityState::NONE) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
         state_ = AbilityState::DESTRUCTION;
-        sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->NotifyDestroy(false);
         sessionWrapper_->DestroySession();
     }
 }
@@ -779,7 +802,11 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     auto displayArea = RectF(displayOffset, displaySize);
     if (displayArea_ != displayArea || isForce) {
         displayArea_ = displayArea;
-        sessionWrapper_->NotifyDisplayArea(displayArea_);
+        if (state_ == AbilityState::FOREGROUND) {
+            sessionWrapper_->NotifyDisplayArea(displayArea_);
+        } else {
+            displayAreaChanged_ = true;
+        }
     }
 }
 
@@ -882,6 +909,13 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     state_ = AbilityState::NONE;
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        if (!isShowPlaceholder_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChildAtIndex(0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        sessionWrapper_->NotifyDestroy();
         sessionWrapper_->DestroySession();
     }
     if (onErrorCallback_) {
@@ -994,20 +1028,6 @@ void UIExtensionPattern::SetDensityDpi(bool densityDpi)
     densityDpi_ = densityDpi;
 }
 
-void UIExtensionPattern::DispatchFollowHostDensity(bool densityDpi)
-{
-    densityDpi_ = densityDpi;
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->SetDensityDpiImpl(densityDpi_);
-}
-
-void UIExtensionPattern::OnDpiConfigurationUpdate()
-{
-    if (GetDensityDpi()) {
-        DispatchFollowHostDensity(true);
-    }
-}
-
 bool UIExtensionPattern::GetDensityDpi()
 {
     return densityDpi_;
@@ -1100,9 +1120,14 @@ void UIExtensionPattern::OnMountToParentDone()
     UIEXT_LOGI("OnMountToParentDone.");
     hasMountToParent_ = true;
     if (needReNotifyForeground_) {
-        needReNotifyForeground_ = false;
-        UIEXT_LOGI("NotifyForeground OnMountToParentDone.");
-        NotifyForeground();
+        auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
+        if (hostWindowNode) {
+            needReNotifyForeground_ = false;
+            UIEXT_LOGI("NotifyForeground OnMountToParentDone.");
+            NotifyForeground();
+        } else {
+            UIEXT_LOGI("No WindowScene When OnMountToParentDone, wait.");
+        }
     }
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
@@ -1121,9 +1146,14 @@ void UIExtensionPattern::AfterMountToParent()
     UIEXT_LOGI("AfterMountToParent.");
     hasMountToParent_ = true;
     if (needReNotifyForeground_) {
-        needReNotifyForeground_ = false;
-        UIEXT_LOGI("NotifyForeground AfterMountToParent.");
-        NotifyForeground();
+        auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
+        if (hostWindowNode) {
+            needReNotifyForeground_ = false;
+            UIEXT_LOGI("NotifyForeground AfterMountToParent.");
+            NotifyForeground();
+        } else {
+            UIEXT_LOGI("No WindowScene When AfterMountToParent, wait.");
+        }
     }
 }
 

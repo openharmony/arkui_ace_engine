@@ -134,7 +134,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
-enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, APPEAR, DISAPPEAR };
+enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, AI_WRITE, APPEAR, DISAPPEAR };
 enum class CloseReason {
     CLOSE_REASON_NORMAL = 1,
     CLOSE_REASON_HOLD_BY_OTHER,
@@ -169,6 +169,7 @@ struct SelectMenuInfo {
     bool showCopyAll = true;
     bool showCut = true;
     bool showCameraInput = false;
+    bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;
     OptionMenuType menuType = OptionMenuType::TOUCH_MENU;
 
@@ -183,7 +184,8 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
-                 (showCut == info.showCut) && (showCameraInput == info.showCameraInput));
+                 (showCut == info.showCut) && (showCameraInput == info.showCameraInput) &&
+                 (showAIWrite == info.showAIWrite));
     }
 
     std::string ToString() const
@@ -207,6 +209,7 @@ struct SelectMenuCallback {
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
     std::function<void()> onCameraInput;
+    std::function<void()> onAIWrite;
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
@@ -273,6 +276,7 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
     std::function<void(const GestureEvent&, bool isFirst)> onClick;
+    std::function<void(const GestureEvent&, bool isFirst)> afterOnClick;
 
     // handle move callback.
     std::function<void(bool isFirst)> onHandleMoveStart;
@@ -304,6 +308,8 @@ struct SelectOverlayInfo {
     HandleLevelMode handleLevelMode = HandleLevelMode::OVERLAY;
     bool enableHandleLevel = false;
     VectorF scale = VectorF(1.0f, 1.0f);
+    bool clipHandleDrawRect = false;
+    std::optional<RectF> clipViewPort;
 
     std::string ToString() const
     {

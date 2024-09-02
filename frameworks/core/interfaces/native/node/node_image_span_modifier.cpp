@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -197,6 +193,30 @@ void ResetImageSpanColorFilter(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
+
+void SetImageSpanBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    borderRadius.radiusTopRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderRadius.multiValued = true;
+    ImageSpanView::SetBorderRadius(frameNode, borderRadius);
+}
+
+void ResetImageSpanBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::ResetBorderRadius(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -206,7 +226,8 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter};
+        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter,
+        SetImageSpanBorderRadius, ResetImageSpanBorderRadius };
     return &modifier;
 }
 
@@ -216,7 +237,7 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError};
+        SetImageSpanOnError, ResetImageSpanOnError };
     return &modifier;
 }
 } // namespace NodeModifier

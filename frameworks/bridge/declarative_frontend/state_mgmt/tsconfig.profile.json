@@ -87,7 +87,7 @@
     "src/lib/v2/v2_view.ts",
     "src/lib/v2/v2_decorators.ts",
     "src/lib/v2/v2_json_coder.ts",
-    "src/lib/v2/v2_make_observed_core.ts",
+    "src/lib/v2/v2_make_observed.ts",
     "src/lib/common/sendable_type.ts",
 
     // partial_update specific
@@ -96,6 +96,10 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+
+    // common
+    "src/lib/common/gesture_span.ts",
+    "src/lib/common/gesture_span_native.d.ts",
   
     // init
     "src/index.ts",

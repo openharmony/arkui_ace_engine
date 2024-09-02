@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -31,6 +29,13 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
     stack->Push(symbolNode);
     
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode});
+}
+
+RefPtr<FrameNode> SymbolModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(
+        V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    return symbolNode;
 }
 
 void SymbolModelNG::SetFontWeight(const Ace::FontWeight& value)
@@ -115,5 +120,10 @@ void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOpt
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions, frameNode);
+}
+
+void SymbolModelNG::SetSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId)
+{
+    InitialSymbol(frameNode, symbolId);
 }
 } // namespace OHOS::Ace::NG

@@ -81,11 +81,6 @@ public:
         return isViewHasFocused_;
     }
 
-    void SetIsDefaultHasBeFocused(bool isDefaultHasBeFocused)
-    {
-        isDefaultHasBeFocused_ = isDefaultHasBeFocused;
-    }
-
     void SetViewRootScope(const RefPtr<FocusHub>& viewRootScope)
     {
         if (!viewRootScope) {
@@ -106,9 +101,10 @@ public:
     }
 
     bool GetFocusViewFocusable();
+    void FocusViewDidShow(const RefPtr<FocusHub>& focusHub);
 
 private:
-    bool isDefaultHasBeFocused_ = false;
+    bool neverShown_ = true;
     bool isViewRootScopeFocused_ = true;
     bool isViewHasFocused_ = false;
     bool isViewHasShow_ = false;

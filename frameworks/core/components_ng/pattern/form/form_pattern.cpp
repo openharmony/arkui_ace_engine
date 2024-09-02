@@ -27,27 +27,12 @@
 #include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "core/common/form_manager.h"
-#include "core/common/frontend.h"
-#include "core/common/resource/resource_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
-#include "core/components/form/sub_container.h"
-#include "core/components_ng/pattern/form/form_event_hub.h"
-#include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/form/form_node.h"
-#include "core/components_ng/pattern/form/form_theme.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -62,6 +47,7 @@ constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
+constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -437,22 +423,29 @@ void FormPattern::UpdateStaticCard()
     UnregisterAccessibility();
 }
 
-void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
+void FormPattern::SetNonTransparentAfterRecover()
 {
-    // delete image rs node
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    // delete image frame node
-    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-
+    ACE_FUNCTION_TRACE();
     // set frs node non transparent
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
-        TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
     }
+}
+
+void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
+{
+    ACE_FUNCTION_TRACE();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    // delete image rs node and frame node
+    RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -611,6 +604,10 @@ void FormPattern::OnModifyDone()
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
+
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -654,12 +651,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        PostBgTask(
-            [weak = WeakClaim(this), info] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->AddFormComponent(info);
-            }, "ArkUIHandleFormComponent");
+        AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
     }
@@ -687,6 +679,15 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
+    PostBgTask([weak = WeakClaim(this), info, host] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddFormComponentTask(info, host);
+        }, "ArkUIAddFormComponent");
+}
+
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host)
+{
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
     if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
@@ -1482,6 +1483,13 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     CHECK_NULL_VOID(context);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetNonTransparentAfterRecover();
+        },
+        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover");
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();

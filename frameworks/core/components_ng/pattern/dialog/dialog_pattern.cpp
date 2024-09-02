@@ -17,18 +17,12 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
-#include <optional>
-#include <string>
 
-#include "base/geometry/dimension.h"
-#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
@@ -132,6 +126,31 @@ void DialogPattern::OnAttachToFrameNode()
     };
     auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
+    RegisterHoverModeChangeCallback();
+}
+
+void DialogPattern::RegisterHoverModeChangeCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto hoverModeChangeCallback = [weak = WeakClaim(this), context](bool isHalfFoldHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetCurve(motion);
+        context->FlushUITasks();
+        context->Animate(optionPosition, motion, [host, context]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            context->FlushUITasks();
+        });
+    };
+    auto hoverModeCallId = context->RegisterHalfFoldHoverChangedCallback(std::move(hoverModeChangeCallback));
+    UpdateHoverModeChangedCallbackId(hoverModeCallId);
 }
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -141,6 +160,9 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
+    if (HasHoverModeChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
     }
 }
 
@@ -1640,6 +1662,96 @@ void DialogPattern::InitHostWindowRect()
         CHECK_NULL_VOID(subwindow);
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    }
+}
+
+void DialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Type", DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type).c_str());
+    if (!dialogProperties_.title.empty()) {
+        json->Put("Title", dialogProperties_.title.c_str());
+    }
+    if (!dialogProperties_.subtitle.empty()) {
+        json->Put("Subtitle", dialogProperties_.subtitle.c_str());
+    }
+    if (!dialogProperties_.content.empty()) {
+        json->Put("Content", dialogProperties_.content.c_str());
+    }
+    json->Put("DialogButtonDirection",
+        DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(dialogProperties_.buttonDirection).c_str());
+    if (dialogProperties_.width.has_value()) {
+        json->Put("Width", dialogProperties_.width.value().ToString().c_str());
+    }
+    if (dialogProperties_.height.has_value()) {
+        json->Put("Height", dialogProperties_.height.value().ToString().c_str());
+    }
+    if (dialogProperties_.backgroundBlurStyle.has_value()) {
+        json->Put("BackgroundBlurStyle", std::to_string(dialogProperties_.backgroundBlurStyle.value()).c_str());
+    }
+    if (dialogProperties_.borderWidth.has_value()) {
+        json->Put("BorderWidth", dialogProperties_.borderWidth.value().ToString().c_str());
+    }
+    if (dialogProperties_.borderColor.has_value()) {
+        json->Put("BorderColor", dialogProperties_.borderColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.backgroundColor.has_value()) {
+        json->Put("BackgroundColor", dialogProperties_.backgroundColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.borderRadius.has_value()) {
+        json->Put("BorderRadius", dialogProperties_.borderRadius.value().ToString().c_str());
+    }
+    DumpBoolProperty(json);
+    DumpObjectProperty(json);
+}
+
+void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("AutoCancel", GetBoolStr(dialogProperties_.autoCancel).c_str());
+    json->Put("CustomStyle", GetBoolStr(dialogProperties_.customStyle).c_str());
+    json->Put("IsMenu", GetBoolStr(dialogProperties_.isMenu).c_str());
+    json->Put("IsMask", GetBoolStr(dialogProperties_.isMask).c_str());
+    json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
+    json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
+    json->Put("IsShowInSubWindow", GetBoolStr(dialogProperties_.isShowInSubWindow).c_str());
+}
+
+void DialogPattern::DumpObjectProperty(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(dialogProperties_.alignment).c_str());
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    children->Put("dx", dialogProperties_.offset.GetX().ToString().c_str());
+    children->Put("dy", dialogProperties_.offset.GetY().ToString().c_str());
+    json->Put("Offset", children);
+    if (dialogProperties_.buttons.size() > 0) {
+        std::unique_ptr<JsonValue> buttons = JsonUtil::Create(true);
+        int32_t inx = -1;
+        for (auto buttonInfo : dialogProperties_.buttons) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            child->Put("text", buttonInfo.text.c_str());
+            child->Put("color", buttonInfo.textColor.c_str());
+            inx++;
+            std::string key = "button_" + std::to_string(inx);
+            buttons->Put(key.c_str(), child);
+        }
+        json->Put("buttons", buttons);
+    }
+    if (dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+
+        child->Put("radius", shadow.GetBlurRadius());
+        child->Put("style", static_cast<int32_t>(shadow.GetStyle()));
+        child->Put("type", static_cast<int32_t>(shadow.GetShadowType()));
+        child->Put("fill", GetBoolStr(shadow.GetIsFilled()).c_str());
+        child->Put("offset", shadow.GetOffset().ToString().c_str());
+        json->Put("shadow", child);
+    }
+    if (dialogProperties_.maskColor.has_value()) {
+        json->Put("MaskColor", dialogProperties_.maskColor.value().ToString().c_str());
+    }
+    if (dialogProperties_.maskRect.has_value()) {
+        json->Put("MaskRect", dialogProperties_.maskRect.value().ToString().c_str());
     }
 }
 } // namespace OHOS::Ace::NG

@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -136,6 +131,7 @@ void BaseTextSelectOverlay::ToggleMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->ToggleOptionMenu();
+    UpdateOriginalMenuIsShow();
 }
 
 void BaseTextSelectOverlay::ShowMenu()
@@ -143,6 +139,7 @@ void BaseTextSelectOverlay::ShowMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->ShowOptionMenu();
+    UpdateOriginalMenuIsShow();
 }
 
 void BaseTextSelectOverlay::HideMenu(bool noAnimation)
@@ -150,6 +147,7 @@ void BaseTextSelectOverlay::HideMenu(bool noAnimation)
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->HideOptionMenu(noAnimation);
+    UpdateOriginalMenuIsShow();
 }
 
 void BaseTextSelectOverlay::DisableMenu()
@@ -201,10 +199,12 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
     return pattern->GetHost();
 }
 
-void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
-    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+    if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    } else if (IsTouchUp(sourceType, touchType)) {
+        HideMenu(true);
     }
 }
 
@@ -239,6 +239,11 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
     if (enableHandleLevel_) {
         overlayInfo.scale = GetHostScale();
     }
+    overlayInfo.afterOnClick = [weak = WeakClaim(this)](const GestureEvent&, bool isFirst) {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->UpdateOriginalMenuIsShow();
+    };
 }
 
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
@@ -626,13 +631,19 @@ void BaseTextSelectOverlay::UpdateTransformFlag()
 
 std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
 {
+    if (IsClipHandleWithViewPort()) {
+        RectF viewPort;
+        if (GetClipHandleViewPort(viewPort)) {
+            return viewPort;
+        }
+    }
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, std::nullopt);
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
-        auto scrollableContainer = host->GetPattern<NestableScrollContainer>();
+        auto scrollableContainer = parent->GetPattern<NestableScrollContainer>();
         if (scrollableContainer) {
             return parent->GetTransformRectRelativeToWindow();
         }
@@ -703,6 +714,7 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     isHandleDragging_ = false;
+    originalMenuIsShow_ = false;
     if (enableHandleLevel_) {
         auto host = GetOwner();
         CHECK_NULL_VOID(host);
@@ -811,23 +823,36 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     if (IsAncestorNodeGeometryChange(flag)) {
         isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
     }
-    isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasUnsupportedTransform());
-    if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
-        HideMenu(true);
-    } else if (IsAncestorNodeEndScroll(flag)) {
-        ShowMenu();
-    }
+    auto isScrollEnd = IsAncestorNodeEndScroll(flag);
+    isSwitchToEmbed = isSwitchToEmbed && (!isScrollEnd || HasUnsupportedTransform());
+    UpdateMenuWhileAncestorNodeChanged(
+        isStartScroll || isStartAnimation || isTransformChanged || isStartTransition, isScrollEnd);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterRenderTask([weak = WeakClaim(this), isSwitchToEmbed]() {
+    pipeline->AddAfterRenderTask([weak = WeakClaim(this), isSwitchToEmbed, isScrollEnd]() {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
+        if (isScrollEnd) {
+            overlay->SwitchToOverlayMode();
+            return;
+        }
         if (isSwitchToEmbed) {
             overlay->SwitchToEmbedMode();
-        } else {
-            overlay->SwitchToOverlayMode();
         }
     });
+}
+
+void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if (shouldHideMenu) {
+        manager->HideOptionMenu(true);
+        return;
+    }
+    if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging()) {
+        manager->ShowOptionMenu();
+    }
 }
 
 bool BaseTextSelectOverlay::IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag)
@@ -1084,5 +1109,53 @@ bool BaseTextSelectOverlay::CheckHasTransformMatrix(const RefPtr<RenderContext>&
     Vector4F perspectiveVector(transform.perspective[xIndex], transform.perspective[yIndex],
         transform.perspective[zIndex], transform.perspective[wIndex]);
     return !(perspectiveVector == perspectiveIdentity);
+}
+
+bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    if (HasUnsupportedTransform()) {
+        return false;
+    }
+    RectF contentRect;
+    if (!GetFrameNodeContentRect(host, contentRect)) {
+        return false;
+    }
+    contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        RectF parentContentRect;
+        if (!GetFrameNodeContentRect(parent, parentContentRect)) {
+            return false;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        if (renderContext->GetClipEdge().value_or(false)) {
+            contentRect = contentRect.IntersectRectT(parentContentRect);
+        }
+        contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
+    contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
+    UpdateClipHandleViewPort(contentRect);
+    rect = contentRect;
+    return true;
+}
+
+bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto geometryNode = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (geometryNode->GetContent()) {
+        contentRect = geometryNode->GetContentRect();
+    } else {
+        contentRect = RectF(OffsetF(0.0f, 0.0f), geometryNode->GetFrameSize());
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

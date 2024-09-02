@@ -60,7 +60,15 @@ public:
     struct AnimationParams {
         AnimationCallbacks callbacks;
         AnimationOperation type = AnimationOperation::PLAY;
+
+        void Reset()
+        {
+            callbacks.finishCb = nullptr;
+            callbacks.repeatCb = nullptr;
+            type = AnimationOperation::CANCEL;
+        }
     };
+
     void SetParams(int32_t duration, AnimationCallbacks&& param)
     {
         params_.callbacks = std::move(param);
@@ -77,6 +85,12 @@ public:
      *
      */
     void Tick();
+
+    /**
+     * @brief Force update animations by @c delta to simulate velocity animation
+     *
+     */
+    void TickByVelocity(float velocity);
 
     void Reset();
 

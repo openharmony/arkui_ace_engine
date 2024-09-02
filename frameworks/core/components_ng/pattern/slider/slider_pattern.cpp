@@ -44,6 +44,8 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double STEP_OFFSET = 50.0;
+constexpr uint64_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
+const std::string STR_ACCESSIBILITY_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -106,6 +108,23 @@ void SliderPattern::InitAccessibilityHoverEvent()
         CHECK_NULL_VOID(slider);
         slider->HandleAccessibilityHoverEvent(isHover, info);
     });
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
+        if (focus) {
+            auto slider = weak.Upgrade();
+            CHECK_NULL_VOID(slider);
+            slider->HandleSliderOnAccessibilityFocusCallback();
+        }
+    });
+}
+
+void SliderPattern::HandleSliderOnAccessibilityFocusCallback()
+{
+    for (const auto& pointNode : pointAccessibilityNodeVec_) {
+        pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
+            AccessibilityProperty::Level::NO_STR);
+    }
 }
 
 void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const AccessibilityHoverInfo& info)
@@ -118,10 +137,6 @@ void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const Accessibil
                 AccessibilityProperty::Level::YES_STR);
         }
     } else if (!isHover) {
-        for (const auto& pointNode : pointAccessibilityNodeVec_) {
-            pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
-                AccessibilityProperty::Level::NO_STR);
-        }
         auto host = GetHost();
         auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
@@ -372,8 +387,12 @@ SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
 {
     auto host = GetHost();
     auto& hostContent = host->GetGeometryNode()->GetContent();
-    float pointNodeHeight = blockHotSize_.Height();
-    float pointNodeWidth = blockHotSize_.Width();
+    auto pointCount = pointAccessibilityNodeEventVec_.size();
+    if (pointCount <= 1) {
+        return SizeF(0, 0);
+    }
+    float pointNodeHeight = sliderLength_ / (pointCount - 1);
+    float pointNodeWidth = pointNodeHeight;
     if (direction_ == Axis::HORIZONTAL) {
         pointNodeHeight = hostContent->GetRect().Height();
     } else {
@@ -707,6 +726,11 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
         }
     }
     panMoveFlag_ = allowDragEvents_;
+    if (panMoveFlag_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+    }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1316,10 +1340,33 @@ void SliderPattern::FireChangeEvent(int32_t mode)
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
+    SendAccessibilityValueEvent(mode);
+}
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+void SliderPattern::SendAccessibilityValueEvent(int32_t mode)
+{
+    if (accessibilityValue_ == value_) {
+        return;
+    }
+    accessibilityValue_ = value_;
+    auto currentTime = GetMilliseconds();
+    if (currentTime - lastAccessibilityValueTime_ < ACCESSIBILITY_SENDEVENT_TIMESTAMP) {
+        return;
+    }
+    lastAccessibilityValueTime_ = currentTime;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
+        },
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_SENDEVENT_TIMESTAMP, STR_ACCESSIBILITY_SENDEVENT);
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)

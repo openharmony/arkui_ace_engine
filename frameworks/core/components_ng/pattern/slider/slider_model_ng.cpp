@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -719,6 +717,7 @@ Gradient SliderModelNG::CreateSolidGradient(Color value)
 
 void SliderModelNG::SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

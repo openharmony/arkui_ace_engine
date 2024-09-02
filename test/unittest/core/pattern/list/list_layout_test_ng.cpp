@@ -14,6 +14,11 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -505,6 +510,28 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -100);
     ScrollSnap(-110, 0);
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 50);
+}
+
+/**
+ * @tc.name: ContentOffset007
+ * @tc.desc: Test List edge check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign START
+     * @tc.expected: not OutOfBoundary
+     */
+    const float contentStartOffset = 50;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateDone(frameNode_);
+
+    EXPECT_FALSE(pattern_->IsOutOfBoundary());
 }
 
 /**
@@ -1257,6 +1284,67 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListPattern_GetItemIndex001
+ * @tc.desc: Test the GetItemIndex function of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List then slide List by Scroller.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone(frameNode_);
+    pattern_->ScrollBy(ITEM_HEIGHT / 2.0f);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid ListItem index.
+     * @tc.expected: Return -1 when input invalid x and y.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(100000, -100000), -1));
+
+    /**
+     * @tc.steps: step3. Get valid ListItem Rect.
+     * @tc.expected: Return actual Rect when input valid index.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(FILL_LENGTH.Value() * LIST_WIDTH /2, ITEM_HEIGHT * 0.2), 1));
+}
+
+/**
+ * @tc.name: ListPattern_GetItemIndexInGroup001
+ * @tc.desc: Test the GetItemIndexInGroup function of List.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndexInGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List then slide List by Scroller.
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->ScrollTo(ITEM_HEIGHT * 2);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get invalid group item index.
+     * @tc.expected: Return {-1, -1, -1} when input invalid group x and y.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(100000, -100000), {-1, -1, -1}));
+
+    /**
+     * @tc.steps: step3. Get valid group item index.
+     * @tc.expected: Return actual index when input valid group x and y.
+     */
+    EXPECT_TRUE(IsEqual(
+        pattern_->GetItemIndexInGroup(FILL_LENGTH.Value() * LIST_WIDTH* 0.9, ITEM_HEIGHT* 0.9), {0, 1, 2}));
+}
+
+/**
  * @tc.name: ListPattern_GetItemRectInGroup001
  * @tc.desc: Test the GetItemRectInGroup function of List.
  * @tc.type: FUNC
@@ -1595,5 +1683,70 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(item14->IsActive(), false);
     auto item15 = frameNode_->GetChildByIndex(15)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+}
+
+/**
+ * @tc.name: SetHeaderFooterComponent01
+ * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List group with ComponentContent
+     */
+    const int32_t groupNumber = 5;
+    const float contentStartOffset = 100;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetSticky(V2::StickyStyle::BOTH);
+    CreateGroupWithSettingWithComponentContent(groupNumber, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get the count of group
+     * @tc.expected: header and footer can be added successfully.
+     */
+    auto group0 = GetChildFrameNode(frameNode_, 0);
+    auto group1 = GetChildFrameNode(frameNode_, 1);
+    auto group0Children = group0->GetChildren();
+    auto group1Children = group1->GetChildren();
+    auto group0Pattern = group0->GetPattern<ListItemGroupPattern>();
+    EXPECT_EQ(group0Children.size(), 4);
+    EXPECT_EQ(group1Children.size(), 4);
+
+    /**
+     * @tc.steps: step3. Update header and footer
+     * @tc.expected: new header and footer can be set.
+     */
+    bool headerResult = false;
+    bool footerResult = false;
+    group0Pattern->AddHeader(CreateCustomNode("NewHeader"));
+    group0Pattern->AddFooter(CreateCustomNode("NewFooter"));
+    const char newFooter[] = "NewFooter";
+    const char newHeader[] = "NewHeader";
+    auto children = group0->GetChildren();
+    for (auto child : children) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode->GetTag() == newHeader) {
+            headerResult = true;
+        }
+        if (childFrameNode->GetTag() == newFooter) {
+            footerResult = true;
+        }
+    }
+    EXPECT_TRUE(headerResult);
+    EXPECT_TRUE(footerResult);
+
+    /**
+     * @tc.steps: step4. Remove group0 header and footer
+     * @tc.expected: header and footer can be removed successfully.
+     */
+    group0Pattern->RemoveHeader();
+    group0Pattern->RemoveFooter();
+    group0Children = group0->GetChildren();
+    EXPECT_EQ(group0Children.size(), 2);
 }
 } // namespace OHOS::Ace::NG

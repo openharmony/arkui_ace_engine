@@ -16,14 +16,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 #include <cstdint>
-#include <iterator>
-#include <utility>
 
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
@@ -110,6 +103,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
 void SpanString::ApplyToSpans(
     const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation)
 {
+    SetGroupId(span);
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto intersection = (*it)->GetIntersectionInterval(interval);
         if (!intersection) {
@@ -407,6 +401,10 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<LineHeightSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
+        case SpanType::Url:
+            return MakeRefPtr<UrlSpan>();
+        case SpanType::BackgroundColor:
+            return MakeRefPtr<BackgroundColorSpan>();
         default:
             return nullptr;
     }
@@ -467,6 +465,14 @@ void SpanString::SetString(const std::string& text)
     text_ = text;
 }
 
+void SpanString::SetGroupId(const RefPtr<SpanBase>& span)
+{
+    if (span->GetSpanType() == SpanType::BackgroundColor) {
+        auto backgroundColorSpan = DynamicCast<BackgroundColorSpan>(span);
+        CHECK_NULL_VOID(backgroundColorSpan);
+        backgroundColorSpan->SetBackgroundColorGroupId(groupId_++);
+    }
+}
 void SpanString::SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems)
 {
     spans_ = spanItems;
@@ -867,5 +873,133 @@ void SpanString::DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor,
             spanStr->AppendSpanItem(spanItem);
         }
     }
+    spanStr->UpdateSpansMap();
+}
+
+void SpanString::UpdateSpansMap()
+{
+    spansMap_.clear();
+    for (auto& spanItem : spans_) {
+        if (!spanItem) {
+            continue;
+        }
+        auto start = spanItem->interval.first;
+        auto end = spanItem->interval.second;
+        std::list<RefPtr<SpanBase>> spanBases = {
+            ToFontSpan(spanItem, start, end),
+            ToDecorationSpan(spanItem, start, end),
+            ToBaselineOffsetSpan(spanItem, start, end),
+            ToLetterSpacingSpan(spanItem, start, end),
+            ToGestureSpan(spanItem, start, end),
+            ToImageSpan(spanItem),
+            ToParagraphStyleSpan(spanItem, start, end),
+            ToLineHeightSpan(spanItem, start, end) };
+        for (auto& spanBase : spanBases) {
+            if (!spanBase) {
+                continue;
+            }
+            auto it = spansMap_.find(spanBase->GetSpanType());
+            if (it == spansMap_.end()) {
+                spansMap_.insert({ spanBase->GetSpanType(), { spanBase } });
+            } else {
+                it->second.emplace_back(std::move(spanBase));
+            }
+        }
+    }
+}
+
+RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
+    Font font;
+    font.fontColor = spanItem->fontStyle->GetTextColor();
+    font.fontFamiliesNG = spanItem->fontStyle->GetFontFamily();
+    font.fontSize = spanItem->fontStyle->GetFontSize();
+    font.fontStyle = spanItem->fontStyle->GetItalicFontStyle();
+    font.fontWeight = spanItem->fontStyle->GetFontWeight();
+    return AceType::MakeRefPtr<FontSpan>(font, start, end);
+}
+
+RefPtr<DecorationSpan> SpanString::ToDecorationSpan(
+    const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
+    TextDecoration type = spanItem->fontStyle->GetTextDecoration().value_or(TextDecoration::NONE);
+    std::optional<Color> color = spanItem->fontStyle->GetTextDecorationColor();
+    std::optional<TextDecorationStyle> style = spanItem->fontStyle->GetTextDecorationStyle();
+    return AceType::MakeRefPtr<DecorationSpan>(type, color, style, start, end);
+}
+
+RefPtr<BaselineOffsetSpan> SpanString::ToBaselineOffsetSpan(
+    const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
+    Dimension baselineOffset;
+    if (spanItem->textLineStyle->GetBaselineOffset().has_value()) {
+        baselineOffset.SetValue(spanItem->textLineStyle->GetBaselineOffsetValue().ConvertToVp());
+    }
+    return AceType::MakeRefPtr<BaselineOffsetSpan>(baselineOffset, start, end);
+}
+
+RefPtr<LetterSpacingSpan> SpanString::ToLetterSpacingSpan(
+    const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
+    Dimension letterSpacing;
+    if (spanItem->fontStyle->GetLetterSpacing().has_value()) {
+        letterSpacing.SetValue(spanItem->fontStyle->GetLetterSpacingValue().ConvertToVp());
+    }
+    return AceType::MakeRefPtr<LetterSpacingSpan>(letterSpacing, start, end);
+}
+
+RefPtr<GestureSpan> SpanString::ToGestureSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    GestureStyle gestureInfo;
+    if (spanItem->onClick) {
+        gestureInfo.onClick = spanItem->onClick;
+    }
+    if (spanItem->onLongPress) {
+        gestureInfo.onLongPress = spanItem->onLongPress;
+    }
+    return AceType::MakeRefPtr<GestureSpan>(gestureInfo, start, end);
+}
+
+RefPtr<TextShadowSpan> SpanString::ToTextShadowSpan(
+    const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->fontStyle, nullptr);
+    std::vector<Shadow> textShadow = spanItem->fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    return AceType::MakeRefPtr<TextShadowSpan>(textShadow, start, end);
+}
+
+RefPtr<ImageSpan> SpanString::ToImageSpan(const RefPtr<NG::SpanItem>& spanItem)
+{
+    auto imageItem = DynamicCast<NG::ImageSpanItem>(spanItem);
+    CHECK_NULL_RETURN(imageItem, nullptr);
+    return AceType::MakeRefPtr<ImageSpan>(imageItem->options);
+}
+
+RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
+    const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
+    SpanParagraphStyle paragraphStyle;
+    paragraphStyle.align = spanItem->textLineStyle->GetTextAlign();
+    paragraphStyle.maxLines = spanItem->textLineStyle->GetMaxLines();
+    paragraphStyle.textOverflow = spanItem->textLineStyle->GetTextOverflow();
+    paragraphStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
+    paragraphStyle.wordBreak = spanItem->textLineStyle->GetWordBreak();
+    paragraphStyle.textIndent = spanItem->textLineStyle->GetTextIndent();
+    return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, start, end);
+}
+
+RefPtr<LineHeightSpan> SpanString::ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
+    Dimension lineHeight;
+    if (spanItem->textLineStyle->GetLineHeight().has_value()) {
+        lineHeight.SetValue(spanItem->textLineStyle->GetLineHeightValue().ConvertToVp());
+    }
+    return AceType::MakeRefPtr<LineHeightSpan>(lineHeight, start, end);
 }
 } // namespace OHOS::Ace

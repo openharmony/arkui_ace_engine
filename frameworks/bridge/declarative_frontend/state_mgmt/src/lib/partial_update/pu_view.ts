@@ -249,6 +249,17 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
   }
 
+  public purgeDeleteElmtId(rmElmtId: number): boolean {
+    stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (PU) is purging the rmElmtId:${rmElmtId}`);
+    const result = this.updateFuncByElmtId.delete(rmElmtId);
+    if (result) {
+      this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+      // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+    }
+    return result;
+  }
+
   protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {
     this.ownObservedPropertiesStore_.forEach((stateVar: ObservedPropertyAbstractPU<any>) => {
       stateVar.purgeDependencyOnElmtId(elmtId);

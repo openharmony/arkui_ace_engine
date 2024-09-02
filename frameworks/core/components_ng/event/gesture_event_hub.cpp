@@ -15,12 +15,6 @@
 
 #include "core/components_ng/event/gesture_event_hub.h"
 
-#include <cstdint>
-#include <list>
-#include <memory>
-#include <string>
-#include "drag_event.h"
-
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -37,20 +31,11 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
-#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
-#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
-#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"
@@ -97,77 +82,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = eventHub_.Upgrade();
-    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-    if (scrollableActuator_) {
-        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
-            localPoint, host, targetComponent, responseLinkResult);
-    }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
-    if (dragEventActuator_) {
-        dragEventActuator_->AddTouchListener(touchRestrict);
-    }
-    if (touchEventActuator_) {
-        touchEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
-    }
-    if (clickEventActuator_ && !redirectClick_) {
-        clickEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
-    }
-    if (userParallelClickEventActuator_) {
-        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
-        if (clickRecognizer) {
-            clickRecognizer->SetGestureInfo(
-                MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, GestureTypeName::CLICK, true));
-            clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
-            clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
-        }
-    }
-    if (panEventActuator_) {
-        panEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
-    }
-
-    TouchTestResult dragTargets;
-    if (longPressEventActuator_) {
-        longPressEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
-    }
-    if (dragEventActuator_) {
-        dragEventActuator_->OnCollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
-    }
-
-    std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
-    for (const auto& item : dragTargets) {
-        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
-        if (recognizer) {
-            recognizer->BeginReferee(touchId);
-            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
-            recognizer->SetTargetComponent(targetComponent);
-            if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
-                auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
-                if (group) {
-                    group->SetChildrenTargetComponent(targetComponent);
-                }
-            }
-        }
-        longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
-    }
-    if (!longPressRecognizers.empty()) {
-        // this node has long press and drag event, combine into parallelRecognizer.
-        if (!nodeParallelRecognizer_) {
-            nodeParallelRecognizer_ = MakeRefPtr<ParallelRecognizer>(std::move(longPressRecognizers));
-        } else {
-            nodeParallelRecognizer_->AddChildren(longPressRecognizers);
-        }
-        innerTargets.emplace_back(nodeParallelRecognizer_);
-    } else {
-        nodeParallelRecognizer_.Reset();
-    }
+    ProcessEventTouchTestHit(coordinateOffset, touchRestrict, innerTargets,
+        finalResult, touchId, localPoint, targetComponent, responseLinkResult);
+    ProcessDragEventTouchTestHit(coordinateOffset, touchRestrict, innerTargets,
+        finalResult, touchId, localPoint, targetComponent, responseLinkResult);
 
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     for (auto const& eventTarget : innerTargets) {
@@ -194,6 +114,92 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     ProcessTouchTestHierarchy(
         coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId, targetComponent, responseLinkResult);
 
+    return false;
+}
+
+bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (scrollableActuator_) {
+        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
+            localPoint, host, targetComponent, responseLinkResult);
+    }
+    if (dragEventActuator_) {
+        dragEventActuator_->AddTouchListener(touchRestrict);
+    }
+    if (touchEventActuator_) {
+        touchEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
+    }
+    if (clickEventActuator_ && !redirectClick_) {
+        clickEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
+    }
+    if (userParallelClickEventActuator_) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        if (clickRecognizer) {
+            clickRecognizer->SetGestureInfo(
+                MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, GestureTypeName::CLICK, true));
+            clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
+            clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
+        }
+    }
+    if (panEventActuator_) {
+        panEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
+    }
+    return false;
+}
+
+bool GestureEventHub::ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    TouchTestResult dragTargets;
+    if (longPressEventActuator_) {
+        longPressEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
+    }
+    if (dragEventActuator_) {
+        dragEventActuator_->OnCollectTouchTarget(
+            coordinateOffset, touchRestrict, getEventTargetImpl, dragTargets, responseLinkResult);
+    }
+
+    std::list<RefPtr<NGGestureRecognizer>> longPressRecognizers;
+    for (const auto& item : dragTargets) {
+        auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(item);
+        if (recognizer) {
+            recognizer->BeginReferee(touchId);
+            recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
+            recognizer->SetTargetComponent(targetComponent);
+            auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            if (group) {
+                group->SetChildrenTargetComponent(targetComponent);
+            }
+        }
+        longPressRecognizers.emplace_back(AceType::DynamicCast<NGGestureRecognizer>(item));
+    }
+    if (!longPressRecognizers.empty()) {
+        // this node has long press and drag event, combine into parallelRecognizer.
+        if (!nodeParallelRecognizer_) {
+            nodeParallelRecognizer_ = MakeRefPtr<ParallelRecognizer>(std::move(longPressRecognizers));
+        } else {
+            nodeParallelRecognizer_->AddChildren(longPressRecognizers);
+        }
+        innerTargets.emplace_back(nodeParallelRecognizer_);
+    } else {
+        nodeParallelRecognizer_.Reset();
+    }
     return false;
 }
 
@@ -228,6 +234,59 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
     }
 
     return current;
+}
+
+void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host)
+{
+    if (current) {
+        recognizers.push_front(current);
+    }
+    if (recognizers.size() > 1) {
+        if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
+            externalParallelRecognizer_.emplace_back(AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
+        } else {
+            externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
+        }
+        externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
+        externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
+        externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+        externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
+        current = externalParallelRecognizer_[parallelIndex];
+        parallelIndex++;
+    } else if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    }
+}
+
+void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority)
+{
+    if (current) {
+        if (priority == GesturePriority::Low) {
+            recognizers.push_front(current);
+        } else {
+            recognizers.push_back(current);
+        }
+    }
+
+    if (recognizers.size() > 1) {
+        if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
+            externalExclusiveRecognizer_.emplace_back(AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
+        } else {
+            externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
+        }
+        externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
+        externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
+        externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
+        externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
+        current = externalExclusiveRecognizer_[exclusiveIndex];
+        exclusiveIndex++;
+    } else if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    }
 }
 
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -275,50 +334,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto priority = recognizer->GetPriority();
         std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
         if (priority == GesturePriority::Parallel) {
-            if (current) {
-                recognizers.push_front(current);
-            }
-            if (recognizers.size() > 1) {
-                if ((static_cast<int32_t>(externalParallelRecognizer_.size()) <= parallelIndex)) {
-                    externalParallelRecognizer_.emplace_back(
-                        AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers)));
-                } else {
-                    externalParallelRecognizer_[parallelIndex]->AddChildren(recognizers);
-                }
-                externalParallelRecognizer_[parallelIndex]->SetCoordinateOffset(offset);
-                externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
-                externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
-                externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
-                current = externalParallelRecognizer_[parallelIndex];
-                parallelIndex++;
-            } else if (recognizers.size() == 1) {
-                current = *recognizers.begin();
-            }
+            ProcessParallelPriorityGesture(current, recognizers, parallelIndex, offset, touchId, targetComponent, host);
         } else {
-            if (current) {
-                if (priority == GesturePriority::Low) {
-                    recognizers.push_front(current);
-                } else {
-                    recognizers.push_back(current);
-                }
-            }
-
-            if (recognizers.size() > 1) {
-                if ((static_cast<int32_t>(externalExclusiveRecognizer_.size()) <= exclusiveIndex)) {
-                    externalExclusiveRecognizer_.emplace_back(
-                        AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers)));
-                } else {
-                    externalExclusiveRecognizer_[exclusiveIndex]->AddChildren(recognizers);
-                }
-                externalExclusiveRecognizer_[exclusiveIndex]->SetCoordinateOffset(offset);
-                externalExclusiveRecognizer_[exclusiveIndex]->BeginReferee(touchId);
-                externalExclusiveRecognizer_[exclusiveIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
-                externalExclusiveRecognizer_[exclusiveIndex]->SetTargetComponent(targetComponent);
-                current = externalExclusiveRecognizer_[exclusiveIndex];
-                exclusiveIndex++;
-            } else if (recognizers.size() == 1) {
-                current = *recognizers.begin();
-            }
+            ProcessExternalExclusiveRecognizer(
+                current, recognizers, exclusiveIndex, offset, touchId, targetComponent, host, priority);
         }
     }
 
@@ -623,6 +642,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
 RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap)
 {
     float preScale = 1.0f;
+    CHECK_NULL_RETURN(dragEventActuator_, defaultPixelMap);
     RefPtr<PixelMap> preScaledPixelMap = dragEventActuator_->GetPreScaledPixelMapForDragThroughTouch(preScale);
     if (preScale == targetScale && preScaledPixelMap != nullptr) {
         return preScaledPixelMap;
@@ -633,7 +653,9 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
         TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
         preScaledPixelMap = defaultPixelMap;
     }
-    preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    if (!NearEqual(targetScale, 1.0f)) {
+        preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    }
 #endif
     return preScaledPixelMap;
 }
@@ -799,6 +821,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     dragDropManager->SetDraggingPressedState(true);
     if (dragPreviewInfo.inspectorId != "") {
         auto dragPreviewPixelMap = GetDragPreviewPixelMap();
+        TAG_LOGI(AceLogTag::ACE_DRAG, "InspectorId exist, get thumbnail.");
         if (dragPreviewPixelMap == nullptr) {
             dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
         }
@@ -810,6 +833,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Non-mouse dragging, get thumbnail.");
                 dragDropInfo.pixelMap = dragPreviewPixelMap_;
                 OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
                 return;
@@ -819,6 +843,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     if (dragPreviewInfo.pixelMap != nullptr) {
         dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+        TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap exist, get thumbnail.");
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
         return;
     } else if (dragPreviewInfo.customNode != nullptr) {
@@ -827,10 +852,12 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
                             frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
             ContainerScope scope(id);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
             if (pixelMap != nullptr) {
                 dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             }
@@ -851,6 +878,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         return;
     }
 #endif
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropInfo is empty.");
     OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
 }
 
@@ -931,19 +959,17 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         recordsSize = badgeNumber.value();
     }
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
-    float defaultPixelMapScale =
-        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    auto windowScale = dragDropManager->GetWindowScale();
-    float scale = windowScale * defaultPixelMapScale;
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto overlayManager = mainPipeline->GetOverlayManager();
+    auto dragNodePipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(dragNodePipeline);
+    auto overlayManager = dragNodePipeline->GetOverlayManager();
     bool isSwitchToSubWindow = false;
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    bool isStartDraggingFromSubWindow = (pipeline != mainPipeline);
+    auto window = SubwindowManager::GetInstance()->ShowPreviewNG(isStartDraggingFromSubWindow);
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);
@@ -955,6 +981,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
+    float defaultPixelMapScale =
+        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
+    // use menuPreviewScale only for 1.0f menu scale.
+    if (isMenuShow && NearEqual(menuPreviewScale_, 1.0f)) {
+        defaultPixelMapScale = menuPreviewScale_;
+    }
+    auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * defaultPixelMapScale;
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -1000,7 +1034,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
 
         CHECK_NULL_VOID(imageNode);
-        float previewScale = DEFALUT_DRAG_PPIXELMAP_SCALE;
+        float previewScale =
+            info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
@@ -1024,6 +1059,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
+    dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
+    dragPreviewPixelMap_ = nullptr;
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
@@ -1079,10 +1116,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             DragEventActuator::UpdatePreviewPositionAndScale(
                 textNode, textNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
         }
-        DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
+        DragEventActuator::MountPixelMap(
+            subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode, true);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
-        dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info, isMenuShow);
+        dragDropManager->DoDragStartAnimation(
+            subWindowOverlayManager, info, eventHub->GetGestureEventHub(), isMenuShow);
         if (hasContextMenu) {
             //response: 0.347, dampingRatio: 0.99, blendDuration: 0.0
             const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
@@ -1995,5 +2034,18 @@ void GestureEventHub::SetMouseDragMonitorState(bool state)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
+}
+
+bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, false);
+    if (gestureEventHub->IsTextCategoryComponent(frameNode->GetTag())) {
+        return frameNode->IsDraggable() && eventHub->HasOnDragStart();
+    }
+    return gestureEventHub->IsAllowedDrag(eventHub);
 }
 } // namespace OHOS::Ace::NG

@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/row_modifier.h"
-#include "core/components/common/layout/constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
+
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -81,6 +79,20 @@ void ResetRowSpace(ArkUINodeHandle node)
     RowModelNG::SetSpace(frameNode, space);
 }
 
+void SetRowReverse(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RowModelNG::SetIsReverse(frameNode, value);
+}
+
+void ResetRowReverse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RowModelNG::SetIsReverse(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIRowModifier* GetRowModifier()
 {
@@ -88,6 +100,8 @@ const ArkUIRowModifier* GetRowModifier()
         SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
         ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems,
         SetRowSpace, ResetRowSpace,
+        SetRowReverse,
+        ResetRowReverse,
     };
     return &modifier;
 }

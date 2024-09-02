@@ -29,6 +29,8 @@ public:
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
+    static void SetResponseRegion(
+        FrameNode* frameNode, const std::vector<DimensionRect>& regions, bool isUserSetResponseRegion);
 
 private:
     void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);

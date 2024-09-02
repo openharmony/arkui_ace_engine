@@ -17,12 +17,12 @@ class RefInfo {
   private static obj2ref: WeakMap<object, object> = new WeakMap();
 
   static get(target: Object): any {
-    if (typeof (target) !== "object") {
-      throw new Error("target must be a object");
+    if (typeof (target) !== 'object') {
+      throw new Error('target must be a object');
     }
-    // makeObserved does not support @Observed and @ObservedV2/@Trace class, will return target directly
-    if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target)) {
-      stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)}. makeObserved will stop work`)
+    // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
+    if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
+      stateMgmtConsole.warn(`${target.constructor.name} is Observed ${ObservedObject.IsObservedObject(target)}, IsObservedV2 ${ObserveV2.IsObservedObjectV2(target)} or makeObserved proxy value ${ObserveV2.IsMakeObserved(target)}. makeObserved will stop work`);
       return { proxy: target };
     }
     let ret = RefInfo.obj2ref.get(target);

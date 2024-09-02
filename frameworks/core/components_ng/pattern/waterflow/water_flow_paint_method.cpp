@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-
 namespace OHOS::Ace::NG {
 void WaterFlowPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {

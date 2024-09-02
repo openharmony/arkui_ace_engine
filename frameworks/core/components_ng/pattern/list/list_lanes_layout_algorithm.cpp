@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
 namespace OHOS::Ace::NG {
 
 void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
@@ -86,7 +81,7 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
 }
 
 void ListLanesLayoutAlgorithm::MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,
-    int32_t index, float pos, bool forward)
+    int32_t index, float& pos, bool forward)
 {
     CHECK_NULL_VOID(groupWrapper);
     auto host = groupWrapper->GetHostNode();
@@ -98,6 +93,9 @@ void ListLanesLayoutAlgorithm::MeasureGroup(LayoutWrapper* listWrapper, const Re
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(listWrapper->GetLayoutProperty());
     SetListItemGroupParam(groupWrapper, index, pos, forward, listLayoutProperty, false);
     groupWrapper->Measure(groupLayoutConstraint_);
+    if (forward && LessOrEqual(pos, 0.0f)) {
+        AdjustStartPosition(groupWrapper, pos);
+    }
 }
 
 void ListLanesLayoutAlgorithm::MeasureItem(const RefPtr<LayoutWrapper>& itemWrapper, int32_t index, bool forward)

@@ -189,6 +189,7 @@ private:
     void HandleBlurEvent();
     void HandleButtonHoverEvent(bool state, int32_t index);
     void HandleButtonTouchEvent(bool isPressed, int32_t index);
+    void HandleEnable();
     void ResetTextState();
     void ResetTextStateByNode(const RefPtr<FrameNode>& textFrameNode);
     void FlushTextStyle();

@@ -41,6 +41,7 @@
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/common/render_boundary_manager.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
@@ -284,14 +285,6 @@ public:
         auto dmOrientation = uiWindow_->GetRequestedOrientation();
         return static_cast<Orientation>(static_cast<uint32_t>(dmOrientation));
     }
-
-    RefPtr<DisplayInfo> GetDisplayInfo() override;
-
-    void InitIsFoldable() override;
-
-    bool IsFoldable() const override;
-
-    FoldStatus GetCurrentFoldStatus() override;
 
     void SetHapPath(const std::string& hapPath);
 
@@ -573,6 +566,7 @@ public:
     bool IsScenceBoardWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
+    bool IsMainWindow() const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
@@ -672,6 +666,9 @@ public:
     {
         return registerComponents_;
     }
+    void RenderLayoutBoundary(bool isDebugBoundary);
+    void AddWatchSystemParameter();
+    void RemoveWatchSystemParameter();
 
 private:
     virtual bool MaybeRelease() override;
@@ -704,7 +701,6 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
-    RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
     std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
 
@@ -767,6 +763,7 @@ private:
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
 };
 
 } // namespace OHOS::Ace::Platform

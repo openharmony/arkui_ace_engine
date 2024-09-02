@@ -23,7 +23,6 @@
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
 #include "transaction/rs_transaction.h"
-#include "ui/rs_surface_node.h"
 #include "want_params.h"
 #include "wm/wm_common.h"
 
@@ -51,6 +50,8 @@ constexpr char PULL_FAIL_NAME[] = "extension_pulling_up_fail";
 constexpr char PULL_FAIL_MESSAGE[] = "pulling another embedded component failed, not allowed to cascade.";
 constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
+constexpr char EXTENSION_TRANSPARENT_NAME[] = "extension_node_transparent";
+constexpr char EXTENSION_TRANSPARENT_MESSAGE[] = "the extension ability has transparent node.";
 constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
 constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
@@ -317,8 +318,8 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
-        .isAsyncModalBinding_ = config.isAsyncModalBinding,
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -462,7 +463,7 @@ void SecuritySessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
-void SecuritySessionWrapperImpl::NotifyDestroy()
+void SecuritySessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
@@ -523,11 +524,11 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
 }
 
-void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
+void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
 {
     int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, callSessionId]() {
+        [weak = hostPattern_, callSessionId, errorCode]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (callSessionId != pattern->GetSessionId()) {
@@ -536,8 +537,11 @@ void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
                     callSessionId, pattern->GetSessionId());
                 return;
             }
-            pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
-                LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
+            bool isTransparent = errorCode == ERROR_CODE_UIEXTENSION_TRANSPARENT;
+            pattern->FireOnErrorCallback(
+                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
+                isTransparent ? EXTENSION_TRANSPARENT_NAME : LIFECYCLE_TIMEOUT_NAME,
+                isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
 }
@@ -601,7 +605,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        reason, "NotifyDisplayArea", transaction);
 }
 
 void SecuritySessionWrapperImpl::NotifySizeChangeReason(
@@ -639,10 +644,12 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
         int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
         keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
     }
-    info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
+    sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
+        info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
+    newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
     PLATFORM_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
         keyboardHeight);
-    session_->NotifyOccupiedAreaChangeInfo(info);
+    session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
 }
 

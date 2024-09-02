@@ -191,7 +191,7 @@ public:
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
 
 protected:
-    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId) override;
+    void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
     void DumpTree(int32_t depth, int64_t nodeID, bool isDumpSimplify = false) override;
@@ -446,6 +446,8 @@ private:
 
     void NotifyChildTreeOnDeregister();
 
+    void SendUecOnTreeEvent(int64_t splitElementId);
+
     void NotifySetChildTreeIdAndWinId(int64_t elementId, const int32_t treeId, const int32_t childWindowId);
 
     bool CheckIsChildElement(
@@ -464,6 +466,10 @@ private:
         int64_t elementId);
 
     void NotifyAccessibilitySAStateChange(bool state);
+    void DumpTreeNodeInfoInJson(
+        const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
+    void CreateNodeInfoJson(
+        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -483,7 +489,7 @@ private:
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
-    const int32_t shiftBits = 16;
+    bool isUseJson_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

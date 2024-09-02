@@ -41,9 +41,9 @@ struct TextDetectConfig {
     std::string types;
     std::function<void(const std::string&)> onResult;
     Color entityColor;
-    TextDecoration entityDecorationType;
+    TextDecoration entityDecorationType = TextDecoration::UNDERLINE;
     Color entityDecorationColor;
-    TextDecorationStyle entityDecorationStyle;
+    TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
 
     TextDetectConfig()
     {
@@ -59,10 +59,13 @@ struct TextDetectConfig {
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_STRING(jsonValue, types);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, entityColor);
-        JSON_STRING_PUT_INT(jsonValue, entityDecorationType);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, entityDecorationColor);
+        jsonValue->Put("types", types.c_str());
+        jsonValue->Put("color", entityColor.ToString().c_str());
+        auto decorationJson = JsonUtil::Create(true);
+        decorationJson->Put("type", static_cast<int64_t>(entityDecorationType));
+        decorationJson->Put("color", entityDecorationColor.ToString().c_str());
+        decorationJson->Put("style", static_cast<int64_t>(entityDecorationStyle));
+        jsonValue->Put("decoration", decorationJson);
         return jsonValue->ToString();
     }
 };
@@ -92,6 +95,8 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetVariableFontWeight(int32_t value) = 0;
+    virtual void SetEnableVariableFontWeight(bool value) = 0;
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;

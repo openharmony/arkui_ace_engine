@@ -15,7 +15,15 @@
 
 #include "swiper_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/button/button_theme.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 
 namespace OHOS::Ace::NG {
 void SwiperTestNg::SetUpTestSuite()
@@ -1352,6 +1360,555 @@ HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalculateGestureState002
+ * @tc.desc: test Swiper indicator gesture state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureState002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->CalculateGestureState(1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
+
+    pattern_->CalculateGestureState(-1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
+
+    pattern_->isTouchDown_ = true;
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -0.9f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -0.9f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 3;
+    pattern_->currentIndex_ = 3;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -0.9f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+}
+
+/**
+ * @tc.name: CalculateGestureState003
+ * @tc.desc: test Swiper indicator gesture state when displayCount > 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureState003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(2); }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+
+    pattern_->isTouchDown_ = true;
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 5);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 5);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 2;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -0.9f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -0.9f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 5;
+    pattern_->currentIndex_ = 5;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureState(0.0f, -0.9f, 5);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+}
+
+/**
+ * @tc.name: CalculateGestureState004
+ * @tc.desc: test Swiper indicator gesture state when loop = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureState004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 3;
+    pattern_->currentIndex_ = 3;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+}
+
+/**
+ * @tc.name: CalculateGestureStateOnRTL001
+ * @tc.desc: test Swiper indicator gesture state on RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureStateOnRTL001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->CalculateGestureStateOnRTL(1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
+
+    pattern_->CalculateGestureStateOnRTL(-1.0f, 0.0f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
+
+    pattern_->isTouchDown_ = true;
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -0.9f, 1);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -0.9f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 3;
+    pattern_->currentIndex_ = 3;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -0.9f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+}
+
+/**
+ * @tc.name: CalculateGestureStateOnRTL002
+ * @tc.desc: test Swiper indicator gesture state on RTL and displayCount > 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureStateOnRTL002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(2); }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+
+    pattern_->isTouchDown_ = true;
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 5);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 5);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 2;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -0.9f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -0.9f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 5;
+    pattern_->currentIndex_ = 5;
+    pattern_->needTurn_ = false;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -0.9f, 5);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+}
+
+/**
+ * @tc.name: CalculateGestureStateOnRTL003
+ * @tc.desc: test Swiper indicator gesture state on RTL and loop = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureStateOnRTL003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetLoop(false); });
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->mainDeltaSum_ = -1.0f;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 0);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 3;
+    pattern_->currentIndex_ = 3;
+    pattern_->mainDeltaSum_ = 1.0f;
+    pattern_->CalculateGestureStateOnRTL(0.0f, -1.1f, 3);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop001
+ * @tc.desc: test Swiper indicator touch bottom loop state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+
+    pattern_->currentFirstIndex_ = 3;
+    pattern_->currentIndex_ = 3;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop002
+ * @tc.desc: test Swiper indicator touch bottom loop state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+
+    pattern_->currentFirstIndex_ = 4;
+    pattern_->currentIndex_ = 3;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoopOnRTL001
+ * @tc.desc: test Swiper indicator touch bottom loop state on RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+
+    pattern_->currentFirstIndex_ = 3;
+    pattern_->currentIndex_ = 3;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoopOnRTL002
+ * @tc.desc: test Swiper indicator touch bottom loop state on RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoopOnRTL002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    pattern_->currentFirstIndex_ = -1;
+    pattern_->currentIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = 4;
+    pattern_->currentIndex_ = 3;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    pattern_->HandleTouchBottomLoopOnRTL();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
+
+/**
+ * @tc.name: CalcCurrentPageStatus001
+ * @tc.desc: test turn page rate and current index for Swiper indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalcCurrentPageStatus001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+
+    auto turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    auto currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, 0);
+
+    pattern_->UpdateCurrentOffset(240.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, -0.5f);
+    EXPECT_EQ(currentFirstIndex, -1);
+
+    pattern_->UpdateCurrentOffset(120.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, -0.25f);
+    EXPECT_EQ(currentFirstIndex, -1);
+
+    pattern_->ChangeIndex(3, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentFirstIndex_, 3);
+
+    pattern_->UpdateCurrentOffset(-240.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, -0.5f);
+    EXPECT_EQ(currentFirstIndex, 3);
+
+    pattern_->ChangeIndex(0, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentFirstIndex_, 0);
+
+    pattern_->itemPosition_[-1] = { -480.0f, 0.0f };
+    pattern_->itemPosition_[1] = { 480.0f, 960.0f };
+
+    turnPageRate = pattern_->CalcCurrentPageStatus(-480.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(-480.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, 1);
+
+    turnPageRate = pattern_->CalcCurrentPageStatus(480.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(480.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, -1);
+}
+
+/**
+ * @tc.name: CalcCurrentPageStatus002
+ * @tc.desc: test turn page rate and current index for Swiper indicator when displayCount > 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalcCurrentPageStatus002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(2); }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+
+    auto turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    auto currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, 0);
+
+    pattern_->UpdateCurrentOffset(-120.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, -0.5f);
+    EXPECT_EQ(currentFirstIndex, 0);
+
+    pattern_->UpdateCurrentOffset(-120.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, 1);
+
+    pattern_->UpdateCurrentOffset(-120.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, -0.5f);
+    EXPECT_EQ(currentFirstIndex, 1);
+
+    pattern_->UpdateCurrentOffset(480.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, -0.5f);
+    EXPECT_EQ(currentFirstIndex, -1);
+
+    pattern_->UpdateCurrentOffset(120.0f);
+    FlushLayoutTask(frameNode_);
+    turnPageRate = pattern_->CalcCurrentPageStatus(0.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(0.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, -1);
+
+    pattern_->ChangeIndex(5, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentFirstIndex_, 5);
+
+    pattern_->itemPosition_[4] = { -240.0f, 0.0f };
+
+    turnPageRate = pattern_->CalcCurrentPageStatus(-240.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(-240.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, 6);
+
+    turnPageRate = pattern_->CalcCurrentPageStatus(240.0f).first;
+    currentFirstIndex = pattern_->CalcCurrentPageStatus(240.0f).second;
+    EXPECT_EQ(turnPageRate, 0.0f);
+    EXPECT_EQ(currentFirstIndex, 4);
+}
+
+/**
  * @tc.name: ResetDisplayCount001
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
@@ -1850,7 +2407,7 @@ HWTEST_F(SwiperTestNg, FadeOverScroll001, TestSize.Level1)
     offset = 0.0f;
     EXPECT_FALSE(pattern_->FadeOverScroll(offset));
     EXPECT_FALSE(pattern_->IsVisibleChildrenSizeLessThanSwiper());
-    offset = 10.0f;
+    offset = -10.0f;
     EXPECT_TRUE(pattern_->FadeOverScroll(offset));
 }
 
@@ -1879,7 +2436,7 @@ HWTEST_F(SwiperTestNg, IsOutOfStart001, TestSize.Level1)
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    offset = 10.0f;
+    offset = -10.0f;
     EXPECT_TRUE(pattern_->IsOutOfStart(offset));
 }
 

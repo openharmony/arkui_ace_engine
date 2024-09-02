@@ -14,12 +14,8 @@
  */
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 
-#include "want.h"
-
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/form/form_component.h"
-#include "core/components/form/resource/form_request_data.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
 void FormModelImpl::Create(const RequestFormInfo& info)
@@ -120,7 +116,7 @@ void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
 }
 
 int32_t FormModelImpl::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
-    const std::string& formBindingDataStr, int64_t& formId)
+    const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {
     LOGE("Not support RequestPublishFormWithSnapshot in old pipeline");
     return 0;

@@ -16,16 +16,15 @@
 #include "grid_test_ng.h"
 
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components/button/button_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -41,15 +40,27 @@ void GridTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_GRID);
     auto gridItemTheme = GridItemTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
-    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
-
+    auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
+    EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
+    MockAnimationManager::Enable(true);
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
 #endif
+}
+
+void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) const
+{
+    ASSERT_EQ(expectedList.size(), pattern_->preloadItemList_.size());
+    auto it = expectedList.begin();
+    for (auto&& item : pattern_->preloadItemList_) {
+        EXPECT_EQ(*it, item.idx);
+        ++it;
+    }
 }
 
 void GridTestNg::TearDownTestSuite()
@@ -57,7 +68,10 @@ void GridTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void GridTestNg::SetUp() {}
+void GridTestNg::SetUp()
+{
+    MockAnimationManager::GetInstance().Reset();
+}
 
 void GridTestNg::TearDown()
 {
@@ -67,6 +81,9 @@ void GridTestNg::TearDown()
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     ClearOldNodes(); // Each testcase will create new list at begin
+    MockAnimationManager::GetInstance().Reset();
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
 }
 
 void GridTestNg::GetGrid()

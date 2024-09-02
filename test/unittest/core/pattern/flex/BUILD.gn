@@ -21,5 +21,6 @@ ace_unittest("flex_test_ng") {
     "old_cases/flex_test_ng.cpp",
     "old_cases/flex_testthree_ng.cpp",
     "old_cases/flex_testtwo_ng.cpp",
+    "old_cases/flex_wrap_layout_algorithm_test.cpp",
   ]
 }

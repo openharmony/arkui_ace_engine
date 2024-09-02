@@ -58,6 +58,7 @@ CJ_EXPORT void FFICJVectorNativeTextShadowSetElement(
     VectorNativeTextShadow vec, int64_t index, NativeTextShadow textShadow);
 CJ_EXPORT void FFICJVectorNativeTextShadowDelete(VectorNativeTextShadow vec);
 
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFormat(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockOnChange(void (*callback)(int64_t timeStamp));

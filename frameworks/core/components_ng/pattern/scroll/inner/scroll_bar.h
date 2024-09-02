@@ -285,13 +285,13 @@ public:
     {
         return scrollEndCallback_;
     }
-    void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
+    void SetCalcPredictSnapOffsetCallback(CalcPredictSnapOffsetCallback&& calcPredictSnapOffsetCallback)
     {
-        calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
+        calcPredictSnapOffsetCallback_ = std::move(calcPredictSnapOffsetCallback);
     }
-    const CalePredictSnapOffsetCallback& GetCalePredictSnapOffsetCallback() const
+    const CalcPredictSnapOffsetCallback& GetCalcPredictSnapOffsetCallback() const
     {
-        return calePredictSnapOffsetCallback_;
+        return calcPredictSnapOffsetCallback_;
     }
     void SetStartScrollSnapMotionCallback(StartScrollSnapMotionCallback&& startScrollSnapMotionCallback)
     {
@@ -382,10 +382,16 @@ public:
     // infos for dump
     void AddScrollBarLayoutInfo();
     void GetShapeModeDumpInfo();
+    void GetShapeModeDumpInfo(std::unique_ptr<JsonValue>& json);
     void GetPositionModeDumpInfo();
+    void GetPositionModeDumpInfo(std::unique_ptr<JsonValue>& json);
     void GetAxisDumpInfo();
+    void GetAxisDumpInfo(std::unique_ptr<JsonValue>& json);
     void GetPanDirectionDumpInfo();
+    void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo();
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
+    void StopFlingAnimation();
 
 protected:
     void InitTheme();
@@ -470,7 +476,7 @@ private:
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
-    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
+    CalcPredictSnapOffsetCallback calcPredictSnapOffsetCallback_;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
     ScrollPageCallback scrollPageCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;

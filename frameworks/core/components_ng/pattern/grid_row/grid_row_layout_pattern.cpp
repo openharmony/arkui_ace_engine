@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"
 
-#include <optional>
-
-#include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 

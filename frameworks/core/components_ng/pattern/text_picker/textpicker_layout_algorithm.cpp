@@ -14,14 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
-#include <cstdint>
-
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components/picker/picker_theme.h"
-#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
-#include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -333,35 +325,32 @@ const Dimension TextPickerLayoutAlgorithm::AdjustFontSizeScale(const Dimension& 
 float TextPickerLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing)
 {
     auto fontScale = 1.0f;
-
-    if (NeedAdaptForAging()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_RETURN(pipeline, fontScale);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_RETURN(pickerTheme, fontScale);
-        auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
-        auto themePadding = pickerTheme->GetPickerDialogFontPadding();
-        auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
-        double adjustedScale = std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(),
-            pickerTheme->GetMaxTwoFontScale());
-        if (!NearZero(adjustedScale)) {
-            userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 +
-                (themePadding.ConvertToPx() * DIVIDER_SIZE);
-        } else {
-            return fontScale;
-        }
-
-        auto themeHeightLimit = isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() :
-            pickerTheme->GetGradientHeightLimit();
-        auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() :
-            pickerTheme->GetGradientHeight();
-        if (GreatOrEqualCustomPrecision(userSetHeightValue, themeHeightLimit.ConvertToPx())) {
-            userSetHeightValue = themeHeightLimit.ConvertToPx();
-        } else {
-            userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
-        }
-        fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontScale);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, fontScale);
+    auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
+    auto themePadding = pickerTheme->GetPickerDialogFontPadding();
+    auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
+    double adjustedScale = std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(),
+        pickerTheme->GetMaxTwoFontScale());
+    if (!NearZero(adjustedScale)) {
+        userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 +
+            (themePadding.ConvertToPx() * DIVIDER_SIZE);
+    } else {
+        return fontScale;
     }
+
+    auto themeHeightLimit = isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() :
+        pickerTheme->GetGradientHeightLimit();
+    auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() :
+        pickerTheme->GetGradientHeight();
+    if (GreatOrEqualCustomPrecision(userSetHeightValue, themeHeightLimit.ConvertToPx())) {
+        userSetHeightValue = themeHeightLimit.ConvertToPx();
+    } else {
+        userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
+    }
+    fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
 }
 

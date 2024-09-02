@@ -28,6 +28,12 @@
 #include "test/mock/core/image_provider/mock_image_file_cache.cpp"
 #include "test/mock/core/image_provider/mock_image_loader.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
@@ -71,6 +77,8 @@ public:
 
 void ImageProviderTestNg::SetUpTestSuite()
 {
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::SetUp();
     g_threads = std::vector<std::thread>();
 }
@@ -88,6 +96,7 @@ void ImageProviderTestNg::TearDown()
 void ImageProviderTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
     g_loader = nullptr;
 }
 
@@ -1357,5 +1366,70 @@ HWTEST_F(ImageProviderTestNg, MakeCanvasImageIfNeed002, TestSize.Level1)
     ctx->pendingMakeCanvasImageTask_ = func;
     auto res = ctx->MakeCanvasImageIfNeed(dstSize, true, ImageFit::COVER);
     EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: DownloadImageSuccess002
+ * @tc.desc: Test DownloadImageSuccess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, DownloadImageSuccess002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    std::string imageData = "test";
+    ctx->DownloadImageSuccess(imageData);
+    imageData.clear();
+    ctx->DownloadImageSuccess(imageData);
+    EXPECT_TRUE(!Positive(imageData.size()));
+}
+
+/**
+ * @tc.name: GetCurrentLoadingState007
+ * @tc.desc: Test ImageProvider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, GetCurrentLoadingState007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construction parameters
+     * @tc.expected: ImageSourceInfo.
+     */
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    EXPECT_EQ(ctx->GetCurrentLoadingState(), "UNLOADED");
+    ctx->stateManager_ = nullptr;
+    EXPECT_EQ(ctx->GetCurrentLoadingState(), "UNLOADED");
+}
+
+/**
+ * @tc.name: ImageProvider001
+ * @tc.desc: Test function of ImageProvider.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProvider001, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
+    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    ASSERT_NE(imageObject, nullptr);
+    imageObject->ClearData();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    EXPECT_FALSE(ImageProvider::PrepareImageData(imageObject));
+}
+
+/**
+ * @tc.name: ImageProvider002
+ * @tc.desc: Test function of ImageProvider.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, ImageProvider002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    src.srcType_ = SrcType::FILE;
+    ImageProvider::CreateImageObjHelper(src, true);
+    EXPECT_NE(g_loader, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif

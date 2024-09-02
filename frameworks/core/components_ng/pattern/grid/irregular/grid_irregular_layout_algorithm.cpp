@@ -15,16 +15,10 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -285,7 +279,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
     Jump(mainSize);
 
-    if (info_.extraOffset_) {
+    if (info_.extraOffset_ && !NearZero(*info_.extraOffset_)) {
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += *info_.extraOffset_;
         MeasureOnOffset(mainSize);
@@ -454,11 +448,11 @@ std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const P
 
 int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
 {
+    GridIrregularFiller filler(&info_, wrapper_);
     int32_t jumpLine = -1;
     auto it = info_.FindInMatrix(jumpIdx);
     if (it == info_.gridMatrix_.end()) {
         // fill matrix up to jumpIndex_
-        GridIrregularFiller filler(&info_, wrapper_);
         jumpLine = filler.FillMatrixOnly(jumpIdx);
     } else {
         jumpLine = it->first;
@@ -467,7 +461,6 @@ int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
     if (info_.scrollAlign_ == ScrollAlign::END) {
         // jump to the last line the item occupies
         auto lastLine = jumpLine + GridLayoutUtils::GetItemSize(&info_, wrapper_, jumpIdx).rows - 1;
-        GridIrregularFiller filler(&info_, wrapper_);
         filler.FillMatrixByLine(jumpLine, lastLine + 1);
         jumpLine = lastLine;
     }
@@ -481,9 +474,9 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
      * the recursion is 3 iterations ([Start && len not filled] -> [End && len not filled] -> [Start with jumpIdx 0]).
      */
     GridIrregularFiller filler(&info_, wrapper_);
+    const FillParams params { crossLens_, crossGap_, mainGap_ };
     switch (info_.scrollAlign_) {
         case ScrollAlign::START: {
-            const FillParams params { crossLens_, crossGap_, mainGap_ };
             // call this to ensure irregular items on the first line are measured, not skipped
             filler.MeasureLineWithIrregulars(params, jumpLineIdx);
 
@@ -499,8 +492,10 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
         case ScrollAlign::CENTER: {
             // because the current line's height is unknown, we can't determine the exact target length to fill.
             // Using the full [mainSize]
-            float targetLen = mainSize / 2.0f;
-            float backwardLen = filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
+            const auto pos = info_.GetItemPos(info_.jumpIndex_);
+            const float itemLen = filler.MeasureItem(params, info_.jumpIndex_, pos.first, pos.second, false).first;
+            const float targetLen = mainSize / 2.0f;
+            float backwardLen = filler.MeasureBackward(params, mainSize, jumpLineIdx);
             backwardLen -= info_.lineHeightMap_.at(jumpLineIdx) / 2.0f;
             if (LessNotEqual(backwardLen, targetLen)) {
                 jumpLineIdx = 0;
@@ -508,7 +503,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
                 PrepareLineHeight(mainSize, jumpLineIdx);
                 return;
             }
-            float forwardLen = filler.Fill({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx).length;
+            float forwardLen = filler.Fill(params, std::max(mainSize, itemLen), jumpLineIdx).length;
             forwardLen -= info_.lineHeightMap_.at(jumpLineIdx) / 2.0f;
             if (LessNotEqual(forwardLen, targetLen)) {
                 jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
@@ -518,7 +513,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             break;
         }
         case ScrollAlign::END: {
-            float len = filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
+            float len = filler.MeasureBackward(params, mainSize, jumpLineIdx);
             if (LessNotEqual(len, mainSize)) {
                 jumpLineIdx = 0;
                 info_.scrollAlign_ = ScrollAlign::START;
@@ -594,15 +589,15 @@ bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
 
 void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
 {
-    std::list<int32_t> itemsToPreload;
+    std::list<GridPreloadItem> itemsToPreload;
     for (int32_t i = 1; i <= cacheCnt; ++i) {
         const int32_t l = info_.startIndex_ - i;
         if (l >= 0 && !wrapper_->GetChildByIndex(l, true)) {
-            itemsToPreload.push_back(l);
+            itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
         if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
-            itemsToPreload.push_back(r);
+            itemsToPreload.emplace_back(r);
         }
     }
 
@@ -618,8 +613,10 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
-            auto constraint = filler.MeasureItem(GridIrregularFiller::FillParameters { crossLens, crossGap, mainGap },
-                itemIdx, pos.first, pos.second, true);
+            auto constraint = filler
+                                  .MeasureItem(GridIrregularFiller::FillParameters { crossLens, crossGap, mainGap },
+                                      itemIdx, pos.first, pos.second, true)
+                                  .second;
 
             auto item = DynamicCast<FrameNode>(host->GetChildByIndex(itemIdx, true));
             CHECK_NULL_RETURN(item, false);

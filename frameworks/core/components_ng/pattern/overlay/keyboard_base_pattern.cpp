@@ -16,9 +16,7 @@
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void KeyboardPattern::BeforeCreateLayoutWrapper()
@@ -141,4 +139,8 @@ void KeyboardPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveOnAreaChangeNode(node->GetId());
 }
 
+void KeyboardPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("TargetId", targetId_);
+}
 } // namespace OHOS::Ace::NG

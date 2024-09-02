@@ -15,22 +15,9 @@
 
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 
-#include "base/geometry/dimension.h"
-#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -125,4 +112,11 @@ void BlankPattern::BeforeCreateLayoutWrapper()
     }
 }
 
+void BlankPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto blankProperty = GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(blankProperty);
+    auto blankMin = blankProperty->GetMinSize().value_or(Dimension());
+    json->Put("min", blankMin.ToString().c_str());
+}
 } // namespace OHOS::Ace::NG

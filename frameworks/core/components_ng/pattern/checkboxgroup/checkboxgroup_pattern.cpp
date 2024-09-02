@@ -14,17 +14,7 @@
  */
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_component.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -272,8 +262,7 @@ void CheckBoxGroupPattern::UpdateUIStatus(bool check)
     auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto selectStatus = paintProperty->GetSelectStatus();
-    TAG_LOGD(
-        AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup update ui status %{public}d %{public}d", check, selectStatus);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup update status %{public}d %{public}d", check, selectStatus);
     if (selectStatus == CheckBoxGroupPaintProperty::SelectStatus::PART) {
         uiStatus_ = check ? UIStatus::PART_TO_ON : UIStatus::PART_TO_OFF;
     } else {

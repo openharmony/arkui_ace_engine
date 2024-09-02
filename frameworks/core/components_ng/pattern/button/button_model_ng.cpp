@@ -15,20 +15,14 @@
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void ButtonModelNG::SetFontSize(const Dimension& fontSize)
@@ -394,8 +388,13 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        // undefined use capsule type.
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            // undefined use ROUNDED_RECTANGLE type.
+            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
+        } else {
+            // undefined use capsule type.
+            ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
+        }
     }
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -584,7 +583,15 @@ void ButtonModelNG::ResetBorderRadius()
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value, frameNode, ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        value = ButtonType::ROUNDED_RECTANGLE;
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
+                                                        frameNode, ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
+                                                        frameNode, ButtonType::CAPSULE);
+    }
+
     return value;
 }
 

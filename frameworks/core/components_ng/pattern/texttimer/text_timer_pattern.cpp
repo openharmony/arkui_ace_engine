@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
-#include <stack>
 #include <string>
 
 #include "base/log/dump_log.h"
 #include "base/i18n/localization.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -396,5 +390,14 @@ void TextTimerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("format: ", format);
     auto elapsedTime = GetFormatDuration(elapsedTime_);
     DumpLog::GetInstance().AddDesc("elapsedTime: ", elapsedTime);
+}
+
+void TextTimerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(textTimerLayoutProperty);
+    json->Put("isCountDown", textTimerLayoutProperty->GetIsCountDown().value_or(false));
+    json->Put("format", textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT).c_str());
+    json->Put("elapsedTime", std::to_string(GetFormatDuration(elapsedTime_)).c_str());
 }
 } // namespace OHOS::Ace::NG

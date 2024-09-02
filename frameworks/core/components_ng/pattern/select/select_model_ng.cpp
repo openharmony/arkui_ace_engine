@@ -15,16 +15,7 @@
 
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/pattern/select/select_properties.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -529,7 +520,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    select->PushDestroyCallback(destructor);
+    select->PushDestroyCallbackWithTag(destructor, V2::SELECT_ETS_TAG);
 }
 
 void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)
@@ -742,6 +733,7 @@ void SelectModelNG::ResetBuilderFunc(FrameNode* frameNode)
 
 void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
@@ -753,6 +745,7 @@ void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&
 
 void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::string& value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetItemSelected(index, value);

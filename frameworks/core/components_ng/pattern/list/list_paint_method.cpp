@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_paint_method.h"
 
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/render/divider_painter.h"
-
 namespace OHOS::Ace::NG {
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {

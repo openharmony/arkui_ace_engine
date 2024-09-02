@@ -15,21 +15,10 @@
 
 #include "core/interfaces/native/node/node_api.h"
 
-#include <deque>
 #include <securec.h>
 
-#include "base/error/error_code.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/macros.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
@@ -214,6 +203,12 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }
+    return node;
+}
+
+ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32 flags, const ArkUI_Params& params)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNodeWithParams(type, peerId, params));
     return node;
 }
 
@@ -1618,6 +1613,7 @@ const ArkUIBasicAPI* GetBasicAPI()
     /* clang-format off */
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
+        CreateNodeWithParams,
         GetNodeByViewStack,
         DisposeNode,
         GetName,

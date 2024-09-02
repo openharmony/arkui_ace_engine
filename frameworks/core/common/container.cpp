@@ -200,6 +200,26 @@ void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
     pipelineContext->SetFontWeightScale(fontWeightScale);
 }
 
+RefPtr<DisplayInfo> Container::GetDisplayInfo()
+{
+    return DisplayInfoUtils::GetInstance().GetDisplayInfo();
+}
+
+void Container::InitIsFoldable()
+{
+    DisplayInfoUtils::GetInstance().InitIsFoldable();
+}
+
+bool Container::IsFoldable()
+{
+    return DisplayInfoUtils::GetInstance().IsFoldable();
+}
+
+FoldStatus Container::GetCurrentFoldStatus()
+{
+    return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
+}
+
 template<>
 int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 {

@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -66,13 +67,11 @@ const std::string HIDDEN_ICON_STR = "123";
 const std::string SWITCHING_ICON_STR = "123";
 constexpr Dimension IMAGE_WIDTH = 10.0_vp;
 constexpr Dimension IMAGE_HEIGHT = 10.0_vp;
-constexpr Dimension DEFAULT_IMAGE_WIDTH_V10 = 24.0_vp;
-constexpr Dimension DEFAULT_IMAGE_HEIGHT_V10 = 24.0_vp;
-constexpr int32_t PLATFORM_VERSION_9 = 9;
-constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr static int32_t TEST_VALUE = 12;
 constexpr float MAX_SIDE_BAR = 20.0f;
 constexpr float MIN_SIDE_BAR = -10.0f;
+constexpr Dimension CUSTOM_CONTROL_BUTTON_WIDTH = 30.0_vp;
+constexpr Dimension CUSTOM_CONTROL_BUTTON_HEIGHT = 30.0_vp;
 } // namespace
 
 class SideBarPatternTestNg : public testing::Test {
@@ -893,7 +892,70 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
     pattern->showSideBar_ = false;
     EXPECT_FALSE(pattern->showSideBar_);
     pattern->OnUpdateShowSideBar(layoutProperty);
-    EXPECT_TRUE(pattern->showSideBar_);
+    EXPECT_FALSE(pattern->showSideBar_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg030
+ * @tc.desc: Test SideBar UpdateControlButtonIcon In version13
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
+     * frameNode.
+     * @tc.expected: check whether the sideBarContainer node's children is not empty.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
+    pattern->CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    /**
+     * @tc.steps: step2. execute UpdateControlButtonIcon method, then get the default imageId of controlButton
+     * @tc.expected: check whether the controlButton's imageId is same as the default image.
+     */
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    pattern->UpdateControlButtonIcon();
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.resourceId_, InternalResource::ResourceId::SIDE_BAR_CLOSE);
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->UpdateControlButtonIcon();
+    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.resourceId_, InternalResource::ResourceId::SIDE_BAR_OPEN);
+
+    pattern->sideBarStatus_ = SideBarStatus::CHANGING;
+    pattern->UpdateControlButtonIcon();
+    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.resourceId_, InternalResource::ResourceId::SIDE_BAR_CLOSE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1020,20 +1082,26 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg033, TestSize.Level1)
      * @tc.steps: step2. Set platform version to 10, then execute GetControlImageSize.
      * @tc.expected: image's width is 24vp, and height is 24vp.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto expectWidth = sideBarTheme->GetControlButtonWidthSmall();
+    auto expectHeight = sideBarTheme->GetControlButtonHeightSmall();
     Dimension width;
     Dimension height;
     pattern->GetControlImageSize(width, height);
-    EXPECT_EQ(width, DEFAULT_IMAGE_WIDTH_V10);
-    EXPECT_EQ(height, DEFAULT_IMAGE_HEIGHT_V10);
+    EXPECT_EQ(width, expectWidth);
+    EXPECT_EQ(height, expectHeight);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 
     /**
      * @tc.steps: step3. Set image's width and height to 10vp, then execute GetControlImageSize.
      * @tc.expected: image's width is 10vp, and height is 10vp.
      */
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_9);
     auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateControlButtonWidth(IMAGE_WIDTH);
@@ -1583,7 +1651,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg050, TestSize.Level1)
     pattern->hasInit_ = true;
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
     pattern->OnUpdateShowSideBar(layoutProperty);
-    EXPECT_TRUE(pattern->showSideBar_);
+    EXPECT_FALSE(pattern->showSideBar_);
 }
 
 /**
@@ -1989,5 +2057,200 @@ HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern003, TestSize.Level1)
     pattern->showSideBar_ = false;
     pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+}
+
+/**
+ * @tc.name: SideBarContainerPattern004
+ * @tc.desc: Test SideBar CreateControlButton and Image In version13
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
+     * frameNode.
+     * @tc.expected: check whether the sideBarContainer node's children is not empty.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
+    pattern->CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    /**
+     * @tc.steps: step2. get the controlButton and controlImage properties,
+     * @tc.expected: check whether the controlButton's properties is same as the default theme.
+     */
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto buttonPattern = buttonFrameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonRenderContext = buttonFrameNode->GetRenderContext();
+    ASSERT_NE(buttonRenderContext, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    auto expectedButtonRadius = sideBarTheme->GetControlButtonBackboardRadius();
+    auto currentButtonRadius = buttonLayoutProperty->GetBorderRadiusValue();
+    EXPECT_EQ(BorderRadiusProperty(expectedButtonRadius), currentButtonRadius);
+
+    auto expectedBlenderColorClick = sideBarTheme->GetControlButtonBackboardColorPress();
+    EXPECT_EQ(expectedBlenderColorClick.GetValue(), buttonPattern->blendClickColor_.value().GetValue());
+    auto expectedBlenderColorHover = sideBarTheme->GetControlButtonBackboardColorHover();
+    EXPECT_EQ(expectedBlenderColorHover.GetValue(), buttonPattern->blendHoverColor_.value().GetValue());
+    auto expectedFocusColor = sideBarTheme->GetControlButtonBackboardStrokeColor();
+    EXPECT_EQ(expectedFocusColor.GetValue(), buttonPattern->focusBorderColor_.GetValue());
+    auto expectedBackBoardColor = sideBarTheme->GetControlButtonBackboardColor();
+    auto currentBackBoardColor = buttonRenderContext->GetBackgroundColorValue();
+    EXPECT_EQ(expectedBackBoardColor.GetValue(), currentBackBoardColor.GetValue());
+    auto expectedControlImageColor = sideBarTheme->GetControlImageColor();
+    pattern->UpdateControlButtonIcon();
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), expectedControlImageColor.GetValue());
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SideBarContainerPattern005
+ * @tc.desc: Test SideBar control image size In version13
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
+     * frameNode.
+     * @tc.expected: check whether the sideBarContainer node's children is not empty.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
+    pattern->CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    /**
+     * @tc.steps: step2. get the  controlImage size,
+     * @tc.expected: check whether the controlButton's size is same as the get size.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto themeImageWidth = sideBarTheme->GetControlButtonWidthSmall();
+    auto themeImageHeight = sideBarTheme->GetControlButtonHeightSmall();
+    auto expectedImageWidth = layoutProperty->GetControlButtonWidth().value_or(themeImageWidth);
+    auto expectedImageHeight = layoutProperty->GetControlButtonHeight().value_or(themeImageHeight);
+
+    Dimension getImageWidth;
+    Dimension getImageHeight;
+    pattern->GetControlImageSize(getImageWidth, getImageHeight);
+    EXPECT_EQ(getImageWidth, expectedImageWidth);
+    EXPECT_EQ(getImageHeight, expectedImageHeight);
+    
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+
+/**
+ * @tc.name: SideBarContainerPattern006
+ * @tc.desc: Test SideBar control image size In version13
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create control button.
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+    pattern->CreateAndMountControlButton(frameNode);
+    pattern->SetControlButtonPosCustom(false);
+
+    /**
+     * @tc.steps: step2. Set control button size to custom, then execute OnUpdateShowControlButton.
+     * @tc.expected: IsControlButtonCustomed return true.
+     */
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto themeButtonWidth = sideBarTheme->GetControlButtonWidthSmall();
+    auto themeButtonHeight = sideBarTheme->GetControlButtonHeightSmall();
+
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateControlButtonWidth(CUSTOM_CONTROL_BUTTON_WIDTH);
+    layoutProperty->UpdateControlButtonHeight(CUSTOM_CONTROL_BUTTON_HEIGHT);
+    pattern->OnUpdateShowControlButton(layoutProperty, frameNode);
+
+    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonWidth().value_or(themeButtonWidth).Value(),
+        CUSTOM_CONTROL_BUTTON_WIDTH.Value()));
+    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonHeight().value_or(themeButtonHeight).Value(),
+        CUSTOM_CONTROL_BUTTON_HEIGHT.Value()));
+
+    auto isControlButtonCustomed = pattern->IsControlButtonCustomed();
+    EXPECT_EQ(isControlButtonCustomed, true);
+
+    /**
+     * @tc.steps: step3. Set control button size to theme size, then execute OnUpdateShowControlButton.
+     * @tc.expected: IsControlButtonCustomed return false.
+     */
+    
+    layoutProperty->UpdateControlButtonWidth(themeButtonWidth);
+    layoutProperty->UpdateControlButtonHeight(themeButtonHeight);
+    pattern->OnUpdateShowControlButton(layoutProperty, frameNode);
+    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonWidth().value_or(themeButtonWidth).Value(),
+        themeButtonWidth.Value()));
+    ASSERT_TRUE(NearEqual(layoutProperty->GetControlButtonHeight().value_or(themeButtonHeight).Value(),
+        themeButtonHeight.Value()));
+
+    isControlButtonCustomed = pattern->IsControlButtonCustomed();
+    EXPECT_EQ(isControlButtonCustomed, false);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

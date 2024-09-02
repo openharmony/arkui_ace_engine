@@ -16,11 +16,6 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include <cstdint>
 
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/render/drawing_forward.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
@@ -98,10 +93,14 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
 
 void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
 {
-    if (!isStarted) {
+    if (!isStarted_ || info.GetTouches().empty()) {
         return;
     }
     auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (!isSelecting_ && LessOrEqual((localOffset - startOffset_).GetDistance(), minMoveDistance_.ConvertToPx())) {
+        return;
+    }
+    isSelecting_ = true;
     auto index = GetTouchIndex({ localOffset.GetX(), localOffset.GetY() });
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);

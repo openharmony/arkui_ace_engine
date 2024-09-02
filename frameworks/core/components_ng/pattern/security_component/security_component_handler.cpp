@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 
-#include <securec.h>
-
 #include "adapter/ohos/entrance/ace_container.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -113,6 +106,18 @@ bool SecurityComponentHandler::CheckBlur(const RefPtr<FrameNode>& node, const Re
 {
     if (renderContext->GetFrontBlurRadius().has_value() &&
         GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0f)) {
+        LOGW("SecurityComponentCheckFail: Parent %{public}s blur is set, security component is invalid",
+            node->GetTag().c_str());
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckForegroundBlurStyle(const RefPtr<FrameNode>& node,
+    const RefPtr<RenderContext>& renderContext)
+{
+    auto blurStyleOption = renderContext->GetFrontBlurStyle();
+    if (blurStyleOption.has_value() && (blurStyleOption->blurStyle != BlurStyle::NO_MATERIAL)) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundBlurStyle is set, security component is invalid",
             node->GetTag().c_str());
         return true;
@@ -212,8 +217,7 @@ bool SecurityComponentHandler::CheckClipMask(const RefPtr<FrameNode>& node, cons
 bool SecurityComponentHandler::CheckForegroundColor(const RefPtr<FrameNode>& node,
     const RefPtr<RenderContext>& renderContext)
 {
-    if (renderContext->GetForegroundColor().has_value() &&
-        (renderContext->GetForegroundColor().value() != Color::TRANSPARENT)) {
+    if (renderContext->GetForegroundColor().has_value()) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundColor is set, security component is invalid",
             node->GetTag().c_str());
         return true;
@@ -268,8 +272,9 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
         CheckContrast(node, renderContext) || CheckInvert(node, renderContext) ||
         CheckSepia(node, renderContext) || CheckHueRotate(node, renderContext) ||
         CheckColorBlend(node, renderContext) || CheckClipMask(node, renderContext) ||
-        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext)||
-        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext)) {
+        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext) ||
+        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext) ||
+        CheckForegroundBlurStyle(node, renderContext)) {
         return true;
     }
     return false;
@@ -552,7 +557,7 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
         "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
         "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
         "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
-        "Counter" };
+        "Counter", "Custom" };
 
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);

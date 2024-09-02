@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rating/rating_layout_property.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
-#include "core/components_ng/pattern/rating/rating_render_property.h"
 
 namespace OHOS::Ace::NG {
 AccessibilityValue RatingAccessibilityProperty::GetAccessibilityValue() const

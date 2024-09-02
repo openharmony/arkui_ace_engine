@@ -19,6 +19,7 @@
 #include <functional>
 #include <list>
 #include <utility>
+#include <mutex>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -492,12 +493,17 @@ public:
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-
-    void TryVisibleChangeOnDescendant(bool isVisible) override;
-    void NotifyVisibleChange(bool isVisible);
+    bool RenderCustomChild(int64_t deadline) override;
+    void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
+    void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
+    {
+        destroyCallbacksMap_[tag] = callback;
     }
 
     std::list<std::function<void()>> GetDestroyCallback() const
@@ -512,13 +518,19 @@ public:
 
     void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
     {
+        std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
         ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
     }
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
     {
+        std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
         ndkFontUpdateCallback_ = callback;
     }
+
+    void FireColorNDKCallback();
+    void FireFontNDKCallback(const ConfigurationChange& configurationChange);
 
     bool MarkRemoving() override;
 
@@ -882,6 +894,11 @@ public:
     bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool GetMonopolizeEvents() const;
@@ -987,7 +1004,7 @@ public:
     {
         return isUseTransitionAnimator_;
     }
-    
+
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -1051,6 +1068,9 @@ public:
 
 protected:
     void DumpInfo() override;
+    std::list<std::function<void()>> destroyCallbacks_;
+    std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
@@ -1094,10 +1114,20 @@ private:
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpDragInfo(std::unique_ptr<JsonValue>& json);
+    void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpExtensionHandlerInfo(std::unique_ptr<JsonValue>& json);
+    void DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json);
+    void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
+
     void DumpSafeAreaInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
@@ -1165,11 +1195,13 @@ private:
 
     bool AllowVisibleAreaCheck() const;
 
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
-    std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
@@ -1231,6 +1263,8 @@ private:
 
     std::string nodeName_;
 
+    ColorMode colorMode_ = ColorMode::LIGHT;
+
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;
@@ -1283,7 +1317,8 @@ private:
     friend class RosenRenderContext;
     friend class RenderContext;
     friend class Pattern;
-
+    mutable std::shared_mutex fontSizeCallbackMutex_;
+    mutable std::shared_mutex colorModeCallbackMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG

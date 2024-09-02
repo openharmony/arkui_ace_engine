@@ -13,22 +13,12 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-
-#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
-
-#include "core/components_ng/base/ui_node.h"
 
 #define protected public
 #define private public
-
 #include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"

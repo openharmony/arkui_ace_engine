@@ -16,15 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/animation/animator.h"
-#include "core/common/container.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
 
@@ -148,7 +140,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
-    host->NotifyVisibleChange(false);
+    host->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -161,7 +153,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
-    host->NotifyVisibleChange(true);
+    host->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -225,7 +217,7 @@ void PagePattern::OnShow()
         return;
     }
     std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
+    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), bundleName);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -242,7 +234,7 @@ void PagePattern::OnShow()
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 #endif
-    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
+    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetFullPath());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
@@ -260,7 +252,7 @@ void PagePattern::OnShow()
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
-            param = entryPageInfo->GetPageParams();
+            param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
         Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);

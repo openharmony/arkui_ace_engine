@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -85,5 +78,16 @@ FocusPattern QRCodePattern::GetFocusPattern() const
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(focusedColor);
     return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+}
+
+void QRCodePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    json->Put("Color", paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString().c_str());
+    json->Put("ContentOpacity", std::to_string(paintProperty->GetOpacityValue(1.0f)).c_str());
+    json->Put("ContentString", paintProperty->GetValueValue(" ").c_str());
 }
 } // namespace OHOS::Ace::NG

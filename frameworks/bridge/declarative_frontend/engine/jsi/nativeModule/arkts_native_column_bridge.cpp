@@ -117,4 +117,31 @@ ArkUINativeModuleValue ColumnBridge::ResetSpace(ArkUIRuntimeCallInfo* runtimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ColumnBridge::SetReverse(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto hasValue = secondArg->IsBoolean();
+    if (!hasValue) {
+        GetArkUINodeModifiers()->getColumnModifier()->setColumnReverse(nativeNode, true);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto isReverse = secondArg->ToBoolean(vm)->Value();
+    GetArkUINodeModifiers()->getColumnModifier()->setColumnReverse(nativeNode, isReverse);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ColumnBridge::ResetReverse(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getColumnModifier()->resetColumnReverse(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

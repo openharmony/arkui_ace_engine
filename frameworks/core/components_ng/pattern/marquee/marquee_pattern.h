@@ -82,9 +82,14 @@ public:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void OnVisibleChange(bool isVisible) override;
     void OnWindowHide() override;
     void OnWindowShow() override;
+    void SetMarqueeFrameRateRange(const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type)
+    {
+        frameRateRange_[type] = rateRange;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -125,6 +130,7 @@ private:
     int32_t lastWindowHeight_ = 0.0;
     int32_t lastWindowWidth_ = 0.0;
     float marqueeWidth_ = 0.0f;
+    std::unordered_map<MarqueeDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;
 };
 } // namespace OHOS::Ace::NG
 

@@ -37,6 +37,8 @@ struct ListItemGroupLayoutInfo {
     bool atStart = false;
     bool atEnd = false;
     float averageHeight = -1;
+    float headerSize = 0.0f;
+    float footerSize = 0.0f;
 };
 
 struct ListItemInfo {
@@ -385,6 +387,8 @@ public:
         posMap_ = posMap;
     }
 
+    void ResetLayoutItem(LayoutWrapper* layoutWrapper);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -430,6 +434,7 @@ protected:
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     std::pair<int32_t, int32_t> GetLayoutGroupCachedCount(
         const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView);
+    void AdjustStartPosition(const RefPtr<LayoutWrapper>& layoutWrapper, float& startPos);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -467,10 +472,11 @@ private:
     virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         int32_t cacheCount, int32_t cached, int32_t& currIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
-        const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
-    static void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
-    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
+    static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint, int64_t deadline,
+        int32_t cached, const ListMainSizeValues& listMainSizeValues);
+    static void PostIdleTaskV2(
+        RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param, ListMainSizeValues listMainSizeValues);
+    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline, ListMainSizeValues listMainSizeValues);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,15 @@
 
 #include "base/log/event_report.h"
 
-#include <ctime>
-#include <string>
 #include <unistd.h>
 
 #include "hisysevent.h"
 
-#include "base/log/ace_trace.h"
-#include "base/json/json_util.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "res_sched_client.h"
+#include "res_type.h"
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 
 namespace OHOS::Ace {
 namespace {
@@ -83,8 +82,12 @@ constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
+constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+constexpr int32_t MAX_JANK_FRAME_TIME = 32;
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 
 constexpr char DUMP_LOG_COMMAND[] = "B";
 
@@ -393,6 +396,21 @@ void EventReport::ReportEventComplete(DataBase& data)
         static_cast<long long>(inputTime), static_cast<long long>(e2eLatency));
 }
 
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+void EventReport::ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
+    const int64_t maxFrameTime)
+{
+    uint32_t eventType = ResourceSchedule::ResType::RES_TYPE_APP_FRAME_DROP;
+    int32_t subType = isInteractionJank ? ResourceSchedule::ResType::AppFrameDropType::INTERACTION_APP_JANK
+                                        : ResourceSchedule::ResType::AppFrameDropType::JANK_FRAME_APP;
+    std::unordered_map<std::string, std::string> payload = {
+        { "bundleName", bundleName },
+        { "maxFrameTime", std::to_string(maxFrameTime) },
+    };
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(eventType, subType, payload);
+}
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
+
 void EventReport::ReportEventJankFrame(DataBase& data)
 {
     std::string eventName = "INTERACTION_APP_JANK";
@@ -401,10 +419,6 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& bundleName = data.baseInfo.bundleName;
     const auto& processName = data.baseInfo.processName;
     const auto& abilityName = data.baseInfo.abilityName;
-    const auto& pageUrl = data.baseInfo.pageUrl;
-    const auto& versionCode = data.baseInfo.versionCode;
-    const auto& versionName = data.baseInfo.versionName;
-    const auto& pageName = data.baseInfo.pageName;
     auto startTime = data.beginVsyncTime;
     ConvertRealtimeToSystime(data.beginVsyncTime, startTime);
     const auto& durition = (data.endVsyncTime - data.beginVsyncTime) / NS_TO_MS;
@@ -424,10 +438,10 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_PROCESS_NAME, processName,
         EVENT_KEY_MODULE_NAME, bundleName,
         EVENT_KEY_ABILITY_NAME, abilityName,
-        EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_VERSION_CODE, versionCode,
-        EVENT_KEY_VERSION_NAME, versionName,
-        EVENT_KEY_PAGE_NAME, pageName,
+        EVENT_KEY_PAGE_URL, data.baseInfo.pageUrl,
+        EVENT_KEY_VERSION_CODE, data.baseInfo.versionCode,
+        EVENT_KEY_VERSION_NAME, data.baseInfo.versionName,
+        EVENT_KEY_PAGE_NAME, data.baseInfo.pageName,
         EVENT_KEY_STARTTIME, static_cast<uint64_t>(startTime),
         EVENT_KEY_DURITION, static_cast<uint64_t>(durition),
         EVENT_KEY_TOTAL_FRAMES, totalFrames,
@@ -442,6 +456,11 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     ACE_SCOPED_TRACE("INTERACTION_APP_JANK: sceneId =%s, startTime=%lld(ms),"
         "maxFrameTime=%lld(ms)", sceneId.c_str(),
         static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    if (isDisplayAnimator && maxFrameTime > MAX_JANK_FRAME_TIME) {
+        ReportAppFrameDropToRss(true, bundleName, maxFrameTime);
+    }
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 }
 
 void EventReport::ReportJankFrameApp(JankInfo& info)
@@ -466,6 +485,9 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
         EVENT_KEY_PAGE_NAME, pageName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    ReportAppFrameDropToRss(false, bundleName);
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 }
 
 void EventReport::ReportJankFrameFiltered(JankInfo& info)
@@ -492,6 +514,36 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
     ACE_SCOPED_TRACE("JANK_FRAME_FILTERED: skipppedFrameTime=%lld(ms), windowName=%s",
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
+}
+
+void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
+{
+    std::string eventName = "JANK_FRAME_UNFILTERED";
+    const auto& bundleName = info.baseInfo.bundleName;
+    const auto& processName = info.baseInfo.processName;
+    const auto& abilityName = info.baseInfo.abilityName;
+    const auto& pageUrl = info.baseInfo.pageUrl;
+    const auto& versionCode = info.baseInfo.versionCode;
+    const auto& versionName = info.baseInfo.versionName;
+    const auto& pageName = info.baseInfo.pageName;
+    const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& windowName = info.windowName;
+    const auto& filterType = info.filterType;
+    const auto& sceneId = info.sceneId;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
+        EVENT_KEY_FILTER_TYPE, filterType,
+        EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
+    ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
+        static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);
 }
 
 void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,

@@ -31,6 +31,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t ARGC_COUNT_TWO = 2;
 constexpr int32_t MAX_PARSE_DEPTH = 3;
+constexpr uint32_t MAX_PARSE_LENGTH = 1024;
+constexpr uint32_t MAX_PARSE_PROPERTY_SIZE = 15;
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
 }
@@ -323,6 +325,17 @@ void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::stri
     pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
 }
 
+bool JSNavigationStack::CallByPushDestination(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto isPushDestination = pathInfo->GetPropertyValue<bool>("pushDestination", false);
+    return isPushDestination;
+}
+
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
     auto name = GetNameByIndex(index);
@@ -336,6 +349,9 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
     if (errorCode != ERROR_CODE_NO_ERROR) {
+        if (CallByPushDestination(index)) {
+            return nullptr;
+        }
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
@@ -344,7 +360,8 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
         pattern->SetName(name);
         pattern->SetIndex(index);
         auto onPop = GetOnPopByIndex(index);
-        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        auto isEntry = GetIsEntryByIndex(index);
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -422,6 +439,42 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
     return func->Call(dataSourceObj_, 1, params);
 }
 
+bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto getIsEntryFunc = dataSourceObj_->GetProperty("getIsEntryByIndex");
+    if (!getIsEntryFunc->IsFunction()) {
+        return false;
+    }
+    auto func = JSRef<JSFunc>::Cast(getIsEntryFunc);
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    auto result = func->Call(dataSourceObj_, 1, params);
+    if (!result->IsBoolean()) {
+        return false;
+    }
+    return result->ToBoolean();
+}
+
+void JSNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
+{
+    CHECK_NULL_VOID(dataSourceObj_->IsEmpty());
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto setIsEntryFunc = dataSourceObj_->GetProperty("setIsEntryByIndex");
+    if (!setIsEntryFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(setIsEntryFunc);
+    JSRef<JSVal> params[ARGC_COUNT_TWO];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(isEntry));
+    func->Call(dataSourceObj_, ARGC_COUNT_TWO, params);
+}
+
 bool JSNavigationStack::GetNavDestinationNodeInUINode(
     RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
@@ -477,6 +530,107 @@ void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
     replaceFunc->Call(dataSourceObj_, 1, params);
 }
 
+std::string JSNavigationStack::GetRouteParam() const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
+    auto size = GetSize();
+    if (size > 0) {
+        auto param = GetParamByIndex(size - 1);
+        return ConvertParamToString(param, true);
+    }
+    return "";
+}
+
+int32_t JSNavigationStack::GetSize() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return 0;
+    }
+    auto sizeFunc = dataSourceObj_->GetProperty("size");
+    if (!sizeFunc->IsFunction()) {
+        return 0;
+    }
+    auto func = JSRef<JSFunc>::Cast(sizeFunc);
+    auto jsValue = JSRef<JSVal>::Cast(func->Call(dataSourceObj_));
+    if (jsValue->IsNumber()) {
+        return jsValue->ToNumber<int32_t>();
+    }
+    return 0;
+}
+
+std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param, bool needLimit) const
+{
+    if (param->IsBoolean()) {
+        bool ret = param->ToBoolean();
+        return ret ? "true" : "false";
+    } else if (param->IsNumber()) {
+        double ret = param->ToNumber<double>();
+        std::ostringstream oss;
+        oss << ret;
+        return oss.str();
+    } else if (param->IsString()) {
+        std::string ret = param->ToString();
+        if (needLimit && ret.size() > MAX_PARSE_LENGTH) {
+            return ret.substr(0, MAX_PARSE_LENGTH);
+        }
+        return ret;
+    } else if (param->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(param);
+        auto jsonObj = JsonUtil::Create(true);
+        ParseJsObject(jsonObj, obj, MAX_PARSE_DEPTH, needLimit);
+        return jsonObj->ToString();
+    }
+    return "";
+}
+
+void JSNavigationStack::ParseJsObject(
+    std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (depthLimit == 0) {
+        return;
+    }
+    depthLimit--;
+    auto propertyNames = obj->GetPropertyNames();
+    if (!propertyNames->IsArray()) {
+        return;
+    }
+    size_t size = propertyNames->Length();
+    if (needLimit && size > MAX_PARSE_PROPERTY_SIZE) {
+        size = MAX_PARSE_PROPERTY_SIZE;
+    }
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> name = propertyNames->GetValueAt(i);
+        if (!name->IsString()) {
+            continue;
+        }
+        auto propertyName = name->ToString();
+        auto key = propertyName.c_str();
+        JSRef<JSVal> value = obj->GetProperty(key);
+        if (value->IsBoolean()) {
+            bool ret = value->ToBoolean();
+            json->Put(key, ret ? "true" : "false");
+        } else if (value->IsNumber()) {
+            double ret = value->ToNumber<double>();
+            std::ostringstream oss;
+            oss << ret;
+            json->Put(key, oss.str().c_str());
+        } else if (value->IsString()) {
+            std::string ret = value->ToString();
+            if (needLimit && ret.size() > MAX_PARSE_LENGTH) {
+                json->Put(key, ret.substr(0, MAX_PARSE_LENGTH).c_str());
+            } else {
+                json->Put(key, ret.c_str());
+            }
+        } else if (value->IsObject()) {
+            JSRef<JSObject> childObj = JSRef<JSObject>::Cast(value);
+            auto childJson = JsonUtil::Create(true);
+            ParseJsObject(childJson, childObj, depthLimit, needLimit);
+            json->Put(key, childJson);
+        }
+    }
+}
+
 bool JSNavigationStack::GetAnimatedValue() const
 {
     if (dataSourceObj_->IsEmpty()) {
@@ -509,96 +663,6 @@ bool JSNavigationStack::GetDisableAnimation() const
     }
     auto disableAllAnimation = dataSourceObj_->GetProperty("disableAllAnimation");
     return disableAllAnimation->ToBoolean();
-}
-
-std::string JSNavigationStack::GetRouteParam() const
-{
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
-    auto size = GetSize();
-    if (size > 0) {
-        auto param = GetParamByIndex(size - 1);
-        return ConvertParamToString(param);
-    }
-    return "";
-}
-
-int32_t JSNavigationStack::GetSize() const
-{
-    if (dataSourceObj_->IsEmpty()) {
-        return 0;
-    }
-    auto sizeFunc = dataSourceObj_->GetProperty("size");
-    if (!sizeFunc->IsFunction()) {
-        return 0;
-    }
-    auto func = JSRef<JSFunc>::Cast(sizeFunc);
-    auto jsValue = JSRef<JSVal>::Cast(func->Call(dataSourceObj_));
-    if (jsValue->IsNumber()) {
-        return jsValue->ToNumber<int32_t>();
-    }
-    return 0;
-}
-
-std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param) const
-{
-    if (param->IsBoolean()) {
-        bool ret = param->ToBoolean();
-        return ret ? "true" : "false";
-    } else if (param->IsNumber()) {
-        double ret = param->ToNumber<double>();
-        std::ostringstream oss;
-        oss<< ret;
-        return oss.str();
-    } else if (param->IsString()) {
-        std::string ret = param->ToString();
-        return ret;
-    } else if (param->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(param);
-        auto jsonObj = JsonUtil::Create(true);
-        ParseJsObject(jsonObj, obj, MAX_PARSE_DEPTH);
-        return jsonObj->ToString();
-    }
-    return "";
-}
-
-void JSNavigationStack::ParseJsObject(
-    std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const
-{
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
-    if (depthLimit == 0) {
-        return;
-    }
-    depthLimit--;
-    auto propertyNames = obj->GetPropertyNames();
-    if (!propertyNames->IsArray()) {
-        return;
-    }
-    for (size_t i = 0; i < propertyNames->Length(); i++) {
-        JSRef<JSVal> name = propertyNames->GetValueAt(i);
-        if (!name->IsString()) {
-            continue;
-        }
-        auto propertyName = name->ToString();
-        auto key = propertyName.c_str();
-        JSRef<JSVal> value = obj->GetProperty(key);
-        if (value->IsBoolean()) {
-            bool ret = value->ToBoolean();
-            json->Put(key, ret ? "true" : "false");
-        } else if (value->IsNumber()) {
-            double ret = value->ToNumber<double>();
-            std::ostringstream oss;
-            oss<< ret;
-            json->Put(key, oss.str().c_str());
-        } else if (value->IsString()) {
-            std::string ret = value->ToString();
-            json->Put(key, ret.c_str());
-        } else if (value->IsObject()) {
-            JSRef<JSObject> childObj = JSRef<JSObject>::Cast(value);
-            auto childJson = JsonUtil::Create(true);
-            ParseJsObject(childJson, childObj, depthLimit);
-            json->Put(key, childJson);
-        }
-    }
 }
 
 void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback)
@@ -723,7 +787,11 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
     auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
     if (pattern) {
         auto onPop = navPathInfo->GetProperty("onPop");
-        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
+        auto isEntryVal = navPathInfo->GetProperty("isEntry");
+        bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+        pattern->SetName(name);
+        pattern->SetIndex(GetSize() - 1);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -768,6 +836,7 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
         preProxy->SetNavDestinationContext(from);
         params[0] = preObj;
     }
+
     auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
     if (!topDestination) {
         params[1] = JSRef<JSVal>::Make(ToJSValue("navBar"));
@@ -1064,6 +1133,7 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
     pathInfo->SetProperty("param", jsPathInfo->GetParam());
     pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
+    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
     return pathInfo;
 }
 

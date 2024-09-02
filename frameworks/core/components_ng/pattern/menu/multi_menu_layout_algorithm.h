@@ -38,6 +38,9 @@ private:
         std::optional<LayoutConstraintF>& layoutConstraint);
     void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+    void UpdateMenuDefaultConstraintByDevice(const RefPtr<MenuPattern>& pattern,
+        LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
+        bool idealSizeHasVal);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultiMenuLayoutAlgorithm);
 };

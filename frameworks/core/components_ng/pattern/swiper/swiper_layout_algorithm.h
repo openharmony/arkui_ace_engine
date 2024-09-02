@@ -112,11 +112,6 @@ public:
         return contentCrossSize_;
     }
 
-    void SetContentCrossSize(float contentCrossSize)
-    {
-        contentCrossSize_ = contentCrossSize;
-    }
-
     void SetCurrentOffset(float offset)
     {
         currentOffset_ = offset;
@@ -339,7 +334,8 @@ private:
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
     bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
-    void UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<SwiperLayoutProperty>& property);
+    void UpdateLayoutInfoBeforeMeasureSwiper(
+        const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint, Axis axis);
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
     float GetChildMainAxisSize(
         const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);

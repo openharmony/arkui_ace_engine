@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 
-#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
@@ -82,9 +81,19 @@ public:
         return tempTitleOffsetY_;
     }
 
+    float GetTempTitleOffsetX() const
+    {
+        return tempTitleOffsetX_;
+    }
+
     float GetTempSubTitleOffsetY() const
     {
         return tempSubTitleOffsetY_;
+    }
+
+    float GetTempSubTitleOffsetX() const
+    {
+        return tempSubTitleOffsetX_;
     }
 
     float GetMaxTitleBarHeight() const
@@ -207,6 +216,11 @@ public:
         currentTitleOffsetY_ = currentTitleOffsetY;
     }
 
+    void SetCurrentTitleOffsetX(float currentTitleOffsetX)
+    {
+        currentTitleOffsetX_ = currentTitleOffsetX;
+    }
+
     void SetCurrentTitleBarHeight(float currentTitleBarHeight)
     {
         currentTitleBarHeight_ = currentTitleBarHeight;
@@ -251,16 +265,6 @@ public:
     {
         maxMenuNums_ = maxMenu;
     }
-
-    bool GetIsTitleMoving() const
-    {
-        return isTitleMoving_;
-    }
-
-    void SetIsTitleMoving(bool isTitleMoving)
-    {
-        isTitleMoving_ = isTitleMoving;
-    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -295,6 +299,10 @@ public:
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 
+    void UpdateOffsetXToAvoidSideBar();
+    void ResetSideBarControlButtonInfo();
+    void UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size);
+
     bool IsFontSizeSettedByDeveloper() const
     {
         return isFontSizeSettedByDeveloper_;
@@ -308,6 +316,18 @@ public:
     {
         shouldResetSubTitleProperty_ = reset;
     }
+
+    RectF GetControlButtonInfo() const
+    {
+        return controlButtonRect_;
+    }
+
+    bool IsNecessaryToAvoidSideBar() const
+    {
+        return needToAvoidSideBar_;
+    }
+
+    void InitSideBarButtonUpdateCallbackIfNeeded();
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -331,7 +351,9 @@ private:
     void SetMaxTitleBarHeight();
     void SetTempTitleBarHeight(float offsetY);
     void SetTempTitleOffsetY();
+    void SetTempTitleOffsetX();
     void SetTempSubTitleOffsetY();
+    void SetTempSubTitleOffsetX();
     void SetDefaultTitleFontSize();
     void SetDefaultSubtitleOpacity();
 
@@ -365,6 +387,10 @@ private:
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
+
+    RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
+    void UpdateTitlePositionInfo();
+    float GetNavLeftPadding(float parentWidth);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -403,7 +429,6 @@ private:
     bool CanOverDrag_ = true;
     bool isTitleScaleChange_ = true;
     bool isTitleChanged_ = false; // navigation Non-custom title changed
-    bool isTitleMoving_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
     bool isFreeTitleUpdated_ = false;
@@ -427,6 +452,17 @@ private:
     bool isFontSizeSettedByDeveloper_ = false;
     bool shouldResetMainTitleProperty_ = true;
     bool shouldResetSubTitleProperty_ = true;
+    float moveRatioX_ = 0.0f;
+    float minTitleOffsetX_ = 0.0f;
+    float maxTitleOffsetX_ = 0.0f;
+    float defaultTitleOffsetX_ = 0.0f;
+    float currentTitleOffsetX_ = 0.0f;
+    float tempTitleOffsetX_ = 0.0f;
+    float tempSubTitleOffsetX_ = 0.0f;
+    float titleMoveDistanceX_ = 0.0f;
+    bool needToAvoidSideBar_ = false;
+    RectF controlButtonRect_;
+    bool isScrolling_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/utils/resource_configuration.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/theme/theme_style.h"
 namespace OHOS::Ace {
 
@@ -229,6 +230,12 @@ public:
     virtual ColorMode GetResourceColorMode() const
     {
         return ColorMode::LIGHT;
+    }
+
+    virtual RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
+        const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
+    {
+        return nullptr;
     }
 };
 

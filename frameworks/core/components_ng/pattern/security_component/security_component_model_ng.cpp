@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
-#include "base/i18n/localization.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/utils/utils.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -382,6 +377,11 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundBottomPadding, bottom.value());
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdateHasCustomPadding(true);
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& padding)

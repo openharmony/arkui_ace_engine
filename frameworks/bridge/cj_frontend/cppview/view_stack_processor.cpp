@@ -14,9 +14,6 @@
  */
 
 #include "bridge/cj_frontend/cppview/view_stack_processor.h"
-
-#include "base/geometry/dimension.h"
-#include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 
 namespace OHOS::Ace::Framework {

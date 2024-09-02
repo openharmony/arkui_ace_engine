@@ -16,21 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_WATER_FLOW_TEST_NG_H
 
-#include <cstdint>
-#include <map>
-#include <memory>
-
-#include "gtest/gtest.h"
-
+#include "test/unittest/core/pattern/test_ng.h"
 #define protected public
 #define private public
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "base/geometry/offset.h"
-#include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
-#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #undef private

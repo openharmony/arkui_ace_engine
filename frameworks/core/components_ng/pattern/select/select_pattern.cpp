@@ -51,7 +51,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -163,8 +162,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
     CHECK_NULL_VOID(hub);
 
     auto onSelect = hub->GetSelectEvent();
-    TAG_LOGD(
-        AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d value %{public}s", index, value.c_str());
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d", index);
     if (onSelect) {
         onSelect(index, value);
     }
@@ -379,8 +377,7 @@ void SelectPattern::CreateSelectedCallback()
         CHECK_NULL_VOID(newSelected);
         auto value = newSelected->GetText();
         auto onSelect = hub->GetSelectEvent();
-        TAG_LOGD(
-            AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d value %{public}s", index, value.c_str());
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d", index);
         if (onSelect) {
             onSelect(index, value);
         }

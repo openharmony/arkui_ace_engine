@@ -134,11 +134,14 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void ResetGridItemInfo()
     {
         irregularItemInfo_.reset();
     }
+
+    void UpdateGridItemStyle(GridItemStyle gridItemStyle);
 
 protected:
     void OnModifyDone() override;

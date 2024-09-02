@@ -15,19 +15,12 @@
 
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 
-#include <sys/stat.h>
-#include <sys/statfs.h>
-
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
-#include "core/common/dynamic_component_renderer.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/event/key_event.h"
-#include "core/event/pointer_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
-#include "session/host/include/session.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -130,8 +123,10 @@ void IsolatedPattern::FireOnErrorCallbackOnUI(
     ContainerScope scope(instanceId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto uiTaskExecutor = SingleTaskExecutor::Make(
-        host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this), code, name, msg] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -288,5 +283,22 @@ void IsolatedPattern::DumpInfo()
         .append(std::to_string(rendererDumpInfo.limitedWorkerInitTime)));
     DumpLog::GetInstance().AddDesc(std::string("loadAbcTime: ")
         .append(std::to_string(rendererDumpInfo.loadAbcTime)));
+}
+
+void IsolatedPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("isolatedId", platformId_);
+    json->Put("abcPath", curIsolatedInfo_.abcPath.c_str());
+    json->Put("reourcePath", curIsolatedInfo_.reourcePath.c_str());
+    json->Put("entryPoint", curIsolatedInfo_.reourcePath.c_str());
+    json->Put("reourcePath", curIsolatedInfo_.entryPoint.c_str());
+    json->Put("createLimitedWorkerTime", std::to_string(isolatedDumpInfo_.createLimitedWorkerTime).c_str());
+
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    RendererDumpInfo rendererDumpInfo;
+    dynamicComponentRenderer_->Dump(rendererDumpInfo);
+    json->Put("createUiContenTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
+    json->Put("limitedWorkerInitTime", std::to_string(rendererDumpInfo.limitedWorkerInitTime).c_str());
+    json->Put("loadAbcTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
 }
 } // namespace OHOS::Ace::NG

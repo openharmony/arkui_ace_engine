@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -50,11 +50,13 @@ template("ace_osal_ohos_source_set") {
       "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
+      "ai_write_adapter.cpp",
       "anr_thread.cpp",
       "app_bar_helper_impl.cpp",
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
+      "display_info_utils.cpp",
       "download_manager_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
@@ -73,6 +75,7 @@ template("ace_osal_ohos_source_set") {
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
+      "thp_extra_manager_impl.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
@@ -97,6 +100,12 @@ template("ace_osal_ohos_source_set") {
           defined(global_parts_info.resourceschedule_soc_perf)) {
         external_deps += [ "soc_perf:socperf_client" ]
         defines += [ "SOC_PERF_ENABLE" ]
+      }
+
+      if (defined(global_parts_info) && defined(
+              global_parts_info.resourceschedule_resource_schedule_service)) {
+        external_deps += [ "resource_schedule_service:ressched_client" ]
+        defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
       }
 
       if (defined(resourceschedule_ffrt_support) &&
@@ -177,10 +186,14 @@ template("ace_osal_ohos_source_set") {
     }
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+      "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     ]
 
     if (ability_runtime_graphics) {
       external_deps += [ "image_framework:image_native" ]
+    }
+    if (os_account_exists) {
+      external_deps += [ "os_account:os_account_innerkits" ]
     }
   }
 }

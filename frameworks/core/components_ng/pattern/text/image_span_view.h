@@ -43,6 +43,8 @@ public:
     static TextBackgroundStyle GetSpanTextBackgroundStyle(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
+    static void SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius);
+    static void ResetBorderRadius(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_SPAN_VIEW_H

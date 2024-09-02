@@ -53,6 +53,8 @@ public:
         synced_ = false;
     }
 
+    float CalibrateOffset() override;
+
     int32_t GetCrossIndex(int32_t itemIndex) const override;
 
     OverScrollOffset GetOverScrolledDelta(float delta) const override;
@@ -209,11 +211,16 @@ public:
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
      */
     std::vector<std::vector<Lane>> lanes_;
-    // mapping of all items previously or currently in lanes_.
+    /**
+     * @brief mapping of all items previously or currently in lanes_.
+     * REQUIRES: All items in lanes_ are in idxToLane_.
+     */
     std::unordered_map<int32_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
-    float totalOffset_ = 0.0f;   // record total offset when continuously scrolling. Reset when jumped
+    /* Record total offset when continuously scrolling. No longer accurate after jump. Reset when reach top */
+    float totalOffset_ = 0.0f;
+
     std::vector<float> mainGap_; // update this at the end of a layout
 
     // maximum content height encountered so far, mainly for comparing content and viewport height

@@ -160,11 +160,13 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     Point leftPoint, rightPoint;
     if (isRTL) {
-        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
+        auto textFieldLeftOffset = textFieldPattern->GetPaddingLeft() + textFieldPattern->GetBorderLeft();
+        leftPoint.SetX(hasResponseArea ? textFieldLeftOffset : contentRect.Left());
         rightPoint.SetX(contentRect.Right());
     } else {
+        auto textFieldRightOffset = textFieldPattern->GetPaddingRight() + textFieldPattern->GetBorderRight();
         leftPoint.SetX(contentRect.Left());
-        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
+        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() - textFieldRightOffset : contentRect.Right());
     }
 
     leftPoint.SetY(textFrameRect.Height());
@@ -254,6 +256,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     pen.SetColor(ToRSColor(cursorColor_->Get()));
     canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
+    ACE_LAYOUT_SCOPED_TRACE("PaintCursor[offset:%f, %f]", paintOffset.GetX(), paintOffset.GetY());
     float clipRectHeight = 0.0f;
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),

@@ -132,6 +132,11 @@ class ObserveV2 {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
+  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
+    const trackedKey = ObserveV2.OB_PREFIX + prop;
+    return (parentObj && typeof (parentObj) === 'object' && trackedKey in parentObj);
+  }
+
   public static getCurrentRecordedId(): number {
     const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
     return bound ? bound[0] : -1;
@@ -418,7 +423,12 @@ class ObserveV2 {
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
       if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
         /* update not already in progress */ !this.startDirty_) {
-        Promise.resolve().then(this.updateDirty.bind(this));
+        Promise.resolve()
+        .then(this.updateDirty.bind(this))
+        .catch(error => {
+          stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+          throw error;
+        });
       }
 
       // add bindId to the correct Set of pending changes.
@@ -449,9 +459,9 @@ class ObserveV2 {
    * process @Computed until no more @Computed need update
    * process @Monitor until no more @Computed and @Monitor
    * process UINode update until no more @Computed and @Monitor and UINode rerender
-   * 
+   *
    * @param updateUISynchronously should be set to true if called during VSYNC only
-   * 
+   *
    */
 
   public updateDirty2(updateUISynchronously: boolean = false): void {
@@ -547,7 +557,7 @@ class ObserveV2 {
    * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
    * Code left here to reproduce benchmark measurements, compare with future optimisation
    * @param elmtIds
-   * 
+   *
    */
   private updateUINodesSynchronously(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
@@ -680,13 +690,13 @@ class ObserveV2 {
         let ret = target[prop];
         let type = typeof (ret);
 
-        return type === "function"
+        return type === 'function'
           ? ret.bind(receiver)
-          : (type === "object"
+          : (type === 'object'
             ? RefInfo.get(ret).proxy
             : ret);
       },
-      set(target: object, prop: string, value: any, receiver: any) {
+      set(target: object, prop: string, value: any, receiver: any): boolean {
         if (target[prop] === value) {
           return true;
         }
@@ -694,7 +704,7 @@ class ObserveV2 {
         ObserveV2.getObserve().fireChange(RefInfo.get(target), prop);
         return true;
       }
-    }
+    };
 
 
   public static commonHandlerSet(target: any, key: string | symbol, value: any): boolean {
@@ -705,7 +715,9 @@ class ObserveV2 {
     if (target[key] === value) {
       return true;
     }
+
     target[key] = value;
+
     ObserveV2.getObserve().fireChange(RefInfo.get(target), key.toString());
     return true;
   }
@@ -730,22 +742,11 @@ class ObserveV2 {
       }
 
       let refInfo = RefInfo.get(target);
-      if (key === 'size') {
-        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-        return target.size;
-      }
-  
       let ret = target[key];
+
       if (typeof (ret) !== 'function') {
-        if (typeof (ret) === "object") {
-          let wrapper = RefInfo.get(ret);
-          ObserveV2.getObserve().addRef(refInfo, key);
-          return wrapper.proxy;
-        }
-        if (key === 'length') {
-          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-        }
-        return ret;
+        ObserveV2.getObserve().addRef(refInfo, key === 'length' ? ObserveV2.OB_LENGTH : key);
+        return (typeof (ret) === 'object') ? RefInfo.get(ret).proxy : ret;
       }
 
       if (ObserveV2.arrayMutatingFunctions.has(key as string)) {
@@ -767,7 +768,12 @@ class ObserveV2 {
         ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH)
         return function (callbackFn: (value: any, index: number, array: Array<any>) => void): any {
           const result = ret.call(target, (value: any, index: number, array: Array<any>) => {
-            callbackFn(typeof value == "object" ? RefInfo.get(value).proxy : value, index, receiver);
+            // Collections.Array will report BusinessError: The foreach cannot be bound if call "receiver".
+            // because the passed parameter is not the instance of the container class.
+            // so we must call "target" here to deal with the collections situations.
+            // But we also need to addref for each index.
+            receiver[index];
+            callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
           });
           return result;
         }
@@ -777,7 +783,16 @@ class ObserveV2 {
 
     },
     set(target: any, key: string | symbol, value: any): boolean {
-      return ObserveV2.commonHandlerSet(target, key, value);
+
+      if (typeof key === 'symbol' || target[key] === value) {
+        return true;
+      }
+
+      const originalLength = target.length;
+      target[key] = value;
+      const arrayLenChanged = target.length !== originalLength;
+      ObserveV2.getObserve().fireChange(RefInfo.get(target), arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString());
+      return true;
     }
   }
 
@@ -798,16 +813,16 @@ class ObserveV2 {
         }
         return target[key];
       }
-  
+
       let refInfo = RefInfo.get(target);
       if (key === 'size') {
         ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
         return target.size;
       }
-  
+
       let ret = target[key];
       if (typeof (ret) !== 'function') {
-        if (typeof (ret) === "object") {
+        if (typeof (ret) === 'object') {
           let wrapper = RefInfo.get(ret);
           ObserveV2.getObserve().addRef(refInfo, key);
           return wrapper.proxy;
@@ -936,7 +951,7 @@ class ObserveV2 {
       }
       return ret.bind(target);
     },
-    
+
     set(target: any, key: string | symbol, value: any): boolean {
       return ObserveV2.commonHandlerSet(target, key, value);
     }
@@ -1106,7 +1121,18 @@ class ObserveV2 {
       if (target[key] === value) {
         return true;
       }
-      target[key] = value;
+      if (Array.isArray(target)) {
+        const originalLength = target.length;
+        target[key] = value;
+        if (target.length !== originalLength) {
+            ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
+            // autoProxyObject function adds ref to OB_LENGTH for all arrays that
+            // are not MakeObserved. No need to fire key.toString() separately. Just return.
+            return true;
+        }
+      } else {
+          target[key] = value;
+      }
       ObserveV2.getObserve().fireChange(target, key.toString());
       return true;
     }

@@ -17,7 +17,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {

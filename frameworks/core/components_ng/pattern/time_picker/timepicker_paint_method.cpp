@@ -26,8 +26,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
-constexpr uint8_t ENABLED_ALPHA = 255;
-constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
 CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -54,7 +52,7 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto fontScale = timePickerPattern->GetPaintDividerSpacing();
     dividerSpacing = dividerSpacing * fontScale;
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, layoutProperty, frameRect, dividerSpacing,
-               dividerColor, enabled = enabled_](RSCanvas& canvas) {
+               dividerColor](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
 
@@ -71,28 +69,7 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             OffsetF offsetY = OffsetF(contentRect.GetX(), downLine);
             dividerPainter.DrawLine(canvas, offsetY);
         }
-
-        if (!enabled) {
-            picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
-        }
     };
 }
 
-void TimePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
-{
-    double centerY = Y;
-    double centerX = X;
-    RSRect rRect(0, 0, centerX, centerY);
-    RSPath path;
-    path.AddRoundRect(rRect, 0, 0, RSPathDirection::CW_DIRECTION);
-    RSPen pen;
-    RSBrush brush;
-    brush.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    pen.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    canvas.AttachBrush(brush);
-    canvas.AttachPen(pen);
-    canvas.DrawPath(path);
-    canvas.DetachPen();
-    canvas.DetachBrush();
-}
 } // namespace OHOS::Ace::NG

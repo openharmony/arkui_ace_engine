@@ -14,18 +14,28 @@
  */
 #include "core/interfaces/native/node/node_xcomponent_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t ERROR_UINT_CODE = -1;
 std::string g_strValue;
+
+void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableAnalyzer(frameNode, enable);
+}
+
+void ResetXComponentEnableAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableAnalyzer(frameNode, false);
+}
 
 void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
@@ -145,6 +155,13 @@ void SetImageAIOptions(ArkUINodeHandle node, void* options)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::SetImageAIOptions(frameNode, options);
 }
+
+void InitXComponent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::InitXComponent(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -155,6 +172,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         nullptr, // setXComponentOptions
         nullptr, // getXComponentSurfaceId
         nullptr, // getXComponentController
+        SetXComponentEnableAnalyzer,
+        ResetXComponentEnableAnalyzer,
         SetXComponentBackgroundColor,
         ResetXComponentBackgroundColor,
         SetXComponentOpacity,
@@ -169,6 +188,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         GetNativeXComponent,
         SetXComponentLibraryname,
         SetImageAIOptions,
+        InitXComponent,
     };
 
     return &modifier;

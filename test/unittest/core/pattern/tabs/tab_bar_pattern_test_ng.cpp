@@ -15,6 +15,8 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components_ng/pattern/text/text_layout_property.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -386,7 +388,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -422,7 +425,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight004, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -456,7 +460,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -491,7 +496,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight006, Test
      */
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -525,7 +531,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -560,7 +567,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight008, Test
      */
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -593,7 +601,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, Test
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -627,7 +636,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight010, Test
      * @tc.expected: Related function runs ok.
      */
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     int32_t index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
 }
@@ -661,7 +671,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -695,7 +706,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -729,7 +741,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -762,7 +775,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight014, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.selectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -921,7 +935,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -955,7 +970,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -989,7 +1005,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1022,7 +1039,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, Test
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
     labelStyle.unselectedColor = Color::WHITE;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1056,7 +1074,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, Test
     iconStyle.selectedColor = Color::WHITE;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1089,7 +1108,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, Test
     iconStyle.unselectedColor = Color::WHITE;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1122,7 +1142,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, Test
     iconStyle.selectedColor = Color::WHITE;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);
@@ -1154,7 +1175,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
     IconStyle iconStyle;
     tabBarPattern_->SetIconStyle(iconStyle, 0);
     LabelStyle labelStyle;
-    tabBarPattern_->SetLabelStyle(labelStyle, 0);
+    auto tabBarItemNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    tabBarPattern_->SetLabelStyle(tabBarItemNode->GetId(), labelStyle);
     index = 0;
     tabBarPattern_->UpdateTextColorAndFontWeight(index);
     tabBarPattern_->UpdateImageColor(index);

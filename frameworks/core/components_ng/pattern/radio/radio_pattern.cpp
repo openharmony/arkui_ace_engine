@@ -15,17 +15,8 @@
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/radio/radio_paint_property.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -220,7 +211,7 @@ void RadioPattern::UpdateSelectStatus(bool isSelected)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d update status %d", host->GetId(), isSelected);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d update status %d", host->GetId(), isSelected);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     MarkIsSelected(isSelected);
@@ -366,7 +357,7 @@ void RadioPattern::OnClick()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d handle click event", host->GetId());
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d handle click event", host->GetId());
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     bool check = false;
@@ -523,7 +514,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
     if (preCheck_) {
         auto radioEventHub = GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(radioEventHub);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire unselect event", frameNode->GetId());
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire unselect event", frameNode->GetId());
         radioEventHub->UpdateChangeEvent(false);
         isOnAnimationFlag_ = false;
     }
@@ -712,7 +703,7 @@ void RadioPattern::UpdateGroupCheckStatus(
     }
 
     if (!isFirstCreated_) {
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire group change event %{public}d",
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire group change event %{public}d",
             frameNode->GetId(), check);
         radioEventHub->UpdateChangeEvent(check);
     }

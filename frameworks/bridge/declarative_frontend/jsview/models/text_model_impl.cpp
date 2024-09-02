@@ -15,15 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 
-#include <utility>
-
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/declaration/text/text_declaration.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
 void TextModelImpl::Create(const std::string& content)

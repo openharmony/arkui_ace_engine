@@ -25,12 +25,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -305,9 +300,13 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
         CounterNodeMeasure(contentWidth, layoutWrapper);
     }
 
-    auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
-                      ? paragraph_->GetHeight()
-                      : std::max(preferredHeight_, paragraph_->GetHeight());
+    float height = 0.0f;
+    if (isFontSizeNonPositive_) {
+        height = paragraph_->GetHeight();
+    } else {
+        height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0) ? paragraph_->GetHeight()
+                                                                  : std::max(preferredHeight_, paragraph_->GetHeight());
+    }
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
@@ -419,27 +418,11 @@ TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layou
     RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, TextAlign::END);
     TextDirection layoutDirection = property->GetLayoutDirection();
-    TextAlign textAlign = TextAlign::END;
-    switch (layoutDirection) {
-        case TextDirection::LTR:
-        case TextDirection::AUTO:
-            if (isRTL) {
-                textAlign = TextAlign::START;
-            } else {
-                textAlign = TextAlign::END;
-            }
-            break;
-        case TextDirection::RTL:
-            if (isRTL) {
-                textAlign = TextAlign::END;
-            } else {
-                textAlign = TextAlign::START;
-            }
-            break;
-        default:
-            break;
+    if ((layoutDirection == TextDirection::RTL && !isRTL) ||
+        (layoutDirection == TextDirection::LTR && isRTL)) {
+        return TextAlign::START;
     }
-    return textAlign;
+    return TextAlign::END;
 }
 
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
@@ -525,6 +508,22 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     CHECK_NULL_VOID(textGeometryNode);
 
     countX = contentRect.GetX();
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    if (responseArea) {
+        if (isRTL) {
+            countX -= responseArea->GetAreaRect().Width();
+        } else {
+            countX += responseArea->GetAreaRect().Width();
+        }
+    }
+    if (cleanNodeResponseArea) {
+        if (isRTL) {
+            countX -= cleanNodeResponseArea->GetAreaRect().Width();
+        } else {
+            countX += cleanNodeResponseArea->GetAreaRect().Width();
+        }
+    }
     textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
     counterNode->Layout();
 }
@@ -966,34 +965,34 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     SetAdaptFontSizeLineHeight(lineHeight, textStyle);
     textStyle.SetLineHeight(Dimension(), false);
     bool result = false;
+    const std::string& text = textContent_.empty() ? "a" : textContent_;
     switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
         case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
             if (pattern->IsInlineMode()) {
-                result = AdaptInlineFocusMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint,
-                    layoutWrapper);
+                result = AdaptInlineFocusMinFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
-                result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptMinFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         case TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST:
             if (pattern->IsInlineMode()) {
-                result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptInlineFocusFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
-                result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptMinFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
             if (pattern->IsInlineMode()) {
-                result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptInlineFocusFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             } else {
-                result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+                result = AdaptMaxFontSize(textStyle, text, 1.0_fp, contentConstraint, layoutWrapper);
             }
             break;
         default:
             break;
     }
     textStyle.SetLineHeight(lineHeight, hasHeightOverride);
-    if (result && hasHeightOverride) {
+    if (result && (hasHeightOverride || textContent_.empty())) {
         return CreateParagraphAndLayout(textStyle, textContent_, contentConstraint, layoutWrapper, false);
     }
     return result;

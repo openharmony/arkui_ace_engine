@@ -252,6 +252,8 @@ public:
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost) override;
     void OnTooltip(const std::string& tooltip) override;
+    void OnPopupSize(int x, int y, int width, int height) override;
+    void OnPopupShow(bool show) override;
     bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     bool OnOpenAppLink(const std::string& url,
                        std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
@@ -293,6 +295,10 @@ public:
     void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
 
     void OnCursorUpdate(double x, double y, double width, double height) override;
+
+    void StartVibraFeedback(const std::string& vibratorType) override;
+
+    void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
 
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

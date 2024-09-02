@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
-#include <atomic>
-
 #include "base/log/dump_log.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
-#include "core/common/container.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -268,6 +262,19 @@ void NavDestinationPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto id = host->GetId();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(id);
+}
+
+void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void NavDestinationPattern::DumpInfo()
@@ -324,10 +331,6 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
         pattern->HandleLongPressActionEnd();
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
-
-    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavDestinationPattern::HandleLongPress()
@@ -434,5 +437,26 @@ void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
 int32_t NavDestinationPattern::GetTitlebarZIndex() const
 {
     return DEFAULT_TITLEBAR_ZINDEX;
+}
+
+void NavDestinationPattern::OnWindowHide()
+{
+    CHECK_NULL_VOID(navDestinationContext_);
+    auto navPathInfo = navDestinationContext_->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    if (!navPathInfo->GetIsEntry()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "window lifecycle change to hide, clear navDestination entry tag");
+    navPathInfo->SetIsEntry(false);
+    auto stack = GetNavigationStack().Upgrade();
+    CHECK_NULL_VOID(stack);
+    auto index = navDestinationContext_->GetIndex();
+    stack->SetIsEntryByIndex(index, false);
+}
+
+void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("name", name_.c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
-#include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -169,5 +165,13 @@ void GridItemModelNG::SetColumnStart(FrameNode* frameNode, int32_t columnStart)
 void GridItemModelNG::SetColumnEnd(FrameNode* frameNode, int32_t columnEnd)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnEnd, columnEnd, frameNode);
+}
+
+void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateGridItemStyle(gridItemStyle);
 }
 } // namespace OHOS::Ace::NG

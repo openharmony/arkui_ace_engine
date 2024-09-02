@@ -98,6 +98,12 @@ enum class DialogButtonDirection {
     VERTICAL,
 };
 
+// avoid mode when keyboard shows
+enum class KeyboardAvoidMode {
+    DEFAULT = 0,
+    NONE,
+};
+
 class DialogAlignmentUtils {
 public:
     static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
@@ -229,6 +235,7 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
+    bool enableHoverMode = false;
     bool isScenceBoardDialog = false;
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
@@ -239,6 +246,7 @@ struct DialogProperties {
     std::optional<Shadow> shadow;
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
+    std::optional<HoverModeAreaType> hoverModeArea;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
@@ -266,6 +274,8 @@ struct DialogProperties {
     std::function<bool(int32_t)> onWillDismissCallByNDK;
 
     WordBreak wordBreak = WordBreak::BREAK_ALL;
+
+    KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -274,6 +284,7 @@ struct PromptDialogAttr {
     bool autoCancel = true;
     bool showInSubWindow = false;
     bool isModal = false;
+    bool enableHoverMode = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t& info)> customOnWillDismiss;
 
@@ -289,6 +300,7 @@ struct PromptDialogAttr {
     std::optional<Shadow> shadow;
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
+    std::optional<HoverModeAreaType> hoverModeArea;
 
     WeakPtr<NG::UINode> contentNode;
     bool customStyle = false;
@@ -299,6 +311,7 @@ struct PromptDialogAttr {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
     std::function<void(DialogProperties&)> onLanguageChange;
+    KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

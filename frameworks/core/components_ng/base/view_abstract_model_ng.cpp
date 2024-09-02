@@ -15,18 +15,7 @@
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
-#include <utility>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -39,14 +28,13 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/mouse_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
+constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
+constexpr char KEY_MENU[] = "Menu";
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -136,7 +124,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteMenu(id);
         };
-        targetNode->PushDestroyCallback(destructor);
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
             params.clear();
@@ -151,7 +139,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteMenu(id);
         };
-        targetNode->PushDestroyCallback(destructor);
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     }
 }
 
@@ -215,6 +203,12 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    BindContextMenu(targetNode, type, buildFunc, menuParam, previewBuildFunc);
+}
+
+void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type,
+    std::function<void()>& buildFunc, const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -232,6 +226,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+            menuWrapperPattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
         }
     }
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
@@ -333,7 +328,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
 void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)
@@ -346,6 +341,10 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
         gestureHub->SetMenuBindingType(menuParam.menuBindType);
+        auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
+        // set menu preview scale to drag.
+        gestureHub->SetMenuPreviewScale(
+            LessOrEqual(menuPreviewScale, 0.0) ? DEFALUT_DRAG_PPIXELMAP_SCALE : menuPreviewScale);
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
@@ -359,6 +358,7 @@ void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, cons
         return customNode;
     };
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
     targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
     NG::ViewAbstract::SetBackgroundAlign(align);
 }

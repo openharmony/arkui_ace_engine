@@ -14,11 +14,6 @@
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
-#include <algorithm>
-#include <cstdint>
-
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap)
 {
@@ -56,6 +51,17 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     newStartIndex_ = EMPTY_NEW_START_INDEX;
 
     synced_ = true;
+}
+
+float WaterFlowLayoutInfoSW::CalibrateOffset()
+{
+    if (startIndex_ == 0) {
+        // can calibrate totalOffset when at top
+        const float prev = totalOffset_;
+        totalOffset_ = startPos_ - TopMargin();
+        return totalOffset_ - prev;
+    }
+    return 0.0f;
 }
 
 float WaterFlowLayoutInfoSW::DistanceToTop(int32_t itemIdx, float mainGap) const
@@ -99,7 +105,7 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
     if (itemStart_ && Positive(lanes_[0][0].startPos - TopMargin())) {
         return true;
     }
-    if (offsetEnd_) {
+    if (!itemStart_ && offsetEnd_) {
         return std::all_of(lanes_.back().begin(), lanes_.back().end(), [this](const Lane& lane) {
             return LessNotEqual(lane.endPos + footerHeight_ + BotMargin(), lastMainSize_);
         });
@@ -375,7 +381,6 @@ void WaterFlowLayoutInfoSW::ResetWithLaneOffset(std::optional<float> laneBasePos
             }
         });
     }
-    totalOffset_ = 0.0f;
     maxHeight_ = 0.0f;
     idxToLane_.clear();
     synced_ = false;
@@ -464,7 +469,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                        [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
             return true;
         }
         const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;
@@ -600,7 +605,7 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
     }
     const size_t n = sections.size();
     const size_t curSegIdx = static_cast<size_t>(GetSegment(newStartIndex_));
-    auto curSection = sections[curSegIdx];
+    const auto& curSection = sections[curSegIdx];
     if (curSection.OnlyCountDiff(prevSection)) {
         // move old lanes_[prevSegIdx,...] to Lanes_[curSegIdx,...]
         if (n <= lanes_.size()) {
@@ -658,18 +663,12 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
 
 void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
 {
-    for (auto it = idxToLane_.begin(); it != idxToLane_.end();) {
-        if (it->first >= updateIdx) {
-            it = idxToLane_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
+    idxToLane_.clear();
+    const int32_t diff = newStartIndex_ - startIndex_;
     for (auto& section : lanes_) {
         for (size_t i = 0; i < section.size(); i++) {
             for (auto& item : section[i].items_) {
-                item.idx += (newStartIndex_ - startIndex_);
+                item.idx += diff;
                 idxToLane_[item.idx] = i;
             }
         }

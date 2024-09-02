@@ -16,21 +16,9 @@
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 
-#include <algorithm>
-
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

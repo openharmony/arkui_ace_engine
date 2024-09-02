@@ -176,6 +176,7 @@ export const defaultTheme = {
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         },
+        focusOutlineMargin: 2,
         normalBorderRadius: {
             "id": -1,
             "type": 10002,
@@ -217,7 +218,7 @@ export const defaultTheme = {
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         },
-        opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+        opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
         breakPointConstraintWidth: {
             breakPointMinWidth: 128,
             breakPointSmMaxWidth: 156,
@@ -327,9 +328,9 @@ export class ChipComponent extends ViewPU {
         this.onClicked = noop;
         this.__suffixIconOnFocus = new ObservedPropertySimplePU(false, this, "suffixIconOnFocus");
         this.__chipBreakPoints = new ObservedPropertySimplePU(BreakPointsType.SM, this, "chipBreakPoints");
-        this.smListener = mediaquery.matchMediaSync("(0vp<width) and (width<600vp)");
-        this.mdListener = mediaquery.matchMediaSync("(600vp<=width) and (width<840vp)");
-        this.lgListener = mediaquery.matchMediaSync("(840vp<=width)");
+        this.smListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)');
+        this.mdListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)');
+        this.lgListener = mediaquery.matchMediaSync('(840vp<=width)');
         this.__isShowPressedBackGroundColor = new ObservedPropertySimplePU(false, this, "isShowPressedBackGroundColor");
         this.__fontSizeScale = new ObservedPropertyObjectPU(0, this, "fontSizeScale");
         this.__fontWeightScale = new ObservedPropertyObjectPU(0, this, "fontWeightScale");
@@ -342,9 +343,9 @@ export class ChipComponent extends ViewPU {
             }
         };
         this.callbackId = undefined;
-        this.__prefixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width), this, "prefixSymbolWidth");
-        this.__suffixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width), this, "suffixSymbolWidth");
-        this.__allowCloseSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById("AllowCloseSymbolGlyph")?.size?.width), this, "allowCloseSymbolWidth");
+        this.__prefixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById('PrefixSymbolGlyph')?.size?.width), this, "prefixSymbolWidth");
+        this.__suffixSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById('SuffixSymbolGlyph')?.size?.width), this, "suffixSymbolWidth");
+        this.__allowCloseSymbolWidth = new ObservedPropertyObjectPU(this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width), this, "allowCloseSymbolWidth");
         this.__symbolEffect = new ObservedPropertyObjectPU(new SymbolEffect(), this, "symbolEffect");
         this.setInitiallyProvidedValue(l5);
         this.finalizeConstruction();
@@ -854,14 +855,7 @@ export class ChipComponent extends ViewPU {
                 return v3;
             case 'object':
                 try {
-                    if (v3.id !== -1) {
-                        return px2vp(getContext(this).resourceManager.getNumber(v3.id));
-                    }
-                    else {
-                        return px2vp(getContext(this)
-                            .resourceManager
-                            .getNumberByName((v3.params[0]).split('.')[2]));
-                    }
+                    return this.lengthMetricsToVp(LengthMetrics.resource(v3));
                 }
                 catch (a4) {
                     return Number.NEGATIVE_INFINITY;
@@ -1188,7 +1182,7 @@ export class ChipComponent extends ViewPU {
     }
 
     getChipNodeOpacity() {
-        return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled;
+        return this.chipOpacity;
     }
 
     handleTouch(i3) {
@@ -1453,7 +1447,7 @@ export class ChipComponent extends ViewPU {
                         SymbolGlyph.onSizeChange((v1, w1) => {
                             this.prefixSymbolWidth = w1?.width;
                         });
-                        SymbolGlyph.key("PrefixSymbolGlyph");
+                        SymbolGlyph.key('PrefixSymbolGlyph');
                     }, SymbolGlyph);
                 });
             }
@@ -1514,7 +1508,7 @@ export class ChipComponent extends ViewPU {
                         SymbolGlyph.onSizeChange((f1, g1) => {
                             this.suffixSymbolWidth = g1?.width;
                         });
-                        SymbolGlyph.key("SuffixSymbolGlyph");
+                        SymbolGlyph.key('SuffixSymbolGlyph');
                     }, SymbolGlyph);
                 });
             }
@@ -1568,10 +1562,15 @@ export class ChipComponent extends ViewPU {
                         });
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
+                        SymbolGlyph.focusBox({
+                            margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+                            strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+                            strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+                        });
                         SymbolGlyph.onSizeChange((u, v) => {
                             this.allowCloseSymbolWidth = v?.width;
                         });
-                        SymbolGlyph.key("AllowCloseSymbolGlyph");
+                        SymbolGlyph.key('AllowCloseSymbolGlyph');
                         SymbolGlyph.onClick(() => {
                             if (!this.getChipEnable()) {
                                 return;

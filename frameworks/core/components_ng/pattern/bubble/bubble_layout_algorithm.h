@@ -36,7 +36,7 @@ struct BubbleDumpInfo {
     bool enableArrow = false;
     bool mask = true;
     std::string targetNode;
-    int32_t targetID;
+    int32_t targetID = -1;
     OffsetF targetOffset;
     SizeF targetSize;
     RectF touchRegion;
@@ -95,6 +95,11 @@ public:
     RectF GetTouchRegion() const
     {
         return touchRegion_;
+    }
+
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
     }
 
     const Border& GetBorder() const
@@ -215,6 +220,7 @@ private:
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
     void SetBubbleRadius();
+    void UpdateHostWindowRect();
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -246,6 +252,7 @@ private:
     OffsetF arrowPositionForPaint_;
     SizeF selfSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
     SizeF buttonRowSize_;
     OffsetF buttonRowOffset_;
     // top right bottom left

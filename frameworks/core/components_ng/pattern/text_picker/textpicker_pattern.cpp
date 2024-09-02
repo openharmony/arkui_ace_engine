@@ -32,8 +32,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +46,7 @@ const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
 const Dimension FOUCS_WIDTH = 2.0_vp;
 const Dimension MARGIN_SIZE = 12.0_vp;
+constexpr float DISABLE_ALPHA = 0.6f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -306,8 +305,13 @@ void TextPickerPattern::InitDisabled()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!enabled_) {
+        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 RefPtr<FrameNode> TextPickerPattern::GetColumnNode()

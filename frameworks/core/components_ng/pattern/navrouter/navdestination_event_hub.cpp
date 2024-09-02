@@ -14,8 +14,6 @@
  */
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 
-#include "core/common/container.h"
-#include "frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 namespace OHOS::Ace::NG {
 void NavDestinationEventHub::FireOnDisappear()

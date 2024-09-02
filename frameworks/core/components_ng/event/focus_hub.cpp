@@ -15,35 +15,60 @@
 
 #include "core/components_ng/event/focus_hub.h"
 
-#include <cinttypes>
-#include <cstdint>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_event_handler.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
+constexpr uint32_t FOCUS_PADDING = 5;
+namespace {
+float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode,
+    const RefPtr<FrameNode>& curFrameNode, bool isVertical)
+{
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, false);
+    auto parentFrameSize = parentGeometryNode->GetFrameSize();
+    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
+    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto curGeometry = curFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(curGeometry, false);
+    auto curFrameSize = curGeometry->GetFrameSize();
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
+        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
+        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
+        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
+        offsetToTarFrame.GetY());
+
+    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
+    if (NearZero(diffToTarFrame)) {
+        return false;
+    }
+    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
+    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
+    float moveOffset = 0.0;
+    float focusPadding = PipelineBase::Vp2PxWithCurrentDensity(FOCUS_PADDING);
+    if (LessNotEqual(diffToTarFrame - focusPadding, 0)) {
+        moveOffset = -diffToTarFrame + focusPadding;
+    } else if (GreatNotEqual(diffToTarFrame + curFrameLength + focusPadding, parentFrameLength)) {
+        moveOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusPadding;
+    }
+    return moveOffset;
+}
+}
 
 RefPtr<FocusManager> FocusHub::GetFocusManager() const
 {
@@ -103,6 +128,15 @@ int32_t FocusHub::GetFrameId() const
     return frameNode ? frameNode->GetId() : -1;
 }
 
+RefPtr<PipelineContext> FocusHub::GetPipelineContext() const
+{
+    auto frameNode = GetFrameNode();
+    if (frameNode) {
+        return frameNode->GetContextRefPtr();
+    }
+    return NG::PipelineContext::GetCurrentContextSafely();
+}
+
 void FocusHub::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     focusNodes.clear();
@@ -137,12 +171,20 @@ bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
     return OnKeyEvent(keyEvent);
 }
 
-void FocusHub::DumpFocusTree(int32_t depth)
+void FocusHub::DumpFocusTree(int32_t depth, bool hasJson)
 {
     if (focusType_ == FocusType::NODE) {
-        DumpFocusNodeTree(depth);
+        if (hasJson) {
+            DumpFocusNodeTreeInJson(depth);
+        } else {
+            DumpFocusNodeTree(depth);
+        }
     } else if (focusType_ == FocusType::SCOPE) {
-        DumpFocusScopeTree(depth);
+        if (hasJson) {
+            DumpFocusScopeTreeInJson(depth);
+        } else {
+            DumpFocusScopeTree(depth);
+        }
     }
 }
 
@@ -309,7 +351,7 @@ void FocusHub::LostFocusToViewRoot()
     auto focusedChild = viewRootScope->lastWeakFocusNode_.Upgrade();
     CHECK_NULL_VOID(focusedChild);
     FocusManager::FocusGuard guard(viewRootScope, SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT);
-    focusedChild->LostFocus();
+    focusedChild->LostFocus(BlurReason::CLEAR_FOCUS);
 }
 
 void FocusHub::LostFocus(BlurReason reason)
@@ -496,8 +538,10 @@ bool FocusHub::IsEnabled() const
 void FocusHub::SetEnabled(bool enabled)
 {
     if (!enabled) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be disabled",
-            GetFrameName().c_str(), GetFrameId());
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be disabled", GetFrameName().c_str(),
+                GetFrameId());
+        }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -517,8 +561,10 @@ bool FocusHub::IsShow() const
 void FocusHub::SetShow(bool show)
 {
     if (!show) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unShown",
-            GetFrameName().c_str(), GetFrameId());
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unShown", GetFrameName().c_str(),
+                GetFrameId());
+        }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -634,19 +680,41 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         return false;
     }
 
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto* pipeline = frameNode->GetContext();
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     auto info = KeyEventInfo(keyEvent);
-    if (pipeline &&
-        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
+    if (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) ||
+        pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT)) {
         info.SetMetaKey(1);
     }
-
     if (keyEvent.isPreIme) {
         return OnKeyPreIme(info, keyEvent);
     }
 
+    bool retInternal = OnKeyEventNodeInternal(keyEvent);
+    bool retCallback = OnKeyEventNodeUser(info, keyEvent);
+    if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
+        auto ret = false;
+        switch (keyEvent.code) {
+            case KeyCode::KEY_SPACE:
+            case KeyCode::KEY_ENTER:
+            case KeyCode::KEY_NUMPAD_ENTER:
+                ret = OnClick(keyEvent);
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
+                    GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
+                break;
+            default:;
+        }
+        return ret;
+    }
+    return retInternal || retCallback;
+}
+
+bool FocusHub::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
     if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
@@ -660,7 +728,13 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
     }
+    return retInternal;
+}
 
+bool FocusHub::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent)
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
@@ -680,23 +754,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
     }
-
-    if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
-        auto ret = false;
-        switch (keyEvent.code) {
-            case KeyCode::KEY_SPACE:
-            case KeyCode::KEY_ENTER:
-            case KeyCode::KEY_NUMPAD_ENTER:
-                ret = OnClick(keyEvent);
-                TAG_LOGI(AceLogTag::ACE_FOCUS,
-                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-                    GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
-                break;
-            default:;
-        }
-        return ret;
-    }
-    return retInternal || retCallback;
+    return retCallback;
 }
 
 bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
@@ -717,17 +775,11 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return true;
     }
 
-    if (keyEvent.isPreIme) {
+    if (keyEvent.isPreIme || keyEvent.action != KeyAction::DOWN) {
         return false;
     }
 
-    if (keyEvent.action != KeyAction::DOWN) {
-        return false;
-    }
-
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto* pipeline = frameNode->GetContext();
+    auto pipeline = GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetIsFocusActive()) {
         return false;
@@ -744,6 +796,11 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return false;
     }
 
+    return RequestNextFocusByKey(keyEvent);
+}
+
+bool FocusHub::RequestNextFocusByKey(const KeyEvent& keyEvent)
+{
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
             return RequestNextFocus(FocusStep::UP, GetRect());
@@ -831,6 +888,7 @@ void FocusHub::RequestFocus() const
     }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());
     context->AddDirtyFocus(GetFrameNode());
 }
 
@@ -907,7 +965,9 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
     auto scrollIndexAbility = curPattern ? curPattern->GetScrollIndexAbility() : nullptr;
     if (scrollIndexAbility) {
         scrollIndexAbility(isHead ? FocusHub::SCROLL_TO_HEAD : FocusHub::SCROLL_TO_TAIL);
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, false);
+        auto pipeline = node->GetContextRefPtr();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
@@ -951,7 +1011,9 @@ bool FocusHub::OnClick(const KeyEvent& event)
         info.SetLocalLocation(centerToNode);
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, false);
+        auto pipelineContext = node->GetContextRefPtr();
         if (pipelineContext) {
             auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
             info.SetScreenLocation(windowOffset);
@@ -999,7 +1061,7 @@ bool FocusHub::GoToNextFocusLinear(FocusStep step, const RectF& rect)
     if (step == FocusStep::NONE) {
         return false;
     }
-    bool reverse = !IsFocusStepForward(step, AceApplicationInfo::GetInstance().IsRightToLeft());
+    bool reverse = !IsFocusStepForward(step, IsComponentDirectionRtl());
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = FlushChildrenFocusHub(focusNodes);
     if (focusNodes.empty()) {
@@ -1141,7 +1203,9 @@ void FocusHub::OnFocusNode()
     if (onFocusInternal_) {
         onFocusInternal_();
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto focusHub = weak.Upgrade();
@@ -1162,7 +1226,6 @@ void FocusHub::OnFocusNode()
 
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
-    focusManager->PaintFocusState();
     focusManager->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::ON_FOCUS_NODE);
     if (focusType_ == FocusType::NODE) {
         focusManager->FocusSwitchingEnd(SwitchingEndReason::NODE_FOCUS);
@@ -1203,9 +1266,6 @@ void FocusHub::OnBlurNode()
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
     }
-    auto focusManager = pipeline->GetOrCreateFocusManager();
-    CHECK_NULL_VOID(focusManager);
-    focusManager->PaintFocusState();
 
     pipeline->RequestFrame();
 }
@@ -1311,7 +1371,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return true;
     }
 
-    if (focusStyleType_ == FocusStyleType::NONE && !box_.HasCustomStyle()) {
+    if (focusStyleType_ == FocusStyleType::NONE) {
         return false;
     }
 
@@ -1472,7 +1532,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
     if (onClearFocusStateCallback_) {
         onClearFocusStateCallback_();
     }
-    if (focusStyleType_ != FocusStyleType::NONE || box_.HasCustomStyle()) {
+    if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
@@ -1502,18 +1562,23 @@ bool FocusHub::IsNeedPaintFocusState()
 {
     if (currentFocus_ && IsFocusableNode() &&
         (focusDepend_ == FocusDependence::SELF || focusType_ == FocusType::NODE)) {
-        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
+        return IsNeedPaintFocusStateSelf();
     }
     auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
     while (lastFocusNode) {
         if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
             break;
         }
-        if (lastFocusNode->GetFocusStyleType() != FocusStyleType::NONE || lastFocusNode->HasFocusStateStyle()) {
+        if (lastFocusNode->IsNeedPaintFocusStateSelf()) {
             return false;
         }
         lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     }
+    return IsNeedPaintFocusStateSelf();
+}
+
+bool FocusHub::IsNeedPaintFocusStateSelf()
+{
     return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
 }
 
@@ -1708,6 +1773,21 @@ bool FocusHub::IsFocusableWholePath()
         parent = parent->GetParentFocusHub();
     }
     return IsFocusable();
+}
+
+WeakPtr<FocusHub> FocusHub::GetUnfocusableParentFocusNode()
+{
+    if (!IsFocusable()) {
+        return AceType::WeakClaim(this);
+    }
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (!parent->IsFocusableNode()) {
+            return AceType::WeakClaim(AceType::RawPtr(parent));
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return nullptr;
 }
 
 bool FocusHub::IsSelfFocusableWholePath()
@@ -1916,35 +1996,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(parentGeometryNode, false);
-    auto parentFrameSize = parentGeometryNode->GetFrameSize();
-    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
-    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
-    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
-    auto curGeometry = curFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(curGeometry, false);
-    auto curFrameSize = curGeometry->GetFrameSize();
-    TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
-        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
-        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
-        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
-        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
-        offsetToTarFrame.GetY());
-
-    float diffToTarFrame = scrollAxis == Axis::VERTICAL ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
-    if (NearZero(diffToTarFrame)) {
-        return false;
-    }
-    float curFrameLength = scrollAxis == Axis::VERTICAL ? curFrameSize.Height() : curFrameSize.Width();
-    float parentFrameLength = scrollAxis == Axis::VERTICAL ? parentFrameSize.Height() : parentFrameSize.Width();
-    float moveOffset = 0.0;
-    if (LessNotEqual(diffToTarFrame, 0)) {
-        moveOffset = -diffToTarFrame;
-    } else if (GreatNotEqual(diffToTarFrame + curFrameLength, parentFrameLength)) {
-        moveOffset = parentFrameLength - diffToTarFrame - curFrameLength;
-    }
+    auto moveOffset = GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
@@ -1960,7 +2012,9 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
 
 bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
@@ -1974,8 +2028,9 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
     if ((isSyncRequest && !focusNode->IsSyncRequestFocusable()) || (!isSyncRequest && !focusNode->IsFocusable())) {
         result = false;
     }
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.",
-        id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
+    TAG_LOGI(AceLogTag::ACE_FOCUS,
+        "Request focus immediately %{public}s by id: %{public}s. The node is %{public}s/%{public}d.",
+        isSyncRequest ? "sync" : "async", id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
     if (result || !isSyncRequest) {
         pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
         if (isSyncRequest) {
@@ -2007,7 +2062,9 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
     if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
         return false;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;
     }
@@ -2518,5 +2575,122 @@ void FocusHub::ToJsonValue(
     json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
     json->PutExtAttr("tabIndex", tabIndex, filter);
     json->PutExtAttr("focusBox", focusBox, filter);
+}
+
+void FocusHub::DumpFocusScopeTreeInJson(int32_t depth)
+{
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    std::string information = GetFrameName();
+    information += IsCurrentFocus() ? "(Scope*)" : "(Scope)";
+    auto frameId = GetFrameId();
+    children->Put("id", frameId);
+    if (GetInspectorKey().has_value()) {
+        children->Put("idstr", GetInspectorKey().value().c_str());
+    }
+    if (!IsFocusable()) {
+        information = "(-)" + information;
+        children->Put("Enabled", IsEnabled());
+        children->Put("Show", IsShow());
+        children->Put("Focusable", focusable_);
+        children->Put("ParentFocusable", parentFocusable_);
+    }
+    if (IsDefaultFocus()) {
+        information += "[Default]";
+    }
+    if (isFocusScope_ && !focusScopeId_.empty()) {
+        if (GetIsFocusGroup()) {
+            children->Put("GroupId", focusScopeId_.c_str());
+        } else {
+            children->Put("ScopeId", focusScopeId_.c_str());
+        }
+    }
+    if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR)) {
+        children->Put("prior-focus-in-", focusScopeId_.c_str());
+    }
+    if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS)) {
+        children->Put("previous-focus-in-", focusScopeId_.c_str());
+    }
+    auto focusMgr = GetFocusManager();
+    if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
+        information += " [Painted]";
+    }
+    information += ("_" + std::to_string(frameId));
+    json->Put(information.c_str(), children);
+    std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
+    auto prefix = DumpLog::GetInstance().GetPrefix(depth);
+    DumpLog::GetInstance().PrintJson(prefix + jsonstr);
+    std::list<RefPtr<FocusHub>> focusNodes;
+    GetChildrenFocusHub(focusNodes);
+    for (const auto& child : focusNodes) {
+        child->DumpFocusTree(depth + 1, true);
+    }
+}
+
+void FocusHub::DumpFocusNodeTreeInJson(int32_t depth)
+{
+    auto json = JsonUtil::Create(true);
+    std::string information = GetFrameName();
+    std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    if (IsCurrentFocus()) {
+        information += "(Node*)";
+    } else {
+        information += "(Node)";
+    }
+    auto frameId = GetFrameId();
+    children->Put("id", frameId);
+    if (GetInspectorKey().has_value()) {
+        children->Put("idstr", GetInspectorKey().value().c_str());
+    }
+    if (!IsFocusable()) {
+        information = "(-)" + information;
+        children->Put("Enabled", IsEnabled());
+        children->Put("Show", IsShow());
+        children->Put("Focusable", focusable_);
+        children->Put("ParentFocusable", parentFocusable_);
+    }
+    information += IsDefaultFocus() ? "[Default]" : "";
+    if (isFocusScope_ && !focusScopeId_.empty()) {
+        if (GetIsFocusGroup()) {
+            children->Put("GroupId", focusScopeId_.c_str());
+        } else {
+            children->Put("ScopeId", focusScopeId_.c_str());
+        }
+    }
+    if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR)) {
+        children->Put("prior-focus-in-", focusScopeId_.c_str());
+    }
+    if (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PREVIOUS)) {
+        children->Put("previous-focus-in-", focusScopeId_.c_str());
+    }
+    auto focusMgr = GetFocusManager();
+    if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
+        information += " [Painted]";
+    }
+    information += ("_" + std::to_string(frameId));
+    json->Put(information.c_str(), children);
+    std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
+    auto prefix = DumpLog::GetInstance().GetPrefix(depth);
+    DumpLog::GetInstance().PrintJson(prefix + jsonstr);
+}
+
+bool FocusHub::IsComponentDirectionRtl()
+{
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto frame = GetFrameNode();
+    CHECK_NULL_RETURN(frame, isRightToLeft);
+    auto layoutProperty = frame->GetLayoutPropertyPtr<LayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, isRightToLeft);
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
+    if (layoutDirection == TextDirection::AUTO) {
+        return isRightToLeft;
+    }
+    if (layoutDirection == TextDirection::LTR) {
+        return false;
+    }
+    if (layoutDirection == TextDirection::RTL) {
+        return true;
+    }
+    return isRightToLeft;
 }
 } // namespace OHOS::Ace::NG

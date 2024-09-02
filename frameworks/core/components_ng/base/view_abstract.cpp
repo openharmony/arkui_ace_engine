@@ -15,18 +15,10 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
-#include <cstdint>
-#include <optional>
-#include <string>
-#include <utility>
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/matrix4.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -41,21 +33,8 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1728,11 +1707,16 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    // subwindow model needs to use subContainer to get popupInfo
-    if (showInSubWindow) {
+    if (popupInfo.popupNode) {
+        showInSubWindow = false;
+    } else {
+        // subwindow model needs to use subContainer to get popupInfo
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
+        }
+        if (popupInfo.popupNode) {
+            showInSubWindow = true;
         }
     }
 
@@ -1777,7 +1761,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
                 overlayManager->ErasePopup(id);
                 SubwindowManager::GetInstance()->HideSubWindowNG();
             };
-            targetNode->PushDestroyCallback(destructor);
+            targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
         } else {
             // erase popup in subwindow when target node destroy
             auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
@@ -1788,7 +1772,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
                 overlayManager->ErasePopup(id);
                 SubwindowManager::GetInstance()->HideSubWindowNG();
             };
-            targetNode->PushDestroyCallback(destructor);
+            targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
         }
     } else {
         // use param to update PopupParm
@@ -1807,6 +1791,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
+        popupPattern->RegisterPopupStateChangeCallback(param->GetOnStateChange());
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
@@ -2033,6 +2018,14 @@ void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOpti
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
+}
+
+void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
@@ -3195,6 +3188,14 @@ void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetFocusType(FrameNode* frameNode, FocusType focusType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(focusType);
+}
+
 void ViewAbstract::SetTouchable(FrameNode* frameNode, bool touchable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3547,6 +3548,12 @@ void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const Brightness
     ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
+void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+}
+
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3578,6 +3585,7 @@ void ViewAbstract::SetMouseResponseRegion(FrameNode* frameNode, const std::vecto
 void ViewAbstract::SetSharedTransition(
     FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
+    CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
         target->SetSharedTransitionOptions(option);
@@ -3835,7 +3843,9 @@ void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto instanceId = frameNode->GetContext()->GetInstanceId();
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
     ContainerScope scope(instanceId);
     if (value) {
         focusHub->RequestFocus();

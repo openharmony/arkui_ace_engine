@@ -62,6 +62,11 @@ class ComputedV2 {
         ObserveV2.getObserve().addRef(this, propertyKey);
         return ObserveV2.autoProxyObject(this, cachedProp);
       },
+      set(_) {
+        const error = `@Computed ${propertyKey} is readonly, cannot set value for it`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      },
       enumerable: true
     });
 
@@ -89,8 +94,18 @@ class ComputedV2 {
   // register current watchId while executing compute function
   private observeObjectAccess(): Object | undefined {
     ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
-    let ret = this.propertyComputeFunc_.call(this.target_);
-    ObserveV2.getObserve().stopRecordDependencies();
+    let ret;
+
+    try {
+        ret = this.propertyComputeFunc_.call(this.target_);
+    } catch (e) {
+        stateMgmtConsole.applicationError(`@Computed Exception caught for ${this.propertyComputeFunc_.name}`, e.toString());
+        ret = undefined;
+        throw e;
+    } finally {
+        ObserveV2.getObserve().stopRecordDependencies();
+    }
+
     return ret;
   }
 }
@@ -104,7 +119,12 @@ class AsyncAddComputedV2 {
 
   static addComputed(target: Object, name: string): void {
     if (AsyncAddComputedV2.computedVars.length === 0) {
-      Promise.resolve(true).then(AsyncAddComputedV2.run);
+      Promise.resolve(true)
+      .then(AsyncAddComputedV2.run)
+      .catch(error => {
+        stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
+        throw error;
+      });
     }
     AsyncAddComputedV2.computedVars.push({target: target, name: name});
   }

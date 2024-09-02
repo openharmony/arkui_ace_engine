@@ -40,9 +40,9 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::developerModeOn_ = false;
-bool SystemProperties::layoutTraceEnable_ = false;
-bool SystemProperties::traceInputEventEnable_ = false;
-bool SystemProperties::stateManagerEnable_ = false;
+std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
+std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
+std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
@@ -73,7 +73,7 @@ ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
-bool SystemProperties::debugBoundaryEnabled_ = false;
+std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
@@ -324,5 +324,10 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
 }
 } // namespace OHOS::Ace

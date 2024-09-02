@@ -293,12 +293,15 @@ public:
     void AddScrollBarLayoutInfo();
 
     void GetAxisDumpInfo();
+    void GetAxisDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetDisplayModeDumpInfo();
+    void GetDisplayModeDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetPanDirectionDumpInfo();
-
+    void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetScrollEnabled(bool enabled)
     {
@@ -312,6 +315,21 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+
+    RefPtr<ScrollBarProxy> GetScrollBarProxy()
+    {
+        return scrollBarProxy_;
+    }
+
+    void SetEnableNestedSorll(bool enableNestedSorll)
+    {
+        enableNestedSorll_ = enableNestedSorll;
+    }
+
+    bool GetEnableNestedSorll() const
+    {
+        return enableNestedSorll_;
+    }
 
 private:
     void OnModifyDone() override;
@@ -369,6 +387,7 @@ private:
 
     // dump info
     std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
+    bool enableNestedSorll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

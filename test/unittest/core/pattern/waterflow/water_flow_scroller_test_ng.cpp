@@ -17,6 +17,7 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -513,6 +514,60 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Refresh001
+ * @tc.desc: Test WaterFlow nested in refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
+{
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "179.37px"); // friction
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+
+    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+}
+
+/**
  * @tc.name: ScrollToIndex002
  * @tc.desc: Test ScrollToIndex func
  * @tc.type: FUNC
@@ -740,5 +795,79 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->itemEnd_, false);
     EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, false);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+}
+
+/**
+ * @tc.name: ReachStart001
+ * @tc.desc: Test ReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachStart001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    bool reached = false;
+    model.SetOnReachStart([&reached]() { reached = true; });
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    pattern_->ScrollToIndex(29);
+    FlushLayoutTask(frameNode_);
+
+    reached = false;
+    UpdateCurrentOffset(Infinity<float>());
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_TRUE(reached);
+    FlushLayoutTask(frameNode_);
+
+    reached = false;
+    UpdateCurrentOffset(-5.0f);
+    EXPECT_FALSE(reached);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -5.0f);
+    reached = false;
+    UpdateCurrentOffset(6.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(reached);
+}
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: Test ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    MockAnimationManager::GetInstance().SetTicks(1);
+    pattern_->ScrollPage(false, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->Offset(), -800.0f);
+
+    pattern_->ScrollToIndex(29);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 25), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
+
+    pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_HALF);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 25), 400.0f);
+
+    ScrollableController controller;
+    controller.SetScrollPattern(pattern_);
+    controller.ScrollPage(true, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 17);
+    EXPECT_EQ(info->endIndex_, 21);
 }
 } // namespace OHOS::Ace::NG

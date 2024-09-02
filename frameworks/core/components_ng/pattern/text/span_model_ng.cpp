@@ -15,16 +15,6 @@
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
 #define ACE_UPDATE_SPAN_PROPERTY(name, value, flag)                                                              \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
@@ -97,6 +87,9 @@ void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
 void SpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontWeight, value, PropertyInfo::FONTWEIGHT);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateUserFontWeight(true);
 }
 
 void SpanModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -211,6 +204,7 @@ void SpanModelNG::SetFontWeight(UINode* uiNode, FontWeight value)
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateFontWeight(value);
     spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+    spanNode->UpdateUserFontWeight(true);
 }
 
 void SpanModelNG::SetTextCase(UINode* uiNode, TextCase value)

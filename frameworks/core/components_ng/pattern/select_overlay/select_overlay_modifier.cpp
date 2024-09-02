@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 
-#include <vector>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -94,11 +88,11 @@ void SelectOverlayModifier::SetDefaultCircleAndLineEndOffset()
                 lineEndOffset->Set(circleOffset_.front()->Get());
             }
             lineEndOffset_.emplace_back(lineEndOffset);
-            if (lineEndOffset_.size() > i - 1) {
+            if (static_cast<int32_t>(lineEndOffset_.size()) > i - 1) {
                 AttachProperty(lineEndOffset_[i - 1]);
             }
         }
-        if (circleOffset_.size() > i) {
+        if (static_cast<int32_t>(circleOffset_.size()) > i) {
             AttachProperty(circleOffset_[i]);
         }
     }
@@ -211,7 +205,7 @@ void SelectOverlayModifier::LineEndOffsetWithAnimation(bool isMore, bool noAnima
 
 void SelectOverlayModifier::BackArrowTransitionChange(const OffsetF& coordinate, int32_t i)
 {
-    if (circleOffset_.size() < i || lineEndOffset_.size() < i - 1) {
+    if (static_cast<int32_t>(circleOffset_.size()) < i || static_cast<int32_t>(lineEndOffset_.size()) < i - 1) {
         return;
     }
     circleOffset_[i]->Set(coordinate);

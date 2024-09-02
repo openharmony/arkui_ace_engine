@@ -14,15 +14,6 @@
  */
 #include "core/components_ng/pattern/text/span/span_object.h"
 
-#include <optional>
-#include <utility>
-
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/render/paragraph.h"
-
 namespace OHOS::Ace {
 // SpanBase
 std::optional<std::pair<int32_t, int32_t>> SpanBase::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
@@ -850,5 +841,174 @@ std::string ExtSpan::ToString() const
 bool ExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 {
     return false;
+}
+
+// UrlSpan
+UrlSpan::UrlSpan(const std::string& urlAddress) : SpanBase(0, 0), urlAddress_(urlAddress) {}
+
+UrlSpan::UrlSpan(const std::string& urlAddress, int32_t start, int32_t end)
+    : SpanBase(start, end), urlAddress_(urlAddress)
+{}
+
+std::string UrlSpan::GetUrlSpanAddress() const&
+{
+    return urlAddress_;
+}
+
+void UrlSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddUrlStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveUrlStyle(spanItem);
+            break;
+    }
+}
+
+RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<UrlSpan>(urlAddress_, start, end);
+    return spanBase;
+}
+
+void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    auto address = GetUrlSpanAddress();
+    spanItem->HandleUrlNormalStyle(spanItem);
+    auto urlOnRelease = [address]() {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->HyperlinkStartAbility(address);
+    };
+    auto urlOnHover = [](const RefPtr<NG::SpanItem>& spanItem, bool isHover, int32_t urlId) {
+        spanItem->HandeUrlHoverEvent(isHover, urlId, spanItem);
+    };
+    auto urlOnClick = [address](OHOS::Ace::GestureEvent&) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->HyperlinkStartAbility(address);
+    };
+    auto urlOnPress = [](const RefPtr<NG::SpanItem>& spanItem, bool isPress) {
+        spanItem->HandeUrlOnPressEvent(spanItem, isPress);
+    };
+    spanItem->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+    spanItem->SetUrlOnHoverEvent(std::move(urlOnHover));
+    spanItem->SetUrlOnPressEvent(std::move(urlOnPress));
+    spanItem->SetUrlOnClickEvent(std::move(urlOnClick));
+}
+
+void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spanItem->fontStyle->ResetTextColor();
+    spanItem->urlOnRelease = nullptr;
+    spanItem->urlOnHover = nullptr;
+    spanItem->urlOnClick = nullptr;
+    spanItem->urlOnPress = nullptr;
+}
+
+SpanType UrlSpan::GetSpanType() const
+{
+    return SpanType::Url;
+}
+
+std::string UrlSpan::ToString() const
+{
+    std::stringstream str;
+    str << "UrlSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool UrlSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto urlSpan = DynamicCast<UrlSpan>(other);
+    if (!urlSpan) {
+        return false;
+    }
+    auto urlAddress = urlSpan->GetUrlSpanAddress();
+    return urlAddress == urlAddress_;
+}
+
+BackgroundColorSpan::BackgroundColorSpan(
+    std::optional<TextBackgroundStyle> textBackgroundStyle, int32_t start, int32_t end)
+    : SpanBase(start, end), textBackgroundStyle_(std::move(textBackgroundStyle))
+{}
+
+void BackgroundColorSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddSpanStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveSpanStyle(spanItem);
+            break;
+    }
+}
+
+BackgroundColorSpan::BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle)
+    : textBackgroundStyle_(textBackgroundStyle) {}
+
+RefPtr<SpanBase> BackgroundColorSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<BackgroundColorSpan>(GetBackgroundColor(), start, end);
+    return spanBase;
+}
+void BackgroundColorSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (textBackgroundStyle_.has_value()) {
+        TextBackgroundStyle tempVal = GetBackgroundColor();
+        spanItem->backgroundStyle = tempVal;
+    }
+}
+
+void BackgroundColorSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    if (spanItem->backgroundStyle.has_value()) {
+        spanItem->backgroundStyle.reset();
+    }
+}
+
+TextBackgroundStyle BackgroundColorSpan::GetBackgroundColor() const
+{
+    return textBackgroundStyle_.value();
+}
+
+void BackgroundColorSpan::SetBackgroundColorGroupId(int32_t groupId)
+{
+    textBackgroundStyle_->groupId = groupId;
+}
+
+SpanType BackgroundColorSpan::GetSpanType() const
+{
+    return SpanType::BackgroundColor;
+}
+
+std::string BackgroundColorSpan::ToString() const
+{
+    std::stringstream str;
+    str << "BackgroundColorSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool BackgroundColorSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto backgroundColorSpan = DynamicCast<BackgroundColorSpan>(other);
+        if (!backgroundColorSpan) {
+            return false;
+        }
+    auto backgroundColor = backgroundColorSpan->GetBackgroundColor();
+    return backgroundColor == textBackgroundStyle_;
 }
 } // namespace OHOS::Ace

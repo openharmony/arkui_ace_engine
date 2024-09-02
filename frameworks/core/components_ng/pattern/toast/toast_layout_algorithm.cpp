@@ -15,13 +15,8 @@
 
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void UpdateToastAlign(int32_t& alignment)
@@ -99,7 +94,15 @@ size_t GetLineCount(const RefPtr<LayoutWrapper>& textWrapper, LayoutConstraintF&
 
 void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto toastProps = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProps);
+    auto toastNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(toastNode);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(toastPattern);
+    toastPattern->InitWrapperRect(layoutWrapper, toastProps);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
     // TextAlign should be START when lines of text are greater than 1
     if (GetLineCount(text, layoutConstraint) > 1) {

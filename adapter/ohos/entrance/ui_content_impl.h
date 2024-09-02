@@ -35,7 +35,6 @@
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
@@ -52,6 +51,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
     }
@@ -95,6 +95,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
+    void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
@@ -270,6 +271,8 @@ public:
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
+    bool GetTargetNode(
+        int32_t& nodeIdLabel, RefPtr<NG::FrameNode>& targetNode, const CustomPopupUIExtensionConfig& config);
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
@@ -337,6 +340,16 @@ public:
 
     void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
+    void AddDestructCallback(void* key, const std::function<void()>& callback)
+    {
+        destructCallbacks_.emplace(key, callback);
+    }
+
+    void RemoveDestructCallback(void* key)
+    {
+        destructCallbacks_.erase(key);
+    }
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -346,6 +359,7 @@ private:
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
+    void ProcessDestructCallbacks();
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
@@ -357,13 +371,8 @@ private:
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
-    void RenderLayoutBoundary(bool isDebugBoundary);
-    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
+    void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -403,12 +412,12 @@ private:
 
     sptr<IRemoteObject> parentToken_ = nullptr;
     sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();
-    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
+    std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 };
 
 } // namespace OHOS::Ace

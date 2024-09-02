@@ -150,7 +150,7 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -237,6 +237,41 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+
+    // The function is only used for urlspan
+    void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
+    void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
+    void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
+    GestureEventFunc urlOnClick;
+    std::function<void()> urlOnRelease;
+    std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
+    std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
+    void SetUrlAddress(const std::string& address)
+    {
+        address_ = address;
+    }
+    std::string GetUrlAddress()
+    {
+        return address_;
+    }
+    void SetUrlOnReleaseEvent(std::function<void()>&& urlOnRelease_)
+    {
+        urlOnRelease = std::move(urlOnRelease_);
+    }
+    void SetUrlOnHoverEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem,
+        bool isHover, int32_t urlId)>&& urlOnHover_)
+    {
+        urlOnHover = std::move(urlOnHover_);
+    }
+    void SetUrlOnClickEvent(GestureEventFunc&& urlOnClick_)
+    {
+        urlOnClick = std::move(urlOnClick_);
+    }
+    void SetUrlOnPressEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem, bool isPress)>&& urlOnPress_)
+    {
+        urlOnPress = std::move(urlOnPress_);
+    }
+
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -277,6 +312,14 @@ public:
     {
         return isParentText;
     }
+    bool GetHasUserFontWeight()
+    {
+        return hasUserFontWeight_;
+    }
+    void SetHasUserFontWeight(bool hasUserFontWeight)
+    {
+        hasUserFontWeight_ = hasUserFontWeight;
+    }
     std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
@@ -292,11 +335,24 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    void SetSymbolId(uint32_t symbolId)
+    {
+        symbolId_ = symbolId;
+    }
+
+    uint32_t GetSymbolId()
+    {
+        return symbolId_;
+    }
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
+    bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
+    Dimension radius_ = 2.0_vp;
+    std::string address_;
+    uint32_t symbolId_ = 0;
 };
 
 enum class PropertyInfo {
@@ -323,8 +379,11 @@ enum class PropertyInfo {
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
     HALFLEADING,
+    VARIABLE_FONT_WEIGHT,
+    ENABLE_VARIABLE_FONT_WEIGHT,
     MIN_FONT_SCALE,
     MAX_FONT_SCALE,
+    BACKGROUNDCOLOR,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -423,14 +482,25 @@ public:
         spanItem_->fontStyle->UpdateColorByResourceId();
     }
 
+    bool GetHasUserFontWeight()
+    {
+        return hasUserFontWeight_;
+    }
+
+    void UpdateUserFontWeight(bool hasUserFontWeight)
+    {
+        hasUserFontWeight_ = hasUserFontWeight;
+        spanItem_->SetHasUserFontWeight(hasUserFontWeight);
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -441,6 +511,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
     DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
+    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -510,11 +582,12 @@ public:
 
 protected:
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     std::set<PropertyInfo> propertyInfo_;
-
+    bool hasUserFontWeight_ = false;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
@@ -552,6 +625,18 @@ public:
         dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
     }
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
+
+    void SetCustomNode(const RefPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_;
+    }
+private:
+    RefPtr<UINode> customNode_;
 };
 
 class PlaceholderSpanPattern : public Pattern {

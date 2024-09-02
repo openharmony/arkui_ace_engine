@@ -15,17 +15,9 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
-#include "base/memory/referenced.h"
-#include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -238,21 +230,18 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     CHECK_NULL_VOID(controlButtonsNode);
     ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
 
-    if (hideMaximize) {
-        auto maximizeBtn =
-            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
-        CHECK_NULL_VOID(maximizeBtn);
-        maximizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        maximizeBtn->MarkDirtyNode();
-    }
+    auto maximizeBtn =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
+    CHECK_NULL_VOID(maximizeBtn);
+    maximizeBtn->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
+    maximizeBtn->MarkDirtyNode();
 
-    if (hideMinimize) {
-        auto minimizeBtn =
-            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
-        CHECK_NULL_VOID(minimizeBtn);
-        minimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-        minimizeBtn->MarkDirtyNode();
-    }
+    auto minimizeBtn =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
+    CHECK_NULL_VOID(minimizeBtn);
+    minimizeBtn->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
+    minimizeBtn->MarkDirtyNode();
+
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     InitTitleRowLayoutProperty(GetCustomTitleRow());
 }

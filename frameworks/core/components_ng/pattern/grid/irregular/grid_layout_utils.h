@@ -44,7 +44,7 @@ public:
      * @param buildCb callback to build a GridItem.
      */
     static void PreloadGridItems(
-        const RefPtr<GridPattern>& pattern, std::list<int32_t>&& items, const BuildGridItemCallback& buildCb);
+        const RefPtr<GridPattern>& pattern, std::list<GridPreloadItem>&& items, const BuildGridItemCallback& buildCb);
 
 private:
     // helper to add the GridItem build task to Pipeline

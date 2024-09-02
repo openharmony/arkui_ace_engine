@@ -14,12 +14,8 @@
  */
 #include "safe_area_manager.h"
 
-#include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
@@ -275,6 +271,14 @@ bool SafeAreaManager::AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node
         return true;
     }
     return false;
+}
+
+std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
+{
+    // To isolate set comparator, use vector to collect a copy of nodes
+    std::vector<WeakPtr<FrameNode>> result;
+    std::copy(needExpandNodes_.begin(), needExpandNodes_.end(), std::back_inserter(result));
+    return result;
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)

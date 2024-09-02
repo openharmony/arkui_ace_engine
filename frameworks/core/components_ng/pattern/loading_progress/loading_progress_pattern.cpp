@@ -16,8 +16,6 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
-#include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
-
 namespace OHOS::Ace::NG {
 
 bool LoadingProgressPattern::OnDirtyLayoutWrapperSwap(
@@ -177,5 +175,10 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
     auto enableLoading = paintProperty->GetEnableLoadingValue(true);
     LoadingProgressConfiguration loadingProgressConfiguration(enableLoading, enabled);
     return (makeFunc_.value())(loadingProgressConfiguration);
+}
+
+void LoadingProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("IsInVisibleArea", isVisibleArea_ ? "true" : "false");
 }
 } // namespace OHOS::Ace::NG

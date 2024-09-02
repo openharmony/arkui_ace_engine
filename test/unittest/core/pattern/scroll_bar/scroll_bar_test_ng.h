@@ -16,27 +16,12 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_BAR_SCROLL_BAR_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_BAR_SCROLL_BAR_TEST_NG_H
 
-#include "gtest/gtest.h"
-
-#include "base/geometry/offset.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

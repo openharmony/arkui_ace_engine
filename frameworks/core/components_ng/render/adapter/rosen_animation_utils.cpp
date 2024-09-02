@@ -229,13 +229,14 @@ std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInte
         std::make_shared<AnimationUtils::InteractiveAnimation>();
     CHECK_NULL_RETURN(interactiveAnimation, nullptr);
     auto wrappedOnFinish = GetWrappedCallback(callback);
-    auto wrappedStart = GetWrappedCallback(addCallback);
     Rosen::RSAnimationTimingProtocol timingProtocol;
     Rosen::RSAnimationTimingCurve curve;
     interactiveAnimation->interactiveAnimation_ =
         Rosen::RSInteractiveImplictAnimator::Create(timingProtocol, curve);
     CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, nullptr);
-    interactiveAnimation->interactiveAnimation_->AddAnimation(wrappedStart);
+    if (addCallback) {
+        interactiveAnimation->interactiveAnimation_->AddAnimation(addCallback);
+    }
     interactiveAnimation->interactiveAnimation_->SetFinishCallBack(wrappedOnFinish);
     return interactiveAnimation;
 }
@@ -271,5 +272,14 @@ void AnimationUtils::UpdateInteractiveAnimation(
     CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
     interactiveAnimation->interactiveAnimation_->PauseAnimation();
     interactiveAnimation->interactiveAnimation_->SetFraction(progress);
+}
+
+void AnimationUtils::AddInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+    const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->AddAnimation(callback);
 }
 } // namespace OHOS::Ace

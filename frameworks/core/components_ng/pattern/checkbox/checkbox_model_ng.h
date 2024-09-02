@@ -64,6 +64,8 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle checkboxStyle);
+    static void SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name);
+    static void SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName);
 
     static bool GetSelect(FrameNode* frameNode);
     static Color GetSelectedColor(FrameNode* frameNode);

@@ -14,8 +14,6 @@
  */
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 
-#include "base/log/log_wrapper.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 
 namespace OHOS::Ace::NG::NodeModifier {

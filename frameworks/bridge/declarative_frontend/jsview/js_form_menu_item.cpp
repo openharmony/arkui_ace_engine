@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/js_menu_item.h"
+#include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
+
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -22,27 +23,28 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/menu_item_model_impl.h"
+#include "bridge/declarative_frontend/jsview/js_menu_item.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
 constexpr int NUM_WANT_1 = 0;
 constexpr int NUM_ID_2 = 1;
 constexpr int NUM_DATA_3 = 2;
 constexpr int NUM_FUN_4 = 3;
 constexpr int NUM_CALLBACKNUM = 2;
+}
+
 
 void JSFormMenuItem::JSBind(BindingTarget globalObj)
 {
@@ -62,6 +64,7 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
         TAG_LOGE(AceLogTag::ACE_FORM, "onTap wantWrap is NULL.");
         return;
     }
+
     int64_t formId = 0;
     AAFwk::Want& want = const_cast<AAFwk::Want&>(wantWrap->GetWant());
     if (!want.HasParameter("ohos.extra.param.key.add_form_to_host_snapshot") ||
@@ -73,14 +76,19 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
         return;
     }
 
-    FormModel::GetInstance()->RequestPublishFormWithSnapshot(want, formBindingDataStr, formId);
+    std::string errMsg;
+    int32_t errCode = FormModel::GetInstance()->RequestPublishFormWithSnapshot(want, formBindingDataStr, formId,
+                                                                               errMsg);
     if (!jsCBFunc) {
         TAG_LOGE(AceLogTag::ACE_FORM, "jsCBFunc is null");
         return;
     }
 
     JSRef<JSVal> params[NUM_CALLBACKNUM];
-    params[0] = JSRef<JSVal>::Make(ToJSValue((formId > 0) ? 0 : -1));
+    JSRef<JSObject> errObj = JSRef<JSObject>::New();
+    errObj->SetProperty<int32_t>("code", errCode);
+    errObj->SetProperty<std::string>("message", errMsg);
+    params[0] = errObj;
     params[1] = JSRef<JSVal>::Make(ToJSValue(formId));
     jsCBFunc->ExecuteJS(NUM_CALLBACKNUM, params);
 }

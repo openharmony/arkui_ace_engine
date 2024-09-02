@@ -15,11 +15,8 @@
 
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
-#include "core/components_ng/pattern/rating/rating_render_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void RatingModelNG::Create(double rating, bool indicator)
@@ -36,7 +33,7 @@ void RatingModelNG::Create(double rating, bool indicator)
 
 void RatingModelNG::SetRatingScore(double value)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
     ACE_UPDATE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, value);
 }
 
@@ -145,6 +142,7 @@ void RatingModelNG::SetBackgroundSrc(FrameNode* frameNode, const std::string& va
 
 void RatingModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

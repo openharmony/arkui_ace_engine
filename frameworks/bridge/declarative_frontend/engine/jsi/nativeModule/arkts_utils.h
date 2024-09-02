@@ -26,8 +26,26 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
 
+namespace OHOS::Rosen {
+    class BrightnessBlender;
+}
+
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
+
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+};
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
@@ -36,6 +54,7 @@ public:
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsDimensionFromResource(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
@@ -97,6 +116,9 @@ public:
             return false;
         }
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
+        if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
+            return false;
+        }
         int32_t length = static_cast<int32_t>(handle->Length(vm));
         if (length != defaultLength) {
             return false;
@@ -166,6 +188,7 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
+    static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
     static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
 #if !defined(PREVIEW)
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);

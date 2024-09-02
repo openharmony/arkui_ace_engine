@@ -15,22 +15,15 @@
 
 #include "base/utils/system_properties.h"
 
-#include <cstdint>
-#include <memory>
-#include <mutex>
 #include <shared_mutex>
-#include <string>
-#include <unistd.h>
-
-#include "dm_common.h"
+#include <regex>
 
 #include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
+#include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -47,6 +40,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
+constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
@@ -63,6 +57,7 @@ float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 std::shared_mutex mutex_;
+const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
@@ -366,10 +361,10 @@ std::pair<float, float> GetPercent()
 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
 bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
-bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
-bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
+std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
+std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
@@ -385,6 +380,7 @@ ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalWidth_ = 0;
 ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
+ACE_WEAK_SYM FoldScreenType SystemProperties::foldScreenType_ { FoldScreenType::UNKNOWN };
 ACE_WEAK_SYM bool SystemProperties::needAvoidWindow_ { false };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
@@ -402,7 +398,7 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled() && developerModeOn_;
+std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
@@ -430,10 +426,13 @@ bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
 float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
+float SystemProperties::fontScale_ = 1.0;
+float SystemProperties::fontWeightScale_ = 1.0;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
 }
+
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -555,9 +554,9 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
-    traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
-    stateManagerEnable_ = IsStateManagerEnable();
+    layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
+    traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
+    stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
@@ -602,17 +601,13 @@ ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
 {
     // Default value of font weight scale is 1.0.
-    std::string prop =
-        "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+    return fontWeightScale_;
 }
 
 ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
-    std::string prop =
-        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+    return fontScale_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -770,6 +765,44 @@ void SystemProperties::RemoveWatchSystemParameter(
     RemoveParameterWatcher(key, callback, context);
 }
 
+void SystemProperties::EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetInputEventTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback(
+    const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetSecurityDevelopermodeLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetStateManagerEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
+{
+    bool isDebugBoundary = strcmp(value, "true") == 0;
+    SetDebugBoundaryEnabled(isDebugBoundary);
+    auto container = reinterpret_cast<Platform::AceContainer*>(context);
+    CHECK_NULL_VOID(container);
+    container->RenderLayoutBoundary(isDebugBoundary);
+}
+
 float SystemProperties::GetDefaultResolution()
 {
     float density = 1.0f;
@@ -782,22 +815,22 @@ float SystemProperties::GetDefaultResolution()
 
 void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
 {
-    layoutTraceEnable_ = layoutTraceEnable && developerModeOn_;
+    layoutTraceEnable_.store(layoutTraceEnable && developerModeOn_);
 }
 
 void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
 {
-    traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
+    traceInputEventEnable_.store(inputEventTraceEnable && developerModeOn_);
 }
 
 void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
 {
-    layoutTraceEnable_ = layoutTraceEnable && IsLayoutTraceEnabled();
+    layoutTraceEnable_.store(layoutTraceEnable && IsLayoutTraceEnabled());
 }
 
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
-    debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
+    debugBoundaryEnabled_.store(debugBoundaryEnabled && developerModeOn_);
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
@@ -813,5 +846,26 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
+}
+
+void SystemProperties::InitFoldScreenTypeBySystemProperty()
+{
+    if (foldScreenType_ != FoldScreenType::UNKNOWN) {
+        return;
+    }
+
+    auto foldTypeProp = system::GetParameter(PROPERTY_FOLD_TYPE, "0,0,0,0");
+    if (std::regex_match(foldTypeProp, FOLD_TYPE_REGEX)) {
+        auto index = foldTypeProp.find_first_of(',');
+        auto foldScreenTypeStr = foldTypeProp.substr(0, index);
+        auto type = std::stoi(foldScreenTypeStr);
+        foldScreenType_ = static_cast<FoldScreenType>(type);
+    }
 }
 } // namespace OHOS::Ace

@@ -30,13 +30,20 @@ void MockImplicitAnimation::UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) 
             cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
         }
     }
+    if (auto prop = AceType::DynamicCast<NG::AnimatablePropertyOffsetF>(propWk.Upgrade()); prop) {
+        NG::MockAnimationProxy<NG::OffsetF>::GetInstance().Next(prop, remainingTicks_);
+        auto cb = prop->GetUpdateCallback();
+        if (cb) {
+            cb(NG::MockAnimationProxy<NG::OffsetF>::GetInstance().GetStagingValue(prop));
+        }
+    }
     /* add update code for other types */
 #endif
 }
 
 void MockImplicitAnimation::Next()
 {
-    if (Finished()) {
+    if (paused_ || Finished()) {
         return;
     }
     UpdateProp(prop_);
@@ -48,5 +55,34 @@ void MockImplicitAnimation::Next()
             cbs_.finishCb();
         }
     }
+}
+
+void MockImplicitAnimation::ForceUpdate(float delta)
+{
+    auto prop = AceType::DynamicCast<NG::AnimatablePropertyFloat>(prop_.Upgrade());
+    CHECK_NULL_VOID(prop);
+    NG::MockAnimationProxy<float>::GetInstance().ForceUpdate(prop, delta);
+    auto cb = prop->GetUpdateCallback();
+    if (cb) {
+        cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
+    }
+}
+
+void MockImplicitAnimation::End()
+{
+    remainingTicks_ = 0;
+    if (cbs_.finishCb) {
+        cbs_.finishCb();
+    }
+}
+
+void MockImplicitAnimation::JumpToEnd()
+{
+    remainingTicks_ = 1;
+    UpdateProp(prop_);
+    if (cbs_.repeatCb) {
+        cbs_.repeatCb();
+    }
+    End();
 }
 } // namespace OHOS::Ace

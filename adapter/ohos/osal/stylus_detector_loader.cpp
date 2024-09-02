@@ -16,7 +16,6 @@
 #include "core/common/stylus/stylus_detector_loader.h"
 
 #include <dlfcn.h>
-#include <memory>
 
 #include "frameworks/base/log/log_wrapper.h"
 
@@ -31,7 +30,12 @@ const std::string STYLUS_CLIENT_SO_PATH = "/system/lib/libstylus_innerapi.z.so";
 std::shared_ptr<StylusDetectorLoader> StylusDetectorLoader::Load()
 {
     auto engLib(std::make_shared<StylusDetectorLoader>());
-    return engLib->Init() ? engLib : nullptr;
+    auto ret = engLib->Init();
+    if (!ret) {
+        LOGD("Stylus detector loader instance init failed.");
+        return nullptr;
+    }
+    return engLib;
 }
 
 StylusDetectorLoader::~StylusDetectorLoader()

@@ -58,6 +58,7 @@ struct OptionParam {
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
+    bool disableSystemClick = false;
 
     // Used for security controls.
     bool isPasteOption = false;
@@ -209,6 +210,7 @@ public:
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
+    static void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender);
 
     // graphics
     static void SetBrightness(const Dimension &value);
@@ -537,6 +539,7 @@ public:
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetFocusType(FrameNode* frameNode, FocusType type);
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
@@ -598,6 +601,7 @@ public:
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);

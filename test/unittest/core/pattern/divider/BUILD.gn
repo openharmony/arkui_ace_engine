@@ -15,5 +15,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("divider_test_ng") {
   type = "new"
-  sources = [ "divider_test_ng.cpp" ]
+  sources = [
+    "divider_base_test_ng.cpp",
+    "divider_base_test_ng.h",
+    "divider_new_test_ng.cpp",
+    "old_cases/divider_test_ng.cpp",
+  ]
 }

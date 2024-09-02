@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
-#include "core/components_ng/property/flex_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -1605,7 +1593,7 @@ std::optional<float> RelativeContainerLayoutAlgorithm::GetOriginMarginLeft(
     TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp)
 {
     CHECK_NULL_RETURN(marginProp, 0);
-    return textDirection != TextDirection::RTL ? marginProp->left:marginProp->right;
+    return textDirection != TextDirection::RTL ? marginProp->left : marginProp->right;
 }
 
 float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
@@ -1646,7 +1634,7 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
 }
 
 float RelativeContainerLayoutAlgorithm::CalcAnchorWidth(
-    bool anchorIsContainer, float& containerWidth, const std::string& anchor)
+    bool anchorIsContainer, float containerWidth, const std::string& anchor)
 {
     if (!versionGreatorOrEqualToEleven_) {
         return anchorIsContainer

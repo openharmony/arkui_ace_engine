@@ -14,15 +14,6 @@
  */
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -151,11 +142,18 @@ void ResetEffectStrategy(ArkUINodeHandle node)
     SymbolModelNG::SetSymbolEffect(frameNode, 0);
 }
 
-void SetSymbolId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
+void SetSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::InitialSymbol(frameNode, symbolId);
+    SymbolModelNG::SetSymbolGlyphInitialize(frameNode, symbolId);
+}
+
+void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetSymbolGlyphInitialize(frameNode, 0);
 }
 }
 
@@ -174,7 +172,8 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         ResetRenderingStrategy,
         SetEffectStrategy,
         ResetEffectStrategy,
-        SetSymbolId,
+        SetSymbolGlyphInitialize,
+        ResetSymbolGlyphInitialize,
     };
 
     return &modifier;
@@ -194,7 +193,8 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         ResetRenderingStrategy,
         SetEffectStrategy,
         ResetEffectStrategy,
-        SetSymbolId,
+        SetSymbolGlyphInitialize,
+        ResetSymbolGlyphInitialize,
     };
 
     return &modifier;

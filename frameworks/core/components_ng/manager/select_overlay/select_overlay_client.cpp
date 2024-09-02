@@ -15,16 +15,39 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void SelectOverlayClient::InitSelectOverlay()
+{
+    InitMenuCallback();
+    selectOverlayInfo_.onHandleMoveStart = [weak = WeakClaim(this)](bool isFirst) {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnHandleMoveStart(isFirst);
+    };
+    selectOverlayInfo_.onHandleMove = [weak = WeakClaim(this)](const RectF& rect, bool isFirst) {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnHandleMove(rect, isFirst);
+    };
+    selectOverlayInfo_.onHandleMoveDone = [weak = WeakClaim(this)](const RectF& rect, bool isFirst) {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnHandleMoveDone(rect, isFirst);
+    };
+    selectOverlayInfo_.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnHandleClosed(closedByGlobalEvent);
+    };
+    selectOverlayInfo_.callerFrameNode = GetClientHost();
+    selectOverlayInfo_.firstHandle.isShow = false;
+    selectOverlayInfo_.secondHandle.isShow = false;
+    selectOverlayInfo_.hitTestMode = HitTestMode::HTMDEFAULT;
+}
+
+void SelectOverlayClient::InitMenuCallback()
 {
     selectOverlayInfo_.menuCallback.onCopy = [weak = WeakClaim(this)]() {
         auto client = weak.Upgrade();
@@ -51,30 +74,11 @@ void SelectOverlayClient::InitSelectOverlay()
         CHECK_NULL_VOID(client);
         client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::CAMERA_INPUT);
     };
-    selectOverlayInfo_.onHandleMoveStart = [weak = WeakClaim(this)](bool isFirst) {
+    selectOverlayInfo_.menuCallback.onAIWrite = [weak = WeakClaim(this)]() {
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);
-        client->OnHandleMoveStart(isFirst);
+        client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::AI_WRITE);
     };
-    selectOverlayInfo_.onHandleMove = [weak = WeakClaim(this)](const RectF& rect, bool isFirst) {
-        auto client = weak.Upgrade();
-        CHECK_NULL_VOID(client);
-        client->OnHandleMove(rect, isFirst);
-    };
-    selectOverlayInfo_.onHandleMoveDone = [weak = WeakClaim(this)](const RectF& rect, bool isFirst) {
-        auto client = weak.Upgrade();
-        CHECK_NULL_VOID(client);
-        client->OnHandleMoveDone(rect, isFirst);
-    };
-    selectOverlayInfo_.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
-        auto client = weak.Upgrade();
-        CHECK_NULL_VOID(client);
-        client->OnHandleClosed(closedByGlobalEvent);
-    };
-    selectOverlayInfo_.callerFrameNode = GetClientHost();
-    selectOverlayInfo_.firstHandle.isShow = false;
-    selectOverlayInfo_.secondHandle.isShow = false;
-    selectOverlayInfo_.hitTestMode = HitTestMode::HTMDEFAULT;
 }
 
 void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverlayInfo)

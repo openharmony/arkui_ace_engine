@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 
-#include <cstdint>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -331,7 +323,8 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
     gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.size()) - 1 ;
+    auto iter = gridLayoutInfo_.gridMatrix_.rbegin();
+    gridLayoutInfo_.endMainLineIndex_ = (iter == gridLayoutInfo_.gridMatrix_.rend() ? -1 : iter->first);
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

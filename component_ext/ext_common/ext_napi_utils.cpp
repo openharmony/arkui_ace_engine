@@ -15,10 +15,6 @@
 
 #include "ext_napi_utils.h"
 
-#include <cstddef>
-
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
 #include "securec.h"
 
 namespace OHOS::Ace {

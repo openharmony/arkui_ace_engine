@@ -89,6 +89,12 @@ public:
 
     void UpdateOffset(float delta) override;
 
+    float CalibrateOffset() override
+    {
+        /* offset always accurate */
+        return 0.0f;
+    }
+
     float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
     float GetDelta(float prevPos) const override
@@ -184,7 +190,6 @@ public:
     int32_t childrenCount_ = 0;
 
     float currentOffset_ = 0.0f;
-    float prevOffset_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
 

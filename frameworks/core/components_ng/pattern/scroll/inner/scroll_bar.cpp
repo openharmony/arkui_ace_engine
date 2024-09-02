@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
-#include <cmath>
-
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/curves.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -203,7 +197,7 @@ void ScrollBar::SetRectTrickRegion(
         return;
     }
     double activeSize = barRegionSize_ * mainSize / estimatedHeight - outBoundary_;
-    
+
     if (!NearZero(outBoundary_)) {
         activeSize = std::max(
             std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
@@ -377,7 +371,7 @@ void ScrollBar::SetGestureEvent()
             }
             if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
                     info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
-                info.GetTouches().size() <= 1) {
+                    (info.GetTouches().size() <= 1)) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
@@ -535,16 +529,26 @@ void ScrollBar::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            GestureEvent info;
+            scrollBar->HandleDragEnd(info);
+        }
+    });
 }
 
-void ScrollBar::HandleDragStart(const GestureEvent& info)
+void ScrollBar::StopFlingAnimation()
 {
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
     }
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
-        "globalLocation: %{public}s",
-        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+}
+
+void ScrollBar::HandleDragStart(const GestureEvent& info)
+{
+    StopFlingAnimation();
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
@@ -591,9 +595,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         dragFRCSceneCallback_(0, NG::SceneStatus::END);
     }
     auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
-        "velocity is %{public}f",
-        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("inner scrollBar HandleDragEnd velocity:%f", velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
@@ -614,8 +616,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
             scrollBar->ProcessFrictionMotion(value);
         });
     }
-    if (calePredictSnapOffsetCallback_ && startScrollSnapMotionCallback_) {
-        auto predictSnapOffset = calePredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()),
+    if (calcPredictSnapOffsetCallback_ && startScrollSnapMotionCallback_) {
+        auto predictSnapOffset = calcPredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()),
                                                                 CalcPatternOffset(GetDragOffset()), -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -1020,5 +1022,127 @@ Axis ScrollBar::GetPanDirection() const
 {
     CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
     return panRecognizer_->GetAxisDirection();
+}
+
+void ScrollBar::GetShapeModeDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (shapeMode_) {
+        case ShapeMode::RECT: {
+            json->Put("shapeMode", "RECT");
+            break;
+        }
+        case ShapeMode::ROUND: {
+            json->Put("shapeMode", "ROUND");
+            break;
+        }
+        case ShapeMode::DEFAULT: {
+            json->Put("shapeMode", "DEFAULT");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetPositionModeDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (positionMode_) {
+        case PositionMode::RIGHT: {
+            json->Put("padding.right", padding_.Right().ToString().c_str());
+            break;
+        }
+        case PositionMode::LEFT: {
+            json->Put("padding.left", padding_.Left().ToString().c_str());
+            break;
+        }
+        case PositionMode::BOTTOM: {
+            json->Put("padding.bottom", padding_.Bottom().ToString().c_str());
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("axis", "NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("axis", "VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("axis", "FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBar::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (panRecognizer_) {
+        switch (panRecognizer_->GetAxisDirection()) {
+            case Axis::NONE: {
+                json->Put("panDirection", "NONE");
+                break;
+            }
+            case Axis::VERTICAL: {
+                json->Put("panDirection", "VERTICAL");
+                break;
+            }
+            case Axis::HORIZONTAL: {
+                json->Put("panDirection", "HORIZONTAL");
+                break;
+            }
+            case Axis::FREE: {
+                json->Put("panDirection", "FREE");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
+void ScrollBar::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("activeRect", activeRect_.ToString().c_str());
+    json->Put("touchRegion", touchRegion_.ToString().c_str());
+    json->Put("hoverRegion", hoverRegion_.ToString().c_str());
+    json->Put("normalWidth", normalWidth_.ToString().c_str());
+    json->Put("activeWidth", activeWidth_.ToString().c_str());
+    json->Put("touchWidth", touchWidth_.ToString().c_str());
+    json->Put("hoverWidth", hoverWidth_.ToString().c_str());
+    GetShapeModeDumpInfo(json);
+    GetPositionModeDumpInfo(json);
+    GetAxisDumpInfo(json);
+    GetPanDirectionDumpInfo(json);
+    json->Put("hostBorderRadius", hostBorderRadius_.ToString().c_str());
+    json->Put("startReservedHeight", startReservedHeight_.ToString().c_str());
+    json->Put("endReservedHeight", endReservedHeight_.ToString().c_str());
+    json->Put("isScrollable", std::to_string(isScrollable_).c_str());
+    json->Put("isReverse", std::to_string(isReverse_).c_str());
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : innerScrollBarLayoutInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("innerScrollBarLayoutInfos", children);
 }
 } // namespace OHOS::Ace::NG

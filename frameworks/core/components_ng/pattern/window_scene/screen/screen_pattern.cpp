@@ -21,9 +21,7 @@
 #include "root_scene.h"
 #include "screen_manager.h"
 #include "transaction/rs_transaction_proxy.h"
-#include "ui/rs_display_node.h"
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"

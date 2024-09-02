@@ -16,11 +16,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
@@ -441,21 +437,23 @@ void UpdateTitleBarMenuNode(const RefPtr<NavBarNode>& navBarNode, const SizeF& n
     CHECK_NULL_VOID(toolBarLayoutProperty);
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto isHideToolbar = navBarPattern->GetToolbarHideStatus();
+    auto preMenuNode = titleBarNode->GetMenu();
 
-    if (titleBarNode->GetMenu()) {
-        titleBarNode->RemoveChild(titleBarNode->GetMenu());
+    bool isNeedLandscapeMenu = CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar;
+    RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? navBarNode->GetLandscapeMenu() : navBarNode->GetMenu();
+    if (preMenuNode == newMenuNode) {
+        return;
     }
-
-    if (CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar) {
+    if (isNeedLandscapeMenu) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetMenu(navBarNode->GetLandscapeMenu());
     } else {
         if (!isHideToolbar) {
             toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         }
-        titleBarNode->SetMenu(navBarNode->GetMenu());
     }
-    titleBarNode->AddChild(titleBarNode->GetMenu());
+    titleBarNode->RemoveChild(preMenuNode);
+    titleBarNode->SetMenu(newMenuNode);
+    titleBarNode->AddChild(newMenuNode);
 }
 
 float TransferTitleBarHeight(const RefPtr<NavBarNode>& hostNode, float titleBarHeight)

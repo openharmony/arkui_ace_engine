@@ -186,7 +186,7 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -260,6 +260,16 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
+    void UpdateHoverModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        hoverModeChangedCallbackId_ = id;
+    }
+
+    bool HasHoverModeChangedCallbackId()
+    {
+        return hoverModeChangedCallbackId_.has_value();
+    }
+
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -294,6 +304,11 @@ public:
         isScrollHeightNegative_ = isScrollHeightNegative;
     }
 
+    bool TriggerAutoSaveWhenInvisible() override
+    {
+        return true;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -303,6 +318,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
@@ -353,7 +369,9 @@ private:
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
+    void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
     void DumpObjectProperty();
+    void DumpObjectProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
@@ -367,6 +385,7 @@ private:
     std::optional<AnimationOption> openAnimation_;
     std::optional<AnimationOption> closeAnimation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> hoverModeChangedCallbackId_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values

@@ -14,8 +14,6 @@
  */
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
-#include "base/log/dump_log.h"
-
 using namespace OHOS::Ace::NG;
 namespace OHOS::Ace {
 bool InputAIChecker::NeedAIAnalysis(const std::string& content, const NG::CaretUpdateType targetType,

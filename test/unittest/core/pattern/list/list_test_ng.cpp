@@ -14,12 +14,16 @@
  */
 
 #include "list_test_ng.h"
+
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components/button/button_theme.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 
 namespace OHOS::Ace::NG {
 void ListTestNg::SetUpTestSuite()
@@ -548,5 +552,29 @@ void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
         predictParam = listPattern->GetPredictLayoutParamV2();
         tryCount--;
     }
+}
+
+void ListTestNg::CreateGroupWithSettingWithComponentContent(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        groupModel.SetSpace(Dimension(SPACE));
+        groupModel.SetDivider(ITEM_DIVIDER);
+        groupModel.SetHeaderComponent(CreateCustomNode("Header"));
+        groupModel.SetFooterComponent(CreateCustomNode("Footer"));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(LIST_WIDTH), CalcLength(LIST_HEIGHT)));
+    return frameNode;
 }
 } // namespace OHOS::Ace::NG

@@ -16,10 +16,6 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -225,7 +221,7 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     auto viewSize = geometryNode->GetFrameSize();
-    
+
     auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
@@ -513,6 +509,8 @@ void ScrollBarPattern::DumpAdvanceInfo()
     hasChild_ ? DumpLog::GetInstance().AddDesc("hasChild: true") : DumpLog::GetInstance().AddDesc("hasChild: false");
     preFrameChildState_ ? DumpLog::GetInstance().AddDesc("preFrameChildState: true")
                         : DumpLog::GetInstance().AddDesc("preFrameChildState: false");
+    enableNestedSorll_ ? DumpLog::GetInstance().AddDesc("enableNestedSorll: true")
+                       : DumpLog::GetInstance().AddDesc("enableNestedSorll: false");
     if (!hasChild_ && scrollBar_) {
         scrollBar_->DumpAdvanceInfo();
     }
@@ -658,15 +656,20 @@ void ScrollBarPattern::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+        auto scrollBar = weakBar.Upgrade();
+        if (scrollBar) {
+            GestureEvent info;
+            scrollBar->HandleDragEnd(info);
+        }
+    });
 }
 
 void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
 {
     StopMotion();
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start, localLocation: %{public}s, "
-        "globalLocation: %{public}s",
-        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start");
     ACE_SCOPED_TRACE("outer scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
@@ -696,9 +699,7 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
     auto velocity = IsReverse() ? -info.GetMainVelocity() : info.GetMainVelocity();
-    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, position is %{public}f and %{public}f, "
-        "velocity is %{public}f",
-        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("outer scrollBar HandleDragEnd velocity:%f", velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
@@ -944,5 +945,104 @@ bool ScrollBarPattern::IsReverse() const
 void ScrollBarPattern::SetReverse(bool reverse)
 {
     isReverse_ = reverse;
+}
+
+void ScrollBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    GetAxisDumpInfo(json);
+    GetDisplayModeDumpInfo(json);
+    GetPanDirectionDumpInfo(json);
+    json->Put("hasChild", hasChild_);
+    json->Put("preFrameChildState", preFrameChildState_);
+    json->Put("enableNestedSorll", enableNestedSorll_);
+    if (!hasChild_ && scrollBar_) {
+        scrollBar_->DumpAdvanceInfo(json);
+    }
+    json->Put("childRect", childRect_.ToString().c_str());
+    json->Put("scrollableDistance", std::to_string(scrollableDistance_).c_str());
+    json->Put("controlDistance_", std::to_string(controlDistance_).c_str());
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (const auto& info : outerScrollBarLayoutInfos_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        info.ToJson(child);
+        children->Put(child);
+    }
+    json->Put("outerScrollBarLayoutInfos", children);
+}
+
+void ScrollBarPattern::GetDisplayModeDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (displayMode_) {
+        case DisplayMode::OFF: {
+            json->Put("outerScrollBarState", "OFF");
+            break;
+        }
+        case DisplayMode::AUTO: {
+            json->Put("outerScrollBarState", "AUTO");
+            break;
+        }
+        case DisplayMode::ON: {
+            json->Put("outerScrollBarState", "ON");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void ScrollBarPattern::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (panRecognizer_) {
+        switch (panRecognizer_->GetAxisDirection()) {
+            case Axis::NONE: {
+                json->Put("panDirection", "NONE");
+                break;
+            }
+            case Axis::VERTICAL: {
+                json->Put("panDirection", "VERTICAL");
+                break;
+            }
+            case Axis::HORIZONTAL: {
+                json->Put("panDirection", "HORIZONTAL");
+                break;
+            }
+            case Axis::FREE: {
+                json->Put("panDirection", "FREE");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    } else {
+        json->Put("panDirection", "null");
+    }
+}
+
+void ScrollBarPattern::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    switch (axis_) {
+        case Axis::NONE: {
+            json->Put("Axis", "NONE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            json->Put("Axis", "VERTICAL");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            json->Put("Axis", "HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            json->Put("Axis", "FREE");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

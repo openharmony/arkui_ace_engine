@@ -15,16 +15,9 @@
 
 #include "core/components_ng/pattern/text/image_span_view.h"
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/image/image_source_info.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)
@@ -154,5 +147,19 @@ void ImageSpanView::SetOnError(FrameNode* frameNode, std::function<void(const Lo
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
+}
+
+void ImageSpanView::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)
+{
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ImageSpanView::ResetBorderRadius(FrameNode* frameNode)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(0));
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ImageModelNG::ResetBackBorder(frameNode);
 }
 } // namespace OHOS::Ace::NG

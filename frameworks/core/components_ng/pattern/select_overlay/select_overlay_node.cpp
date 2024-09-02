@@ -50,10 +50,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/menu_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #endif
@@ -76,6 +72,7 @@ constexpr int32_t OPTION_INDEX_SHARE = 4;
 constexpr int32_t OPTION_INDEX_TRANSLATE = 5;
 constexpr int32_t OPTION_INDEX_SEARCH = 6;
 constexpr int32_t OPTION_INDEX_CAMERA_INPUT = 7;
+constexpr int32_t OPTION_INDEX_AI_WRITE = 8;
 constexpr int32_t ANIMATION_DURATION1 = 350;
 constexpr int32_t ANIMATION_DURATION2 = 150;
 
@@ -92,19 +89,24 @@ const std::string OH_DEFAULT_COPY = "OH_DEFAULT_COPY";
 const std::string OH_DEFAULT_PASTE = "OH_DEFAULT_PASTE";
 const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
 const std::string OH_DEFAULT_CAMERA_INPUT = "OH_DEFAULT_CAMERA_INPUT";
+const std::string OH_DEFAULT_AI_WRITE = "OH_DEFAULT_AI_WRITE";
 const std::string OH_DEFAULT_COLLABORATION_SERVICE = "OH_DEFAULT_COLLABORATION_SERVICE";
 
 const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
     { OH_DEFAULT_CUT, [](const SelectMenuInfo& info){ return info.showCut; } },
     { OH_DEFAULT_COPY, [](const SelectMenuInfo& info){ return info.showCopy; } },
     { OH_DEFAULT_SELECT_ALL, [](const SelectMenuInfo& info){ return info.showCopyAll; } },
-    { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info){ return info.showPaste; } }
+    { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info){ return info.showPaste; } },
+    { OH_DEFAULT_AI_WRITE, [](const SelectMenuInfo& info){ return info.showAIWrite; } }
 };
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        return;
+    }
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto gestureHub = node->GetOrCreateGestureEventHub();
@@ -168,8 +170,12 @@ RefPtr<FrameNode> BuildPasteButton(
     PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
     buttonWidth = MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
+    } else {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(buttonWidth), CalcLength(textOverlayTheme->GetMenuButtonHeight()) });
+    }
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
@@ -208,7 +214,7 @@ RefPtr<FrameNode> CreatePasteButtonForCreateMenu(
             menuItem.end = end;
             result = onCreateCallback.onMenuItemClick(menuItem);
         }
-        if (!result) {
+        if (!result && onPaste) {
             onPaste();
         }
     };
@@ -541,7 +547,8 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const s
     std::unordered_map<std::string, std::function<void()>> systemCallback = {
         { OH_DEFAULT_CUT, info->menuCallback.onCut }, { OH_DEFAULT_COPY, info->menuCallback.onCopy },
         { OH_DEFAULT_SELECT_ALL, info->menuCallback.onSelectAll }, { OH_DEFAULT_PASTE, info->menuCallback.onPaste },
-        { OH_DEFAULT_CAMERA_INPUT, info->menuCallback.onCameraInput }
+        { OH_DEFAULT_CAMERA_INPUT, info->menuCallback.onCameraInput },
+        { OH_DEFAULT_AI_WRITE, info->menuCallback.onAIWrite }
     };
     return systemCallback;
 }
@@ -571,6 +578,9 @@ std::string GetSystemIconPath(const std::string& id, const std::string& iconPath
     if (id == OH_DEFAULT_CAMERA_INPUT) {
         return iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG);
     }
+    if (id == OH_DEFAULT_AI_WRITE) {
+        return iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG);
+    }
     return iconPath;
 }
 
@@ -591,6 +601,9 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     }
     if (id == OH_DEFAULT_PASTE) {
         return Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE);
+    }
+    if (id == OH_DEFAULT_AI_WRITE) {
+        return textOverlayTheme->GetAIWrite();
     }
     if (id == OH_DEFAULT_CAMERA_INPUT) {
         return textOverlayTheme->GetCameraInput();
@@ -641,6 +654,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
         };
         params.emplace_back(GetItemContent(item.id, item.content.value_or("")), "", callback);
         params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
+        params.back().disableSystemClick = true;
         itemNum++;
     }
     return params;
@@ -1101,7 +1115,6 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, params);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     auto defaultOptionCallback = GetDefaultOptionCallback();
     if (!isShowInDefaultMenu_[OPTION_INDEX_CUT]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_CUT_SVG) : "";
@@ -1133,17 +1146,27 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
         params.emplace_back(
             Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath, defaultOptionCallback);
     }
-    if (!isShowInDefaultMenu_[OPTION_INDEX_SEARCH]) {
-        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SEARCH_SVG) : "";
-        params.emplace_back(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), iconPath, defaultOptionCallback);
-    }
+    GetFlexibleOptionsParams(info, params);
+    return params;
+}
+
+void SelectOverlayNode::GetFlexibleOptionsParams(
+    const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     if (!isShowInDefaultMenu_[OPTION_INDEX_CAMERA_INPUT]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG) : "";
         auto iconName = textOverlayTheme ? textOverlayTheme->GetCameraInput() : "";
         params.emplace_back(iconName, iconPath, info->menuCallback.onCameraInput);
     }
-    return params;
+    if (!isShowInDefaultMenu_[OPTION_INDEX_AI_WRITE]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG) : "";
+        auto iconName = textOverlayTheme ? textOverlayTheme->GetAIWrite() : "";
+        params.emplace_back(iconName, iconPath, info->menuCallback.onAIWrite);
+    }
 }
 
 void SelectOverlayNode::addMenuOptionItemsParams(
@@ -1405,6 +1428,11 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto curWindowRect = pipeline->GetCurrentWindowRect();
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+    }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 
@@ -1426,7 +1454,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     ShowCopyAll(maxWidth, allocatedSize, info);
     ShowShare(maxWidth, allocatedSize, info);
     ShowCamera(maxWidth, allocatedSize, info);
-
+    ShowAIWrite(maxWidth, allocatedSize, info);
     if (isDefaultBtnOverMaxWidth_) {
         isDefaultBtnOverMaxWidth_ = false;
         return true;
@@ -1515,6 +1543,29 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
         }
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL] = true;
+    }
+}
+
+void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+{
+    if (info->menuInfo.showAIWrite) {
+        CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
+        float buttonWidth = 0.0f;
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_VOID(theme);
+        auto button = BuildButton(theme->GetAIWrite(), info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
+        if (maxWidth - allocatedSize >= buttonWidth) {
+            button->MountToParent(selectMenuInner_);
+            allocatedSize += buttonWidth;
+            isShowInDefaultMenu_[OPTION_INDEX_AI_WRITE] = true;
+        } else {
+            button.Reset();
+            isDefaultBtnOverMaxWidth_ = true;
+        }
+    } else {
+        isShowInDefaultMenu_[OPTION_INDEX_AI_WRITE] = true;
     }
 }
 
@@ -1674,55 +1725,56 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
 {
     std::vector<MenuItemParam> systemItemParams;
     if (info->menuInfo.showCopy || info->isUsingMouse) {
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
-        menuOptionsParam.id = OH_DEFAULT_COPY;
-        menuOptionsParam.content = Localization::GetInstance()->GetEntryLetters(BUTTON_COPY);
-        param.menuOptionsParam = menuOptionsParam;
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_COPY, BUTTON_COPY);
         systemItemParams.emplace_back(param);
     }
 
     if (info->menuInfo.showPaste || info->isUsingMouse) {
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
-        menuOptionsParam.id = OH_DEFAULT_PASTE;
-        menuOptionsParam.content = Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE);
-        param.menuOptionsParam = menuOptionsParam;
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_PASTE, BUTTON_PASTE);
         systemItemParams.emplace_back(param);
     }
 
     if (info->menuInfo.showCut || info->isUsingMouse) {
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
-        menuOptionsParam.id = OH_DEFAULT_CUT;
-        menuOptionsParam.content = Localization::GetInstance()->GetEntryLetters(BUTTON_CUT);
-        param.menuOptionsParam = menuOptionsParam;
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_CUT, BUTTON_CUT);
         systemItemParams.emplace_back(param);
     }
 
     if (info->menuInfo.showCopyAll || info->isUsingMouse) {
-        MenuItemParam param;
-        MenuOptionsParam menuOptionsParam;
-        menuOptionsParam.id = OH_DEFAULT_SELECT_ALL;
-        menuOptionsParam.content = Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL);
-        param.menuOptionsParam = menuOptionsParam;
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
         systemItemParams.emplace_back(param);
     }
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, systemItemParams);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, systemItemParams);
     if (info->menuInfo.showCameraInput) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
         menuOptionsParam.id = OH_DEFAULT_CAMERA_INPUT;
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, systemItemParams);
-        auto theme = pipeline->GetTheme<TextOverlayTheme>();
-        CHECK_NULL_RETURN(theme, systemItemParams);
-        auto content = theme->GetCameraInput();
         menuOptionsParam.content = theme->GetCameraInput();
         param.menuOptionsParam = menuOptionsParam;
         systemItemParams.emplace_back(param);
     }
+    if (info->menuInfo.showAIWrite) {
+        MenuItemParam param;
+        MenuOptionsParam menuOptionsParam;
+        menuOptionsParam.id = OH_DEFAULT_AI_WRITE;
+        menuOptionsParam.content = theme->GetAIWrite();
+        param.menuOptionsParam = menuOptionsParam;
+        systemItemParams.emplace_back(param);
+    }
     return systemItemParams;
+}
+
+const MenuItemParam SelectOverlayNode::GetSystemMenuItemParam(const std::string& menuId, const std::string& menuButton)
+{
+    MenuItemParam param;
+    MenuOptionsParam menuOptionsParam;
+    menuOptionsParam.id = menuId;
+    menuOptionsParam.content = Localization::GetInstance()->GetEntryLetters(menuButton);
+    param.menuOptionsParam = menuOptionsParam;
+    return param;
 }
 
 void SelectOverlayNode::MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation)

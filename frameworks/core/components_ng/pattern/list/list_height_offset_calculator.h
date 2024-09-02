@@ -41,6 +41,8 @@ public:
             for (const auto& pos : itemPosition) {
                 if (pos.second.groupInfo && pos.second.groupInfo.value().averageHeight > 0) {
                     groupedItemHeight_ = pos.second.groupInfo.value().averageHeight;
+                    groupHeaderHeight_ = pos.second.groupInfo.value().headerSize;
+                    groupFooterHeight_ = pos.second.groupInfo.value().footerSize;
                     break;
                 }
             }
@@ -56,14 +58,16 @@ public:
                 estimateHeight_ += spaceWidth_;
             }
             if (currentIndex_ == startIndex_) {
-                estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_);
+                estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_,
+                    groupHeaderHeight_, groupFooterHeight_);
             }
             if (currLane_ > 0) {
                 estimateHeight_ += currRowHeight_;
                 currLane_ = 0;
                 currRowHeight_ = 0.0f;
             }
-            estimateHeight_ += listItemGroupPatten->GetEstimateHeight(groupedItemHeight_);
+            estimateHeight_ += listItemGroupPatten->GetEstimateHeight(groupedItemHeight_,
+                groupHeaderHeight_, groupFooterHeight_);
             currentIndex_++;
             return;
         }
@@ -137,7 +141,7 @@ public:
                     itor++;
                     continue;
                 }
-                totalHeight += group->GetEstimateHeight(groupedItemHeight_);
+                totalHeight += group->GetEstimateHeight(groupedItemHeight_, groupHeaderHeight_, groupFooterHeight_);
             } else {
                 totalHeight += itor->second.endPos - itor->second.startPos;
             }
@@ -161,7 +165,8 @@ public:
                 auto group = frameNode->GetPattern<ListItemGroupPattern>();
                 if (group && group->HasLayoutedItem()) {
                     std::pair<float, float> pos = { itor->second.startPos, itor->second.endPos };
-                    return group->GetEstimateOffset(estimateOffset_ + skipHeight, pos);
+                    return group->GetEstimateOffset(estimateOffset_ + skipHeight, pos,
+                        groupHeaderHeight_, groupFooterHeight_);
                 }
             }
             skipHeight += averageHeight;
@@ -258,6 +263,8 @@ private:
 
     float estimateItemHeight_ = DEFAULT_ITEM_HEIGHT;
     float groupedItemHeight_ = DEFAULT_ITEM_HEIGHT;
+    float groupHeaderHeight_ = 0.0f;
+    float groupFooterHeight_ = 0.0f;
 
     int32_t lanes_ = 1;
     int32_t currLane_ = 0;

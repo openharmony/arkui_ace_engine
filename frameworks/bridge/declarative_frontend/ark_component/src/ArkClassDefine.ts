@@ -937,7 +937,7 @@ class ArkCustomProperty {
 }
 
 class ArkBlendMode {
-  blendMode: number;
+  blendMode: number | Blender;
   blendApplyType: number;
   constructor() {
     this.blendMode = undefined;
@@ -1184,6 +1184,19 @@ class ArkGridEdgeEffect {
   isEqual(another: ArkGridEdgeEffect): boolean {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+
+class ArkPlaceholder {
+  value: ResourceStr | undefined;
+  style?: PlaceholderStyle | undefined;
+  constructor() {
+    this.value = undefined;
+    this.style = undefined;
+  }
+  isEqual(another: ArkPlaceholder): boolean {
+    return (this.value === another.value) &&
+      (this.style === another.style);
   }
 }
 
@@ -1458,5 +1471,54 @@ class ArkFocusScopePriority {
   }
   isEqual(another: ArkFocusScopePriority): boolean {
     return (this.scopeId === another.scopeId) && (this.priority === another.priority);
+  }
+}
+
+class ArkTextFont {
+  value: Font;
+  enableVariableFontWeight: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.enableVariableFontWeight = undefined;
+  }
+
+  isEqual(another: ArkTextFont): boolean {
+    return (this.value === another.value && this.enableVariableFontWeight === another.enableVariableFontWeight);
+  }
+
+  checkObjectDiff(another: ArkTextFont): boolean {
+    return !this.isEqual(another);
+  }
+}
+
+class ArkFontWeight {
+  value: number | FontWeight | string;
+  enableVariableFontWeight: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.enableVariableFontWeight = undefined;
+  }
+
+  isEqual(another: ArkTextFont): boolean {
+    return (this.value === another.value && this.enableVariableFontWeight === another.enableVariableFontWeight);
+  }
+
+  checkObjectDiff(another: ArkTextFont): boolean {
+    return !this.isEqual(another);
+  }
+}
+
+class ArkNavigationTitle {
+  value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined;
+  navigationTitleOptions?: NavigationTitleOptions | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.navigationTitleOptions = undefined;
+  }
+  isEqual(another: ArkNavigationTitle): boolean {
+    return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
   }
 }

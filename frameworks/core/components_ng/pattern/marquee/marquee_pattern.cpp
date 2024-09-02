@@ -15,33 +15,10 @@
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
-#include <string>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/animation/curves.h"
-#include "core/common/container_scope.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/marquee/marquee_theme.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/marquee/marquee_layout_property.h"
-#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -220,6 +197,10 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     }
     lastAnimationParam_.lastDuration = duration;
     AnimationOption option;
+    auto iter = frameRateRange_.find(MarqueeDynamicSyncSceneType::ANIMATE);
+    if (iter != frameRateRange_.end()) {
+        option.SetFrameRateRange(iter->second);
+    }
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(duration);
     needSecondPlay ? option.SetIteration(1) : option.SetIteration(playCount);
@@ -653,5 +634,19 @@ bool MarqueePattern::IsRunMarquee()
             paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
     }
     return GreatOrEqual(textWidth + padding, marqueeSize.Width());
+}
+
+void MarqueePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    json->Put("Marquee text content", textLayoutProperty->GetContent().value_or("").c_str());
+    json->Put("Play status", playStatus_);
+    json->Put("loop", loop_);
+    json->Put("step", scrollAmount_);
 }
 } // namespace OHOS::Ace::NG

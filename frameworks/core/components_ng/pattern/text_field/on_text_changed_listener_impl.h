@@ -38,6 +38,7 @@ public:
     void SetKeyboardStatus(bool status) override;
     void SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) override;
     void SendKeyboardStatus(const MiscServices::KeyboardStatus& keyboardStatus) override;
+    void NotifyKeyboardHeight(uint32_t height) override;
     void SendFunctionKey(const MiscServices::FunctionKey& functionKey) override;
     void MoveCursor(MiscServices::Direction direction) override;
     void HandleSetSelection(int32_t start, int32_t end) override;
@@ -47,8 +48,9 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info) override;
-    void AutoFillReceivePrivateCommand(
-        const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand);
+    static void AutoFillReceivePrivateCommand(
+        const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand,
+        const WeakPtr<TextInputClient>& pattern);
     int32_t SetPreviewText(const std::u16string &text, const MiscServices::Range &range) override;
     void FinishTextPreview() override;
     int32_t ReceivePrivateCommand(

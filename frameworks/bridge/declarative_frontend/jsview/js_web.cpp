@@ -44,9 +44,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1922,6 +1920,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedLifecycleChange", &JSWeb::OnNativeEmbedLifecycleChange);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedVisibilityChange", &JSWeb::OnNativeEmbedVisibilityChange);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedGestureEvent", &JSWeb::OnNativeEmbedGestureEvent);
     JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
@@ -1941,6 +1940,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
+    JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4464,6 +4464,15 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> EmbedVisibilityChangeToJSValue(const NativeEmbedVisibilityInfo& visibilityInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("visibility", visibilityInfo.GetVisibility());
+    obj->SetProperty("embedId", visibilityInfo.GetEmbedId());
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -4481,6 +4490,25 @@ void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
     };
     WebModel::GetInstance()->SetNativeEmbedLifecycleChangeId(jsCallback);
 }
+
+void JSWeb::OnNativeEmbedVisibilityChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbedVisibilityInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), EmbedVisibilityChangeToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                            const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedVisibilityInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedVisibilityChangeId(jsCallback);
+}
+
 
 JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
 {
@@ -5097,4 +5125,13 @@ void JSWeb::KeyboardAvoidMode(int32_t mode)
     WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
     WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
+
+void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
 } // namespace OHOS::Ace::Framework

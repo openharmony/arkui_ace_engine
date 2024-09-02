@@ -22,10 +22,12 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
-#include "core/common/form_manager.h"
-#include "frameworks/base/json/json_util.h"
+
 
 namespace OHOS::Ace {
+namespace {
+    constexpr int32_t ERR_OK = 0;
+}
 int32_t FormUtilsImpl::RouterEvent(
     const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
 {
@@ -76,7 +78,7 @@ int32_t FormUtilsImpl::RouterEvent(
 }
 
 int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
-    const std::string& formBindingDataStr, int64_t& formId)
+    const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {
     std::unique_ptr<AppExecFwk::FormProviderData> formBindingData = std::make_unique<AppExecFwk::FormProviderData>();
     bool withFormBindingData = false;
@@ -88,6 +90,10 @@ int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
     std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     int32_t ret = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(const_cast<Want&>(want),
         withFormBindingData, formBindingData, formId, formDataProxies);
+    if (ret != ERR_OK) {
+        errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+    }
+    
     return ret;
 }
 

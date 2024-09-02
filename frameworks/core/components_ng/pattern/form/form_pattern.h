@@ -168,6 +168,7 @@ private:
     void UpdateConfiguration();
     void HandleFormComponent(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
+    void AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host);
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
@@ -181,6 +182,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
+    void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);

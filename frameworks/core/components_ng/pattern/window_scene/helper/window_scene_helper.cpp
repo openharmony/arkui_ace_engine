@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 #include "input_manager.h"
-#include "key_event.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "base/memory/referenced.h"
@@ -30,8 +28,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif

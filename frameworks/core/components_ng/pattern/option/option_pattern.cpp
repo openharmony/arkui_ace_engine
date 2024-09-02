@@ -15,24 +15,9 @@
 
 #include "core/components_ng/pattern/option/option_pattern.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#include "core/components_ng/pattern/security_component/security_component_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -114,7 +99,9 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->HideMenu();
+    if (!blockClick_) {
+        menuPattern->HideMenu();
+    }
 }
 
 void OptionPattern::PlayBgColorAnimation(bool isHoverChange)

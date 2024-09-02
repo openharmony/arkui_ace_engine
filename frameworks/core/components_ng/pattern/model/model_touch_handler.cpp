@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/model/model_touch_handler.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -120,6 +119,8 @@ Render3D::PointerEvent ModelTouchHandler::CreateSceneTouchEvent(const TouchEvent
         case TouchType::HOVER_MOVE:
         case TouchType::HOVER_EXIT:
         case TouchType::HOVER_CANCEL:
+        case TouchType::PROXIMITY_IN:
+        case TouchType::PROXIMITY_OUT:
         case TouchType::UNKNOWN:
             break;
     }

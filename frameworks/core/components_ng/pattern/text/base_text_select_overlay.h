@@ -68,7 +68,7 @@ public:
 
     // override SelectOverlayHolder
     RefPtr<FrameNode> GetOwner() override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     bool CheckRestartHiddenHandleTask(int32_t requestCode) override;
@@ -131,6 +131,7 @@ public:
     void SetMenuIsShow(bool isShowMenu)
     {
         isShowMenu_ = isShowMenu;
+        originalMenuIsShow_ = isShowMenu;
     }
 
     bool IsShowMenu()
@@ -270,6 +271,18 @@ protected:
     void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
     virtual void UpdateTransformFlag();
     bool CheckHasTransformAttr();
+    void UpdateOriginalMenuIsShow()
+    {
+        originalMenuIsShow_ = IsCurrentMenuVisibile();
+    }
+    virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
+    bool GetClipHandleViewPort(RectF& rect);
+    virtual void UpdateClipHandleViewPort(RectF& rect) {};
+    bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
+    virtual bool IsClipHandleWithViewPort()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -298,6 +311,7 @@ private:
     bool isChangeToOverlayModeAtEdge_ = true;
     bool hasRegisterListener_ = false;
     RectF globalPaintRect_;
+    bool originalMenuIsShow_ = true;
 };
 
 } // namespace OHOS::Ace::NG

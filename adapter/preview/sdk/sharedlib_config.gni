@@ -514,6 +514,12 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
           part_name = "graphic_2d"
           lib_names = [ "drawing_napi" ]
         },
+        {
+          label = "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/ui_effect:uieffect_napi"
+          subsystem_name = "graphic"
+          part_name = "graphic_2d"
+          lib_names = [ "uieffect_napi" ]
+        },
       ]
     },
   ]

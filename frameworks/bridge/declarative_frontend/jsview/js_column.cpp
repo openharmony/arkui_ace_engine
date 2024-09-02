@@ -113,6 +113,15 @@ void JSColumn::SetJustifyContent(int32_t value)
     }
 }
 
+void JSColumn::SetReverse(const JSCallbackInfo& info)
+{
+    if (info[0]->IsBoolean()) {
+        ColumnModel::GetInstance()->SetIsReverse(info[0]->ToBoolean());
+    } else {
+        ColumnModel::GetInstance()->SetIsReverse(true);
+    }
+}
+
 void JSColumn::JSBind(BindingTarget globalObj)
 {
     JSClass<JSColumn>::Declare("Column");
@@ -123,6 +132,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
     JSClass<JSColumn>::StaticMethod("justifyContent", &JSColumn::SetJustifyContent, opt);
     JSClass<JSColumn>::StaticMethod("alignItems", &JSColumn::SetAlignItems, opt);
+    JSClass<JSColumn>::StaticMethod("reverse", &JSColumn::SetReverse, opt);
     JSClass<JSColumn>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
     JSClass<JSColumn>::StaticMethod("height", &JSFlex::JsHeight, opt);
     JSClass<JSColumn>::StaticMethod("width", &JSFlex::JsWidth, opt);

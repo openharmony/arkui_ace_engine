@@ -15,8 +15,6 @@
 
 #include "core/components_v2/water_flow/water_flow_item_element.h"
 
-#include "core/components_v2/water_flow/render_water_flow_item.h"
-
 namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> WaterFlowItemElement::CreateRenderNode()
 {

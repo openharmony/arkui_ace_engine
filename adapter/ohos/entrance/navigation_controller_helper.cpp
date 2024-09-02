@@ -15,8 +15,6 @@
 
 #include "navigation_controller_helper.h"
 
-#include "base/log/log_wrapper.h"
-#include "core/common/ace_engine.h"
 #include "ui_content_impl.h"
 
 namespace OHOS {

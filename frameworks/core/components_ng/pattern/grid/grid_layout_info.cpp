@@ -14,9 +14,6 @@
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
-#include <numeric>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -56,6 +53,9 @@ void GridLayoutInfo::ClearDragState()
 void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
 {
     auto lastItemIndex = itemIndex;
+    if (crossCount_ == 0) {
+        return;
+    }
     for (int32_t i = from; i <= to; ++i) {
         int32_t mainIndex = (i - startIndex_) / crossCount_ + startMainLineIndex_;
         int32_t crossIndex = (i - startIndex_) % crossCount_;
@@ -75,6 +75,9 @@ void GridLayoutInfo::MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex)
 
 void GridLayoutInfo::MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex)
 {
+    if (crossCount_ == 0) {
+        return;
+    }
     for (int32_t i = from; i <= to; ++i) {
         int32_t mainIndex = (i - startIndex_) / crossCount_ + startMainLineIndex_;
         int32_t crossIndex = (i - startIndex_) % crossCount_;
@@ -161,7 +164,13 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
-    float defaultHeight = GetCurrentLineHeight();
+    if (lineHeightMap_.empty()) {
+        return 0.0f;
+    }
+    float defaultHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
+    if (crossCount_ == 0) {
+        return 0.0f;
+    }
     auto lines = startIndex_ / crossCount_;
     float res = 0.0f;
     for (int i = 0; i < lines; ++i) {
@@ -238,8 +247,11 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 
 float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
 {
-    float lineHeight = GetCurrentLineHeight();
     float res = 0.0f;
+    if (crossCount_ == 0 || lineHeightMap_.empty()) {
+        return res;
+    }
+    float lineHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
     auto lines = (childrenCount_) / crossCount_;
     for (int i = 0; i < lines; ++i) {
         auto it = lineHeightMap_.find(i);
@@ -665,6 +677,9 @@ MatIter SearchInReverse(const decltype(GridLayoutInfo::gridMatrix_)& mat, int32_
 
 MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
 {
+    if (crossCount_ == 0) {
+        return gridMatrix_.end();
+    }
     if (index == 0) {
         return gridMatrix_.begin();
     }

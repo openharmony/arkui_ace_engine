@@ -14,6 +14,7 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -864,7 +865,7 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
     ScrollSnap(-500.0, 0.0);
     float scrollableDistance = pattern_->GetScrollableDistance();
     EXPECT_EQ(scrollableDistance, ITEM_HEIGHT * 2 + DEVIATION_HEIGHT); // 220.f
-    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance);
+    EXPECT_EQ(pattern_->GetTotalOffset(), scrollableDistance - DEVIATION_HEIGHT);
 
     /**
      * @tc.steps: step4. Scroll Up, the delta is small
@@ -1857,7 +1858,7 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListMaintainVisibleContentPosition002
+ * @tc.name: ListMaintainVisibleContentPosition003
  * @tc.desc: Test Test maintain visible content position with ListItemGroup
  * @tc.type: FUNC
  */
@@ -2081,4 +2082,55 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition005, TestSize.Level1)
     EXPECT_EQ(pattern_->currentOffset_, 100);
 }
 
+/**
+ * @tc.name: ListMaintainVisibleContentPosition006
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup and space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    auto groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(10));
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 0, insert 2 Item in 0.
+     * @tc.expected: Current index is 2, currentOffset = 220
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(0, 2);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
+    EXPECT_EQ(pattern_->currentOffset_, 220);
+
+    /**
+     * @tc.steps: step2. Current start index is 2, insert Item in 1 two times.
+     * @tc.expected: Current index is 1, currentOffset = 110
+     */
+    groupPattern->NotifyDataChange(1, -1);
+    groupPattern->NotifyDataChange(1, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 110);
+    EXPECT_EQ(groupPattern->layoutedItemInfo_.value().startIndex, 1);
+
+    /**
+     * @tc.steps: step2. Current start index is 0, insert Item in 0 two times.
+     * @tc.expected: Current index is 0, currentOffset = 0
+     */
+    groupPattern->NotifyDataChange(0, -1);
+    groupPattern->NotifyDataChange(0, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(groupPattern->layoutedItemInfo_.value().startIndex, 0);
+}
 } // namespace OHOS::Ace::NG

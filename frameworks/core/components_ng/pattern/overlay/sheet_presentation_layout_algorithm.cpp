@@ -15,22 +15,7 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "base/window/foldable_window.h"
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -471,5 +456,4 @@ bool SheetPresentationLayoutAlgorithm::SheetInSplitWindow() const
     }
     return false;
 }
-
 } // namespace OHOS::Ace::NG

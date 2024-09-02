@@ -40,7 +40,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkListCreate(double space, int32_t unit, int32_t
 CJ_EXPORT void FfiOHOSAceFrameworkListSetWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetDirection(int32_t direction);
-CJ_EXPORT void FfiOHOSAceFrameworkListSetDivider(DividerParams& params);
+CJ_EXPORT void FfiOHOSAceFrameworkListSetDivider(DividerParams params);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetEditMode(bool flag);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetEdgeEffect(int32_t edgeEffect);
 CJ_EXPORT void FfiOHOSAceFrameworkListSetCachedCount(int32_t cachedCount);

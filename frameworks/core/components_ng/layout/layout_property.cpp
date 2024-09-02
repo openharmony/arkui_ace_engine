@@ -15,21 +15,6 @@
 
 #include "core/components_ng/layout/layout_property.h"
 
-#include <optional>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -755,7 +740,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    host->NotifyVisibleChange(visible == VisibleType::VISIBLE);
+    host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
