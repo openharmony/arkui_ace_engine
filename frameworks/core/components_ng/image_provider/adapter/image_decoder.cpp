@@ -147,7 +147,9 @@ std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RS
 std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
 {
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto rsSkiaData = data_->GetImpl<Rosen::Drawing::SkiaData>();
+    CHECK_NULL_RETURN(rsSkiaData, nullptr);
+    auto skData = rsSkiaData->GetSkData();
     auto encodedImage = std::make_shared<RSImage>();
     if (!encodedImage->MakeFromEncoded(data_)) {
         return nullptr;
