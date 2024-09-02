@@ -430,6 +430,7 @@ public:
     bool IsPhoneInLandScape();
     bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
+    void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
 
@@ -660,6 +661,11 @@ private:
     float GetTopAreaInWindow() const;
     void MarkOuterBorderRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
+    void AvoidKeyboardBySheetMode();
+    bool AvoidKeyboardBeforeTranslate();
+    void AvoidKeyboardAfterTranslate(float height);
+    void ResizeBy(float height);
+    bool IsTranslateWhenAvoidKeyboard();
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     SheetKey sheetKey_;
@@ -741,6 +747,8 @@ private:
 
     float preDetentsHeight_ = 0.0f;
     float scale_ = 1.0;
+
+    SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
 };
 } // namespace OHOS::Ace::NG
 
