@@ -19,7 +19,7 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
     super(nativePtr, classType);
   }
   allowChildTypes(): string[] {
-    return ["GridItem"];
+    return ['GridItem'];
   }
   initialize(value: Object[]): void {
     if (value.length === 1 && isObject(value[0])) {
