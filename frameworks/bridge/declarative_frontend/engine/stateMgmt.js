@@ -4006,7 +4006,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.isActive_ = true;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
         this.isDeleting_ = false;
-        // KEEP
         this.isCompFreezeAllowed_ = false;
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
@@ -4089,15 +4088,12 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     aboutToReuse(_) { }
     aboutToRecycle() { }
-    // KEEP
     isDeleting() {
         return this.isDeleting_;
     }
-    // KEEP
     setDeleting() {
         this.isDeleting_ = true;
     }
-    // KEEP
     setDeleteStatusRecursively() {
         if (!this.childrenWeakrefMap_.size) {
             return;
@@ -4110,28 +4106,18 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             }
         });
     }
-    // KEEP
     isCompFreezeAllowed() {
         return this.isCompFreezeAllowed_;
     }
-    // KEEP, FIXME
-    purgeDeleteElmtId(rmElmtId) {
-        
-        const result = this.updateFuncByElmtId.delete(rmElmtId);
-        if (result) {
-            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
-            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
-            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
-        }
-        // FIXME: only do this if app uses V3
-        ObserveV2.getObserve().clearBinding(rmElmtId);
-        return result;
+    getChildViewV2ForElmtId(elmtId) {
+        const optComp = this.childrenWeakrefMap_.get(elmtId);
+        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ? optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
         // ViewPU overrides to unregister ViewPU from variables, 
         // not in use in ViewV2
     }
-    // KEEP, overwritten by sub classes
+    // overwritten by sub classes
     debugInfo__() {
         return `@Component '${this.constructor.name}'[${this.id__()}]`;
     }
@@ -4140,7 +4126,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     // for given elmtIds look up their component name/type and format a string out of this info
     // use function only for debug output and DFX.
-    // KEEP
     debugInfoElmtIds(elmtIds) {
         let result = '';
         let sepa = '';
@@ -4150,7 +4135,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         });
         return result;
     }
-    // KEEP
     debugInfoElmtId(elmtId, isProfiler = false) {
         return isProfiler ? {
             elementId: elmtId,
@@ -4168,7 +4152,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         stateMgmtConsole.warn(`Printing profiler information`);
         stateMgmtProfiler.report();
     }
-    // KEEP  
     updateStateVarsOfChildByElmtId(elmtId, params) {
         
         
@@ -4192,7 +4175,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs/ViewV2
     // this function equals purgeDeletedElmtIdsRecursively because it does un-registration for all ViewPU/V2's
-    // KEEP
     purgeDeletedElmtIds() {
         
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
@@ -4259,11 +4241,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // if this component does not have updateFunc for elmtId, return false.
         return typeof updateFunc === 'function';
     }
-    // KEEP
     static pauseRendering() {
         PUV2ViewBase.renderingPaused = true;
     }
-    // KEEP
     static restoreRendering() {
         PUV2ViewBase.renderingPaused = false;
     }
@@ -4395,7 +4375,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
      * @param elmtId -  the id of the component
      * @returns ArkComponent | undefined
      */
-    // KEEP
     getNodeById(elmtId) {
         const entry = this.updateFuncByElmtId.get(elmtId);
         return entry ? entry.getNode() : undefined;
@@ -4413,7 +4392,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     debugInfoViewHierarchy(recursive = false) {
         return this.debugInfoViewHierarchyInternal(0, recursive);
     }
-    // KEEP
     debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
         if (this.isCompFreezeAllowed()) {
@@ -4427,11 +4405,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         }
         return retVaL;
     }
-    // KEEP
     debugInfoUpdateFuncByElmtId(recursive = false) {
         return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
     }
-    // KEEP
     debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
         this.updateFuncByElmtId.forEach((value, key, map) => {
@@ -6373,6 +6349,16 @@ class ViewPU extends PUV2ViewBase {
         }
         (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
         this.localStoragebackStore_ = undefined;
+    }
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        return result;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
         this.ownObservedPropertiesStore_.forEach((stateVar) => {
@@ -8849,7 +8835,7 @@ class MonitorV2 {
         this.values_.forEach((item) => {
             const [success, value] = this.analysisProp(isInit, item);
             if (!success) {
-
+                
                 return;
             }
             let dirty = item.setValue(isInit, value);
@@ -9127,6 +9113,29 @@ class ViewV2 extends PUV2ViewBase {
             this.parent_.removeChild(this);
         }
     }
+    /**
+    * Virtual function implemented in ViewPU and ViewV2
+    * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
+    *
+    * @param rmElmtId - The Element ID to be purged and deleted
+    * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
+   */
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
+            if (childOpt) {
+                childOpt.setDeleting();
+                childOpt.setDeleteStatusRecursively();
+            }
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        // Needed only for V2
+        ObserveV2.getObserve().clearBinding(rmElmtId);
+        return result;
+    }
     initialRenderView() {
         
         this.initialRender();
@@ -9262,6 +9271,10 @@ class ViewV2 extends PUV2ViewBase {
         
     }
     UpdateElement(elmtId) {
+        if (this.isDeleting_) {
+            
+            return;
+        }
         
         if (elmtId === this.id__()) {
             // do not attempt to update itself
