@@ -1233,7 +1233,7 @@ bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
     isRemoving_ = true;
-    const auto& children = GetChildren();
+    const auto children = GetChildren();
     for (const auto& child : children) {
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }
