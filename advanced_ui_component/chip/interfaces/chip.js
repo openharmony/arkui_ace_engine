@@ -254,7 +254,6 @@ export class ChipComponent extends ViewPU {
         this.__isHover = new ObservedPropertySimplePU(false, this, "isHover");
         this.__isHovering = new ObservedPropertySimplePU(false, this, "isHovering");
         this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, "chipScale");
-        this.__iconScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, "iconScale");
         this.__chipOpacity = new ObservedPropertySimplePU(1, this, "chipOpacity");
         this.__chipBlendColor = new ObservedPropertyObjectPU(Color.Transparent, this, "chipBlendColor");
         this.__deleteChip = new ObservedPropertySimplePU(false, this, "deleteChip");
@@ -265,9 +264,9 @@ export class ChipComponent extends ViewPU {
         this.onClicked = noop;
         this.__suffixIconOnFocus = new ObservedPropertySimplePU(false, this, "suffixIconOnFocus");
         this.__chipBreakPoints = new ObservedPropertySimplePU(BreakPointsType.SM, this, "chipBreakPoints");
-        this.smListener = mediaquery.matchMediaSync("0vp<width<600vp");
-        this.mdListener = mediaquery.matchMediaSync("600vp<=width<840vp");
-        this.lgListener = mediaquery.matchMediaSync("840vp<=width");
+        this.smListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)');
+        this.mdListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)');
+        this.lgListener = mediaquery.matchMediaSync('(840vp<=width)');
         this.__isShowPressedBackGroundColor = new ObservedPropertySimplePU(false, this, "isShowPressedBackGroundColor");
         this.__fontSizeScale = new ObservedPropertyObjectPU(0, this, "fontSizeScale");
         this.__fontWeightScale = new ObservedPropertyObjectPU(0, this, "fontWeightScale");
@@ -331,9 +330,6 @@ export class ChipComponent extends ViewPU {
         }
         if (params.chipScale !== undefined) {
             this.chipScale = params.chipScale;
-        }
-        if (params.iconScale !== undefined) {
-            this.iconScale = params.iconScale;
         }
         if (params.chipOpacity !== undefined) {
             this.chipOpacity = params.chipOpacity;
@@ -436,7 +432,6 @@ export class ChipComponent extends ViewPU {
         this.__isHover.purgeDependencyOnElmtId(rmElmtId);
         this.__isHovering.purgeDependencyOnElmtId(rmElmtId);
         this.__chipScale.purgeDependencyOnElmtId(rmElmtId);
-        this.__iconScale.purgeDependencyOnElmtId(rmElmtId);
         this.__chipOpacity.purgeDependencyOnElmtId(rmElmtId);
         this.__chipBlendColor.purgeDependencyOnElmtId(rmElmtId);
         this.__deleteChip.purgeDependencyOnElmtId(rmElmtId);
@@ -471,7 +466,6 @@ export class ChipComponent extends ViewPU {
         this.__isHover.aboutToBeDeleted();
         this.__isHovering.aboutToBeDeleted();
         this.__chipScale.aboutToBeDeleted();
-        this.__iconScale.aboutToBeDeleted();
         this.__chipOpacity.aboutToBeDeleted();
         this.__chipBlendColor.aboutToBeDeleted();
         this.__deleteChip.aboutToBeDeleted();
@@ -596,12 +590,6 @@ export class ChipComponent extends ViewPU {
     }
     set chipScale(newValue) {
         this.__chipScale.set(newValue);
-    }
-    get iconScale() {
-        return this.__iconScale.get();
-    }
-    set iconScale(newValue) {
-        this.__iconScale.set(newValue);
     }
     get chipOpacity() {
         return this.__chipOpacity.get();

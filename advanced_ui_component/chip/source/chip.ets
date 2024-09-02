@@ -353,29 +353,28 @@ export struct ChipComponent {
   @State isHaveBg: boolean = false;
   @Prop chipNodeActivatedBackgroundColor: ResourceColor;
   @State isHaveActiveBg: boolean = false;
-  @Prop chipNodeRadius: Dimension | undefined = void (0);
-  @Prop chipEnabled: boolean = true;
-  @Prop chipActivated: boolean = false;
-  @State isHover: boolean = false;
+  @Prop chipNodeRadius: Dimension | undefined = void (0)
+  @Prop chipEnabled: boolean = true
+  @Prop chipActivated: boolean = false
+  @State isHover: boolean = false
   @State isHovering: boolean = false;
-  @State chipScale: ScaleOptions = { x: 1, y: 1 };
-  @State iconScale: ScaleOptions = { x: 1, y: 1 };
-  @State chipOpacity: number = 1;
-  @State chipBlendColor: ResourceColor = Color.Transparent;
-  @State deleteChip: boolean = false;
-  @State chipNodeOnFocus: boolean = false;
-  @State useDefaultSuffixIcon: boolean = false;
-  private chipNodeSize: SizeOptions = {};
-  private onClose: () => void = noop;
-  private onClicked: () => void = noop;
-  @State suffixIconOnFocus: boolean = false;
-  @State chipBreakPoints: BreakPointsType = BreakPointsType.SM;
-  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("0vp<width<600vp");
-  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("600vp<=width<840vp");
-  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync("840vp<=width");
-  @State private isShowPressedBackGroundColor: boolean = false;
-  @State fontSizeScale: number | undefined = 0;
-  @State fontWeightScale: number | undefined = 0;
+  @State chipScale: ScaleOptions = { x: 1, y: 1 }
+  @State chipOpacity: number = 1
+  @State chipBlendColor: ResourceColor = Color.Transparent
+  @State deleteChip: boolean = false
+  @State chipNodeOnFocus: boolean = false
+  @State useDefaultSuffixIcon: boolean = false
+  private chipNodeSize: SizeOptions = {}
+  private onClose: () => void = noop
+  private onClicked: () => void = noop
+  @State suffixIconOnFocus: boolean = false
+  @State chipBreakPoints: BreakPointsType = BreakPointsType.SM
+  private smListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)')
+  private mdListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)')
+  private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(840vp<=width)')
+  @State private isShowPressedBackGroundColor: boolean = false
+  @State fontSizeScale: number | undefined = 0
+  @State fontWeightScale: number | undefined = 0
   private callbacks: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
       this.fontSizeScale = configuration.fontSizeScale;
@@ -437,7 +436,7 @@ export struct ChipComponent {
   private getFocusFontSize(): Dimension {
     let isSmallChipSize = this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL;
     let focusFontSize = isSmallChipSize ? this.theme.label.smallFocusFontSize :
-    this.theme.label.normalFocusFontSize;
+      this.theme.label.normalFocusFontSize;
     return this.verifyResource(focusFontSize as Resource)
   }
 
@@ -663,13 +662,13 @@ export struct ChipComponent {
       suffixIconSize.width = this.suffixIcon?.size?.width
     } else {
       suffixIconSize.width = this.getSuffixIconSrc() ?
-      this.sizeToVp(this.getIconSizeWidth()) : 0;
+        this.sizeToVp(this.getIconSizeWidth()) : 0;
     }
     if (this.suffixIcon?.size?.height !== void (0) && this.toVp(this.suffixIcon?.size?.height) >= 0) {
       suffixIconSize.height = this.suffixIcon?.size?.height
     } else {
       suffixIconSize.height = this.getSuffixIconSrc() ?
-      this.sizeToVp(this.getIconSizeHeight()) : 0;
+        this.sizeToVp(this.getIconSizeHeight()) : 0;
     }
     return suffixIconSize
   }
@@ -699,7 +698,7 @@ export struct ChipComponent {
 
   private getActiveIconColor(): ResourceColor {
     return this.chipNodeOnFocus ? this.theme.prefixIcon.focusActivatedColor :
-    this.theme.prefixIcon.activatedFillColor;
+      this.theme.prefixIcon.activatedFillColor;
   }
 
   private getFillIconColor(iconType: string): ResourceColor {
@@ -792,8 +791,8 @@ export struct ChipComponent {
       return this.chipNodeRadius as Dimension
     } else {
       return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
-      this.sizeToVp(this.theme.chipNode.smallBorderRadius as Resource) :
-      this.sizeToVp(this.theme.chipNode.normalBorderRadius as Resource));
+        this.sizeToVp(this.theme.chipNode.smallBorderRadius as Resource) :
+        this.sizeToVp(this.theme.chipNode.normalBorderRadius as Resource));
     }
   }
 
@@ -810,7 +809,7 @@ export struct ChipComponent {
     }
     if (this.chipNodeOnFocus && !this.isSetbackgroundColor()) {
       currentColor = this.getChipActive() ? themeChipNode.focusActivatedBgColor :
-      themeChipNode.focusBgColor;
+        themeChipNode.focusBgColor;
       return currentColor;
     }
     if (this.getChipActive()) {
@@ -822,13 +821,13 @@ export struct ChipComponent {
       this.isHovering = false;
       return sourceColor
         .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
-        themeChipNode.hoverAndPressedBlendColor : themeChipNode.pressedBlendColor))
+          themeChipNode.hoverAndPressedBlendColor : themeChipNode.pressedBlendColor))
         .color;
     }
     if (this.isHovering) {
       return sourceColor
         .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
-        themeChipNode.hoverAndPressedBlendColor : themeChipNode.hoverBlendColor))
+          themeChipNode.hoverAndPressedBlendColor : themeChipNode.hoverBlendColor))
         .color;
     }
     return currentColor;
@@ -841,7 +840,7 @@ export struct ChipComponent {
     } else {
       this.chipNodeSize = this.chipSize as SizeOptions
       return (this.chipNodeSize?.height !== void (0) && this.toVp(this.chipNodeSize?.height) >= 0) ?
-      this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight
+        this.toVp(this.chipNodeSize?.height) : this.theme.chipNode.normalHeight
     }
   }
 
@@ -1296,7 +1295,7 @@ export struct ChipComponent {
       let forwardDelChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
         !this.suffixIconOnFocus;
       let enterChip = event.keyCode === KeyCode.KEYCODE_ENTER &&
-      this.allowClose && !this.suffixIcon?.src;
+        this.allowClose && !this.suffixIcon?.src;
       if (forwardDelChip || enterChip) {
         this.deleteChipNodeAnimate();
       }
