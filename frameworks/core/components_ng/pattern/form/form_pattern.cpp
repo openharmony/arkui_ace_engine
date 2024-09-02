@@ -651,12 +651,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        PostBgTask(
-            [weak = WeakClaim(this), info] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->AddFormComponent(info);
-            }, "ArkUIHandleFormComponent");
+        AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
     }
@@ -684,6 +679,15 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
+    PostBgTask([weak = WeakClaim(this), info, host] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddFormComponentTask(info, host);
+        }, "ArkUIAddFormComponent");
+}
+
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host)
+{
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
     if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
