@@ -675,15 +675,15 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
-    RefPtr<PipelineContext> refPtr = host->GetContextRefPtr();
-    PostBgTask([weak = WeakClaim(this), info, refPtr] {
+    RefPtr<PipelineContext> pipeline = host->GetContextRefPtr();
+    PostBgTask([weak = WeakClaim(this), info, pipeline] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->AddFormComponentTask(info, refPtr);
+            pattern->AddFormComponentTask(info, pipeline);
         }, "ArkUIAddFormComponent");
 }
 
-void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> refPtr)
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline)
 {
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
@@ -700,9 +700,9 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         return;
     }
 #if OHOS_STANDARD_SYSTEM
-    formManagerBridge_->AddForm(refPtr, info, formInfo);
+    formManagerBridge_->AddForm(pipeline, info, formInfo);
 #else
-    formManagerBridge_->AddForm(refPtr, info);
+    formManagerBridge_->AddForm(pipeline, info);
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
