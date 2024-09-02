@@ -264,7 +264,9 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
         rowWidth += childSize.Width() + iconContentPadding;
         rowHeight = std::max(rowHeight, childSize.Height());
     }
-    rowWidth -= iconContentPadding;
+    if (GreatNotEqual(rowWidth, iconContentPadding)) {
+        rowWidth -= iconContentPadding;
+    }
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, rowHeight));
 }
 
