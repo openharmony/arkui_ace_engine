@@ -76,6 +76,7 @@ public:
     RefPtr<ScrollLayoutProperty> layoutProperty_;
     RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
+    RefPtr<ScrollableController> positionController_;
     RefPtr<ScrollBar> scrollBar_;
 
     std::vector<RefPtr<FrameNode>> contentChildren_;
