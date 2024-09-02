@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 
-#include "base/utils/utils.h"
-#include "core/animation/spring_curve.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;

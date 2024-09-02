@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
