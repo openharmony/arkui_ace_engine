@@ -93,7 +93,15 @@ const OPERATE_ITEM_BACKGROUND_COLOR = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_switch_outline_off'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 const OPERATE_ITECOLOR = '#99000000';
 const MARQUEE = 1;
+const isMARQUEE = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_right_textOverflow'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value;
 const UNUSUAL = -1;
+const FOCUSED_BG = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_backboard'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+const NORMAL_BG = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+const FOCUSED_SCALE = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_magnification'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value;
+const FOCUSED_SHADOW = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
+    .value;
+const NORMAL_SHADOW = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
+    .value;
 class ContentItemStruct extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -115,12 +123,12 @@ class ContentItemStruct extends ViewPU {
         this.__itemDirection = new SynchedPropertySimpleOneWayPU(params.itemDirection, this, "itemDirection");
         this.__isFocus = new SynchedPropertySimpleOneWayPU(params.isFocus, this, "isFocus");
         this.__primaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_left_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextSize");
-        this.__primaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColors");
+        this.__primaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColors");
         this.__itemHeight = new SynchedPropertyObjectOneWayPU(params.itemHeight, this, "itemHeight");
         this.__iconColor = new ObservedPropertyObjectPU(null, this, "iconColor");
-        this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_secondary_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
+        this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
         this.__secondaryThirdTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_left_secondary_description_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryThirdTextSize");
-        this.__descriptionColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_left_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColors");
+        this.__descriptionColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColors");
         this.setInitiallyProvidedValue(params);
         this.declareWatch("iconStyle", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
@@ -592,7 +600,7 @@ class OperateItemStruct extends ViewPU {
         this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, "rowSpace");
         this.__isFocus = new SynchedPropertySimpleTwoWayPU(params.isFocus, this, "isFocus");
         this.__secondaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextSize");
-        this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
+        this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
         this.__iconColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "iconColor");
         this.__isChecked = new SynchedPropertySimpleTwoWayPU(params.isChecked, this, "isChecked");
         this.setInitiallyProvidedValue(params);
@@ -1085,8 +1093,7 @@ class OperateItemStruct extends ViewPU {
             Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
             Text.textOverflow({
-                overflow: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_right_textOverflow'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                    .value === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+                overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
             });
             Text.marqueeOptions({
                 start: this.isFocus,
@@ -1400,8 +1407,7 @@ class OperateItemStruct extends ViewPU {
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
                         Text.textOverflow({
-                            overflow: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_right_textOverflow'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                                .value === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+                            overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
                         });
                         Text.marqueeOptions({
                             start: this.isFocus,
@@ -1532,7 +1538,7 @@ export class ComposeListItem extends ViewPU {
         }
         this.__contentItem = new SynchedPropertyObjectOneWayPU(params.contentItem, this, "contentItem");
         this.__operateItem = new SynchedPropertyObjectOneWayPU(params.operateItem, this, "operateItem");
-        this.__frontColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "frontColor");
+        this.__frontColor = new ObservedPropertyObjectPU(NORMAL_BG, this, "frontColor");
         this.__borderSize = new ObservedPropertySimplePU(0, this, "borderSize");
         this.__canFocus = new ObservedPropertySimplePU(false, this, "canFocus");
         this.__canTouch = new ObservedPropertySimplePU(true, this, "canTouch");
@@ -1995,11 +2001,11 @@ export class ComposeListItem extends ViewPU {
             Stack.create();
             Stack.onFocus(() => {
                 this.isFocus = true;
-                this.frontColor = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_backboard'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+                this.frontColor = FOCUSED_BG;
             });
             Stack.onBlur(() => {
                 this.isFocus = false;
-                this.frontColor = { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+                this.frontColor = NORMAL_BG;
             });
             Stack.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_radio'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Stack.onClick(() => {
@@ -2017,14 +2023,10 @@ export class ComposeListItem extends ViewPU {
                 }
             });
             Stack.scale({
-                x: this.isFocus ? LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_magnification'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                    .value : RECOVER_YSCALE,
-                y: this.isFocus ? LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_magnification'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                    .value : RECOVER_YSCALE
+                x: this.isFocus ? FOCUSED_SCALE : RECOVER_YSCALE,
+                y: this.isFocus ? FOCUSED_SCALE : RECOVER_YSCALE
             });
-            Stack.shadow(this.isFocus ? LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                .value : LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
-                .value);
+            Stack.shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW);
             Stack.padding({
                 left: STACK_PADDING,
                 right: STACK_PADDING
@@ -2055,7 +2057,7 @@ export class ComposeListItem extends ViewPU {
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
                 if (!IS_CLOSE_CHILD_FOCUS) {
-                    this.frontColor = isHover ? this.hoveringColor : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+                    this.frontColor = isHover ? this.hoveringColor : NORMAL_BG;
                 }
             });
             Flex.onTouch((event) => {
@@ -2066,7 +2068,7 @@ export class ComposeListItem extends ViewPU {
                     this.frontColor = this.touchDownColor;
                 }
                 if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                    this.frontColor = this.isActive ? this.activedColor : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_color_background_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+                    this.frontColor = this.isActive ? this.activedColor : NORMAL_BG;
                 }
             });
             ViewStackProcessor.visualState("focused");
@@ -2092,7 +2094,7 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new ContentItemStruct(this, {}, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1064, col: 11 });
+                                let componentCall = new ContentItemStruct(this, {}, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1070, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {};
@@ -2131,7 +2133,7 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1067, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1073, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2213,7 +2215,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.__containerDirection,
                                     isFocus: this.__isFocus,
                                     isChecked: this.__isChecked,
-                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1082, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1088, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

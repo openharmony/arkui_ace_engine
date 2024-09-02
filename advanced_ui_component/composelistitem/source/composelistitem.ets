@@ -127,7 +127,15 @@ const OPERATE_ITEM_BACKGROUND_COLOR = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR = $r('sys.color.ohos_id_color_switch_outline_off');
 const OPERATE_ITECOLOR = '#99000000';
 const MARQUEE = 1;
+const isMARQUEE = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
 const UNUSUAL = -1;
+const FOCUSED_BG = $r('sys.color.composeListItem_focused_backboard');
+const NORMAL_BG = $r('sys.color.composeListItem_color_background_normal');
+const FOCUSED_SCALE = LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification')).value;
+const FOCUSED_SHADOW = LengthMetrics.resource($r('sys.float.composeListItem_focused_shadow_attribute'))
+  .value as ShadowStyle;
+const NORMAL_SHADOW = LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute'))
+  .value as ShadowStyle;
 
 @Component
 struct ContentItemStruct {
@@ -146,12 +154,12 @@ struct ContentItemStruct {
   @Prop itemDirection: FlexDirection;
   @Prop @Watch('onPropChange') isFocus: boolean = false;
   @State primaryTextSize: string | number | Resource = $r('sys.float.composeListItem_normal_left_text_size');
-  @State primaryTextColors: ResourceColor = $r('sys.color.composeListItem_normal_left_text_color');
+  @State primaryTextColors: ResourceColor = $r('sys.color.font_primary');
   @Prop itemHeight: number | null = null;
   @State iconColor: ResourceColor | null = null;
-  @State secondaryTextColors: ResourceColor = $r('sys.color.composeListItem_normal_left_secondary_text_color');
+  @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State secondaryThirdTextSize: string | number | Resource = $r('sys.float.composeListItem_left_secondary_description_text_size');
-  @State descriptionColors: ResourceColor = $r('sys.color.composeListItem_normal_left_description_text_color');
+  @State descriptionColors: ResourceColor = $r('sys.color.font_tertiary');
 
   onWillApplyTheme(theme: Theme): void {
     this.primaryTextColor = theme.colors.fontPrimary;
@@ -322,7 +330,7 @@ struct OperateItemStruct {
   @State rowSpace: number = DEFAULT_ROW_SPACE;
   @Link @Watch('onFocusChange') isFocus: boolean;
   @State secondaryTextSize: Length = $r('sys.float.composeListItem_normal_right_text_size');
-  @State secondaryTextColors: ResourceColor = $r('sys.color.composeListItem_normal_right_text_color');
+  @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_normal_right_icon_color');
   @Link @Watch('onPropChange') isChecked: boolean;
 
@@ -488,8 +496,7 @@ struct OperateItemStruct {
       .fontSize(this.secondaryTextSize)
       .fontColor(this.secondaryTextColors)
       .textOverflow({
-        overflow: LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow'))
-          .value === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+        overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
       })
       .marqueeOptions({
         start: this.isFocus,
@@ -728,8 +735,7 @@ struct OperateItemStruct {
             .fontSize(this.secondaryTextSize)
             .fontColor(this.secondaryTextColors)
             .textOverflow({
-              overflow: LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow'))
-                .value === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
+              overflow: isMARQUEE === MARQUEE ? TextOverflow.MARQUEE : TextOverflow.None
             })
             .marqueeOptions({
               start: this.isFocus,
@@ -850,7 +856,7 @@ struct OperateItemStruct {
 export struct ComposeListItem {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
   @Prop @Watch('onPropChange') operateItem: OperateItem | null = null;
-  @State frontColor: ResourceColor = $r('sys.color.composeListItem_color_background_normal');
+  @State frontColor: ResourceColor = NORMAL_BG
   @State borderSize: number = 0;
   @State canFocus: boolean = false
   @State canTouch: boolean = true
@@ -1132,7 +1138,7 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
         if (!IS_CLOSE_CHILD_FOCUS) {
-          this.frontColor = isHover ? this.hoveringColor : $r('sys.color.composeListItem_color_background_normal');
+          this.frontColor = isHover ? this.hoveringColor : NORMAL_BG
         }
       })
       .onTouch((event: TouchEvent) => {
@@ -1143,7 +1149,7 @@ export struct ComposeListItem {
           this.frontColor = this.touchDownColor;
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.frontColor = this.isActive ? this.activedColor : $r('sys.color.composeListItem_color_background_normal');
+          this.frontColor = this.isActive ? this.activedColor : NORMAL_BG
         }
       })
       .stateStyles({
@@ -1166,11 +1172,11 @@ export struct ComposeListItem {
     }
     .onFocus(() => {
       this.isFocus = true;
-      this.frontColor = $r('sys.color.composeListItem_focused_backboard');
+      this.frontColor = FOCUSED_BG;
     })
     .onBlur(() => {
       this.isFocus = false;
-      this.frontColor = $r('sys.color.composeListItem_color_background_normal');
+      this.frontColor = NORMAL_BG
     })
     .borderRadius($r('sys.float.composeListItem_normal_radio'))
     .onClick(() => {
@@ -1188,14 +1194,10 @@ export struct ComposeListItem {
       }
     })
     .scale({
-      x: this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification'))
-        .value : RECOVER_YSCALE,
-      y: this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_magnification'))
-        .value : RECOVER_YSCALE
+      x: this.isFocus ? FOCUSED_SCALE : RECOVER_YSCALE,
+      y: this.isFocus ? FOCUSED_SCALE : RECOVER_YSCALE
     })
-    .shadow(this.isFocus ? LengthMetrics.resource($r('sys.float.composeListItem_focused_shadow_attribute'))
-      .value as ShadowStyle : LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute'))
-      .value as ShadowStyle)
+    .shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW)
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING
