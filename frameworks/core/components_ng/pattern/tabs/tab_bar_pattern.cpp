@@ -1304,11 +1304,6 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
 {
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    if (tabBarPattern->IsContainsBuilder()) {
-        return;
-    }
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
@@ -1319,6 +1314,11 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
+        auto iter = tabBarType_.find(columnNode->GetId());
+        if (iter != tabBarType_.end() && iter->second) {
+            index++;
+            continue;
+        }
         auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1437,9 +1437,14 @@ void TabBarPattern::TriggerTranslateAnimation(
     CHECK_NULL_VOID(host);
     auto originalPaintRect = layoutProperty->GetIndicatorRect(indicator);
     auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
-    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateIndicator(targetPaintRect);
+    if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::SUBTABBATSTYLE) ==
+            static_cast<int32_t>(tabBarStyles_.size()) &&
+        std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
+            static_cast<int32_t>(selectedModes_.size())) {
+        auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateIndicator(targetPaintRect);
+    }
     float targetOffset = 0.0f;
     if (host->GetGeometryNode()->GetPaddingSize().Width() < childrenMainSize_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {

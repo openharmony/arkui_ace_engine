@@ -188,9 +188,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
     {
-        tabBarType_.emplace(std::make_pair(tabContentId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
     }
 
     bool IsContainsBuilder();
