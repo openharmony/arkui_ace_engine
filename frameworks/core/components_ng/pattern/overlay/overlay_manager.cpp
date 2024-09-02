@@ -1058,6 +1058,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
             SetPreviewFirstShow(menu);
         }
+        SetPatternFirstShow(menu);
         return;
     }
     AnimationOption option;
