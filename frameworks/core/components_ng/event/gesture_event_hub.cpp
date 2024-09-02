@@ -255,6 +255,10 @@ void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>
         externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
         current = externalParallelRecognizer_[parallelIndex];
         parallelIndex++;
+    } else if (static_cast<int32_t>(externalParallelRecognizer_.size()) > parallelIndex) {
+        externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
+        current = externalParallelRecognizer_[parallelIndex];
+        parallelIndex++;
     } else if (recognizers.size() == 1) {
         current = *recognizers.begin();
     }
