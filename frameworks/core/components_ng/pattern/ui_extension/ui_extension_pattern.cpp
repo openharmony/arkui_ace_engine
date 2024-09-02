@@ -1224,19 +1224,19 @@ void UIExtensionPattern::DumpInfo()
     CHECK_NULL_VOID(sessionWrapper_);
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
-    DumpLog::GetInstance().AddDesc(std::string("want: ").append(std::to_string(want_)));
-    DumpLog::GetInstance().AddDesc(std::string("displayArea: ").append(std::to_string(displayArea_.ToString())));
+    DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
+    DumpLog::GetInstance().AddDesc(std::string("displayArea: ").append(displayArea_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
     DumpLog::GetInstance().AddDesc(std::string("focusStatus: ").append(std::to_string(focusState_)));
-    DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(std::to_string(state_)));
+    DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     std::vector<std::string> params = container->GetUieParams();
-    std::vector<std::string> providerInfo;
-    sessionWrapper_->NotifyUieDump(params, providerInfo);
-    for (std::string info : providerInfo) {
-        DumpLog::GetInstance().AddDesc(std::string("Provider UI Extension info: ").append(info));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (std::string info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
     }
 }
 } // namespace OHOS::Ace::NG
