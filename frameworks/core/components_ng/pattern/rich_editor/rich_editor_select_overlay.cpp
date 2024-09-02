@@ -148,8 +148,8 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     pattern->SetMovingHandleOffset(movingHandleOffsetF);
 
     float x = localOffset.GetX();
-    float y = localOffset.GetY();
-    y += handleRect.Height() / 2; // 2: Half the height of the handle
+    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
+    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
