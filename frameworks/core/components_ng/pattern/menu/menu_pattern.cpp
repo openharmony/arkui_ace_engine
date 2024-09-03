@@ -223,6 +223,17 @@ void MenuPattern::OnAttachToFrameNode()
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
+void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+}
+
 void MenuPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
