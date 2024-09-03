@@ -155,16 +155,16 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
 void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
     const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
-    ACE_SCOPED_TRACE("CreateImageObj [%s]-[%d]-[%lld]", src.ToString().c_str(), imageDfxConfig.nodeId_,
-        static_cast<long long>(imageDfxConfig.accessibilityId_));
+    auto nodeId = imageDfxConfig.nodeId_;
+    auto accessId = imageDfxConfig.accessibilityId_;
+    ACE_SCOPED_TRACE(
+        "CreateImageObj [%s]-[%d]-[%lld]", src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Failed to create image loader, Image source type not supported. src = %{private}s, nodeId = "
-            "%{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+            "%{public}d-%{public}lld.", src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
         std::string errorMessage("Failed to create image loader, Image source type not supported");
         FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
@@ -173,8 +173,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Fail load imageData. src = %{private}s, nodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+            src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
         FailCallback(src.GetKey(), "Failed to load image data", sync);
         return;
     }
@@ -184,8 +183,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     if (!imageObj) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Failed to build image object. src = %{private}s, nodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+            src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
         FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
