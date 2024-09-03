@@ -26,6 +26,17 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    if (buttonLayoutProperty->HasType() && buttonLayoutProperty->GetType() == ButtonType::CIRCLE &&
+        !pattern->GetHasCustomPadding()) {
+        NG::PaddingProperty paddings;
+        paddings.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        paddings.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        paddings.left = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        paddings.right = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        buttonLayoutProperty->UpdatePadding(paddings);
+    }
     if (pattern->UseContentModifier()) {
         const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
         std::list<RefPtr<LayoutWrapper>> builderChildList;
@@ -44,8 +55,6 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     HandleChildLayoutConstraint(layoutWrapper, layoutConstraint);
-    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(buttonLayoutProperty);
     if (buttonLayoutProperty->HasLabel()) {
         // If the button has label, according to whether the font size is set to do the corresponding expansion button,
         // font reduction, truncation and other operations.
