@@ -8367,11 +8367,12 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-bool TextFieldPattern::IsTextEditableForStylus()
+bool TextFieldPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
     if (!focusHub->IsFocusable() || !host->IsVisible()) {
         return false;
     }
