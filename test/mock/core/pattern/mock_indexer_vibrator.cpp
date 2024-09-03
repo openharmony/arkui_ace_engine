@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 
 namespace OHOS::Ace::NG {
-void VibratorUtils::StartVibraFeedback()
-{
-}
-
-void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
+void VibratorImpl::StartVibraFeedback()
 {
 }
 } // namespace OHOS::Ace::NG

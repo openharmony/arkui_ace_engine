@@ -91,7 +91,6 @@ private:
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset);
-    void StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex);
     void CloseMagnifier();
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
