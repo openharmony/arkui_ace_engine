@@ -622,7 +622,7 @@ public:
     bool CursorMoveDown();
     bool CursorMoveUpOperation();
     bool CursorMoveDownOperation();
-    bool SetCaretPosition(int32_t position, bool needNotifyImf = true) override;
+    void SetCaretPosition(int32_t position);
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
@@ -1464,6 +1464,8 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     bool InsertOrDeleteSpace(int32_t index) override;
+
+    bool SetCaretOffset(int32_t caretPostion) override;
 
     const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
     {
