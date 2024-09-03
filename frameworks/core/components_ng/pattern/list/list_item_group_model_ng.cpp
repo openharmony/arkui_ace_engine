@@ -63,6 +63,7 @@ void ListItemGroupModelNG::SetHeader(std::function<void()>&& header)
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddHeader(headerNode);
+    pattern->SetHeaderComponentContentExist(false);
 }
 
 void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
@@ -79,6 +80,7 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerNode);
+    pattern->SetFooterComponentContentExist(false);
 }
 
 void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
@@ -158,6 +160,7 @@ void ListItemGroupModelNG::SetFooterComponent(const RefPtr<NG::UINode>& footerCo
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerComponent);
+    pattern->SetFooterComponentContentExist(true);
 }
 
 void ListItemGroupModelNG::SetHeaderComponent(const RefPtr<NG::UINode>& headerComponent)
@@ -168,6 +171,7 @@ void ListItemGroupModelNG::SetHeaderComponent(const RefPtr<NG::UINode>& headerCo
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddHeader(headerComponent);
+    pattern->SetHeaderComponentContentExist(true);
 }
 
 void ListItemGroupModelNG::RemoveFooter()
