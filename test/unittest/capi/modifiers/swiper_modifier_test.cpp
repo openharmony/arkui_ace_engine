@@ -172,12 +172,16 @@ public:
 };
 
 /**
- * @tc.name: SwiperModifierTest1
- * @tc.desc: Check the functionality of SwiperModifier.SetSwiperOptionsImpl
+ * @tc.name: setSwiperOptionsTest
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.SetSwiperOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest1, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setSwiperOptionsTest, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setSwiperOptions, nullptr);
+    modifier_->setSwiperOptions(node_, nullptr);
+    // the SwiperInterfaceModifier.SetSwiperOptionsImpl not implemented due to no SwiperController support,
+    // it consists from a stub only
 }
 /**
  * @tc.name: setIndexTest
@@ -1681,30 +1685,71 @@ HWTEST_F(SwiperModifierTest, setOnGestureSwipeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->info.velocity, 78.9f);
 }
 /**
- * @tc.name: SwiperModifierTest24
+ * @tc.name: setNestedScrollTest
  * @tc.desc: Check the functionality of SwiperModifier.NestedScrollImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest24, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setNestedScrollTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setEffectMode, nullptr);
-    // this property JSON showing is not supported in ace_engine
+    ASSERT_NE(modifier_->setNestedScroll, nullptr);
+    // the result can't be checked due to nothing corresponded attributes in JSON object,
+    // that is provided by the SwiperPattern::ToJsonValue and SwiperLayoutProperty::ToJsonValue
 }
 /**
- * @tc.name: SwiperModifierTest25
+ * @tc.name: setCustomContentTransition
  * @tc.desc: Check the functionality of SwiperModifier.CustomContentTransitionImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest25, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setCustomContentTransition, TestSize.Level1)
 {
+    ASSERT_NE(modifier_->setCustomContentTransition, nullptr);
+
+    Ark_SwiperContentAnimatedTransition transition {
+        .timeout = OptValue<Opt_Number>(1000),
+        .transition = {
+            .id = 0 // the data for the transition handler invoking should be here
+        }
+    };
+    modifier_->setCustomContentTransition(node_, &transition);
 }
 /**
- * @tc.name: SwiperModifierTest26
+ * @tc.name: setOnContentDidScrollTest
  * @tc.desc: Check the functionality of SwiperModifier.OnContentDidScrollImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest26, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setOnContentDidScrollTest, TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        int32_t selectedIndex;
+        int32_t index;
+        float position;
+        float mainAxisLength;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::swiperEventReceiver.onContentDidScroll = []
+    (Ark_Int32 nodeId, Ark_Number selectedIndex, Ark_Number index, Ark_Number position, Ark_Number mainAxisLength)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .selectedIndex = Converter::Convert<Ark_Int32>(selectedIndex),
+            .index = Converter::Convert<Ark_Int32>(index),
+            .position = Converter::Convert<Ark_Float32>(position),
+            .mainAxisLength = Converter::Convert<Ark_Float32>(mainAxisLength),
+        };
+    };
+
+    ASSERT_NE(modifier_->setOnContentDidScroll, nullptr);
+
+    modifier_->setOnContentDidScroll(node_, {});
+
+    // for the full confirm it'required to simullate invoking of the private SwiperPattern::FireContentDidScrollEvent
+    // and check the checkEvent's values
 }
 /**
  * @tc.name: setIndicatorInteractiveTest

@@ -67,7 +67,7 @@ namespace SwiperInterfaceModifier {
 void SetSwiperOptionsImpl(Ark_NativePointer node,
                           const Opt_SwiperController* controller)
 {
-    // TODO
+    LOGE("SwiperInterfaceModifier.SetSwiperOptionsImpl not implemented due to no SwiperController support");
 }
 } // SwiperInterfaceModifier
 
@@ -552,18 +552,42 @@ void NestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     value = ::trimToAceRange(value, NestedScrollMode::SELF_ONLY, NestedScrollMode::PARALLEL);
     SwiperModelNG::SetNestedScroll(frameNode, value);
-
 }
+
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  const Ark_SwiperContentAnimatedTransition* transition)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(transition);
+
+    SwiperContentAnimatedTransition transitionInfo;
+    auto optTimeout = Converter::OptConvert<Ark_Int32>(transition->timeout);
+    transitionInfo.timeout = (!optTimeout || *optTimeout < 0) ? DEFAULT_DURATION : *optTimeout;
+
+    // probably, the transition->transition.id should be applied here to obtain the onTransitionFunc pointer
+    void (* onTransitionFunc)(const RefPtr<SwiperContentTransitionProxy>& proxy) = nullptr;
+    transitionInfo.transition = onTransitionFunc;
+    SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }
+
 void OnContentDidScrollImpl(Ark_NativePointer node,
                             Ark_Function handler)
 {
-    // TODO
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
+        auto arkSelectedIndex = Converter::ArkValue<Ark_Number>(selectedIndex);
+        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+        auto arkPosition = Converter::ArkValue<Ark_Number>(position);
+        auto arkMainAxisLength = Converter::ArkValue<Ark_Number>(mainAxisLength);
+        GetFullAPI()->getEventsAPI()->getSwiperEventsReceiver()->onContentDidScroll(
+            frameNode->GetId(), arkSelectedIndex, arkIndex, arkPosition, arkMainAxisLength
+        );
+    };
+    SwiperModelNG::SetOnContentDidScroll(frameNode, onEvent);
 }
+
 void IndicatorInteractiveImpl(Ark_NativePointer node,
                               Ark_Boolean value)
 {
