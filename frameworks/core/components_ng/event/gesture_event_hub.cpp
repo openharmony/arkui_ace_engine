@@ -1106,6 +1106,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             SubwindowManager::GetInstance()->HidePreviewNG();
             overlayManager->RemovePixelMap();
         }
+        DragNotifyMsg notifyMessage;
+        notifyMessage.isInnerAndOuterTriggerBothNeeded = false;
+        auto dragCallBack = GetDragCallback(pipeline, eventHub);
+        CHECK_NULL_VOID(dragCallBack);
+        dragCallBack(notifyMessage);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
@@ -1601,7 +1606,9 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
-                eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+                if (notifyMessage.isInnerAndOuterTriggerBothNeeded) {
+                    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+                }
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
