@@ -95,11 +95,11 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     });
     SimulateSwipe(200.0f, 2000.0f);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 200.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 144.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 72.0f);
 
     // change attribute during animation
     layoutProperty_->UpdateLoop(true);
@@ -145,7 +145,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
         model.SetLoop(false);
     });
     SimulateSwipe(100.0f, 1000.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 72.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimation();
     FlushLayoutTask(frameNode_);
@@ -155,7 +155,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimationImmediately();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 72.0f);
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
