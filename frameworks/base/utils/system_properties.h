@@ -586,6 +586,8 @@ public:
 
     static bool IsSmallFoldProduct();
 
+    static std::string GetWebDebugRenderMode();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

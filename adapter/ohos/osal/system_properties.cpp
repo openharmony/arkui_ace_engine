@@ -868,4 +868,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
+
+std::string SystemProperties::GetWebDebugRenderMode()
+{
+    return OHOS::system::GetParameter("web.debug.renderMode", "");
+}
 } // namespace OHOS::Ace
