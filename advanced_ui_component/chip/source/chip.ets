@@ -144,7 +144,7 @@ interface ChipNodeTheme {
   focusOutlineColor: ResourceColor;
   borderColor: ResourceColor,
   defaultBorderWidth: Dimension;
-  activatedBorderColor:ResourceColor,
+  activatedBorderColor: ResourceColor,
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
@@ -388,7 +388,7 @@ export struct ChipComponent {
     }
   }
 
-  private getIconSize():Resource{
+  private getIconSize(): Resource{
     if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
       return this.theme.prefixIcon.smallSize.width as Resource;
     } else {
@@ -396,7 +396,7 @@ export struct ChipComponent {
     }
   }
 
-  private defaultSymbolFontsize():Resource{
+  private defaultSymbolFontsize(): Resource{
     if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
       return this.theme.defaultSymbol.smallFontSize as Resource;
     } else {
@@ -404,12 +404,12 @@ export struct ChipComponent {
     }
   }
 
-  private sizeToVp(sizeResource:Resource):number{
+  private sizeToVp(sizeResource: Resource): number{
     let metrics = LengthMetrics.resource(sizeResource);
     return this.lengthMetricsToVp(metrics)
   }
 
-  private verifyResource(resourceValue:Resource, defaultValue:Dimension):Dimension {
+  private verifyResource(resourceValue: Resource, defaultValue: Dimension): Dimension{
     if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params as string[]) &&
       (resourceValue.params as string[])[0] && (resourceValue.params as string[])[0].includes('.') &&
       (resourceValue.params as string[])[0].split('.').length > 2) {
@@ -427,7 +427,7 @@ export struct ChipComponent {
     return this.chipNodeOnFocus ? this.theme.label.focusActiveFontColor : this.theme.label.activatedFontColor;
   }
 
-  private getFontColor():ResourceColor{
+  private getFontColor(): ResourceColor{
     return this.chipNodeOnFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
   }
 
@@ -514,7 +514,7 @@ export struct ChipComponent {
     }
   }
 
-  private getChipNodeBorderWidth():Dimension {
+  private getChipNodeBorderWidth(): Dimension{
     if (!this.isSetBackgroundColor()) {
       return this.sizeToVp(this.theme.chipNode.defaultBorderWidth as Resource);
     } else {
@@ -522,7 +522,7 @@ export struct ChipComponent {
     }
   }
 
-  private getChipNodeBorderColor():ResourceColor{
+  private getChipNodeBorderColor(): ResourceColor{
     let themeChipNode = this.theme.chipNode;
     if (this.getChipActive()) {
       return themeChipNode.activatedBorderColor;
@@ -647,12 +647,12 @@ export struct ChipComponent {
     return prefixIconSize
   }
 
-  private getActiveIconColor():ResourceColor{
+  private getActiveIconColor(): ResourceColor{
     return this.chipNodeOnFocus ? this.theme.prefixIcon.focusActivatedColor :
     this.theme.prefixIcon.activatedFillColor;
   }
 
-  private getFillIconColor(iconType:string):ResourceColor{
+  private getFillIconColor(iconType: string): ResourceColor{
     if (iconType === IconType.PREFIX_ICON) {
       if (this.prefixIcon?.fillColor) {
         return this.prefixIcon.fillColor;
@@ -666,7 +666,7 @@ export struct ChipComponent {
     }
   }
 
-  private getActiveIconColorArray(iconType:string):ResourceColor[]{
+  private getActiveIconColorArray(iconType: string): ResourceColor[]{
     if (iconType === IconType.PREFIX_ICON) {
       return this.getColorArray(this.prefixIcon?.activatedFillColor,
         this.theme.prefixIcon.focusActivatedColor, this.theme.prefixIcon.activatedFillColor);
@@ -676,15 +676,15 @@ export struct ChipComponent {
     }
   }
 
-  private getColorArray(userDefined:ResourceColor | undefined, focusColor:ResourceColor,
-                        normalColor:ResourceColor):ResourceColor[]{
+  private getColorArray(userDefined: ResourceColor | undefined, focusColor: ResourceColor,
+                        normalColor: ResourceColor): ResourceColor[]{
     if (userDefined) {
       return [userDefined];
     }
     return this.chipNodeOnFocus ? [focusColor] : [normalColor];
   }
 
-  private getFillIconColorArray(iconType:string):ResourceColor[]{
+  private getFillIconColorArray(iconType: string): ResourceColor[]{
     if (iconType === IconType.PREFIX_ICON) {
       return this.getColorArray(this.prefixIcon?.fillColor,
         this.theme.prefixIcon.focusFillColor, this.theme.prefixIcon.fillColor);
@@ -859,7 +859,7 @@ export struct ChipComponent {
     return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled
   }
 
-  private getfocusBox():FocusBoxStyle{
+  private getfocusBox(): FocusBoxStyle{
     return this.chipNodeOnFocus ? { strokeWidth: LengthMetrics.vp(2) } : { strokeWidth: LengthMetrics.vp(0) };
   }
 
@@ -1067,11 +1067,11 @@ export struct ChipComponent {
     }
   }
 
-  private isSetBackgroundColor():boolean{
+  private isSetBackgroundColor(): boolean{
     return this.isSetBg || this.isSetActiveBg;
   }
 
-  private getShadowStyles():ShadowStyle | undefined{
+  private getShadowStyles(): ShadowStyle | undefined{
     if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
       let smallShadow = this.theme.chipNode.smallShadowStyle as Resource;
       let smallShadowType = this.verifyResource(smallShadow, -1) as number;
