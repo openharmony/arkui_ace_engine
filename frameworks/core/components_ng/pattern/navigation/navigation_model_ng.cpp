@@ -1090,11 +1090,6 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     } else {
         CreateImageBackIcon(backButtonNode, navigationGroupNode);
     }
-
-    //read navigation back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
-    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
-
     backButtonNode->MarkModifyDone();
     titleBarNode->SetBackButton(backButtonNode);
     titleBarNode->AddChild(backButtonNode, 0);

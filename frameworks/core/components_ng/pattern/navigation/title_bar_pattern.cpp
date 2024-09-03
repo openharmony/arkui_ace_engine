@@ -17,6 +17,7 @@
 
 #include <sstream>
 
+#include "base/i18n/localization.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -323,6 +324,11 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
+
+    //read navigation/navdestination back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+
     auto backButtonIconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
     CHECK_NULL_VOID(backButtonIconNode);
     auto parentType = titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR);
