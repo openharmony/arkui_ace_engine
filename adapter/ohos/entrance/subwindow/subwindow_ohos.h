@@ -57,6 +57,7 @@ public:
     bool InitContainer() override;
     void ResizeWindow() override;
     NG::RectF GetRect() override;
+    void SetRect(const NG::RectF& rect) override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
@@ -214,6 +215,7 @@ private:
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
     std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
+    NG::RectF windowRect_;
 };
 
 } // namespace OHOS::Ace

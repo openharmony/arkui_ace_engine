@@ -38,6 +38,7 @@ public:
     virtual bool InitContainer() = 0;
     virtual void ResizeWindow() = 0;
     virtual NG::RectF GetRect() = 0;
+    virtual void SetRect(const NG::RectF& rect) = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;

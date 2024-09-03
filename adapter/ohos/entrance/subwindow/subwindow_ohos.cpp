@@ -290,13 +290,14 @@ void SubwindowOhos::ResizeWindow()
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
+void SubwindowOhos::SetRect(const NG::RectF& rect)
+{
+    windowRect_ = rect;
+}
+
 NG::RectF SubwindowOhos::GetRect()
 {
-    NG::RectF rect;
-    CHECK_NULL_RETURN(window_, rect);
-    rect.SetRect(
-        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
-    return rect;
+    return windowRect_;
 }
 
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
