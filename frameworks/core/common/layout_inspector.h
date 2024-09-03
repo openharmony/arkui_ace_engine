@@ -20,17 +20,10 @@
 
 namespace OHOS::Ace {
 
-typedef struct {
-    uint64_t rsNodeId = 0;
-    int32_t frameNodeId = 0;
-    std::string nodeType;
-    std::string debugline;
-} FrameNodeInfo;
-
-typedef std::function<void(bool)> ProfilerStatusCallback;
-typedef std::function<void(FrameNodeInfo)> RsProfilerNodeMountCallback;
-
 class LayoutInspector {
+
+using ProfilerStatusCallback = std::function<void(bool)>&&;
+
 public:
     static void SupportInspector();
     static void SetlayoutInspectorStatus(int32_t containerId);
@@ -39,23 +32,17 @@ public:
     static void SetCallback(int32_t instanceId);
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
-
-    // state profiler
-    static bool GetStateProfilerStatus();
+    // for profiler
     static void SetStateProfilerStatus(bool status);
     static void TriggerJsStateProfilerStatusCallback(bool status);
+    static void SetJsStateProfilerStatusCallback(ProfilerStatusCallback callback);
     static void SendStateProfilerMessage(const std::string& message);
-    static void SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& callback);
-
-    // rs profiler
-    static RsProfilerNodeMountCallback GetRsProfilerNodeMountCallback();
-    static void SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback&& callback);
+    static bool GetStateProfilerStatus();
 
 private:
     static bool stateProfilerStatus_;
     static bool layoutInspectorStatus_;
-    static ProfilerStatusCallback jsStateProfilerStatusCallback_;
-    static RsProfilerNodeMountCallback rsProfilerNodeMountCallback_;
+    static std::function<void(bool)> jsStateProfilerStatusCallback_;
 };
 
 } // namespace OHOS::Ace
