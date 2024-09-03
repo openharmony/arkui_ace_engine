@@ -76,14 +76,15 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
 RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
-
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto isFirstBuild = frameNode->IsFirstBuilding();
     if (layout) {
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][isFirstBuild:%d]", V2::TEXT_ETS_TAG, nodeId, isFirstBuild);
         layout->UpdateContent(content);
     }
     // set draggable for framenode
-    if (frameNode->IsFirstBuilding()) {
+    if (isFirstBuild) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();

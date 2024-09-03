@@ -2344,7 +2344,7 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_LAYOUT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
-    DumpRecord(std::to_string(nowTime));
+    DumpRecord("OnModifyDone:" + std::to_string(nowTime));
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -3216,7 +3216,12 @@ void TextPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
     dumpLog.AddDesc(std::string("IsFollowSystem: ").append(std::to_string(followSystem)));
     dumpLog.AddDesc(std::string("maxFontScale: ").append(std::to_string(maxFontScale)));
-    dumpLog.AddDesc(std::string("halfLeading: ").append(std::to_string(halfLeading)));
+    dumpLog.AddDesc(std::string("ConfigHalfLeading: ").append(std::to_string(halfLeading)));
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProp);
+    auto flag = textLayoutProp->HasHalfLeading();
+    dumpLog.AddDesc(
+        std::string("HalfLeading: ").append(flag ? std::to_string(textLayoutProp->GetHalfLeadingValue(false)) : "NA"));
 }
 
 void TextPattern::DumpTextEngineInfo()
@@ -3241,6 +3246,28 @@ void TextPattern::DumpTextEngineInfo()
                             .append(std::to_string(pManager_->GetLongestLine())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
+    DumpParagraphsInfo();
+}
+
+void TextPattern::DumpParagraphsInfo()
+{
+    CHECK_NULL_VOID(pManager_);
+    auto& dumpLog = DumpLog::GetInstance();
+    auto paragraphs = pManager_->GetParagraphs();
+    if (paragraphs.empty()) {
+        dumpLog.AddDesc(std::string("paragraphs is empty!"));
+        return;
+    }
+    dumpLog.AddDesc(std::string("paragraphs size:").append(std::to_string(paragraphs.size())));
+    for (auto&& info : paragraphs) {
+        auto paragraph = info.paragraph;
+        if (paragraph) {
+            auto text = StringUtils::Str16ToStr8(paragraph->GetParagraphText());
+            auto textStyle = paragraph->GetParagraphStyle();
+            auto direction = V2::ConvertTextDirectionToString(textStyle.direction);
+            dumpLog.AddDesc(std::string("paragraph: ").append(text).append("; direction:").append(direction));
+        }
+    }
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
@@ -3251,7 +3278,7 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
     auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
 
-    auto inheritPropertyInfo = child->CalculateInheritPropertyInfo();
+    auto inheritPropertyInfo = child->GetInheritPropertyInfo();
     for (const PropertyInfo& info : inheritPropertyInfo) {
         switch (info) {
             case PropertyInfo::FONTSIZE:

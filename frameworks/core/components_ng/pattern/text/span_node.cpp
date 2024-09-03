@@ -193,6 +193,8 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node)
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto textPattern = textNode->GetPattern<TextPattern>();
             if (textPattern) {
+                ACE_TEXT_SCOPED_TRACE("RequestTextFlushDirty [Parent:%d,Tag:%s][Span:%d]", textNode->GetId(),
+                    textNode->GetTag().c_str(), node->GetId());
                 textPattern->OnModifyDone();
                 return;
             }
@@ -1134,10 +1136,14 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle(), filter);
 }
 
-std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
+std::set<PropertyInfo> SpanNode::GetInheritPropertyInfo()
 {
-    std::set<PropertyInfo> inheritPropertyInfo;
-    static const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+    return propertyInfoContainer_;
+}
+
+void SpanNode::SetPropertyInfoContainer()
+{
+    std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
         PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
@@ -1145,11 +1151,8 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
         PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
         PropertyInfo::MAX_FONT_SCALE, PropertyInfo::VARIABLE_FONT_WEIGHT, PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT };
-    set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
-        propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
-    return inheritPropertyInfo;
+    propertyInfoContainer_ = propertyInfoContainer;
 }
-
 
 void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
