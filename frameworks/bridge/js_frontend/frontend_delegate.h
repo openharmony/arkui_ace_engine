@@ -23,7 +23,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/noncopyable.h"
-#include "core/common/router_recover_record.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/render/snapshot_param.h"
@@ -71,19 +70,19 @@ public:
     // Jump to the specified page.
     virtual void Push(const std::string& uri, const std::string& params) = 0;
     virtual void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
-    virtual void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
+    virtual void PushWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
-    virtual void PushNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
+    virtual void PushNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
     // Jump to the specified page, but current page will be removed from the stack.
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     virtual void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
-    virtual void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
+    virtual void ReplaceWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
-    virtual void ReplaceNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
+    virtual void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
     // Back to specified page or the previous page if url not set.
@@ -99,11 +98,6 @@ public:
     virtual void Clear() = 0;
     // Gets the number of pages in the page stack.
     virtual int32_t GetStackSize() const = 0;
-    // Gets the index of current page, only used for PagePattern::OnAttachToMainTree.
-    virtual int32_t GetCurrentPageIndex() const
-    {
-        return GetStackSize();
-    }
     // Gets current page's states
     virtual void GetState(int32_t& index, std::string& name, std::string& path) = 0;
     // Gets page's states by index.
@@ -134,13 +128,12 @@ public:
 
     virtual void ResetRequestFocusCallback();
 
-    // restore
-    virtual std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
-        const std::string& contentInfo, ContentInfoType type)
+    // distribute
+    virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {
-        return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NO_ERRORS);
+        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
     }
-    virtual std::string GetContentInfo(ContentInfoType type)
+    virtual std::string GetContentInfo()
     {
         return "";
     }
