@@ -88,7 +88,7 @@ class SetGutterModifier extends ModifierWithKey<number | GutterOption> {
     super(value);
   }
   static identity: Symbol = Symbol('gridRowGutter');
-  parseGutter(value: any): number[] {
+  parseGutter(value: number | GridRowSizeOption): number[] {
     let gutters: number[] = [0, 0, 0, 0, 0, 0];
     if (isNumber(value)) {
       gutters[BreakpointConstants.XS] = value;

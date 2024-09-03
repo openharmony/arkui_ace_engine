@@ -200,3 +200,11 @@ INTERACTION_APP_JANK:
   MAX_FRAMETIME: {type: UINT64, desc: max single frame time during the scene}
   MAX_SEQ_MISSED_FRAMES: {type: INT32, desc: max successive missed frames during the scene}
   NOTE: {type: STRING, desc: extra infomation}
+
+NON_MANUAL_POSTCARD_ACTION:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: performance, desc: non manual postcard action}
+  FORM_NAME: {type: STRING, desc: form name}
+  BUNDLE_NAME: {type: STRING, desc: package name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  MODULE_NAME: {type: STRING, desc: package name}
+  DIMENSION: {type: INT32, desc: dimension}

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/event/event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -292,6 +290,11 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
     frameNode->InitLastArea();
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
+}
+
+void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
+{
+    onAreaChangedInnerCallbacks_.erase(id);
 }
 
 void EventHub::ClearCustomerOnDragFunc()

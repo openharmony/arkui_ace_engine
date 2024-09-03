@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

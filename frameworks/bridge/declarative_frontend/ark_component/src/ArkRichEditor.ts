@@ -170,6 +170,65 @@ class RichEditorAboutToIMEInputModifier extends ModifierWithKey<(value: RichEdit
   }
 }
 
+class RichEditorOnWillChangeModifier extends ModifierWithKey<(value: RichEditorChangeValue) => boolean> {
+  constructor(value: (value: RichEditorChangeValue) => boolean) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnWillChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnWillChange(node, this.value);
+    }
+  }
+}
+
+class RichEditorOnDidChangeModifier extends ModifierWithKey<OnDidChangeCallback> {
+  constructor(value: OnDidChangeCallback) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnDidChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnDidChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnDidChange(node, this.value);
+    }
+  }
+}
+
+class RichEditorPlaceholderModifier extends ModifierWithKey<ArkPlaceholder> {
+  constructor(value: ArkPlaceholder) {
+    super(value);
+  }
+  static identity = Symbol('richEditorPlaceholder');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetPlaceholder(node);
+    } else {
+      getUINativeModule().richEditor.setPlaceholder(node, this.value.value, this.value.style);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !(this.stageValue as ArkPlaceholder).isEqual(this.value as ArkPlaceholder);
+  }
+}
+
+class RichEditorAboutToDeleteModifier extends ModifierWithKey<(value: RichEditorDeleteValue) => boolean> {
+  constructor(value: (value: RichEditorDeleteValue) => boolean) {
+    super(value);
+  }
+  static identity = Symbol('richEditorAboutToDelete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetAboutToDelete(node);
+    } else {
+      getUINativeModule().richEditor.setAboutToDelete(node, this.value);
+    }
+  }
+}
+
 class RichEditorOnReadyModifier extends ModifierWithKey<() => void> {
   constructor(value: () => void) {
     super(value);
@@ -374,8 +433,24 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     modifierWithKey(this._modifiersWithKeys, RichEditorOnIMEInputCompleteModifier.identity, RichEditorOnIMEInputCompleteModifier, callback);
     return this;
   }
+  onWillChange(callback: (value: RichEditorChangeValue) => boolean): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnWillChangeModifier.identity, RichEditorOnWillChangeModifier, callback);
+    return this;
+  }
+  onDidChange(callback: OnDidChangeCallback): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnDidChangeModifier.identity, RichEditorOnDidChangeModifier, callback);
+    return this;
+  }
+  placeholder(value: ResourceStr, style?: PlaceholderStyle): RichEditorAttribute {
+    let placeholder: ArkPlaceholder = new ArkPlaceholder();
+    placeholder.value = value;
+    placeholder.style = style;
+    modifierWithKey(this._modifiersWithKeys, RichEditorPlaceholderModifier.identity, RichEditorPlaceholderModifier, placeholder);
+    return this;
+  }
   aboutToDelete(callback: (value: RichEditorDeleteValue) => boolean): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToDeleteModifier.identity, RichEditorAboutToDeleteModifier, callback);
+    return this;
   }
   onDeleteComplete(callback: () => void): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnDeleteCompleteModifier.identity, RichEditorOnDeleteCompleteModifier, callback);

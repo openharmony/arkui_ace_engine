@@ -74,6 +74,18 @@ public:
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPaintProperty);
+
+    void SetIdealWidthForWeb(int32_t width)
+    {
+        idealWidth_ = width;
+    }
+
+    float GetIdealWidthForWeb() const
+    {
+        return idealWidth_;
+    }
+private:
+    float idealWidth_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

@@ -15,24 +15,10 @@
 
 #include "adapter/ohos/entrance/pa_engine/engine/jsi/jsi_pa_engine.h"
 
-#include <dlfcn.h>
-
-#include "form_provider_info.h"
-#include "hisysevent.h"
 #include "js_backend_timer_module.h"
 #include "js_environment.h"
-#include "napi/native_node_api.h"
 #include "napi_common_ability.h"
-#include "napi_common_want.h"
-#include "napi_remote_object.h"
-#include "native_engine/impl/ark/ark_native_engine.h"
 
-#include "base/log/ace_trace.h"
-#include "base/log/event_report.h"
-#include "base/log/exception_handler.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 

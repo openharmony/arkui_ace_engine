@@ -14,12 +14,6 @@
  */
 #include "bridge/cj_frontend/cppview/search_controller.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/search/search_component.h"
-#include "core/components/search/search_theme.h"
-#include "core/components/text_field/text_field_component.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-
 namespace OHOS::Ace::Framework {
 
 void SearchController::CaretPosition(int32_t caretPosition)

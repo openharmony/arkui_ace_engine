@@ -14,24 +14,15 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include <string>
 
-#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
-#include "base/perfmonitor/perf_monitor.h"
-#include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/common/manager_interface.h"
-#include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -669,8 +660,10 @@ void NavigationPattern::RefreshNavDestination()
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
-    auto focusHub = hostNode->GetFocusHub();
-    if (isChanged_ && focusHub->IsFocusableWholePath()) {
+    RefPtr<FrameNode> targetNode = newTopNavPath.has_value() ? AceType::DynamicCast<FrameNode>(
+            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second)) :
+            AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    if (isChanged_ && GetIsFocusable(targetNode)) {
         InputMethodManager::GetInstance()->CloseKeyboard();
     }
 #endif
@@ -913,8 +906,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
             }
             auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
-            auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ?
-            navigationPattern->navigationStack_->GetRouteParam() : "";
+            auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ?
+                navigationPattern->navigationStack_->GetRouteParam() : "";
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
             navDestinationPattern->SetIsOnShow(true);
             NavigationPattern::FireNavigationChange(curDestination, true, false);
@@ -922,7 +915,6 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
         }
         return;
     }
-    navigationPattern->SyncWithJsStackIfNeeded();
     for (int32_t index = end - 1; index >= 0 && index >= start; index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -2348,8 +2340,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         return;
     }
     if (lifecycle == NavDestinationLifecycle::ON_SHOW) {
-        auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ?
-            navigationStack_->GetRouteParam() : "";
+        auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         NotifyPageShow(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(true);
@@ -2417,6 +2408,15 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
     }
+}
+
+void NavigationPattern::OnWindowHide()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navigationPattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SyncWithJsStackIfNeeded();
 }
 
 void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
@@ -2571,6 +2571,7 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
 
 bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, false);
     auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
     auto focusHub = hostNode->GetFocusHub();

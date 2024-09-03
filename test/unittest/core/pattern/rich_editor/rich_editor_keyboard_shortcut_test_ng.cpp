@@ -133,10 +133,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 13);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 24);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);

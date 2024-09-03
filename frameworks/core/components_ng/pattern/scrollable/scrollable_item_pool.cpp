@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
 namespace OHOS::Ace::NG {

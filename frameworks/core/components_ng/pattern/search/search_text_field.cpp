@@ -66,13 +66,14 @@ void SearchTextFieldPattern::ApplyNormalTheme()
     }
 }
 
-bool SearchTextFieldPattern::IsTextEditableForStylus()
+bool SearchTextFieldPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parentFrameNode, false);
     auto focusHub = parentFrameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
     if (!focusHub->IsFocusable() || !parentFrameNode->IsVisible()) {
         return false;
     }
@@ -114,9 +115,17 @@ void SearchTextFieldPattern::SearchRequestStartTwinkling()
 void SearchTextFieldPattern::SearchRequestStopTwinkling()
 {
     searchRequestStopTwinkling_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    UpdateSelection(selectController_->GetCaretIndex());
+    UpdateSelection(0);
     StopTwinkling();
+}
+
+void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
+{
+    searchRequestStopTwinkling_ = false;
+}
+
+bool SearchTextFieldPattern::IsSearchTextField()
+{
+    return true;
 }
 } // namespace OHOS::Ace::NG

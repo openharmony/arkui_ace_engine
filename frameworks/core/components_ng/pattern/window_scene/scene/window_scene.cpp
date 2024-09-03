@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
-#include "transaction/rs_sync_transaction_controller.h"
-#include "ui/rs_surface_node.h"
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -416,7 +414,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     AddChild(host, appWindow_, appWindowName_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(callback_);
-    CHECK_EQUAL_VOID(session_->GetSystemConfig().uiType_, "pc");
+    CHECK_EQUAL_VOID(session_->GetSystemConfig().IsPcWindow(), true);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().freeMultiWindowEnable_, true);
     CHECK_EQUAL_VOID(IsWindowSizeEqual(), true);
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);
@@ -581,7 +579,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (surfaceNode) {
         surfaceNode->SetBufferAvailableCallback(callback_);
     }
-    CHECK_EQUAL_RETURN(session_->GetSystemConfig().uiType_, "pc", false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, false);
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();

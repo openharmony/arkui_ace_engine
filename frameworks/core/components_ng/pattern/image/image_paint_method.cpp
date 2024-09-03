@@ -15,12 +15,9 @@
 
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
-#include "core/common/container.h"
 #include "core/components/image/image_theme.h"
-#include "core/components/text/text_theme.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
 constexpr unsigned int TOP_LEFT = 0;

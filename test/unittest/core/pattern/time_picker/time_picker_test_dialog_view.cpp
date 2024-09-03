@@ -187,10 +187,10 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest001, TestSize.Level
     pipeline->SetFontScale(0);
     /**
      * @tc.steps: step2. fontSizeValue's unit is VP,isUserSetFont is true,and
-     * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_VP.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect equal FONT_SIZE_LIMIT.
      */
     auto ret = TimePickerDialogView::ConvertFontScaleValue(FONT_SIZE_VP, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT / 2);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value());
     /**
      * @tc.steps: step2+. fontSizeValue's unit is not VP,isUserSetFont is false,and
      * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_VALUE_NOMARL / FontScale.
@@ -214,14 +214,14 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest001, TestSize.Level
     EXPECT_EQ(ret, FONT_VALUE_NOMARL * scale);
     /**
      * @tc.steps: step3+. fontSizeValue's unit is VP,isUserSetFont is true/false.
-     * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_VP * TwoFontScale/ThirdFontScale.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_LIMIT/FONT_SIZE_VP.
      */
     pickerTheme->pickerDialogMaxTwoFontScale_ = 10;
     pickerTheme->pickerDialogMaxThirdFontScale_ = 5;
     ret = TimePickerDialogView::ConvertFontScaleValue(FONT_SIZE_VP, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value());
     ret = TimePickerDialogView::ConvertFontScaleValue(FONT_SIZE_VP, FONT_SIZE_LIMIT, false);
-    EXPECT_EQ(ret, FONT_SIZE_VP * (pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale()));
+    EXPECT_EQ(ret.Value(), FONT_SIZE_VP.Value());
 }
 
 /**
@@ -241,23 +241,26 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest002, TestSize.Level
     ASSERT_TRUE(pickerTheme);
     pipeline->SetFontScale(0);
     auto ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_SIZE_VP, FONT_SIZE_LIMIT, false);
-    EXPECT_EQ(ret, FONT_SIZE_VP);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_VP.Value());
     /**
      * @tc.steps: step2. fontSizeValue's unit is VP,isUserSetFont is true
      * @tc.expected: call ConvertFontSizeLimit and result expect FONT_SIZE_LIMIT_MORE/FONT_SIZE_VP.
      */
+    auto nFontScale = 5;
+    pipeline->SetFontScale(nFontScale);
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_SIZE_VP, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT / 2);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value() / nFontScale);
+    pipeline->SetFontScale(0);
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_SIZE_VP, FONT_SIZE_LIMIT_MORE, true);
-    EXPECT_EQ(ret, FONT_SIZE_VP);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_VP.Value());
     /**
      * @tc.steps: step2+. fontSizeValue's unit is not VP,isUserSetFont is true
      * @tc.expected: call ConvertFontSizeLimit and result expect FONT_SIZE_LIMIT_MORE/FONT_VALUE_NOMARL.
      */
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value());
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT_MORE, true);
-    EXPECT_EQ(ret, FONT_VALUE_NOMARL);
+    EXPECT_EQ(ret.Value(), FONT_VALUE_NOMARL.Value());
 }
 
 /**
@@ -290,7 +293,7 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest003, TestSize.Level
     pipeline->rootHeight_ = 0;
     pickerTheme->pickerDialogMaxOneFontScale_ = 5;
     ret = TimePickerDialogView::ConvertTitleFontScaleValue(FONT_VALUE_NOMARL);
-    EXPECT_EQ(ret, Dimension(FONT_VALUE_NOMARL / pipeline->GetFontScale()));
+    EXPECT_EQ(ret, Dimension(FONT_VALUE_NOMARL.Value() / pipeline->GetFontScale()));
     /**
      * @tc.steps: step3. set NeedAdaptForAging is true.
      * fontSizeValue's unit is VP

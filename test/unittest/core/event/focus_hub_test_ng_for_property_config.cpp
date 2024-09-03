@@ -1722,4 +1722,28 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
     listNode->geometryNode_->SetFrameSize(SizeF(10, 10));
     EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
-} // namespace OHOS::Ace::NG123456
+
+/**
+ * @tc.name: GetUnicodeTest001
+ * @tc.desc: Test GetUnicode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, GetUnicodeTest001, TestSize.Level1)
+{
+    KeyEvent keyEvent;
+    auto defaultInfo = KeyEventInfo(keyEvent);
+    /**
+     * @tc.steps: step1. Get the default unicode.
+     * @tc.expected: default unicode is 0.
+     */
+    EXPECT_EQ(defaultInfo.GetUnicode(), 0);
+
+    /**
+     * @tc.steps: step2. Set the Unicode value to 98.
+     * @tc.expected: get unicode value is 98.
+     */
+    keyEvent.unicode = 98;
+    auto info = KeyEventInfo(keyEvent);
+    EXPECT_EQ(info.GetUnicode(), 98);
+}
+} // namespace OHOS::Ace::NG

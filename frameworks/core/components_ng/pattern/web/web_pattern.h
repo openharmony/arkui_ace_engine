@@ -25,6 +25,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
@@ -557,6 +558,7 @@ public:
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon);
     AceAutoFillType GetFocusedType();
+    HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
@@ -845,6 +847,10 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    void OnSelectHandleStart(bool isFirst);
+    void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
+    void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
+
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
 
@@ -912,6 +918,7 @@ private:
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
+    void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
     void SetMouseHoverExit(bool isHoverExit)
     {
@@ -955,6 +962,7 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
+    int32_t GetBufferSizeByDeviceType();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

@@ -24,8 +24,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 CanvasPattern::~CanvasPattern()

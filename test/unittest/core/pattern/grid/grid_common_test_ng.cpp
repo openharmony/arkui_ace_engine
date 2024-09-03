@@ -15,6 +15,7 @@
 
 #include "grid_test_ng.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -1282,9 +1283,13 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
 
     /**
      * @tc.steps: step2. When grid is Scrollable
@@ -1293,12 +1298,16 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
     ClearOldNodes();
     model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(20);
+    CreateFixedItems(40);
     CreateDone(frameNode_);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, -GRID_HEIGHT);
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
 }
 
 /**

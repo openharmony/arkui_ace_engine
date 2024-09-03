@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
 
 namespace OHOS::Ace::Framework {
 void NavigationModelImpl::Create()

@@ -1462,6 +1462,16 @@ const __creatorMap__ = new Map([
                 return new ArkTextAreaComponent(node, type);
             });
         }],
+    ['Checkbox', (context) => {
+            return new TypedFrameNode(context, 'Checkbox', (node, type) => {
+                return new ArkCheckboxComponent(node, type);
+            });
+        }],
+    ['CheckboxGroup', (context) => {
+            return new TypedFrameNode(context, 'CheckboxGroup', (node, type) => {
+                return new ArkCheckboxGroupComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {

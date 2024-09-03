@@ -15,13 +15,7 @@
 
 #include "core/components_v2/list/list_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "core/components_v2/list/list_component.h"
-#include "core/components_v2/list/render_list.h"
 #include "core/components_v2/list/render_list_item_group.h"
-#include "core/pipeline/base/composed_component.h"
-#include "core/components/box/render_box.h"
 
 namespace OHOS::Ace::V2 {
 

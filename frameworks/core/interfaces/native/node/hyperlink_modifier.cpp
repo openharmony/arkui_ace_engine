@@ -15,10 +15,8 @@
 
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

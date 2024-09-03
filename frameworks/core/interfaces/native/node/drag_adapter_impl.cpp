@@ -14,19 +14,9 @@
  */
 #include "core/interfaces/native/node/drag_adapter_impl.h"
 
-#include "native_type.h"
-
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
-#include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::DragAdapter {
 namespace {

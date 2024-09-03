@@ -19,45 +19,19 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/log/ace_checker.h"
-#include "base/log/ace_performance_check.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/utils.h"
-#include "core/animation/page_transition_common.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/theme/app_theme.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
-#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
-#include "core/components_ng/pattern/stack/stack_model_ng.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/package/package_event_proxy.h"
 
 namespace OHOS::Ace::NG {
@@ -1403,8 +1377,8 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             navigation->isOnAnimation_ = false;
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             navigation->CleanPopAnimations();
-            for (auto iter: preNavList) {
-                auto preNode = iter.Upgrade();
+            for (auto iter = preNavList.rbegin(); iter != preNavList.rend(); ++iter) {
+                auto preNode = (*iter).Upgrade();
                 CHECK_NULL_VOID(preNode);
                 auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                 CHECK_NULL_VOID(preNavDesNode);
@@ -1704,7 +1678,7 @@ void NavigationGroupNode::InitPopPreList(const RefPtr<FrameNode>& preNode, std::
     const auto& preNavDestinationNodes = navigationPattern->GetAllNavDestinationNodesPrev();
 
     // find the nodes need to do EXIT_POP
-    for (unsigned int index = preStartIndex; index < preNavDestinationNodes.size(); index++) {
+    for (int32_t index = preStartIndex; index < static_cast<int32_t>(preNavDestinationNodes.size()); index++) {
         auto node = GetNavDestinationNode(preNavDestinationNodes[index].second.Upgrade());
         CHECK_NULL_VOID(node);
         auto preNode = AceType::DynamicCast<FrameNode>(node);
@@ -1740,11 +1714,12 @@ void NavigationGroupNode::InitPopCurList(const RefPtr<FrameNode>& curNode, std::
             SetNeedSetInvisible(false);
         }
     }
-    if (curNavdestionNodes.size() == 0) {
+    int32_t size = static_cast<int32_t>(curNavdestionNodes.size());
+    if (size == 0) {
         return;
     }
     // find the nodes need to do ENTER_POP
-    for (unsigned int index = curStartIndex; index < curNavdestionNodes.size(); index++) {
+    for (int32_t index = curStartIndex; index < size; index++) {
         auto node = GetNavDestinationNode(curNavdestionNodes[index].second);
         CHECK_NULL_VOID(node);
         auto curNode = AceType::DynamicCast<FrameNode>(node);
@@ -1781,11 +1756,12 @@ void NavigationGroupNode::InitPushPreList(const RefPtr<FrameNode>& preNode,
             prevNavList.emplace_back(WeakPtr<FrameNode>(preNode));
         }
     }
-    if (preNavdestinationNodes.size() == 0) {
+    int32_t size = static_cast<int32_t>(preNavdestinationNodes.size());
+    if (size == 0) {
         return;
     }
     // find the nodes need to do EXIT_PUSH
-    for (unsigned int index = preStartIndex; index < preNavdestinationNodes.size(); index++) {
+    for (int32_t index = preStartIndex; index < size; index++) {
         auto node = GetNavDestinationNode(preNavdestinationNodes[index].second.Upgrade());
         CHECK_NULL_VOID(node);
         auto preNode = AceType::DynamicCast<FrameNode>(node);

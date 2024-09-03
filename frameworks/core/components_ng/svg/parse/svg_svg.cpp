@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 
-#include "base/geometry/size.h"
-#include "include/pathops/SkPathOps.h"
-
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

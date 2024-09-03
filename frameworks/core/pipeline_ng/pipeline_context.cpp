@@ -1779,7 +1779,15 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
             context->GetSafeAreaManager()->GetKeyboardOffset();
 
-        if (!manager->GetOnFocusTextField().Upgrade()) {
+        auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+        float adjust = 0.0f;
+        if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+            auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
+            adjust = adjustRect.Top();
+        }
+        currentPos += adjust;
+
+        if (!onFocusField) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
         } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
@@ -1824,8 +1832,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
-            "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
-            keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
+            "rootSize.Height() %{public}f adjust: %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, height, rootSize.Height(), adjust,
+            context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
         // layout before scrolling textfield to safeArea, because of getting correct position
@@ -2425,36 +2434,31 @@ void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool
     }
 }
 
-void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+void PipelineContext::DumpData(
+    const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
-    if (params.size() > 1 && params[1] == "-lastpage") {
-        auto lastPage = stageManager_->GetLastPage();
-        if (hasJson) {
-            if (params.size() < USED_JSON_PARAM && lastPage) {
-                lastPage->DumpTree(0, hasJson);
-                DumpLog::GetInstance().PrintEndDumpInfoNG(true);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() > USED_JSON_PARAM && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM], true)) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        } else {
-            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
-                lastPage->DumpTree(0, hasJson);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() > USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM])) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        }
-    } else {
-        rootNode_->DumpTree(0, hasJson);
+    CHECK_NULL_VOID(node);
+    int32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
+    if (params.size() < used_id_flag) {
+        node->DumpTree(0, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
+    }
+    if (params.size() == used_id_flag && !node->DumpTreeById(0, params[PARAM_NUM], hasJson)) {
+        DumpLog::GetInstance().Print(
+            "There is no id matching the ID in the parameter,please check whether the id is correct");
+    }
+}
+
+void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+{
+    if (params.size() > 1 && params[1] == "-lastpage") {
+        auto lastPage = stageManager_->GetLastPage();
+        DumpData(lastPage, params, hasJson);
+    } else {
+        DumpData(rootNode_, params, hasJson);
     }
 }
 
@@ -2544,7 +2548,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        rootNode_->DumpTree(0);
+        rootNode_->DumpTree(0, true);
         DumpLog::GetInstance().OutPutDefault();
     }
     return true;
@@ -2846,7 +2850,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
     if (window && window->IsUserSetCursor()) {
         return false;
     }
-    if (mouseStyleNodeId_ != nodeId || isByPass) {
+    if (!mouseStyleNodeId_.has_value() || mouseStyleNodeId_.value() != nodeId || isByPass) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -3057,7 +3061,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
-    } else if (isBeforeDragHandleAxis_ && event.action == AxisAction::END) {
+    } else if (isBeforeDragHandleAxis_ && (event.action == AxisAction::END || event.action == AxisAction::CANCEL)) {
         eventManager_->DispatchTouchEvent(scaleEvent);
         isBeforeDragHandleAxis_ = false;
     }
@@ -3346,6 +3350,7 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
@@ -3761,7 +3766,7 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
     return false;
 }
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("Set app icon failed, Window modal is not container.");
@@ -3772,7 +3777,21 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
+}
+
+void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("Set app icon failed, Window modal is not container.");
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetWindowContainerColor(activeColor, inactiveColor);
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)
@@ -4426,6 +4445,7 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
 
 std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode)
 {
+    CHECK_NULL_RETURN(rootNode, "");
     std::vector<RectF> responseRegionList;
     rootNode->GetResponseRegionListByTraversal(responseRegionList);
     std::string responseRegionStrOrigin;

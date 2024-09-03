@@ -538,8 +538,9 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* node) override;
     int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

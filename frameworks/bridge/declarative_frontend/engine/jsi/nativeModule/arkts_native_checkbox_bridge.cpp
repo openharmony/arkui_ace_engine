@@ -409,4 +409,25 @@ ArkUINativeModuleValue CheckboxBridge::ResetCheckboxShape(ArkUIRuntimeCallInfo* 
     GetArkUINodeModifiers()->getCheckboxModifier()->resetCheckboxShape(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CheckboxBridge::SetCheckboxOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> nameArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(2);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUI_CharPtr nameStr = "";
+    ArkUI_CharPtr groupStr = "";
+    if (!nameArg.IsNull() && nameArg->IsString(vm)) {
+        nameStr = nameArg->ToString(vm)->ToString(vm).c_str();
+    }
+    if (!groupArg->IsNull() && groupArg->IsString(vm)) {
+        groupStr = groupArg->ToString(vm)->ToString(vm).c_str();
+    }
+    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxName(nativeNode, nameStr);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxGroup(nativeNode, groupStr);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -510,13 +510,10 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             if (sandBoxCount_ > 0) {
                 return;
             }
-            sandBoxCount_ = 0;
-            CHECK_NULL_VOID(!host->IsRemoving());
-        } else {
-            sandBoxCount_ = 0;
         }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
+        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
@@ -2265,6 +2262,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -4409,6 +4407,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
     }
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::CleanTransition()
@@ -4469,6 +4468,7 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
         rsNode_->AddModifier(gradientStyleModifier_);
     }
     gradientStyleModifier_->SetGradient(gradient);
+    gradientStyleModifier_->SetSizeF(frameSize);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
@@ -5287,10 +5287,6 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
-        std::string backgroundFilter = rsNode_->GetBackgroundFilterDescription();
-        DumpLog::GetInstance().AddDesc(
-        std::string("backgroundFilter:").append(backgroundFilter));
-
         const auto& groupProperty = GetOrCreateBackground();
         if (groupProperty->propEffectOption.has_value()) {
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();

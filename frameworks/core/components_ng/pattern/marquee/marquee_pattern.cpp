@@ -15,33 +15,10 @@
 
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
-#include <string>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/animation/curves.h"
-#include "core/common/container_scope.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/marquee/marquee_theme.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/marquee/marquee_layout_property.h"
-#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -611,7 +588,7 @@ float MarqueePattern::GetTextStart()
     float start = GetTextOffset();
     auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
     bool isRtl = direction == TextDirection::RTL ? true : false;
-    if (!isRtl) return start;
+    if (!isRtl || !IsRunMarquee()) return start;
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, start);

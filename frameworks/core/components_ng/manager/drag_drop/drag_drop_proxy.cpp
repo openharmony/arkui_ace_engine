@@ -15,9 +15,6 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
-#include <memory>
-#include <optional>
-
 #include "menu_item_model.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"

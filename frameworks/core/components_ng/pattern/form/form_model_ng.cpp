@@ -130,6 +130,7 @@ int32_t FormModelNG::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
     const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {
     auto formUtils = FormManager::GetInstance().GetFormUtils();
+    CHECK_NULL_RETURN(formUtils, -1);
     return formUtils->RequestPublishFormEvent(want, formBindingDataStr, formId, errMsg);
 }
 

@@ -61,6 +61,7 @@ void ScrollTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    positionController_ = nullptr;
     scrollBar_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
@@ -76,6 +77,7 @@ void ScrollTestNg::GetScroll()
     layoutProperty_ = frameNode_->GetLayoutProperty<ScrollLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollAccessibilityProperty>();
+    positionController_ = pattern_->GetScrollPositionController();
 }
 
 ScrollModelNG ScrollTestNg::CreateScroll()

@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components/button/button_theme.h"
 #include "core/components/toggle/toggle_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -367,6 +359,14 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
         } else {
             frameSize.SetHeight(frameSize.Height() + agingPadding);
         }
+        auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
+        CHECK_NULL_RETURN(layoutContraint, false);
+        auto maxHeight = layoutContraint->maxSize.Height();
+        auto minHeight = layoutContraint->minSize.Height();
+        auto actualHeight = frameSize.Height();
+        actualHeight = std::min(actualHeight, maxHeight);
+        actualHeight = std::max(actualHeight, minHeight);
+        frameSize.SetHeight(actualHeight);
         geometryNode->SetFrameSize(frameSize);
     }
     HandleBorderRadius(layoutWrapper);

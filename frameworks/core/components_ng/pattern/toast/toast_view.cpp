@@ -14,20 +14,10 @@
  */
 #include "core/components_ng/pattern/toast/toast_view.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/toast/toast_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 constexpr float MAX_TOAST_SCALE = 2.0f;
@@ -152,6 +142,20 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
         toastContext->UpdateOuterBorderColor(outerColorProp);
     }
+    auto toastInfo = pattern->GetToastInfo();
+    ToastView::UpdateToastNodeStyle(toastNode);
+}
+
+void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
+{
+    auto toastContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(toastContext);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
     toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

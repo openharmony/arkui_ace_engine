@@ -143,8 +143,8 @@ protected:
     void SetStrokeGradientStyle(double opacity);
     bool SetGradientStyle(double opacity);
     void UpdateLineDash();
-    void SetLinearGradient(const Size& viewPort, Gradient& gradient);
-    void SetRadialGradient(const Size& viewPort, Gradient& gradient);
+    void SetLinearGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
+    void SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
 
 #ifndef USE_ROSEN_DRAWING
     SkPath path_;
@@ -159,6 +159,7 @@ protected:
 
 private:
     void UpdateColorFilter(RSFilter& filter);
+    bool CheckHrefPattern();
 };
 
 } // namespace OHOS::Ace::NG

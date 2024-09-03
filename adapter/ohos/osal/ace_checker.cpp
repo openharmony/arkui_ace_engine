@@ -22,8 +22,6 @@
 #include "parameters.h"
 #endif
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t PAGE_NODES = 1000;

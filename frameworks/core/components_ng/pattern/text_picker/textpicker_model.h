@@ -29,12 +29,14 @@ struct TextPickerDialog {
     uint32_t selectedValue;
     std::vector<std::string> getRangeVector;
     bool isDefaultHeight;
+    bool enableHoverMode;
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<Shadow> shadow;
+    std::optional<HoverModeAreaType> hoverModeArea;
 };
 struct TextPickerDialogEvent {
     std::function<void()> onDidAppear;
@@ -84,6 +86,7 @@ public:
     virtual void SetSingleRange(bool isSingleRange) = 0;
     virtual bool GetSingleRange() = 0;
     virtual void SetDivider(const NG::ItemDivider& divider) {};
+    virtual void HasUserDefinedOpacity() = 0;
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;

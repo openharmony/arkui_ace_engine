@@ -80,7 +80,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
@@ -113,6 +112,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollbar_bridge.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -1126,6 +1126,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::SetCheckboxGroupStyle));
     checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxGroupStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::ResetCheckboxGroupStyle));
+    checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCheckboxGroupOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::SetCheckboxGroupOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkboxgroup"), checkboxgroup);
 
     auto panel = panda::ObjectRef::New(vm);
@@ -1739,6 +1741,22 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnIMEInputComplete));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnIMEInputComplete"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnIMEInputComplete));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnWillChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnWillChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDidChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDidChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDidChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDidChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPlaceholder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetPlaceholder));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPlaceholder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetPlaceholder));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAboutToDelete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetAboutToDelete));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAboutToDelete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetAboutToDelete));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSubmit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnSubmit));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSubmit"),
@@ -2485,6 +2503,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetIgnoreLayoutSafeArea));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetIgnoreLayoutSafeArea));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetTitle));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetTitle));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetMenus));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetMenus));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
@@ -2648,6 +2674,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterResourceAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
     RegisterBadgeAttributes(object, vm);
+    RegisterScrollBarAttributes(object, vm);
     return object;
 }
 
@@ -2696,6 +2723,8 @@ void ArkUINativeModule::RegisterCheckboxAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetContentModifierBuilder));
     checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxPadding"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CheckboxBridge::ResetCheckboxPadding));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCheckboxOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CheckboxBridge::SetCheckboxOptions));
 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkbox"), checkbox);
 }
@@ -3347,6 +3376,14 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetIgnoreLayoutSafeArea));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetIgnoreLayoutSafeArea));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetTitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetTitle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMenus));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMenus));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 
@@ -5215,5 +5252,15 @@ void ArkUINativeModule::RegisterBadgeAttributes(Local<panda::ObjectRef> object, 
     badge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBadgeParamWithString"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BadgeBridge::SetBadgeParamWithString));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "badge"), badge);
+}
+
+void ArkUINativeModule::RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto ScrollBar = panda::ObjectRef::New(vm);
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarEnableNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::SetScrollBarEnableNestedScroll));
+    ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarEnableNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::ResetScrollBarEnableNestedScroll));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "ScrollBar"), ScrollBar);
 }
 } // namespace OHOS::Ace::NG

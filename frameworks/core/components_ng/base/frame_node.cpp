@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-#include <cstdint>
-#include "base/geometry/ng/rect_t.h"
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
@@ -24,7 +22,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
-#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -42,34 +39,10 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/stylus/stylus_detector_mgr.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/base/extension_handler.h"
-#include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/event/target_component.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -477,6 +450,7 @@ FrameNode::FrameNode(
 
 FrameNode::~FrameNode()
 {
+    ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
@@ -492,7 +466,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false, GetContext());
+        OnDetachFromMainTree(false, GetContextWithCheck());
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -1767,14 +1741,16 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     } else {
         {
             auto layoutConstraint = GetLayoutConstraint();
-            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]", GetTag().c_str(),
-                GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
-                layoutConstraint.ToString().c_str());
+            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
+                             "[layoutPriority:%d][pageId:%d][depth:%d]",
+                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                layoutConstraint.ToString().c_str(), GetLayoutPriority(), GetPageId(), GetDepth());
             Measure(layoutConstraint);
         }
         {
-            ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-                GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
+            ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d][pageId:%d][depth:%d]",
+                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                GetLayoutPriority(), GetPageId(), GetDepth());
             Layout();
         }
     }
@@ -3613,12 +3589,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first) {
+    if (res.first || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second) {
+    if (res.second || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -5271,19 +5247,30 @@ uint32_t FrameNode::GetWindowPatternType() const
     return pattern_->GetWindowPatternType();
 }
 
-void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, NotificationType notificationType)
 {
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
+    int32_t updateFrom = CalcAbsPosition(index, id);
     auto pattern = GetPattern();
-    pattern->NotifyDataChange(updateFrom, count);
+    switch (notificationType) {
+        case NotificationType::START_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            break;
+        case NotificationType::END_CHANGE_POSITION:
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        case NotificationType::START_AND_END_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        default:
+            break;
+    }
+}
+
+// for Grid refresh GridItems
+void FrameNode::ChildrenUpdatedFrom(int32_t index)
+{
+    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
@@ -5471,6 +5458,17 @@ void FrameNode::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     if (renderContext_) {
         renderContext_->DumpInfo(json);
         renderContext_->DumpAdvanceInfo(json);
+    }
+}
+
+void FrameNode::ResetPredictNodes()
+{
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            frameNode->isLayoutDirtyMarked_ = false;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

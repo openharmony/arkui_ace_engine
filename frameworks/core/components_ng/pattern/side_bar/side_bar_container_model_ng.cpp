@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/image/pixel_map.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -387,5 +380,26 @@ void SideBarContainerModelNG::ResetControlButtonIconInfo(FrameNode* frameNode)
         SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
         SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
+}
+
+void SideBarContainerModelNG::ResetControlButton()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sideBarTheme = pipeline->GetTheme<NG::SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+    auto defaultControlButtonWidthSmall = sideBarTheme->GetControlButtonWidthSmall();
+    auto defaultControlButtonHeightSmall = sideBarTheme->GetControlButtonHeightSmall();
+    auto controlButtonTopSmall = sideBarTheme->GetControlButtonMarginTopSmall();
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, defaultControlButtonWidthSmall);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, defaultControlButtonHeightSmall);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, controlButtonTopSmall);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT);
 }
 } // namespace OHOS::Ace::NG

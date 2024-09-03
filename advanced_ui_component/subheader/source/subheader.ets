@@ -287,6 +287,16 @@ export struct SubHeader {
       (this.operationItem?.length > 0) && this.operationItem[0].value !== '';
   }
 
+  private isLeftAreaAccessibilityGroup(): boolean {
+    if (this.titleBuilder || this.secondaryTitle) {
+      return true;
+    }
+    if (this.select) {
+      return false;
+    }
+    return true;
+  }
+
   build() {
     if (this.isSuitableAging()) {
       Column() {
@@ -302,6 +312,7 @@ export struct SubHeader {
           end: this.contentMargin ? this.contentMargin.end : LengthMetrics.resource($r('sys.float.margin_right')),
         })
         .width('100%')
+        .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
 
         this.rightAreaParentAging();
       }
@@ -318,6 +329,7 @@ export struct SubHeader {
         })
         .width('100%')
         .flexShrink(1)
+        .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
 
         this.rightAreaParent();
       }
@@ -345,24 +357,27 @@ export struct SubHeader {
       'yes' : 'no')
   }
 
+  private getRightAreaAccessibilityText(): string {
+    if (this.operationType !== OperationType.TEXT_ARROW || !this.operationItem || this.operationItem.length <= 0) {
+      return '';
+    }
+    if (this.operationItem[0].value.toString().length <= 0) {
+      // 播报：更多、more等, 使用的字段是：sys.string.ohos_toolbar_more
+      return Util.getStringByResource(125833704, '');
+    }
+    return '';
+  }
+
   @Builder
   rightAreaParentAging(): void {
-    if (this.operationType === OperationType.BUTTON) {
-      Button({ type: ButtonType.Normal, stateEffect: false }) {
-        this.rightArea();
-      }
-      .align(Alignment.Start)
-      .rightAreaClickEvent()
-      .rightAreaParentAgingStyles()
-      .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
-    } else {
-      Row() {
-        this.rightArea();
-      }
-      .justifyContent(FlexAlign.Start)
-      .rightAreaClickEvent()
-      .rightAreaParentAgingStyles()
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      this.rightArea();
     }
+    .align(Alignment.Start)
+    .rightAreaClickEvent()
+    .rightAreaParentAgingStyles()
+    .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+    .accessibilityText(this.getRightAreaAccessibilityText())
   }
 
   @Styles
@@ -379,23 +394,15 @@ export struct SubHeader {
 
   @Builder
   rightAreaParent(): void {
-    if (this.operationType === OperationType.BUTTON) {
-      Button({ type: ButtonType.Normal, stateEffect: false }) {
-        this.rightArea();
-      }
-      .align(Alignment.BottomEnd)
-      .rightAreaClickEvent()
-      .rightAreaParentStyles()
-      .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
-    } else {
-      Row() {
-        this.rightArea();
-      }
-      .justifyContent(FlexAlign.End)
-      .alignItems(VerticalAlign.Bottom)
-      .rightAreaClickEvent()
-      .rightAreaParentStyles()
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      this.rightArea();
     }
+    .focusable(this.operationItem ? true : false)
+    .align(Alignment.BottomEnd)
+    .rightAreaClickEvent()
+    .rightAreaParentStyles()
+    .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+    .accessibilityText(this.getRightAreaAccessibilityText())
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
@@ -566,7 +573,6 @@ export struct SubHeader {
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
-        .accessibilityLevel('yes')
         .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
@@ -580,7 +586,6 @@ export struct SubHeader {
           top: $r('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
-        .accessibilityLevel('yes')
     }
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
@@ -604,7 +609,6 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.secondaryTitleModifier)
-        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonListPadding()
@@ -653,7 +657,6 @@ export struct SubHeader {
           this.changeFlexAlign(FlexAlign.SpaceBetween);
         })
         .attributeModifier(this.primaryTitleModifier)
-        .accessibilityLevel('yes')
     }
     .alignItems(HorizontalAlign.Start)
     .commonContentPadding()
@@ -908,13 +911,13 @@ struct SingleIconStyle {
 
   build() {
     if (this.item && this.item.iconOptions) {
-      Row() {
+      Button({ type: ButtonType.Normal, stateEffect: false }) {
         this.IconZone();
       }
       .focusable(true)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
-      .justifyContent(FlexAlign.Center)
+      .align(Alignment.Center)
       .backgroundColor(this.bgColor)
       .stateStyles({
         normal: {
@@ -1052,6 +1055,29 @@ class Util {
       let message: string = (error as BusinessError).message;
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
       return 0;
+    }
+  }
+
+  /**
+   * get resource string
+   *
+   * @param resourceId resource id
+   * @param defaultString default value
+   * @returns resource string
+   */
+  public static getStringByResource(resourceId: number, defaultString: string): string {
+    try {
+      let resourceString: string = getContext().resourceManager.getStringSync(resourceId);
+      if (resourceString === '') {
+        return defaultString;
+      } else {
+        return resourceString;
+      }
+    } catch (error) {
+      let code: number = (error as BusinessError).code;
+      let message: string = (error as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `SubHeader getStringByResource error, code: ${code}, message: ${message}`);
+      return '';
     }
   }
 

@@ -15,12 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
-#include <iterator>
-#include <ostream>
-
-#include "base/utils/utils.h"
-#include "core/components/common/properties/text_layout_info.h"
-
 namespace OHOS::Ace::NG {
 float ParagraphManager::GetHeight() const
 {

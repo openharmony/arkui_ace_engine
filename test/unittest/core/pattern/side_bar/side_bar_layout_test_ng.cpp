@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -1265,5 +1266,87 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg029, TestSize.Level1)
     sideBarLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->minSideBarWidth_, layoutAlgorithm->maxSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg0030
+ * @tc.desc: Test SideBar Measure control button in version 13
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg0030, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(sideBarFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(layoutWrapper == nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    EXPECT_FALSE(sideBarPattern == nullptr);
+    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    EXPECT_FALSE(sideBarLayoutProperty == nullptr);
+    SizeF value(SIZEF_WIDTH, SIZEF_HEIGHT);
+    sideBarLayoutProperty->UpdateMarginSelfIdealSize(value);
+    sideBarLayoutProperty->UpdateContentConstraint();
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    auto parentWidth = MAX_PARENT_WIDTH;
+    sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::EMBED);
+
+    layoutAlgorithm->MeasureControlButton(sideBarLayoutProperty, layoutWrapper, parentWidth);
+    EXPECT_NE(layoutWrapper->layoutProperty_, nullptr);
+    EXPECT_NE(layoutWrapper->geometryNode_, nullptr);
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg031
+ * @tc.desc: Test SideBar LayoutControlButton in version 13
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg031, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(sideBarFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto layoutWrapper = LayoutWrapperNode(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    EXPECT_FALSE(sideBarPattern == nullptr);
+    auto sideBarLayoutProperty = sideBarPattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    EXPECT_FALSE(sideBarLayoutProperty == nullptr);
+    SizeF value(SIZEF_WIDTH, SIZEF_HEIGHT);
+    sideBarLayoutProperty->UpdateMarginSelfIdealSize(value);
+    sideBarLayoutProperty->UpdateContentConstraint();
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    auto buttonLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper.GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    auto themeMarginTop = sideBarTheme->GetControlButtonMarginTopSmall();
+    auto themeMarginLeft = sideBarTheme->GetControlButtonMarginLeftSmall();
+    layoutProperty->UpdateControlButtonLeft(themeMarginLeft);
+    layoutProperty->UpdateControlButtonTop(themeMarginTop);
+    layoutAlgorithm->LayoutControlButton(&layoutWrapper, buttonLayoutWrapper);
+    ASSERT_TRUE(
+        NearEqual(layoutProperty->GetControlButtonLeft().value_or(themeMarginLeft).Value(), themeMarginLeft.Value()));
+    ASSERT_TRUE(
+        NearEqual(layoutProperty->GetControlButtonTop().value_or(themeMarginTop).Value(), themeMarginTop.Value()));
+    
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

@@ -1232,6 +1232,8 @@ struct CJUIScrollBarModifier {
     void (*setScrollBarState)(ArkUINodeHandle node, ArkUI_Int32 state);
     void (*resetScrollBarState)(ArkUINodeHandle node);
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
+    void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
 };
 
 struct CJUIScrollerModifier {
@@ -1869,6 +1871,8 @@ struct CJUICheckboxModifier {
     ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
+    void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
+    void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct CJUICheckboxGroupModifier {
@@ -1888,6 +1892,7 @@ struct CJUICheckboxGroupModifier {
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct CJUIImageSpanModifier {

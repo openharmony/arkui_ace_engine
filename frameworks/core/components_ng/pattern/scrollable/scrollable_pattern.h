@@ -69,7 +69,7 @@ public:
     {
         UnRegister2DragDropManager();
         if (scrollBarProxy_) {
-            scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+            scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
         }
     }
 
@@ -646,6 +646,32 @@ public:
         ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
+    RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
+    {
+        return scrollBarProxy_;
+    }
+
+    virtual void OnAttachToMainTree() override;
+
+    void AddNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
+    void SetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern);
+
+    void SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& node);
+
+    void UnsetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern);
+
+    void SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>& node);
+
+    void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
+    bool GetNestedScrolling() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetNestedScrolling();
+    }
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -657,10 +683,6 @@ protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
-    }
-    RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
-    {
-        return scrollBarProxy_;
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
@@ -738,6 +760,9 @@ protected:
         return scrollOriginChild_.Upgrade();
     }
 
+    void SetCanOverScroll(bool val);
+    bool GetCanOverScroll() const;
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -806,9 +831,6 @@ private:
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
-    void SetCanOverScroll(bool val);
-    bool GetCanOverScroll() const;
-
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
@@ -852,6 +874,7 @@ private:
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
+    std::list<WeakPtr<NG::ScrollBarProxy>> nestScrollBarProxy_;
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;

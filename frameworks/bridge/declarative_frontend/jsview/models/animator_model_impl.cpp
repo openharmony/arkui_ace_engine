@@ -15,10 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/animator_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_animator.h"
-#include "core/pipeline/pipeline_context.h"
-#include "frameworks/core/event/ace_event_handler.h"
-
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif

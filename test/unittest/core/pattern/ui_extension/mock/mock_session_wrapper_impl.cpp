@@ -165,7 +165,7 @@ void SessionWrapperImpl::NotifyForeground()
 void SessionWrapperImpl::NotifyBackground()
 {
 }
-void SessionWrapperImpl::NotifyDestroy()
+void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
 }
 

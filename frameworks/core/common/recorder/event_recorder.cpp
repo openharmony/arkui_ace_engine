@@ -179,6 +179,11 @@ bool EventRecorder::IsPageRecordEnable() const
     return pageEnable_ && eventSwitch_.pageEnable;
 }
 
+bool EventRecorder::IsPageParamRecordEnable() const
+{
+    return pageParamEnable_ && eventSwitch_.pageParamEnable;
+}
+
 bool EventRecorder::IsExposureRecordEnable() const
 {
     return exposureEnable_ && eventSwitch_.exposureEnable;

@@ -14,13 +14,11 @@
  */
 
 #include "core/components_ng/pattern/toast/toast_accessibility_property.h"
-#include "base/log/log_wrapper.h"
 
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
 #endif
 
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 

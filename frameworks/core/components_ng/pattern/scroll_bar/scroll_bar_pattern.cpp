@@ -16,10 +16,6 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -513,6 +509,8 @@ void ScrollBarPattern::DumpAdvanceInfo()
     hasChild_ ? DumpLog::GetInstance().AddDesc("hasChild: true") : DumpLog::GetInstance().AddDesc("hasChild: false");
     preFrameChildState_ ? DumpLog::GetInstance().AddDesc("preFrameChildState: true")
                         : DumpLog::GetInstance().AddDesc("preFrameChildState: false");
+    enableNestedSorll_ ? DumpLog::GetInstance().AddDesc("enableNestedSorll: true")
+                       : DumpLog::GetInstance().AddDesc("enableNestedSorll: false");
     if (!hasChild_ && scrollBar_) {
         scrollBar_->DumpAdvanceInfo();
     }
@@ -956,7 +954,7 @@ void ScrollBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     GetPanDirectionDumpInfo(json);
     json->Put("hasChild", hasChild_);
     json->Put("preFrameChildState", preFrameChildState_);
-
+    json->Put("enableNestedSorll", enableNestedSorll_);
     if (!hasChild_ && scrollBar_) {
         scrollBar_->DumpAdvanceInfo(json);
     }

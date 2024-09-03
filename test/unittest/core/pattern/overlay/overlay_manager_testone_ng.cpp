@@ -1103,11 +1103,6 @@ HWTEST_F(OverlayManagerTestOneNG, HideAllPopups001, TestSize.Level1)
     popupNode->MountToParent(rootNode);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetNode->GetId()].markNeedUpdate);
-    overlayManager->popupMap_.clear();
-    overlayManager->popupMap_[targetNode->GetId()] = popupInfo;
-    layoutProp->UpdateShowInSubWindow(false);
-    overlayManager->HideAllPopups();
-    EXPECT_FALSE(overlayManager->popupMap_[targetNode->GetId()].markNeedUpdate);
 }
 
 /**

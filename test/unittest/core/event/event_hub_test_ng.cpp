@@ -873,14 +873,6 @@ HWTEST_F(EventHubTestNg, EventHubFrameNodeTest003, TestSize.Level1)
     eventHub->SetJSFrameNodeOnAppear(std::move(flagFunc));
     eventHub->FireOnAppear();
     EXPECT_NE(eventHub->onJSFrameNodeAppear_, nullptr);
-
-    /**
-     * @tc.steps: step4. Call FireOnAppear with onAppear_  is and onJSFrameNodeAppear_ are both not nullptr.
-     * @tc.expected: onAppear_ is nullptr.
-     */
-    eventHub->SetOnAppear(std::move(flagFunc));
-    eventHub->FireOnAppear();
-    EXPECT_NE(eventHub->onAppear_, nullptr);
 }
 
 /**

@@ -15,12 +15,7 @@
 
 #include "core/interfaces/native/node/view_model.h"
 
-#include <optional>
-
-#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -58,6 +53,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
@@ -77,11 +73,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -551,6 +544,14 @@ void* createMarqueeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -618,6 +619,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createTextClockNode,
     createTextTimerNode,
     createMarqueeNode,
+    createCheckBoxGroupNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

@@ -23,10 +23,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -170,7 +167,7 @@ bool WaterFlowLayoutSW::ItemHeightChanged() const
 
 void WaterFlowLayoutSW::CheckReset()
 {
-    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
@@ -656,7 +653,7 @@ void WaterFlowLayoutSW::LayoutSection(
     size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl)
 {
     const auto& margin = info_->margins_[idx];
-    float crossPos = rtl ? selfCrossLen + mainGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
+    float crossPos = rtl ? selfCrossLen + crossGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
     for (size_t i = 0; i < info_->lanes_[idx].size(); ++i) {
         if (rtl) {
             crossPos -= itemsCrossSize_[idx][i] + crossGaps_[idx];
@@ -763,6 +760,11 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
 {
     auto it = info_->idxToLane_.find(idx);
     if (it == info_->idxToLane_.end()) {
+        return false;
+    }
+    if (it->second >= info_->lanes_[info_->GetSegment(idx)].size()) {
+        TAG_LOGW(ACE_WATERFLOW, "Invalid lane index in map: %{public}zu for section: %{public}d", it->second,
+            info_->GetSegment(idx));
         return false;
     }
     auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);

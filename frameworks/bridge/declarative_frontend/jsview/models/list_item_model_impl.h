@@ -37,12 +37,14 @@ public:
     void SetSelected(bool selected) override {};
     void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override {};
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
-        [[maybe_unused]] OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect) override;
+        [[maybe_unused]] OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect,
+        NG::FrameNode* node = nullptr) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-        OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea) override;
+        OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
+        NG::FrameNode* node = nullptr) override;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -17,12 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scroll_component.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

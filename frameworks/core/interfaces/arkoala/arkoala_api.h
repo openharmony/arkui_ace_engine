@@ -402,6 +402,11 @@ struct ArkUIDimensionType {
     ArkUI_Int32 units;
 };
 
+struct ArkUIOptionalDimensionType {
+    ArkUI_Int32 isSet;
+    ArkUIDimensionType dimension;
+};
+
 struct ArkUIChainAnimationOptionsType {
     ArkUI_Float32 minSpace;
     ArkUI_Float32 maxSpace;
@@ -739,6 +744,7 @@ enum ArkUINodeType {
     ARKUI_TEXT_CLOCK,
     ARKUI_TEXT_TIMER,
     ARKUI_MARQUEE,
+    ARKUI_CHECK_BOX_GROUP,
 };
 
 enum ArkUIEventCategory {
@@ -1220,6 +1226,16 @@ struct ArkUIOptionalCharPtr {
     ArkUI_CharPtr value;
 };
 
+struct ArkUIOptionalVoidPtr {
+    ArkUI_Int32 isSet;
+    void* value;
+};
+
+struct ArkUIOptionalBool {
+    ArkUI_Int32 isSet;
+    ArkUI_Bool value;
+};
+
 struct ArkUISwiperIndicator {
     ArkUISwiperIndicatorType type;
     ArkUI_Int32 dimUnit;
@@ -1425,6 +1441,20 @@ typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 typedef struct ArkUI_Params {
     ArkUINodeType nodeType;
 } ArkUI_Params;
+
+struct ArkUINavigationTitlebarOptions {
+    ArkUIOptionalUint colorValue;
+    ArkUIOptionalInt blurStyle;
+    ArkUIOptionalInt barStyle;
+    ArkUIOptionalDimensionType paddingStart;
+    ArkUIOptionalDimensionType paddingEnd;
+};
+
+struct ArkUIBarItem {
+    ArkUIOptionalCharPtr text;
+    ArkUIOptionalCharPtr icon;
+    ArkUIOptionalBool isEnable;
+};
 
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
@@ -2165,6 +2195,7 @@ struct ArkUIImageModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageBorderRadius)(ArkUINodeHandle node);
     void (*setImageBorder)(ArkUINodeHandle node);
+    void (*setImageBorderWithValues)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*resetImageBorder)(ArkUINodeHandle node);
     void (*setImageOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetImageOpacity)(ArkUINodeHandle node);
@@ -2688,6 +2719,8 @@ struct ArkUIScrollBarModifier {
     void (*setScrollBarState)(ArkUINodeHandle node, ArkUI_Int32 state);
     void (*resetScrollBarState)(ArkUINodeHandle node);
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
+    void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollerModifier {
@@ -2975,6 +3008,13 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setTitle)(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
+        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options);
+    void (*resetTitle)(ArkUINodeHandle node);
+    void (*setMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
+    void (*resetMenus)(ArkUINodeHandle node);
+    void (*setMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
+    void (*setMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
 };
 
 struct ArkUITextAreaModifier {
@@ -3392,6 +3432,8 @@ struct ArkUICheckboxModifier {
     ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
+    void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
+    void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -3411,6 +3453,7 @@ struct ArkUICheckboxGroupModifier {
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct ArkUIImageSpanModifier {
@@ -3602,6 +3645,13 @@ struct ArkUINavigationModifier {
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setNavTitle)(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
+        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options);
+    void (*resetNavTitle)(ArkUINodeHandle node);
+    void (*setNavMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
+    void (*resetNavMenus)(ArkUINodeHandle node);
+    void (*setNavMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
+    void (*setNavMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
 };
 
 struct ArkUINavRouterModifier {
@@ -4398,6 +4448,15 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorEditMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetRichEditorEditMenuOptions)(ArkUINodeHandle node);
+    void (*setRichEditorOnWillChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);
+    void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
+    void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
+        const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount);
+    void (*resetRichEditorPlaceholder)(ArkUINodeHandle node);
+    void (*setRichEditorAboutToDelete)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorAboutToDelete)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

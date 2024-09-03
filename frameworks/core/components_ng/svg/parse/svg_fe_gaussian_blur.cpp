@@ -15,9 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
 
-#include "include/effects/SkImageFilters.h"
-
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

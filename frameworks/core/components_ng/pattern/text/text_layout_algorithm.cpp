@@ -15,22 +15,11 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
-#include <limits>
-
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_drag/text_drag_base.h"
-#include "core/components_ng/render/font_collection.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
@@ -429,9 +418,7 @@ bool TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::strin
     double minFontSize = 0.0;
     GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize(); // Get stepSize
-    auto adaptUnit = maxFontSizeDimension.GetAdaptDimensionUnit(textStyle.GetAdaptMinFontSize());
-    Dimension step(1.0f, adaptUnit);
+    Dimension step(1.0f, DimensionUnit::PX);
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }

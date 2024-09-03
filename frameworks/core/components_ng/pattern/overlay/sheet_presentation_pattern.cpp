@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
-#include "sheet_presentation_property.h"
-
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -130,19 +128,26 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
 
-    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_RETURN(layoutProperty, 0.0f);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
-
     // full screen subwindow sheet is also WINDOW_MODE_FLOATING, can not enter
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if (IsBottomLarge() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        sheetTopSafeArea = GetTopAreaInWindow();
+    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
+               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        sheetTopSafeArea = GetBottomSafeArea();
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
                AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetTopSafeArea = 0.0f;
+    }
+    // before API13，ignore safeArea height when in landscape
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+        CHECK_NULL_RETURN(layoutProperty, 0.0f);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
+            IsPhoneInLandScape()) {
+            sheetTopSafeArea = 0.0f;
+        }
     }
     return sheetTopSafeArea;
 }
@@ -163,7 +168,6 @@ void SheetPresentationPattern::InitPageHeight()
     if (overlay && overlay->IsRootExpansive() && showInPage) {
         sheetTopSafeArea_ = .0f;
     }
-
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -174,11 +178,13 @@ void SheetPresentationPattern::InitPageHeight()
     auto windowManager = pipelineContext->GetWindowManager();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    auto sheetType = GetSheetType();
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if (IsBottomLarge() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        sheetTopSafeArea_ = GetTopAreaInWindow();
+    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
+               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        sheetTopSafeArea_ = GetBottomSafeArea();
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
@@ -199,9 +205,9 @@ void SheetPresentationPattern::InitScrollProps()
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);
 
-    // real-time refresh should set scroll always enabled,
-    // because sheet will be not draggable when sheet init height is less than content height
-    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS);
+    // When sheet content height is larger than sheet height,
+    // the sheet height should set scroll always enabled.
+    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable());
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -460,6 +466,7 @@ void SheetPresentationPattern::InitPanEvent()
 
 void SheetPresentationPattern::HandleDragStart()
 {
+    InitScrollProps();
     SetIsDragging(true);
     if (animation_ && isAnimationProcess_) {
         AnimationUtils::StopAnimation(animation_);
@@ -2278,6 +2285,7 @@ bool SheetPresentationPattern::IsScrollOutOfBoundary()
 
 void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    InitScrollProps();
     if (animation_ && isAnimationProcess_) {
         AnimationUtils::StopAnimation(animation_);
         isAnimationBreak_ = true;
@@ -2331,7 +2339,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
     // the sheet height should be updated.
     // When dragging up the sheet, and sheet height is less than or equal to sheet content height,
     // the sheet content should scrolling.
-    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight && IsScrollable()) {
+    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight) {
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
     }
@@ -2416,42 +2424,25 @@ void SheetPresentationPattern::OverlaySheetSpringBack()
     overlayManager->SheetSpringBack();
 }
 
-// No status bar and landscape
-bool SheetPresentationPattern::IsNoStatusBarAndLandscape() const
+float SheetPresentationPattern::GetBottomSafeArea()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host, .0f);
     auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
+    CHECK_NULL_RETURN(pipelineContext, .0f);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
-
-    if ((SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) &&
-        NearEqual(safeAreaInsets.top_.Length(), 0)) {
-        return true;
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+        auto topAreaInWindow = GetTopAreaInWindow();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", topAreaInWindow);
+        return topAreaInWindow;
+    } else {
+        return safeAreaInsets.top_.Length();
     }
-    return false;
-}
-// The purpose is to not exceed the maximum size
-bool SheetPresentationPattern::IsBottomLarge()
-{
-    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    auto sheetType = GetSheetType();
-    // We need to consider the height set by the developer here
-    if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
-        sheetStyle.sheetMode == SheetMode::LARGE) {
-        return true;
-    }
-    return false;
 }
 
 // Height of status bar
 float SheetPresentationPattern::GetTopAreaInWindow() const
 {
-    if (IsNoStatusBarAndLandscape()) {
-        return 0.0f;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     auto pipelineContext = host->GetContext();

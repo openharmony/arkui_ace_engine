@@ -83,11 +83,12 @@ private:
     static void RecordFlexLayoutsCount(const std::vector<PerformanceCheckNode>& nodeList, const CodeInfo& info);
     static void RecordVsyncTimeout(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& info);
     static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
-    void RecordFunctionTimeout(int64_t sec, const std::string& functionName);
+    static void RecordFunctionTimeout();
     static RefPtr<Framework::RevSourceMap> GetCurrentSourceMap();
     int64_t markTime_ = 0;
     std::string name_;
     static std::string currentPath_;
+    static std::vector<std::pair<int64_t, std::string>> records_;
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedPerformanceCheck);
 };
 } // namespace OHOS::Ace

@@ -15,14 +15,9 @@
 
 #include "ui_service_mgr_stub.h"
 
-#include "errors.h"
 #include "ipc_skeleton.h"
-#include "string_ex.h"
 #include "tokenid_kit.h"
-#include "ui_service_mgr_errors.h"
 #include "ui_service_mgr_xcollie.h"
-#include "ui_service_proxy.h"
-#include "ui_service_stub.h"
 
 namespace OHOS::Ace {
 constexpr uint32_t UI_MGR_SERVICE_TIMEOUT = 5;

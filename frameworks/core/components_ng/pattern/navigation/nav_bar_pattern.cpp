@@ -18,23 +18,14 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
-#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -338,8 +329,10 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
     if (navBarLayoutProperty->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        toolBarNode->SetActive(false);
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        toolBarNode->SetActive(true);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
         if (opts) {

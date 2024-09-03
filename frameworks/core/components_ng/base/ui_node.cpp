@@ -14,24 +14,10 @@
  */
 #include "core/components_ng/base/ui_node.h"
 
-#include <memory>
-
-#include "base/geometry/ng/point_t.h"
 #include "base/log/ace_checker.h"
-#include "base/log/ace_performance_check.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -164,16 +150,10 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
-    if (!addModalUiextension && modalUiextensionCount_ > 0) {
-        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-            "Current modalUiextension count is : %{public}d",
-            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
-        return;
-    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -669,6 +649,14 @@ void UINode::DetachFromMainTree(bool recursive)
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
+}
+
+void UINode::FireCustomDisappear()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        child->FireCustomDisappear();
+    }
 }
 
 void UINode::ProcessOffscreenTask(bool recursive)
@@ -1251,12 +1239,6 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
     return { false, count };
 }
 
-// for Grid refresh GridItems
-void UINode::ChildrenUpdatedFrom(int32_t index)
-{
-    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
-}
-
 bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
@@ -1632,21 +1614,27 @@ void UINode::GetContainerComponentText(std::string& text)
     }
 }
 
-void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
 {
     int32_t updateFrom = 0;
     for (const auto& child : GetChildren()) {
         if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
+            updateFrom += changeIdx;
             break;
         }
         int32_t count = child->FrameCount();
         updateFrom += count;
     }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
     auto accessibilityId = GetAccessibilityId();
     auto parent = GetParent();
     if (parent) {
-        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

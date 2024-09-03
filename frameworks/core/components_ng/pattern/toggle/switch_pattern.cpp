@@ -15,20 +15,6 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
-#include <cmath>
-#include <cstdint>
-
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve.h"
-#include "core/animation/curves.h"
-#include "core/common/container.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
-#include "core/components_ng/pattern/toggle/switch_paint_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

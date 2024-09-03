@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_painter.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

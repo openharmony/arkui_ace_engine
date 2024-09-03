@@ -336,7 +336,9 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     if (!hideMinimize_) {
         titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, rightPadding));
     }
-    titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
+    if (!hideClose_) {
+        titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
+    }
     return titleChildren;
 }
 

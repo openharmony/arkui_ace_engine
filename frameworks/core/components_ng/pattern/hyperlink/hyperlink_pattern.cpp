@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
-#include "base/json/json_util.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/common/font_manager.h"
 #include "core/common/udmf/udmf_client.h"
