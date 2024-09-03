@@ -20,7 +20,6 @@
 #include "base/memory/referenced.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
@@ -184,20 +183,8 @@ public:
 
     bool AvoidBottom() const override
     {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            // ModalPage will not avoid bottom in any scenes.
-            return false;
-        }
         // If UIExtensionComponent uses ModalPage, ModalPage will not avoid bottom.
         return !isUIExtension_;
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            return MakeRefPtr<ModalPresentationLayoutAlgorithm>();
-        }
-        return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
 private:

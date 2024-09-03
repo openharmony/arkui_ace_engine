@@ -1462,6 +1462,7 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value)
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -1473,6 +1474,7 @@ void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
 void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -1484,6 +1486,7 @@ void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
 void NavigationModelNG::SetMinContentWidth(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
@@ -1495,6 +1498,7 @@ void NavigationModelNG::SetMinContentWidth(const Dimension& value)
 void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navigationEventHub);
     navigationEventHub->SetOnNavBarStateChange(std::move(onNavBarStateChange));
@@ -1503,6 +1507,7 @@ void NavigationModelNG::SetOnNavBarStateChange(std::function<void(bool)>&& onNav
 void NavigationModelNG::SetOnNavigationModeChange(std::function<void(NavigationMode)>&& modeChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navigationEventHub);
     navigationEventHub->SetOnNavigationModeChange(std::move(modeChange));

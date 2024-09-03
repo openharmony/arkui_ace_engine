@@ -13,5 +13,18 @@
  * limitations under the License.
  */
 
-{
+interface ClickEvent {}
+
+interface GestureStyleArg {
+    onClick?: (event: ClickEvent) => void; // arg MUST contain a onclick function
+    onLongPress?: (event: ClickEvent) => void; // arg MAY contain a longpress function
+}
+  
+/**
+ * NativeGestureStyle aka JSGestureSpan C++ class exposed to JS
+ * 
+ * all definitions in this file are framework internal
+ */
+declare class NativeGestureStyle {
+    constructor(arg: GestureStyleArg);
 }

@@ -46,7 +46,7 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
             auto builderLayoutConstraint = layoutConstraint;
-            bool isCustomBuilderExist = layoutProperty->GetIsCustomBuilderExistValue(false);
+            bool isCustomBuilderExist = layoutProperty->GetIsCustomBuilderExistValue(true);
             if (isCustomBuilderExist) {
                 builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
                     CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));

@@ -36,7 +36,6 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -102,6 +101,7 @@ void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    pipeline_ = pipeline;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto fontManager = pipeline->GetFontManager();
@@ -127,7 +127,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     dataDetectorAdapter_->aiDetectDelayTask_.Cancel();
     CloseSelectOverlay();
-    auto pipeline = GetContext();
+    auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -341,12 +341,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     }
-
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && GetWideText().length() != 0) {
-        VibratorUtils::StartVibraFeedback("longPress.light");
-    }
-
     if (IsDraggable(localOffset)) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging

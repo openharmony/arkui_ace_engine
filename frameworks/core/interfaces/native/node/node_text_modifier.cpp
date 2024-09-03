@@ -1106,7 +1106,15 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     }
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
+    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+    } else {
+        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+    }
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)

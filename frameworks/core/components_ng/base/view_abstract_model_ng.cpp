@@ -358,6 +358,7 @@ void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, cons
         return customNode;
     };
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
     targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
     NG::ViewAbstract::SetBackgroundAlign(align);
 }

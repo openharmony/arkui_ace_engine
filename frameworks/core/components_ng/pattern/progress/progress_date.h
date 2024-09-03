@@ -101,6 +101,7 @@ struct ProgressAnimatableProperty {
     Color borderColor;
     float strokeWidth = 0.0f;
     float strokeRadius = 0.0f;
+    float value = 0.0f;
 };
 
 class ProgressConfiguration : public CommonConfiguration {

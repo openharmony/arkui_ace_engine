@@ -28,6 +28,9 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {

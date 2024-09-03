@@ -454,7 +454,7 @@ bool ViewStackProcessor::ShouldPopImmediately()
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
     auto menuComponent = AceType::DynamicCast<MenuComponent>(GetMainComponent());
-    return (strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0 ||
+    return ((type && strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0)||
             !(componentGroup || multiComposedComponent || soleChildComponent || menuComponent));
 }
 
@@ -516,14 +516,14 @@ void ViewStackProcessor::PopContainer()
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
     auto soleChildComponent = AceType::DynamicCast<SoleChildComponent>(GetMainComponent());
-    if ((componentGroup && strcmp(type, AceType::TypeName<TextSpanComponent>()) != 0) || multiComposedComponent ||
-        soleChildComponent) {
+    if ((componentGroup && type && strcmp(type, AceType::TypeName<TextSpanComponent>()) != 0) ||
+        multiComposedComponent || soleChildComponent) {
         Pop();
         return;
     }
 
     while ((!componentGroup && !multiComposedComponent && !soleChildComponent) ||
-           strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0) {
+          (type &&  strcmp(type, AceType::TypeName<TextSpanComponent>()) == 0)) {
         if (componentsStack_.size() <= 1) {
             break;
         }

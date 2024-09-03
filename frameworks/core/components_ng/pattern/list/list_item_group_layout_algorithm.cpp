@@ -355,6 +355,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     if (totalItemCount_ <= 0) {
         totalMainSize_ = headerMainSize_ + footerMainSize_;
         itemPosition_.clear();
+        layoutedItemInfo_.reset();
         return;
     }
     int32_t startIndex = 0;
@@ -1176,7 +1177,7 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
 ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
 {
     ListItemGroupLayoutInfo info;
-    if (totalItemCount_ == 0) {
+    if (totalItemCount_ == 0 || childrenSize_) {
         info.atStart = true;
         info.atEnd = true;
         return info;
@@ -1184,7 +1185,7 @@ ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
     if (layoutedItemInfo_.has_value()) {
         const auto& itemInfo = layoutedItemInfo_.value();
         info.atStart = itemInfo.startIndex == 0;
-        info.atEnd = itemInfo.endIndex == totalItemCount_ - 1;
+        info.atEnd = itemInfo.endIndex >= totalItemCount_ - 1;
         auto totalHeight = (itemInfo.endPos - itemInfo.startPos + spaceWidth_);
         auto itemCount = itemInfo.endIndex - itemInfo.startIndex + 1;
         info.averageHeight = totalHeight / itemCount;

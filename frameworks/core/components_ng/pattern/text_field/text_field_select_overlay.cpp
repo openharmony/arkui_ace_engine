@@ -21,7 +21,6 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
@@ -419,13 +418,6 @@ int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& loca
     return GetTextInputCaretPosition(localOffset);
 }
 
-void TextFieldSelectOverlay::StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex)
-{
-    if (currentIndex != preIndex) {
-        VibratorUtils::StartVibraFeedback("slide");
-    }
-}
-
 void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
@@ -436,9 +428,6 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         localOffset = localOffset - GetPaintOffsetWithoutTransform();
     }
     auto selectController = pattern->GetTextSelectController();
-    CHECK_NULL_VOID(selectController);
-    int32_t startIndex = selectController->GetFirstHandleIndex();
-    int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto movingCaretOffset =
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
@@ -457,17 +446,13 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
     if (IsSingleHandle()) {
-        int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-        StartVibratorByCaretIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
-            StartVibratorByCaretIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
-            StartVibratorByCaretIndexChange(position, endIndex);
             selectController->MoveSecondHandleToContentRect(position, false);
             UpdateFirstHandleOffset();
         }

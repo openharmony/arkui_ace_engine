@@ -943,7 +943,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    bool isStartDraggingFromSubWindow = (pipeline != mainPipeline);
+    auto window = SubwindowManager::GetInstance()->ShowPreviewNG(isStartDraggingFromSubWindow);
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);

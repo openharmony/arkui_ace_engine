@@ -2175,6 +2175,7 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2209,6 +2210,7 @@ class NavPathStack {
       })
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = true;
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
@@ -2262,6 +2264,7 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2282,6 +2285,7 @@ class NavPathStack {
       })
     }
     [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    info.pushDestination = true;
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
@@ -2872,6 +2876,9 @@ var SaveDescription;
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
   SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
+  SaveDescription[SaveDescription['EXPORT_TO_GALLERY'] = 9] = 'EXPORT_TO_GALLERY';
+  SaveDescription[SaveDescription['QUICK_SAVE_TO_GALLERY'] = 10] = 'QUICK_SAVE_TO_GALLERY';
+  SaveDescription[SaveDescription['RESAVE_TO_GALLERY'] = 11] = 'RESAVE_TO_GALLERY';
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;
@@ -3322,6 +3329,14 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
+
+var AccessibilityHoverType;
+(function (AccessibilityHoverType) {
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_ENTER"] = 0] = "HOVER_ENTER";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_MOVE"] = 1] = "HOVER_MOVE";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
+  AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
+})(AccessibilityHoverType || (AccessibilityHoverType = {}));
 
 class ImageAnalyzerController {
   constructor() {

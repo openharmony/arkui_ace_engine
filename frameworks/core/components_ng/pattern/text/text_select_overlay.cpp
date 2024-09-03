@@ -19,7 +19,6 @@
 #include <optional>
 
 #include "base/utils/utils.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -216,14 +215,8 @@ void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, 
     CHECK_NULL_VOID(textPattern);
     auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirstHandle) {
-        if (textPattern->GetTextSelector().baseOffset != currentHandleIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
-        }
         textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
     } else {
-        if (textPattern->GetTextSelector().destinationOffset != currentHandleIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
-        }
         textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
     }
 }
@@ -363,10 +356,10 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsTouchUp(sourceType, touchType) || IsMouseClickDown(sourceType, touchType)) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    if (IsMouseClickDown(sourceType, touchType)) {
         textPattern->ResetSelection();
     }
+    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
 }
 
 void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)

@@ -654,6 +654,7 @@ void NavigationPattern::RefreshNavDestination()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto preTopNavPath = std::move(preTopNavPath_);
+    auto preLastStandardIndex = hostNode->GetLastStandardIndex();
     auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
@@ -663,7 +664,7 @@ void NavigationPattern::RefreshNavDestination()
         navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
 #endif
     std::string navDestinationName = "";
-    CheckTopNavPathChange(preTopNavPath, newTopNavPath);
+    CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
@@ -703,7 +704,8 @@ void NavigationPattern::RefreshNavDestination()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
+    int32_t preLastStandardIndex)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -845,7 +847,7 @@ void NavigationPattern::CheckTopNavPathChange(
         navigationStack_->UpdateAnimatedValue(true);
     } else {
         // before the animation of navDes replacing, update the zIndex of the previous navDes node
-        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
+        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination, preLastStandardIndex);
         // transition with animation need to run after layout task
         StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);
     }
@@ -1933,7 +1935,7 @@ void NavigationPattern::OnColorConfigurationUpdate()
 }
 
 void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
-    const RefPtr<FrameNode> &newTopNavDestination)
+    const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex)
 {
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) {
@@ -1944,9 +1946,29 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
         auto newDesNodeContext = newTopNavDestination->GetRenderContext();
         CHECK_NULL_VOID(newDesNodeContext);
         std::optional<int32_t> newNodeZIndex = newDesNodeContext->GetZIndex();
+        int32_t standardIndex = newNodeZIndex.value_or(0) - 1;
+        auto hideNodes = hostNode->GetHideNodes();
+        for (auto iter = hideNodes.begin(); iter != hideNodes.end(); ++iter) {
+            // if navdestination nodes is not need removed, default zIndex is satisfied, don't need change
+            if (!iter->second) {
+                continue;
+            }
+            auto navDestination = iter->first;
+            if (!navDestination) {
+                continue;
+            }
+            auto navDestinationContext = navDestination->GetRenderContext();
+            if (!navDestinationContext) {
+                continue;
+            }
+            // get navDestination index in hideNodes, use navdestination index in pre navigation stack
+            int32_t hideNodesIndex =
+                static_cast<int32_t>(hideNodes.size()) - (navDestination->GetIndex() - preLastStandardIndex);
+            navDestinationContext->UpdateZIndex(standardIndex - hideNodesIndex);
+        }
         auto preDesNodeContext = preTopNavDestination->GetRenderContext();
         CHECK_NULL_VOID(preDesNodeContext);
-        preDesNodeContext->UpdateZIndex(newNodeZIndex.value_or(0) - 1);
+        preDesNodeContext->UpdateZIndex(standardIndex);
         navigationContentNode->RebuildRenderContextTree();
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);

@@ -4898,6 +4898,18 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
     InitIndexCanChangeMap();
 }
 
+void SwiperPattern::OnScrollDragEndRecursive()
+{
+    NestableScrollContainer::OnScrollDragEndRecursive();
+    if (IsDisableSwipe()) {
+        return;
+    }
+    // Swiper and child handle drag end event together.
+    if (!DuringTranslateAnimation()) {
+        HandleDragEnd(0.0f);
+    }
+}
+
 void SwiperPattern::NotifyParentScrollEnd()
 {
     auto parent = GetNestedScrollParent();

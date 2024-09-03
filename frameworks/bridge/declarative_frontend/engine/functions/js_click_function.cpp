@@ -217,14 +217,14 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
 
 void JsWeakClickFunction::Execute(MouseInfo& info)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    objectTemplate->SetInternalFieldCount(1);
-    JSRef<JSObject> obj = objectTemplate->NewInstance();
+    JSRef<JSObjTemplate> objTemp = JSRef<JSObjTemplate>::New();
+    objTemp->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objTemp->NewInstance();
+    Offset localOffset = info.GetLocalLocation();
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset screenOffset = info.GetScreenLocation();
     obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));

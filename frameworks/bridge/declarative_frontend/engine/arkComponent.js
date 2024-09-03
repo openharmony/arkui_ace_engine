@@ -23812,6 +23812,9 @@ class ArkXComponentComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
   initialize(value) {
     if (value[0]) {
       modifierWithKey(this._modifiersWithKeys, XComponentInitializeModifier.identity,

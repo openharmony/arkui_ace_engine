@@ -12,18 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+class GestureStyle extends NativeGestureStyle {
+// hold arg so NativeGestureStyle can make use of the functions
+// contained in it without root (global) cycle dependency problems. like
+// onClick onLongPress etc.
+    private arg_: GestureStyleArg;
 
-{
-  "module": {
-    "name": "common",
-    "type": "shared",
-    "description": "$string:shared_desc",
-    "deviceTypes": [
-      "phone",
-      "tablet",
-      "2in1"
-    ],
-    "deliveryWithInstall": true,
-    "pages": "$profile:main_pages"
-  }
+    constructor(arg: GestureStyleArg) {
+        super(arg);
+        this.arg_ = arg;
+    }
 }
+  

@@ -48,7 +48,6 @@
 #include "core/common/ime/text_selection.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -1714,7 +1713,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
     auto touchOffset = info.GetTouches().front().GetLocalLocation();
-    int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
         float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
@@ -1738,11 +1736,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
     }
-
-    if (selectController_->GetCaretIndex() != preCaretIndex) {
-        VibratorUtils::StartVibraFeedback("slide");
-    }
-
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2972,7 +2965,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    VibratorUtils::StartVibraFeedback("longPress.light");
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
         return;

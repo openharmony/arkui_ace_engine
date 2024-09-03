@@ -351,7 +351,7 @@ public:
     virtual void AnimateTo(
         float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true);
-    bool CanOverScroll(int32_t source)
+    virtual bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
             IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
@@ -683,6 +683,9 @@ protected:
     OffsetF mouseStartOffset_;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
+    bool animateOverScroll_ = false;
+    bool animateCanOverScroll_ = false;
+    bool lastCanOverScroll_ = false;
 
     RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
     {
@@ -830,9 +833,7 @@ private:
     // scroller
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
-    bool animateOverScroll_ = false;
     bool isAnimateOverScroll_ = false;
-    bool animateCanOverScroll_ = false;
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
@@ -884,7 +885,6 @@ private:
     void AddHotZoneSenceInterface(SceneStatus scene);
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
-    bool lastCanOverScroll_ = false;
     RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
 
