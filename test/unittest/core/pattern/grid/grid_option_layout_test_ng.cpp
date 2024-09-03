@@ -891,8 +891,12 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     auto model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateGridItems(3);
+    model.SetLayoutOptions({});
+    CreateGridItems(3); // 0-height items
     CreateDone();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
 
     GestureEvent info;
     info.SetMainVelocity(1200.f);
@@ -902,12 +906,20 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 100);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
     scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
