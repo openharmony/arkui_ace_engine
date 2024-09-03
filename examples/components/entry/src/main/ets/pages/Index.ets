@@ -16,8 +16,8 @@
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from '../common/route';
 import { ContainersDestination, containersRoute } from './containers';
-import { OperatesDestination, operatesRoute } from './operates';
 import { DisplaysDestination, displaysRoute } from './displays';
+import { OperatesDestination, operatesRoute } from './operates';
 import { PickersDestination, pickersRoute } from './pickers';
 
 @Styles
@@ -61,8 +61,8 @@ struct Index {
   @Provide('router') router: NavPathStack = new NavPathStack();
   @State routes: RouteGroup[] = [
     containersRoute,
-    operatesRoute,
     displaysRoute,
+    operatesRoute,
     pickersRoute,
   ];
   @State selection: string | null = null;
