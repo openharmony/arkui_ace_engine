@@ -197,7 +197,6 @@ void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
     RefPtr<NG::FrameNode> &hostNode,
     RefPtr<NG::PipelineContext> &context)
 {
-
     if (eventType == NG::AccessibilityHoverEventType::ENTER) {
         ResetHoverForThirdState();
     }
@@ -242,7 +241,7 @@ void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
 }
 
 void AccessibilityHoverManagerForThirdNG::SendThirdAccessibilityAsyncEvent(
-    const AccessibilityEvent &accessibilityEvent, 
+    const AccessibilityEvent& accessibilityEvent,
     const RefPtr<NG::FrameNode>& hostNode)
 {}
 
