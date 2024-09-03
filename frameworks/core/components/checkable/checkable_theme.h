@@ -46,6 +46,18 @@ public:
     {
         return focusColor_;
     }
+    const Color& GetFocusBoardColor() const
+    {
+        return focusBoardColor_;
+    }
+    const Color& GetBorderFocusedColor() const
+    {
+        return borderFocusedColor_;
+    }
+    const Color& GetFocusedBGColorUnselected() const
+    {
+        return focusedBGColorUnselected_;
+    }
     const Dimension& GetWidth() const
     {
         return width_;
@@ -146,6 +158,16 @@ public:
         return focusPaintPadding_;
     }
 
+    const Dimension& GetFocusBoardSize() const
+    {
+        return focusBoardSize_;
+    }
+
+    const Dimension& GetRoundFocusBoardSize() const
+    {
+        return roundFocusBoardSize_;
+    }
+
     double GetHoverDuration() const
     {
         return hoverDuration_;
@@ -208,6 +230,9 @@ protected:
     Color focusedRingUnchecked_;
     Color focusedBgUnchecked_;
     Color focusedBgColor_;
+    Color focusBoardColor_;
+    Color borderFocusedColor_;
+    Color focusedBGColorUnselected_;
     Dimension sizeFocusBg_;
     Dimension sizeHoverBg_;
     Dimension width_;
@@ -222,6 +247,8 @@ protected:
     Dimension defaultPaddingSize_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
+    Dimension focusBoardSize_;
+    Dimension roundFocusBoardSize_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -295,6 +322,7 @@ public:
             theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = checkboxPattern->GetAttr<double>("color_animation_duration", 0.0);
+            SetCheckboxFocus(themeConstants, theme);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -312,6 +340,17 @@ public:
             theme->hotZoneHorizontalPadding_ =
                 checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+        }
+
+        void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
+            theme->focusBoardColor_ = checkboxPattern->GetAttr<Color>("color_focused_bg", Color(0xffff0000));
+            theme->focusBoardSize_ = checkboxPattern->GetAttr<Dimension>("size_focused_bg", 2.0_vp);
+            theme->borderFocusedColor_ = checkboxPattern->GetAttr<Color>("focused_border_color", Color(0xffff0000));
+            theme->focusedBGColorUnselected_ =
+                checkboxPattern->GetAttr<Color>("focused_bg_color_unselected", Color(0xffff0000));
+            theme->roundFocusBoardSize_ = checkboxPattern->GetAttr<Dimension>("round_size_focused_bg", 2.0_vp);
         }
     };
 

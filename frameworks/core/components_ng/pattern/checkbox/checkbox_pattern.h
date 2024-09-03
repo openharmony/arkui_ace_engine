@@ -235,10 +235,16 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitFocusEvent();
     void OnClick();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -282,6 +288,7 @@ private:
     bool isHover_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
+    bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -293,6 +300,7 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;
