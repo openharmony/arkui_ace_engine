@@ -16,10 +16,6 @@
 #include "bridge/cj_frontend/frontend/cj_frontend.h"
 
 #include "bridge/cj_frontend/frontend/cj_page_router.h"
-#include "bridge/js_frontend/js_ace_page.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/gestures/swipe_recognizer.h"
-#include "core/components/navigator/navigator_component.h"
 
 namespace OHOS::Ace::Framework {
 void CJFrontend::InternalInitialize()

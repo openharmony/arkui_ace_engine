@@ -14,30 +14,10 @@
  */
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 
-#include <vector>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "base/geometry/rect.h"
-#include "base/geometry/rrect.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/popup/popup_theme.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/bubble/bubble_render_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {

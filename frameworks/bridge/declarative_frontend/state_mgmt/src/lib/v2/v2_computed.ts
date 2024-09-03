@@ -62,6 +62,11 @@ class ComputedV2 {
         ObserveV2.getObserve().addRef(this, propertyKey);
         return ObserveV2.autoProxyObject(this, cachedProp);
       },
+      set(_) {
+        const error = `@Computed ${propertyKey} is readonly, cannot set value for it`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      },
       enumerable: true
     });
 

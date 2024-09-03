@@ -176,6 +176,7 @@ export const defaultTheme = {
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         },
+        focusOutlineMargin: 2,
         normalBorderRadius: {
             "id": -1,
             "type": 10002,
@@ -1561,6 +1562,11 @@ export class ChipComponent extends ViewPU {
                         });
                         SymbolGlyph.fontSize(this.theme.defaultSymbol.fontSize);
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor());
+                        SymbolGlyph.focusBox({
+                            margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+                            strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+                            strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+                        });
                         SymbolGlyph.onSizeChange((u, v) => {
                             this.allowCloseSymbolWidth = v?.width;
                         });

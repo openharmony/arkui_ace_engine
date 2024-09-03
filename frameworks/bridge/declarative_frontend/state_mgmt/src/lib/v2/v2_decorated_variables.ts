@@ -146,14 +146,15 @@ class VariableUtilV3 {
    * @param provideVarName - The name of the property in the provider view that the consumer will access.
    *
    */
-    public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): void {
+    public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): any {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
+      const view = weakView.deref();
+
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} get`);
           ObserveV2.getObserve().addRef(this, consumeVarName);
-          const view = weakView.deref();
           if (!view) {
             const error = `${this.debugInfo__()}: get() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
@@ -164,7 +165,6 @@ class VariableUtilV3 {
         set(val) {
           // If the object has not been observed, you can directly assign a value to it. This improves performance.
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} set`);
-          const view = weakView.deref();
           if (!view) {
             const error = `${this.debugInfo__()}: set() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
@@ -181,9 +181,10 @@ class VariableUtilV3 {
         },
         enumerable: true
       });
+      return view[provideVarName];
     }
 
-    public static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: any): void {
+    public static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: any): any {
       stateMgmtConsole.debug(`defineConsumerWithoutProvider: ${consumeView.debugInfo__()} @Consumer ${consumeVarName} does not have @Provider counter part, will use local init value`);
 
       const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
@@ -203,6 +204,7 @@ class VariableUtilV3 {
         },
         enumerable: true
       });
+      return consumeView[storeProp];
     }
   }
 

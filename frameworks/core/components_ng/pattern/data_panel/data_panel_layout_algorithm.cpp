@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
 
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 

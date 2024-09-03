@@ -14,18 +14,11 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#include "base/log/ace_scoring_log.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
-#include "core/components_ng/pattern/security_component/security_component_theme.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
 #endif
@@ -454,7 +447,11 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto onAppear = [weak = WeakClaim(this)]() {
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    auto onAppear = [weak = WeakClaim(this), instanceId]() {
+        ContainerScope scope(instanceId);
 #ifdef SECURITY_COMPONENT_ENABLE
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);

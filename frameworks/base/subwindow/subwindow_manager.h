@@ -58,7 +58,7 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
     Rect GetParentWindowRect();
 
-    RefPtr<Subwindow> ShowPreviewNG();
+    RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow);
     void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
@@ -94,14 +94,6 @@ public:
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
-    int32_t GetDialogSubWindowId()
-    {
-        return dialogSubWindowId_;
-    }
-    void SetDialogSubWindowId(int32_t dialogSubWindowId)
-    {
-        dialogSubWindowId_ = dialogSubWindowId;
-    }
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
@@ -141,8 +133,11 @@ public:
     }
     void ClearToastInSystemSubwindow();
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsFreeMultiWindow(int32_t instanceId) const;
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
+
+    void SetRect(const NG::RectF& rect, int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
@@ -160,7 +155,6 @@ private:
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
     SubwindowMap subwindowMap_;
-    int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
 
     RefPtr<Subwindow> currentSubwindow_;

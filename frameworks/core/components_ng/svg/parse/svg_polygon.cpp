@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 

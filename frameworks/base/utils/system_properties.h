@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -47,6 +48,11 @@ enum class FoldScreenType: int32_t {
 
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
+extern const char ENABLE_DEBUG_BOUNDARY_KEY[];
+extern const char ENABLE_TRACE_LAYOUT_KEY[];
+extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
+extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
+extern const char ENABLE_DEBUG_STATEMGR_KEY[];
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -276,7 +282,7 @@ public:
 
     static bool GetDebugBoundaryEnabled()
     {
-        return debugBoundaryEnabled_;
+        return debugBoundaryEnabled_.load();
     }
 
     static bool GetDebugOffsetLogEnabled()
@@ -301,7 +307,7 @@ public:
 
     static bool GetLayoutTraceEnabled()
     {
-        return layoutTraceEnable_;
+        return layoutTraceEnable_.load();
     }
 
     static bool GetSyncDebugTraceEnabled()
@@ -331,17 +337,17 @@ public:
 
     static bool GetTraceInputEventEnabled()
     {
-        return traceInputEventEnable_;
+        return traceInputEventEnable_.load();
     }
 
     static bool GetStateManagerEnabled()
     {
-        return stateManagerEnable_;
+        return stateManagerEnable_.load();
     }
 
     static void SetStateManagerEnabled(bool stateManagerEnable)
     {
-        stateManagerEnable_ = stateManagerEnable;
+        stateManagerEnable_.store(stateManagerEnable);
     }
 
     static void SetFaultInjectEnabled(bool faultInjectEnable)
@@ -540,7 +546,12 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
+    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -551,9 +562,11 @@ public:
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
+    static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
+
     static bool GetAcePerformanceMonitorEnabled()
     {
-        return acePerformanceMonitorEnable_;
+        return acePerformanceMonitorEnable_.load();
     }
 
     static bool GetAceCommercialLogEnabled()
@@ -580,8 +593,8 @@ private:
     static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
-    static bool layoutTraceEnable_;
-    static bool traceInputEventEnable_;
+    static std::atomic<bool> layoutTraceEnable_;
+    static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
@@ -617,7 +630,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool layoutDetectEnabled_;
-    static bool debugBoundaryEnabled_;
+    static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
@@ -635,8 +648,8 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
-    static bool stateManagerEnable_;
-    static bool acePerformanceMonitorEnable_;
+    static std::atomic<bool> stateManagerEnable_;
+    static std::atomic<bool> acePerformanceMonitorEnable_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;

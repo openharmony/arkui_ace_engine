@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/panel/close_icon_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {

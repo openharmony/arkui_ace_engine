@@ -41,8 +41,6 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -574,11 +572,7 @@ void TabsModelNG::Pop()
     auto tabBarFocusNode = tabBarNode->GetFocusHub();
     CHECK_NULL_VOID(tabBarFocusNode);
     if (tabBarPosition == BarPosition::START) {
-        if (tabsFocusNode->IsCurrentFocus()) {
-            tabBarFocusNode->RequestFocusImmediately();
-        } else {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
+        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
     }
 
     auto tabContentNum = swiperNode->TotalChildCount();

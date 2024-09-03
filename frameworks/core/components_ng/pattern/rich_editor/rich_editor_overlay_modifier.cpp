@@ -21,8 +21,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
@@ -192,8 +190,7 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     canvas.AttachPen(pen);
     float midPosX = offset.GetX() + caretWidth / 2;
     float startPosY = offset.GetY();
-    float endPosY = LessOrEqual(offset.GetY() + caretHeight, contentRect_.value().Bottom())
-                        ? offset.GetY() + caretHeight : contentRect_.value().Bottom();
+    float endPosY = startPosY + caretHeight;
     float roundCapRadius = caretWidth / 2;
     canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius), RSPoint(midPosX, endPosY - roundCapRadius));
     canvas.DetachPen();

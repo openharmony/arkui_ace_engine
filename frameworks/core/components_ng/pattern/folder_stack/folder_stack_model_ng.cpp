@@ -14,22 +14,10 @@
  */
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/perfmonitor/perf_constants.h"
-#include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/utils.h"
-#include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
-#include "core/components_ng/pattern/folder_stack/control_parts_stack_pattern.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
 #include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
-#include "core/components_ng/pattern/folder_stack/hover_stack_pattern.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void FolderStackModelNG::Create()

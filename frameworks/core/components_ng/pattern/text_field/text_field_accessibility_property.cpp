@@ -34,7 +34,11 @@ bool TextFieldAccessibilityProperty::IsPassword() const
     CHECK_NULL_RETURN(frameNode, false);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsInPasswordMode();
+    CHECK_NULL_RETURN(textFieldPattern->IsInPasswordMode(), false);
+    auto responseArea = textFieldPattern->GetResponseArea();
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea);
+    CHECK_NULL_RETURN(passwordArea, false);
+    return passwordArea->IsObscured();
 }
 
 AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const

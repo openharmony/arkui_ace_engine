@@ -16,8 +16,6 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
-#include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
-
 namespace OHOS::Ace::NG {
 
 bool LoadingProgressPattern::OnDirtyLayoutWrapperSwap(

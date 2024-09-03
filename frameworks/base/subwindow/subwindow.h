@@ -38,12 +38,13 @@ public:
     virtual bool InitContainer() = 0;
     virtual void ResizeWindow() = 0;
     virtual NG::RectF GetRect() = 0;
+    virtual void SetRect(const NG::RectF& rect) = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
     virtual void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
-    virtual bool ShowPreviewNG() = 0;
+    virtual bool ShowPreviewNG(bool isStartDraggingFromSubWindow) = 0;
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
@@ -85,6 +86,10 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual bool IsFreeMultiWindow() const = 0;
+    virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
+    virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
+    virtual void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) = 0;
 
     int32_t GetSubwindowId() const
     {

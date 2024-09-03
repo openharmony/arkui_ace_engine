@@ -343,4 +343,655 @@ HWTEST_F(NavigationAnimationTest, NavigationFinishAnimation004, TestSize.Level1)
     ASSERT_NE(navDestinationAProperty, nullptr);
     ASSERT_EQ(navDestinationAProperty->GetVisibilityValue(), VisibleType::VISIBLE);
 }
-};
+
+/**
+ * @tc.name: StartDialogTransitionPopTest001
+ * @tc.desc: Test dialog pop system transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2. add nodes into preNavlist
+     * @tc.expected: step2. size of preNavlist size is one
+     */
+    auto preDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    preDestination->SetIndex(0);
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
+    preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(preDestination)));
+    navigationStack->navPathListBeforePoped_ = preNodes;
+    EXPECT_EQ(navigationStack->navPathListBeforePoped_.size(), 1);
+
+    /**
+     * @tc.steps: step3. test dialog pop transition
+     * @tc.expected: step3. current transition size is one
+     */
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
+    navigationNode->StartDialogtransition(preDestination, nullptr, false);
+    EXPECT_EQ(navigationNode->popAnimations_.size(), 1);
+}
+
+/**
+ * @tc.name: StartDialogTransitionPopTest002
+ * @tc.desc: Test dialog pop system transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2.set index and push Standrd and dialog into preNavlist
+     * @tc.expected: size of preNavlist size is two
+     */
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationA->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationA->SetIndex(0);
+    auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationB->SetIndex(1);
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
+    preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(navDestinationA)));
+    preNodes.emplace_back(std::make_pair("pageTwo", WeakPtr<UINode>(navDestinationB)));
+    navigationStack->navPathListBeforePoped_ = preNodes;
+    EXPECT_EQ(navigationStack->navPathListBeforePoped_.size(), 2);
+
+    /**
+     * @tc.steps: step3. test dialog pop transition, pop std and dialog at the same time
+     * @tc.expected: step3. current transition size is one
+     */
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
+    navigationNode->StartDialogtransition(navDestinationB, navDestinationA, false);
+    EXPECT_EQ(navigationNode->popAnimations_.size(), 1);
+}
+
+/**
+ * @tc.name: StartDialogTransitionPopTest003
+ * @tc.desc: Test dialog pop system transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2.set index and push Standrd and dialog into preNavlist
+     * @tc.expected: size of preNavlist size is three.
+     */
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationA->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navDestinationA->SetIndex(0);
+    auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationB->SetIndex(1);
+    auto navDestinationC = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationC->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navDestinationC->SetIndex(2);
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
+    preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(navDestinationA)));
+    preNodes.emplace_back(std::make_pair("pageTwo", WeakPtr<UINode>(navDestinationB)));
+    preNodes.emplace_back(std::make_pair("pageThree", WeakPtr<UINode>(navDestinationC)));
+    navigationStack->navPathListBeforePoped_ = preNodes;
+    EXPECT_EQ(navigationStack->navPathListBeforePoped_.size(), 3);
+
+    /**
+     * @tc.steps: step3. test dialog pop transition abd pop std and dialog at the same time.
+     * @tc.expected: step3. current transition animation size is one.
+     */
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
+    navigationNode->StartDialogtransition(navDestinationC, navDestinationA, false);
+    EXPECT_EQ(navigationNode->popAnimations_.size(), 1);
+}
+
+/**
+ * @tc.name: StartDialogTransitionPushTest001
+ * @tc.desc: Test dialog push system transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2.push page A to navDestination stack
+     */
+    auto curDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    curDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("dialog", curDestination);
+    curDestination->SetIndex(0);
+
+    /**
+     * @tc.steps: step3. test push dialog animation.
+     * @tc.expected: step3. current transition animation size is one.
+     */
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
+    navigationNode->StartDialogtransition(nullptr, curDestination, true);
+    EXPECT_EQ(navigationNode->pushAnimations_.size(), 1);
+}
+
+/**
+ * @tc.name: StartDialogTransitionPushTest002
+ * @tc.desc: Test dialog push system transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set index and push std and dialog to stack
+     */
+    auto preDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preDestination->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationStack->Add("standard", preDestination);
+    preDestination->SetIndex(0);
+    auto curDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    curDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("dialog", curDestination);
+    curDestination->SetIndex(1);
+
+    /**
+     * @tc.steps: step3. test push dialog animation.
+     * @tc.expected: step3. current transition animation size is one.
+     */
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
+    navigationNode->StartDialogtransition(preDestination, curDestination, true);
+    EXPECT_EQ(navigationNode->pushAnimations_.size(), 1);
+}
+
+/**
+ * @tc.name: StartDialogTransitionPushTest003
+ * @tc.desc: Test dialog push system transition
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set index and push std and two dialogs to the stack
+     */
+    auto preDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    preDestination->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationStack->Add("standard", preDestination);
+    preDestination->SetIndex(0);
+    auto curDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    curDestinationA->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("dialogA", curDestinationA);
+    curDestinationA->SetIndex(1);
+    auto curDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    curDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("dialogB", curDestinationB);
+    curDestinationB->SetIndex(2);
+
+    /**
+     * @tc.steps: step3. test push two dialogs animation.
+     * @tc.expected: step3. current transition animation size is one.
+     */
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    pattern->MarkNeedSyncWithJsStack();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
+    navigationNode->StartDialogtransition(preDestination, curDestinationB, true);
+    EXPECT_EQ(navigationNode->pushAnimations_.size(), 1);
+}
+
+/**
+ * @tc.name: TransitionWithDialogPop001
+ * @tc.desc: Test dialog pop system transition with std animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 1, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create and push navdestination nodes into stack
+     */
+    auto stdNavdestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(stdNavdestination, nullptr);
+    stdNavdestination->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    auto dialogDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dialogDestination, nullptr);
+    dialogDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
+    preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(stdNavdestination)));
+    preNodes.emplace_back(std::make_pair("pageTwo", WeakPtr<UINode>(dialogDestination)));
+    navigationStack->navPathListBeforePoped_ = preNodes;
+
+    /**
+     * @tc.steps: step3. test pop one std and one dialog at the same time.
+     * @tc.expected: step3. poped nodes' properties should match exit pop condition.
+     */
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+    navigationNode->preLastStandardIndex_ = 0;
+    navigationNode->lastStandardIndex_ = -1;
+    bool isNavBar = true;
+    navigationNode->TransitionWithDialogPop(dialogDestination, navBarNode, isNavBar);
+    EXPECT_FALSE(navigationNode->GetNeedSetInvisible());
+    EXPECT_EQ(stdNavdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_EQ(stdNavdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_FALSE(stdNavdestination->IsOnAnimation());
+    EXPECT_FALSE(stdNavdestination->IsOnAnimation());
+}
+
+/**
+ * @tc.name: TransitionWithDialogPop002
+ * @tc.desc: Test dialog pop system transition with std animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestination and set properties
+     */
+    auto stdNavdestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(stdNavdestinationA, nullptr);
+    stdNavdestinationA->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationStack->Add("standardA", stdNavdestinationA);
+    auto dialogDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dialogDestinationA, nullptr);
+    dialogDestinationA->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("dialogA", dialogDestinationA);
+    auto stdNavdestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(stdNavdestinationB, nullptr);
+    stdNavdestinationB->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    auto dialogDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dialogDestinationB, nullptr);
+    dialogDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+
+    /**
+     * @tc.steps: step3. add navdestination nodes into stack
+     */
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
+    preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(stdNavdestinationA)));
+    preNodes.emplace_back(std::make_pair("pageTwo", WeakPtr<UINode>(dialogDestinationA)));
+    preNodes.emplace_back(std::make_pair("pageThree", WeakPtr<UINode>(stdNavdestinationB)));
+    preNodes.emplace_back(std::make_pair("pageFour", WeakPtr<UINode>(dialogDestinationB)));
+    navigationStack->navPathListBeforePoped_ = preNodes;
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step4. test pop one std and one dialog at the same time.
+     * @tc.expected: step4. properties should match enter and exit pop condition.
+     */
+    navigationNode->preLastStandardIndex_ = 2;
+    navigationNode->lastStandardIndex_ = 0;
+    navigationNode->TransitionWithDialogPop(dialogDestinationA, dialogDestinationB);
+    EXPECT_EQ(stdNavdestinationA->GetTransitionType(), PageTransitionType::ENTER_POP);
+    EXPECT_EQ(stdNavdestinationA->GetTransitionType(), PageTransitionType::ENTER_POP);
+    EXPECT_EQ(stdNavdestinationB->GetTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_EQ(dialogDestinationB->GetTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_FALSE(stdNavdestinationB->IsOnAnimation());
+}
+
+/**
+ * @tc.name: TransitionWithDialogPop002
+ * @tc.desc: Test dialog push system transition with std animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, TransitionWithDialogPush001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 1, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestination and add into stack
+     */
+    auto stdNavdestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(stdNavdestinationB, nullptr);
+    stdNavdestinationB->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    navigationStack->Add("standardB", stdNavdestinationB);
+    stdNavdestinationB->SetIndex(0);
+    auto dialogDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dialogDestinationB, nullptr);
+    dialogDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("dialogB", dialogDestinationB);
+    dialogDestinationB->SetIndex(1);
+
+    /**
+     * @tc.steps: step3. test push one std and one dialog at the same time.
+     * @tc.expected: step3. properties should match enter push condition.
+     */
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+    navigationNode->preLastStandardIndex_ = -1;
+    navigationNode->lastStandardIndex_ = 0;
+    navigationNode->TransitionWithDialogPush(navBarNode, dialogDestinationB);
+    EXPECT_EQ(stdNavdestinationB->GetTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_EQ(dialogDestinationB->GetTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_FALSE(stdNavdestinationB->IsOnAnimation());
+    EXPECT_FALSE(dialogDestinationB->IsOnAnimation());
+}
+
+/**
+ * @tc.name: TransitionWithDialogPush002
+ * @tc.desc: Test dialog push system transition with std animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, TransitionWithDialogPush002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create navdestination and add into stack
+     */
+    std::vector<NavDestinationMode> srcVec = { NavDestinationMode::STANDARD, NavDestinationMode::DIALOG,
+        NavDestinationMode::STANDARD, NavDestinationMode::DIALOG };
+    std::vector<std::string> names = { "A", "B", "C", "D" };
+    const int32_t testNumber = 4;
+    for (int32_t index = 0; index < testNumber; ++index) {
+        auto navdestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+        ASSERT_NE(navdestination, nullptr);
+        navigationStack->Add(names[index], navdestination);
+        navdestination->SetIndex(index);
+    }
+    auto stdNavdestinationA = AceType::DynamicCast<NavDestinationGroupNode>(navigationStack->Get(0));
+    auto dialogDestinationA = AceType::DynamicCast<NavDestinationGroupNode>(navigationStack->Get(1));
+    auto stdNavdestinationB = AceType::DynamicCast<NavDestinationGroupNode>(navigationStack->Get(2));
+    auto dialogDestinationB = AceType::DynamicCast<NavDestinationGroupNode>(navigationStack->Get(3));
+
+    /**
+     * @tc.steps: step3. add navdestination nodes into preNavlist
+     */
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
+    preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(stdNavdestinationA)));
+    preNodes.emplace_back(std::make_pair("pageTwo", WeakPtr<UINode>(dialogDestinationA)));
+    navigationStack->navPathListBeforePoped_ = preNodes;
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    navigationPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step4. test push one std and one dialog at the same time and
+     *  one std and one dialog do exit push at the same time.
+     * @tc.expected: step4. properties should match enter and exit push condition.
+     */
+    navigationNode->preLastStandardIndex_ = 0;
+    navigationNode->lastStandardIndex_ = 2;
+    navigationNode->TransitionWithDialogPush(dialogDestinationA, dialogDestinationB);
+    EXPECT_EQ(stdNavdestinationA->GetTransitionType(), PageTransitionType::EXIT_PUSH);
+    EXPECT_EQ(stdNavdestinationA->GetTransitionType(), PageTransitionType::EXIT_PUSH);
+    EXPECT_EQ(stdNavdestinationB->GetTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_EQ(dialogDestinationB->GetTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_FALSE(stdNavdestinationA->IsOnAnimation());
+    EXPECT_FALSE(stdNavdestinationA->IsOnAnimation());
+    EXPECT_FALSE(stdNavdestinationB->IsOnAnimation());
+    EXPECT_FALSE(dialogDestinationB->IsOnAnimation());
+}
+
+/**
+ * @tc.name: SystemAnimation001
+ * @tc.desc: Test navbar system animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, SystemAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navbar node
+     */
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 1, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    navBarNode->SetTitleBarNode(titleBarNode);
+
+    /**
+     * @tc.steps: step2. do navbar system transition
+     * @tc.expected: step2. properties should match enter and exit animation condition.
+     */
+    navBarNode->InitSystemTransitionPop();
+    EXPECT_EQ(navBarNode->GetTransitionType(), PageTransitionType::ENTER_POP);
+    navBarNode->SystemTransitionPushAction(true);
+    EXPECT_EQ(navBarNode->GetTransitionType(), PageTransitionType::EXIT_PUSH);
+}
+
+/**
+ * @tc.name: SystemAnimation002
+ * @tc.desc: Test navdestination system animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navdestination node and titlebar node
+     */
+    auto navdestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navdestination, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    navdestination->SetTitleBarNode(titleBarNode);
+
+    /**
+     * @tc.steps: step2. do navdestination enter push animation
+     * @tc.expected: step2. properties should match enter push condition.
+     */
+    navdestination->InitSystemTransitionPush(true);
+    EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_TRUE(navdestination->IsOnAnimation());
+    navdestination->SystemTransitionPushCallback(true);
+    EXPECT_FALSE(navdestination->IsOnAnimation());
+
+    /**
+     * @tc.steps: step3. do navdestination exit push animation
+     * @tc.expected: step2. properties should match exit push condition.
+     */
+    navdestination->InitSystemTransitionPush(false);
+    EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_PUSH);
+    EXPECT_TRUE(navdestination->IsOnAnimation());
+    navdestination->SystemTransitionPushCallback(false);
+    EXPECT_FALSE(navdestination->IsOnAnimation());
+    auto navdestinationLayoutProperty = navdestination->GetLayoutProperty();
+    ASSERT_NE(navdestinationLayoutProperty, nullptr);
+    ASSERT_EQ(navdestinationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: SystemAnimation003
+ * @tc.desc: Test navdestination system animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, SystemAnimation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navdestination node and titlebar node
+     */
+    auto navdestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navdestination, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    navdestination->SetTitleBarNode(titleBarNode);
+
+    /**
+     * @tc.steps: step2. do navdestination enter or exit pop animation
+     * @tc.expected: step2. properties should match enter or exit pop condition.
+     */
+    navdestination->InitSystemTransitionPop(true);
+    EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_POP);
+    navdestination->InitSystemTransitionPop(false);
+    EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_TRUE(navdestination->IsOnAnimation());
+    navdestination->SystemTransitionPopCallback(false);
+    EXPECT_FALSE(navdestination->IsOnAnimation());
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(backButton, nullptr);
+    titleBarNode->SetBackButton(backButton);
+    auto titleBarNodeRender = titleBarNode->GetRenderContext();
+}
+}; // namespace OHOS::Ace::NG

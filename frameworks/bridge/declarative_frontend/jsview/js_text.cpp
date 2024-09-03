@@ -46,10 +46,6 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
@@ -895,7 +891,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     if (!tmpInfo->IsBoolean()) {
         return;
     }
-    TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
+    ViewAbstractModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)

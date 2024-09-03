@@ -48,6 +48,8 @@ protected:
      */
     void PreloadItems(LayoutWrapper* host, const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t cacheCount);
 
+    static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
+
 private:
     static std::list<int32_t> GeneratePreloadList(
         const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount);

@@ -61,6 +61,7 @@ class ListTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static RefPtr<FrameNode> CreateCustomNode(const std::string& tag);
     void SetUp() override;
     void TearDown() override;
     void GetList();
@@ -75,6 +76,8 @@ public:
     void CreateGroupChildrenMainSize(int32_t groupNumber);
     void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
     void CreateGroupWithSetting(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupWithSettingWithComponentContent(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,

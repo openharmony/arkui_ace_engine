@@ -129,8 +129,10 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
     GestureEventFunc* click = nullptr;
     if (callback) {
         click = reinterpret_cast<GestureEventFunc*>(callback);
+        TextModelNG::SetOnClick(frameNode, std::move(*click));
+    } else {
+        TextModelNG::SetOnClick(frameNode, nullptr);
     }
-    TextModelNG::SetOnClick(frameNode, std::move(*click));
 }
 
 void ResetOnClick(ArkUINodeHandle node)
@@ -421,14 +423,14 @@ void SetTextDraggable(ArkUINodeHandle node, ArkUI_Uint32 draggable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, static_cast<bool>(draggable));
+    ViewAbstract::SetDraggable(frameNode, static_cast<bool>(draggable));
 }
 
 void ResetTextDraggable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
+    ViewAbstract::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
 }
 
 void SetTextPrivacySensitve(ArkUINodeHandle node, ArkUI_Uint32 sensitive)
@@ -1124,7 +1126,15 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     }
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
+    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+    } else {
+        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+    }
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)

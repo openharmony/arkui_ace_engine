@@ -168,6 +168,7 @@ private:
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
     static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
+    static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };
 
 } // namespace OHOS::Ace::NG

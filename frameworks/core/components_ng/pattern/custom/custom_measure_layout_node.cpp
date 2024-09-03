@@ -15,15 +15,6 @@
 
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
-#include "base/log/dump_log.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/custom/custom_node_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
-
 namespace OHOS::Ace::NG {
 
 RefPtr<CustomMeasureLayoutNode> CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(

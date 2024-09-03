@@ -125,7 +125,7 @@ class EnableIncModifier extends ModifierWithKey<boolean> {
     super(value);
   }
   static identity = Symbol('enableInc');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().counter.resetEnableInc(node);
     } else {
@@ -138,7 +138,7 @@ class EnableDecModifier extends ModifierWithKey<boolean> {
     super(value);
   }
   static identity = Symbol('enableDec');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().counter.resetEnableDec(node);
     } else {

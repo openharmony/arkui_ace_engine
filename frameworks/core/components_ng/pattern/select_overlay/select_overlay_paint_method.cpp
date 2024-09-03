@@ -15,13 +15,8 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float AGING_MIN_SCALE = 1.75f;
@@ -103,6 +98,7 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetScale(info_.scale);
     selectOverlayContentModifier_->SetFirstCircleIsShow(info_.firstHandle.isCircleShow);
     selectOverlayContentModifier_->SetSecondCircleIsShow(info_.secondHandle.isCircleShow);
+    selectOverlayContentModifier_->SetClipHandleDrawRect(info_.clipHandleDrawRect && isOverlayMode);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()

@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 
-#include <valarray>
-
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/swiper/render_swiper.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "core/components_ng/render/paint_property.h"
-#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator
@@ -495,12 +488,33 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
 }
 
+std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndexOnRTL(int32_t index)
+{
+    int32_t startCurrentIndex = index;
+    auto isInvalid = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
+                     GreatOrEqualCustomPrecision(turnPageRate_, 1.0f);
+    if (!isInvalid) {
+        startCurrentIndex = LessNotEqualCustomPrecision(turnPageRate_, 0.0f) ? index - 1 : index + 1;
+    }
+
+    if (startCurrentIndex == -1) {
+        startCurrentIndex = itemCount_ - 1;
+    }
+
+    return { startCurrentIndex, index };
+}
+
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
 {
     if (mouseClickIndex_ || gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         turnPageRate_ = 0;
     }
+
+    if (isHorizontalAndRightToLeft_) {
+        return GetIndexOnRTL(index);
+    }
+
     auto actualTurnPageRate = turnPageRate_;
     if (isSwipeByGroup_ && groupTurnPageRate_ != 0) {
         actualTurnPageRate = groupTurnPageRate_;

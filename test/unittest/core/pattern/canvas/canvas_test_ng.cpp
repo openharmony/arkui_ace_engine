@@ -385,7 +385,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
      * @tc.steps: step1. FillText : ret == false
      */
     offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
-    EXPECT_FALSE(offPattern->offscreenPaintMethod_->UpdateParagraph("test", false, false));
+    EXPECT_FALSE(offPattern->offscreenPaintMethod_->UpdateFillParagraph("test"));
 
     /**
      * @tc.steps: step2. StrokeText : HasShadow() == false

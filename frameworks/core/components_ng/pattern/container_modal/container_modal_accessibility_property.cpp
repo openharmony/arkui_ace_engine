@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/container_modal/container_modal_accessibility_property.h"
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::string ContainerModalAccessibilityProperty::GetText() const

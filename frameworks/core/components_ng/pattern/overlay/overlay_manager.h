@@ -234,7 +234,7 @@ public:
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
-    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
+    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed = false);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveAllModalInOverlayByStack();
@@ -280,6 +280,16 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    bool GetHasDragPixelMap() const
+    {
+        return hasDragPixelMap_;
+    }
+
+    void SetHasDragPixelMap(bool hasDragPixelMap)
+    {
+        hasDragPixelMap_ = hasDragPixelMap;
+    }
+
     bool GetHasGatherNode()
     {
         return hasGatherNode_;
@@ -294,7 +304,11 @@ public:
 
     RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
 
+    RefPtr<FrameNode> GetDragPixelMapContentNode() const;
+
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
+
+    RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;
 
     bool GetHasFilter()
     {
@@ -331,12 +345,14 @@ public:
         filterColumnNodeWeak_ = columnNode;
     }
     void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
+    void MountPixelMapToWindowScene(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap = false);
     void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap = false);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay = false);
+    void RemoveDragPixelMap();
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
     void RemoveFilterAnimation();
@@ -496,7 +512,7 @@ public:
         const RefPtr<FrameNode>& targetNode);
     bool ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
         const RectF& aiRect, const RefPtr<FrameNode>& targetNode);
-    void CloseAIEntityMenu(int32_t targetId);
+    void CloseAIEntityMenu();
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -682,6 +698,7 @@ private:
 
     void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
+    void SetPreviewFirstShow(const RefPtr<FrameNode>& menu);
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
@@ -758,7 +775,7 @@ private:
     int32_t RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter);
     int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);
-    void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode);
+    void FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode, bool& isNavDestination);
 
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
@@ -807,10 +824,12 @@ private:
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
     bool hasPixelMap_ { false };
+    bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };
     bool isOnAnimation_ { false };
     WeakPtr<FrameNode> pixmapColumnNodeWeak_;
+    WeakPtr<FrameNode> dragPixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
     bool isContextMenuDragHideFinished_ = false;
@@ -842,14 +861,13 @@ private:
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
     bool isAttachToCustomNode_ = false;
+    int32_t aiEntityMenuTargetId_ = -1;
 
     // Only used when CreateModalUIExtension
     // No thread safety issue due to they are all run in UI thread
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
-
-    std::optional<Color> sheetMaskColor_;
 };
 } // namespace OHOS::Ace::NG
 

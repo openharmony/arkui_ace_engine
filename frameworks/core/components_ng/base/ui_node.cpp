@@ -14,24 +14,10 @@
  */
 #include "core/components_ng/base/ui_node.h"
 
-#include <memory>
-
-#include "base/geometry/ng/point_t.h"
 #include "base/log/ace_checker.h"
-#include "base/log/ace_performance_check.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -164,16 +150,10 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
-    if (!addModalUiextension && modalUiextensionCount_ > 0) {
-        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-            "Current modalUiextension count is : %{public}d",
-            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
-        return;
-    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -204,7 +184,7 @@ void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
                 GetTag().c_str(), GetId());
         }
         OHOS::Ace::LogBacktrace();
-        
+
         if (withAbort) {
             abort();
         }
@@ -671,6 +651,14 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
+void UINode::FireCustomDisappear()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        child->FireCustomDisappear();
+    }
+}
+
 void UINode::ProcessOffscreenTask(bool recursive)
 {
     if (useOffscreenProcess_) {
@@ -825,49 +813,82 @@ bool UINode::NeedRequestAutoSave()
     return false;
 }
 
-void UINode::DumpTree(int32_t depth)
+void UINode::DumpTree(int32_t depth, bool hasJson)
 {
-    if (DumpLog::GetInstance().GetDumpFile()) {
-        DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-        DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
-        DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+    if (hasJson) {
+        std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        children->Put("ID", nodeId_);
+        children->Put("Depth", GetDepth());
+        children->Put("InstanceId", instanceId_);
+        children->Put("AccessibilityId", accessibilityId_);
         if (IsDisappearing()) {
-            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+            children->Put("IsDisappearing", IsDisappearing());
         }
-        DumpInfo();
-        DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+        DumpInfo(children);
+        std::string key = isRoot_ ? tag_ : tag_ + std::to_string(nodeId_);
+        json->Put(key.c_str(), children);
+        std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
+        auto prefix = DumpLog::GetInstance().GetPrefix(depth);
+        DumpLog::GetInstance().Append(prefix + jsonstr);
+    } else {
+        if (DumpLog::GetInstance().GetDumpFile()) {
+            DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
+            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+            DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
+            DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+            if (IsDisappearing()) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+            }
+            DumpInfo();
+            DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+        }
     }
     for (const auto& item : GetChildren()) {
-        item->DumpTree(depth + 1);
+        item->DumpTree(depth + 1, hasJson);
     }
     for (const auto& [item, index, branch] : disappearingChildren_) {
-        item->DumpTree(depth + 1);
+        item->DumpTree(depth + 1, hasJson);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
-        frameNode->GetOverlayNode()->DumpTree(depth + 1);
+        frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
     }
 }
 
-bool UINode::DumpTreeById(int32_t depth, const std::string& id)
+bool UINode::DumpTreeById(int32_t depth, const std::string& id, bool hasJson)
 {
-    if (DumpLog::GetInstance().GetDumpFile() &&
-        (id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
-        DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-        DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
-        DumpAdvanceInfo();
-        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
-        return true;
+    if (hasJson) {
+        if ((id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
+            std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+            std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+            children->Put("ID", nodeId_);
+            children->Put("Depth", GetDepth());
+            children->Put("IsDisappearing", IsDisappearing());
+            DumpAdvanceInfo(children);
+            json->Put(tag_.c_str(), children);
+            DumpLog::GetInstance().PrintJson(json->ToString());
+            return true;
+        }
+    } else {
+        if (DumpLog::GetInstance().GetDumpFile() &&
+            (id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
+            DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
+            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+            DumpAdvanceInfo();
+            DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+            return true;
+        }
     }
     for (const auto& item : GetChildren()) {
-        if (item->DumpTreeById(depth + 1, id)) {
+        if (item->DumpTreeById(depth + 1, id, hasJson)) {
             return true;
         }
     }
     for (const auto& [item, index, branch] : disappearingChildren_) {
-        if (item->DumpTreeById(depth + 1, id)) {
+        if (item->DumpTreeById(depth + 1, id, hasJson)) {
             return true;
         }
     }
@@ -1216,12 +1237,6 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
         count += res.second;
     }
     return { false, count };
-}
-
-// for Grid refresh GridItems
-void UINode::ChildrenUpdatedFrom(int32_t index)
-{
-    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
 bool UINode::MarkRemoving()
@@ -1599,21 +1614,27 @@ void UINode::GetContainerComponentText(std::string& text)
     }
 }
 
-void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
 {
     int32_t updateFrom = 0;
     for (const auto& child : GetChildren()) {
         if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
+            updateFrom += changeIdx;
             break;
         }
         int32_t count = child->FrameCount();
         updateFrom += count;
     }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
     auto accessibilityId = GetAccessibilityId();
     auto parent = GetParent();
     if (parent) {
-        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

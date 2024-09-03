@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
+
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -31,8 +32,6 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"

@@ -23,6 +23,7 @@
 namespace OHOS::Rosen {
 struct SessionUIParam;
 class RSObjAbsGeometry;
+enum class RSUINodeType : uint32_t;
 }
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,7 @@ private:
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetGlobalGeometry(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetLocalGeometry(const RefPtr<FrameNode>& node);
     void UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,
-        bool isTransformScene);
+        bool isParentTransformScene);
     int32_t GetNodeZIndex(const RefPtr<FrameNode>& node);
     uint64_t GetScreenId(const RefPtr<FrameNode>& screenNode);
     uint64_t GetRSNodeId(const RefPtr<FrameNode>& node);
@@ -68,7 +69,11 @@ private:
     void GetUINodeInfo(const RefPtr<FrameNode>& node, int32_t parentId, std::ostringstream& oss);
     void GetUITreeInfo(const RefPtr<FrameNode>& node, int32_t depth, int32_t parentId, std::ostringstream& oss);
     void GetTotalUITreeInfo(uint64_t screenId, std::string& info);
-
+    void DumpRSNodeType(Rosen::RSUINodeType rsNode, std::ostringstream& oss);
+    void GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
+        std::ostringstream& oss);
+    void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
+        std::ostringstream& oss);
     std::unordered_map<uint64_t, RefPtr<FrameNode>> screenNodeMap_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     bool isCoreDebugEnable_ = false;

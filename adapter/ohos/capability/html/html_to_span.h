@@ -118,6 +118,8 @@ private:
         const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     bool IsTextShadowAttr(const std::string& key);
     std::pair<std::string, double> GetUnitAndSize(const std::string& str);
+    bool IsLength(const std::string& str);
+    void InitShadow(Shadow &textShadow, std::vector<std::string> &attribute);
     void InitLineHeight(const std::string& key, const std::string& value, StyleValues& values);
     Dimension FromString(const std::string& str);
     TextAlign StringToTextAlign(const std::string& value);

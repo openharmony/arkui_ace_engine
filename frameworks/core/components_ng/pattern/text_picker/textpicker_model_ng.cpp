@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -67,6 +66,10 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     }
 
     properties.maskRect = textPickerDialog.maskRect;
+    properties.enableHoverMode = textPickerDialog.enableHoverMode;
+    if (textPickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = textPickerDialog.hoverModeArea.value();
+    }
 }
 }
 
@@ -1214,6 +1217,17 @@ const Dimension TextPickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
+}
+
+void TextPickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    textPickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
 
 } // namespace OHOS::Ace::NG

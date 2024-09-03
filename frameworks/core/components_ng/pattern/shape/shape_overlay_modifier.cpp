@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 void ShapeOverlayModifier::onDraw(DrawingContext& drawingContext)

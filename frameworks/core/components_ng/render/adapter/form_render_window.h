@@ -20,6 +20,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include <mutex>
+#include "render_service_client/core/ui/rs_frame_rate_linker.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "vsync_receiver.h"
 #endif
@@ -42,6 +43,7 @@ public:
     void Destroy() override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
+    void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
 
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
@@ -73,6 +75,16 @@ public:
     {
         return rsUIDirector_->HasUIRunningAnimation();
     }
+
+    int32_t GetCurrentRefreshRateMode() const override
+    {
+        return rsUIDirector_->GetCurrentRefreshRateMode();
+    }
+
+    int32_t GetAnimateExpectedRate() const override
+    {
+        return rsUIDirector_->GetAnimateExpectedRate();
+    }
 #endif
 
     void OnShow() override;
@@ -88,6 +100,8 @@ private:
     OnVsyncCallback onVsyncCallback_;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode_;
+    std::shared_ptr<Rosen::RSFrameRateLinker> frameRateLinker_ = nullptr;
+    std::tuple<int32_t, int32_t, int32_t> frameRateData_{0, 0, 0};
 #endif
     ACE_DISALLOW_COPY_AND_MOVE(FormRenderWindow);
 };

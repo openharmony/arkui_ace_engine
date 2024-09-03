@@ -156,8 +156,12 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     if (controllerHandler->onWillDismissCall) {
-        dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
-            return controllerHandler->onWillDismissCall(reason);
+        dialogProperties.onWillDismiss = [controllerHandler](int32_t reason) {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
+            auto executeClose = (*(controllerHandler->onWillDismissCall))(reason);
+            if (!executeClose) {
+            }
         };
     }
 

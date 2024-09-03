@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/declarative_engine_loader.h"
 
-#include "base/utils/macros.h"
-
 #ifdef USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif

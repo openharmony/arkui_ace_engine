@@ -28,6 +28,7 @@ enum class EventCategory {
     CATEGORY_PAGE,
     CATEGORY_COMPONENT,
     CATEGORY_EXPOSURE,
+    CATEGORY_PAGE_PARAM,
 };
 
 struct ExposureCfg {

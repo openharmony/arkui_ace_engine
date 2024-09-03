@@ -15,10 +15,7 @@
 #include "core/interfaces/native/node/node_content_modifier.h"
 
 #include "base/error/error_code.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/node_content.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {

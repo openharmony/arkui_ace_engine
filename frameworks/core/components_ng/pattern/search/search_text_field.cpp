@@ -66,13 +66,14 @@ void SearchTextFieldPattern::ApplyNormalTheme()
     }
 }
 
-bool SearchTextFieldPattern::IsTextEditableForStylus()
+bool SearchTextFieldPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parentFrameNode, false);
     auto focusHub = parentFrameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
     if (!focusHub->IsFocusable() || !parentFrameNode->IsVisible()) {
         return false;
     }
@@ -83,6 +84,48 @@ bool SearchTextFieldPattern::IsTextEditableForStylus()
     if (NearZero(opacity.value_or(1.0f))) {
         return false;
     }
+    return true;
+}
+
+void SearchTextFieldPattern::ProcessSelection()
+{
+    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (SelectOverlayIsOn()) {
+        needToRefreshSelectOverlay_ = textWidth > 0;
+        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
+            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        SetIsSingleHandle(!IsSelected());
+        if (isTextChangedAtCreation_ && textWidth == 0) {
+            CloseSelectOverlay();
+            StartTwinkling();
+        }
+    } else if (HasFocus() && !IsSelected() && !searchRequestStopTwinkling_) {
+        StartTwinkling();
+    } else {
+        needToRefreshSelectOverlay_ = false;
+    }
+}
+
+void SearchTextFieldPattern::SearchRequestStartTwinkling()
+{
+    searchRequestStopTwinkling_ = false;
+    StartTwinkling();
+}
+
+void SearchTextFieldPattern::SearchRequestStopTwinkling()
+{
+    searchRequestStopTwinkling_ = true;
+    UpdateSelection(0);
+    StopTwinkling();
+}
+
+void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
+{
+    searchRequestStopTwinkling_ = false;
+}
+
+bool SearchTextFieldPattern::IsSearchTextField()
+{
     return true;
 }
 } // namespace OHOS::Ace::NG

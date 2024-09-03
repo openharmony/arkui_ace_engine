@@ -597,7 +597,7 @@ HWTEST_F(TextInputMenuTestNg, SetTextSelection004, TestSize.Level1)
      * @tc.expected: The menu still pop up
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->textFieldController_->SetTextSelection(0, DEFAULT_TEXT.length(), options);
     ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);

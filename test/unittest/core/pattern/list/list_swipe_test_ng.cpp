@@ -717,6 +717,11 @@ HWTEST_F(ListSwipeTestNg, SwiperItem011, TestSize.Level1)
     itemPattern->ResetSwipeStatus();
     isDelete = false;
     HandleDragStart(FIRSTITEM_INDEX);
+    HandleDragUpdate(FIRSTITEM_INDEX, DELETE_AREA_DISTANCE / 2);
+    HandleDragEnd(FIRSTITEM_INDEX);
+    EXPECT_FALSE(isDelete);
+
+    HandleDragStart(FIRSTITEM_INDEX);
     HandleDragUpdate(FIRSTITEM_INDEX, DELETE_AREA_DISTANCE + 1);
     HandleDragEnd(FIRSTITEM_INDEX);
     EXPECT_TRUE(isDelete);
@@ -788,6 +793,11 @@ HWTEST_F(ListSwipeTestNg, SwiperItem012, TestSize.Level1)
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     itemPattern->ResetSwipeStatus();
     isDelete = false;
+    HandleDragStart(FIRSTITEM_INDEX);
+    HandleDragUpdate(FIRSTITEM_INDEX, -exceedArea / 2);
+    HandleDragEnd(FIRSTITEM_INDEX);
+    EXPECT_FALSE(isDelete);
+
     HandleDragStart(FIRSTITEM_INDEX);
     HandleDragUpdate(FIRSTITEM_INDEX, -(exceedArea + 1));
     HandleDragEnd(FIRSTITEM_INDEX);
@@ -1043,6 +1053,12 @@ HWTEST_F(ListSwipeTestNg, SwiperItem018, TestSize.Level1)
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     itemPattern->ResetSwipeStatus();
     HandleDragStart(FIRSTITEM_INDEX);
+    HandleDragUpdate(FIRSTITEM_INDEX, DELETE_AREA_DISTANCE / 2);
+    HandleDragEnd(FIRSTITEM_INDEX);
+    EXPECT_EQ(offset.ConvertToPx(), START_NODE_LEN);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+
+    HandleDragStart(FIRSTITEM_INDEX);
     HandleDragUpdate(FIRSTITEM_INDEX, DELETE_AREA_DISTANCE + 1);
     HandleDragEnd(FIRSTITEM_INDEX);
     EXPECT_EQ(curState, SwipeActionState::ACTIONING);
@@ -1108,6 +1124,12 @@ HWTEST_F(ListSwipeTestNg, SwiperItem019, TestSize.Level1)
      */
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     itemPattern->ResetSwipeStatus();
+    HandleDragStart(FIRSTITEM_INDEX);
+    HandleDragUpdate(FIRSTITEM_INDEX, -DELETE_AREA_DISTANCE / 2);
+    HandleDragEnd(FIRSTITEM_INDEX);
+    EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+    EXPECT_EQ(offset.ConvertToPx(), -START_NODE_LEN);
+
     HandleDragStart(FIRSTITEM_INDEX);
     HandleDragUpdate(FIRSTITEM_INDEX, -DELETE_AREA_DISTANCE - 1);
     HandleDragEnd(FIRSTITEM_INDEX);

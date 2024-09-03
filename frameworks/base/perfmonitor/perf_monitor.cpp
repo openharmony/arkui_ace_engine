@@ -30,6 +30,24 @@ constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
+// Obtain the last three digits of the full path
+constexpr int32_t PATH_DEPTH = 3;
+
+std::string ParsePageUrl(const std::string& pagePath)
+{
+    std::string res;
+    std::vector<std::string> paths;
+    StringUtils::StringSplitter(pagePath, '/', paths);
+    if (paths.empty() || paths.size() < PATH_DEPTH) {
+        return pagePath;
+    }
+    vector<string>::iterator it = paths.end();
+    for (int i = 0; i < PATH_DEPTH; i++) {
+        it--;
+        res = '/' + *it + res;
+    }
+    return res;
+}
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -273,6 +291,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     }
     ACE_SCOPED_TRACE("Animation start and current sceneId=%s", sceneId.c_str());
     if (record == nullptr) {
+        currentSceneId = sceneId;
         record = new SceneRecord();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
@@ -365,7 +384,7 @@ void PerfMonitor::ReportJankFrameApp(double jank)
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl)
 {
-    baseInfo.pageUrl = pageUrl;
+    baseInfo.pageUrl = ParsePageUrl(pageUrl);
 }
 
 std::string PerfMonitor::GetPageUrl()
@@ -386,7 +405,8 @@ std::string PerfMonitor::GetPageName()
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName)
 {
-    EventReport::ReportPageShowMsg(pageUrl, bundleName, pageName);
+    std::string parsePageUrl = ParsePageUrl(pageUrl);
+    EventReport::ReportPageShowMsg(parsePageUrl, bundleName, pageName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)
@@ -601,13 +621,22 @@ void PerfMonitor::ProcessJank(double jank, const std::string& windowName)
 
 void PerfMonitor::ReportJankFrame(double jank, const std::string& windowName)
 {
-    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD) && !IsExclusionFrame()) {
+    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD)) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         jankInfo.windowName = windowName;
         RecordBaseInfo(nullptr);
         jankInfo.baseInfo = baseInfo;
-        EventReport::ReportJankFrameFiltered(jankInfo);
+        jankInfo.filterType = GetFilterType();
+        if (!mRecords.empty()) {
+            jankInfo.sceneId = currentSceneId;
+        } else {
+            jankInfo.sceneId = DEFAULT_SCENE_ID;
+        }
+        EventReport::ReportJankFrameUnFiltered(jankInfo);
+        if (!IsExclusionFrame()) {
+            EventReport::ReportJankFrameFiltered(jankInfo);
+        }
     }
 }
 
@@ -632,4 +661,12 @@ void PerfMonitor::CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId)
         isExceptAnimator = false;
     }
 }
+
+int32_t PerfMonitor::GetFilterType() const
+{
+    int32_t filterType = (isBackgroundApp << 4) | (isResponseExclusion << 3) | (isStartAppFrame << 2)
+        | (isExclusionWindow << 1) | isExceptAnimator;
+    return filterType;
+}
+
 } // namespace OHOS::Ace

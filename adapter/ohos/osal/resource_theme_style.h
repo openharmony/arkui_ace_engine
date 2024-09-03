@@ -18,6 +18,8 @@
 
 #include <map>
 #include <future>
+#include <mutex>
+#include <shared_mutex>
 
 #include "core/components/theme/theme_style.h"
 #include "core/components/theme/resource_adapter.h"
@@ -41,6 +43,20 @@ public:
     {
         promise_.set_value();
     }
+    void PushBackCheckThemeStyleVector(const std::string& patternName)
+    {
+        std::unique_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
+        checkThemeStyleVector_.push_back(patternName);
+    }
+    bool CheckThemeStyle(const std::string& patternName)
+    {
+        std::shared_lock<std::shared_mutex> lock(checkThemeStyleVectorMutex_);
+        auto it = std::find(checkThemeStyleVector_.begin(), checkThemeStyleVector_.end(), patternName.c_str());
+        if (it == checkThemeStyleVector_.end()) {
+            return false;
+        }
+        return true;
+    }
 protected:
     void OnParseStyle();
     void OnParseResourceMedia(const std::string& attrName, const std::string& attrValue);
@@ -51,7 +67,8 @@ private:
     RefPtr<ResourceAdapter> resAdapter_;
     std::promise<void> promise_;
     std::shared_future<void> future_ = promise_.get_future();
-    std::vector<std::string> checkThemeStyleVector; // theme pattern name list for checking the preloaded theme style
+    std::vector<std::string> checkThemeStyleVector_; // theme pattern name list for checking the preloaded theme style
+    std::shared_mutex checkThemeStyleVectorMutex_;
 };
 } // namespace OHOS::Ace
 

@@ -47,6 +47,7 @@ public:
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
+    static void SetImagePreviewMenu(std::function<void()>& builder, const NG::SelectMenuParam& selectMenuParam);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetPlaceholder(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
@@ -78,7 +79,6 @@ public:
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
     static void EditMenuOptions(const JSCallbackInfo& info);
-    static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);

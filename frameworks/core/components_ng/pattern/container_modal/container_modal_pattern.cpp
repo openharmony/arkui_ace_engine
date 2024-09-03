@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
-#include "base/resource/internal_resource.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -100,7 +94,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus_));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -330,7 +324,7 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderColorProperty borderColor;
     borderColor.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
     renderContext->UpdateBorderColor(borderColor);
@@ -470,7 +464,7 @@ void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 }
 
 void ContainerModalPattern::SetTitleButtonHide(
-    const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize)
+    const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     auto leftSplitButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, LEFT_SPLIT_BUTTON_INDEX));
@@ -489,17 +483,22 @@ void ContainerModalPattern::SetTitleButtonHide(
     CHECK_NULL_VOID(minimizeButton);
     minimizeButton->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
     minimizeButton->MarkDirtyNode();
+
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
+    closeButton->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
+    closeButton->MarkDirtyNode();
 }
 
-void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsRow);
-    SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize);
+    SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize, hideClose);
     hideSplitButton_ = hideSplit;
     LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
-         "hideMinimize: %{public}d",
-        hideSplit, hideMaximize, hideMinimize);
+         "hideMinimize: %{public}d, hideClose: %{public}d",
+        hideSplit, hideMaximize, hideMinimize, hideClose);
 }
 
 void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
@@ -514,6 +513,29 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isEnabled);
     LOGI("Set close button status %{public}s", isEnabled ? "enable" : "disable");
+}
+
+void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
+{
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    // update container modal background
+    auto renderContext = containerNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
+    activeColor_ = activeColor;
+    inactiveColor_ = inactiveColor;
+}
+
+Color ContainerModalPattern::GetContainerColor(bool isFocus)
+{
+
+    if (isFocus) {
+        return activeColor_;
+    } else {
+        return inactiveColor_;
+    }
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()
@@ -678,9 +700,19 @@ void ContainerModalPattern::InitTitle()
 
 void ContainerModalPattern::Init()
 {
+    InitContainerColor();
     InitContainerEvent();
     InitTitle();
     InitLayoutProperty();
+}
+
+void ContainerModalPattern::InitContainerColor()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    activeColor_ = theme->GetBackGroundColor(true);
+    inactiveColor_ = theme->GetBackGroundColor(false);
 }
 
 void ContainerModalPattern::OnColorConfigurationUpdate()
@@ -724,6 +756,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));

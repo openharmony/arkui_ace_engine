@@ -127,6 +127,22 @@ struct DragDropBaseInfo {
     std::string extraInfo;
 };
 
+struct BindMenuStatus {
+    bool isBindCustomMenu = false;
+    bool isBindLongPressMenu = false;
+    bool isShow = false;
+    MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
+    MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
+    bool IsNotNeedCollectDragActuator() const
+    {
+        return (isBindLongPressMenu && longPressPreviewMode == MenuPreviewMode::NONE);
+    }
+    bool IsNotNeedShowPreview() const
+    {
+        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
+    }
+};
+
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
@@ -442,6 +458,14 @@ public:
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
+    bool ProcessEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+    
+    bool ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+
     RefPtr<FrameNode> GetFrameNode() const;
 
     void OnContextAttached() {}
@@ -705,8 +729,26 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
     static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
+
+    void SetMenuPreviewScale(float menuPreviewScale)
+    {
+        menuPreviewScale_ = menuPreviewScale;
+    }
+
+    float GetMenuPreviewScale() const
+    {
+        return menuPreviewScale_;
+    }
+    
+    void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
+    const BindMenuStatus& GetBindMenuStatus()
+    {
+        return bindMenuStatus_;
+    }
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -732,6 +774,15 @@ private:
 
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
+
+    void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
+    
+    void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        GesturePriority priority);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -791,10 +842,12 @@ private:
     // the value from show parameter of context menu, which is controlled by caller manually
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
+    BindMenuStatus bindMenuStatus_;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
+    float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
 };
 
 } // namespace OHOS::Ace::NG

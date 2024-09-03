@@ -199,6 +199,9 @@ public:
     void OnCollectAccessibilityHoverEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& host);
 
+    void OnCollectPenHoverEvent(
+        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
+
     void OnCollectAxisEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, AxisTestResult& onAxisResult);
 
@@ -208,6 +211,7 @@ private:
     RefPtr<HoverEventTarget> hoverEventTarget_;
     RefPtr<HoverEffectTarget> hoverEffectTarget_;
     RefPtr<HoverEventTarget> accessibilityHoverEventTarget_;
+    RefPtr<HoverEventTarget> penHoverEventTarget_;
     RefPtr<AxisEventTarget> axisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;

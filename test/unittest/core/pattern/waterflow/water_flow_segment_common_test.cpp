@@ -663,6 +663,33 @@ HWTEST_F(WaterFlowSegmentCommonTest, Segmented007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Segmented008
+ * @tc.desc: It should be dirty after change Section.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Segmented008, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    CreateDone();
+    // after measure, PropertyChangeFlag should be reset to 0.
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_NORMAL);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+    // after change section, PropertyChangeFlag should be dirty.
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_NORMAL);
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 10, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 5, .margin = MARGIN_1 } };
+    secObj->ChangeData(1, 1, newSection);
+    EXPECT_EQ(layoutProperty_->GetPropertyChangeFlag(), NG::PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+/**
  * @tc.name: CheckHeight001
  * @tc.desc: Layout WaterFlow and check if callback height is used
  * @tc.type: FUNC

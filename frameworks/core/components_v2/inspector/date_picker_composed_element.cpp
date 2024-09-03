@@ -15,13 +15,8 @@
 
 #include "core/components_v2/inspector/date_picker_composed_element.h"
 
-#include <unordered_map>
-
 #include "base/log/dump_log.h"
 #include "core/components/picker/picker_base_element.h"
-#include "core/components/picker/picker_date_component.h"
-#include "core/components/picker/picker_time_component.h"
-#include "core/components/picker/render_picker_base.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {

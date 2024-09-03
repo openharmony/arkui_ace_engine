@@ -16,16 +16,10 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 
 #include <cstdint>
-#include <string>
 
-#include "base/geometry/axis.h"
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/bilateral_spring_node.h"
-#include "core/animation/spring_model.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -111,10 +105,11 @@ void ListPattern::ChangeAxis(RefPtr<UINode> node)
             auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
             if (listItemPattern) {
                 listItemPattern->ChangeAxis(GetAxis());
-                return;
+                continue;
             }
             auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
             if (listItemGroupPattern) {
+                listItemGroupPattern->ResetLayoutedInfo();
                 frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 ChangeAxis(child);
             }
@@ -588,6 +583,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
         jumpIndexInGroup_.reset();
     }
+    if (targetIndexInGroup_) {
+        listLayoutAlgorithm->SetTargetIndexInGroup(targetIndexInGroup_.value());
+    }
     if (predictSnapOffset_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
         listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
@@ -891,6 +889,9 @@ SizeF ListPattern::GetContentSize() const
 
 bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
+    if (itemPosition_.empty()) {
+        return false;
+    }
     auto res = GetOutBoundaryOffset(useCurrentDelta);
     // over scroll in drag update from normal to over scroll.
     return Positive(res.start) || Positive(res.end);
@@ -1217,24 +1218,14 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
     auto isScrollIndex = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, isScrollIndex);
-    if (nextIndex < startIndex_) {
-        if (nextIndexInGroup == -1) {
-            isScrollIndex = true;
-            ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
-            pipeline->FlushUITasks();
-        } else {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
-            pipeline->FlushUITasks();
-        }
-    } else if (nextIndex > endIndex_) {
-        if (nextIndexInGroup == -1) {
-            isScrollIndex = true;
-            ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
-            pipeline->FlushUITasks();
-        } else {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::END);
-            pipeline->FlushUITasks();
-        }
+    if (nextIndex < startIndex_ && nextIndexInGroup == -1) {
+        isScrollIndex = true;
+        ScrollToIndex(nextIndex, false, ScrollAlign::START);
+        pipeline->FlushUITasks();
+    } else if (nextIndex > endIndex_ && nextIndexInGroup == -1) {
+        isScrollIndex = true;
+        ScrollToIndex(nextIndex, false, ScrollAlign::END);
+        pipeline->FlushUITasks();
     }
     return isScrollIndex;
 }
@@ -1264,7 +1255,7 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
         }
         if ((nextIndexInGroup < nextListItemGroupPara.displayStartIndex) ||
             (nextIndexInGroup > nextListItemGroupPara.displayEndIndex) || (isScrollIndex)) {
-            ScrollToIndex(nextIndex, nextIndexInGroup, scrollAlign);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, scrollAlign);
             pipeline->FlushUITasks();
         }
     } else if (nextIndexInGroup > nextListItemGroupPara.itemEndIndex) {
@@ -1272,10 +1263,10 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
         groupIndexInGroup = false;
     } else {
         if ((nextIndexInGroup < curIndexInGroup) && (nextIndexInGroup < nextListItemGroupPara.displayStartIndex)) {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::START);
             pipeline->FlushUITasks();
         } else if ((nextIndexInGroup > curIndexInGroup) && (nextIndexInGroup > nextListItemGroupPara.displayEndIndex)) {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::END);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::END);
             pipeline->FlushUITasks();
         }
     }
@@ -1477,14 +1468,26 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(
     if (it == itemsPosInGroup.end()) {
         return false;
     }
-    auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
-    float paddingBeforeContent = padding ? padding.value() : 0.0f;
+    auto axis = GetAxis();
+    std::optional<float> padding;
+    std::optional<float> margin;
+    if (axis == Axis::HORIZONTAL) {
+        padding = IsReverse() ? groupWrapper->GetGeometryNode()->GetPadding()->right
+                              : groupWrapper->GetGeometryNode()->GetPadding()->left;
+        margin = IsReverse() ? groupWrapper->GetGeometryNode()->GetMargin()->right
+                             : groupWrapper->GetGeometryNode()->GetMargin()->left;
+    } else {
+        padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
+        margin = groupWrapper->GetGeometryNode()->GetMargin()->top;
+    }
+    auto marginValue = margin.value_or(0.f);
+    auto paddingValue = padding.value_or(0.f);
     if (align == ScrollAlign::CENTER) {
-        targetPos = paddingBeforeContent + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
+        targetPos = paddingValue + marginValue + startPos + (it->second.startPos + it->second.endPos) / 2.0f -
                     contentMainSize_ / 2.0f;
     } else {
-        float itemStartPos = paddingBeforeContent + startPos + it->second.startPos;
-        float itemEndPos = paddingBeforeContent + startPos + it->second.endPos;
+        float itemStartPos = paddingValue + marginValue + startPos + it->second.startPos;
+        float itemEndPos = paddingValue + marginValue + startPos + it->second.endPos;
         if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
             itemStartPos -= groupPattern->GetHeaderMainSize();
         }
@@ -1756,7 +1759,16 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
-        posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        if (pos.groupInfo) {
+            bool groupAtStart = pos.groupInfo.value().atStart;
+            if (groupAtStart) {
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+            } else {
+                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height });
+            }
+        } else {
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
     bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);
@@ -1992,6 +2004,13 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
     chainAnimation_->SetDelta(-dragOffset, overDrag);
+    if (source == SCROLL_FROM_UPDATE && GetCanOverScroll()) {
+        float tempDelta = currentDelta_;
+        currentDelta_ -= dragOffset;
+        bool isAtEdge = IsAtTop() || IsAtBottom();
+        currentDelta_ = tempDelta;
+        SetCanOverScroll(isAtEdge);
+    }
 }
 
 float ListPattern::GetChainDelta(int32_t index) const
@@ -2457,5 +2476,63 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+}
+
+void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    for (auto item : itemPosition_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        child->Put("itemPosition.first", std::to_string(item.first).c_str());
+        child->Put("startPos", std::to_string(item.second.startPos).c_str());
+        child->Put("endPos", std::to_string(item.second.endPos).c_str());
+        child->Put("isGroup", std::to_string(item.second.isGroup).c_str());
+        children->Put(child);
+    }
+    json->Put("itemPosition", children);
+}
+
+void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    ScrollablePattern::DumpAdvanceInfo(json);
+    json->Put("maxListItemIndex", maxListItemIndex_);
+    json->Put("startIndex", startIndex_);
+    json->Put("endIndex", endIndex_);
+    json->Put("centerIndex", centerIndex_);
+    json->Put("startMainPos", startMainPos_);
+    json->Put("endMainPos", endMainPos_);
+    json->Put("currentOffset", currentOffset_);
+    json->Put("contentMainSize", contentMainSize_);
+    json->Put("contentStartOffset", contentStartOffset_);
+    json->Put("contentEndOffset", contentEndOffset_);
+    json->Put("currentDelta", currentDelta_);
+    json->Put("crossMatchChild", crossMatchChild_);
+    json->Put("smooth", smooth_);
+    json->Put("jumpIndex", jumpIndex_.has_value() ? std::to_string(jumpIndex_.value()).c_str() : "null");
+    json->Put(
+        "jumpIndexInGroup", jumpIndexInGroup_.has_value() ? std::to_string(jumpIndexInGroup_.value()).c_str() : "null");
+    json->Put("targetIndex", targetIndex_.has_value() ? std::to_string(targetIndex_.value()).c_str() : "null");
+    json->Put("predictSnapOffset",
+        predictSnapOffset_.has_value() ? std::to_string(predictSnapOffset_.value()).c_str() : "null");
+    json->Put("predictSnapEndPos",
+        predictSnapEndPos_.has_value() ? std::to_string(predictSnapEndPos_.value()).c_str() : "null");
+    json->Put("paintStateFlag", paintStateFlag_);
+    json->Put("isFramePaintStateValid", isFramePaintStateValid_);
+    CreatePositionInfo(json);
+    json->Put("scrollStop", scrollStop_);
+    std::unique_ptr<JsonValue> lanesChildrenArray = JsonUtil::CreateArray(true);
+    for (auto item : lanesItemRange_) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        child->Put("lanesItemRange.first", std::to_string(item.first).c_str());
+        child->Put("lanesItemRange.second", std::to_string(item.second).c_str());
+        lanesChildrenArray->Put(child);
+    }
+    json->Put("lanesItemRange", lanesChildrenArray);
+    json->Put("lanes", std::to_string(lanes_).c_str());
+    json->Put("laneGutter", std::to_string(laneGutter_).c_str());
+    json->Put("dragFromSpring", dragFromSpring_);
+    json->Put("isScrollEnd", isScrollEnd_);
+    json->Put("IsAtTop", IsAtTop());
+    json->Put("IsAtBottom", IsAtBottom());
 }
 } // namespace OHOS::Ace::NG

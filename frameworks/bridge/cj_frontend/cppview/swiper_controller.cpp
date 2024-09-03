@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/swiper_controller.h"
 
-#include <cinttypes>
-
 namespace OHOS::Ace::Framework {
 
 NativeSwiperController::NativeSwiperController() : FFIData()

@@ -138,6 +138,24 @@ void BorderImagePainter::InitBorderImageWidth()
     ParseNegativeNumberToZeroOrCeil(bottomWidth_);
 }
 
+RectF BorderImagePainter::GetDrawRect(const OffsetF& offset)
+{
+    const float offsetLeftX = std::ceil(offset.GetX() - leftOutset_);
+    const float offsetRightX = std::ceil(offset.GetX() + paintSize_.Width() + rightOutset_);
+    const float offsetTopY = std::ceil(offset.GetY() - topOutset_);
+    const float offsetBottomY = std::ceil(offset.GetY() + paintSize_.Height() + bottomOutset_);
+
+    // desRectLeftTop:
+    // [offsetLeftX, offsetTopY, offsetLeftX + leftWidth_ + EXTRA_OFFSET, offsetTopY + topWidth_ + EXTRA_OFFSET]
+    // desRectRightBottom:
+    // [offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetBottomY - bottomWidth_ - EXTRA_OFFSET, offsetRightX,
+    // offsetBottomY]
+    float rbX = offsetRightX - rightWidth_ - EXTRA_OFFSET + offsetRightX;
+    float rbY = offsetBottomY - bottomWidth_ - EXTRA_OFFSET + offsetBottomY;
+
+    return { offsetLeftX, offsetTopY, rbX - offsetLeftX, rbY - offsetTopY };
+}
+
 void BorderImagePainter::InitBorderImageOutset()
 {
     if (!borderImageProperty_.GetHasBorderImageOutset() && !hasWidthProp_) {

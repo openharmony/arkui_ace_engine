@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
-#include <stack>
-
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/animation_pub.h"
-#include "core/animation/spring_curve.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
@@ -229,6 +221,17 @@ void MenuPattern::OnAttachToFrameNode()
         pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+}
+
+void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
 }
 
 void MenuPattern::OnModifyDone()
@@ -514,7 +517,8 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
                 DynamicCast<FrameNode>(child)->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
+            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
             UpdateMenuItemChildren(nodesSet);

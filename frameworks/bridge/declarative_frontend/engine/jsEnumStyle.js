@@ -181,11 +181,11 @@ var LineCapStyle;
 
 var ButtonType;
 (function (ButtonType) {
-  ButtonType[ButtonType["Normal"] = 0] = "Normal";
-  ButtonType[ButtonType["Capsule"] = 1] = "Capsule";
-  ButtonType[ButtonType["Circle"] = 2] = "Circle";
-  ButtonType[ButtonType["Arc"] = 4] = "Arc";
-  ButtonType[ButtonType["ROUNDED_RECTANGLE"] = 8] = "ROUNDED_RECTANGLE";
+  ButtonType[ButtonType['Normal'] = 0] = 'Normal';
+  ButtonType[ButtonType['Capsule'] = 1] = 'Capsule';
+  ButtonType[ButtonType['Circle'] = 2] = 'Circle';
+  ButtonType[ButtonType['Arc'] = 4] = 'Arc';
+  ButtonType[ButtonType['ROUNDED_RECTANGLE'] = 8] = 'ROUNDED_RECTANGLE';
 })(ButtonType || (ButtonType = {}));
 
 var DevicePosition;
@@ -1064,6 +1064,12 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+var MenuType;
+(function (MenuType) {
+  MenuType[MenuType["SELECTION_MENU"] = 0] = "SELECTION_MENU";
+  MenuType[MenuType["PREVIEW_MENU"] = 1] = "PREVIEW_MENU";
+})(MenuType || (MenuType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
@@ -1622,6 +1628,14 @@ var ScrollSizeMode ;
   ScrollSizeMode[ScrollSizeMode["FOLLOW_DETENT"] = 0] = "FOLLOW_DETENT";
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
 })(ScrollSizeMode || (ScrollSizeMode = {}));
+
+var SheetKeyboardAvoidMode;
+(function (SheetKeyboardAvoidMode) {
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -3351,6 +3365,22 @@ var AccessibilityHoverType;
   AccessibilityHoverType[AccessibilityHoverType["HOVER_EXIT"] = 2] = "HOVER_EXIT";
   AccessibilityHoverType[AccessibilityHoverType["HOVER_CANCEL"] = 3] = "HOVER_CANCEL";
 })(AccessibilityHoverType || (AccessibilityHoverType = {}));
+
+let WidthBreakpoint;
+(function (WidthBreakpoint) {
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XS'] = 0] = 'WIDTH_XS';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_SM'] = 1] = 'WIDTH_SM';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_MD'] = 2] = 'WIDTH_MD';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_LG'] = 3] = 'WIDTH_LG';
+  WidthBreakpoint[WidthBreakpoint['WIDTH_XL'] = 4] = 'WIDTH_XL';
+})(WidthBreakpoint || (WidthBreakpoint = {}));
+
+let HeightBreakpoint;
+(function (HeightBreakpoint) {
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_SM'] = 0] = 'HEIGHT_SM';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_MD'] = 1] = 'HEIGHT_MD';
+  HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
+})(HeightBreakpoint || (HeightBreakpoint = {}));
 
 class ImageAnalyzerController {
   constructor() {

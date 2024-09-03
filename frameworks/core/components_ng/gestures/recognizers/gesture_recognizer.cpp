@@ -15,17 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/event/response_ctrl.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/event/axis_event.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -186,6 +176,9 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             break;
         case AxisAction::END:
             HandleTouchUpEvent(event);
+            break;
+        case AxisAction::CANCEL:
+            HandleTouchCancelEvent(event);
             break;
         default:
             HandleTouchCancelEvent(event);
@@ -500,9 +493,16 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
     auto result = host->InResponseRegionList(localPoint, responseRegion);
     if (!result) {
+        std::string responseInfo = std::string("responseRegionList = ");
+        for (const auto& item : responseRegion) {
+            responseInfo.append(item.ToString()).append("; ");
+        }
         TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s",
-            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str());
+            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s, point = "
+            "%{public}s, frameRect = %{public}s, %{public}s",
+            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),
+            localPoint.ToString().c_str(), host->GetFrameRectWithoutSafeArea().ToString().c_str(),
+            responseInfo.c_str());
     }
     return result;
 }

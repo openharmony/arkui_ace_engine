@@ -14,14 +14,7 @@
  */
 #include "frameworks/core/interfaces/native/node/node_symbol_span_modifier.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
-#include "frameworks/core/components/common/properties/text_style_parser.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/base/view_abstract.h"
 #include "frameworks/core/components_ng/pattern/text/symbol_span_model_ng.h"
-#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {

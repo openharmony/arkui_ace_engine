@@ -31,7 +31,15 @@ public:
     TextInputAction GetDefaultTextInputAction() const override;
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
-    bool IsTextEditableForStylus() override;
+    bool IsTextEditableForStylus() const override;
+    void ProcessSelection() override;
+    void SearchRequestStartTwinkling();
+    void SearchRequestStopTwinkling();
+    void ResetSearchRequestStopTwinkling();
+    bool IsSearchTextField() override;
+
+private:
+    bool searchRequestStopTwinkling_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -277,7 +277,7 @@ void RefreshPattern::InitProgressColumn()
     CHECK_NULL_VOID(theme);
     loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-    
+
     PaddingProperty textpadding;
     textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
@@ -1243,5 +1243,10 @@ void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
+}
+
+void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
 }
 } // namespace OHOS::Ace::NG

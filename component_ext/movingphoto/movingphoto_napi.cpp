@@ -16,12 +16,7 @@
 #include "movingphoto_napi.h"
 
 #include "ext_napi_utils.h"
-#include "movingphoto_controller.h"
 #include "movingphoto_model_ng.h"
-
-#include "base/utils/utils.h"
-#include "core/pipeline/pipeline_base.h"
-#include "base/resource/data_provider_manager.h"
 
 extern const char _binary_multimedia_movingphotoview_js_start[];
 extern const char _binary_multimedia_movingphotoview_abc_start[];

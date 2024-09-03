@@ -15,11 +15,7 @@
 
 #include "core/components_v2/indexer/indexer_component.h"
 
-#include "core/components/arc/arc_component.h"
-#include "core/components/text/text_component.h"
 #include "core/components_v2/indexer/indexer_element.h"
-#include "core/components_v2/indexer/render_indexer.h"
-#include "core/components_v2/indexer/popup_list_component.h"
 
 namespace OHOS::Ace::V2 {
 RefPtr<Element> IndexerComponent::CreateElement()

@@ -17,9 +17,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "frameworks/core/common/container.h"
 
-#include "render_service_client/core/ui/rs_ui_director.h"
-#include "render_service_client/core/ui/rs_ui_share_context.h"
-
 namespace OHOS::Ace::NG {
 
 Render3D::HapInfo ModelAdapterWrapper::SetHapInfo()

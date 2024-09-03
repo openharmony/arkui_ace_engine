@@ -129,8 +129,13 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode = proxyNode;
     }
     if (parent) {
-        parent->ReplaceChild(viewNode_, newNode);
-        newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        if (newNode) {
+            parent->ReplaceChild(viewNode_, newNode);
+            newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        } else {
+            parent->RemoveChild(viewNode_);
+            parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        }
     }
     viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
     CHECK_NULL_VOID(viewNode_);
@@ -232,6 +237,23 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
+    TouchEvent touchEvent = InitTouchEvent(info);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto result = postEventManager->PostEvent(viewNode_, touchEvent);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+TouchEvent JSBaseNode::InitTouchEvent(const JSCallbackInfo& info)
+{   
     TouchEvent touchEvent;
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto typeJsVal = obj->GetProperty("type");
@@ -296,12 +318,12 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         JSRef<JSArray> changedTouchesArray = JSRef<JSArray>::Cast(changedTouchesJsVal);
         if (static_cast<int32_t>(changedTouchesArray->Length()) <= 0) {
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-            return;
+            return touchEvent;
         }
         JSRef<JSVal> item = changedTouchesArray->GetValueAt(0);
         if (!item->IsObject()) {
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-            return;
+            return touchEvent;
         }
         JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
         touchEvent.id = itemObj->GetPropertyValue<int32_t>("id", 0);
@@ -311,18 +333,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
         touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto postEventManager = pipelineContext->GetPostEventManager();
-    if (!postEventManager) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto result = postEventManager->PostEvent(viewNode_, touchEvent);
-    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    return touchEvent;
 }
 
 void JSBaseNode::UpdateStart(const JSCallbackInfo& info)

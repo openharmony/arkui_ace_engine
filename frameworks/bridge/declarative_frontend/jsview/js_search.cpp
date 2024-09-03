@@ -434,21 +434,18 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
         src = "";
     }
-    std::string bundleName;
-    std::string moduleName;
-    GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-
     // set icon color
     Color colorVal = theme->GetSearchIconColor();
     auto colorProp = param->GetProperty("color");
     if (!colorProp->IsUndefined() && !colorProp->IsNull()) {
         ParseJsColor(colorProp, colorVal);
-        NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
-        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
-    } else {
-        NG::IconOptions searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
-        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
     }
+
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
+    NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
 
 static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
