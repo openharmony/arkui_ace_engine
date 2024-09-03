@@ -160,13 +160,11 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     Point leftPoint, rightPoint;
     if (isRTL) {
-        auto textFieldLeftOffset = textFieldPattern->GetPaddingLeft() + textFieldPattern->GetBorderLeft();
-        leftPoint.SetX(hasResponseArea ? textFieldLeftOffset : contentRect.Left());
+        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
         rightPoint.SetX(contentRect.Right());
     } else {
-        auto textFieldRightOffset = textFieldPattern->GetPaddingRight() + textFieldPattern->GetBorderRight();
         leftPoint.SetX(contentRect.Left());
-        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() - textFieldRightOffset : contentRect.Right());
+        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
     }
 
     leftPoint.SetY(textFrameRect.Height());

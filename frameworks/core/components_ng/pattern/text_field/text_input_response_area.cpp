@@ -62,17 +62,13 @@ void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t in
 OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
     auto offset = Alignment::GetAlignPosition(parentSize, childSize, Alignment::CENTER);
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, OffsetF(0, 0));
+    auto textFieldPattern = hostPattern_.Upgrade();
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, OffsetF(0, 0));
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
-        auto textFieldLeftOffset = textFieldPattern->GetPaddingLeft() + textFieldPattern->GetBorderLeft();
-        return OffsetF(nodeWidth + textFieldLeftOffset, offset.GetY());
+        return OffsetF(nodeWidth, offset.GetY());
     } else {
-        auto textFieldRightOffset = textFieldPattern->GetPaddingRight() + textFieldPattern->GetBorderRight();
-        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth - textFieldRightOffset, offset.GetY());
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, offset.GetY());
     }
 }
 
