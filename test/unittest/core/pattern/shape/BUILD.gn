@@ -25,7 +25,6 @@ ace_unittest("shape_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/path_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/path_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/polygon_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/shape/rect_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_model_ng.cpp",
