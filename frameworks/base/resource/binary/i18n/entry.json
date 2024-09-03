@@ -74,7 +74,7 @@
             "ok":"OK",
             "cancel":"Cancel",
             "more":"More",
-            "prev":"Prev",
+            "prev":"Previous",
             "next":"Next"
         },
         "refresh":{
@@ -95,29 +95,29 @@
             "off":"Off"
         },
         "stepper":{
-            "start":"START",
-            "skip":"SKIP",
-            "back":"BACK",
-            "next":"NEXT"
+            "start":"Start",
+            "skip":"Skip",
+            "back":"Back",
+            "next":"Next"
         },
         "window":{
             "maximize":"Maximize",
             "exitMaximize":"Exit Maximize",
             "fullScreen":"Full Screen",
             "exitFullScreen":"Exit Full Screen",
-            "leftSide":"Show On Left",
-            "rightSide":"Show On Right"
+            "leftSide":"Show on left",
+            "rightSide":"Show on right"
         },
         "datepicker":{
-            "lunarSwitch":"Display Lunar",
+            "lunarSwitch":"Show lunar calendar",
             "prev":"PREV"
         },
         "navigation":{
-            "back":"BACK",
-            "more":"MORE"
+            "back":"Back",
+            "more":"More"
         },
         "sheet":{
-            "close":"CLOSE"
+            "close":"Close"
         }
     },
     "ml":{
@@ -733,8 +733,9 @@
         "common":{
             "ok":"གཏན་འཁེལ།",
             "cancel":"འདོར་བ།",
-            "prev":"སྔོན་འགྲོ",
-            "next":"རྗེས་འགྲོ"
+            "prev":"གོམ་རིམ་གོང་མ།",
+            "next":"གོམ་རིམ་ཕྱི་མ།",
+            "more":"དེ་ལས་མང་བ།"
         },
         "textoverlay":{
             "paste":"སྦྱར་བ།",
@@ -746,15 +747,15 @@
             "translate":"ཡིག་སྒྱུར།"
         },
         "refresh":{
-            "last_updated":"ཐེངས་སྔོན་མར་གསར་བཅོས་བྱས་པའི་དུས་ཚོད། %s",
+            "last_updated":"ཐེངས་སྔོན་མའི་གསར་སྒྱུར་དུས་ཚོད། %s",
             "loading":"གསར་འདོན་བྱེད་བཞིན་ཡོད།"
         },
         "switch":{
-            "on":"འབྱེད།",
+            "on":"ཕྱེ།",
             "off":"ཁ་རྒྱག"
         },
         "stepper":{
-            "skip":"མཆོང་པ།",
+            "skip":"མཆོང་བ།",
             "next":"གོམ་རིམ་ཕྱི་མ།",
             "start":"འགོ་རྩོམ།",
             "back":"ཕྱིར་ལོག"
@@ -762,6 +763,16 @@
         "window":{
             "leftSide":"སྒེའུ་ཁུང་བརྙན་ཡོལ་གྱི་གཡོན་དུ་མངོན་སྟོན་བྱེད།",
             "rightSide":"སྒེའུ་ཁུང་བརྙན་ཡོལ་གྱི་གཡས་སུ་མངོན་སྟོན་བྱེད།"
+        },
+        "datepicker":{
+            "lunarSwitch":"ལུགས་རྙིང་ལོ་ཐོ་མངོན་སྟོན།"
+        },
+        "navigation":{
+            "back":"ཕྱིར་ལོག",
+            "more":"དེ་ལས་མང་བ།"
+        },
+        "sheet":{
+            "close":"ཁ་རྒྱག"
         }
     },
     "mai":{
@@ -2015,8 +2026,9 @@
         "common":{
             "ok":"جەزملەش",
             "cancel":"بىكار قىلىش",
-            "prev":"ئالدىنقى قەدەم",
-            "next":"كېيىنكى قەدەم"
+            "prev":"ئالدىنقى",
+            "next":"كېيىنكى",
+            "more":"كۆپرەك"
         },
         "textoverlay":{
             "paste":"چاپلاش",
@@ -2044,6 +2056,16 @@
         "window":{
             "leftSide":"سولدا كۆرسىتىش",
             "rightSide":"ئوڭدا كۆرسىتىش"
+        },
+        "datepicker":{
+            "lunarSwitch":"دېھقانلار كالېندارى كۆرسىتىش"
+        },
+        "navigation":{
+            "back":"قايتىش",
+            "more":"كۆپرەك"
+        },
+        "sheet":{
+            "close":"ئېتىش"
         }
     },
     "et":{
@@ -2196,12 +2218,13 @@
             "ok":"確定",
             "cancel":"取消",
             "prev":"上一步",
-            "next":"下一步"
+            "next":"下一步",
+            "more":"更多"
         },
         "textoverlay":{
             "paste":"貼上",
             "select_all":"全選",
-            "cut":"剪下",
+            "cut":"剪切",
             "copy":"複製",
             "search":"搜尋",
             "share":"分享",
@@ -2212,8 +2235,8 @@
             "loading":"重新整理中..."
         },
         "switch":{
-            "on":"開",
-            "off":"關"
+            "on":"啟用",
+            "off":"停用"
         },
         "stepper":{
             "skip":"略過",
@@ -2227,6 +2250,13 @@
         },
         "datepicker":{
             "lunarSwitch":"顯示農曆"
+        },
+        "navigation":{
+            "back":"返回",
+            "more":"更多"
+        },
+        "sheet":{
+            "close":"關閉"
         }
     },
     "zh-TW":{
@@ -2234,7 +2264,8 @@
             "ok":"確定",
             "cancel":"取消",
             "prev":"上一步",
-            "next":"下一步"
+            "next":"下一步",
+            "more":"更多"
         },
         "textoverlay":{
             "paste":"貼上",
@@ -2265,6 +2296,13 @@
         },
         "datepicker":{
             "lunarSwitch":"顯示農曆"
+        },
+        "navigation":{
+            "back":"返回",
+            "more":"更多"
+        },
+        "sheet":{
+            "close":"關閉"
         }
     },
     "hr":{
@@ -2385,31 +2423,53 @@
     },
     "zz-ZX":{
         "common":{
-            "ok":"[HM_637199]_OK",
-            "cancel":"[HM_637200]_Cancel"
+            "ok":"[TS_954613]_OK",
+            "cancel":"[TS_954617]_Cancel",
+            "prev":"[TS_955112]_Previous",
+            "next":"[TS_955113]_Next",
+            "more":"[TS_954609]_More"
         },
         "textoverlay":{
-            "paste":"[HM_637196]_Paste",
-            "select_all":"[HM_637195]_Select all",
-            "cut":"[HM_637202]_Cut",
-            "copy":"[HM_637198]_Copy",
-            "search":"[HM_743926]_Search",
-            "share":"[HM_743924]_Share",
-            "translate":"[HM_743925]_Translate"
+            "paste":"[TS_954610]_Paste",
+            "select_all":"[TS_954607]_Select all",
+            "cut":"[TS_954616]_Cut",
+            "copy":"[TS_954628]_Copy",
+            "search":"[TS_954612]_Search",
+            "share":"[TS_954621]_Share",
+            "translate":"[TS_954627]_Translate"
         },
         "refresh":{
-            "last_updated":"[HM_637204]_Last updated: %s",
-            "loading":"[HM_637205]_Refreshing…"
+            "last_updated":"[TS_954615]_Last updated: %s",
+            "loading":"[TS_954633]_Refreshing…"
         },
         "switch":{
-            "on":"[HM_637197]_On",
-            "off":"[HM_637194]_Off"
+            "on":"[TS_954636]_On",
+            "off":"[TS_954608]_Off"
         },
         "stepper":{
-            "skip":"[HM_699345]_Skip",
-            "next":"[HM_699342]_Next",
-            "start":"[HM_699340]_Start",
-            "back":"[HM_699338]_Back"
+            "skip":"[TS_954626]_Skip",
+            "next":"[TS_954614]_Next",
+            "start":"[TS_954631]_Start",
+            "back":"[TS_954619]_Back"
+        },
+        "navigation":{
+            "back":"[TS_954632]_Back",
+            "more":"[TS_954620]_MORE"
+        },
+        "sheet":{
+            "close":"[TS_961627]_Close"
+        },
+        "window":{
+            "leftSide":"[TS_954622]_Show on left",
+            "maximize":"[TS_954623]_Maximize",
+            "rightSide":"[TS_954624]_Show on right",
+            "exitMaximize":"[TS_954635]_Exit Maximize",
+            "exitFullScreen":"[TS_954630]_Exit Full Screen",
+            "fullScreen":"[TS_954629]_Full Screen"
+        },
+        "datepicker":{
+            "lunarSwitch":"[TS_954634]_Show lunar calendar",
+            "prev":"[TS_954625]_PREV"
         }
     }
 }
