@@ -248,6 +248,7 @@ public:
         return finalResult;
     }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
+    virtual std::pair<size_t, size_t> GetEllipsisTextRange() = 0;
     virtual void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(
