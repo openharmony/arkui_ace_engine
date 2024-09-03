@@ -64,11 +64,19 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
 
 void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "DoSetActiveChildRange: Repeat(nodeId): %{public}d: start: %{public}d - end: %{public}d; cacheStart: "
+        "%{public}d, cacheEnd: %{public}d: ==> keep in L1: %{public}d - %{public}d,",
+        GetId(), start, end, cacheStart, cacheEnd, start - cacheStart, end + cacheEnd);
+
     ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
         start, end, cacheStart, cacheEnd);
+
+    // memorize active range
     caches_.SetLastActiveRange(start - cacheStart, end + cacheEnd);
     // notify TS side
     onSetActiveRange_(start, end);
+
     bool needSync = caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](
         int32_t index, const RefPtr<UINode>& node) -> bool {
         if (node == nullptr) {
@@ -78,24 +86,15 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
         if (!frameNode) {
             return false;
         }
-        if (((start <= index) && (index <= end)) || ((end < start) && (index <= end || start <= index))) {
-            TAG_LOGD(AceLogTag::ACE_REPEAT, "...in range: index %{public}d -> nodeId %{public}d: SetActive(true)",
-                index, static_cast<int32_t>(frameNode->GetId()));
-            frameNode->SetActive(true);
-        } else {
-            TAG_LOGD(AceLogTag::ACE_REPEAT, "...out of range: index %{public}d -> nodeId %{public}d: SetActive(false)",
-                index, frameNode->GetId());
-            frameNode->SetActive(false);
-        }
-        if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-            ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+        if (CheckNode4IndexInL1(index, start, end, cacheStart, cacheEnd, frameNode)) {
             // keep in Repeat L1
-            TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d -> nodeId %{public}d: keep in Repeat L1",
+            TAG_LOGD(AceLogTag::ACE_REPEAT, "...in visible, index %{public}d -> nodeId %{public}d: keep in Repeat L1",
                 static_cast<int32_t>(index), frameNode->GetId());
             return true;
         }
-        TAG_LOGD(AceLogTag::ACE_REPEAT, "index %{public}d -> nodeId %{public}d: SetActive(false), "
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "...out of visible, index %{public}d -> nodeId %{public}d: SetActive(false), "
             "detach, move to spare items L2", index, frameNode->GetId());
+
         // move active node into L2 cached. check transition flag.
         if (node->OnRemoveFromParent(true)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
@@ -111,6 +110,29 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
         children_.clear();
         PostIdleTask();
     }
+}
+
+bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end,
+    int32_t cacheStart, int32_t cacheEnd, RefPtr<FrameNode>& frameNode)
+{
+    if (((start <= index) && (index <= end)) || ((end < start) && (index <= end || start <= index))) {
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "...in range: index %{public}d -> nodeId %{public}d: SetActive(true)",
+            index, static_cast<int32_t>(frameNode->GetId()));
+        frameNode->SetActive(true);
+    } else {
+        TAG_LOGD(AceLogTag::ACE_REPEAT, "...out of range: index %{public}d -> nodeId %{public}d: SetActive(false)",
+            index, frameNode->GetId());
+        frameNode->SetActive(false);
+    }
+
+    auto totalCount = static_cast<int32_t>(totalCount_);
+    if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
+        (isLoop_ && (start - cacheStart < 0 && start - cacheStart + totalCount <= index)) ||
+        (isLoop_ && (end + cacheEnd >= totalCount && index <= end + cacheEnd - totalCount)) ||
+        ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+        return true;
+    }
+    return false;
 }
 
 void RepeatVirtualScrollNode::DropFromL1(const std::string& key)
