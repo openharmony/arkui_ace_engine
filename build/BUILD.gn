@@ -101,7 +101,11 @@ config("ace_engine_public_config") {
 }
 
 config("lto_link_config") {
-  ldflags = [ "-Wl,--lto-O2" ]
+  if (enable_lto_O0) {
+    ldflags = [ "-Wl,--lto-O0" ]
+  } else {
+    ldflags = [ "-Wl,--lto-O2" ]
+  }
   if (ace_engine_feature_enable_pgo && enable_enhanced_opt) {
     ldflags +=
         [ "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}" ]

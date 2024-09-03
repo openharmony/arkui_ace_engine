@@ -35,6 +35,11 @@
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/gradient_property.h"
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/common/ace_view.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 using HiddenChangeEvent = std::function<void(bool)>;
