@@ -201,7 +201,8 @@ public:
     }
 
     virtual std::string GetArcDotIndicatorStyle() const { return ""; }
-
+    // ArcSwiper will implement this interface in order to set transitionAnimation disable
+    virtual void SetDisableTransitionAnimation(bool isDisable) {};
     int32_t GetCurrentShownIndex() const
     {
         return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
@@ -709,6 +710,13 @@ protected:
      */
     void NotifyParentScrollEnd();
 
+    bool SupportSwiperCustomAnimation() const
+    {
+        auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
+            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
+    }
+
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
@@ -726,6 +734,8 @@ protected:
     float currentIndexOffset_ = 0.0f;
 
     Axis direction_ = Axis::HORIZONTAL;
+
+    std::unordered_map<SwiperDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_;
 
 private:
     void OnModifyDone() override;
@@ -772,6 +782,8 @@ private:
     virtual void ResetAnimationParam() {};
     // ArcSwiper will implement this interface in order to reset the animation effect of the current node.
     virtual void ResetCurrentFrameNodeAnimation() {};
+    // ArcSwiper will implement this interface in order to reset the background color of parent node.
+    virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
     virtual void PlayScrollAnimation(float offset) {};
     virtual void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
@@ -982,13 +994,6 @@ private:
     void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
     void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);
 
-    bool SupportSwiperCustomAnimation()
-    {
-        auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-        return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
-            !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
-    }
-
     void ResetOnForceMeasure();
     void UpdateTabBarIndicatorCurve();
     bool CheckDragOutOfBoundary(double dragVelocity);
@@ -1133,7 +1138,6 @@ private:
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
-    std::unordered_map<SwiperDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;
     // capture
     std::optional<int32_t> leftCaptureIndex_;
     std::optional<int32_t> rightCaptureIndex_;
