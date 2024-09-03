@@ -53,7 +53,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 #if defined(PIXEL_MAP_SUPPORTED)
-constexpr int32_t CREATE_PIXELMAP_TIME = 80;
+constexpr int32_t CREATE_PIXELMAP_TIME = 30;
 constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
@@ -859,28 +859,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
-        auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
-                            frameNode, dragDropInfo, event](
-                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
-            ContainerScope scope(id);
-            TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
-            if (pixelMap != nullptr) {
-                dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-            }
-            auto taskScheduler = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskScheduler);
-            taskScheduler->PostTask(
-                [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
-                    CHECK_NULL_VOID(gestureEventHubPtr);
-                    CHECK_NULL_VOID(frameNode);
-                    gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
-        };
-        SnapshotParam param;
-        param.delay = CREATE_PIXELMAP_TIME;
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
-        PrintBuilderNode(dragPreviewInfo.customNode);
+        StartDragForCustomBuilder(info, pipeline, frameNode, dragDropInfo, event);
         return;
     }
 #endif
@@ -2036,6 +2015,40 @@ void GestureEventHub::CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes)
                 AceLogTag::ACE_DRAG, "ImageNode did not complete decoding, nodeId: %{public}d", imageNode->GetId());
         }
     }
+}
+
+void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+    const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+    SnapshotParam param;
+    param.delay = CREATE_PIXELMAP_TIME;
+    std::shared_ptr<Media::PixelMap> pixelMap = ComponentSnapshot::CreateSync(dragDropInfo.customNode, param);
+    if (pixelMap != nullptr) {
+        dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Snapshot createSync failed, get thumbnail by async.");
+    auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
+                        frameNode, dragDropInfo, event](
+                        std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
+        ContainerScope scope(id);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
+        if (pixelMap != nullptr) {
+            dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        }
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
+                CHECK_NULL_VOID(gestureEventHubPtr);
+                CHECK_NULL_VOID(frameNode);
+                gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
+    };
+    NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
+    PrintBuilderNode(dragDropInfo.customNode);
 }
 #endif
 
