@@ -4071,7 +4071,7 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     uint8_t imageBorderBitsets = 0;
 
     auto valueSource = object->GetProperty(static_cast<int32_t>(ArkUIIndex::SOURCE));
-    CHECK_NULL_VOID((valueSource->IsString() || !valueSource->IsObject()));
+    CHECK_NULL_VOID((valueSource->IsString() || valueSource->IsObject()));
     std::string srcResult;
     if (valueSource->IsString() && !valueSource->ToString().empty()) {
         borderImage->SetSrc(valueSource->ToString());
