@@ -45,9 +45,9 @@ template("napi_observer_static") {
     deps += [ "../utils:napi_utils_static_${platform}" ]
 
     if (is_arkui_x) {
-      deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
+      deps += [ "$ace_napi:ace_container_scope_static" ]
     } else {
-      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+      external_deps += [ "napi:ace_container_scope" ]
     }
 
     subsystem_name = ace_engine_subsystem
