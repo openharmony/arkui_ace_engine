@@ -130,11 +130,13 @@ bool SubwindowOhos::InitContainer()
         CHECK_NULL_RETURN(parentWindow, false);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
+        std::string windowTag = "";
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (GetAboveApps()) {
+            windowTag = "Toast_";
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
@@ -163,8 +165,8 @@ bool SubwindowOhos::InitContainer()
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
-            windowOption, parentWindow->GetContext());
+        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
+            std::to_string(windowId_), windowOption, parentWindow->GetContext());
         if (!window_) {
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
             return false;
@@ -1182,7 +1184,6 @@ void SubwindowOhos::ClearToast()
 void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
     SetIsToastWindow(
         toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1208,7 +1209,12 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     if (parentContainer->IsScenceBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
+        // Recover current subwindow in subwindow manager to ensure popup/menu can close the right subwindow
+        auto currentWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
         ShowWindow(false);
+        SubwindowManager::GetInstance()->SetCurrentSubwindow(currentWindow);
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(false);
     }
     delegate->ShowToast(toastInfo, std::move(callback));
 }
