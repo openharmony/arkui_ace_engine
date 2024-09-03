@@ -489,8 +489,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void TryVisibleChangeOnDescendant(bool isVisible) override;
-    void NotifyVisibleChange(bool isVisible);
+    void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
+    void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);

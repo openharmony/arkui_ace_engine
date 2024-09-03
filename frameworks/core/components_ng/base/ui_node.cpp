@@ -1171,15 +1171,15 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
     }
 }
 
-void UINode::TryVisibleChangeOnDescendant(bool isVisible)
+void UINode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
-    UpdateChildrenVisible(isVisible);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
 }
 
-void UINode::UpdateChildrenVisible(bool isVisible) const
+void UINode::UpdateChildrenVisible(VisibleType preVisibility, VisibleType currentVisibility) const
 {
     for (const auto& child : GetChildren()) {
-        child->TryVisibleChangeOnDescendant(isVisible);
+        child->TryVisibleChangeOnDescendant(preVisibility, currentVisibility);
     }
 }
 
