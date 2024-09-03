@@ -218,6 +218,16 @@ public:
         showTime_ = value;
     }
 
+    void SetShowLunarSwitch(bool value)
+    {
+        showLunarSwitch_ = value;
+    }
+
+    bool GetShowLunarSwitch()
+    {
+        return showLunarSwitch_;
+    }
+
     const EventMarker& GetDialogAcceptEvent() const
     {
         return OnDialogAccept_;
@@ -724,6 +734,7 @@ private:
     bool lunar_ = false;
     bool showMonthDays_ = false;
     bool showTime_ = false;
+    bool showLunarSwitch_ = false;
     Color backgroundColor_ = Color::WHITE;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
