@@ -6604,11 +6604,15 @@ void RichEditorPattern::HandleOnCopyStyledString()
     RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+#ifdef PREVIEW
+    clipboard_->SetData(subSpanString->GetString(), CopyOptions::Distributed);
+#else
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     clipboard_->AddSpanStringRecord(pasteData, tlvData);
     clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
     clipboard_->SetData(pasteData, copyOption_);
+#endif
 }
 
 void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
@@ -6634,7 +6638,11 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
             auto data = pattern->GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
                 result.offsetInSpan[RichEditorSpanRange::RANGESTART],
                 result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+#ifdef PREVIEW
+            clipboard->SetData(data, CopyOptions::Distributed);
+#else
             clipboard->AddTextRecord(pasteData, data);
+#endif
             return;
         }
         if (result.type == SelectSpanType::TYPEIMAGE) {
@@ -6723,6 +6731,15 @@ void RichEditorPattern::HandleOnPaste()
         return;
     }
     CHECK_NULL_VOID(clipboard_);
+#ifdef PREVIEW
+    auto pasteCallback = [weak = WeakClaim(this)](const std::string& text) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback in previewer");
+        auto richEditor = weak.Upgrade();
+        CHECK_NULL_VOID(richEditor);
+        richEditor->PasteStr(richEditor, text);
+    };
+    clipboard_->GetData(pasteCallback);
+#else
     auto pasteCallback = [weak = WeakClaim(this)](std::vector<uint8_t>& arr, const std::string& text) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "pasteCallback callback");
         auto richEditor = weak.Upgrade();
@@ -6734,17 +6751,23 @@ void RichEditorPattern::HandleOnPaste()
             richEditor->RequestKeyboardToEdit();
             return;
         }
-        if (text.empty()) {
-            richEditor->ResetSelection();
-            richEditor->StartTwinkling();
-            richEditor->CloseSelectOverlay();
-            richEditor->RequestKeyboardToEdit();
-            return;
-        }
-        richEditor->AddPasteStr(text);
-        richEditor->ResetAfterPaste();
+        richEditor->PasteStr(richEditor, text);
     };
     clipboard_->GetSpanStringData(pasteCallback);
+#endif
+}
+
+void RichEditorPattern::PasteStr(const RefPtr<RichEditorPattern>& richEditor, const std::string& text)
+{
+    if (text.empty()) {
+        richEditor->ResetSelection();
+        richEditor->StartTwinkling();
+        richEditor->CloseSelectOverlay();
+        richEditor->RequestKeyboardToEdit();
+        return;
+    }
+    richEditor->AddPasteStr(text);
+    richEditor->ResetAfterPaste();
 }
 
 void RichEditorPattern::SetCaretSpanIndex(int32_t index)
