@@ -53,6 +53,7 @@ public:
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
     void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const MenuParam& menuParam) override;
+    void SetBarState(DisplayMode mode) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);

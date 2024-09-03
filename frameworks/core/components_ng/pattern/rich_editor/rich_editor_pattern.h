@@ -930,6 +930,11 @@ public:
         imagePreviewMenuParam_ = menuParam;
     }
 
+    void SetBarState(DisplayMode mode)
+    {
+        barDisplayMode_ = mode;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -1342,6 +1347,7 @@ private:
     std::function<void()> imagePreviewMenuBuilder_;
     std::optional<MenuParam> imagePreviewMenuParam_ = std::nullopt;
     bool isImageSelfResponseEvent_ = true;
+    DisplayMode barDisplayMode_ = DisplayMode::AUTO;
 };
 } // namespace OHOS::Ace::NG
 

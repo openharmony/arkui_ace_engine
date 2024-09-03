@@ -363,6 +363,7 @@ public:
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
     virtual void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const NG::MenuParam& menuParam) {}
+    virtual void SetBarState(DisplayMode mode) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;
