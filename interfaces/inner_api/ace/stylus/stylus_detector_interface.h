@@ -68,6 +68,11 @@ struct MoveCursorOption {
     bool showHandle;
 };
 
+struct ChoiceTextOption {
+    StylusGestureRect rect;
+    bool showMenu;
+}
+
 class IAceStylusCallback {
 public:
     virtual ~IAceStylusCallback() = default;
