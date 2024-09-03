@@ -1820,7 +1820,10 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
     actuator->ClearGatherNodeChildrenInfo();
-    
+    auto geometryNode = stackNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({0.0f, 0.0f});
+
     for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
         auto itemFrameNode = (*iter);
         if (itemFrameNode == frameNode) {
