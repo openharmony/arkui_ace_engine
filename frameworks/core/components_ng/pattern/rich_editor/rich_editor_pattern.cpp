@@ -9768,4 +9768,23 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
     style.SetFontFamilies({ "HarmonyOS Sans" });
     return style;
 }
+
+bool RichEditorPattern::IsTextEditableForStylus() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusable() || !host->IsVisible()) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG
