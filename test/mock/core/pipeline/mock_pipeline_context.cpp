@@ -890,6 +890,11 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
+bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    return false;
+}
+
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

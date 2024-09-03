@@ -1753,12 +1753,16 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
         };
-        auto addAnimationCallback = [proxy, navigationTransition]() {
-            navigationTransition.transition(proxy);
-        };
+        auto pipelineContext = hostNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto navigationManager = pipelineContext->GetNavigationManager();
+        CHECK_NULL_RETURN(navigationManager, false);
+        navigationManager->SetInteractive(hostNode->GetId());
         proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(
-            addAnimationCallback, finishCallback), finishCallback);
+            nullptr, finishCallback), finishCallback);
+        navigationTransition.transition(proxy);
         isFinishInteractiveAnimation_ = false;
+        navigationManager->FinishInteractiveAnimation();
         proxy->StartAnimation();
     } else {
         navigationStack_->ClearRecoveryList();
