@@ -286,6 +286,11 @@ public:
         return cacheParam_;
     }
 
+    void SetNeedMeasureFormLastItem(bool needMeasureFormLastItem)
+    {
+        isNeedMeasureFormLastItem_ = needMeasureFormLastItem;
+    }
+
     ListItemGroupLayoutInfo GetLayoutInfo() const;
 
 private:
@@ -382,6 +387,7 @@ private:
     bool needAllLayout_ = false;
     bool needAdjustRefPos_ = false;
     bool isNeedCheckOffset_ = false;
+    bool isNeedMeasureFormLastItem_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
