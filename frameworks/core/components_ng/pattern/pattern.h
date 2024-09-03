@@ -608,11 +608,6 @@ public:
         return false;
     }
 
-    virtual uint32_t GetWindowPatternType() const
-    {
-        return 0;
-    }
-    
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;

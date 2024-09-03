@@ -25,7 +25,6 @@ class WindowScene : public WindowPattern {
 public:
     explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
-    uint32_t GetWindowPatternType() const override;
 
 protected:
     std::optional<RenderContext::ContextParam> GetContextParam() const override

@@ -89,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-
+    
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -892,7 +892,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-    void FlushWindowPatternInfo();
+
     void FlushFocusView();
     void FlushFocusScroll();
 

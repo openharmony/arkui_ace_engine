@@ -25,8 +25,6 @@
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -91,19 +89,6 @@ void ScreenPattern::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(displayNode);
-    auto instance = WindowSceneLayoutManager::GetInstance();
-    if (instance) {
-        instance->RegisterScreenNode(screenSession_->GetScreenId(), host);
-    }
-}
-
-void ScreenPattern::OnDetachFromFrameNode(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(screenSession_);
-    auto instance = WindowSceneLayoutManager::GetInstance();
-    if (instance) {
-        instance->UnregisterScreenNode(screenSession_->GetScreenId());
-    }
 }
 
 void ScreenPattern::UpdateDisplayInfo()
@@ -244,10 +229,5 @@ float ScreenPattern::GetDensityInCurrentResolution()
         screen->GetDensityInCurResolution(density);
     }
     return density;
-}
-
-uint32_t ScreenPattern::GetWindowPatternType() const
-{
-    return static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
 }
 } // namespace OHOS::Ace::NG
