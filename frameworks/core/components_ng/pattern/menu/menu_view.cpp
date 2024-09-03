@@ -829,12 +829,12 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
         props->UpdateUserDefinedIdealSize(targetSize);
         props->UpdateImageFit(ImageFit::FILL);
 
-        ShowGatherAnimation(target, wrapperNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
+        ShowGatherAnimation(target, wrapperNode);
     }
     
     auto geometryNode = imageNode->GetGeometryNode();
@@ -917,7 +917,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (isAllowedDrag) {
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetLastChild());
         CHECK_NULL_VOID(pixelMapNode);
         auto renderContext = pixelMapNode->GetRenderContext();
