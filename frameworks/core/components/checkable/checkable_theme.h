@@ -62,6 +62,22 @@ public:
     {
         return width_;
     }
+
+    const Color& GetFocusBoardColor() const
+    {
+        return focusBoardColor_;
+    }
+
+    const Color& GetBorderFocusedColor() const
+    {
+        return borderFocusedColor_;
+    }
+
+    const Color& GetFocusedBGColorUnselected() const
+    {
+        return focusedBGColorUnselected_;
+    }
+
     const Dimension& GetHeight() const
     {
         return height_;
