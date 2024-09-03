@@ -206,6 +206,27 @@ ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
     return nodeId;
 }
 
+void PropertyUpdate(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    if (uiNode) {
+        uiNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    }
+}
+
+ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    size_t size = isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
+                             : static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
+    CHECK_NULL_RETURN(size > 0, nullptr);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
+    return reinterpret_cast<ArkUINodeHandle>(child);
+}
+
 void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32 (*parentOffset)[2], ArkUI_Bool useVp)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
@@ -401,27 +422,6 @@ ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
-}
-
-void PropertyUpdate(ArkUINodeHandle node)
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    if (uiNode) {
-        uiNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
-    }
-}
-
-ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
-{
-    auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
-    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    size_t size = isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
-                             : static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
-    CHECK_NULL_RETURN(size > 0, nullptr);
-    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
-    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 ArkUINodeHandle GetFirstUINode(ArkUINodeHandle node)
