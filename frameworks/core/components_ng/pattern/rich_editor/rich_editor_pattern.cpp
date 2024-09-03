@@ -9975,7 +9975,10 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
         } else if (index > 0 && wtext[index - 1] == L' ') {
             DeleteByRange(nullptr, index - 1, index);
         } else {
-            SetCaretPosition(index);
+            auto ret = SetCaretOffset(index);
+            if (!ret) {
+                return false;
+            }
             InsertValue(" ");
         }
         return true;
