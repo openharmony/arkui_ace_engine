@@ -208,7 +208,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::DeleteText(int32_t nodeId, vo
             if (std::get<0>(ret) == 0) {
                 auto textInputClient = frameNode->GetPattern<TextInputClient>();
                 CHECK_NULL_VOID(textInputClient);
-                textInputClient->SetCaretPosition(std::get<INDEX_S>(ret));
+                textInputClient->SetCaretOffset(std::get<INDEX_S>(ret));
                 textInputClient->DeleteForward(std::get<INDEX_E>(ret) - std::get<INDEX_S>(ret));
                 resultCode = 0;
             }
@@ -221,11 +221,12 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
     RefPtr<TaskExecutor> taskScheduler)
 {
     int32_t resultCode = -1;
-    StylusGestureRect *rectPtr = static_cast<StylusGestureRect*>(data);
-    CHECK_NULL_RETURN(rectPtr, resultCode);
-    auto rect = *rectPtr;
+    ChoiceTextOption *optionPtr = static_cast<ChoiceTextOption*>(data);
+    CHECK_NULL_RETURN(optionPtr, resultCode);
+    auto choiceTextOption = *optionPtr;
     taskScheduler->PostSyncTask(
-        [&resultCode, nodeId, rect]() {
+        [&resultCode, nodeId, choiceTextOption]() {
+            auto rect = choiceTextOption.rect;
             TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture global rect:%{public}f, %{public}f, %{public}f, %{public}f",
                 rect.Left, rect.Top, rect.Width, rect.Height);
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
@@ -250,7 +251,10 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
             if (std::get<0>(ret) == 0) {
                 auto textInputClient = frameNode->GetPattern<TextInputClient>();
                 CHECK_NULL_VOID(textInputClient);
-                SelectionOptions option = { .menuPolicy = MenuPolicy::SHOW };
+                SelectionOptions option = { .menuPolicy = MenuPolicy::HIDE };
+                if (choiceTextOption.showMenu) {
+                    option = { .menuPolicy = MenuPolicy::SHOW };
+                }
                 textInputClient->SetSelection(std::get<INDEX_S>(ret), std::get<INDEX_E>(ret), option);
                 resultCode = 0;
             }
@@ -330,7 +334,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::HandleMoveCursor(const RefPtr
     if (start >= 0 && start <= wtextLength) {
         auto textInputClient = frameNode->GetPattern<TextInputClient>();
         CHECK_NULL_RETURN(textInputClient, -1);
-        textInputClient->SetCaretPosition(start);
+        textInputClient->SetCaretOffset(start);
         frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
         return 0;
     }
