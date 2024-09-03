@@ -141,10 +141,11 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto prevHeader = header_.Upgrade();
-        if (prevHeader) {
+        if (prevHeader && isHeaderComponentContentExist_) {
             host->RemoveChild(prevHeader);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             header_ = nullptr;
+            isHeaderComponentContentExist_ = false;
         }
     }
 
@@ -153,10 +154,11 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto prevFooter = footer_.Upgrade();
-        if (prevFooter) {
+        if (prevFooter && isFooterComponentContentExist_) {
             host->RemoveChild(prevFooter);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             footer_ = nullptr;
+            isFooterComponentContentExist_ = false;
         }
     }
 
@@ -168,6 +170,16 @@ public:
     void SetIndexInList(int32_t index)
     {
         indexInList_ = index;
+    }
+
+    void SetHeaderComponentContentExist(bool isHeaderComponentContentExist)
+    {
+        isHeaderComponentContentExist_ = isHeaderComponentContentExist;
+    }
+
+    void SetFooterComponentContentExist(bool isFooterComponentContentExist)
+    {
+        isFooterComponentContentExist_ = isFooterComponentContentExist;
     }
 
     int32_t GetIndexInList() const
@@ -292,6 +304,8 @@ private:
 
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
+    bool isHeaderComponentContentExist_ = false;
+    bool isFooterComponentContentExist_ = false;
     int32_t itemStartIndex_ = 0;
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

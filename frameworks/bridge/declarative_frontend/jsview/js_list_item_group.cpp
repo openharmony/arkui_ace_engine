@@ -162,6 +162,8 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
     auto listItemGroupStyle = GetListItemGroupStyle(args);
     ListItemGroupModel::GetInstance()->Create(listItemGroupStyle);
     if (args.Length() < 1 || !args[0]->IsObject()) {
+        NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
+        NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         args.ReturnSelf();
         return;
     }
@@ -178,7 +180,9 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     } else {
-        SetHeaderBuilder(obj);
+        if (!SetHeaderBuilder(obj)) {
+            NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
+        }
     }
 
     if (obj->HasProperty("footerComponent")) {
@@ -187,7 +191,9 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     } else {
-        SetFooterBuilder(obj);
+        if (!SetFooterBuilder(obj)) {
+            NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
+        }
     }
 
     args.ReturnSelf();
