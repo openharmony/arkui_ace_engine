@@ -2512,7 +2512,7 @@ void TextFieldPattern::ScheduleCursorTwinkling()
         return;
     }
 
-    if (HasFocus()) {
+    if (dragRecipientStatus_ == DragStatus::DRAGGING) {
         return;
     }
 
