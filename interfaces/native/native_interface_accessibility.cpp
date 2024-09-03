@@ -36,7 +36,7 @@ int32_t OH_ArkUI_AccessibilityProviderRegisterCallback(
     ArkUI_AccessibilityProvider* provider, ArkUI_AccessibilityProviderCallbacks* callbacks)
 {
     if ((provider == nullptr) || (callbacks == nullptr)) {
-        return OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER;
+        return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
     }
     return provider->AccessibilityProviderRegisterCallback(callbacks);
 }
@@ -93,422 +93,414 @@ void OH_ArkUI_DestoryAccessibilityEventInfo(ArkUI_AccessibilityEventInfo* eventI
     delete eventInfo;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoElementId(
+int32_t OH_ArkUI_AccessibilityElementInfoSetElementId(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t elementId)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetElementId(elementId);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoComponentId(
-    ArkUI_AccessibilityElementInfo* elementInfo, int32_t componentId)
-{
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    elementInfo->SetComponentId(componentId);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
-}
-
-int32_t OH_ArkUI_SetAccessibilityElementInfoParentId(
+int32_t OH_ArkUI_AccessibilityElementInfoSetParentId(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t parentId)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetParentId(parentId);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoComponentType(
+int32_t OH_ArkUI_AccessibilityElementInfoSetComponentType(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* componentType)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(componentType, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(componentType, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetComponentType(componentType);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoContents(
+int32_t OH_ArkUI_AccessibilityElementInfoSetContents(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* contents)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(contents, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(contents, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetContents(contents);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoHintText(
+int32_t OH_ArkUI_AccessibilityElementInfoSetHintText(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* hintText)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(hintText, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(hintText, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetHintText(hintText);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityText(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityText(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* accessibilityText)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(accessibilityText, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(accessibilityText, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetAccessibilityText(accessibilityText);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityDescription(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityDescription(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* accessibilityDescription)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(accessibilityDescription, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(accessibilityDescription, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetAccessibilityDescription(accessibilityDescription);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoChildNodeIds(
+int32_t OH_ArkUI_AccessibilityElementInfoSetChildNodeIds(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t childCount, int64_t* childNodeIds)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(childNodeIds, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(childNodeIds, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     if (childCount <= 0) {
-        return OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER;
+        return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
     }
     elementInfo->ClearChildNodeIds();
     for (int32_t i = 0; i < childCount; i++) {
         elementInfo->AddChildNodeId(childNodeIds[i]);
     }
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoOperationActions(
+int32_t OH_ArkUI_AccessibilityElementInfoSetOperationActions(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t operationCount,
     ArkUI_AccessibleAction* operationActions)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(operationActions, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(operationActions, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     if (operationCount <= 0) {
-        return OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER;
+        return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
     }
     elementInfo->ClearChildNodeIds();
     for (int32_t i = 0; i < operationCount; i++) {
         elementInfo->AddOperationAction(operationActions[i]);
     }
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoScreenRect(
+int32_t OH_ArkUI_AccessibilityElementInfoSetScreenRect(
     ArkUI_AccessibilityElementInfo* elementInfo, ArkUI_AccessibleRect* screenRect)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(screenRect, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(screenRect, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetRect(*screenRect);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoCheckable(
+int32_t OH_ArkUI_AccessibilityElementInfoSetCheckable(
     ArkUI_AccessibilityElementInfo* elementInfo, bool checkable)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetCheckable(checkable);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoChecked(
+int32_t OH_ArkUI_AccessibilityElementInfoSetChecked(
     ArkUI_AccessibilityElementInfo* elementInfo, bool checked)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetChecked(checked);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoFocusable(
+int32_t OH_ArkUI_AccessibilityElementInfoSetFocusable(
     ArkUI_AccessibilityElementInfo* elementInfo, bool focusable)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetFocusable(focusable);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoFocused(
+int32_t OH_ArkUI_AccessibilityElementInfoSetFocused(
     ArkUI_AccessibilityElementInfo* elementInfo, bool isFocused)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetFocused(isFocused);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoVisible(
+int32_t OH_ArkUI_AccessibilityElementInfoSetVisible(
     ArkUI_AccessibilityElementInfo* elementInfo, bool isVisible)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetVisible(isVisible);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityFocused(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityFocused(
     ArkUI_AccessibilityElementInfo* elementInfo, bool accessibilityFocused)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetAccessibilityFocused(accessibilityFocused);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoSelected(
+int32_t OH_ArkUI_AccessibilityElementInfoSetSelected(
     ArkUI_AccessibilityElementInfo* elementInfo, bool selected)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetSelected(selected);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoClickable(
+int32_t OH_ArkUI_AccessibilityElementInfoSetClickable(
     ArkUI_AccessibilityElementInfo* elementInfo, bool clickable)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetClickable(clickable);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoLongClickable(
+int32_t OH_ArkUI_AccessibilityElementInfoSetLongClickable(
     ArkUI_AccessibilityElementInfo* elementInfo, bool longClickable)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetLongClickable(longClickable);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoEnabled(
+int32_t OH_ArkUI_AccessibilityElementInfoSetEnabled(
     ArkUI_AccessibilityElementInfo* elementInfo, bool isEnabled)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetEnabled(isEnabled);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoIsPassword(
+int32_t OH_ArkUI_AccessibilityElementInfoSetIsPassword(
     ArkUI_AccessibilityElementInfo* elementInfo, bool isPassword)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetPassword(isPassword);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoScrollable(
+int32_t OH_ArkUI_AccessibilityElementInfoSetScrollable(
     ArkUI_AccessibilityElementInfo* elementInfo, bool scrollable)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetScrollable(scrollable);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoEditable(
+int32_t OH_ArkUI_AccessibilityElementInfoSetEditable(
     ArkUI_AccessibilityElementInfo* elementInfo, bool editable)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetEditable(editable);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoIsHint(
+int32_t OH_ArkUI_AccessibilityElementInfoSetIsHint(
     ArkUI_AccessibilityElementInfo* elementInfo, bool isHint)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetHint(isHint);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoRangeInfo(
+int32_t OH_ArkUI_AccessibilityElementInfoSetRangeInfo(
     ArkUI_AccessibilityElementInfo* elementInfo, ArkUI_AccessibleRangeInfo* rangeInfo)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(rangeInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(rangeInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetRangeInfo(*rangeInfo);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoGridInfo(
+int32_t OH_ArkUI_AccessibilityElementInfoSetGridInfo(
     ArkUI_AccessibilityElementInfo* elementInfo, ArkUI_AccessibleGridInfo* gridInfo)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(gridInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(gridInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetGridInfo(*gridInfo);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoGridItemInfo(
+int32_t OH_ArkUI_AccessibilityElementInfoSetGridItemInfo(
     ArkUI_AccessibilityElementInfo* elementInfo, ArkUI_AccessibleGridItemInfo* gridItem)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(gridItem, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(gridItem, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetGridItemInfo(*gridItem);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoTextBeginSelected(
-    ArkUI_AccessibilityElementInfo* elementInfo, int32_t textBeginSelected)
+int32_t OH_ArkUI_AccessibilityElementInfoSetSelectedTextStart(
+    ArkUI_AccessibilityElementInfo* elementInfo, int32_t selectedTextStart)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    elementInfo->SetTextBeginSelected(textBeginSelected);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    elementInfo->SetTextBeginSelected(selectedTextStart);
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoTextEndSelected(
-    ArkUI_AccessibilityElementInfo* elementInfo, int32_t textEndSelected)
+int32_t OH_ArkUI_AccessibilityElementInfoSetSelectedTextEnd(
+    ArkUI_AccessibilityElementInfo* elementInfo, int32_t selectedTextEnd)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    elementInfo->SetTextEndSelected(textEndSelected);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    elementInfo->SetTextEndSelected(selectedTextEnd);
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoCurrentItemIndex(
+int32_t OH_ArkUI_AccessibilityElementInfoSetCurrentItemIndex(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t currentItemIndex)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetCurrentIndex(currentItemIndex);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoBeginItemIndex(
-    ArkUI_AccessibilityElementInfo* elementInfo, int32_t beginItemIndex)
+int32_t OH_ArkUI_AccessibilityElementInfoSetStartItemIndex(
+    ArkUI_AccessibilityElementInfo* elementInfo, int32_t startItemIndex)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    elementInfo->SetBeginIndex(beginItemIndex);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    elementInfo->SetBeginIndex(startItemIndex);
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoEndItemIndex(
+int32_t OH_ArkUI_AccessibilityElementInfoSetEndItemIndex(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t endItemIndex)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetEndIndex(endItemIndex);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoItemCount(
+int32_t OH_ArkUI_AccessibilityElementInfoSetItemCount(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t itemCount)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetItemCount(itemCount);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityOffset(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityOffset(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t offset)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetOffset(offset);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityGroup(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityGroup(
     ArkUI_AccessibilityElementInfo* elementInfo, bool accessibilityGroup)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetAccessibilityGroup(accessibilityGroup);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityLevel(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityLevel(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* accessibilityLevel)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(accessibilityLevel, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(accessibilityLevel, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetAccessibilityLevel(accessibilityLevel);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoZIndex(
+int32_t OH_ArkUI_AccessibilityElementInfoSetZIndex(
     ArkUI_AccessibilityElementInfo* elementInfo, int32_t zIndex)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetZIndex(zIndex);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoAccessibilityOpacity(
+int32_t OH_ArkUI_AccessibilityElementInfoSetAccessibilityOpacity(
     ArkUI_AccessibilityElementInfo* elementInfo, float opacity)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     if (std::isnan(opacity)) {
-        return OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER;
+        return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
     }
     elementInfo->SetOpacity(opacity);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoBackgroundColor(
+int32_t OH_ArkUI_AccessibilityElementInfoSetBackgroundColor(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* backgroundColor)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(backgroundColor, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(backgroundColor, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetBackgroundColor(backgroundColor);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoBackgroundImage(
+int32_t OH_ArkUI_AccessibilityElementInfoSetBackgroundImage(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* backgroundImage)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(backgroundImage, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(backgroundImage, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetBackgroundImage(backgroundImage);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoBlur(
+int32_t OH_ArkUI_AccessibilityElementInfoSetBlur(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* blur)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(blur, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(blur, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetBlur(blur);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityElementInfoHitTestBehavior(
+int32_t OH_ArkUI_AccessibilityElementInfoSetHitTestBehavior(
     ArkUI_AccessibilityElementInfo* elementInfo, const char* hitTestBehavior)
 {
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(hitTestBehavior, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(hitTestBehavior, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     elementInfo->SetHitTestBehavior(hitTestBehavior);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityEventEventType(
+int32_t OH_ArkUI_AccessibilityEventSetEventType(
     ArkUI_AccessibilityEventInfo* eventInfo, ArkUI_AccessibilityEventType eventType)
 {
-    CHECK_NULL_RETURN(eventInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(eventInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     eventInfo->SetEventType(eventType);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityEventTextAnnouncedForAccessibility(
+int32_t OH_ArkUI_AccessibilityEventSetTextAnnouncedForAccessibility(
     ArkUI_AccessibilityEventInfo* eventInfo, const char* textAnnouncedForAccessibility)
 {
-    CHECK_NULL_RETURN(eventInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(eventInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     eventInfo->SetTextAnnouncedForAccessibility(textAnnouncedForAccessibility);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityEventRequestFocusId(
+int32_t OH_ArkUI_AccessibilityEventSetRequestFocusId(
     ArkUI_AccessibilityEventInfo* eventInfo, int32_t requestFocusId)
 {
-    CHECK_NULL_RETURN(eventInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(eventInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     eventInfo->SetRequestFocusId(requestFocusId);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
-int32_t OH_ArkUI_SetAccessibilityEventElementInfo(
+int32_t OH_ArkUI_AccessibilityEventSetElementInfo(
     ArkUI_AccessibilityEventInfo* eventInfo, ArkUI_AccessibilityElementInfo* elementInfo)
 {
-    CHECK_NULL_RETURN(eventInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(elementInfo, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(eventInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(elementInfo, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     eventInfo->SetElementInfo(elementInfo);
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
 int32_t OH_ArkUI_FindAccessibilityActionArgumentByKey(
     ArkUI_AccessibilityActionArguments* arguments, const char* key, char** value)
 {
-    CHECK_NULL_RETURN(arguments, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
-    CHECK_NULL_RETURN(key, OH_ARKUI_ACCESSIBILITY_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(arguments, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
+    CHECK_NULL_RETURN(key, ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER);
     *value = const_cast<char*>(arguments->FindValueByKey(key));
-    return OH_ARKUI_ACCESSIBILITY_RESULT_SUCCESS;
+    return ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL;
 }
 
 #ifdef __cplusplus

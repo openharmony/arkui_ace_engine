@@ -22,6 +22,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SEND_EVENT_FAILED = -1;
+
 std::shared_ptr<ArkUI_AccessibilityProvider> GetAccessbilityProvider(
     const WeakPtr<XComponentPattern>& weakPattern)
 {
@@ -142,9 +144,9 @@ int32_t XComponentAccessibilityProvider::SendAccessibilityAsyncEvent(
     auto thirdAccessibilityManager = thirdAccessibilityManager_.lock();
     if (thirdAccessibilityManager == nullptr) {
         if (callback) {
-            callback(-2);
+            callback(SEND_EVENT_FAILED);
         }
-        return -2;
+        return SEND_EVENT_FAILED;
     }
 
     thirdAccessibilityManager->SendAccessibilityAsyncEvent(

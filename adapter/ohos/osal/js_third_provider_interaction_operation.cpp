@@ -33,6 +33,68 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+void LogAccessibilityElementInfo(
+    const std::string& tag, const Accessibility::AccessibilityElementInfo& info)
+{
+    std::string printStr;
+    printStr.append(tag).append(", info: [");
+    printStr.append("accessibilityId: ").append(std::to_string(info.GetAccessibilityId()));
+    printStr.append(", accessibilityText: ").append(info.GetAccessibilityText());
+    printStr.append(", childCount: ").append(std::to_string(info.GetChildCount()));
+    printStr.append(", windowId: ").append(std::to_string(info.GetWindowId()));
+    printStr.append(", parentNodeId: ").append(std::to_string(info.GetParentNodeId()));
+    printStr.append(", checkable: ").append(info.IsCheckable() ? "true" : "false");
+    printStr.append(", checked: ").append(info.IsChecked() ? "true" : "false");
+    printStr.append(", focusable: ").append(info.IsFocusable() ? "true" : "false");
+    printStr.append(", focused: ").append(info.IsFocused() ? "true" : "false");
+    printStr.append(", visible: ").append(info.IsVisible() ? "true" : "false");
+    printStr.append(", hasAccessibilityFocus: ")
+        .append(info.HasAccessibilityFocus() ? "true" : "false");
+    printStr.append(", selected: ").append(info.IsSelected() ? "true" : "false");
+    printStr.append(", clickable: ").append(info.IsClickable() ? "true" : "false");
+    printStr.append(", longClickable: ").append(info.IsLongClickable() ? "true" : "false");
+    printStr.append(", enabled: ").append(info.IsEnabled() ? "true" : "false");
+    printStr.append(", componentType: ").append(info.GetComponentType());
+    printStr.append(", content: ").append(info.GetContent());
+    printStr.append(", pageId: ").append(std::to_string(info.GetPageId()));
+    printStr.append(", triggerAction: ")
+        .append(std::to_string(static_cast<int32_t>(info.GetTriggerAction())));
+    printStr.append(", accessibilityText: ").append(info.GetAccessibilityText());
+    printStr.append(", childTreeId: ").append(std::to_string(info.GetChildTreeId()));
+    printStr.append(", belongTreeId: ").append(std::to_string(info.GetBelongTreeId()));
+    printStr.append(", parentWindowId: ").append(std::to_string(info.GetParentWindowId()));
+    printStr.append(", accessibilityGroup: ").append(info.GetAccessibilityGroup() ? "true" : "false");
+    std::string actionStr;
+    actionStr.append("{");
+    for (const auto& action : info.GetActionList()) {
+        actionStr.append(std::to_string(
+            static_cast<int32_t>(action.GetActionType()))).append(" ");
+    }
+    actionStr.append("}");
+    printStr.append(", action: ").append(actionStr);
+    printStr.append("]");
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "%{public}s", printStr.c_str());
+}
+
+void LogAccessibilityEventInfo(
+    const std::string& tag, const Accessibility::AccessibilityEventInfo& info)
+{
+    std::string printStr;
+    printStr.append(tag).append(", info: [");
+    printStr.append("accessibilityId: ").append(std::to_string(info.GetAccessibilityId()));
+    printStr.append(", windowId: ").append(std::to_string(info.GetWindowId()));
+    printStr.append(", viewId: ").append(std::to_string(info.GetViewId()));
+    printStr.append(", componentType: ").append(info.GetComponentType());
+    printStr.append(", pageId: ").append(std::to_string(info.GetPageId()));
+    printStr.append(", eventType: ").append(
+        std::to_string(static_cast<int32_t>(info.GetEventType())));
+    printStr.append(", triggerAction: ").append(
+        std::to_string(static_cast<int32_t>(info.GetTriggerAction())));
+    printStr.append(", requestFocusElementId: ").append(
+        std::to_string(info.GetRequestFocusElementId()));
+    printStr.append("]");
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "%{public}s", printStr.c_str());
+}
 void FillNodeConfig(
     const NodeConfig& config, Accessibility::AccessibilityElementInfo& info)
 {
@@ -50,6 +112,9 @@ void FillNodeConfig(
     info.SetParentWindowId(config.parentWindowId);
     info.SetBundleName(config.bundleName);
     info.SetInspectorKey(config.inspectorKey);
+    int64_t splitElementId = info.GetAccessibilityId();
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(config.belongTreeId, splitElementId);
+    info.SetAccessibilityId(splitElementId);
 }
 
 void CopyNativeInfoToAccessibilityElementInfo(
@@ -112,7 +177,11 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
         splitElementId, mode, requestId, infos);
     if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "SearchElementInfoByAccessibilityId failed.");
+        infos.clear();
     }
+
     // 3. Return result
     SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
 }
@@ -176,6 +245,9 @@ void JsThirdProviderInteractionOperation::SearchElementInfosByText(
     bool ret = FindAccessibilityNodeInfosByTextFromProvider(
         splitElementId, text, requestId, infos);
     if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "SearchElementInfosByText failed.");
+        infos.clear();
     }
 
     // 3. Return result
@@ -237,22 +309,38 @@ void JsThirdProviderInteractionOperation::FindFocusedElementInfo(
         elementId, splitElementId, splitTreeId);
 
     // 2. FindFocusedAccessibilityNode from provider
+    Accessibility::AccessibilityElementInfo info;
+    bool ret = FindFocusedElementInfoFromProvider(
+        splitElementId, focusType, requestId, info);
+    if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "SearchElementInfosByText failed.");
+        info.SetValidElement(false);
+    }
+
+    // 3. Return result
+    SetFindFocusedElementInfoResult(callback, info, requestId);
+}
+
+bool JsThirdProviderInteractionOperation::FindFocusedElementInfoFromProvider(
+    int64_t elementId, const int32_t focusType, const int32_t requestId,
+    Accessibility::AccessibilityElementInfo& info)
+{
     auto provider = accessibilityProvider_.Upgrade();
-    CHECK_NULL_VOID(provider);
+    CHECK_NULL_RETURN(provider, false);
     ArkUI_AccessibilityElementInfo nativeInfo;
     int32_t code = provider->FindFocusedAccessibilityNode(
-        splitElementId, focusType, requestId, nativeInfo);
+        elementId, focusType, requestId, nativeInfo);
     if (code != 0) {
-        return;
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "FindFocusedElementInfoFromProvider failed: %{public}d", code);
+        return false;
     }
 
     NodeConfig config;
     GetNodeConfig(config);
-    Accessibility::AccessibilityElementInfo info;
     CopyNativeInfoToAccessibilityElementInfo(nativeInfo, config, info);
-
-    // 3. Return result
-    SetFindFocusedElementInfoResult(callback, info, requestId);
+    return true;
 }
 
 void JsThirdProviderInteractionOperation::SetFindFocusedElementInfoResult(
@@ -277,22 +365,38 @@ void JsThirdProviderInteractionOperation::FocusMoveSearch(
         elementId, splitElementId, splitTreeId);
 
     // 2. FindNextFocusAccessibilityNode from provider
+    Accessibility::AccessibilityElementInfo info;
+    bool ret = FocusMoveSearchProvider(
+        splitElementId, direction, requestId, info);
+    if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "FocusMoveSearch failed.");
+        info.SetValidElement(false);
+    }
+
+    // 3. Return result
+    SetFocusMoveSearchResult(callback, info, requestId);
+}
+
+bool JsThirdProviderInteractionOperation::FocusMoveSearchProvider(
+    int64_t elementId, const int32_t direction, const int32_t requestId,
+    Accessibility::AccessibilityElementInfo& info)
+{
     auto provider = accessibilityProvider_.Upgrade();
-    CHECK_NULL_VOID(provider);
+    CHECK_NULL_RETURN(provider, false);
     ArkUI_AccessibilityElementInfo nativeInfo;
     int32_t code = provider->FindNextFocusAccessibilityNode(
-        splitElementId, direction, requestId, nativeInfo);
+        elementId, direction, requestId, nativeInfo);
     if (code != 0) {
-        return;
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "FocusMoveSearchProvider failed: %{public}d", code);
+        return false;
     }
 
     NodeConfig config;
     GetNodeConfig(config);
-    Accessibility::AccessibilityElementInfo info;
     CopyNativeInfoToAccessibilityElementInfo(nativeInfo, config, info);
-
-    // 3. Return result
-    SetFocusMoveSearchResult(callback, info, requestId);
+    return true;
 }
 
 void JsThirdProviderInteractionOperation::SetFocusMoveSearchResult(
@@ -317,11 +421,17 @@ void JsThirdProviderInteractionOperation::ExecuteAction(
     AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(
         elementId, splitElementId, splitTreeId);
 
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction elementId: %{public}" PRId64 ","
+        " action: %{public}d, requestId: %{public}d, splitElementId: %{public}" PRId64 ","
+        " splitTreeId: %{public}d",
+        elementId, action, requestId, splitElementId, splitTreeId);
     // 2. FindNextFocusAccessibilityNode from provider
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
         splitElementId, 0, requestId, infos);
-    if (!ret || infos.size() == 0) {
+    if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Find info failed when ExecuteAction.");
+        SetExecuteActionResult(callback, false, requestId);
         return;
     }
 
@@ -329,16 +439,30 @@ void JsThirdProviderInteractionOperation::ExecuteAction(
     ExecuteActionForThird(splitElementId, infos.front(), action);
 
     //4. ExecuteAccessibilityAction To provider
-    auto provider = accessibilityProvider_.Upgrade();
-    CHECK_NULL_VOID(provider);
-    int32_t code = provider->ExecuteAccessibilityAction(
-        splitElementId, action, requestId, actionArguments);
-    if (code != 0) {
-        return;
+    ret = ExecuteActionFromProvider(splitElementId, action, actionArguments, requestId);
+    if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAccessibilityAction failed.");
     }
 
     // 5. Return result
-    SetExecuteActionResult(callback, code == 0, requestId);
+    SetExecuteActionResult(callback, ret, requestId);
+}
+
+bool JsThirdProviderInteractionOperation::ExecuteActionFromProvider(
+    int64_t elementId, const int32_t action,
+    const std::map<std::string, std::string>& actionArguments, const int32_t requestId)
+{
+    auto provider = accessibilityProvider_.Upgrade();
+    CHECK_NULL_RETURN(provider, false);
+    int32_t code = provider->ExecuteAccessibilityAction(
+        elementId, action, requestId, actionArguments);
+    if (code != 0) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "ExecuteActionFromProvider failed: %{public}d", code);
+        return false;
+    }
+
+    return true;
 }
 
 bool JsThirdProviderInteractionOperation::ExecuteActionForThird(
@@ -373,12 +497,32 @@ void JsThirdProviderInteractionOperation::SetExecuteActionResult(
 
 void JsThirdProviderInteractionOperation::ClearFocus()
 {
+    // 1. Clear focus from provider
+    ClearFocusFromProvider();
+    // 2. Clear DrawBound
+    ClearDrawBound();
+}
+
+bool JsThirdProviderInteractionOperation::ClearFocusFromProvider()
+{
     auto provider = accessibilityProvider_.Upgrade();
-    CHECK_NULL_VOID(provider);
+    CHECK_NULL_RETURN(provider, false);
     int32_t code = provider->ClearFocusedAccessibilityNode();
     if (code != 0) {
-        return;
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
+            "ExecuteActionFromProvider failed: %{public}d", code);
+        return false;
     }
+    return true;
+}
+
+bool JsThirdProviderInteractionOperation::ClearDrawBound()
+{
+    auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+    CHECK_NULL_RETURN(jsAccessibilityManager, false);
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    return jsAccessibilityManager->ClearThirdAccessibilityFocus(hostNode);
 }
 
 void JsThirdProviderInteractionOperation::OutsideTouch()
@@ -429,9 +573,44 @@ void JsThirdProviderInteractionOperation::SetBelongTreeId(const int32_t treeId)
 {
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "SetBelongTreeId treeId: %{public}d", treeId);
     belongTreeId_ = treeId;
+}
+
+int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird(
+    int64_t thirdElementId,
+    Accessibility::EventType eventType)
+{
+    // 1. generate event
+    Accessibility::AccessibilityEventInfo event;
+    event.SetTimeStamp(GetMicroTickCount());
+    event.SetWindowChangeTypes(
+        Accessibility::WindowUpdateType::WINDOW_UPDATE_INVALID);
+    event.SetWindowContentChangeTypes(
+        Accessibility::WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    event.SetSource(thirdElementId);
+    event.SetEventType(eventType);
+    event.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+
+    // 2. get element from third
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    bool ret = FindAccessibilityNodeInfosByIdFromProvider(
+        thirdElementId, 0, 0, infos);
+    if ((!ret) || (infos.size() == 0)) {
+        return -1;
+    }
+
     auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
-    jsAccessibilityManager->SetTreeIdForTest(treeId);
+    CHECK_NULL_RETURN(jsAccessibilityManager, -1);
+    jsAccessibilityManager->UpdateElementInfosTreeId(infos);
+    event.SetElementInfo(infos.front());
+
+    // 3. change event info by host info
+    GetAccessibilityEventInfoFromNativeEvent(event);
+
+    // 4. SendEvent
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, -1);
+    SendAccessibilitySyncEventToService(event, nullptr);
+    return 0;
 }
 
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
@@ -450,8 +629,33 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
     CHECK_NULL_RETURN(host, -1);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Inner SendAccessibilityAsyncEvent");
     SendAccessibilitySyncEventToService(accessibilityEventInfo, callback);
-    callback(880);
+    callback(0);
     return 0;
+}
+
+void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEvent(
+    OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+{
+    // 1. Fill node config
+    NodeConfig config;
+    GetNodeConfig(config);
+
+    // 1.1. Fill elementInfo config
+    auto elementInfo = accessibilityEventInfo.GetElementInfo();
+    FillNodeConfig(config, elementInfo);
+    int64_t elementId = elementInfo.GetAccessibilityId();
+    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(belongTreeId_, elementId);
+    elementInfo.SetAccessibilityId(elementId);
+
+    // 1.2. Fill eventInfo config
+    accessibilityEventInfo.SetPageId(config.pageId);
+    accessibilityEventInfo.SetWindowId(config.windowId);
+    accessibilityEventInfo.SetSource(elementId);
+    accessibilityEventInfo.SetComponentType(elementInfo.GetComponentType());
+    accessibilityEventInfo.AddContent(elementInfo.GetContent());
+    accessibilityEventInfo.SetElementInfo(elementInfo);
+    LogAccessibilityElementInfo("sendEvent", elementInfo);
+    LogAccessibilityEventInfo("sendEvent", accessibilityEventInfo);
 }
 
 void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEvent(
@@ -462,22 +666,8 @@ void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEve
     TransformAccessbilityEventInfo(
         nativeEventInfo, accessibilityEventInfo);
 
-    // 2. Fill node config
-    NodeConfig config;
-    GetNodeConfig(config);
-
-    // 2.1. Fill elementInfo config
-    auto elementInfo = accessibilityEventInfo.GetElementInfo();
-    FillNodeConfig(config, elementInfo);
-    int64_t elementId = elementInfo.GetAccessibilityId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(belongTreeId_, elementId);
-    elementInfo.SetAccessibilityId(elementId);
-
-    // 2.2. Fill eventInfo config
-    accessibilityEventInfo.SetPageId(config.pageId);
-    accessibilityEventInfo.SetComponentType(elementInfo.GetComponentType());
-    accessibilityEventInfo.AddContent(elementInfo.GetContent());
-    accessibilityEventInfo.SetElementInfo(elementInfo);
+    // 2. Transform Accessibility::AccessibilityEventInfo with host info
+    GetAccessibilityEventInfoFromNativeEvent(accessibilityEventInfo);
 }
 
 bool JsThirdProviderInteractionOperation::SendAccessibilitySyncEventToService(

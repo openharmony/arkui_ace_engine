@@ -16,16 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_ACCESSIBILITY_SESSION_ADAPTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_ACCESSIBILITY_SESSION_ADAPTER_H
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/accessibility/accessibility_session_adapter.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-
 class XcomponentAccessibilitySessionAdapter : public AccessibilitySessionAdapter {
-    DECLARE_ACE_TYPE(XcomponentAccessibilitySessionAdapter, AceType);
+    DECLARE_ACE_TYPE(XcomponentAccessibilitySessionAdapter, AccessibilitySessionAdapter);
 public:
     explicit XcomponentAccessibilitySessionAdapter(
-        const WeakPtr<FrameNode> host): host_(host) { }
+        const WeakPtr<FrameNode> host): host_(host) {}
     ~XcomponentAccessibilitySessionAdapter() override = default;
 
     void TransferHoverEvent(const PointF& point, SourceType source,

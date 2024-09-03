@@ -76,7 +76,16 @@ bool XComponentAccessibilityChildTreeCallback::OnSetChildTree(
 bool XComponentAccessibilityChildTreeCallback::OnDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info)
 {
-    return false;
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, true);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, true);
+    return accessibilityManager->OnDumpChildInfoForThird(
+        host->GetAccessibilityId(), params, info);
 }
 
 void XComponentAccessibilityChildTreeCallback::OnClearRegisterFlag()
