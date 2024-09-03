@@ -715,8 +715,6 @@ public:
     bool PrintVsyncInfoIfNeed() const override;
     void SetUIExtensionImeShow(bool imeShow);
 
-    void CheckVirtualKeyboardHeight() override;
-
     void StartWindowAnimation() override
     {
         isWindowAnimation_ = true;

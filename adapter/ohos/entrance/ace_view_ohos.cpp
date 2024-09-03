@@ -71,7 +71,6 @@ void AceViewOhos::SurfaceChanged(const RefPtr<AceViewOhos>& view, int32_t width,
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HideOverlays();
-        pipelineContext->CheckVirtualKeyboardHeight();
     }
 }
 
