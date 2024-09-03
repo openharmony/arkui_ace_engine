@@ -30,11 +30,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
-#include "interfaces/native/ui_input_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {

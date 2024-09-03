@@ -147,16 +147,6 @@ public:
         renderingContext2DModel_->SetShadowColor(Color::TRANSPARENT);
     }
 
-    std::vector<uint32_t> GetLineDash() const
-    {
-        return lineDash_;
-    }
-
-    void SetLineDash(const std::vector<uint32_t> lineDash)
-    {
-        lineDash_ = lineDash;
-    }
-
     void SetAnti(bool anti)
     {
         anti_ = anti;
@@ -220,7 +210,6 @@ private:
     static unsigned int patternCount_;
     std::weak_ptr<Ace::Pattern> GetPatternNG(int32_t id);
     Pattern GetPattern(unsigned int id);
-    std::vector<uint32_t> lineDash_;
     std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;

@@ -27,16 +27,16 @@ namespace OHOS::AAFwk {
 class Want;
 class WantParams;
 } // namespace OHOS::AAFwk
-
+namespace OHOS::AppExecFwk {
+struct BundleInfo;
+} // namespace OHOS::AppExecFwk
 namespace OHOS::Ace {
-namespace NG {
-class TextPattern;
-class RichEditorPattern;
-}
-
 struct AIWriteInfo {
     int32_t selectStart = 0;
     int32_t selectEnd = 0;
+    int32_t maxLength = -1;
+    std::string firstHandle;
+    std::string secondHandle;
     PlatformVersion apiVersion = PlatformVersion::VERSION_THIRTEEN;
     std::vector<uint8_t> selectBuffer;
     std::vector<uint8_t> sentenceBuffer;
@@ -55,6 +55,7 @@ public:
         std::function<void(std::vector<uint8_t>&)> resultCallback);
     std::vector<uint8_t> GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams);
     bool GetBoolParam(const std::string& key, const AAFwk::WantParams& wantParams);
+    bool GetAISupportFromMetadata(const std::string& bundleName, const std::string& abilityName);
     void SetPipelineContext(const WeakPtr<NG::PipelineContext>& pipelineContext)
     {
         pipelineContext_ = pipelineContext;
@@ -79,11 +80,22 @@ public:
     {
         return abilityName_;
     }
+    void SetAIWrite(const bool clickAIWrite)
+    {
+        clickAIWrite_ = clickAIWrite;
+    }
+    bool GetAIWrite()
+    {
+        return clickAIWrite_;
+    }
 private:
+    void SetWantParams(const AIWriteInfo& info, AAFwk::Want& want);
+    bool GetAISupportFromBundleInfo(const AppExecFwk::BundleInfo& bundleInfo, const std::string& abilityName);
     int32_t sessionId_ = -1;
     std::string bundleName_;
     std::string abilityName_;
     WeakPtr<NG::PipelineContext> pipelineContext_;
+    bool clickAIWrite_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_AI_WRITE_H

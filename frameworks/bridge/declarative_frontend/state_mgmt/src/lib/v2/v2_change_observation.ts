@@ -132,6 +132,11 @@ class ObserveV2 {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
+  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
+    const trackedKey = ObserveV2.OB_PREFIX + prop;
+    return (parentObj && typeof (parentObj) === 'object' && trackedKey in parentObj);
+  }
+
   public static getCurrentRecordedId(): number {
     const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
     return bound ? bound[0] : -1;
@@ -454,9 +459,9 @@ class ObserveV2 {
    * process @Computed until no more @Computed need update
    * process @Monitor until no more @Computed and @Monitor
    * process UINode update until no more @Computed and @Monitor and UINode rerender
-   * 
+   *
    * @param updateUISynchronously should be set to true if called during VSYNC only
-   * 
+   *
    */
 
   public updateDirty2(updateUISynchronously: boolean = false): void {
@@ -552,7 +557,7 @@ class ObserveV2 {
    * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
    * Code left here to reproduce benchmark measurements, compare with future optimisation
    * @param elmtIds
-   * 
+   *
    */
   private updateUINodesSynchronously(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
@@ -710,7 +715,9 @@ class ObserveV2 {
     if (target[key] === value) {
       return true;
     }
+
     target[key] = value;
+
     ObserveV2.getObserve().fireChange(RefInfo.get(target), key.toString());
     return true;
   }
@@ -735,22 +742,11 @@ class ObserveV2 {
       }
 
       let refInfo = RefInfo.get(target);
-      if (key === 'size') {
-        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-        return target.size;
-      }
-  
       let ret = target[key];
+
       if (typeof (ret) !== 'function') {
-        if (typeof (ret) === 'object') {
-          let wrapper = RefInfo.get(ret);
-          ObserveV2.getObserve().addRef(refInfo, key);
-          return wrapper.proxy;
-        }
-        if (key === 'length') {
-          ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
-        }
-        return ret;
+        ObserveV2.getObserve().addRef(refInfo, key === 'length' ? ObserveV2.OB_LENGTH : key);
+        return (typeof (ret) === 'object') ? RefInfo.get(ret).proxy : ret;
       }
 
       if (ObserveV2.arrayMutatingFunctions.has(key as string)) {
@@ -787,7 +783,16 @@ class ObserveV2 {
 
     },
     set(target: any, key: string | symbol, value: any): boolean {
-      return ObserveV2.commonHandlerSet(target, key, value);
+
+      if (typeof key === 'symbol' || target[key] === value) {
+        return true;
+      }
+
+      const originalLength = target.length;
+      target[key] = value;
+      const arrayLenChanged = target.length !== originalLength;
+      ObserveV2.getObserve().fireChange(RefInfo.get(target), arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString());
+      return true;
     }
   }
 
@@ -808,13 +813,13 @@ class ObserveV2 {
         }
         return target[key];
       }
-  
+
       let refInfo = RefInfo.get(target);
       if (key === 'size') {
         ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
         return target.size;
       }
-  
+
       let ret = target[key];
       if (typeof (ret) !== 'function') {
         if (typeof (ret) === 'object') {
@@ -946,7 +951,7 @@ class ObserveV2 {
       }
       return ret.bind(target);
     },
-    
+
     set(target: any, key: string | symbol, value: any): boolean {
       return ObserveV2.commonHandlerSet(target, key, value);
     }
@@ -1116,7 +1121,18 @@ class ObserveV2 {
       if (target[key] === value) {
         return true;
       }
-      target[key] = value;
+      if (Array.isArray(target)) {
+        const originalLength = target.length;
+        target[key] = value;
+        if (target.length !== originalLength) {
+            ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
+            // autoProxyObject function adds ref to OB_LENGTH for all arrays that
+            // are not MakeObserved. No need to fire key.toString() separately. Just return.
+            return true;
+        }
+      } else {
+          target[key] = value;
+      }
       ObserveV2.getObserve().fireChange(target, key.toString());
       return true;
     }

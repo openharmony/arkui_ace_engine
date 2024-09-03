@@ -30,6 +30,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t POSITION_WITH_AFFINITY = 2;
+constexpr int32_t PARAM_NUMBER_FOUR = 4;
+constexpr int32_t PARAM_NUMBER_FIVE = 5;
 } // namespace
 class ParagraphManagerTestNg : public testing::Test {
 public:
@@ -66,6 +68,14 @@ void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pMana
     TextLineMetrics textLineMetrics;
     textLineMetrics.lineNumber = 0;
     EXPECT_CALL(*paragraph, GetLineMetrics(_)).WillRepeatedly(Return(textLineMetrics));
+    std::vector<RectF> selectedRects;
+    std::vector<TextDirection> textDirections;
+    RectF rect = RectF(10, 10, 40, 20);
+    selectedRects.emplace_back(rect);
+    textDirections.emplace_back(TextDirection::RTL);
+    EXPECT_CALL(*paragraph, TxtGetRectsForRange(_, _, _, _, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<PARAM_NUMBER_FOUR>(selectedRects),
+            SetArgReferee<PARAM_NUMBER_FIVE>(textDirections)));
     EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(1), Return(true)));
     pManager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
@@ -257,5 +267,65 @@ HWTEST_F(ParagraphManagerTestNg, GetLineMetrics001, TestSize.Level1)
      */
     result = pManager->GetLineMetrics(2).lineNumber;
     EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: GetRectsForRange001
+ * @tc.desc: Test GetRectsForRange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetRectsForRange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pManager and construct paragraphs.
+     */
+
+    /**
+     * @tc.steps: step2. call GetRectsForRange.
+     * @tc.expected: the position of the rect is in the first paragraph.
+     */
+    auto result =
+        pManager->GetRectsForRange(0, 10, OHOS::Ace::RectHeightStyle::TIGHT, OHOS::Ace::RectWidthStyle::TIGHT);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].rect_.GetX(), 10.0f);
+    EXPECT_EQ(result[0].rect_.GetY(), 10.0f);
+    EXPECT_EQ(result[0].rect_.Height(), 20.0f);
+    EXPECT_EQ(result[0].rect_.Width(), 40.0f);
+
+    /**
+     * @tc.steps: step3. call GetRectsForRange.
+     * @tc.expected: the position of the rect is spans two paragraphs.
+     */
+    result = pManager->GetRectsForRange(15, 30, OHOS::Ace::RectHeightStyle::TIGHT, OHOS::Ace::RectWidthStyle::TIGHT);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[1].rect_.GetX(), 10.0f);
+    EXPECT_EQ(result[1].rect_.GetY(), 110.0f);
+    EXPECT_EQ(result[1].rect_.Height(), 20.0f);
+    EXPECT_EQ(result[1].rect_.Width(), 40.0f);
+
+    /**
+     * @tc.steps: step4. call GetRectsForRange.
+     * @tc.expected: the position of the rect is in the last paragraph.
+     */
+    result = pManager->GetRectsForRange(37, 39, OHOS::Ace::RectHeightStyle::TIGHT, OHOS::Ace::RectWidthStyle::TIGHT);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].rect_.GetX(), 10.0f);
+    EXPECT_EQ(result[0].rect_.GetY(), 210.0f);
+    EXPECT_EQ(result[0].rect_.Height(), 20.0f);
+    EXPECT_EQ(result[0].rect_.Width(), 40.0f);
+
+    /**
+     * @tc.steps: step5. call GetRectsForRange.
+     * @tc.expected: exceeding paragraphs scope.
+     */
+    result = pManager->GetRectsForRange(40, 50, OHOS::Ace::RectHeightStyle::TIGHT, OHOS::Ace::RectWidthStyle::TIGHT);
+    EXPECT_TRUE(result.empty());
+
+    /**
+     * @tc.steps: step6. call GetRectsForRange.
+     * @tc.expected: start greater than end.
+     */
+    result = pManager->GetRectsForRange(25, 20, OHOS::Ace::RectHeightStyle::TIGHT, OHOS::Ace::RectWidthStyle::TIGHT);
+    EXPECT_TRUE(result.empty());
 }
 } // namespace OHOS::Ace::NG

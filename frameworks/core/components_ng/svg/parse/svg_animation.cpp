@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 
-#include <unordered_map>
-
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -214,6 +212,11 @@ void SvgAnimation::CreatePropertyAnimation(const T& originalValue, std::function
         animator_->ClearInterpolators();
     } else {
         animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+        animator_->AddStopListener([weak = svgContext_]() {
+            auto context = AceType::DynamicCast<SvgContext>(weak.Upgrade());
+            CHECK_NULL_VOID(context);
+            context->OnAnimationFinished();
+        });
         auto context = svgContext_.Upgrade();
         CHECK_NULL_VOID(context);
         context->AddAnimator(animator_->GetId(), animator_);

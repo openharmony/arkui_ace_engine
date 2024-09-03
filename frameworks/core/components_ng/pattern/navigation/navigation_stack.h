@@ -55,10 +55,27 @@ public:
 
     virtual void SetOnStateChangedCallback(std::function<void()> callback) {}
 
+    void SavePreNavList()
+    {
+        // same navdestination nodes before poped
+        navPathListBeforePoped_.clear();
+        for (auto iter: preNavPathList_) {
+            navPathListBeforePoped_.emplace_back(std::make_pair(iter.first, WeakPtr<UINode>(iter.second)));
+        }
+    }
+
     void SetNavPathList(const NavPathList& navPathList)
     {
+        // save pre nav path list when poped
+        SavePreNavList();
         preNavPathList_ = navPathList;
+        //copy nav path
         navPathList_ = navPathList;
+    }
+
+    std::vector<std::pair<std::string, WeakPtr<UINode>>>& GetAllNavDestinationNodesPrev()
+    {
+        return navPathListBeforePoped_;
     }
 
     bool Empty() const
@@ -229,6 +246,7 @@ protected:
     NavPathList cacheNodes_;
     bool animated_ = true;
     WeakPtr<UINode> navigationNode_;
+    std::vector<std::pair<std::string, WeakPtr<UINode>>> navPathListBeforePoped_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H

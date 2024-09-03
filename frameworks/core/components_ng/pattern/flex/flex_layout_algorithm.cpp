@@ -15,28 +15,9 @@
 
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 
-#include <algorithm>
-#include <functional>
-#include <iterator>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/log/ace_trace.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 

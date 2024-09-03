@@ -19,7 +19,6 @@
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/image_provider/image_utils.h"
@@ -100,19 +99,19 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnLayoutFinished() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnLayoutFinished();
+    }
+
     void OnDrawingCompleted() override
     {
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnDrawingCompleted();
     }
-
-    void OnExtensionDied() override {}
-
-    void OnExtensionTimeout(int32_t errorCode) override {}
-
-    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevelVec) override {}
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
@@ -177,16 +176,16 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    attachToFrameNodeFlag_ = true;
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
-        surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        surfaceNode->SetBufferAvailableCallback(callback_);
         return;
     }
-    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow()

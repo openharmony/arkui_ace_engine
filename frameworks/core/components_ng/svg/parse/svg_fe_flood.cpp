@@ -15,10 +15,6 @@
 
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
 
-#include "2d_graphics/include/effect/shader_effect.h"
-
-#include "base/utils/utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

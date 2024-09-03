@@ -20,7 +20,6 @@
 #include "core/common/container.h"
 #include "core/common/storage/storage_proxy.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t DATA_REQUIRED_ARGS = 2;

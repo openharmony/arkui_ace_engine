@@ -1836,6 +1836,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
+        OnNativeEmbedVisibilityChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedVisibilityChangeEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedVisibilityChangeId(), oldContext);
         OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
@@ -4835,13 +4838,11 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(accessibilityManager);
     if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
         webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED ||
+               eventType == AccessibilityEventType::CLICK) {
+        webPattern->ClearFocusedAccessibilityId();
+    } else if (eventType == AccessibilityEventType::PAGE_CHANGE || eventType == AccessibilityEventType::SCROLL_END) {
         webPattern->UpdateFocusedAccessibilityId();
-    }
-    if (accessibilityId <= 0) {
-        auto webNode = webPattern->GetHost();
-        CHECK_NULL_VOID(webNode);
-        accessibilityId = webNode->GetAccessibilityId();
     }
     if (eventType == AccessibilityEventType::FOCUS) {
         TextBlurReportByFocusEvent(accessibilityId);
@@ -6479,6 +6480,29 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         },
         TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedLifecycleChange");
 }
+
+void WebDelegate::OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility)
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), embedId, visibility]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedVisibilityChangeV2_ = delegate->OnNativeEmbedVisibilityChangeV2_;
+            if (OnNativeEmbedVisibilityChangeV2_) {
+                OnNativeEmbedVisibilityChangeV2_(
+                    std::make_shared<NativeEmbedVisibilityInfo>(visibility, embedId));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedVisibilityChange");
+}
+
+
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
@@ -6645,24 +6669,26 @@ void WebDelegate::SetAccessibilityState(bool state)
         return;
     }
     accessibilityState_ = state;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), state]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->SetAccessibilityState(state);
-            if (state) {
+    if (state) {
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), state]() {
+                auto delegate = weak.Upgrade();
+                CHECK_NULL_VOID(delegate);
+                CHECK_NULL_VOID(delegate->nweb_);
+                delegate->nweb_->SetAccessibilityState(state);
                 auto accessibilityEventListenerImpl =
                     std::make_shared<AccessibilityEventListenerImpl>();
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+    } else {
+        CHECK_NULL_VOID(nweb_);
+        nweb_->SetAccessibilityState(state);
+    }
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
@@ -7132,6 +7158,12 @@ void WebDelegate::OnTextSelected()
         OnContextMenuHide("");
         return delegate->nweb_->OnTextSelected();
     }
+}
+
+void WebDelegate::OnDestroyImageAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->OnDestroyImageAnalyzerOverlay();
 }
 
 NG::WebInfoType WebDelegate::GetWebInfoType()

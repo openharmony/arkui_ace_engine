@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

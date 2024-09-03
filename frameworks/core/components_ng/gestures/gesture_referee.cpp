@@ -13,13 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/gestures/gesture_referee.h"
-#include "recognizers/gesture_recognizer.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {

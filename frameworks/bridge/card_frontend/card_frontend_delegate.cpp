@@ -15,12 +15,6 @@
 
 #include "frameworks/bridge/card_frontend/card_frontend_delegate.h"
 
-#include <string>
-
-#include "base/log/event_report.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-
 namespace OHOS::Ace::Framework {
 
 CardFrontendDelegate::CardFrontendDelegate() : jsAccessibilityManager_(AccessibilityNodeManager::Create()) {}

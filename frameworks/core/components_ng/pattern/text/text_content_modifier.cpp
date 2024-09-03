@@ -68,10 +68,21 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
     : pattern_(pattern)
 {
+    auto patternUpgrade = pattern_.Upgrade();
+    CHECK_NULL_VOID(patternUpgrade);
+    auto textPattern = DynamicCast<TextPattern>(patternUpgrade);
+    CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
     contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
-    contentOffset_ = MakeRefPtr<PropertyOffsetF>(OffsetF());
-    contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
+
+    auto contentRect = geometryNode->GetContentRect();
+    contentOffset_ = MakeRefPtr<PropertyOffsetF>(contentRect.GetOffset());
+    contentSize_ = MakeRefPtr<PropertySizeF>(contentRect.GetSize());
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
@@ -92,10 +103,14 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(fontFamilyString_);
     fontReady_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(fontReady_);
+
+    auto baselineOffset = textPattern->GetBaselineOffset();
+    paintOffset_ = contentRect.GetOffset() - OffsetF(0.0, std::min(baselineOffset, 0.0f));
 }
 
 void TextContentModifier::ChangeDragStatus()
 {
+    CHECK_NULL_VOID(dragStatus_);
     dragStatus_->Set(!dragStatus_->Get());
 }
 
@@ -367,6 +382,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
+        CHECK_NULL_VOID(contentSize_);
+        CHECK_NULL_VOID(contentOffset_);
         auto contentSize = contentSize_->Get();
         auto contentOffset = contentOffset_->Get();
         canvas.Save();
@@ -458,6 +475,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
             }
         }
     }
+    CHECK_NULL_VOID(baselineOffsetFloat_);
     auto baselineOffset = baselineOffsetFloat_->Get();
     int32_t obscuredLineCount = std::min(maxLineCount, static_cast<int32_t>(textLineWidth.size()));
     float offsetY = (contentSize_->Get().Height() - std::fabs(baselineOffset) - (obscuredLineCount * fontSize)) /

@@ -151,7 +151,8 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
         auto imageStateManger = imageLoadContext->GetStateManger();
         CHECK_NULL_RETURN(imageStateManger, false);
 
-        auto result = imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS;
+        auto result =
+            imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS || !imageNode->IsVisible();
         if (!result) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
                 "Image loading failed! ImageId=%{public}d ImageState=%{public}d ImageKey=%{public}s",

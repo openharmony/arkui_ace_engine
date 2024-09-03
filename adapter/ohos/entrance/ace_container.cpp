@@ -85,12 +85,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "core/event/axis_event.h"
-#include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -520,6 +514,17 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             ContainerScope scope(instanceId);
             auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_RETURN(subPipelineContext, false);
+            auto textfieldMgr = DynamicCast<NG::TextFieldManagerNG>(subPipelineContext->GetTextFieldManager());
+            if (textfieldMgr) {
+                auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
+                auto lastRequestKeyboardNode = DynamicCast<NG::FrameNode>(
+                    ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
+                if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
+                    textfieldMgr->OnBackPressed()) {
+                    LOGI("textfield consumed backpressed event");
+                    return true;
+                }
+            }
             auto overlayManager = subPipelineContext->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
             if (overlayManager->RemoveOverlayInSubwindow()) {
@@ -819,6 +824,8 @@ void AceContainer::InitializeCallback()
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
+            } else if (event.IsPenHoverEvent()) {
+                context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
                     context->OnTouchEvent(event, node);
@@ -1464,6 +1471,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
         node.isFocus = info->GetIsFocus();
         node.value = info->GetValue();
         node.placeholder = info->GetPlaceholder();
+        node.metadata = info->GetMetadata();
         NG::RectF rectF = info->GetPageNodeRect();
         node.rect.left = rectF.GetX();
         node.rect.top = rectF.GetY();
@@ -1488,7 +1496,7 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isEnableArrow = false;
     if (!isNative) {
         // web component will manually destroy the popup
-        customConfig.isAutoCancel = false;
+        customConfig.isAutoCancel = true;
     }
 }
 
@@ -2900,9 +2908,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     currentPointerEvent_ = currentEvent;
     auto pointerAction = currentEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
         return;
     }
     MMI::PointerEvent::PointerItem pointerItem;

@@ -32,6 +32,20 @@ namespace OHOS::Rosen {
 
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
+
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+};
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
@@ -40,6 +54,7 @@ public:
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsDimensionFromResource(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
@@ -101,7 +116,7 @@ public:
             return false;
         }
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-        if (handle->IsUndefined() || handle->IsNull()) {
+        if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
             return false;
         }
         int32_t length = static_cast<int32_t>(handle->Length(vm));

@@ -1722,4 +1722,4 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
     listNode->geometryNode_->SetFrameSize(SizeF(10, 10));
     EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
-} // namespace OHOS::Ace::NG123456
+} // namespace OHOS::Ace::NG

@@ -15,12 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 
-#include <algorithm>
 #include <fstream>
-#include <list>
 
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

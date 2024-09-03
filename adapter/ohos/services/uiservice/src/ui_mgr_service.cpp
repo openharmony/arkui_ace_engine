@@ -15,12 +15,6 @@
 
 #include "ui_mgr_service.h"
 
-#include <atomic>
-
-#include "if_system_ability_manager.h"
-#include "ipc_skeleton.h"
-#include "string_ex.h"
-#include "system_ability_definition.h"
 #include "ui_service_mgr_errors.h"
 #include "xcollie/watchdog.h"
 

@@ -4599,7 +4599,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest060, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_PREV_MARGIN, &itemFloat), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_NEXT_MARGIN, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_NEXT_MARGIN, &itemFloat), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR, &itemEnum), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SWIPER_INDICATOR_INTERACTIVE, &item0),

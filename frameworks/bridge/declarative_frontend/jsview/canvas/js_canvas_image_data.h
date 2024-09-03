@@ -37,6 +37,7 @@ public:
     void JsSetWidth(const JSCallbackInfo& info);
     void JsSetHeight(const JSCallbackInfo& info);
     void JsSetData(const JSCallbackInfo& info);
+    bool GetImageDataSize(const JSCallbackInfo& args, int32_t& finalWidth, int32_t& finalHeight);
 
     int32_t width_ = 0;
     int32_t height_ = 0;

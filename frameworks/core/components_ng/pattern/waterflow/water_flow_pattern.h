@@ -215,6 +215,9 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
 
     /**
      * @param step FocusStep

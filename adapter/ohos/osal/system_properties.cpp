@@ -15,23 +15,14 @@
 
 #include "base/utils/system_properties.h"
 
-#include <cstdint>
-#include <memory>
-#include <mutex>
 #include <shared_mutex>
-#include <string>
-#include <unistd.h>
 #include <regex>
-
-#include "dm_common.h"
 
 #include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
 #include "parameters.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -434,10 +425,13 @@ bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
 float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
+float SystemProperties::fontScale_ = 1.0;
+float SystemProperties::fontWeightScale_ = 1.0;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
 }
+
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -606,17 +600,13 @@ ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
 {
     // Default value of font weight scale is 1.0.
-    std::string prop =
-        "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+    return fontWeightScale_;
 }
 
 ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
-    std::string prop =
-        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+    return fontScale_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)

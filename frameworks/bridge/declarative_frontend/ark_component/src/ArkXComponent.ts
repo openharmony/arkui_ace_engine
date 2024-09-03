@@ -28,6 +28,9 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
@@ -60,14 +63,6 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   }
   outlineWidth(value: Dimension | EdgeOutlineWidths): this {
     throw new Error('Method not implemented.');
-  }
-  width(value: Length): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentWidthModifier.identity, XComponentWidthModifier, value);
-    return this;
-  }
-  height(value: Length): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentHeightModifier.identity, XComponentHeightModifier, value);
-    return this;
   }
   expandSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this {
     throw new Error('Method not implemented.');
@@ -536,42 +531,6 @@ class XComponentInitializeModifier extends ModifierWithKey<XComponentParam> {
       getUINativeModule().xComponent.setXComponentInitialize(node, this.value?.id,
         this.value?.type, this.value?.imageAIOptions, this.value?.libraryname, this.value?.controller);
     }
-  }
-}
-
-class XComponentWidthModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentWidth');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetWidth(node);
-    } else {
-      getUINativeModule().xComponent.setWidth(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
-class XComponentHeightModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentHeight');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetHeight(node);
-    } else {
-      getUINativeModule().xComponent.setHeight(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

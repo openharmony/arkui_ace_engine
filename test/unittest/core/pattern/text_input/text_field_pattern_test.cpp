@@ -1440,48 +1440,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern061, TestSize.Level0)
 }
 
 /**
- * @tc.name: TextPattern062
- * @tc.desc: test testInput text HandleCursorOnDragEnded
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTest, TextPattern062, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    ASSERT_NE(notifyDragEvent, nullptr);
-    pattern->HandleCursorOnDragEnded(notifyDragEvent);
-}
-
-/**
- * @tc.name: TextPattern063
- * @tc.desc: test testInput text HandleOnDragStatusCallback
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTest, TextPattern063, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    ASSERT_NE(notifyDragEvent, nullptr);
-    pattern->HandleOnDragStatusCallback(DragEventType::START, notifyDragEvent);
-}
-
-/**
  * @tc.name: TextPattern064
  * @tc.desc: test testInput text GetAvoidSoftKeyboardOffset
  * @tc.type: FUNC

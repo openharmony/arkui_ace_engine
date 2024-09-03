@@ -647,6 +647,22 @@ struct CJUITextModifier {
     void (*resetTextOnCopy)(ArkUINodeHandle node);
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setFontWeightWithOption)(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo);
+    void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*resetTextMinFontScale)(ArkUINodeHandle node);
+    void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*resetTextMaxFontScale)(ArkUINodeHandle node);
+    void (*setTextSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetTextHalfLeading)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
+    void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
+    void (*resetTextOnClick)(ArkUINodeHandle node);
+    void (*setTextResponseRegion)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
+    void (*resetTextResponseRegion)(ArkUINodeHandle node);
 };
 
 struct CJUIButtonModifier {
@@ -1216,6 +1232,8 @@ struct CJUIScrollBarModifier {
     void (*setScrollBarState)(ArkUINodeHandle node, ArkUI_Int32 state);
     void (*resetScrollBarState)(ArkUINodeHandle node);
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
+    void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
 };
 
 struct CJUIScrollerModifier {
@@ -1853,6 +1871,8 @@ struct CJUICheckboxModifier {
     ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
+    void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
+    void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct CJUICheckboxGroupModifier {
@@ -1872,6 +1892,7 @@ struct CJUICheckboxGroupModifier {
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct CJUIImageSpanModifier {
@@ -2253,6 +2274,13 @@ struct CJUICalendarPickerModifier {
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
+    void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetCalendarPickerBorderColor)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
+    void (*resetCalendarPickerBorderRadius)(ArkUINodeHandle node);
+    void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
 };
 
 struct CJUIRatingModifier {

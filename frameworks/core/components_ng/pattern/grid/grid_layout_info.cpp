@@ -167,7 +167,10 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
-    float defaultHeight = GetCurrentLineHeight();
+    if (lineHeightMap_.empty()) {
+        return 0.0f;
+    }
+    float defaultHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
     if (crossCount_ == 0) {
         return 0.0f;
     }
@@ -247,11 +250,11 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 
 float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
 {
-    float lineHeight = GetCurrentLineHeight();
     float res = 0.0f;
-    if (crossCount_ == 0) {
+    if (crossCount_ == 0 || lineHeightMap_.empty()) {
         return res;
     }
+    float lineHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
     auto lines = (childrenCount_) / crossCount_;
     for (int i = 0; i < lines; ++i) {
         auto it = lineHeightMap_.find(i);

@@ -129,8 +129,10 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
     GestureEventFunc* click = nullptr;
     if (callback) {
         click = reinterpret_cast<GestureEventFunc*>(callback);
+        TextModelNG::SetOnClick(frameNode, std::move(*click));
+    } else {
+        TextModelNG::SetOnClick(frameNode, nullptr);
     }
-    TextModelNG::SetOnClick(frameNode, std::move(*click));
 }
 
 void ResetOnClick(ArkUINodeHandle node)
@@ -1124,7 +1126,15 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     }
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
+    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
+        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+    } else {
+        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+    }
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -1214,7 +1224,10 @@ const CJUITextModifier* GetCJUITextModifier()
         SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
         SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange };
+        ResetTextOnTextSelectionChange, SetFontWeightWithOption, SetTextMinFontScale, ResetTextMinFontScale,
+        SetTextMaxFontScale, ResetTextMaxFontScale, SetTextSelectionMenuOptions, ResetTextSelectionMenuOptions,
+        SetTextHalfLeading, ResetTextHalfLeading, GetTextHalfLeading, SetOnClick, ResetOnClick, SetResponseRegion,
+        ResetResponseRegion };
 
     return &modifier;
 }

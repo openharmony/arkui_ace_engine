@@ -26,8 +26,6 @@
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
-#include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
 
 
 namespace OHOS::Ace::NG {
@@ -1038,10 +1036,18 @@ ArkUINativeModuleValue SearchBridge::SetMaxLength(ArkUIRuntimeCallInfo *runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= 0) {
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchMaxLength(nativeNode, secondArg->Int32Value(vm));
-    } else {
+    if (!secondArg->IsNumber()) {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchMaxLength(nativeNode);
+    } else {
+        int32_t maxLength = secondArg->Int32Value(vm);
+        if (std::isinf(static_cast<float>(secondArg->ToNumber(vm)->Value()))) {
+            maxLength = INT32_MAX; // Infinity
+        }
+        if (maxLength >= 0) {
+            GetArkUINodeModifiers()->getSearchModifier()->setSearchMaxLength(nativeNode, maxLength);
+        } else {
+            GetArkUINodeModifiers()->getSearchModifier()->resetSearchMaxLength(nativeNode);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }

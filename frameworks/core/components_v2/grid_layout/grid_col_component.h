@@ -29,22 +29,22 @@ class ACE_EXPORT GridColComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(GridColComponent, SoleChildComponent);
 
 public:
-    void SetSpan(const RefPtr<GridContainerSize>& span)
+    void SetSpan(const GridContainerSize& span)
     {
         span_ = span;
     }
 
-    void SetOffset(const RefPtr<GridContainerSize>& offset)
+    void SetOffset(const GridContainerSize& offset)
     {
         offset_ = offset;
     }
 
-    void SetOrder(const RefPtr<GridContainerSize>& order)
+    void SetOrder(const GridContainerSize& order)
     {
         order_ = order;
     }
 
-    RefPtr<GridContainerSize> GetSpan() const
+    GridContainerSize GetSpan() const
     {
         return span_;
     }
@@ -53,29 +53,29 @@ public:
     {
         switch (sizeType) {
             case GridSizeType::XS:
-                return span_->xs;
+                return span_.xs;
                 break;
             case GridSizeType::SM:
-                return span_->sm;
+                return span_.sm;
                 break;
             case GridSizeType::MD:
-                return span_->md;
+                return span_.md;
                 break;
             case GridSizeType::LG:
-                return span_->lg;
+                return span_.lg;
                 break;
             case GridSizeType::XL:
-                return span_->xl;
+                return span_.xl;
                 break;
             case GridSizeType::XXL:
-                return span_->xxl;
+                return span_.xxl;
                 break;
             default:
-                return span_->xs;
+                return span_.xs;
         }
     }
 
-    RefPtr<GridContainerSize> GetOffset() const
+    GridContainerSize GetOffset() const
     {
         return offset_;
     }
@@ -84,29 +84,29 @@ public:
     {
         switch (sizeType) {
             case GridSizeType::XS:
-                return offset_->xs;
+                return offset_.xs;
                 break;
             case GridSizeType::SM:
-                return offset_->sm;
+                return offset_.sm;
                 break;
             case GridSizeType::MD:
-                return offset_->md;
+                return offset_.md;
                 break;
             case GridSizeType::LG:
-                return offset_->lg;
+                return offset_.lg;
                 break;
             case GridSizeType::XL:
-                return offset_->xl;
+                return offset_.xl;
                 break;
             case GridSizeType::XXL:
-                return offset_->xxl;
+                return offset_.xxl;
                 break;
             default:
-                return offset_->xs;
+                return offset_.xs;
         }
     }
 
-    RefPtr<GridContainerSize> GetOrder() const
+    GridContainerSize GetOrder() const
     {
         return order_;
     }
@@ -115,25 +115,25 @@ public:
     {
         switch (sizeType) {
             case GridSizeType::XS:
-                return order_->xs;
+                return order_.xs;
                 break;
             case GridSizeType::SM:
-                return order_->sm;
+                return order_.sm;
                 break;
             case GridSizeType::MD:
-                return order_->md;
+                return order_.md;
                 break;
             case GridSizeType::LG:
-                return order_->lg;
+                return order_.lg;
                 break;
             case GridSizeType::XL:
-                return order_->xl;
+                return order_.xl;
                 break;
             case GridSizeType::XXL:
-                return order_->xxl;
+                return order_.xxl;
                 break;
             default:
-                return order_->xs;
+                return order_.xs;
         }
     }
 
@@ -142,9 +142,9 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
 
 private:
-    RefPtr<GridContainerSize> span_ = AceType::MakeRefPtr<GridContainerSize>(1);
-    RefPtr<GridContainerSize> offset_ = AceType::MakeRefPtr<GridContainerSize>(0);
-    RefPtr<GridContainerSize> order_ = AceType::MakeRefPtr<GridContainerSize>(0);
+    GridContainerSize span_ = GridContainerSize(1);
+    GridContainerSize offset_ = GridContainerSize(0);
+    GridContainerSize order_ = GridContainerSize(0);
 };
 
 } // namespace OHOS::Ace::V2

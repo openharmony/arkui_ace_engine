@@ -15,9 +15,6 @@
 
 #include "core/components_ng/manager/focus/focus_view.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -261,7 +258,7 @@ bool FocusView::RequestDefaultFocus()
                 defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId());
         } else {
             SetIsViewRootScopeFocused(false);
-            auto ret = defaultFocusNode->RequestFocusImmediately();
+            auto ret = defaultFocusNode->RequestFocusImmediatelyInner();
             FocusViewDidShow(defaultFocusNode);
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on default focus: %{public}s/%{public}d return: %{public}d.",
                 defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
@@ -270,7 +267,7 @@ bool FocusView::RequestDefaultFocus()
     }
     if (isViewRootScopeFocused_ && viewRootScope) {
         SetIsViewRootScopeFocused(true);
-        auto ret = viewRootScope->RequestFocusImmediately();
+        auto ret = viewRootScope->RequestFocusImmediatelyInner();
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on view root scope: %{public}s/%{public}d return: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
@@ -281,7 +278,7 @@ bool FocusView::RequestDefaultFocus()
         focusViewHub->InheritFocus();
         ret = true;
     } else {
-        ret = focusViewHub->RequestFocusImmediately();
+        ret = focusViewHub->RequestFocusImmediatelyInner();
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on focus view return: %{public}d.", ret);
     return ret;
@@ -342,6 +339,7 @@ void FocusView::FocusViewDidShow(const RefPtr<FocusHub>& focusHub)
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d reset shown flag.",
             GetFrameName().c_str(), GetFrameId());
         neverShown_ = false;
+        return;
     }
     RefPtr<UINode> node = focusHub->GetFrameNode();
     do {

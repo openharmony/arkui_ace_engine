@@ -15,17 +15,9 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "base/log/dump_log.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -307,6 +299,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(textColor);
     host->SetNeedCallChildrenUpdate(false);
+    ToastView::UpdateToastNodeStyle(host);
 }
 
 void ToastPattern::OnAttachToFrameNode()

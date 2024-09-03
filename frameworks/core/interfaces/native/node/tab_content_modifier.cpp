@@ -15,7 +15,6 @@
 #include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/interfaces/native/node/view_model.h"
 

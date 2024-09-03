@@ -14,10 +14,7 @@
  */
 
 #include "movingphoto_layout_algorithm.h"
-#include "movingphoto_layout_property.h"
 #include "movingphoto_pattern.h"
-
-#include "base/geometry/ng/size_t.h"
 
 namespace OHOS::Ace::NG {
 

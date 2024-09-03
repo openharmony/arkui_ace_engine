@@ -308,6 +308,8 @@ struct SelectOverlayInfo {
     HandleLevelMode handleLevelMode = HandleLevelMode::OVERLAY;
     bool enableHandleLevel = false;
     VectorF scale = VectorF(1.0f, 1.0f);
+    bool clipHandleDrawRect = false;
+    std::optional<RectF> clipViewPort;
 
     std::string ToString() const
     {

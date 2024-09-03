@@ -14,56 +14,14 @@
  */
 #include "core/interfaces/native/node/node_xcomponent_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t ERROR_UINT_CODE = -1;
 std::string g_strValue;
-
-void SetXComponentWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (unitEnum == DimensionUnit::CALC) {
-        ViewAbstract::SetWidth(frameNode, CalcLength(CalcLength(std::string(calcValue))));
-    } else {
-        ViewAbstract::SetWidth(frameNode, CalcLength(value, unitEnum));
-    }
-}
-
-void ResetXComponentWidth(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ClearWidthOrHeight(frameNode, true);
-}
-
-void SetXComponentHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (unitEnum == DimensionUnit::CALC) {
-        ViewAbstract::SetHeight(frameNode, CalcLength(CalcLength(std::string(calcValue))));
-    } else {
-        ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
-    }
-}
-
-void ResetXComponentHeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ClearWidthOrHeight(frameNode, false);
-}
 
 void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
 {
@@ -197,6 +155,13 @@ void SetImageAIOptions(ArkUINodeHandle node, void* options)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::SetImageAIOptions(frameNode, options);
 }
+
+void InitXComponent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::InitXComponent(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -207,10 +172,6 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         nullptr, // setXComponentOptions
         nullptr, // getXComponentSurfaceId
         nullptr, // getXComponentController
-        SetXComponentWidth,
-        ResetXComponentWidth,
-        SetXComponentHeight,
-        ResetXComponentHeight,
         SetXComponentEnableAnalyzer,
         ResetXComponentEnableAnalyzer,
         SetXComponentBackgroundColor,
@@ -227,6 +188,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         GetNativeXComponent,
         SetXComponentLibraryname,
         SetImageAIOptions,
+        InitXComponent,
     };
 
     return &modifier;

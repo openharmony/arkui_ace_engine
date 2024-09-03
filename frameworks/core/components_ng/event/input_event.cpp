@@ -29,6 +29,7 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     hoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     hoverEffectTarget_ = MakeRefPtr<HoverEffectTarget>(frameNode->GetTag(), frameNode->GetId());
     accessibilityHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    penHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
 }
 
@@ -93,6 +94,38 @@ void InputEventActuator::OnCollectHoverEvent(
     hoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     hoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(hoverEventTarget_);
+}
+
+void InputEventActuator::OnCollectPenHoverEvent(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
+        return;
+    }
+
+    auto penHoverCallback = [weakClaim = WeakClaim(this)](bool isHover, HoverInfo& penHoverInfo) {
+        auto actuator = weakClaim.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto inputEvents = actuator->inputEvents_;
+        for (const auto& inputCallback : inputEvents) {
+            if (inputCallback) {
+                (*inputCallback)(isHover);
+                (*inputCallback)(isHover, penHoverInfo);
+            }
+        }
+        auto userCallback = actuator->userCallback_;
+        if (userCallback) {
+            (*userCallback)(isHover, penHoverInfo);
+        }
+        auto userJSCallback = actuator->userJSFrameNodeCallback_;
+        if (userJSCallback) {
+            (*userJSCallback)(isHover, penHoverInfo);
+        }
+    };
+    penHoverEventTarget_->SetPenHoverCallback(penHoverCallback);
+    penHoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    penHoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(penHoverEventTarget_);
 }
 
 void InputEventActuator::OnCollectHoverEffect(

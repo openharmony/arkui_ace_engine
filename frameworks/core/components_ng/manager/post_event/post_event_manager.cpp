@@ -15,7 +15,6 @@
 
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 
-#include "base/log/log_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

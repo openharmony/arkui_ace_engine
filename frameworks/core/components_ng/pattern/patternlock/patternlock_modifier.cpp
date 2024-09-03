@@ -15,20 +15,7 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_modifier.h"
 
-#include <algorithm>
-#include <string>
-#include <vector>
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

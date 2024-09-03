@@ -36,6 +36,12 @@ public:
     virtual void SetOnChange(NG::SelectedChangeEvent&& onChange) = 0;
     virtual void SetChangeEvent(NG::SelectedChangeEvent&& onChange) = 0;
     virtual void SetPadding(const NG::PaddingProperty& padding) = 0;
+    virtual void ClearBorderColor() = 0;
+    virtual void ClearBorderRadius() = 0;
+    virtual void ClearHeight() = 0;
+    virtual void ClearBorder() = 0;
+    virtual void ClearBorderWidth() = 0;
+    virtual void ClearPadding() = 0;
 
 private:
     static std::unique_ptr<CalendarPickerModel> instance_;

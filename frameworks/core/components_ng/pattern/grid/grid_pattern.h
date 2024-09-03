@@ -229,6 +229,9 @@ public:
     float GetAverageHeight() const;
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
+    void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -333,6 +336,9 @@ private:
     void SyncLayoutBeforeSpring();
 
     void FireOnScrollStart() override;
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
 
     inline bool UseIrregularLayout() const;
 

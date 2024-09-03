@@ -16,9 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_INPUT_MANAGER_INPUT_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_INPUT_MANAGER_INPUT_MANAGER_H
 
+#include <set>
+
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
+
+using HotKey = std::tuple<std::set<int32_t>, int32_t>;
 
 enum class KeyboardType : int32_t {
     NONE,
@@ -39,6 +43,8 @@ public:
     static KeyboardType GetKeyboardType(int32_t deviceId);
 
     static bool IsKeyboardConnected();
+
+    static bool GetSystemHotkeys(std::vector<HotKey>& hotkeys);
 };
 
 } // namespace OHOS::Ace

@@ -1508,6 +1508,20 @@ class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> 
   }
 }
 
+class AdvancedBlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('advancedBlendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    } else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
 class BlendModeModifier extends ModifierWithKey<ArkBlendMode> {
   constructor(value: ArkBlendMode) {
     super(value);
@@ -4304,6 +4318,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  advancedBlendMode(blendMode: BlendMode, blendApplyType?: BlendApplyType): this {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, AdvancedBlendModeModifier.identity,
+      AdvancedBlendModeModifier, arkBlendMode);
+    return this;
+  }
+
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ClipModifier.identity, ClipModifier, value);
     return this;
@@ -4550,6 +4573,7 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
   if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -4585,6 +4609,10 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

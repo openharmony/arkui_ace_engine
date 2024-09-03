@@ -20,7 +20,6 @@
 #else
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
-#include "core/common/container.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"

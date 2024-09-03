@@ -15,8 +15,6 @@
 
 #include "core/components_ng/base/view_full_update_model_ng.h"
 
-#include "base/log/ace_trace.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 namespace OHOS::Ace::NG {

@@ -331,7 +331,8 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     gridLayoutInfo_.endIndex_ = itemIndex - 1;
     gridLayoutInfo_.startMainLineIndex_ = 0;
-    gridLayoutInfo_.endMainLineIndex_ = static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.size()) - 1 ;
+    auto iter = gridLayoutInfo_.gridMatrix_.rbegin();
+    gridLayoutInfo_.endMainLineIndex_ = (iter == gridLayoutInfo_.gridMatrix_.rend() ? -1 : iter->first);
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -15,16 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 #if !defined(WEARABLE_PRODUCT)
 #include "frameworks/core/components/form/form_component.h"

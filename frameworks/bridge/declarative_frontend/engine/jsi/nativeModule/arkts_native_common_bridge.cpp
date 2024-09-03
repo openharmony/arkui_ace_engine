@@ -29,18 +29,8 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "core/components/common/properties/blend_mode.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/geometry/calc_dimension.h"
-#include "frameworks/base/geometry/dimension.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -94,7 +84,15 @@ constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+constexpr double WIDTH_BREAKPOINT_320VP = 320.0; // window width threshold
+constexpr double WIDTH_BREAKPOINT_600VP = 600.0;
+constexpr double WIDTH_BREAKPOINT_840VP = 840.0;
+constexpr double WIDTH_BREAKPOINT_1440VP = 1440.0;
+constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0.8
+constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 
+enum class WidthBreakpoint {WIDTH_XS, WIDTH_SM, WIDTH_MD, WIDTH_LG, WIDTH_XL};
+enum class HeightBreakpoint {HEIGHT_SM, HEIGHT_MD, HEIGHT_LG};
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -5353,6 +5351,49 @@ ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeC
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
     int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
+    if (blendModeArg->IsNumber()) {
+        int32_t blendModeNum = blendModeArg->Int32Value(vm);
+        if (blendModeNum >= static_cast<int32_t>(OHOS::Ace::BlendMode::NONE) &&
+            blendModeNum <= static_cast<int32_t>(OHOS::Ace::BlendMode::LUMINOSITY)) {
+            blendModeValue = blendModeNum;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::SRC_OVER);
+            blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::OFFSCREEN);
+        }
+        if (blendApplyTypeArg->IsNumber()) {
+            int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
+            if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
+                blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
+                blendApplyTypeValue = blendApplyTypeNum;
+            }
+        }
+        GetArkUINodeModifiers()->getCommonModifier()->setBlendMode(nativeNode, blendModeValue, blendApplyTypeValue);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetBlendMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBlendMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetAdvancedBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);      // 0: index of parameter frameNode
+    Local<JSValueRef> blendModeArg = runtimeCallInfo->GetCallArgRef(1);      // 1: index of parameter blendMode
+    Local<JSValueRef> blendApplyTypeArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter blendApplyType
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
+    int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
     if (blendApplyTypeArg->IsNumber()) {
         int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
         if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
@@ -5380,7 +5421,7 @@ ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::ResetBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue CommonBridge::ResetAdvancedBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -6482,102 +6523,6 @@ ArkUINativeModuleValue CommonBridge::ResetOnDetach(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetOnLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
-    auto obj = secondeArg->ToObject(vm);
-    auto containerId = Container::CurrentId();
-    panda::Local<panda::FunctionRef> func = obj;
-    auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
-                           containerId](const std::string& xcomponentId) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
-        PipelineContext::SetCallBackNode(node);
-        const char* keys[] = { "load" };
-        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, xcomponentId.c_str()) };
-        auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        panda::Local<panda::JSValueRef> params[1] = { obj };
-        func->Call(vm, func.ToLocal(), params, 1);
-    };
-    NG::ViewAbstract::SetOnLoad(frameNode, std::move(onLoad));
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CommonBridge::ResetOnLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    ViewAbstract::DisableOnLoad(frameNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CommonBridge::SetOnDestroy(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
-    auto obj = secondeArg->ToObject(vm);
-    auto containerId = Container::CurrentId();
-    panda::Local<panda::FunctionRef> func = obj;
-    auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
-                           containerId]() {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        ContainerScope scope(containerId);
-        PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
-    };
-    NG::ViewAbstract::SetOnDestroy(frameNode, std::move(onDestroy));
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CommonBridge::ResetOnDestroy(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    ViewAbstract::DisableOnDestroy(frameNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CommonBridge::SetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsBoolean()) {
-        bool boolValue = secondArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getCommonModifier()->setEnableAnalyzer(nativeNode, boolValue);
-    } else {
-        GetArkUINodeModifiers()->getCommonModifier()->resetEnableAnalyzer(nativeNode);
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CommonBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getCommonModifier()->resetEnableAnalyzer(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -6595,13 +6540,14 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtime
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(node);
-        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
-            "stopPropagation", "getModifierKeyState", "intentionCode" };
+        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode",
+            "timestamp", "stopPropagation", "getModifierKeyState", "intentionCode" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
             panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
             panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
+            panda::NumberRef::New(vm, info.GetUnicode()),
             panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
             panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
@@ -7392,6 +7338,64 @@ ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
     std::string windowName = context->GetWindow()->GetWindowName();
     return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
+}
+
+ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
+    double density = PipelineBase::GetCurrentDensity();
+    double width;
+    if (density == 0) {
+        width = window->GetCurrentWindowRect().Width();
+    } else {
+        width = window->GetCurrentWindowRect().Width() / density;
+    }
+
+    WidthBreakpoint breakpoint;
+    if (width < WIDTH_BREAKPOINT_320VP) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (width < WIDTH_BREAKPOINT_600VP) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (width < WIDTH_BREAKPOINT_840VP) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (width < WIDTH_BREAKPOINT_1440VP) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    }
+    return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
+}
+
+ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
+    auto width = window->GetCurrentWindowRect().Width();
+    auto height = window->GetCurrentWindowRect().Height();
+    auto aspectRatio = 0.0;
+    if (width == 0) {
+        aspectRatio = 0.0;
+    } else {
+        aspectRatio = height / width;
+    }
+    HeightBreakpoint breakpoint;
+    if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD1) {
+        breakpoint = HeightBreakpoint::HEIGHT_SM;
+    } else if (aspectRatio < HEIGHT_ASPECTRATIO_THRESHOLD2) {
+        breakpoint = HeightBreakpoint::HEIGHT_MD;
+    } else {
+        breakpoint = HeightBreakpoint::HEIGHT_LG;
+    }
+    return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
 }
 
 ArkUINativeModuleValue CommonBridge::SetSystemBarEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)

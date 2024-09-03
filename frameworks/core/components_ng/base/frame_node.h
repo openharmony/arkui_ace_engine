@@ -891,6 +891,11 @@ public:
     bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool GetMonopolizeEvents() const;
@@ -996,7 +1001,7 @@ public:
     {
         return isUseTransitionAnimator_;
     }
-    
+
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -1062,6 +1067,7 @@ protected:
     void DumpInfo() override;
     std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
@@ -1105,10 +1111,20 @@ private:
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpDragInfo(std::unique_ptr<JsonValue>& json);
+    void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpExtensionHandlerInfo(std::unique_ptr<JsonValue>& json);
+    void DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json);
+    void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
+
     void DumpSafeAreaInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
@@ -1175,6 +1191,9 @@ private:
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
     bool AllowVisibleAreaCheck() const;
+
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

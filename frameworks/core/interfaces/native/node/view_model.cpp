@@ -15,17 +15,11 @@
 
 #include "core/interfaces/native/node/view_model.h"
 
-#include <optional>
-
-#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
@@ -33,6 +27,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
@@ -41,12 +36,14 @@
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -56,6 +53,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
@@ -75,11 +73,8 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -209,14 +204,6 @@ void* createProgressNode(ArkUI_Int32 nodeId)
 void* createCheckBoxNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -533,6 +520,38 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createTextClockNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextTimerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createMarqueeNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -552,7 +571,6 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createButtonNode,
     createProgressNode,
     createCheckBoxNode,
-    createCheckBoxGroupNode,
     createColumnNode,
     createRowNode,
     createFlexNode,
@@ -598,9 +616,26 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSymbolNode,
     createQRcodeNode,
     createBadgeNode,
+    createTextClockNode,
+    createTextTimerNode,
+    createMarqueeNode,
+    createCheckBoxGroupNode,
 };
 
-void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
+void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
+{
+    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
+    if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
+        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return createArkUIFrameNodes[tag](nodeId);
+}
+
+void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

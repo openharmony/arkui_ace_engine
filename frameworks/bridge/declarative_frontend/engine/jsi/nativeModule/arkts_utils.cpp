@@ -18,6 +18,7 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/base/image/pixel_map.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -25,13 +26,24 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
-#include "frameworks/core/common/resource/resource_manager.h"
-#include "frameworks/core/common/resource/resource_object.h"
-#include "frameworks/core/common/resource/resource_wrapper.h"
-#include "frameworks/core/components/declaration/common/declaration.h"
-#include "frameworks/core/components/theme/theme_constants.h"
+#include "frameworks/core/common/resource/resource_configuration.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string GetBundleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
+}
+
+std::string GetModuleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
+}
+}
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -54,19 +66,6 @@ const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
 constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
 constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
-};
 
 uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
 {
@@ -411,7 +410,7 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
     }
 }
 
-void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
+void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
@@ -438,6 +437,22 @@ void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
             CompleteResourceObjectFromParams(vm, jsObj, targetModule, resType, resName);
         }
     }
+
+    std::string bundleName;
+    std::string moduleName;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, jsObj, bundleName, moduleName);
+    if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
+        bundleName = GetBundleNameFromContainer();
+        jsObj->Set(vm,
+            panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)),
+            panda::StringRef::NewFromUtf8(vm, bundleName.c_str()));
+    }
+    if (moduleName == DEFAULT_HAR_MODULE_NAME) {
+        moduleName = GetModuleNameFromContainer();
+        jsObj->Set(vm,
+            panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
+            panda::StringRef::NewFromUtf8(vm, moduleName.c_str()));
+    }
 }
 
 
@@ -449,6 +464,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, jsObj);
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
     if (!resourceWrapper) {
@@ -498,6 +514,7 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, jsObj);
 
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
@@ -545,6 +562,7 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, jsObj);
 
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
@@ -595,7 +613,7 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
         return false;
     }
     auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-    if (handle->IsUndefined() || handle->IsNull()) {
+    if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
         return false;
     }
     int32_t length = static_cast<int32_t>(handle->Length(vm));
@@ -657,6 +675,7 @@ bool ArkTSUtils::ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValu
     resourceType = type->Int32Value(vm);
     auto resIdNum = id->Int32Value(vm);
 
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsValue);
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     CHECK_NULL_RETURN(resourceWrapper, false);
@@ -704,11 +723,10 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
     if (jsObj->IsNull() || !GetResourceIdAndType(vm, jsObj, resId, resType)) {
         return false;
     }
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsObj);
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
-    if (!resourceWrapper) {
-        return false;
-    }
+    CHECK_NULL_RETURN(resourceWrapper, false);
     if (resId == -1) {
         if (!IsGetResourceByName(vm, jsObj)) {
             return false;
@@ -922,6 +940,7 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(
         return false;
     }
 
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsValue);
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     if (!resourceWrapper) {
@@ -1190,6 +1209,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, obj);
     auto resourceWrapper = CreateResourceWrapper(vm, obj, resourceObject);
     if (!resourceWrapper) {
@@ -1234,6 +1254,7 @@ bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsValue);
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     CHECK_NULL_RETURN(resourceWrapper, false);

@@ -396,4 +396,25 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert010, TestSize.Level1)
     auto secondHtml = convert.ToHtml(*dstSpan1);
     EXPECT_EQ(secondHtml, dstHtml);
 }
+
+HWTEST_F(HtmlConvertTestNg, HtmlConvert011, TestSize.Level1)
+{
+    const std::string multiHtml =
+        "<html>"
+        "<head>"
+        "</head>"
+        "<body>"
+        "<p style=\"font-size:50px;text-shadow: 0 0 3px red, green 0 0;\">"
+        "<span style=\"font-size:100px\">100fontsize</span>dddd当地经的123456<span "
+        "style=\"font-size:30px\">30fontsize</span>1232132</p>"
+        "</body>"
+        "</html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(multiHtml);
+    std::list<RefPtr<NG::SpanItem>> spans = dstSpan->GetSpanItems();
+    EXPECT_EQ(spans.size(), 4);
+    auto it = spans.begin();
+    EXPECT_EQ((*it)->fontStyle->GetTextShadow().value()[0].GetColor(), OHOS::Ace::Color::RED);
+    EXPECT_EQ((*it)->fontStyle->GetTextShadow().value()[1].GetColor(), OHOS::Ace::Color::GREEN);
+}
 } // namespace OHOS::Ace::NG

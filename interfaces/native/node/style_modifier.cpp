@@ -1525,6 +1525,9 @@ int32_t SetBorderRadius(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderRadius(
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+    } else if (node->type == ARKUI_NODE_IMAGE_SPAN) {
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBorderRadius(
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
@@ -1539,6 +1542,8 @@ void ResetBorderRadius(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getImageModifier()->resetImageBorderRadius(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaBorderRadius(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_IMAGE_SPAN) {
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->resetImageSpanBorderRadius(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadius(node->uiNodeHandle);
     }
@@ -4021,8 +4026,8 @@ int32_t SetCaretStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretStyle(
-        node->uiNodeHandle, item->value[NUM_0].f32, unit, item->value[NUM_0].u32);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaret(
+        node->uiNodeHandle, item->value[NUM_0].f32, unit);
     return ERROR_CODE_NO_ERROR;
 }
 

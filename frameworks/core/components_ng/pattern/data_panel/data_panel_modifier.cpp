@@ -15,23 +15,8 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 
-#include <cmath>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/rect.h"
-#include "base/geometry/rrect.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/data_panel/data_panel_theme.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

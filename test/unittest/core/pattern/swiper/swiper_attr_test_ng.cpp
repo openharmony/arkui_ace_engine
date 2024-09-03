@@ -122,14 +122,14 @@ HWTEST_F(SwiperAttrTestNg, AttrIndex006, TestSize.Level1)
 {
     /**
      * @tc.cases: Set invalid index = ITEM_NUMBER - 1, loop = false, displayCount = 2
-     * @tc.expected: Default show(currentIndex_ = 0) first item
+     * @tc.expected: Can not reach to ITEM_NUMBER - 1, show the item ITEM_NUMBER - 2
      */
     CreateWithItem([](SwiperModelNG model) {
         model.SetLoop(false);
         model.SetDisplayCount(2);
         model.SetIndex(ITEM_NUMBER - 1);
     });
-    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, ITEM_NUMBER - 2);
 }
 
 /**
@@ -1265,7 +1265,6 @@ HWTEST_F(SwiperAttrTestNg, SetNestedScroll001, TestSize.Level1)
         .backward = NestedScrollMode::SELF_ONLY,
     };
     pattern_->isNestedInterrupt_ = false;
-    pattern_->isFixedNestedScrollMode_ = true;
     pattern_->SetNestedScroll(nestedOpt);
     EXPECT_FALSE(pattern_->isFixedNestedScrollMode_);
     EXPECT_TRUE(pattern_->isNestedInterrupt_);

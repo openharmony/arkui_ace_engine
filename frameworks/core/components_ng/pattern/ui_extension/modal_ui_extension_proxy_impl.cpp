@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 
-#include "frameworks/base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 ModalUIExtensionProxyImpl::ModalUIExtensionProxyImpl(const RefPtr<SessionWrapper>& sessionWrapper)
     : sessionWrapper_(sessionWrapper)

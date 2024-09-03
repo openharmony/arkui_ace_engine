@@ -211,7 +211,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
     tabBarPattern->SetBottomTabBarStyle(bottomTabBarStyle, myIndex);
     auto labelStyle = tabContentPattern->GetLabelStyle();
-    tabBarPattern->SetLabelStyle(labelStyle, myIndex);
+    tabBarPattern->SetLabelStyle(columnNode->GetId(), labelStyle);
     auto iconStyle = tabContentPattern->GetIconStyle();
     tabBarPattern->SetIconStyle(iconStyle, myIndex);
     auto symbol = tabContentPattern->GetSymbol();
@@ -247,6 +247,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
@@ -462,7 +463,7 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     CHECK_NULL_VOID(tabBarFrameNode);
     auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    tabBarPattern->RemoveTabBarItemClickEvent(tabBarNode->GetId());
+    tabBarPattern->RemoveTabBarItemInfo(tabBarItemId);
     tabBarNode->RemoveChild(tabBarItemNode);
     tabContentNode->ResetTabBarItemId();
 
@@ -646,6 +647,22 @@ void TabContentModelNG::SetCustomStyleNode(const RefPtr<FrameNode>& customStyleN
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCustomStyleNode(customStyleNode);
+}
+
+void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar("", "", std::nullopt, std::move(builder));
+}
+
+void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
 }
 
 void TabContentModelNG::SetTabBar(

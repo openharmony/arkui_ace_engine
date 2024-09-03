@@ -27,37 +27,14 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/declaration/button/button_declaration.h"
 #include "core/components/video/video_theme.h"
-#include "core/components/video/video_utils.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/slider/slider_event_hub.h"
-#include "core/components_ng/pattern/slider/slider_layout_property.h"
-#include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/property/gradient_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 using HiddenChangeEvent = std::function<void(bool)>;
@@ -1859,6 +1836,7 @@ RefPtr<VideoPattern> VideoPattern::GetTargetVideoPattern()
     if (patternIsFullScreen) {
         // current is full screen,need to be released
         auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(this);
+        CHECK_NULL_RETURN(fullScreenPattern, nullptr);
         return fullScreenPattern->GetVideoPattern();
     }
     // current node is origin video node, need to operate full screen node

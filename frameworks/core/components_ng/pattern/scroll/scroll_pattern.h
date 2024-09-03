@@ -398,6 +398,8 @@ private:
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;

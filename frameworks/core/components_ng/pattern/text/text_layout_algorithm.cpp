@@ -15,22 +15,11 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
-#include <limits>
-
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_drag/text_drag_base.h"
-#include "core/components_ng/render/font_collection.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
@@ -399,22 +388,37 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize[Length:%d]", static_cast<int32_t>(content.length()));
+    // IsNeedAdaptFontSize
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize();
-    maxFontSize = maxFontSizeDimension.ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    minFontSize = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    if (!IsNeedAdaptFontSize(maxFontSize, minFontSize)) {
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
             TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
             return false;
         }
         return true;
     }
+    // Get suitableSize and set
+    double suitableSize = 0.0;
+    if (!GetSuitableSize(textStyle, content, contentConstraint, layoutWrapper, suitableSize)) {
+        return false;
+    }
+    textStyle.SetFontSize(Dimension(suitableSize));
+    return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+}
+
+// Find the optimal size within [minFontSize, maxFontSize].
+bool TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double& suitableSize)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+    auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize(); // Get stepSize
     auto adaptUnit = maxFontSizeDimension.GetAdaptDimensionUnit(textStyle.GetAdaptMinFontSize());
     Dimension step(1.0f, adaptUnit);
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
@@ -422,22 +426,38 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     }
     double stepSize =
         step.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    while (GreatOrEqual(maxFontSize, minFontSize)) {
-        textStyle.SetFontSize(Dimension(maxFontSize));
+    // Boundary check: for efficiency and to ensure the optimal size is within [minFontSize, maxFontSize].
+    textStyle.SetFontSize(Dimension(maxFontSize));
+    if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+        TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+        return false;
+    }
+    if (!DidExceedMaxLines(maxSize)) {
+        suitableSize = maxFontSize;
+        return true;
+    }
+    // Binary search: to find the optimal size within [minFontSize, maxFontSize].
+    if (NearEqual(stepSize, 0.0)) {
+        return false;
+    }
+    int32_t stepCount = (maxFontSize - minFontSize) / stepSize;
+    int32_t leftBound = 0;
+    int32_t rightBound = stepCount;
+    int32_t mid = (leftBound + rightBound) / 2;
+    while (leftBound < rightBound) {
+        double suitSz = minFontSize + mid * stepSize;
+        textStyle.SetFontSize(Dimension(suitSz));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
             return false;
         }
         if (!DidExceedMaxLines(maxSize)) {
-            break;
+            leftBound = mid;
+        } else {
+            rightBound = mid - 1;
         }
-        bool isEqual = maxFontSize == minFontSize;
-        maxFontSize -= stepSize;
-        if (LessNotEqual(maxFontSize, minFontSize) && !isEqual) {
-            maxFontSize = minFontSize;
-        }
+        mid = (leftBound + rightBound + 1) / 2;
     }
+    suitableSize = minFontSize + leftBound * stepSize;
     return true;
 }
 

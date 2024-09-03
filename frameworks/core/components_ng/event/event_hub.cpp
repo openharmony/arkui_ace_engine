@@ -15,8 +15,6 @@
 
 #include "core/components_ng/event/event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -476,42 +474,6 @@ void EventHub::FireOnDetach()
     if (onDetach_) {
         auto onDetach = onDetach_;
         onDetach();
-    }
-}
-
-void EventHub::SetOnLoad(std::function<void(const std::string& xcomponentId)>&& onLoad)
-{
-    onLoad_ = std::move(onLoad);
-}
-
-void EventHub::ClearOnLoad()
-{
-    onLoad_ = nullptr;
-}
-
-void EventHub::FireOnLoad(const std::string& xcomponentId)
-{
-    if (onLoad_) {
-        auto onLoad = onLoad_;
-        onLoad(xcomponentId);
-    }
-}
-
-void EventHub::SetOnDestroy(std::function<void()>&& onDestroy)
-{
-    onDestroy_ = std::move(onDestroy);
-}
-
-void EventHub::ClearOnDestroy()
-{
-    onDestroy_ = nullptr;
-}
-
-void EventHub::FireOnDestroy()
-{
-    if (onDestroy_) {
-        auto onDestroy = onDestroy_;
-        onDestroy();
     }
 }
 
