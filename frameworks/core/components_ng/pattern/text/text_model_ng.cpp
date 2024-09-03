@@ -1089,11 +1089,4 @@ void TextModelNG::SetHalfLeading(FrameNode* frameNode, bool halfLeading)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HalfLeading, halfLeading, frameNode);
 }
-
-bool TextModelNG::GetHalfLeading(FrameNode* frameNode)
-{
-    bool value = false;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, HalfLeading, value, frameNode, value);
-    return value;
-}
 } // namespace OHOS::Ace::NG

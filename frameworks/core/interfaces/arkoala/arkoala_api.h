@@ -2036,7 +2036,6 @@ struct ArkUITextModifier {
     void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextHalfLeading)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
     void (*setTextResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
