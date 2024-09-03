@@ -178,7 +178,7 @@ struct ContentItemStruct {
     this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_description_text_color') : this.descriptionColor;
   }
 
-  getIconFillColor(): ResourceColor {
+  getIconFillColor():ResourceColor{
     switch (this.iconStyle) {
       case IconType.BADGE:
         return $r('sys.color.composeListItem_badge_color');
@@ -343,7 +343,7 @@ struct OperateItemStruct {
     this.activedColor = theme.colors.interactiveActive;
   }
 
-  onFocusChange() {
+  onFocusChange(){
     this.secondaryTextSize = this.isFocus ? $r('sys.float.composeListItem_focused_right_text_size') : $r('sys.float.composeListItem_normal_right_text_size');
     this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_right_text_color') : this.secondaryTextColor;
     this.iconColor = this.isFocus ? $r('sys.color.composeListItem_focused_right_icon_color') : $r('sys.color.composeListItem_normal_right_icon_color');
@@ -368,7 +368,7 @@ struct OperateItemStruct {
     }
   }
 
-  getUnselectedColor(): ResourceColor {
+  getUnselectedColor():ResourceColor{
     if (IS_CLOSE_CHILD_FOCUS) {
       return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
     }
@@ -982,7 +982,7 @@ export struct ComposeListItem {
     }
   }
 
-  setContainerPadding(top: Resource, bottom: Resource) {
+  setContainerPadding(top:Resource, bottom:Resource){
     this.containerPadding = {
       top: LengthMetrics.resource(top),
       end: LengthMetrics.resource($r('sys.float.titlebar_icon_background_width')),
@@ -991,7 +991,7 @@ export struct ComposeListItem {
     };
   }
 
-  getContainerPadding() {
+  getContainerPadding(){
     if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
       this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top3'), $r('sys.float.composeListItem_single_line_list_left_text_bottom3'));
     } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
