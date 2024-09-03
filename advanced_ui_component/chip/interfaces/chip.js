@@ -26,6 +26,7 @@ const EnvironmentCallback = requireNapi('EnvironmentCallback');
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+
 const resourceFn = resourceManager.getSystemResourceManager();
 export var ChipSize;
 (function (ChipSize) {
@@ -701,7 +702,8 @@ export class ChipComponent extends ViewPU {
     }
     verifyResource(resourceValue, defaultValue) {
         if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) &&
-            (resourceValue.params[0]).split('.').length > 2 && resourceValue.params[0].inc) {
+        resourceValue.params[0] && resourceValue.params[0].includes('.') &&
+            resourceValue.params[0].split('.').length > 2) {
             try {
                 let getNum = resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
                 return getNum;
@@ -1378,9 +1380,7 @@ export class ChipComponent extends ViewPU {
             Button.focusable(true);
             Button.opacity(this.getChipNodeOpacity());
             Button.focusBox(this.getfocusBox());
-            ViewStackProcessor.visualState("normal");
             Button.shadow(this.chipNodeOnFocus ? this.getShadowStyles() : undefined);
-            ViewStackProcessor.visualState();
             Button.onFocus(() => {
                 this.focusBtnChipNodeAnimate();
                 this.chipNodeOnFocus = true;

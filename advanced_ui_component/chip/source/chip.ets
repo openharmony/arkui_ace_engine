@@ -410,8 +410,9 @@ export struct ChipComponent {
   }
 
   private verifyResource(resourceValue: Resource, defaultValue: Dimension): Dimension {
-    if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params) &&
-      ((resourceValue.params as string[])[0]).split('.').length > 2 && resourceValue.params[0].inc) {
+    if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params as string[]) &&
+      (resourceValue.params as string[])[0] && (resourceValue.params as string[])[0].includes('.') &&
+      (resourceValue.params as string[])[0].split('.').length > 2) {
       try {
         let getNum = resourceFn.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
         return getNum;
@@ -752,7 +753,7 @@ export struct ChipComponent {
 
     if (this.chipNodeOnFocus && !this.isSetbackgroundColor()) {
       currentColor = this.getChipActive() ? themeChipNode.focusActivatedBgColor :
-      themeChipNode.focusBgColor;
+        themeChipNode.focusBgColor;
       return currentColor;
     }
     if (this.getChipActive()) {
@@ -771,13 +772,13 @@ export struct ChipComponent {
       this.isHovering = false;
       return sourceColor
         .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
-        Color.Transparent : themeChipNode.pressedBlendColor))
+          Color.Transparent : themeChipNode.pressedBlendColor))
         .color;
     }
     if (this.isHovering) {
       return sourceColor
         .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
-        Color.Transparent : themeChipNode.hoverBlendColor))
+          Color.Transparent : themeChipNode.hoverBlendColor))
         .color;
     }
     return currentColor;
@@ -1223,11 +1224,7 @@ export struct ChipComponent {
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
     .focusBox(this.getfocusBox())
-    .stateStyles({
-      normal: {
-        .shadow(this.chipNodeOnFocus ? this.getShadowStyles() : undefined)
-      },
-    })
+    .shadow(this.chipNodeOnFocus ? this.getShadowStyles() : undefined)
     .onFocus(() => {
       this.focusBtnChipNodeAnimate();
       this.chipNodeOnFocus = true
