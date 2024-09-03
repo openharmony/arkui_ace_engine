@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_paint_method.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -89,11 +88,6 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SheetPresentationProperty>();
-    }
-
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return MakeRefPtr<SheetPresentationPaintMethod>(WeakClaim(this));
     }
 
     int32_t GetTargetId() const override
