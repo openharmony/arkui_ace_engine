@@ -3752,7 +3752,12 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
-    MountToParentWithService(rootNode, modalNode);
+    if (targetId < 0) {
+        // modaluiextention node mounting
+        modalNode->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
+    } else {
+        MountToParentWithService(rootNode, modalNode);
+    }
     modalNode->AddChild(builder);
     if (!isAllowedBeCovered_ && modalNode->GetParent()) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
@@ -5649,20 +5654,7 @@ void OverlayManager::ResetRootNode(int32_t sessionId)
     curSessionIds_.erase(sessionId);
     auto rootNode = FindWindowScene(nullptr);
     CHECK_NULL_VOID(rootNode);
-    auto pipeline = rootNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetInstallationFree()) {
-        // it is in atomicservice
-        for (auto child : rootNode->GetChildren()) {
-            CHECK_NULL_VOID(child);
-            if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-                child->UpdateModalUiextensionCount(false);
-                break;
-            }
-        }
-    } else {
-        rootNode->UpdateModalUiextensionCount(false);
-    }
+    rootNode->UpdateModalUiextensionCount(false);
 }
 
 void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
@@ -6647,11 +6639,7 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
         // it is in atomicservice
         SetNodeBeforeAppbar(rootNode, node);
     } else {
-        if (node->GetTag() == V2::MODAL_PAGE_TAG) {
-            node->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
-        } else {
-            node->MountToParent(rootNode);
-        }
+        node->MountToParent(rootNode);
     }
 }
  
@@ -6679,7 +6667,7 @@ void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
             CHECK_NULL_VOID(childNode);
             if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
                 TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
-                child->AddChildBefore(node, childNode, node->GetTag() == V2::MODAL_PAGE_TAG);
+                child->AddChildBefore(node, childNode);
                 return;
             }
         }

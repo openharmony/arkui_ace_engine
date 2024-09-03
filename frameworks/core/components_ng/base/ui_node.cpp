@@ -164,16 +164,10 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
-    if (!addModalUiextension && modalUiextensionCount_ > 0) {
-        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-            "Current modalUiextension count is : %{public}d",
-            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
-        return;
-    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
