@@ -77,6 +77,8 @@ template("ace_core_source_set") {
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
+      "accessibility/native_interface_accessibility_impl.cpp",
+      "accessibility/native_interface_accessibility_provider.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -661,6 +663,8 @@ template("ace_core_ng_source_set") {
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
+      "accessibility/native_interface_accessibility_impl.cpp",
+      "accessibility/native_interface_accessibility_provider.cpp",
 
       # animation
       "animation/animatable_data.cpp",

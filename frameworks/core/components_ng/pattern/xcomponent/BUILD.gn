@@ -16,6 +16,9 @@ import("$ace_root/frameworks/core/components_ng/components.gni")
 
 build_component_ng("xcomponent_pattern_ng") {
   sources = [
+    "xcomponent_accessibility_child_tree_callback.cpp",
+    "xcomponent_accessibility_provider.cpp",
+    "xcomponent_accessibility_session_adapter.cpp",
     "xcomponent_controller_ng.cpp",
     "xcomponent_ext_surface_callback_client.cpp",
     "xcomponent_layout_algorithm.cpp",
