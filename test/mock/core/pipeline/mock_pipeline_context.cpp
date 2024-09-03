@@ -334,7 +334,7 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 

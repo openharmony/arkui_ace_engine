@@ -345,7 +345,7 @@ public:
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
 
     RefPtr<StageElement> GetStageElement() const;
 

@@ -2671,21 +2671,21 @@ void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
     pipeline->SetOnWindowFocused(callback);
 }
 
-void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, "
-         "hideMinimize: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, hideSplit, hideMaximize, hideMinimize);
+        "hideMinimize: %{public}d, hideClose: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, hideSplit, hideMaximize, hideMinimize, hideClose);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [container, hideSplit, hideMaximize, hideMinimize]() {
+        [container, hideSplit, hideMaximize, hideMinimize, hideClose]() {
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+            pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
         },
         TaskExecutor::TaskType::UI, "ArkUIHideWindowTitleButton");
 }
