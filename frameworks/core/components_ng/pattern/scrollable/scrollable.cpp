@@ -965,10 +965,10 @@ void Scrollable::ProcessSpringMotion(double position)
         ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
                             "nextDistance:%f, nodeId:%d, tag:%s",
             distance, nextDistance, nodeId_, nodeTag_.c_str());
-        if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
-            // pass the velocity to the child component to avoid dealing with additional offsets
-            delta = finalPosition_ - currentPos_;
-        } else {
+        // only handle offsets that are out of bounds
+        delta = finalPosition_ - currentPos_;
+        // remainVelocityCallback_ will pass the velocity to the child component
+        if (!remainVelocityCallback_ || !remainVelocityCallback_(currentVelocity)) {
             StartScrollAnimation(position, currentVelocity);
         }
     }
