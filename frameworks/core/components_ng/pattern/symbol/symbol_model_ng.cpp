@@ -116,7 +116,9 @@ void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& uni
 
 void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOptions& symbolEffectOptions)
 {
+    CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(property);
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions, frameNode);

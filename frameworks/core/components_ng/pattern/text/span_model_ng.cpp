@@ -452,8 +452,9 @@ TextBackgroundStyle SpanModelNG::GetSpanTextBackgroundStyle(UINode* uiNode)
 std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
 {
     std::vector<Shadow> defaultShadow;
-    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(uiNode, defaultShadow);
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, defaultShadow);
     return spanNode->GetTextShadow().value_or(defaultShadow);
 }
 
