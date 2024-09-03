@@ -1767,6 +1767,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ContainerScope scope(self->GetInstanceId());
         ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
