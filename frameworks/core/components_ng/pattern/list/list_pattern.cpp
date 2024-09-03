@@ -1218,24 +1218,14 @@ bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_
     auto isScrollIndex = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, isScrollIndex);
-    if (nextIndex < startIndex_) {
-        if (nextIndexInGroup == -1) {
-            isScrollIndex = true;
-            ScrollToIndex(nextIndex, smooth_, ScrollAlign::START);
-            pipeline->FlushUITasks();
-        } else {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
-            pipeline->FlushUITasks();
-        }
-    } else if (nextIndex > endIndex_) {
-        if (nextIndexInGroup == -1) {
-            isScrollIndex = true;
-            ScrollToIndex(nextIndex, smooth_, ScrollAlign::END);
-            pipeline->FlushUITasks();
-        } else {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::END);
-            pipeline->FlushUITasks();
-        }
+    if (nextIndex < startIndex_ && nextIndexInGroup == -1) {
+        isScrollIndex = true;
+        ScrollToIndex(nextIndex, false, ScrollAlign::START);
+        pipeline->FlushUITasks();
+    } else if (nextIndex > endIndex_ && nextIndexInGroup == -1) {
+        isScrollIndex = true;
+        ScrollToIndex(nextIndex, false, ScrollAlign::END);
+        pipeline->FlushUITasks();
     }
     return isScrollIndex;
 }
@@ -1265,7 +1255,7 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
         }
         if ((nextIndexInGroup < nextListItemGroupPara.displayStartIndex) ||
             (nextIndexInGroup > nextListItemGroupPara.displayEndIndex) || (isScrollIndex)) {
-            ScrollToIndex(nextIndex, nextIndexInGroup, scrollAlign);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, scrollAlign);
             pipeline->FlushUITasks();
         }
     } else if (nextIndexInGroup > nextListItemGroupPara.itemEndIndex) {
@@ -1273,10 +1263,10 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
         groupIndexInGroup = false;
     } else {
         if ((nextIndexInGroup < curIndexInGroup) && (nextIndexInGroup < nextListItemGroupPara.displayStartIndex)) {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::START);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::START);
             pipeline->FlushUITasks();
         } else if ((nextIndexInGroup > curIndexInGroup) && (nextIndexInGroup > nextListItemGroupPara.displayEndIndex)) {
-            ScrollToIndex(nextIndex, nextIndexInGroup, ScrollAlign::END);
+            ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::END);
             pipeline->FlushUITasks();
         }
     }
