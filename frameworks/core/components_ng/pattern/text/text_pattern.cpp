@@ -68,8 +68,6 @@ constexpr char SELECT_TEXT[] = "selectText";
 constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
-const std::string NEWLINE = "\n";
-const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 }; // namespace
 
 TextPattern::~TextPattern()
@@ -175,9 +173,6 @@ void TextPattern::ResetSelection()
 void TextPattern::InitSelection(const Offset& pos)
 {
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(pos, true);
-    if (IsLineBreakOrEndOfParagraph(extend)) {
-        extend--;
-    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
@@ -186,14 +181,6 @@ void TextPattern::InitSelection(const Offset& pos)
             extend + GetGraphemeClusterLength(GetWideText(), extend));
     }
     HandleSelectionChange(start, end);
-}
-
-bool TextPattern::IsLineBreakOrEndOfParagraph(int32_t pos) const
-{
-    CHECK_NULL_RETURN(pos < static_cast<int32_t>(GetWideText().length() + placeholderCount_), true);
-    auto data = GetWideText();
-    CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
-    return true;
 }
 
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)

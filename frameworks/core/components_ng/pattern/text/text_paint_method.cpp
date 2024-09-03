@@ -73,14 +73,15 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     // Privacy masking.
     auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-    bool ifPaintObscuration = std::any_of(reasons.begin(), reasons.end(),
-        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-    if (ifPaintObscuration) {
-        UpdateObscuredRects();
-    } else {
-        textContentModifier_->SetIfPaintObscuration(false);
+    textContentModifier_->SetObscured(reasons);
+    auto spanItemChildren = pattern->GetSpanItemChildren();
+    textContentModifier_->SetIfHaveSpanItemChildren(!spanItemChildren.empty());
+    auto wideTextLength = pattern->GetDisplayWideTextLength();
+    std::vector<RectF> drawObscuredRects;
+    if (wideTextLength != 0) {
+        drawObscuredRects = pManager->GetRects(0, wideTextLength);
     }
-
+    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
     if (renderContext->GetClipEdge().has_value()) {
         textContentModifier_->SetClip(renderContext->GetClipEdge().value());
     }
@@ -88,26 +89,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (textContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);
     }
-}
-
-void TextPaintMethod::UpdateObscuredRects()
-{
-    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(pattern);
-    auto pManager = pattern->GetParagraphManager();
-    CHECK_NULL_VOID(pManager);
-
-    auto spanItemChildren = pattern->GetSpanItemChildren();
-    auto ifPaintObscuration = spanItemChildren.empty();
-    textContentModifier_->SetIfPaintObscuration(ifPaintObscuration);
-    CHECK_NULL_VOID(ifPaintObscuration);
-
-    auto wideTextLength = pattern->GetDisplayWideTextLength();
-    std::vector<RectF> drawObscuredRects;
-    if (wideTextLength != 0 && ifPaintObscuration) {
-        drawObscuredRects = pManager->GetRects(0, wideTextLength);
-    }
-    textContentModifier_->SetDrawObscuredRects(drawObscuredRects);
 }
 
 RefPtr<Modifier> TextPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)

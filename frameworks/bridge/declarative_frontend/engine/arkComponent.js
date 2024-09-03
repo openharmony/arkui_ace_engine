@@ -8446,23 +8446,6 @@ class SearchHeightModifier extends ModifierWithKey {
 }
 SearchHeightModifier.identity = Symbol('searchHeight');
 
-class SearchIdModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchInspectorId(node);
-    } else {
-      getUINativeModule().search.setSearchInspectorId(node, this.value);
-    }
-  }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchIdModifier.identity = Symbol('searchId');
 class SearchDecorationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

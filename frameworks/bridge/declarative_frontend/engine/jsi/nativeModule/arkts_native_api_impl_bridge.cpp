@@ -1344,10 +1344,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchHeight));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchHeight));
-    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchInspectorId"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchInspectorId));
-    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchInspectorId"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchInspectorId));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDecoration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetDecoration));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDecoration"),

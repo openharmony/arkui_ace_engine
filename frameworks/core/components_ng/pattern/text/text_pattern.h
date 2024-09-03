@@ -809,7 +809,6 @@ private:
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     void CreateModifier();
 
-    bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     // SpanString

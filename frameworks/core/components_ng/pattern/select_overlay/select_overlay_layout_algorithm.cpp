@@ -171,11 +171,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetMode() != SelectOverlayMode::HANDLE_ONLY) {
-        LayoutChild(layoutWrapper, pattern->GetMode());
+        LayoutChild(layoutWrapper);
     }
 }
 
-void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, SelectOverlayMode mode)
+void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
@@ -204,7 +204,7 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
-    if ((!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) && mode != SelectOverlayMode::MENU_ONLY) {
+    if (!info_->menuInfo.menuIsShow || info_->menuInfo.menuDisable) {
         hasExtensionMenu_ = false;
         return;
     }

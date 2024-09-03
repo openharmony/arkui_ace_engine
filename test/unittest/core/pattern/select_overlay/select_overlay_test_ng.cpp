@@ -1590,7 +1590,7 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw001, TestSize.Level1)
      * @tc.expected: the menuOptionOffset_ value is correct.
      */
     overlayModifier->onDraw(context);
-    EXPECT_EQ(overlayModifier->hasExtensionMenu_->Get(), false);
+    EXPECT_EQ(overlayModifier->hasExtensionMenu_, false);
 }
 
 /**
@@ -4123,7 +4123,7 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw002, TestSize.Level1)
      * @tc.expected: cover branch isNewAvoid_, firstHandleIsShow_ and secondHandleIsShow_ are true.
      */
     overlayModifier->onDraw(context);
-    EXPECT_EQ(overlayModifier->hasExtensionMenu_->Get(), false);
+    EXPECT_EQ(overlayModifier->hasExtensionMenu_, false);
 }
 
 /**

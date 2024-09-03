@@ -168,9 +168,9 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
 
     // Remove counterNode height.
-    auto counterNode = pattern->GetCounterNode().Upgrade();
-    if (counterNode && !pattern->IsNormalInlineState()) {
-        auto counterHeight = counterNode->GetGeometryNode()->GetFrameSize().Height();
+    auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    if (counterNodeLayoutWrapper && !pattern->IsNormalInlineState()) {
+        auto counterHeight = counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         size.SetHeight(size.Height() - counterHeight);
     }
 

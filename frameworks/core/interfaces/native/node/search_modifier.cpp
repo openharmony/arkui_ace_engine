@@ -287,20 +287,6 @@ void ResetSearchHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetId(frameNode, key);
-}
-
-void ResetSearchInspectorId(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetId(frameNode, "");
-}
-
 void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -843,7 +829,7 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
         SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
         ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
-        SetSearchInspectorId, ResetSearchInspectorId, SetSearchDecoration, ResetSearchDecoration,
+        SetSearchDecoration, ResetSearchDecoration,
         SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
         SetSearchFontFeature, ResetSearchFontFeature, SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
         SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize, SetSearchSelectedBackgroundColor,

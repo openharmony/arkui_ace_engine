@@ -80,8 +80,8 @@
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
@@ -164,8 +164,8 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
-constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
 constexpr int32_t SECOND_INDEX = 2;
+constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
