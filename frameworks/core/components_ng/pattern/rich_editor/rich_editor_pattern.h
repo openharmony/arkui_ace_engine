@@ -947,6 +947,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
+    void PasteStr(const RefPtr<RichEditorPattern>& richEditor, const std::string& text);
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
