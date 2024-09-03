@@ -79,7 +79,7 @@ void RatingModelNG::SetBackgroundSrc(const std::string& value, bool flag)
     }
 }
 
-void RatingModelNG::SetOnChange(ChangeEvent&& onChange)
+void RatingModelNG::SetOnChange(RatingChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -88,13 +88,21 @@ void RatingModelNG::SetOnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
-void RatingModelNG::SetOnChangeEvent(ChangeEvent&& onChangeEvent)
+void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+RefPtr<FrameNode> RatingModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
 }
 
 void RatingModelNG::SetStars(FrameNode* frameNode, int32_t value)
@@ -153,5 +161,11 @@ void RatingModelNG::SetChangeValue(FrameNode* frameNode, double value)
     auto pattern = frameNode->GetPattern<RatingPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRatingScore(value);
+}
+
+void RatingModelNG::SetRatingOptions(FrameNode* frameNode, double rating, bool indicator)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, indicator, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, rating, frameNode);
 }
 } // namespace OHOS::Ace::NG

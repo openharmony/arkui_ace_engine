@@ -293,6 +293,18 @@ ArkUI_CharPtr GetRadioGroup(ArkUINodeHandle node)
     g_radioStrValue = RadioModelNG::GetRadioGroup(frameNode);
     return g_radioStrValue.c_str();
 }
+
+void SetRadioIndicatorType(ArkUINodeHandle node, ArkUI_Uint32 indicatorType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::TICK &&
+        static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::DOT &&
+        static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::CUSTOM) {
+            indicatorType = static_cast<int32_t>(RadioIndicatorType::TICK);
+    }
+    RadioModelNG::SetRadioIndicatorType(frameNode, indicatorType);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -302,7 +314,7 @@ const ArkUIRadioModifier* GetRadioModifier()
         SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
         SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
         ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
-        SetRadioGroup, ResetRadioGroup, GetRadioGroup };
+        SetRadioGroup, ResetRadioGroup, GetRadioGroup, SetRadioIndicatorType };
 
     return &modifier;
 }

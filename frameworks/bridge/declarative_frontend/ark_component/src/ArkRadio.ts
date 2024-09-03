@@ -23,6 +23,17 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, undefined);
+    }
+    return this;
+  }
   checked(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
@@ -87,6 +98,26 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
       this.radioNode.update(radioConfiguration);
     }
     return this.radioNode.getFrameNode();
+  }
+}
+
+class RadioOptionsModifier extends ModifierWithKey<RadioOptions> {
+  constructor(value: RadioOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.setRadioOptions(node, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().radio.setRadioOptions(node, this.value.value, this.value.group, this.value.indicatorType);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.group, this.value.group) ||
+      !isBaseOrResourceEqual(this.stageValue.indicatorType, this.value.indicatorType);
   }
 }
 

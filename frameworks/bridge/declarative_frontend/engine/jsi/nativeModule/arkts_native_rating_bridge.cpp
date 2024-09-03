@@ -194,4 +194,30 @@ ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
         });
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RatingBridge::SetRatingOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> ratingArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> indicatorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    double rating = 0.0;
+    if (!ratingArg->IsNull() && ratingArg->IsNumber()) {
+        rating = ratingArg->ToNumber(vm)->Value();
+    }
+    if (LessNotEqual(rating, 0.0)) {
+        rating = 0.0;
+    }
+
+    int32_t indicator = 0;
+    if (!indicatorArg->IsNull() && indicatorArg->IsBoolean()) {
+        indicator = indicatorArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getRatingModifier()->setRatingOptions(
+        nativeNode, rating, indicator);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

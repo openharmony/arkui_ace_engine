@@ -1472,6 +1472,16 @@ const __creatorMap__ = new Map([
                 return new ArkCheckboxGroupComponent(node, type);
             });
         }],
+    ['Radio', (context) => {
+            return new TypedFrameNode(context, 'Radio', (node, type) => {
+                return new ArkRadioComponent(node, type);
+            });
+        }],
+    ['Rating', (context) => {
+            return new TypedFrameNode(context, 'Rating', (node, type) => {
+                return new ArkRatingComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {
