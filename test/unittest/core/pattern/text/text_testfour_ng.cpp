@@ -270,8 +270,16 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TextTestFourNg, GetTextRacePercent001, TestSize.Level1)
 {
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
     RefPtr<TextContentModifier> textContentModifier =
-        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()), textPattern);
     ASSERT_NE(textContentModifier, nullptr);
 
     textContentModifier->GetTextRacePercent();
