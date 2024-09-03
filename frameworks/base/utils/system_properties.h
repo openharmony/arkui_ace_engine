@@ -551,6 +551,7 @@ public:
     static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -561,9 +562,11 @@ public:
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
+    static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
+
     static bool GetAcePerformanceMonitorEnabled()
     {
-        return acePerformanceMonitorEnable_;
+        return acePerformanceMonitorEnable_.load();
     }
 
     static bool GetAceCommercialLogEnabled()
@@ -646,7 +649,7 @@ private:
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
-    static bool acePerformanceMonitorEnable_;
+    static std::atomic<bool> acePerformanceMonitorEnable_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;

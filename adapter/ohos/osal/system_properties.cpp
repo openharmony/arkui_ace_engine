@@ -419,7 +419,7 @@ bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
-bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -572,7 +572,7 @@ void SystemProperties::InitDeviceInfo(
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
-    acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+    acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -803,6 +803,14 @@ void SystemProperties::EnableSystemParameterDebugBoundaryCallback(const char* ke
     container->RenderLayoutBoundary(isDebugBoundary);
 }
 
+void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value,
+    void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetPerformanceMonitorEnabled(strcmp(value, "true") == 0);
+    }
+}
+
 float SystemProperties::GetDefaultResolution()
 {
     float density = 1.0f;
@@ -831,6 +839,11 @@ void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTra
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
     debugBoundaryEnabled_.store(debugBoundaryEnabled && developerModeOn_);
+}
+
+void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
+{
+    acePerformanceMonitorEnable_.store(performanceMonitorEnable);
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
