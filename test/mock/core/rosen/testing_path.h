@@ -82,7 +82,6 @@ public:
     virtual void ArcTo(const TestingPoint& pt1, const TestingPoint& pt2, float startAngle, float sweepAngle) {}
 
     virtual void CubicTo(float ctrlPt1X, float ctrlPt1Y, float ctrlPt2X, float ctrlPt2Y, float endPtX, float endPtY) {}
-
     virtual void Offset(float dx, float dy) {}
     virtual void AddPoly(const std::vector<TestingPoint>& points, int count, bool close) {}
     virtual bool Op(const TestingPath& path1, TestingPath& path2, TestingPathOp op)
