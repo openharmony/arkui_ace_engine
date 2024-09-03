@@ -336,7 +336,7 @@ void PipelineContext::SetContainerWindow(bool isShow)
 #endif
 }
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("Window modal is not container.");
@@ -348,7 +348,7 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     }
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
-        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
+        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
     }
 }
 
