@@ -94,11 +94,11 @@ void MarqueeModelNG::SetDirection(const std::optional<MarqueeDirection>& directi
 
 void MarqueeModelNG::SetAllowScale(const std::optional<bool>& allowScale)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale.value_or(true));
-    CHECK_NULL_VOID(textChild);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AllowScale, allowScale.value_or(true), textChild);
+    if (allowScale.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, AllowScale, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void MarqueeModelNG::SetTextColor(const std::optional<Color>& textColor)
@@ -179,10 +179,12 @@ void MarqueeModelNG::SetOnFinish(std::function<void()>&& onChange)
 void MarqueeModelNG::SetAllowScale(FrameNode* frameNode, const bool allowScale)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale, frameNode);
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AllowScale, allowScale, textChild);
+    if (allowScale) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, AllowScale,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
 }
 
 void MarqueeModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight)

@@ -171,15 +171,14 @@ DimensionUnit Dimension::GetAdaptDimensionUnit(const Dimension& dimension)
     return static_cast<int32_t>(unit_) <= static_cast<int32_t>(dimension.unit_) ? unit_ : dimension.unit_;
 }
 
-double Dimension::ConvertToPxDistribute(
-    std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale) const
+double Dimension::ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const
 {
     if (unit_ != DimensionUnit::FP) {
         return ConvertToPx();
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    if (!pipeline->IsFollowSystem() || !allowScale) {
+    if (!pipeline->IsFollowSystem()) {
         return value_ * pipeline->GetDipScale();
     }
     auto minFontScale = minOptional.value_or(0.0f);

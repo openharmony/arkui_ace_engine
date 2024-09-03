@@ -18,7 +18,6 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
@@ -73,6 +72,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(contentSize_);
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
+
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value());
     }
@@ -111,7 +111,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -122,7 +122,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -135,7 +135,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -205,7 +205,7 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -655,8 +655,7 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
 
 void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
@@ -664,8 +663,7 @@ void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textSty
 
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
@@ -673,8 +671,7 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle&
 
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);

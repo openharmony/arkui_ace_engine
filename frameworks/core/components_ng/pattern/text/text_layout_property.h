@@ -61,8 +61,6 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
-
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -91,17 +89,16 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, AllowScale, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ForegroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextSelectableMode, TextSelectableMode, PROPERTY_UPDATE_MEASURE_SELF);
