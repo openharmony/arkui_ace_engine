@@ -71,7 +71,7 @@ struct MoveCursorOption {
 struct ChoiceTextOption {
     StylusGestureRect rect;
     bool showMenu;
-}
+};
 
 class IAceStylusCallback {
 public:
