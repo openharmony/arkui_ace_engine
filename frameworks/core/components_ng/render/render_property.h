@@ -196,6 +196,7 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradientBlur, NG::LinearGradientBlurPara);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Magnifier, MagnifierParams);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BgDynamicBrightnessOption, BrightnessOption);

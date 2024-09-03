@@ -446,11 +446,8 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             GetLocalPointWithTransform(movingCaretOffset);
         }
         pattern->SetMovingCaretOffset(movingCaretOffset);
-        auto contentRect = pattern->GetContentRect();
-        auto caretRect = pattern->GetCaretRect();
-        float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
-        float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
-        auto magnifierLocalOffset = OffsetF(x, y);
+        auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
+        auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
         if (IsOverlayMode()) {
             GetLocalPointWithTransform(magnifierLocalOffset);
         }
@@ -493,7 +490,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         overlayManager->MarkInfoChange(DIRTY_COPY_ALL_ITEM);
     }
     if (pattern->GetMagnifierController()) {
-        pattern->GetMagnifierController()->UpdateShowMagnifier();
+        pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
     auto selectController = pattern->GetTextSelectController();
     if (!IsSingleHandle()) {

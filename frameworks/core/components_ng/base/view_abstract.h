@@ -510,6 +510,8 @@ public:
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
     static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
+    static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
+    static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);

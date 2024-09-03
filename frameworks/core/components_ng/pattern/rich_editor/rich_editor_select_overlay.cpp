@@ -131,7 +131,7 @@ void RichEditorSelectOverlay::CloseMagnifier()
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->magnifierController_->UpdateShowMagnifier();
+    pattern->magnifierController_->RemoveMagnifierFrameNode();
 }
 
 void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
@@ -157,14 +157,9 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
     pattern->SetMovingHandleOffset(movingHandleOffsetF);
 
-    auto contentRect = pattern->GetContentRect();
-    auto caretRect = pattern->GetCaretRect();
-    float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
+    float x = localOffset.GetX();
     float y = localOffset.GetY();
-    if (!isFirst) {
-        y = y + handleRect.Height() - caretRect.Height();
-    }
-    y = std::clamp(y, contentRect.Top(), contentRect.Bottom() - caretRect.Height());
+    y += handleRect.Height() / 2; // 2: Half the height of the handle
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
@@ -226,7 +221,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
-    pattern->magnifierController_->UpdateShowMagnifier();
+    pattern->magnifierController_->RemoveMagnifierFrameNode();
     if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
@@ -397,6 +392,7 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
+    isHandleMoving_ = false;
     if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
         pattern->ResetSelection();
     }

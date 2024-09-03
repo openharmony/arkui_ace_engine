@@ -3013,6 +3013,16 @@ void ViewAbstract::SetLinearGradientBlur(FrameNode *frameNode, const NG::LinearG
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradientBlur, blurPara, frameNode);
 }
 
+void ViewAbstract::SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Magnifier, magnifierOffset, frameNode);
+}
+
+void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Magnifier, frameNode);
+}
+
 void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
 {
     auto pipeline = frameNode->GetContext();
