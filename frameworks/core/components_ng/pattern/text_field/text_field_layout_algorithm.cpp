@@ -747,7 +747,6 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextFieldPattern>();
             CHECK_NULL_VOID(pattern);
