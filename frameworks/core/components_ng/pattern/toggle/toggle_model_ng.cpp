@@ -594,9 +594,13 @@ void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool is
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch update isOn %{public}d", isOn);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+    auto paintProperty = frameNode->GetPaintPropertyPtr<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasIsOn() && paintProperty->GetIsOn().value() != isOn) {
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch update isOn %{public}d", isOn);
+    }
+    paintProperty->UpdateIsOn(isOn);
 }
 
 void ToggleModelNG::UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
