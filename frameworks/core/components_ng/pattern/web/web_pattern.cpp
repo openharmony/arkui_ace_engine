@@ -3092,6 +3092,14 @@ void WebPattern::OnSelectHandleDone(const RectF& handleRect, bool isFirst)
     if (!IsQuickMenuShow()) {
         ChangeVisibilityOfQuickMenu();
     }
+    if (startSelectionHandle_ && endSelectionHandle_) {
+        auto offset = GetCoordinatePoint().value_or(OffsetF());
+        auto size = GetHostFrameSize().value_or(SizeF());
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnSelectHandleDone offset(%{public}f,%{public}f) size(%{public}f,%{public}f)"
+            "start(%{public}d,%{public}d) end(%{public}d,%{public}d)", offset.GetX(), offset.GetY(),
+            size.Width(), size.Height(), startSelectionHandle_->GetX(), startSelectionHandle_->GetY(),
+            endSelectionHandle_->GetX(), endSelectionHandle_->GetY());
+    }
 }
 
 void WebPattern::OnSelectHandleMove(const RectF& handleRect, bool isFirst)
