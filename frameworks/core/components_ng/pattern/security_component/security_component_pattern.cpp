@@ -454,7 +454,11 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto onAppear = [weak = WeakClaim(this)]() {
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    auto onAppear = [weak = WeakClaim(this), instanceId]() {
+        ContainerScope scope(instanceId);
 #ifdef SECURITY_COMPONENT_ENABLE
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
