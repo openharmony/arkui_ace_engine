@@ -122,4 +122,9 @@ void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
 {
     searchRequestStopTwinkling_ = false;
 }
+
+bool SearchTextFieldPattern::IsSearchTextField()
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
