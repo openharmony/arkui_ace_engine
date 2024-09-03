@@ -1015,9 +1015,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         } else {
             optionNode = OptionView::CreateMenuOption(
                 optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
-            auto optionPattern = optionNode->GetPattern<OptionPattern>();
-            CHECK_NULL_RETURN(optionPattern, nullptr);
-            optionPattern->SetBlockClick(params[i].disableSystemClick);
+            if (optionNode) {
+                auto optionPattern = optionNode->GetPattern<OptionPattern>();
+                optionPattern->SetBlockClick(params[i].disableSystemClick);
+            }
         }
         if (!optionNode) {
             continue;
