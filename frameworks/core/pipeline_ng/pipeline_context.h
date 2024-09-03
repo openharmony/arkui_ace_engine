@@ -233,6 +233,8 @@ public:
 
     void SetAppBgColor(const Color& color) override;
 
+    void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) override;
+
     void SetAppTitle(const std::string& title) override;
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;

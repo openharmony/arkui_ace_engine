@@ -94,7 +94,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus_));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -324,7 +324,7 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderColorProperty borderColor;
     borderColor.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
     renderContext->UpdateBorderColor(borderColor);
@@ -510,6 +510,29 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     LOGI("Set close button status %{public}s", isEnabled ? "enable" : "disable");
 }
 
+void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
+{
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    // update container modal background
+    auto renderContext = containerNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
+    activeColor_ = activeColor;
+    inactiveColor_ = inactiveColor;
+}
+
+Color ContainerModalPattern::GetContainerColor(bool isFocus)
+{
+
+    if (isFocus) {
+        return activeColor_;
+    } else {
+        return inactiveColor_;
+    }
+}
+
 void ContainerModalPattern::UpdateGestureRowVisible()
 {
     auto gestureRow = GetGestureRow();
@@ -672,9 +695,19 @@ void ContainerModalPattern::InitTitle()
 
 void ContainerModalPattern::Init()
 {
+    InitContainerColor();
     InitContainerEvent();
     InitTitle();
     InitLayoutProperty();
+}
+
+void ContainerModalPattern::InitContainerColor()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    activeColor_ = theme->GetBackGroundColor(true);
+    inactiveColor_ = theme->GetBackGroundColor(false);
 }
 
 void ContainerModalPattern::OnColorConfigurationUpdate()

@@ -334,6 +334,8 @@ public:
         appBgColor_ = color;
     }
 
+    virtual void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) {}
+
     virtual void ChangeDarkModeBrightness() {}
 
     void SetFormRenderingMode(int8_t renderMode)

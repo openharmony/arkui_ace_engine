@@ -60,6 +60,8 @@ protected:
 
     void UpdateLightIntensity();
 
+    Color GetContainerColor(bool isFocus);
+
 private:
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<RenderContext> closeBtnRenderContext_;

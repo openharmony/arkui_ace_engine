@@ -269,6 +269,8 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
+void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) {};
+
 void PipelineContext::ChangeDarkModeBrightness() {}
 
 void PipelineContext::SetAppTitle(const std::string& title) {}

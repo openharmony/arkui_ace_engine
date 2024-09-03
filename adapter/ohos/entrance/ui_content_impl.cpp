@@ -2076,6 +2076,25 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUISetAppBackgroundColor");
 }
 
+void UIContentImpl::SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "[%{public}s][%{public}s][%{public}d]: SetWindowContainerColor:"
+        "active color %{public}u, inactive color %{public}u",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, activeColor, inactiveColor);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, activeColor, inactiveColor]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetWindowContainerColor(Color(activeColor), Color(inactiveColor));
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetWindowContainerColor");
+}
+
 void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);

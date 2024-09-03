@@ -69,7 +69,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus_));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     // only floating window show border
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
@@ -210,7 +210,7 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
-    floatingContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
+    floatingContext->UpdateBackgroundColor(GetContainerColor(isFocus));
     // update floating custom title label
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
@@ -222,6 +222,11 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
     const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn)
 {
     ContainerModalPattern::ChangeTitleButtonIcon(buttonNode, icon, isFocus, isCloseBtn);
+}
+
+Color ContainerModalPatternEnhance::GetContainerColor(bool isFocus)
+{
+    return ContainerModalPattern::GetContainerColor(isFocus);
 }
 
 void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
