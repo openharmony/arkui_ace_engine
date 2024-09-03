@@ -52,16 +52,9 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TEXT,
     THEME_PATTERN_TEXTFIELD,
     THEME_PATTERN_TEXT_OVERLAY,
-    THEME_PATTERN_CONTAINER_MODAL
+    THEME_PATTERN_CONTAINER_MODAL,
 };
-
-// PRELOAD_LIST contain themes that should be preloaded asynchronously
-const char* PRELOAD_LIST[] = {
-    THEME_BLUR_STYLE_COMMON,
-    THEME_PATTERN_ICON
-};
-
-constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
+const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
 bool IsDirExist(const std::string& path)
 {
@@ -232,43 +225,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     theme->ParseContent();
     theme->patternAttrs_.clear();
 
-    PreloadTheme(themeId, theme);
     return theme;
-}
-
-void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme)
-{
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto manager = GetResourceManager();
-    CHECK_NULL_VOID(manager);
-    auto taskExecutor = GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-
-    // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
-        weak = WeakClaim(this)]() -> void {
-        auto themeStyle = resourceThemeStyle.Upgrade();
-        CHECK_NULL_VOID(themeStyle);
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
-            std::string patternName = PRELOAD_LIST[i];
-            themeStyle->checkThemeStyleVector.push_back(patternName);
-            auto style = adapter->GetPatternByName(patternName);
-            if (style) {
-                ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
-                themeStyle->SetAttr(patternName, value);
-            }
-        }
-
-        themeStyle->SetPromiseValue();
-    };
-
-    // isolation of loading card themes
-    if (!container->IsFormRender()) {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
-    }
 }
 
 RefPtr<TaskExecutor> ResourceAdapterImplV2::GetTaskExecutor()
