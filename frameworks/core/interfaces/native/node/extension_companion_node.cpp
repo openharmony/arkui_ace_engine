@@ -15,8 +15,6 @@
 
 #include "core/interfaces/native/node/extension_companion_node.h"
 
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/view_model.h"
 
 namespace {

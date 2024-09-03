@@ -233,6 +233,8 @@ public:
 
     void SetAppBgColor(const Color& color) override;
 
+    void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) override;
+
     void SetAppTitle(const std::string& title) override;
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
@@ -444,7 +446,7 @@ public:
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -569,14 +571,14 @@ public:
 
     void SetMouseStyleHoldNode(int32_t id)
     {
-        if (mouseStyleNodeId_ == -1) {
+        if (!mouseStyleNodeId_.has_value()) {
             mouseStyleNodeId_ = id;
         }
     }
     void FreeMouseStyleHoldNode(int32_t id)
     {
-        if (mouseStyleNodeId_ == id) {
-            mouseStyleNodeId_ = -1;
+        if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
+            mouseStyleNodeId_.reset();
         }
     }
 
@@ -1067,7 +1069,7 @@ private:
     WeakPtr<FrameNode> screenNode_;
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
-    int32_t mouseStyleNodeId_ = -1;
+    std::optional<int32_t> mouseStyleNodeId_;
     uint64_t resampleTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;

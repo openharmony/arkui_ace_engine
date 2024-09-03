@@ -22,9 +22,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/device_config.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -255,7 +252,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
         CHECK_NULL_VOID(adapter);
         for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
             std::string patternName = PRELOAD_LIST[i];
-            themeStyle->checkThemeStyleVector.push_back(patternName);
+            themeStyle->PushBackCheckThemeStyleVector(patternName);
             auto style = adapter->GetPatternByName(patternName);
             if (style) {
                 ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };

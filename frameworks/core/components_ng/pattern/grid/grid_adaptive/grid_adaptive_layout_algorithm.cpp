@@ -15,19 +15,6 @@
 
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 
-#include <algorithm>
-#include <cmath>
-#include <optional>
-#include <type_traits>
-
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
 
 void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

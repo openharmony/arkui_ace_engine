@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"

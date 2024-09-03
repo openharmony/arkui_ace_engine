@@ -15,14 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 
-
-#include <algorithm>
-#include <optional>
-
-#include "base/utils/utils.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 
@@ -156,8 +148,8 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     pattern->SetMovingHandleOffset(movingHandleOffsetF);
 
     float x = localOffset.GetX();
-    float y = localOffset.GetY();
-    y += handleRect.Height() / 2; // 2: Half the height of the handle
+    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
+    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
     auto magnifierLocalOffset = OffsetF(x, y);
     GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
     pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
@@ -217,8 +209,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
     pattern->FireOnSelect(selectStart, selectEnd);
     if (!IsSingleHandle()) {
-        pattern->SetCaretPosition(selectEnd);
-        pattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+        pattern->SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
@@ -330,10 +321,6 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
 void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
     TextSpanType selectType, TextResponseType responseType)
 {
-    auto manager = SelectContentOverlayManager::GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    CHECK_NULL_VOID(manager->IsOpen());
-
     auto pattern = GetPattern<RichEditorPattern>();
     auto menuParams = pattern ? pattern->GetMenuParams(selectType, responseType) : nullptr;
     std::pair<TextSpanType, TextResponseType> selectResponseComb = { selectType, responseType };
@@ -472,7 +459,22 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     if (IsAncestorNodeGeometryChange(flag)) {
         UpdateAllHandlesOffset();
     }
-    BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    FrameNodeChangeInfoFlag changeFlag = flag;
+    if (IsAncestorNodeStartScroll(host->GetChangeInfoFlag()) || IsAncestorNodeEndScroll(host->GetChangeInfoFlag())) {
+        auto parent = host->GetAncestorNodeOfFrame(true);
+        changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
+        while (parent) {
+            if (parent->GetChangeInfoFlag() != FRAME_NODE_CHANGE_INFO_NONE) {
+                changeFlag = changeFlag | parent->GetChangeInfoFlag();
+            }
+            parent = parent->GetAncestorNodeOfFrame(true);
+        }
+    }
+    BaseTextSelectOverlay::OnAncestorNodeChanged(changeFlag);
 }
 
 void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)

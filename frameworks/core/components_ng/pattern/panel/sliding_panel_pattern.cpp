@@ -15,27 +15,8 @@
 
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/animation/friction_motion.h"
 #include "core/animation/spring_animation.h"
 #include "core/components/close_icon/close_icon_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

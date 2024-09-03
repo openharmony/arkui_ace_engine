@@ -16,14 +16,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 #include <cstdint>
-#include <iterator>
-#include <utility>
 
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {

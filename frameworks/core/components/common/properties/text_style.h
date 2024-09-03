@@ -369,20 +369,10 @@ public:
     }
     const Color GetTextColor() const
     {
-        return textColor_.ToColor();
-    }
-
-    const DynamicColor GetDynamicTextColor() const
-    {
         return textColor_;
     }
 
     void SetTextColor(const Color& textColor)
-    {
-        textColor_ = textColor;
-    }
-
-    void SetTextColor(const DynamicColor& textColor)
     {
         textColor_ = textColor;
     }
@@ -409,15 +399,10 @@ public:
 
     const Color GetTextDecorationColor() const
     {
-        return textDecorationColor_.ToColor();
-    }
-
-    const DynamicColor GetDynamicTextDecorationColor() const
-    {
         return textDecorationColor_;
     }
 
-    void SetTextDecorationColor(const DynamicColor& textDecorationColor)
+    void SetTextDecorationColor(const Color& textDecorationColor)
     {
         textDecorationColor_ = textDecorationColor;
     }
@@ -811,8 +796,8 @@ private:
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
     LineBreakStrategy lineBreakStrategy_ { LineBreakStrategy::GREEDY };
-    DynamicColor textColor_ { Color::BLACK };
-    DynamicColor textDecorationColor_ { Color::BLACK };
+    Color textColor_ { Color::BLACK };
+    Color textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;
     int32_t variableFontWeight_ = 0;
     bool hasHeightOverride_ = false;

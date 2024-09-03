@@ -77,10 +77,13 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     if (info_->menuInfo.menuBuilder) {
         auto customMenuLayoutWrapper = layoutWrapper->GetChildByIndex(0);
         CHECK_NULL_VOID(customMenuLayoutWrapper);
-        auto customMenuLayoutConstraint = layoutConstraint;
-        CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
-        customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
-        isMouseCustomMenu = true;
+        auto customNode = customMenuLayoutWrapper->GetHostNode();
+        if (customNode && customNode->GetTag() != "SelectMenu") {
+            auto customMenuLayoutConstraint = layoutConstraint;
+            CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
+            customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
+            isMouseCustomMenu = true;
+        }
     }
     auto childIndex = -1;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -350,12 +353,19 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         }
     };
     adjustPositionXWithViewPort(menuPosition);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         if (IsTextAreaSelectAll()) {
             menuPosition.SetY(singleHandle.Top());
         } else {
-            menuPosition.SetY(
-                static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+            bool isChangeToBottom = !info_->isSingleHandle;
+            isChangeToBottom = isChangeToBottom || (safeAreaManager &&
+                IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText) &&
+                safeAreaManager->GetSystemSafeArea().top_.Length() > singleHandle.Top());
+            if (isChangeToBottom) {
+                menuPosition.SetY(
+                    static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+            }
         }
     }
     auto spaceBetweenViewPort = menuSpacingBetweenText + menuSpacingBetweenHandle;
@@ -371,8 +381,8 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         menuPosition.SetY(viewPort.GetY() + viewPort.Height() + spaceBetweenViewPort);
     }
 
-    auto safeAreaManager = pipeline->GetSafeAreaManager();
-    if (safeAreaManager) {
+    if (safeAreaManager && !(info_->isSingleHandle &&
+        IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText))) {
         // ignore status bar
         auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
         if (menuPosition.GetY() < top) {
@@ -433,9 +443,8 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     LayoutWrapper* layoutWrapper, const RectF& menuRect, double spaceBetweenText, double spaceBetweenHandle)
 {
     auto menuOffset = menuRect.GetOffset();
-    if (!info_->firstHandle.isShow && !info_->secondHandle.isShow) {
-        return menuOffset;
-    }
+    CHECK_NULL_RETURN((info_->firstHandle.isShow || info_->secondHandle.isShow),
+        AdjustSelectMenuOffsetWhenHandlesUnshown(menuRect, spaceBetweenText));
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
@@ -465,15 +474,71 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
+        auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
         if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
-            auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
             if (topArea > offsetY) {
                 offsetY = downPaint.Bottom() - spaceBetweenText - menuRect.Height();
             }
             menuOffset.SetY(offsetY);
+        } else {
+            if (topArea > menuOffset.GetY() && info_->isSingleHandle) {
+                menuOffset.SetY(downPaint.Bottom() + spaceBetweenText + spaceBetweenHandle);
+            }
+            AdjustMenuOffsetAtSingleHandleBottom(downPaint, menuRect, menuOffset, spaceBetweenText);
         }
     }
     return menuOffset;
+}
+
+void SelectOverlayLayoutAlgorithm::AdjustMenuOffsetAtSingleHandleBottom(const RectF handleRect, const RectF& menuRect,
+    OffsetF& menuOffset, double spaceBetweenText)
+{
+    CHECK_NULL_VOID(info_->isSingleHandle);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto shouldAvoidKeyboard =
+        GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
+    if (shouldAvoidKeyboard) {
+        menuOffset.SetY(handleRect.Bottom() - spaceBetweenText - menuRect.Height());
+    }
+}
+
+OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffsetWhenHandlesUnshown(const RectF& menuRect,
+    double spaceBetweenText)
+{
+    auto menuOffset = menuRect.GetOffset();
+    CHECK_NULL_RETURN(info_->isSingleHandle, menuOffset);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, menuOffset);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, menuOffset);
+    auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto selectArea = info_->selectArea;
+    if (topArea > menuOffset.GetY()) {
+        menuOffset.SetY((selectArea.Top() + selectArea.Bottom() - menuRect.Height()) / 2.0f);
+        return menuOffset;
+    }
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto shouldAvoidKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
+        GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
+    auto isBottomTouchKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
+        GreatNotEqual(selectArea.Bottom(), keyboardInsert.start);
+    if (!isBottomTouchKeyboard && shouldAvoidKeyboard) {
+        menuOffset.SetY(selectArea.Bottom() - spaceBetweenText - menuRect.Height());
+        return menuOffset;
+    }
+    if (shouldAvoidKeyboard) {
+        menuOffset.SetY((selectArea.Top() + selectArea.Bottom() - menuRect.Height()) / 2.0f);
+    }
+    return menuOffset;
+}
+
+bool SelectOverlayLayoutAlgorithm::IsMenuAreaSmallerHandleArea(RectF handleRect, float menuHeight, float menuDistance)
+{
+    return handleRect.Height() > menuHeight + menuDistance;
 }
 
 void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect)

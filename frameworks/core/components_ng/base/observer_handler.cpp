@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -111,6 +110,7 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
+    CHECK_NULL_VOID(Container::Current());
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),

@@ -16,11 +16,7 @@
 #include "core/components_v2/inspector/pattern_lock_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/components_v2/pattern_lock/pattern_lock_component.h"
-#include "core/components_v2/pattern_lock/render_pattern_lock.h"
-
 namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const PatternLockComposedElement&)>> CREATE_JSON_MAP {

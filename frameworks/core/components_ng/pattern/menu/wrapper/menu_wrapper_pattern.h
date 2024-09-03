@@ -419,6 +419,28 @@ public:
     bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
+    void StopHoverImageToPreviewAnimation();
+
+    void SetHoverImageToPreviewScale(float scale)
+    {
+        hoverImageToPreviewScale_ = scale;
+    }
+
+    float GetHoverImageToPreviewScale() const
+    {
+        return hoverImageToPreviewScale_;
+    }
+
+    void SetHoverImageToPreviewRate(float rate)
+    {
+        hoverImageToPreviewRate_ = rate;
+    }
+
+    float GetHoverImageToPreviewRate() const
+    {
+        return hoverImageToPreviewRate_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -473,6 +495,8 @@ private:
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
+    float hoverImageToPreviewRate_ = -1.0;
+    float hoverImageToPreviewScale_ = -1.0;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

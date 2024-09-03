@@ -15,17 +15,6 @@
 
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 
-#include <iterator>
-#include <vector>
-
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
-#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

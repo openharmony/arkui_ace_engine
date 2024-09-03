@@ -16,13 +16,8 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 #include "base/i18n/localization.h"
-#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)

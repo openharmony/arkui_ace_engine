@@ -17,7 +17,6 @@
 
 #include <regex>
 #include <set>
-#include <string>
 
 namespace OHOS::Ace {
 namespace {
@@ -227,8 +226,7 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
 
 void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
 {
-    auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
-    if (it == checkThemeStyleVector.end()) {
+    if (!CheckThemeStyle(patternName)) {
         return;
     }
     if (future_.valid()) {

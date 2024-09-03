@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 
 namespace OHOS::Ace::NG {
 void ImageUtils::PostTask(

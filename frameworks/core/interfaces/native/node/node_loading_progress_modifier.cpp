@@ -15,11 +15,8 @@
 #include "node_loading_progress_modifier.h"
 
 #include "base/error/error_code.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/progress/progress_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {

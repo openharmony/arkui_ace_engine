@@ -14,10 +14,6 @@
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
-#include "base/geometry/axis.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE };

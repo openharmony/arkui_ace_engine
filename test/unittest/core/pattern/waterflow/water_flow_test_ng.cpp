@@ -51,6 +51,8 @@ void WaterFlowTestNg::SetUpTestSuite()
 #ifndef TEST_SEGMENTED_WATER_FLOW
     g_segmentedWaterflow = false;
 #endif
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
@@ -843,6 +845,36 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest013, TestSize.Level1)
         IsEqual(pattern_->GetItemRect(1), Rect(WATER_FLOW_WIDTH / 2, 0, WATER_FLOW_WIDTH / 2, BIG_ITEM_MAIN_SIZE)));
 }
 
+/**
+ * @tc.name: WaterFlowTest014
+ * @tc.desc: Test direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow with the RTL direction.
+     * @tc.expected: layout from right to left.
+     */
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetLayoutDirection(TextDirection::RTL);
+    ViewAbstract::SetWidth(CalcLength(620));
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    model.SetColumnsGap(Dimension(10));
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+}
+
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_005 = 400.f;
 constexpr float OFFSET_TIME_005 = 100.f;
@@ -1094,17 +1126,6 @@ HWTEST_F(WaterFlowTestNg, PositionController007, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. test function.
-     * @tc.expected: function ScrollPage is called.
-     */
-    pattern_->SetAxis(Axis::VERTICAL);
-    controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
-    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
-    EXPECT_TRUE(controller->IsAtEnd());
 }
 
 namespace {
@@ -1187,19 +1208,6 @@ HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. Scroll forward and scroll backward
-     * @tc.expected: Will trigger ScrollPage func
-     */
-    accessibilityProperty_->ActActionScrollForward();
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    accessibilityProperty_->ActActionScrollBackward();
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
 namespace {
@@ -1443,6 +1451,25 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
+}
+
+/**
+ * @tc.name: ScrollPage001
+ * @tc.desc: Test ScrollPage func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
+    CreateDone();
+    auto controller = pattern_->positionController_;
+    controller->ScrollPage(false, false);
+    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
+    EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
+    EXPECT_TRUE(controller->IsAtEnd());
 }
 
 /**

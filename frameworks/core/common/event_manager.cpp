@@ -363,8 +363,10 @@ void EventManager::TouchTest(
         TouchEvent touchEvent;
         FalsifyCancelEventAndDispatch(touchEvent);
         refereeNG_->CleanAll(true);
-        touchTestResults_.clear();
-        axisTouchTestResults_.clear();
+        if (event.sourceTool != lastSourceTool_) {
+            touchTestResults_.clear();
+            axisTouchTestResults_.clear();
+        }
     }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
@@ -717,6 +719,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     lastEventTime_ = point.time;
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
+    lastSourceTool_ = event.sourceTool;
     return true;
 }
 
@@ -894,6 +897,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
     }
     lastEventTime_ = event.time;
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
+    lastSourceTool_ = event.sourceTool;
     return true;
 }
 

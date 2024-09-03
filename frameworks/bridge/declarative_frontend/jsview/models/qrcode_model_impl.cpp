@@ -15,7 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
 
-#include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/qrcode/qrcode_component.h"
 

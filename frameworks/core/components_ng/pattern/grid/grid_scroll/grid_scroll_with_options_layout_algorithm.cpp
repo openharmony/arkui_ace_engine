@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 void UpdateGridItemRowAndColumnInfo(const RefPtr<LayoutWrapper>& itemLayoutWrapper, GridItemIndexInfo irregualItemInfo)

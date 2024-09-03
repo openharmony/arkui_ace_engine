@@ -17,18 +17,12 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
-#include <optional>
-#include <string>
 
-#include "base/geometry/dimension.h"
-#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
@@ -264,9 +258,15 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         RecordEvent(buttonIdx);
     }
     if (dialogProperties_.isShowInSubWindow) {
-        SubwindowManager::GetInstance()->DeleteHotAreas(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId(), host->GetId());
-        SubwindowManager::GetInstance()->HideDialogSubWindow(SubwindowManager::GetInstance()->GetDialogSubWindowId());
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto currentId = Container::CurrentId();
+        if (!container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
+        }
+
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
     overlayManager->CloseDialog(host);
 }

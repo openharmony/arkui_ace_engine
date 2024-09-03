@@ -21,13 +21,7 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-#include "frameworks/base/geometry/calc_dimension.h"
-#include "frameworks/base/geometry/dimension.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
 namespace OHOS::Ace::NG {

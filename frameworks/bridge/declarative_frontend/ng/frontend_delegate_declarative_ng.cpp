@@ -15,23 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 
-#include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/event_report.h"
-#include "base/resource/ace_res_config.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/thread/background_task_executor.h"
-#include "base/utils/measure_util.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/common/thread_checker.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/common/ace_engine.h"
 
 namespace OHOS::Ace::Framework {

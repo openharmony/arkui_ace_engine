@@ -15,13 +15,9 @@
 
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/marquee/marquee_paint_property.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t TEXT_MAX_LINES = 1;
@@ -96,6 +92,7 @@ void MarqueeModelNG::SetDirection(const std::optional<MarqueeDirection>& directi
 void MarqueeModelNG::SetAllowScale(const std::optional<bool>& allowScale)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale.value_or(true));
     CHECK_NULL_VOID(textChild);

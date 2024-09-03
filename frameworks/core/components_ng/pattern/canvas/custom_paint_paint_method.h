@@ -210,6 +210,14 @@ public:
         state_.strokeState.SetTextAlign(align);
     }
 
+    void SetDefaultTextAlign()
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            // The default value of TextAlign is TextAlign::START.
+            SetTextAlign(TextAlign::START);
+        }
+    }
+
     void SetTextBaseline(TextBaseline baseline)
     {
         state_.fillState.SetTextBaseline(baseline);

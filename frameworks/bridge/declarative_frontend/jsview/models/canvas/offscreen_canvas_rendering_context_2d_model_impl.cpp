@@ -15,14 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.h"
 
-#include <type_traits>
-
-#include "base/image/pixel_map.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/paint_state.h"
 #include "core/components/custom_paint/custom_paint_component.h"
-#include "core/components/custom_paint/offscreen_canvas.h"
-#include "core/pipeline/pipeline_context.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"

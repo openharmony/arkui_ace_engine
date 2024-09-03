@@ -14,15 +14,9 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
-#include <algorithm>
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/render/drawing.h"
 

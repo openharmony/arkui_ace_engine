@@ -14,7 +14,6 @@
  */
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 
-#include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
@@ -29,12 +28,6 @@
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -94,8 +87,6 @@ void BubblePattern::OnModifyDone()
     UpdateAgingTextSize();
     Pattern::OnModifyDone();
     InitTouchEvent();
-    RegisterButtonOnHover();
-    RegisterButtonOnTouch();
 }
 
 void BubblePattern::AddPipelineCallBack()

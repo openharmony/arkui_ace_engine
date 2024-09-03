@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/list/list_item_theme.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -177,11 +175,12 @@ float ListItemGroupPattern::GetPaddingAndMargin() const
     return offsetBeforeContent + offsetAfterContent;
 }
 
-float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const
+float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<float, float>& targetPos,
+    float headerMainSize, float footerMainSize) const
 {
     if (layoutedItemInfo_.has_value() && layoutedItemInfo_.value().startIndex > 0) {
         float averageHeight = 0.0f;
-        float estimateHeight = GetEstimateHeight(averageHeight);
+        float estimateHeight = GetEstimateHeight(averageHeight, headerMainSize, footerMainSize);
         if (layoutedItemInfo_.value().endIndex >= itemTotalCount_ - 1) {
             return height + estimateHeight - targetPos.second;
         } else {
@@ -191,7 +190,8 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
     return height - targetPos.first;
 }
 
-float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
+float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
+    float headerMainSize, float footerMainSize) const
 {
     auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
@@ -212,9 +212,18 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
             return headerMainSize_ + footerMainSize_ + paddingAndMargin;
         }
     }
+    float totalHeight = 0.0f;
     auto host = GetHost();
     auto totalItem = host->GetTotalChildCount();
-    return averageHeight * totalItem + paddingAndMargin;
+    if (header_.Upgrade()) {
+        totalItem -= 1;
+        totalHeight += headerMainSize;
+    }
+    if (footer_.Upgrade()) {
+        totalItem -= 1;
+        totalHeight += footerMainSize;
+    }
+    return totalHeight + averageHeight * totalItem + paddingAndMargin;
 }
 
 void ListItemGroupPattern::CheckListDirectionInCardStyle()

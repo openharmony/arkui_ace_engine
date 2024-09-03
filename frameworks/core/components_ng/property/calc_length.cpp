@@ -16,7 +16,6 @@
 #include "core/components_ng/property/calc_length.h"
 
 #include "base/utils/string_expression.h"
-#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {

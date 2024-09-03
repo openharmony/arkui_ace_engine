@@ -15,14 +15,7 @@
 
 #include "core/components_ng/syntax/if_else_node.h"
 
-#include <list>
-#include <type_traits>
-
-#include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 

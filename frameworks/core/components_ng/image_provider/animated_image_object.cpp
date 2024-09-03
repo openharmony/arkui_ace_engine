@@ -32,9 +32,9 @@ void AnimatedImageObject::MakeCanvasImage(
         .imageQuality = ctx->GetImageQuality() };
 
 #ifndef USE_ROSEN_DRAWING
-    auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), params, src_.GetSrc());
+    auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), params, src_.GetKey());
 #else
-    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), params, src_.GetSrc());
+    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), params, src_.GetKey());
 #endif
     CHECK_NULL_VOID(ctx);
     if (!image) {

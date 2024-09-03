@@ -15,13 +15,9 @@
 
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
 
-#include "napi_remote_object.h"
-
 #include "ability.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
-#include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {

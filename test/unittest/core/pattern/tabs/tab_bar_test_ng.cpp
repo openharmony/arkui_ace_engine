@@ -1183,6 +1183,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
     indicator.width.SetValue(1.0);
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
+    EXPECT_EQ(indicator.width.Value(), 0);
+    auto targetPaintRect = tabBarLayoutProperty_->GetIndicatorRect(tabBarPattern_->indicator_);
+    tabBarPaintProperty_->UpdateIndicator(targetPaintRect);
+    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(indicator.width.Value(), 10);
     tabBarPattern_->isTouchingSwiper_ = false;
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);

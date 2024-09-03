@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/image/pixel_map.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

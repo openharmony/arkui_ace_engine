@@ -15,7 +15,6 @@
 
 #include "core/components_ng/svg/svg_context.h"
 
-#include "core/common/thread_checker.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -55,7 +54,6 @@ const AttrMap& SvgContext::GetAttrMap(const std::string& key) const
 
 void SvgContext::AddAnimator(int32_t key, const RefPtr<Animator>& animator)
 {
-    ++animatorSumCnt_;
     animators_[key] = animator;
 }
 
@@ -82,15 +80,37 @@ void SvgContext::ControlAnimators(bool play)
     }
 }
 
+void SvgContext::SetOnAnimationFinished(const std::function<void()>& onFinishCallback)
+{
+    onFinishCallbacks_.emplace_back(std::move(onFinishCallback));
+}
+
+void SvgContext::OnAnimationFinished()
+{
+    bool allDone = true;
+    for (auto it = animators_.begin(); it != animators_.end();) {
+        auto animator = it->second.Upgrade();
+        if (!animator) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "null animator in map");
+            continue;
+        }
+        ++it;
+        if (!animator->IsStopped()) {
+            allDone = false;
+            break;
+        }
+    }
+    if (allDone) {
+        for (const auto& callback : onFinishCallbacks_) {
+            callback();
+        }
+    }
+}
+
 void SvgContext::SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
 {
     CHECK_NULL_VOID(funcAnimateFlush);
     animateCallbacks_[imagePtr] = funcAnimateFlush;
-}
-
-size_t SvgContext::GetAnimatorCount()
-{
-    return animators_.size();
 }
 
 void SvgContext::AnimateFlush()

@@ -16,10 +16,8 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void RichEditorModelNG::Create(bool isStyledStringMode)
@@ -337,7 +335,7 @@ void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
     richEditorPattern->SetTextDetectEnable(value);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(const DynamicColor& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -346,14 +344,14 @@ void RichEditorModelNG::SetSelectedBackgroundColor(const DynamicColor& selectedC
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const DynamicColor& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetCaretColor(const DynamicColor& color)
+void RichEditorModelNG::SetCaretColor(const Color& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -362,7 +360,7 @@ void RichEditorModelNG::SetCaretColor(const DynamicColor& color)
     pattern->SetCaretColor(color);
 }
 
-void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const DynamicColor& color)
+void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -530,4 +528,20 @@ void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCr
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
+
+void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const MenuParam& menuParam)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
+
+void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
+    std::function<void()>& buildFunc, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
 } // namespace OHOS::Ace::NG

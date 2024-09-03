@@ -16,10 +16,7 @@
 
 #include "interfaces/native/node/list_option.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 

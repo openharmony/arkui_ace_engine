@@ -17,8 +17,6 @@
 
 #include "dm/display_manager.h"
 
-#include "core/components_ng/render/adapter/rosen_window.h"
-
 namespace OHOS::Ace {
 RefPtr<FoldableWindow> FoldableWindow::CreateFoldableWindow(int32_t instanceId)
 {

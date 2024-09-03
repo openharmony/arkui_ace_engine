@@ -15,8 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 
-#include "base/geometry/rect.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -32,10 +31,20 @@ void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, c
 {
     auto patternUnits = patternAttr_.patternUnits;
 
-    auto scaleX = viewPort.Width() / patternAttr_.width.ConvertToPx();
-    auto scaleY = viewPort.Height() / patternAttr_.height.ConvertToPx();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto scaleX = viewPort.Width() / patternAttr_.width.ConvertToPx();
+        auto scaleY = viewPort.Height() / patternAttr_.height.ConvertToPx();
+        canvas.Save();
+        canvas.Scale(scaleX, scaleY);
+        return;
+    }
     canvas.Save();
-    canvas.Scale(scaleX, scaleY);
+    auto actualWdith = boundingBoxRect_.Width() * patternAttr_.width.Value();
+    auto actualHeight = boundingBoxRect_.Height() * patternAttr_.height.Value();
+    auto actualX = boundingBoxRect_.Width() * patternAttr_.x.Value();
+    auto actualY = boundingBoxRect_.Height() * patternAttr_.y.Value();
+    RSRect clipRect(actualX, actualY, actualX + actualWdith, actualY + actualHeight);
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT, true);
 }
 
 void SvgPattern::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)

@@ -71,4 +71,8 @@ void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t
 void EventReport::ReportHoverStatusChange(
     int32_t foldStatus, int32_t time, bool isHoverMode, int32_t appRotation, int32_t windowMode)
 {}
+
+void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
+    const std::string& abilityName, const std::string& moduleName, int32_t dimension)
+{}
 } // namespace OHOS::Ace

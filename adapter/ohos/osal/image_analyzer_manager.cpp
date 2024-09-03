@@ -15,19 +15,10 @@
 
 #include "core/common/ai/image_analyzer_manager.h"
 
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "js_native_api_types.h"
-
-#include "base/geometry/offset.h"
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_mgr.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
 

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/model/model_pattern.h"
 
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

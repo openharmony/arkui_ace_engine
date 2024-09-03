@@ -14,20 +14,9 @@
  */
 #include "core/interfaces/native/node/search_modifier.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
-#include "core/components_ng/pattern/search/search_node.h"
-#include "core/components/common/layout/constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -822,7 +811,15 @@ void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallb
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
     }
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
+        SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
+        SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
+    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
+        SearchModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+    } else {
+        SearchModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+    }
 }
 
 void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)

@@ -50,10 +50,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/menu_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #endif
@@ -142,22 +138,12 @@ float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
 }
 
 #ifdef OHOS_PLATFORM
-RefPtr<FrameNode> CreatePasteButton(int32_t descriptionId)
-{
-    auto buttonType = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        buttonType = ButtonType::ROUNDED_RECTANGLE;
-    }
-    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(buttonType), true);
-    return pasteButton;
-}
-
 RefPtr<FrameNode> BuildPasteButton(
     const std::function<void()>& callback, int32_t overlayId, float& buttonWidth, bool isSelectAll = false)
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
-    auto pasteButton = CreatePasteButton(descriptionId);
+    auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE), true);
     CHECK_NULL_RETURN(pasteButton, nullptr);
 
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -668,6 +654,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
         };
         params.emplace_back(GetItemContent(item.id, item.content.value_or("")), "", callback);
         params.back().enabled = IsSystemMenuItemEnabled(info, item.id);
+        params.back().disableSystemClick = true;
         itemNum++;
     }
     return params;
@@ -1441,6 +1428,11 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        auto curWindowRect = pipeline->GetCurrentWindowRect();
+        selectOverlayMaxWidth = std::min(selectOverlayMaxWidth, curWindowRect.Width());
+    }
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 

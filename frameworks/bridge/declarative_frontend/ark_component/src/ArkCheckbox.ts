@@ -22,6 +22,17 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, CheckboxOptionsModifier.identity, CheckboxOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CheckboxOptionsModifier.identity, CheckboxOptionsModifier, undefined);
+    }
+    return this;
+  }
   shape(value: CheckBoxShape): this {
     modifierWithKey(this._modifiersWithKeys, CheckBoxShapeModifier.identity, CheckBoxShapeModifier, value);
     return this;
@@ -117,6 +128,25 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   }
   onChange(callback: (value: boolean) => void): this {
     throw new Error('Method not implemented.');
+  }
+}
+
+class CheckboxOptionsModifier extends ModifierWithKey<CheckboxOptions> {
+  constructor(value: CheckboxOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('checkBoxOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkbox.setCheckboxOptions(node, undefined, undefined);
+    } else {
+      getUINativeModule().checkbox.setCheckboxOptions(node, this.value.name, this.value.group);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.name, this.value.name) ||
+      !isBaseOrResourceEqual(this.stageValue.group, this.value.group);
   }
 }
 

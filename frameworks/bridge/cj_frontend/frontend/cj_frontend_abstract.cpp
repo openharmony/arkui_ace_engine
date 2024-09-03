@@ -17,15 +17,9 @@
 
 #include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/measure_util.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "bridge/common/accessibility/accessibility_node_manager.h"
-#include "core/components/page/page_target.h"
-#include "core/components/navigator/navigator_component.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/font_manager.h"
 

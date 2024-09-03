@@ -16,19 +16,14 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -408,13 +403,6 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
-void TextModelNG::SetDraggable(bool draggable)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetDraggable(draggable);
-}
-
 void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
@@ -502,12 +490,6 @@ void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value, frameNode);
-}
-
-void TextModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetDraggable(draggable);
 }
 
 void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)

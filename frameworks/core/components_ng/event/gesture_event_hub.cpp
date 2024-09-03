@@ -15,12 +15,6 @@
 
 #include "core/components_ng/event/gesture_event_hub.h"
 
-#include <cstdint>
-#include <list>
-#include <memory>
-#include <string>
-#include "drag_event.h"
-
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -37,20 +31,11 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
-#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
-#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
-#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
-#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/gestures/gesture_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"
@@ -268,6 +253,10 @@ void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>
         externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
         externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
         externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
+        current = externalParallelRecognizer_[parallelIndex];
+        parallelIndex++;
+    } else if (static_cast<int32_t>(externalParallelRecognizer_.size()) > parallelIndex) {
+        externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
         current = externalParallelRecognizer_[parallelIndex];
         parallelIndex++;
     } else if (recognizers.size() == 1) {
@@ -668,7 +657,11 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
         TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
         preScaledPixelMap = defaultPixelMap;
     }
-    preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    if (!NearEqual(targetScale, 1.0f)) {
+        preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    }
+#else
+    preScaledPixelMap = defaultPixelMap;
 #endif
     return preScaledPixelMap;
 }
@@ -972,10 +965,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         recordsSize = badgeNumber.value();
     }
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
-    float defaultPixelMapScale =
-        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    auto windowScale = dragDropManager->GetWindowScale();
-    float scale = windowScale * defaultPixelMapScale;
     auto dragNodePipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(dragNodePipeline);
     auto overlayManager = dragNodePipeline->GetOverlayManager();
@@ -998,6 +987,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
+    float defaultPixelMapScale =
+        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
+    // use menuPreviewScale only for 1.0f menu scale.
+    if (isMenuShow && NearEqual(menuPreviewScale_, 1.0f)) {
+        defaultPixelMapScale = menuPreviewScale_;
+    }
+    auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * defaultPixelMapScale;
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -1070,6 +1067,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
     dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
     dragPreviewPixelMap_ = nullptr;
+    CHECK_NULL_VOID(pixelMapDuplicated);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
@@ -1111,6 +1109,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             SubwindowManager::GetInstance()->HidePreviewNG();
             overlayManager->RemovePixelMap();
         }
+        DragNotifyMsg notifyMessage;
+        notifyMessage.isInnerAndOuterTriggerBothNeeded = false;
+        auto dragCallBack = GetDragCallback(pipeline, eventHub);
+        CHECK_NULL_VOID(dragCallBack);
+        dragCallBack(notifyMessage);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
@@ -1125,7 +1128,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             DragEventActuator::UpdatePreviewPositionAndScale(
                 textNode, textNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
         }
-        DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
+        DragEventActuator::MountPixelMap(
+            subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode, true);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
         dragDropManager->DoDragStartAnimation(
@@ -1605,7 +1609,9 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
-                eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+                if (notifyMessage.isInnerAndOuterTriggerBothNeeded) {
+                    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+                }
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
@@ -2055,5 +2061,17 @@ bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
         return frameNode->IsDraggable() && eventHub->HasOnDragStart();
     }
     return gestureEventHub->IsAllowedDrag(eventHub);
+}
+
+void GestureEventHub::SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode)
+{
+    if (setIsShow) {
+        bindMenuStatus_.isBindCustomMenu = true;
+        bindMenuStatus_.isShow = isShow;
+        bindMenuStatus_.isShowPreviewMode = previewMode;
+    } else {
+        bindMenuStatus_.isBindLongPressMenu = true;
+        bindMenuStatus_.longPressPreviewMode = previewMode;
+    }
 }
 } // namespace OHOS::Ace::NG

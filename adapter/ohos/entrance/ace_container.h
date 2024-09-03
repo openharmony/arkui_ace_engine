@@ -41,6 +41,7 @@
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/common/render_boundary_manager.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
@@ -665,6 +666,9 @@ public:
     {
         return registerComponents_;
     }
+    void RenderLayoutBoundary(bool isDebugBoundary);
+    void AddWatchSystemParameter();
+    void RemoveWatchSystemParameter();
 
 private:
     virtual bool MaybeRelease() override;
@@ -759,6 +763,7 @@ private:
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
 };
 
 } // namespace OHOS::Ace::Platform

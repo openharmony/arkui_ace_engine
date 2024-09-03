@@ -563,6 +563,12 @@ public:
     void SetParentFocusable(bool parentFocusable);
 
     void SetFocusable(bool focusable, bool isExplicit = true);
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
     void SetShow(bool show);
     void SetEnabled(bool enabled);
 
@@ -1034,6 +1040,8 @@ public:
     bool FocusToHeadOrTailChild(bool isHead);
 
     WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
+
+    bool IsNeedPaintFocusStateSelf();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);

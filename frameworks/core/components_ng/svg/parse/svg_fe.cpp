@@ -15,12 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
-#include "include/core/SkColorFilter.h"
-#include "include/effects/SkColorMatrix.h"
-#include "include/effects/SkImageFilters.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
-
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

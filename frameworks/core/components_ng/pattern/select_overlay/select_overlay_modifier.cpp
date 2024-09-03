@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 
-#include <vector>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {

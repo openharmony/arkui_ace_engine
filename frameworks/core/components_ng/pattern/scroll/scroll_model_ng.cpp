@@ -15,17 +15,8 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
-#include "base/geometry/axis.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

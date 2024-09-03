@@ -86,6 +86,8 @@ public:
         CHECK_NULL_VOID(node);
         node->UpdateInspectorId(id);
     }
+
+    static float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth);
     
 private:
     static RefPtr<FrameNode> CreatePopupDialogNode(

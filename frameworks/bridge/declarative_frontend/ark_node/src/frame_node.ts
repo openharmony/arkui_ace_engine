@@ -839,6 +839,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkTextAreaComponent(node, type);
       })
     }],
+    ['Checkbox', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
+        return new ArkCheckboxComponent(node, type);
+      })
+    }],
+    ['CheckboxGroup', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
+        return new ArkCheckboxGroupComponent(node, type);
+      })
+    }],
   ]
 )
 

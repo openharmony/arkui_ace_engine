@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
-#include "sheet_presentation_property.h"
-
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -141,6 +139,7 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
                AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetTopSafeArea = 0.0f;
     }
+    // before API13，ignore safeArea height when in landscape
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, 0.0f);

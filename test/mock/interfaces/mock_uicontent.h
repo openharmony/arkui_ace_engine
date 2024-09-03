@@ -63,10 +63,11 @@ public:
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
     MOCK_METHOD2(UpdateDecorVisible, void(bool visible, bool hasDeco));
-    MOCK_METHOD3(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize));
+    MOCK_METHOD4(HideWindowTitleButton, void(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose));
     MOCK_METHOD1(SetIgnoreViewSafeArea, void(bool ignoreViewSafeArea));
     MOCK_METHOD0(GetBackgroundColor, uint32_t());
     MOCK_METHOD1(SetBackgroundColor, void(uint32_t color));
+    MOCK_METHOD2(SetWindowContainerColor, void(uint32_t activeColor, uint32_t inactiveColor));
     MOCK_METHOD2(DumpInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
     MOCK_METHOD1(SetNextFrameLayoutCallback, void(std::function<void()>&& callback));
     MOCK_METHOD1(NotifyMemoryLevel, void(int32_t level));

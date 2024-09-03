@@ -17,8 +17,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
 namespace OHOS::Ace::NG {

@@ -15,18 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
-#include "core/components_ng/pattern/toggle/switch_modifier.h"
-#include "core/components_ng/pattern/toggle/switch_paint_property.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/paint_property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

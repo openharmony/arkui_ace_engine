@@ -66,6 +66,9 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
 
 void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
 {
+    if (IsSingleHandle()) {
+        return;
+    }
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
@@ -86,9 +89,6 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
             selectController->UpdateCaretOffset();
         }
     }
-    if (IsSingleHandle()) {
-        pattern->StartTwinkling();
-    }
 }
 
 void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
@@ -96,9 +96,12 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     CHECK_NULL_VOID(latestReqeust_);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     if (latestReqeust_->hideHandle) {
         manager->HideHandle();
     }
+    pattern->StopTwinkling();
     manager->MarkInfoChange(DIRTY_SELECT_TEXT);
     latestReqeust_.reset();
 }
@@ -178,9 +181,6 @@ RectF TextFieldSelectOverlay::GetSecondHandleLocalPaintRect()
     CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
     CHECK_NULL_RETURN(controller, RectF());
-    if (IsSingleHandle()) {
-        return controller->GetCaretRect();
-    }
     auto handleRect = controller->GetSecondHandleRect();
     auto contentHeight = pattern->GetTextContentRect().Height();
     auto handleHeight = std::min(handleRect.Height(), contentHeight);
@@ -559,6 +559,10 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFi
         overlayEvent.SetGlobalLocation(recognizer->GetBeginGlobalLocation());
         pattern->HandleClickEvent(overlayEvent);
     } else if (!IsSingleHandle()) {
+        if (pattern->HandleBetweenSelectedPosition(event)) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield HandleBetweenSelectedPosition");
+            return;
+        }
         auto selectController = pattern->GetTextSelectController();
         auto index = isFirst ? selectController->GetFirstHandleIndex() : selectController->GetSecondHandleIndex();
         pattern->HandleSetSelection(index, index, false);

@@ -14,11 +14,6 @@
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
-#include <algorithm>
-#include <cstdint>
-
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap)
 {
@@ -110,7 +105,7 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
     if (itemStart_ && Positive(lanes_[0][0].startPos - TopMargin())) {
         return true;
     }
-    if (offsetEnd_) {
+    if (!itemStart_ && offsetEnd_) {
         return std::all_of(lanes_.back().begin(), lanes_.back().end(), [this](const Lane& lane) {
             return LessNotEqual(lane.endPos + footerHeight_ + BotMargin(), lastMainSize_);
         });

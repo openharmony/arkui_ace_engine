@@ -82,13 +82,14 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
     void UpdateDecorVisible(bool visible, bool hasDeco = true) override {};
-    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
+    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override {}
 
     // Window color
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;
+    void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

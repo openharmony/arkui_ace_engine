@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
-#include <algorithm>
-
 #include "base/i18n/localization.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
@@ -677,5 +674,16 @@ void NavigationTitleUtil::InitLongPressEvent(const RefPtr<GestureEventHub>& gest
         NavigationTitleUtil::HandleLongPressActionEnd(menuNode);
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+}
+
+float NavigationTitleUtil::ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth)
+{
+    float result = 0.0f;
+    if (value.value().Unit() == DimensionUnit::PERCENT) {
+        result = value.value().Value() * titleBarWidth;
+    } else {
+        result = value.value().ConvertToPx();
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

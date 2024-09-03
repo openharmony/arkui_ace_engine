@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/security_component/security_component_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "location_button/location_button_common.h"
 #include "paste_button/paste_button_common.h"
