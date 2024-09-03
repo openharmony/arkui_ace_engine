@@ -294,6 +294,11 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
+void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
+{
+    onAreaChangedInnerCallbacks_.erase(id);
+}
+
 void EventHub::ClearCustomerOnDragFunc()
 {
     onDragStart_ = nullptr;
