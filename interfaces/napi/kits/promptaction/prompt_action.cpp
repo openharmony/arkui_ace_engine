@@ -833,7 +833,7 @@ void GetNapiBlurStyleAndHoverModeProps(napi_env env, const std::shared_ptr<Promp
 
     napi_typeof(env, asyncContext->backgroundBlurStyleApi, &blurStyleValueType);
     if (blurStyleValueType == napi_number) {
-        int32_t num;
+        int32_t num = 0;
         napi_get_value_int32(env, asyncContext->backgroundBlurStyleApi, &num);
         if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
             backgroundBlurStyle = num;
@@ -843,7 +843,7 @@ void GetNapiBlurStyleAndHoverModeProps(napi_env env, const std::shared_ptr<Promp
     napi_valuetype hoverModeValueType = napi_undefined;
     napi_typeof(env, asyncContext->hoverModeAreaApi, &hoverModeValueType);
     if (hoverModeValueType == napi_number) {
-        int32_t num;
+        int32_t num = 0;
         napi_get_value_int32(env, asyncContext->hoverModeAreaApi, &num);
         if (num >= 0 && num < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
             hoverModeArea = HOVER_MODE_AREA_TYPE[num];

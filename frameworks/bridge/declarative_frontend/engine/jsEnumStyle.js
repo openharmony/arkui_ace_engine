@@ -902,8 +902,8 @@ var DialogAlignment;
 
 let HoverModeAreaType;
 (function (HoverModeAreaType) {
-  HoverModeAreaType[HoverModeAreaType["TOP_SCREEN"] = 0] = "TOP_SCREEN";
-  HoverModeAreaType[HoverModeAreaType["BOTTOM_SCREEN"] = 1] = "BOTTOM_SCREEN";
+  HoverModeAreaType.TOP_SCREEN = 0;
+  HoverModeAreaType.BOTTOM_SCREEN = 1;
 })(HoverModeAreaType || (HoverModeAreaType = {}));
 
 var DialogButtonStyle;
