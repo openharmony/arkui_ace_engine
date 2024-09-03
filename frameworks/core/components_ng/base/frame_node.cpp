@@ -477,6 +477,7 @@ FrameNode::FrameNode(
 
 FrameNode::~FrameNode()
 {
+    ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
@@ -5139,5 +5140,16 @@ void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
     }
     auto pattern = GetPattern();
     pattern->NotifyDataChange(updateFrom, count);
+}
+
+void FrameNode::ResetPredictNodes()
+{
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            frameNode->isLayoutDirtyMarked_ = false;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
