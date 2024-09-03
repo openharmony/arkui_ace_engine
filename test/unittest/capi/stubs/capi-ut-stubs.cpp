@@ -16,6 +16,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
@@ -27,7 +28,8 @@ void NG::PipelineContext::SetCallBackNode(const WeakPtr<NG::FrameNode>& node) {}
 
 RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
 {
-    return nullptr;
+    return FrameNode::CreateFrameNode(
+        V2::CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
 }
 
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
