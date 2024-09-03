@@ -800,7 +800,7 @@ export class ChipComponent extends ViewPU {
         }
     }
     getChipNodeBorderWidth() {
-        if (!this.isSetbackgroundColor()) {
+        if (!this.isSetBackgroundColor()) {
             return this.sizeToVp(this.theme.chipNode.defaultBorderWidth);
         }
         else {
@@ -1029,7 +1029,7 @@ export class ChipComponent extends ViewPU {
     getChipNodeBackGroundColor() {
         let themeChipNode = this.theme.chipNode;
         let currentColor;
-        if (this.chipNodeOnFocus && !this.isSetbackgroundColor()) {
+        if (this.chipNodeOnFocus && !this.isSetBackgroundColor()) {
             currentColor = this.getChipActive() ? themeChipNode.focusActivatedBgColor :
             themeChipNode.focusBgColor;
             return currentColor;
@@ -1051,13 +1051,13 @@ export class ChipComponent extends ViewPU {
         if (this.isShowPressedBackGroundColor) {
             this.isHovering = false;
             return sourceColor
-                .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
+                .blendColor(ColorMetrics.resourceColor(this.isSetBackgroundColor() ?
                 Color.Transparent : themeChipNode.pressedBlendColor))
                 .color;
         }
         if (this.isHovering) {
             return sourceColor
-                .blendColor(ColorMetrics.resourceColor(this.isSetbackgroundColor() ?
+                .blendColor(ColorMetrics.resourceColor(this.isSetBackgroundColor() ?
                 Color.Transparent : themeChipNode.hoverBlendColor))
                 .color;
         }
@@ -1337,7 +1337,7 @@ export class ChipComponent extends ViewPU {
             return Visibility.None;
         }
     }
-    isSetbackgroundColor() {
+    isSetBackgroundColor() {
         return this.isSetBg || this.isSetActiveBg;
     }
     getShadowStyles() {
