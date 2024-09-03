@@ -167,6 +167,7 @@ public:
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+    void DumpParagraphsInfo();
 
     TextSelector GetTextSelector() const
     {

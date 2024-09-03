@@ -79,7 +79,7 @@ void TextBases::TestUpdateScenario(const RefPtr<TextPattern>& pattern)
     for (const auto& child : host->GetChildren()) {
         auto spanNode = AceType::DynamicCast<SpanNode>(child);
         ASSERT_NE(spanNode, nullptr);
-        auto inheritPropertyInfo = spanNode->CalculateInheritPropertyInfo();
+        auto inheritPropertyInfo = spanNode->GetInheritPropertyInfo();
         auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
         if (iter != inheritPropertyInfo.end()) {
             EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
