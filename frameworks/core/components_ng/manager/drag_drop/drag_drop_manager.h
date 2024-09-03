@@ -278,10 +278,7 @@ public:
         dragDropState_ = dragDropMgrState;
     }
 
-    void ResetPreTargetFrameNode()
-    {
-        preTargetFrameNode_ = nullptr;
-    }
+    void ResetPreTargetFrameNode(int32_t instanceId);
 
     void SetDraggingPressedState(bool pointerPressed)
     {
