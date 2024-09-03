@@ -62,7 +62,7 @@ bool SystemProperties::navigationBlurEnabled_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
-bool SystemProperties::acePerformanceMonitorEnable_ = false;
+std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::developerModeOn_ = false;

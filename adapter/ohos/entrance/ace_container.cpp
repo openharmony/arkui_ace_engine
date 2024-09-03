@@ -105,6 +105,7 @@ const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
+const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
@@ -3238,6 +3239,9 @@ void AceContainer::AddWatchSystemParameter()
             ENABLE_DEBUG_STATEMGR_KEY, container, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
         SystemProperties::AddWatchSystemParameter(
             ENABLE_DEBUG_BOUNDARY_KEY, container, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_PERFORMANCE_MONITOR_KEY, container,
+            SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -3254,5 +3258,7 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_STATEMGR_KEY, this, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
 }
 } // namespace OHOS::Ace::Platform
