@@ -204,7 +204,7 @@ public:
 
     static std::map<KeyComb, std::function<void(TextInputClient*)>> keyboardShortCuts_;
 
-    virtual bool SetCaretPosition(int32_t pos, bool needNotifyImf = true)
+    virtual bool SetCaretOffset(int32_t caretPosition)
     {
         return false;
     }
