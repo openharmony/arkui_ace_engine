@@ -5370,7 +5370,7 @@ void TextFieldPattern::HandleSelectionEnd()
     AfterSelection();
 }
 
-bool TextFieldPattern::SetCaretPosition(int32_t position, bool needNotifyImf)
+void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
@@ -5380,8 +5380,13 @@ bool TextFieldPattern::SetCaretPosition(int32_t position, bool needNotifyImf)
     }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
-    CHECK_NULL_RETURN(tmpHost, false);
+    CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::SetCaretOffset(int32_t caretPostion)
+{
+    SetCaretPosition(caretPostion);
     return true;
 }
 
