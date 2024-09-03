@@ -64,7 +64,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
 
       #Miscdevice Vibrator
-      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_utils.cpp",
+      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
 
       # CJUtils
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
