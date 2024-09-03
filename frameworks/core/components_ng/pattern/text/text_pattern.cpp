@@ -1054,6 +1054,7 @@ void TextPattern::InitFocusEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->GetContentModifier()->SetIsFocused(true);
+        pattern->AddIsFocusActiveUpdateEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
@@ -1061,10 +1062,42 @@ void TextPattern::InitFocusEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->GetContentModifier()->SetIsFocused(false);
+        pattern->RemoveIsFocusActiveUpdateEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
 
     focusInitialized_ = true;
+}
+
+void TextPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void TextPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void TextPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetContentModifier()->SetIsFocused(isFocusAcitve);
 }
 
 void TextPattern::InitHoverEvent()
@@ -2178,6 +2211,7 @@ void TextPattern::OnModifyDone()
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_LAYOUT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
     DumpRecord(std::to_string(nowTime));
+    UpdateMarqueeInfo();
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -2281,6 +2315,22 @@ void TextPattern::OnModifyDone()
     }
     SetActionExecSubComponent();
     RecoverCopyOption();
+}
+
+void TextPattern::UpdateMarqueeInfo()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->HasTextMarqueeFadeout()) {
+        textLayoutProperty->UpdateTextMarqueeFadeout(theme->GetIsTextFadeout());
+    }
+    if (!textLayoutProperty->HasTextMarqueeStartPolicy()) {
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(theme->GetMarqueeStartPolicy());
+    }
 }
 
 bool TextPattern::SetActionExecSubComponent()

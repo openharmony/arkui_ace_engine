@@ -77,6 +77,8 @@ public:
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
             theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
             theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
+            theme->marqueeStartPolicy_ = static_cast<MarqueeStartPolicy>(static_cast<int32_t>(
+                pattern->GetAttr<double>("text_marquee_start_policy", 0.0)));
         }
     };
 
@@ -122,6 +124,11 @@ public:
         return dragBackgroundColor_;
     }
 
+    MarqueeStartPolicy GetMarqueeStartPolicy() const
+    {
+        return marqueeStartPolicy_;
+    }
+
 protected:
     TextTheme() = default;
 
@@ -134,6 +141,7 @@ private:
     bool isTextFadeout_ = false;
     Dimension fadeoutWidth_;
     bool isShowHandle_ = false;
+    MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
 };
 
 } // namespace OHOS::Ace

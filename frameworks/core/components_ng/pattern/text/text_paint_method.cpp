@@ -63,7 +63,7 @@ void TextPaintMethod::DoStartTextRace()
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     option.fadeout = layoutProperty->GetTextMarqueeFadeout().value_or(theme->GetIsTextFadeout());
-    option.startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT);
+    option.startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(theme->GetMarqueeStartPolicy());
 
     textContentModifier_->StartTextRace(option);
 }

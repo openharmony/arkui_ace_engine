@@ -1401,6 +1401,16 @@ struct ArkUI_SystemFontStyleEvent {
 };
 typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 
+struct ArkUITextMarqueeOptions {
+    ArkUI_Float32 step;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 loop;
+    ArkUI_Int32 marqueeStartPolicy;
+    ArkUI_Bool start;
+    ArkUI_Bool fromStart;
+    ArkUI_Bool fadeout;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -2043,6 +2053,10 @@ struct ArkUITextModifier {
     void (*setTextResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
+    void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value);
+    void (*resetTextMarqueeOptions)(ArkUINodeHandle node);
+    void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {

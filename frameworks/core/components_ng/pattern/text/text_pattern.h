@@ -694,6 +694,10 @@ protected:
     void InitMouseEvent();
     void InitFocusEvent();
     void InitHoverEvent();
+    void UpdateMarqueeInfo();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void RecoverCopyOption();
     void InitCopyOption();
     void RecoverSelection();
@@ -800,6 +804,7 @@ protected:
     std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<TextSpanType> selectedType_;
     SourceType sourceType_ = SourceType::NONE;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     friend class TextContentModifier;
     // properties for AI
