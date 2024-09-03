@@ -88,6 +88,7 @@ extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
 extern const char THEME_PATTERN_LINEAR_INDICATOR[];
 extern const char THEME_PATTERN_LINEAR_LAYOUT[];
 extern const char THEME_PATTERN_STACK[];
+extern const char THEME_PATTERN_APP[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
