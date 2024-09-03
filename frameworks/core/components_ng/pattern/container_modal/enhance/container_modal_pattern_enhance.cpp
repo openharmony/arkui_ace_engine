@@ -229,7 +229,8 @@ Color ContainerModalPatternEnhance::GetContainerColor(bool isFocus)
     return ContainerModalPattern::GetContainerColor(isFocus);
 }
 
-void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize,
+    bool hideClose)
 {
     auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsNode);
@@ -248,6 +249,9 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     minimizeBtn->MarkDirtyNode();
 
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+        CHECK_NULL_VOID(closeBtn);
+        closeBtn->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
+        closeBtn->MarkDirtyNode();
     InitTitleRowLayoutProperty(GetCustomTitleRow());
 }
 
