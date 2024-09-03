@@ -15,12 +15,14 @@
 
 import { Route, RouteGroup } from '../../common/route';
 import { BindPopupBootcamp } from './BindPopupBootcamp';
+import { ToastBootcamp } from '../displays/ToastBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
   label: '展示类',
   children: [
     { name: 'bindpopup', label: '气泡/BindPopup' },
+    { name: 'toast', label: '即时反馈/Toast' },
   ]
 };
 
@@ -28,6 +30,8 @@ export const displaysRoute: RouteGroup = {
 export function DisplaysDestination(name: string, route: Route) {
   if (name === 'displays/bindpopup') {
     BindPopupBootcamp({ title: route.label })
+  } else if (name === 'displays/toast') {
+    ToastBootcamp({ title: route.label })
   }
 }
 
