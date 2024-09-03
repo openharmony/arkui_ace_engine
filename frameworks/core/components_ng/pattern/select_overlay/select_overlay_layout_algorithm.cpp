@@ -45,12 +45,9 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     PerformMeasureSelf(layoutWrapper);
     // match parent.
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    if (LessOrEqual(frameSize.Width(), 0.0f) || LessOrEqual(frameSize.Height(), 0.0f)) {
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
+    if (pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
         auto parentNode = host->GetAncestorNodeOfFrame();
         CHECK_NULL_VOID(parentNode);
         auto parentGeo = parentNode->GetGeometryNode();
