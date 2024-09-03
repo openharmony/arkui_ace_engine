@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_node.h"
-#include "core/components_ng/pattern/search/search_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -69,16 +68,6 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<SearchLayoutAlgorithm>();
-    }
-
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!searchOverlayModifier_) {
-            searchOverlayModifier_ = AceType::MakeRefPtr<SearchOverlayModifier>(WeakClaim(this));
-        }
-        auto paintMethod =
-            MakeRefPtr<SearchPaintMethod>(searchOverlayModifier_, buttonSize_, searchButton_, isSearchButtonEnabled_);
-        return paintMethod;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -294,6 +283,10 @@ private:
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
     const Dimension ConvertImageIconScaleLimit(const Dimension& fontSizeValue);
+    void UpdateDivider();
+    void UpdateCancelButton();
+    void UpdateDividerColorMode();
+    void UpdateCancelButtonColorMode();
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -330,7 +323,6 @@ private:
     WeakPtr<FrameNode> searchIcon_;
     WeakPtr<FrameNode> cancelIcon_;
     WeakPtr<SearchNode> searchNode_;
-    RefPtr<SearchOverlayModifier> searchOverlayModifier_;
 };
 
 } // namespace OHOS::Ace::NG

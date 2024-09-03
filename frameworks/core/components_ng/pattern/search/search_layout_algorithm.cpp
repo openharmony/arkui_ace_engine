@@ -39,6 +39,7 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t MULTIPLE_2 = 2;
 constexpr float MAX_SEARCH_BUTTON_RATE = 0.4f;
 constexpr float AGING_MIN_SCALE = 1.75f;
@@ -287,6 +288,39 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     searchButtonSizeMeasure_ = buttonGeometryNode->GetFrameSize();
 }
 
+void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
+    CHECK_NULL_VOID(dividerWrapper);
+    auto dividerGeometryNode = dividerWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(dividerGeometryNode);
+    auto dividerLayoutProperty = dividerWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    auto dividerHeight = std::min(static_cast<float>(searchHeight), static_cast<float>(iconHeight));
+    auto dividerWidth = searchTheme->GetSearchDividerWidth();
+
+    CalcSize dividerSize;
+    dividerSize.SetWidth(CalcLength(dividerWidth));
+    dividerSize.SetHeight(CalcLength(dividerHeight));
+    dividerLayoutProperty->UpdateUserDefinedIdealSize(dividerSize);
+
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    dividerWrapper->Measure(childLayoutConstraint);
+    dividerSizeMeasure_ = dividerGeometryNode->GetFrameSize();
+}
+
 double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper)
 {
     double searchHeightAdapt = 0;
@@ -457,6 +491,7 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     SearchButtonMeasure(layoutWrapper);
+    DividerMeasure(layoutWrapper);
     ImageMeasure(layoutWrapper);
     CancelImageMeasure(layoutWrapper);
     CancelButtonMeasure(layoutWrapper);
@@ -562,6 +597,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     };
     LayoutSearchIcon(params);
     LayoutSearchButton(params);
+    LayoutDivider(params);
     LayoutCancelButton(params);
     LayoutCancelImage(params);
     LayoutTextField(params);
@@ -639,6 +675,41 @@ void SearchLayoutAlgorithm::LayoutSearchButton(const LayoutSearchParams& params)
     searchButtonGeometryNode->SetMarginFrameOffset(searchButtonOffset);
     searchButtonWrapper->Layout();
 }
+
+void SearchLayoutAlgorithm::LayoutDivider(const LayoutSearchParams& params)
+{
+    auto searchButtonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
+    auto dividerSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
+
+    auto dividerWrapper = params.layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
+    CHECK_NULL_VOID(dividerWrapper);
+    auto dividerGeometryNode = dividerWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(dividerGeometryNode);
+    auto dividerFrameSize = dividerGeometryNode->GetFrameSize();
+
+    auto padding = params.layoutProperty->CreatePaddingAndBorder();
+    auto leftOffset = padding.left.value_or(0.0f);
+    auto rightOffset = padding.right.value_or(0.0f);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        rightOffset = 0.0f;
+    }
+    auto buttonWidth = searchButtonSizeMeasure_.Width();
+
+    float dividerHorizontalOffset = 0.0f;
+    if (params.isRTL) {
+        dividerHorizontalOffset =
+            leftOffset + buttonWidth + dividerSpace + searchButtonSpace + dividerFrameSize.Width() / 2.0f;
+    } else {
+        dividerHorizontalOffset = params.searchFrameWidth - buttonWidth - dividerSpace - searchButtonSpace -
+                                  dividerFrameSize.Width() / 2.0f - rightOffset;
+    }
+    dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0f);
+    auto dividerVerticalOffset = (params.searchFrameHeight - dividerFrameSize.Height()) / 2.0f;
+    auto dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
+    dividerGeometryNode->SetMarginFrameOffset(dividerOffset);
+    dividerWrapper->Layout();
+}
+
 
 void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
 {
