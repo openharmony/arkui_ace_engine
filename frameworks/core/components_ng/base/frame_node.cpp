@@ -1650,7 +1650,7 @@ void FrameNode::ThrottledVisibleTask()
     GetVisibleRect(visibleRect, frameRect);
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
-                                          VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+                                        VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
         throttledCallbackOnTheWay_ = false;
         return;
@@ -1746,14 +1746,16 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     } else {
         {
             auto layoutConstraint = GetLayoutConstraint();
-            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]", GetTag().c_str(),
-                GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
-                layoutConstraint.ToString().c_str());
+            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
+                             "[layoutPriority:%d][pageId:%d][depth:%d]",
+                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                layoutConstraint.ToString().c_str(), GetLayoutPriority(), GetPageId(), GetDepth());
             Measure(layoutConstraint);
         }
         {
-            ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-                GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
+            ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d][pageId:%d][depth:%d]",
+                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                GetLayoutPriority(), GetPageId(), GetDepth());
             Layout();
         }
     }
@@ -2968,7 +2970,7 @@ RectF GetBoundingBox(std::vector<Point>& pointList)
 {
     Point pMax = pointList[0];
     Point pMin = pointList[0];
-    
+
     for (auto &point: pointList) {
         if (point.GetX() > pMax.GetX()) {
             pMax.SetX(point.GetX());
