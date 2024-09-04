@@ -179,7 +179,7 @@ public:
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
     void HandleDrawCommandSendCallBack();
-    void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
+    void SetHandleNavDestinationSwitchFunc(const NavDestinationSwitchHandleFunc& func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
