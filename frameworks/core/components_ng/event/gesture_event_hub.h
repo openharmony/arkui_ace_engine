@@ -133,13 +133,10 @@ struct BindMenuStatus {
     bool isShow = false;
     MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
-    bool IsNotNeedCollectDragActuator() const
-    {
-        return (isBindLongPressMenu && longPressPreviewMode == MenuPreviewMode::NONE);
-    }
     bool IsNotNeedShowPreview() const
     {
-        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
+        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
+            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
     }
 };
 
