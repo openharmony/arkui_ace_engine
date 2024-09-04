@@ -171,13 +171,11 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
     CHECK_NULL_RETURN(gestureHub, false);
 
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode) ||
-        gestureHub->GetBindMenuStatus().IsNotNeedCollectDragActuator()) {
+        touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d, none long press menu preview is %{public}d",
-            gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet(),
-            gestureHub->GetBindMenuStatus().IsNotNeedCollectDragActuator());
+            "frameNode draggable is %{public}d, custom set is %{public}d,",
+            gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return false;
     }
 
