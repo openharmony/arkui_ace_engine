@@ -68,6 +68,7 @@ public:
     {
         {
             std::lock_guard<std::mutex> lock(mutex_);
+            TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "clean:%{public}s", media_.c_str());
             CleanListenerSet();
         }
 
@@ -132,6 +133,8 @@ public:
                 if (delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
                     continue;
                 }
+                TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "trigger:%{public}s matches:%{public}d",
+                    listener->media_.c_str(), listener->matches_);
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(listener->env_, &scope);
                 if (scope == nullptr) {
@@ -182,6 +185,8 @@ public:
         napi_ref ref = nullptr;
         napi_create_reference(env, cb, 1, &ref);
         listener->cbList_.emplace_back(ref);
+        TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "on:%{public}s num=%{public}d", listener->media_.c_str(),
+            static_cast<int>(listener->cbList_.size()));
         napi_close_handle_scope(env, scope);
 
 #if defined(PREVIEW)
@@ -225,6 +230,8 @@ public:
                 listener->cbList_.erase(iter);
             }
         }
+        TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "off:%{public}s num=%{public}d", listener->media_.c_str(),
+            static_cast<int>(listener->cbList_.size()));
         return nullptr;
     }
 
