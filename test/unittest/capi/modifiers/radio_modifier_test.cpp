@@ -201,11 +201,11 @@ HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
 {
-    auto cehcked = GetStringAttribute(node_, CHECKED_ATTR);
-    EXPECT_EQ(cehcked, "false");
+    auto checked = GetStringAttribute(node_, CHECKED_ATTR);
+    EXPECT_EQ(checked, "false");
     modifier_->setChecked(node_, true);
-    auto cehckedChanged = GetStringAttribute(node_, CHECKED_ATTR);
-    EXPECT_EQ(cehckedChanged, "true");
+    auto checkedChanged = GetStringAttribute(node_, CHECKED_ATTR);
+    EXPECT_EQ(checkedChanged, "true");
 }
 
 /**
