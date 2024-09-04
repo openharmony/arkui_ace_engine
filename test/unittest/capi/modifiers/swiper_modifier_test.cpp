@@ -1309,13 +1309,70 @@ HWTEST_F(SwiperModifierTest, setDisableSwipeTest, TestSize.Level1)
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
 }
 /**
- * @tc.name: SwiperModifierTest16
- * @tc.desc: Check the functionality of SwiperModifier.CurveImpl
+ * @tc.name: setCurveTestBuiltIn
+ * @tc.desc: Check the functionality of SwiperModifier.CurveImpl for built-in curves
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, SwiperModifierTest16, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setCurveTestBuiltIn, TestSize.Level1)
 {
+    static const std::string PROP_NAME("curve");
+    static const std::string DEFAULT_VALUE(Curves::ToString(Curves::EASE_IN_OUT));
+    ASSERT_NE(modifier_->setCurve, nullptr);
+
+    auto checkInitial = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInitial, Curves::DEFAULT_CURVE_NAME);
+
+    auto arkCurveEasyIn =
+        ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Int32>(ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN);
+    modifier_->setCurve(node_, &arkCurveEasyIn);
+    auto checkEasyIO = GetStringAttribute(node_, PROP_NAME);
+    auto expectedCurveEasyIn =
+        Framework::CreateCurve(Framework::CurveIntToString(ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN));
+    EXPECT_EQ(checkEasyIO, Curves::ToString(expectedCurveEasyIn));
+
+    modifier_->setCurve(node_, nullptr);
+    auto checkNull = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkNull, DEFAULT_VALUE);
+
+    auto arkCurveLinear =
+        ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Int32>(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+    modifier_->setCurve(node_, &arkCurveLinear);
+    auto checkLinear = GetStringAttribute(node_, PROP_NAME);
+    auto expectedCurveLinear =
+        Framework::CreateCurve(Framework::CurveIntToString(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR));
+    EXPECT_EQ(checkLinear, Curves::ToString(expectedCurveLinear));
+
+    auto arkCurveInv = ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Int32>(INT_MIN);
+    modifier_->setCurve(node_, &arkCurveInv);
+    auto checkInv = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInv, DEFAULT_VALUE);
 }
+/**
+ * @tc.name: setCurveTestCustom
+ * @tc.desc: Check the functionality of SwiperModifier.CurveImpl for Custom curves
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, setCurveTestCustom, TestSize.Level1)
+{
+    static const std::string PROP_NAME("curve");
+    static const std::string DEFAULT_VALUE(Curves::ToString(Curves::EASE_IN_OUT));
+    ASSERT_NE(modifier_->setCurve, nullptr);
+
+    auto checkInitial = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInitial, Curves::DEFAULT_CURVE_NAME);
+
+    auto arkCurveCustom = ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_String>("interpolating-spring(1, 1, 28, 34)");
+    modifier_->setCurve(node_, &arkCurveCustom);
+    auto checkCustStr = GetStringAttribute(node_, PROP_NAME);
+    // this can't be exactly check due to SwiperPaintProperty::ToJsonValue supports the built-in Curves only
+    EXPECT_NE(checkCustStr, DEFAULT_VALUE);
+
+    auto arkCurveInv = ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_String>("invalidCurveDefinition");
+    modifier_->setCurve(node_, &arkCurveInv);
+    auto checkInv = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkInv, DEFAULT_VALUE);
+}
+
 /**
  * @tc.name: setOnChangeTest
  * @tc.desc: Check the functionality of SwiperModifier.OnChangeImpl

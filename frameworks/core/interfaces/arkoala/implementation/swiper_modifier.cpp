@@ -22,7 +22,6 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 
 namespace {
-
 template <typename T>
 T toAceEnum(Ark_Int32 val, T min, T max)
 {
@@ -61,6 +60,27 @@ constexpr int32_t DEFAULT_DURATION = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWI
 constexpr int32_t DEFAULT_CACHED_COUNT = OHOS::Ace::DEFAULT_SWIPER_CACHED_SIZE;
 constexpr int32_t DEFAULT_DISPLAY_COUNT = OHOS::Ace::DEFAULT_SWIPER_DISPLAY_COUNT;
 } // namespace
+
+namespace OHOS::Ace::NG {
+using CurveVariantType = std::variant<std::string, Ark_Curve, Ark_ICurve>;
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+CurveVariantType Convert(const Ark_String& src) {
+    return Converter::Convert<std::string>(src);
+}
+
+template<>
+CurveVariantType Convert(const Ark_Curve& src) {
+    return src;
+}
+
+template<>
+CurveVariantType Convert(const Ark_ICurve& src) {
+    return src;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperInterfaceModifier {
@@ -420,7 +440,26 @@ void DisableSwipeImpl(Ark_NativePointer node,
 void CurveImpl(Ark_NativePointer node,
                const Type_SwiperAttribute_curve_Arg0* value)
 {
-    // TODO
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<Curve> curve = Framework::CreateCurve(std::string(), true); // the default Framework Curve
+    std::optional<CurveVariantType> optCurveVar;
+    if (value) {
+        optCurveVar = Converter::OptConvert<CurveVariantType>(*value);
+    }
+    if (optCurveVar) {
+        if (std::holds_alternative<std::string>(*optCurveVar)) {
+            auto curveDesc = std::get<std::string>(*optCurveVar);
+            curve = Framework::CreateCurve(curveDesc);
+        } else if (std::holds_alternative<Ark_Curve>(*optCurveVar)) {
+            auto curveType = std::get<Ark_Curve>(*optCurveVar);
+            curve = Framework::CreateCurve(curveType);
+        } else {
+            LOGE("SwiperAttributeModifier::CurveImpl, the optCurveVar->index()=%{public}zd is not supported",
+                optCurveVar->index());
+        }
+    }
+    SwiperModelNG::SetCurve(frameNode, curve);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function event)
