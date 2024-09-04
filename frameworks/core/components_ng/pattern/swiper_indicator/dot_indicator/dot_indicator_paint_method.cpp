@@ -203,7 +203,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
                 mouseClickIndex = itemCount_ - 1 - mouseClickIndex_.value();
             }
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
@@ -496,20 +496,6 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
     if (mouseClickIndex_ || gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         turnPageRate_ = 0;
-    }
-    // item may be invalid in auto linear scene
-    if (nextValidIndex_ >= 0) {
-        int32_t startCurrentIndex = index;
-        int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqualCustomPrecision(turnPageRate_, -1.0f) ||
-                                          GreatOrEqualCustomPrecision(turnPageRate_, 1.0f)
-                                      ? index
-                                      : nextValidIndex_;
-        // reach edge scene
-        if (startCurrentIndex > endCurrentIndex) {
-            startCurrentIndex = currentIndexActual_;
-            endCurrentIndex = currentIndexActual_;
-        }
-        return { startCurrentIndex, endCurrentIndex };
     }
 
     int32_t startCurrentIndex = index;
