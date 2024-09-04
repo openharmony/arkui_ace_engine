@@ -20,7 +20,6 @@
 #include "ipc_skeleton.h"
 #include "root_scene.h"
 #include "screen_manager.h"
-#include "transaction/rs_transaction_proxy.h"
 #include "ui/rs_display_node.h"
 
 #include "base/utils/utils.h"
@@ -70,8 +69,6 @@ ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
     if (screenSession_ != nullptr) {
         screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
             this, std::placeholders::_1));
-        screenSession_->SetUpdateScreenPivotCallback(std::bind(
-            &ScreenPattern::UpdateRenderPivot, this, std::placeholders::_1, std::placeholders::_2));
     }
 }
 
@@ -117,21 +114,6 @@ void ScreenPattern::UpdateDisplayInfo()
     }
 
     UpdateToInputManager(displayNodeRotation);
-}
-
-void ScreenPattern::UpdateRenderPivot(float pivotX, float pivotY)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->SetRenderPivot(pivotX, pivotY);
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    } else {
-        LOGE("RSTransactionProxy transactionProxy is nullptr");
-    }
 }
 
 void ScreenPattern::UpdateToInputManager(float rotation)
