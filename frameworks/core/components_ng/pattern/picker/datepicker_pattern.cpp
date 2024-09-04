@@ -84,21 +84,33 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
     auto children = host->GetChildren();
-    auto heigth = pickerTheme->GetDividerSpacing();
+    auto height = pickerTheme->GetDividerSpacing();
     for (const auto& child : children) {
         auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
+        auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
+        CHECK_NULL_RETURN(datePickerColumnNode, false);
+        auto columnNodeHeight = datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
+        auto maxButtonHeight = static_cast<float>(columnNodeHeight);
+        auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(heigth - PRESS_INTERVAL)));
+            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
+        if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
+            GreatNotEqual(maxButtonHeight, 0.0f)) {
+            auto parentNode = DynamicCast<FrameNode>(host->GetParent());
+            CHECK_NULL_RETURN(parentNode, false);
+            parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
     }
     return true;
 }

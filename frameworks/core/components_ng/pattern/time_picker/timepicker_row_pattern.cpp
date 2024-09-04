@@ -82,17 +82,29 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         if (width > defaultWidth) {
             width = static_cast<float>(defaultWidth);
         }
+        auto timePickerColumnNode = DynamicCast<FrameNode>(childNode->GetLastChild());
+        CHECK_NULL_VOID(timePickerColumnNode);
+        auto columnNodeHeight = timePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
+        auto maxButtonHeight = static_cast<float>(columnNodeHeight);
+        auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(height - PRESS_INTERVAL)));
+            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
+        if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
+            GreatNotEqual(maxButtonHeight, 0.0f)) {
+            auto parentNode = DynamicCast<FrameNode>(host->GetParent());
+            CHECK_NULL_VOID(parentNode);
+            parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
     }
 }
 
