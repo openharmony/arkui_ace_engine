@@ -39,7 +39,7 @@ public:
     RelativeContainerLayoutAlgorithm() = default;
     ~RelativeContainerLayoutAlgorithm()
     {
-        std::lock_guardstd::mutex lock(relativeContainerMutex_);
+        std::lock_guard<std::mutex> lock(relativeContainerMutex_);
     }
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
