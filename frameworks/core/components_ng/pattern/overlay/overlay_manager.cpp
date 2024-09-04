@@ -2137,7 +2137,7 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
 
 void OverlayManager::HideAllMenus()
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide all menus enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menus enter");
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
@@ -2147,7 +2147,6 @@ void OverlayManager::HideAllMenus()
             for (const auto& child : windowScene.Upgrade()->GetChildren()) {
                 auto node = DynamicCast<FrameNode>(child);
                 if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-                    TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
                     PopMenuAnimation(node);
                 }
             }
@@ -2163,7 +2162,6 @@ void OverlayManager::HideAllMenus()
             auto wrapperPattern = node->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             wrapperPattern->UpdateMenuAnimation(node);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
             PopMenuAnimation(node);
         }
     }

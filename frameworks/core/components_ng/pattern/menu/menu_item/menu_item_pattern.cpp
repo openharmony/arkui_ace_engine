@@ -531,7 +531,6 @@ void MenuItemPattern::CloseMenu()
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu.");
     menuWrapperPattern->HideMenu();
 }
 
