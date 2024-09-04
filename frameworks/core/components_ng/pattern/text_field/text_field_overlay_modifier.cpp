@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 TextFieldOverlayModifier::TextFieldOverlayModifier(
     const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
-    : pattern_(pattern), edgeEffect_(edgeEffect), magnifierPainter_(pattern)
+    : pattern_(pattern), edgeEffect_(edgeEffect)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -111,7 +111,6 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintPreviewTextDecoration(context);
-    magnifierPainter_.PaintMagnifier(context.canvas);
 }
 
 void TextFieldOverlayModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)
