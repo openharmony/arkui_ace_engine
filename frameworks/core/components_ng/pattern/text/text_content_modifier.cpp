@@ -361,6 +361,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
+    bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
+        [](const auto& reason) {return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     if (pManager->GetParagraphs().empty()) {
@@ -371,7 +373,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
-    if (!ifPaintObscuration_) {
+    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
         CHECK_NULL_VOID(contentOffset_);

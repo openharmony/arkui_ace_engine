@@ -1240,6 +1240,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
     auto jsValue = info[0];
     auto secondJSValue = info[1];
     if ((!jsValue->IsBoolean() && !secondJSValue->IsObject())) {
+        LOGI("The info is wrong, it is supposed to be a boolean");
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
@@ -1492,6 +1493,19 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
 }
 
+void JSTextField::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    std::string fontFeatureSettings = "";
+    if (jsValue->IsString()) {
+        fontFeatureSettings = jsValue->ToString();
+    }
+    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
     do {
@@ -1611,19 +1625,6 @@ void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetLineSpacing(value);
-}
-
-void JSTextField::SetFontFeature(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    auto jsValue = info[0];
-    std::string fontFeatureSettings = "";
-    if (jsValue->IsString()) {
-        fontFeatureSettings = jsValue->ToString();
-    }
-    TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
 void JSTextField::SetTextOverflow(const JSCallbackInfo& info)

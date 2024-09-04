@@ -274,24 +274,6 @@ class SearchHeightModifier extends ModifierWithKey<Length> {
   }
 }
 
-class SearchIdModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('searchId');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().search.resetSearchInspectorId(node);
-    } else {
-      getUINativeModule().search.setSearchInspectorId(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
 class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
   constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
@@ -875,14 +857,6 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   height(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
-    return this;
-  }
-  id(value: string): this {
-    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
-    return this;
-  }
-  key(value: string): this {
-    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
     return this;
   }
   decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): this {

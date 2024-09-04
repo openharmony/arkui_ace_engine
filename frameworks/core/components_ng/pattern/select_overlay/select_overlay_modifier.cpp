@@ -66,7 +66,7 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
     rotationAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(ROTATION_ANGLE);
     AttachProperty(rotationAngle_);
 
-    circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0);
+    circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(circlesAndBackArrowOpacity_);
 
     firstHandleIsShow_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -74,9 +74,6 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
 
     secondHandleIsShow_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(secondHandleIsShow_);
-
-    hasExtensionMenu_ = AceType::MakeRefPtr<PropertyBool>(false);
-    AttachProperty(hasExtensionMenu_);
 
     SetDefaultCircleAndLineEndOffset();
 }
@@ -218,7 +215,6 @@ void SelectOverlayModifier::BackArrowTransitionAnimation(bool noAnimation)
 void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     CHECK_NULL_VOID(hasExtensionMenu_);
-    CHECK_NULL_VOID(hasExtensionMenu_->Get());
     for (int32_t i = 0; i < ROUND_NUMBER; i++) {
         CHECK_NULL_VOID(circleOffset_[i]);
         if (i < ROUND_NUMBER - 1) {

@@ -84,7 +84,6 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
-    void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
@@ -124,7 +123,6 @@ public:
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
-    static void SetId(FrameNode* frameNode, const std::string& key);
     static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
