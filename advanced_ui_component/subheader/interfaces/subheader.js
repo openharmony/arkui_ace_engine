@@ -24,10 +24,15 @@ var _a;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+if (PUV2ViewBase.contextStack === undefined) {
+    Reflect.set(PUV2ViewBase, 'contextStack', []);
+}
+
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
 const BusinessError = requireNapi('base');
 const common = requireNapi('app.ability.common');
+const hilog = requireNapi('hilog');
 
 const INDEX_TWO = 2;
 const SINGLE_LINE_NUM = 1;
@@ -52,11 +57,11 @@ const ICON_REGION_Y = -6;
 const SINGLE_ICON_REGION_X = -12;
 const SINGLE_ICON_NUMBER = 1;
 export var OperationType;
-(function (u12) {
-    u12[u12['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
-    u12[u12['BUTTON'] = 1] = 'BUTTON';
-    u12[u12['ICON_GROUP'] = 2] = 'ICON_GROUP';
-    u12[u12['LOADING'] = 3] = 'LOADING';
+(function (t8) {
+    t8[t8['TEXT_ARROW'] = 0] = 'TEXT_ARROW';
+    t8[t8['BUTTON'] = 1] = 'BUTTON';
+    t8[t8['ICON_GROUP'] = 2] = 'ICON_GROUP';
+    t8[t8['LOADING'] = 3] = 'LOADING';
 })(OperationType || (OperationType = {}));
 class IconOptions {
 }
@@ -70,85 +75,66 @@ class FontStyle {
 }
 class SubHeaderTheme {
     constructor() {
-        this.fontPrimaryColor = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.fontSecondaryColor = { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.fontButtonColor = { 'id': -1, 'type': 10001, params: ['sys.color.font_emphasize'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.iconArrowColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_tertiary'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.textArrowHoverBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_hover'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.borderFocusColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_focus'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.leftIconColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.rightIconColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.fontPrimaryColor = { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.fontSecondaryColor = { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.fontButtonColor = { 'id': -1, 'type': 10001, params: ['sys.color.font_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.iconArrowColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_tertiary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.textArrowHoverBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.borderFocusColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_focus'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.leftIconColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.rightIconColor = { 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
 }
-function __Text__secondaryTitleStyles(t12) {
-    Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_S'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontColor(t12?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontWeight(t12?.fontWeight);
-    Text.maxLines(t12?.maxLines);
+function __Text__secondaryTitleStyles(s8) {
+    Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_S'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontColor(s8?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontWeight(s8?.fontWeight);
+    Text.maxLines(s8?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-    Text.align(t12?.alignment);
+    Text.align(s8?.alignment);
 }
-function __Text__primaryTitleStyles(s12) {
-    Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_L'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontColor(s12?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
-        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-    Text.fontWeight(s12?.fontWeight);
-    Text.maxLines(s12?.maxLines);
+function __Text__primaryTitleStyles(r8) {
+    Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Subtitle_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontColor(r8?.fontColor ?? { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+    Text.fontWeight(r8?.fontWeight);
+    Text.maxLines(r8?.maxLines);
     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-    Text.align(s12?.alignment);
+    Text.align(r8?.alignment);
 }
 class SubHeaderModifier {
     constructor() {
         this.isAgeing = false;
     }
-    applyNormalAttribute(r12) {
+    applyNormalAttribute(q8) {
         if (this.isAgeing) {
-            r12.width('100%');
+            q8.width('100%');
         }
         else {
         }
     }
 }
 export class SubHeader extends ViewPU {
-    constructor(l12, m12, n12, o12 = -1, p12 = undefined, q12) {
-        super(l12, n12, o12, q12);
-        if (typeof p12 === 'function') {
-            this.paramsGenerator_ = p12;
+    constructor(k8, l8, m8, n8 = -1, o8 = undefined, p8) {
+        super(k8, m8, n8, p8);
+        if (typeof o8 === 'function') {
+            this.paramsGenerator_ = o8;
         }
-        this.__icon = new SynchedPropertyObjectOneWayPU(m12.icon, this, 'icon');
+        this.__icon = new SynchedPropertyObjectOneWayPU(l8.icon, this, 'icon');
         this.iconSymbolOptions = null;
-        this.__primaryTitle = new SynchedPropertyObjectOneWayPU(m12.primaryTitle, this, 'primaryTitle');
+        this.__primaryTitle = new SynchedPropertyObjectOneWayPU(l8.primaryTitle, this, 'primaryTitle');
         this.__primaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(), this, 'primaryTitleModifier');
-        this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(m12.secondaryTitle, this, 'secondaryTitle');
-        this.__secondaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(),
-            this, 'secondaryTitleModifier');
+        this.__secondaryTitle = new SynchedPropertyObjectOneWayPU(l8.secondaryTitle, this, 'secondaryTitle');
+        this.__secondaryTitleModifier = new ObservedPropertyObjectPU(new TextModifier(), this, 'secondaryTitleModifier');
         this.__subHeaderModifier = new ObservedPropertyObjectPU(new SubHeaderModifier(), this, 'subHeaderModifier');
         this.select = null;
-        this.__operationType = new SynchedPropertySimpleOneWayPU(m12.operationType, this, 'operationType');
+        this.__operationType = new SynchedPropertySimpleOneWayPU(l8.operationType, this, 'operationType');
         this.operationItem = null;
         this.operationSymbolOptions = null;
         this.callbackId = undefined;
         this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
         this.__ageing = new ObservedPropertySimplePU(true, this, 'ageing');
-        this.__textArrowBgColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001,
-            params: ['sys.color.ohos_id_color_sub_background_transparent'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-            this, 'textArrowBgColor');
-        this.__buttonBgColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001,
-            params: ['sys.color.ohos_id_color_sub_background_transparent'],
-            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-            this, 'buttonBgColor');
+        this.__textArrowBgColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'textArrowBgColor');
+        this.__buttonBgColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'buttonBgColor');
         this.__buttonStyleWidth = new ObservedPropertySimplePU(0, this, 'buttonStyleWidth');
         this.__buttonStyleHeight = new ObservedPropertySimplePU(0, this, 'buttonStyleHeight');
         this.__textArrowStyleWidth = new ObservedPropertySimplePU(0, this, 'textArrowStyleWidth');
@@ -158,142 +144,148 @@ export class SubHeader extends ViewPU {
         this.__selectValue = new ObservedPropertyObjectPU('', this, 'selectValue');
         this.__flexAlign = new ObservedPropertySimplePU(FlexAlign.SpaceBetween, this, 'flexAlign');
         this.titleBuilder = undefined;
-        this.__contentMargin = new SynchedPropertyObjectOneWayPU(m12.contentMargin, this, 'contentMargin');
-        this.__contentPadding = new SynchedPropertyObjectOneWayPU(m12.contentPadding, this, 'contentPadding');
+        this.__contentMargin = new SynchedPropertyObjectOneWayPU(l8.contentMargin, this, 'contentMargin');
+        this.__contentPadding = new SynchedPropertyObjectOneWayPU(l8.contentPadding, this, 'contentPadding');
         this.__subHeaderMargin = new ObservedPropertyObjectPU({
-            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_left'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_right'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_left'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
         }, this, 'subHeaderMargin');
         this.__subHeaderTheme = new ObservedPropertyObjectPU(new SubHeaderTheme(), this, 'subHeaderTheme');
         this.addProvidedVar('subHeaderTheme', this.__subHeaderTheme, false);
+        this.isFollowingSystemFontScale = false;
+        this.appMaxFontScale = 3.2;
         this.constraintWidth = 0;
         this.paddingLeft = 2;
-        this.setInitiallyProvidedValue(m12);
+        this.setInitiallyProvidedValue(l8);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(k12) {
-        if (k12.icon === undefined) {
+    setInitiallyProvidedValue(j8) {
+        if (j8.icon === undefined) {
             this.__icon.set(null);
         }
-        if (k12.iconSymbolOptions !== undefined) {
-            this.iconSymbolOptions = k12.iconSymbolOptions;
+        if (j8.iconSymbolOptions !== undefined) {
+            this.iconSymbolOptions = j8.iconSymbolOptions;
         }
-        if (k12.primaryTitle === undefined) {
+        if (j8.primaryTitle === undefined) {
             this.__primaryTitle.set(null);
         }
-        if (k12.primaryTitleModifier !== undefined) {
-            this.primaryTitleModifier = k12.primaryTitleModifier;
+        if (j8.primaryTitleModifier !== undefined) {
+            this.primaryTitleModifier = j8.primaryTitleModifier;
         }
-        if (k12.secondaryTitle === undefined) {
+        if (j8.secondaryTitle === undefined) {
             this.__secondaryTitle.set(null);
         }
-        if (k12.secondaryTitleModifier !== undefined) {
-            this.secondaryTitleModifier = k12.secondaryTitleModifier;
+        if (j8.secondaryTitleModifier !== undefined) {
+            this.secondaryTitleModifier = j8.secondaryTitleModifier;
         }
-        if (k12.subHeaderModifier !== undefined) {
-            this.subHeaderModifier = k12.subHeaderModifier;
+        if (j8.subHeaderModifier !== undefined) {
+            this.subHeaderModifier = j8.subHeaderModifier;
         }
-        if (k12.select !== undefined) {
-            this.select = k12.select;
+        if (j8.select !== undefined) {
+            this.select = j8.select;
         }
-        if (k12.operationType === undefined) {
+        if (j8.operationType === undefined) {
             this.__operationType.set(OperationType.BUTTON);
         }
-        if (k12.operationItem !== undefined) {
-            this.operationItem = k12.operationItem;
+        if (j8.operationItem !== undefined) {
+            this.operationItem = j8.operationItem;
         }
-        if (k12.operationSymbolOptions !== undefined) {
-            this.operationSymbolOptions = k12.operationSymbolOptions;
+        if (j8.operationSymbolOptions !== undefined) {
+            this.operationSymbolOptions = j8.operationSymbolOptions;
         }
-        if (k12.callbackId !== undefined) {
-            this.callbackId = k12.callbackId;
+        if (j8.callbackId !== undefined) {
+            this.callbackId = j8.callbackId;
         }
-        if (k12.fontSize !== undefined) {
-            this.fontSize = k12.fontSize;
+        if (j8.fontSize !== undefined) {
+            this.fontSize = j8.fontSize;
         }
-        if (k12.ageing !== undefined) {
-            this.ageing = k12.ageing;
+        if (j8.ageing !== undefined) {
+            this.ageing = j8.ageing;
         }
-        if (k12.textArrowBgColor !== undefined) {
-            this.textArrowBgColor = k12.textArrowBgColor;
+        if (j8.textArrowBgColor !== undefined) {
+            this.textArrowBgColor = j8.textArrowBgColor;
         }
-        if (k12.buttonBgColor !== undefined) {
-            this.buttonBgColor = k12.buttonBgColor;
+        if (j8.buttonBgColor !== undefined) {
+            this.buttonBgColor = j8.buttonBgColor;
         }
-        if (k12.buttonStyleWidth !== undefined) {
-            this.buttonStyleWidth = k12.buttonStyleWidth;
+        if (j8.buttonStyleWidth !== undefined) {
+            this.buttonStyleWidth = j8.buttonStyleWidth;
         }
-        if (k12.buttonStyleHeight !== undefined) {
-            this.buttonStyleHeight = k12.buttonStyleHeight;
+        if (j8.buttonStyleHeight !== undefined) {
+            this.buttonStyleHeight = j8.buttonStyleHeight;
         }
-        if (k12.textArrowStyleWidth !== undefined) {
-            this.textArrowStyleWidth = k12.textArrowStyleWidth;
+        if (j8.textArrowStyleWidth !== undefined) {
+            this.textArrowStyleWidth = j8.textArrowStyleWidth;
         }
-        if (k12.textArrowStyleHeight !== undefined) {
-            this.textArrowStyleHeight = k12.textArrowStyleHeight;
+        if (j8.textArrowStyleHeight !== undefined) {
+            this.textArrowStyleHeight = j8.textArrowStyleHeight;
         }
-        if (k12.iconWidth !== undefined) {
-            this.iconWidth = k12.iconWidth;
+        if (j8.iconWidth !== undefined) {
+            this.iconWidth = j8.iconWidth;
         }
-        if (k12.selectedIndex !== undefined) {
-            this.selectedIndex = k12.selectedIndex;
+        if (j8.selectedIndex !== undefined) {
+            this.selectedIndex = j8.selectedIndex;
         }
-        if (k12.selectValue !== undefined) {
-            this.selectValue = k12.selectValue;
+        if (j8.selectValue !== undefined) {
+            this.selectValue = j8.selectValue;
         }
-        if (k12.flexAlign !== undefined) {
-            this.flexAlign = k12.flexAlign;
+        if (j8.flexAlign !== undefined) {
+            this.flexAlign = j8.flexAlign;
         }
-        if (k12.titleBuilder !== undefined) {
-            this.titleBuilder = k12.titleBuilder;
+        if (j8.titleBuilder !== undefined) {
+            this.titleBuilder = j8.titleBuilder;
         }
-        if (k12.subHeaderMargin !== undefined) {
-            this.subHeaderMargin = k12.subHeaderMargin;
+        if (j8.subHeaderMargin !== undefined) {
+            this.subHeaderMargin = j8.subHeaderMargin;
         }
-        if (k12.subHeaderTheme !== undefined) {
-            this.subHeaderTheme = k12.subHeaderTheme;
+        if (j8.subHeaderTheme !== undefined) {
+            this.subHeaderTheme = j8.subHeaderTheme;
         }
-        if (k12.constraintWidth !== undefined) {
-            this.constraintWidth = k12.constraintWidth;
+        if (j8.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = j8.isFollowingSystemFontScale;
         }
-        if (k12.paddingLeft !== undefined) {
-            this.paddingLeft = k12.paddingLeft;
+        if (j8.appMaxFontScale !== undefined) {
+            this.appMaxFontScale = j8.appMaxFontScale;
+        }
+        if (j8.constraintWidth !== undefined) {
+            this.constraintWidth = j8.constraintWidth;
+        }
+        if (j8.paddingLeft !== undefined) {
+            this.paddingLeft = j8.paddingLeft;
         }
     }
-    updateStateVars(j12) {
-        this.__icon.reset(j12.icon);
-        this.__primaryTitle.reset(j12.primaryTitle);
-        this.__secondaryTitle.reset(j12.secondaryTitle);
-        this.__operationType.reset(j12.operationType);
-        this.__contentMargin.reset(j12.contentMargin);
-        this.__contentPadding.reset(j12.contentPadding);
+    updateStateVars(i8) {
+        this.__icon.reset(i8.icon);
+        this.__primaryTitle.reset(i8.primaryTitle);
+        this.__secondaryTitle.reset(i8.secondaryTitle);
+        this.__operationType.reset(i8.operationType);
+        this.__contentMargin.reset(i8.contentMargin);
+        this.__contentPadding.reset(i8.contentPadding);
     }
-    purgeVariableDependenciesOnElmtId(i12) {
-        this.__icon.purgeDependencyOnElmtId(i12);
-        this.__primaryTitle.purgeDependencyOnElmtId(i12);
-        this.__primaryTitleModifier.purgeDependencyOnElmtId(i12);
-        this.__secondaryTitle.purgeDependencyOnElmtId(i12);
-        this.__secondaryTitleModifier.purgeDependencyOnElmtId(i12);
-        this.__subHeaderModifier.purgeDependencyOnElmtId(i12);
-        this.__operationType.purgeDependencyOnElmtId(i12);
-        this.__fontSize.purgeDependencyOnElmtId(i12);
-        this.__ageing.purgeDependencyOnElmtId(i12);
-        this.__textArrowBgColor.purgeDependencyOnElmtId(i12);
-        this.__buttonBgColor.purgeDependencyOnElmtId(i12);
-        this.__buttonStyleWidth.purgeDependencyOnElmtId(i12);
-        this.__buttonStyleHeight.purgeDependencyOnElmtId(i12);
-        this.__textArrowStyleWidth.purgeDependencyOnElmtId(i12);
-        this.__textArrowStyleHeight.purgeDependencyOnElmtId(i12);
-        this.__iconWidth.purgeDependencyOnElmtId(i12);
-        this.__selectedIndex.purgeDependencyOnElmtId(i12);
-        this.__selectValue.purgeDependencyOnElmtId(i12);
-        this.__flexAlign.purgeDependencyOnElmtId(i12);
-        this.__contentMargin.purgeDependencyOnElmtId(i12);
-        this.__contentPadding.purgeDependencyOnElmtId(i12);
-        this.__subHeaderMargin.purgeDependencyOnElmtId(i12);
-        this.__subHeaderTheme.purgeDependencyOnElmtId(i12);
+    purgeVariableDependenciesOnElmtId(h8) {
+        this.__icon.purgeDependencyOnElmtId(h8);
+        this.__primaryTitle.purgeDependencyOnElmtId(h8);
+        this.__primaryTitleModifier.purgeDependencyOnElmtId(h8);
+        this.__secondaryTitle.purgeDependencyOnElmtId(h8);
+        this.__secondaryTitleModifier.purgeDependencyOnElmtId(h8);
+        this.__subHeaderModifier.purgeDependencyOnElmtId(h8);
+        this.__operationType.purgeDependencyOnElmtId(h8);
+        this.__fontSize.purgeDependencyOnElmtId(h8);
+        this.__ageing.purgeDependencyOnElmtId(h8);
+        this.__textArrowBgColor.purgeDependencyOnElmtId(h8);
+        this.__buttonBgColor.purgeDependencyOnElmtId(h8);
+        this.__buttonStyleWidth.purgeDependencyOnElmtId(h8);
+        this.__buttonStyleHeight.purgeDependencyOnElmtId(h8);
+        this.__textArrowStyleWidth.purgeDependencyOnElmtId(h8);
+        this.__textArrowStyleHeight.purgeDependencyOnElmtId(h8);
+        this.__iconWidth.purgeDependencyOnElmtId(h8);
+        this.__selectedIndex.purgeDependencyOnElmtId(h8);
+        this.__selectValue.purgeDependencyOnElmtId(h8);
+        this.__flexAlign.purgeDependencyOnElmtId(h8);
+        this.__contentMargin.purgeDependencyOnElmtId(h8);
+        this.__contentPadding.purgeDependencyOnElmtId(h8);
+        this.__subHeaderMargin.purgeDependencyOnElmtId(h8);
+        this.__subHeaderTheme.purgeDependencyOnElmtId(h8);
     }
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
@@ -325,154 +317,172 @@ export class SubHeader extends ViewPU {
     get icon() {
         return this.__icon.get();
     }
-    set icon(h12) {
-        this.__icon.set(h12);
+    set icon(g8) {
+        this.__icon.set(g8);
     }
     get primaryTitle() {
         return this.__primaryTitle.get();
     }
-    set primaryTitle(g12) {
-        this.__primaryTitle.set(g12);
+    set primaryTitle(f8) {
+        this.__primaryTitle.set(f8);
     }
     get primaryTitleModifier() {
         return this.__primaryTitleModifier.get();
     }
-    set primaryTitleModifier(f12) {
-        this.__primaryTitleModifier.set(f12);
+    set primaryTitleModifier(e8) {
+        this.__primaryTitleModifier.set(e8);
     }
     get secondaryTitle() {
         return this.__secondaryTitle.get();
     }
-    set secondaryTitle(e12) {
-        this.__secondaryTitle.set(e12);
+    set secondaryTitle(d8) {
+        this.__secondaryTitle.set(d8);
     }
     get secondaryTitleModifier() {
         return this.__secondaryTitleModifier.get();
     }
-    set secondaryTitleModifier(d12) {
-        this.__secondaryTitleModifier.set(d12);
+    set secondaryTitleModifier(c8) {
+        this.__secondaryTitleModifier.set(c8);
     }
     get subHeaderModifier() {
         return this.__subHeaderModifier.get();
     }
-    set subHeaderModifier(c12) {
-        this.__subHeaderModifier.set(c12);
+    set subHeaderModifier(b8) {
+        this.__subHeaderModifier.set(b8);
     }
     get operationType() {
         return this.__operationType.get();
     }
-    set operationType(b12) {
-        this.__operationType.set(b12);
+    set operationType(a8) {
+        this.__operationType.set(a8);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(a12) {
-        this.__fontSize.set(a12);
+    set fontSize(z7) {
+        this.__fontSize.set(z7);
     }
     get ageing() {
         return this.__ageing.get();
     }
-    set ageing(z11) {
-        this.__ageing.set(z11);
+    set ageing(y7) {
+        this.__ageing.set(y7);
     }
     get textArrowBgColor() {
         return this.__textArrowBgColor.get();
     }
-    set textArrowBgColor(y11) {
-        this.__textArrowBgColor.set(y11);
+    set textArrowBgColor(x7) {
+        this.__textArrowBgColor.set(x7);
     }
     get buttonBgColor() {
         return this.__buttonBgColor.get();
     }
-    set buttonBgColor(x11) {
-        this.__buttonBgColor.set(x11);
+    set buttonBgColor(w7) {
+        this.__buttonBgColor.set(w7);
     }
     get buttonStyleWidth() {
         return this.__buttonStyleWidth.get();
     }
-    set buttonStyleWidth(w11) {
-        this.__buttonStyleWidth.set(w11);
+    set buttonStyleWidth(v7) {
+        this.__buttonStyleWidth.set(v7);
     }
     get buttonStyleHeight() {
         return this.__buttonStyleHeight.get();
     }
-    set buttonStyleHeight(v11) {
-        this.__buttonStyleHeight.set(v11);
+    set buttonStyleHeight(u7) {
+        this.__buttonStyleHeight.set(u7);
     }
     get textArrowStyleWidth() {
         return this.__textArrowStyleWidth.get();
     }
-    set textArrowStyleWidth(u11) {
-        this.__textArrowStyleWidth.set(u11);
+    set textArrowStyleWidth(t7) {
+        this.__textArrowStyleWidth.set(t7);
     }
     get textArrowStyleHeight() {
         return this.__textArrowStyleHeight.get();
     }
-    set textArrowStyleHeight(t11) {
-        this.__textArrowStyleHeight.set(t11);
+    set textArrowStyleHeight(s7) {
+        this.__textArrowStyleHeight.set(s7);
     }
     get iconWidth() {
         return this.__iconWidth.get();
     }
-    set iconWidth(s11) {
-        this.__iconWidth.set(s11);
+    set iconWidth(r7) {
+        this.__iconWidth.set(r7);
     }
     get selectedIndex() {
         return this.__selectedIndex.get();
     }
-    set selectedIndex(r11) {
-        this.__selectedIndex.set(r11);
+    set selectedIndex(q7) {
+        this.__selectedIndex.set(q7);
     }
     get selectValue() {
         return this.__selectValue.get();
     }
-    set selectValue(q11) {
-        this.__selectValue.set(q11);
+    set selectValue(p7) {
+        this.__selectValue.set(p7);
     }
     get flexAlign() {
         return this.__flexAlign.get();
     }
-    set flexAlign(p11) {
-        this.__flexAlign.set(p11);
+    set flexAlign(o7) {
+        this.__flexAlign.set(o7);
     }
     get contentMargin() {
         return this.__contentMargin.get();
     }
-    set contentMargin(o11) {
-        this.__contentMargin.set(o11);
+    set contentMargin(n7) {
+        this.__contentMargin.set(n7);
     }
     get contentPadding() {
         return this.__contentPadding.get();
     }
-    set contentPadding(n11) {
-        this.__contentPadding.set(n11);
+    set contentPadding(m7) {
+        this.__contentPadding.set(m7);
     }
     get subHeaderMargin() {
         return this.__subHeaderMargin.get();
     }
-    set subHeaderMargin(m11) {
-        this.__subHeaderMargin.set(m11);
+    set subHeaderMargin(l7) {
+        this.__subHeaderMargin.set(l7);
     }
     get subHeaderTheme() {
         return this.__subHeaderTheme.get();
     }
-    set subHeaderTheme(l11) {
-        this.__subHeaderTheme.set(l11);
+    set subHeaderTheme(k7) {
+        this.__subHeaderTheme.set(k7);
     }
-    onWillApplyTheme(k11) {
-        this.subHeaderTheme.fontPrimaryColor = k11.colors.fontPrimary;
-        this.subHeaderTheme.fontSecondaryColor = k11.colors.fontSecondary;
-        this.subHeaderTheme.fontButtonColor = k11.colors.fontEmphasize;
-        this.subHeaderTheme.iconArrowColor = k11.colors.iconTertiary;
-        this.subHeaderTheme.textArrowHoverBgColor = k11.colors.interactiveHover;
-        this.subHeaderTheme.borderFocusColor = k11.colors.interactiveFocus;
-        this.subHeaderTheme.leftIconColor = k11.colors.iconSecondary;
-        this.subHeaderTheme.rightIconColor = k11.colors.iconPrimary;
+    onWillApplyTheme(j7) {
+        this.subHeaderTheme.fontPrimaryColor = j7.colors.fontPrimary;
+        this.subHeaderTheme.fontSecondaryColor = j7.colors.fontSecondary;
+        this.subHeaderTheme.fontButtonColor = j7.colors.fontEmphasize;
+        this.subHeaderTheme.iconArrowColor = j7.colors.iconTertiary;
+        this.subHeaderTheme.textArrowHoverBgColor = j7.colors.interactiveHover;
+        this.subHeaderTheme.borderFocusColor = j7.colors.interactiveFocus;
+        this.subHeaderTheme.leftIconColor = j7.colors.iconSecondary;
+        this.subHeaderTheme.rightIconColor = j7.colors.iconPrimary;
+    }
+    updateFontScale() {
+        try {
+            let h7 = this.getUIContext();
+            let i7 = h7.getHostContext()?.config.fontSizeScale ?? 1;
+            if (!this.isFollowingSystemFontScale) {
+                return 1;
+            }
+            return Math.min(i7, this.appMaxFontScale);
+        }
+        catch (e7) {
+            let f7 = e7.code;
+            let g7 = e7.message;
+            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${f7}, message: ${g7}`);
+            return 1;
+        }
     }
     async aboutToAppear() {
-        let j11 = this.getUIContext().getHostContext();
-        this.fontSize = j11.config?.fontSizeScale ?? 1;
+        let d7 = this.getUIContext();
+        this.isFollowingSystemFontScale = d7.isFollowingSystemFontScale();
+        this.appMaxFontScale = d7.getMaxFontScale();
+        this.fontSize = this.updateFontScale();
         if (this.isSuitableAging()) {
             this.ageing = true;
             this.subHeaderModifier.isAgeing = this.ageing;
@@ -492,127 +502,90 @@ export class SubHeader extends ViewPU {
             (this.operationItem?.length > 0) && this.operationItem[0].value !== '';
     }
     initialRender() {
-        this.observeComponentCreation2((h10, i10) => {
+        this.observeComponentCreation2((n6, o6) => {
             If.create();
             if (this.isSuitableAging()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((h11, i11) => {
+                    this.observeComponentCreation2((b7, c7) => {
                         Column.create();
                         Column.constraintSize({ minHeight: this.getMinHeight() });
                         Column.padding(this.getAreaPadding());
                     }, Column);
-                    this.observeComponentCreation2((f11, g11) => {
+                    this.observeComponentCreation2((z6, a7) => {
                         Row.create();
                         Row.margin({
-                            top: LengthMetrics.resource({ 'id': -1, 'type': 10002,
-                                params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__' }),
-                            bottom: LengthMetrics.resource({ 'id': -1, 'type': 10002,
-                                params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__' }),
+                            top: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                            bottom: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
                         });
                         Row.padding({
-                            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_left'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_right'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                            start: this.contentMargin ? this.contentMargin.start : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_left'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                            end: this.contentMargin ? this.contentMargin.end : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
                         });
                         Row.width('100%');
                     }, Row);
-                    this.leftArea.bind(this)(this);
+                    this.leftArea.bind(this)();
                     Row.pop();
-                    this.observeComponentCreation2((a11, b11) => {
+                    this.observeComponentCreation2((w6, x6) => {
                         Row.create();
                         Row.margin({
-                            bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                         Row.padding({
-                            start: LengthMetrics.vp(Util.getNumberByResource(125830936,
-                                LEFT_ICON_SIZE_NUMBER) - this.paddingLeft),
-                            end: LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
+                            start: LengthMetrics.vp((this.contentMargin ? (this.contentMargin.start ? this.contentMargin.start.value : 0) :
+                            Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
+                            end: this.contentMargin ? this.contentMargin.end : LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
                         });
                         Row.justifyContent(FlexAlign.Start);
                         Row.width('100%');
                         Row.onClick(() => {
-                            if ((this.operationType === OperationType.TEXT_ARROW ||
-                                this.operationType === OperationType.BUTTON) &&
+                            if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
                             this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
                                 this.operationItem[0].action();
                             }
                         });
-                        Row.onTouch((e11) => {
-                            if (e11.type === TouchType.Down) {
+                        Row.onTouch((y6) => {
+                            if (y6.type === TouchType.Down) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
-                                    this.textArrowBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.interactive_pressed'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.textArrowBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
-                                    this.buttonBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.interactive_pressed'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.buttonBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                             }
-                            if (e11.type === TouchType.Up || e11.type === TouchType.Cancel) {
+                            if (y6.type === TouchType.Up || y6.type === TouchType.Cancel) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
-                                    this.textArrowBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.textArrowBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
-                                    this.buttonBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.buttonBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                             }
                         });
                     }, Row);
-                    this.rightArea.bind(this)(this);
+                    this.rightArea.bind(this)();
                     Row.pop();
                     Column.pop();
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((u10, v10) => {
+                    this.observeComponentCreation2((u6, v6) => {
                         Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.End });
                         Flex.constraintSize({ minHeight: this.getMinHeight() });
                         Flex.margin(this.contentMargin ?? this.subHeaderMargin);
                         Flex.padding(this.getAreaPadding());
                     }, Flex);
-                    this.observeComponentCreation2((s10, t10) => {
+                    this.observeComponentCreation2((s6, t6) => {
                         Row.create();
                         Row.margin({
-                            top: this.fontSize >= MIN_FONT_SIZE ? {
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.padding_level8'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__' } : ''
+                            top: this.fontSize >= MIN_FONT_SIZE ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : ''
                         });
                         Row.width('100%');
                         Row.flexShrink(1);
                     }, Row);
-                    this.leftArea.bind(this)(this);
+                    this.leftArea.bind(this)();
                     Row.pop();
-                    this.observeComponentCreation2((n10, o10) => {
+                    this.observeComponentCreation2((p6, q6) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.End);
                         Row.alignItems(VerticalAlign.Bottom);
@@ -623,56 +596,31 @@ export class SubHeader extends ViewPU {
                         });
                         Row.flexShrink(0);
                         Row.onClick(() => {
-                            if ((this.operationType === OperationType.TEXT_ARROW ||
-                                this.operationType === OperationType.BUTTON) &&
+                            if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
                             this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
                                 this.operationItem[0].action();
                             }
                         });
-                        Row.onTouch((r10) => {
-                            if (r10.type === TouchType.Down) {
+                        Row.onTouch((r6) => {
+                            if (r6.type === TouchType.Down) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
-                                    this.textArrowBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.interactive_pressed'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.textArrowBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
-                                    this.buttonBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.interactive_pressed'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.buttonBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                             }
-                            if (r10.type === TouchType.Up || r10.type === TouchType.Cancel) {
+                            if (r6.type === TouchType.Up || r6.type === TouchType.Cancel) {
                                 if (this.operationType === OperationType.TEXT_ARROW) {
-                                    this.textArrowBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.textArrowBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                                 if (this.operationType === OperationType.BUTTON) {
-                                    this.buttonBgColor = {
-                                        'id': -1,
-                                        'type': 10001,
-                                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                        'bundleName': '__harDefaultBundleName__',
-                                        'moduleName': '__harDefaultModuleName__'
-                                    };
+                                    this.buttonBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                                 }
                             }
                         });
                     }, Row);
-                    this.rightArea.bind(this)(this);
+                    this.rightArea.bind(this)();
                     Row.pop();
                     Flex.pop();
                 });
@@ -680,10 +628,10 @@ export class SubHeader extends ViewPU {
         }, If);
         If.pop();
     }
-    onMeasureSize(z9, a10, b10) {
-        let c10 = { width: z9.width, height: z9.height };
-        let d10 = this.getUIContext().getHostContext();
-        this.fontSize = d10.config?.fontSizeScale ?? 1;
+    onMeasureSize(h6, i6, j6) {
+        let k6 = { width: h6.width, height: h6.height };
+        let l6 = this.getUIContext().getHostContext();
+        this.fontSize = this.updateFontScale();
         if (this.isSuitableAging()) {
             this.ageing = true;
             this.subHeaderModifier.isAgeing = this.ageing;
@@ -692,16 +640,16 @@ export class SubHeader extends ViewPU {
             this.ageing = false;
             this.subHeaderModifier.isAgeing = this.ageing;
         }
-        a10.forEach((f10) => {
-            b10.minHeight = Math.min(Number(this.getMinHeight()), Number(b10.maxHeight));
-            c10.height = f10.measure(b10).height;
-            c10.width = Number(b10.maxWidth);
+        i6.forEach((m6) => {
+            j6.minHeight = Math.min(Number(this.getMinHeight()), Number(j6.maxHeight));
+            k6.height = m6.measure(j6).height;
+            k6.width = Number(j6.maxWidth);
         });
-        return c10;
+        return k6;
     }
-    onPlaceChildren(u9, v9, w9) {
-        v9.forEach((y9) => {
-            y9.layout({ x: 0, y: 0 });
+    onPlaceChildren(d6, e6, f6) {
+        e6.forEach((g6) => {
+            g6.layout({ x: 0, y: 0 });
         });
     }
     getRightAreaMaxWidth() {
@@ -727,21 +675,9 @@ export class SubHeader extends ViewPU {
     }
     getTextArrowPaddingLeft() {
         if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
-            return LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.padding_level1'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            return LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
         }
-        return LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.padding_level0'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        });
+        return LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
     }
     getTextArrowMarginRight() {
         if (this.operationItem && this.operationItem.length > 0 && this.operationItem[0].value) {
@@ -753,76 +689,66 @@ export class SubHeader extends ViewPU {
         if (this.contentPadding) {
             return this.contentPadding;
         }
-        let t9 = {};
+        let c6 = {};
         if (!this.titleBuilder && ((this.secondaryTitle && this.icon) ||
             (!this.primaryTitle && this.secondaryTitle))) {
-            t9 = {
-                start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+            c6 = {
+                start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             };
         }
-        return t9;
+        return c6;
     }
-    leftArea(i9 = null) {
-        this.observeComponentCreation2((k9, l9) => {
+    leftArea(z5 = null) {
+        this.observeComponentCreation2((a6, b6) => {
             If.create();
             if (this.titleBuilder) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.titleBuilder.bind(this)(i9 ? i9 : this);
+                    this.titleBuilder.bind(this)();
                 });
             }
             else if (this.secondaryTitle && this.icon) {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.IconSecondaryTitleStyle.bind(this)(makeBuilderParameterProxy('IconSecondaryTitleStyle',
-                        { content: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] :
-                        this['secondaryTitle']), iconOptions: () => ({
-                            icon: this.icon,
-                            symbolicIconOption: this.iconSymbolOptions,
-                        }) }), i9 ? i9 : this);
+                    this.IconSecondaryTitleStyle.bind(this)(makeBuilderParameterProxy('IconSecondaryTitleStyle', { content: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] : this['secondaryTitle']), iconOptions: () => ({
+                        icon: this.icon,
+                        symbolicIconOption: this.iconSymbolOptions,
+                    }) }));
                 });
             }
             else if (this.secondaryTitle && this.primaryTitle) {
                 this.ifElseBranchUpdateFunction(2, () => {
-                    this.SubTitleStyle.bind(this)(makeBuilderParameterProxy('SubTitleStyle',
-                        { content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']),
-                            subContent: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] :
-                            this['secondaryTitle']) }), i9 ? i9 : this);
+                    this.SubTitleStyle.bind(this)(makeBuilderParameterProxy('SubTitleStyle', { content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']), subContent: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] : this['secondaryTitle']) }));
                 });
             }
             else if (this.secondaryTitle) {
                 this.ifElseBranchUpdateFunction(3, () => {
-                    this.SecondTitleStyle.bind(this)(makeBuilderParameterProxy('SecondTitleStyle',
-                        { content: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] :
-                        this['secondaryTitle']) }), i9 ? i9 : this);
+                    this.SecondTitleStyle.bind(this)(makeBuilderParameterProxy('SecondTitleStyle', { content: () => (this['__secondaryTitle'] ? this['__secondaryTitle'] : this['secondaryTitle']) }));
                 });
             }
             else if (this.select) {
                 this.ifElseBranchUpdateFunction(4, () => {
-                    this.SelectStyle.bind(this)(this.select, i9 ? i9 : this);
+                    this.SelectStyle.bind(this)(this.select);
                 });
             }
             else if (this.primaryTitle) {
                 this.ifElseBranchUpdateFunction(5, () => {
-                    this.PrimaryTitleStyle.bind(this)(makeBuilderParameterProxy('PrimaryTitleStyle',
-                        { content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']) }), i9 ? i9 : this);
+                    this.PrimaryTitleStyle.bind(this)(makeBuilderParameterProxy('PrimaryTitleStyle', { content: () => (this['__primaryTitle'] ? this['__primaryTitle'] : this['primaryTitle']) }));
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(6, () => {
-                    this.dummyFunction.bind(this)(i9 ? i9 : this);
+                    this.dummyFunction.bind(this)();
                 });
             }
         }, If);
         If.pop();
     }
-    rightArea(n8 = null) {
-        this.observeComponentCreation2((e9, f9) => {
+    rightArea(q5 = null) {
+        this.observeComponentCreation2((x5, y5) => {
             If.create();
             if (this.operationType === OperationType.BUTTON && (this.operationItem && this.operationItem.length > 0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.ButtonStyle.bind(this)(this.operationItem[0], n8 ? n8 : this);
+                    this.ButtonStyle.bind(this)(this.operationItem[0]);
                 });
             }
             else {
@@ -831,11 +757,11 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((a9, b9) => {
+        this.observeComponentCreation2((v5, w5) => {
             If.create();
             if (this.operationType === OperationType.TEXT_ARROW && (this.operationItem && this.operationItem.length > 0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.TextArrowStyle.bind(this)(this.operationItem[0], n8 ? n8 : this);
+                    this.TextArrowStyle.bind(this)(this.operationItem[0]);
                 });
             }
             else {
@@ -844,11 +770,11 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((w8, x8) => {
+        this.observeComponentCreation2((t5, u5) => {
             If.create();
             if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.IconGroupStyle.bind(this)(this.operationItem, n8 ? n8 : this);
+                    this.IconGroupStyle.bind(this)(this.operationItem);
                 });
             }
             else {
@@ -857,11 +783,11 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((s8, t8) => {
+        this.observeComponentCreation2((r5, s5) => {
             If.create();
             if (this.operationType === OperationType.LOADING) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.LoadingProcessStyle.bind(this)(n8 ? n8 : this);
+                    this.LoadingProcessStyle.bind(this)();
                 });
             }
             else {
@@ -871,57 +797,45 @@ export class SubHeader extends ViewPU {
         }, If);
         If.pop();
     }
-    IconSecondaryTitleStyle(t7, u7 = null) {
-        this.observeComponentCreation2((k8, l8) => {
+    IconSecondaryTitleStyle(e5, f5 = null) {
+        this.observeComponentCreation2((o5, p5) => {
             Flex.create({ direction: FlexDirection.Row, alignItems: ItemAlign.Center });
             Flex.padding({
-                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                top: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
             Flex.onAppear(() => {
                 this.changeFlexAlign(FlexAlign.SpaceBetween);
             });
         }, Flex);
-        this.observeComponentCreation2((a8, b8) => {
+        this.observeComponentCreation2((i5, j5) => {
             If.create();
-            if (Util.isSymbolResource(t7.iconOptions?.icon)) {
+            if (Util.isSymbolResource(e5.iconOptions?.icon)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i8, j8) => {
-                        SymbolGlyph.create(t7.iconOptions?.icon);
-                        SymbolGlyph.fontSize(t7.iconOptions?.symbolicIconOption?.fontSize ?
-                        Util.symbolFontSize(t7.iconOptions?.symbolicIconOption?.fontSize) : LEFT_ICON_SIZE);
-                        SymbolGlyph.fontColor(t7.iconOptions?.symbolicIconOption?.fontColor ??
-                            [this.subHeaderTheme.leftIconColor]);
-                        SymbolGlyph.fontWeight(t7.iconOptions?.symbolicIconOption?.fontWeight);
-                        SymbolGlyph.renderingStrategy(t7.iconOptions?.symbolicIconOption?.renderingStrategy);
-                        SymbolGlyph.effectStrategy(t7.iconOptions?.symbolicIconOption?.effectStrategy);
-                        SymbolGlyph.margin({ end: LengthMetrics.resource({ 'id': -1, 'type': 10002,
-                            params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__' }) });
+                    this.observeComponentCreation2((m5, n5) => {
+                        SymbolGlyph.create(e5.iconOptions?.icon);
+                        SymbolGlyph.fontSize(e5.iconOptions?.symbolicIconOption?.fontSize ?
+                        Util.symbolFontSize(e5.iconOptions?.symbolicIconOption?.fontSize) : LEFT_ICON_SIZE);
+                        SymbolGlyph.fontColor(e5.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.leftIconColor]);
+                        SymbolGlyph.fontWeight(e5.iconOptions?.symbolicIconOption?.fontWeight);
+                        SymbolGlyph.renderingStrategy(e5.iconOptions?.symbolicIconOption?.renderingStrategy);
+                        SymbolGlyph.effectStrategy(e5.iconOptions?.symbolicIconOption?.effectStrategy);
+                        SymbolGlyph.margin({ end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) });
                         SymbolGlyph.flexShrink(0);
                     }, SymbolGlyph);
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((e8, f8) => {
-                        Image.create(t7.iconOptions?.icon);
+                    this.observeComponentCreation2((k5, l5) => {
+                        Image.create(e5.iconOptions?.icon);
                         Image.fillColor(this.subHeaderTheme.leftIconColor);
                         Image.width(LEFT_ICON_SIZE);
                         Image.height(LEFT_ICON_SIZE);
-                        Image.margin({ end: LengthMetrics.resource({ 'id': -1, 'type': 10002,
-                            params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__' }) });
+                        Image.margin({ end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) });
                         Image.draggable(false);
                         Image.flexShrink(0);
                     }, Image);
@@ -929,8 +843,8 @@ export class SubHeader extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((y7, z7) => {
-            Text.create(t7.content);
+        this.observeComponentCreation2((g5, h5) => {
+            Text.create(e5.content);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Medium,
@@ -943,79 +857,66 @@ export class SubHeader extends ViewPU {
         Text.pop();
         Flex.pop();
     }
-    SubTitleStyle(h7, i7 = null) {
-        this.observeComponentCreation2((q7, r7) => {
+    SubTitleStyle(w4, x4 = null) {
+        this.observeComponentCreation2((c5, d5) => {
             Column.create();
             Column.padding({
-                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                top: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
             Column.alignItems(HorizontalAlign.Start);
             Column.onAppear(() => {
                 this.changeFlexAlign(FlexAlign.SpaceBetween);
             });
         }, Column);
-        this.observeComponentCreation2((o7, p7) => {
-            Text.create(h7.content);
+        this.observeComponentCreation2((a5, b5) => {
+            Text.create(w4.content);
             __Text__primaryTitleStyles({
                 fontWeight: FontWeight.Bold,
-                maxLines: SINGLE_LINE_NUM,
+                maxLines: DOUBLE_LINE_NUM,
                 alignment: Alignment.Start,
                 fontColor: this.subHeaderTheme.fontPrimaryColor,
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
+            Text.accessibilityLevel('yes');
             Text.width('100%');
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((m7, n7) => {
-            Text.create(h7.subContent);
+        this.observeComponentCreation2((y4, z4) => {
+            Text.create(w4.subContent);
             __Text__secondaryTitleStyles({
-                maxLines: SINGLE_LINE_NUM,
+                maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Regular,
                 alignment: Alignment.Start,
                 fontColor: this.subHeaderTheme.fontSecondaryColor,
             });
             Text.width('100%');
             Text.margin({
-                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
+            Text.accessibilityLevel('yes');
         }, Text);
         Text.pop();
         Column.pop();
     }
-    SecondTitleStyle(y6, z6 = null) {
-        this.observeComponentCreation2((f7, g7) => {
+    SecondTitleStyle(q4, r4 = null) {
+        this.observeComponentCreation2((u4, v4) => {
             Column.create();
             Column.alignItems(HorizontalAlign.Start);
             Column.padding({
-                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                top: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level6'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
         }, Column);
-        this.observeComponentCreation2((c7, d7) => {
-            Text.create(y6.content);
+        this.observeComponentCreation2((s4, t4) => {
+            Text.create(q4.content);
             __Text__secondaryTitleStyles({
                 maxLines: DOUBLE_LINE_NUM,
                 fontWeight: FontWeight.Medium,
@@ -1027,63 +928,56 @@ export class SubHeader extends ViewPU {
                 this.changeFlexAlign(FlexAlign.SpaceBetween);
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.secondaryTitleModifier));
+            Text.accessibilityLevel('yes');
         }, Text);
         Text.pop();
         Column.pop();
     }
-    SelectStyle(m6, n6 = null) {
-        this.observeComponentCreation2((v6, w6) => {
+    SelectStyle(i4, j4 = null) {
+        this.observeComponentCreation2((o4, p4) => {
             Column.create();
             Column.alignItems(HorizontalAlign.Start);
             Column.onAppear(() => {
                 this.changeFlexAlign(FlexAlign.SpaceBetween);
             });
         }, Column);
-        this.observeComponentCreation2((q6, r6) => {
-            Select.create(m6.options);
+        this.observeComponentCreation2((k4, l4) => {
+            Select.create(i4.options);
             Select.height('auto');
             Select.width('auto');
             Select.selected(ObservedObject.GetRawObject(this.selectedIndex));
             Select.value(ObservedObject.GetRawObject(this.selectValue));
-            Select.onSelect((t6, u6) => {
-                this.selectedIndex = t6;
-                if (u6) {
-                    this.selectValue = u6;
+            Select.onSelect((m4, n4) => {
+                this.selectedIndex = m4;
+                if (n4) {
+                    this.selectValue = n4;
                 }
-                if (m6.onSelect) {
-                    m6.onSelect(t6, u6);
+                if (i4.onSelect) {
+                    i4.onSelect(m4, n4);
                 }
             });
             Select.font({
-                size: { 'id': -1, 'type': 10002, params: ['sys.float.Body_L'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                size: { 'id': -1, 'type': 10002, params: ['sys.float.Body_L'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 weight: FontWeight.Medium,
             });
         }, Select);
         Select.pop();
         Column.pop();
     }
-    PrimaryTitleStyle(d6, e6 = null) {
-        this.observeComponentCreation2((k6, l6) => {
+    PrimaryTitleStyle(c4, d4 = null) {
+        this.observeComponentCreation2((g4, h4) => {
             Column.create();
             Column.alignItems(HorizontalAlign.Start);
             Column.padding({
-                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                top: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: this.fontSize >= MIN_FONT_SIZE ?
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                top: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: this.fontSize >= MIN_FONT_SIZE ? LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })
+                    : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
         }, Column);
-        this.observeComponentCreation2((h6, i6) => {
-            Text.create(d6.content);
+        this.observeComponentCreation2((e4, f4) => {
+            Text.create(c4.content);
             __Text__primaryTitleStyles({
                 fontWeight: FontWeight.Bold,
                 maxLines: DOUBLE_LINE_NUM,
@@ -1095,98 +989,60 @@ export class SubHeader extends ViewPU {
                 this.changeFlexAlign(FlexAlign.SpaceBetween);
             });
             Text.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.primaryTitleModifier));
+            Text.accessibilityLevel('yes');
         }, Text);
         Text.pop();
         Column.pop();
     }
-    ButtonStyle(c5, d5 = null) {
-        this.observeComponentCreation2((b6, c6) => {
+    ButtonStyle(l3, m3 = null) {
+        this.observeComponentCreation2((a4, b4) => {
             Row.create();
             Row.margin({
-                start: LengthMetrics.resource(this.ageing ?
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: LengthMetrics.resource(this.ageing ?
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                start: LengthMetrics.resource(this.ageing ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: LengthMetrics.resource(this.ageing ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
             Row.justifyContent(FlexAlign.End);
         }, Row);
-        this.observeComponentCreation2((z5, a6) => {
+        this.observeComponentCreation2((y3, z3) => {
             Stack.create();
             Stack.focusable(true);
         }, Stack);
-        this.observeComponentCreation2((h5, i5) => {
+        this.observeComponentCreation2((n3, o3) => {
             If.create();
-            if (c5) {
+            if (l3) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((s5, t5) => {
+                    this.observeComponentCreation2((t3, u3) => {
                         Row.create();
                         Row.padding({
-                            start: LengthMetrics.resource({
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.padding_level1'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            }),
-                            end: LengthMetrics.resource({
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.padding_level1'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            }),
-                            top: LengthMetrics.resource({
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.padding_level2'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            }),
-                            bottom: LengthMetrics.resource({
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.padding_level2'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            }),
+                            start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                            end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                            top: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                            bottom: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
                         });
                         Row.margin({
                             start: this.leftIconMargin(),
-                            bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                         Row.backgroundColor(ObservedObject.GetRawObject(this.buttonBgColor));
                         Row.focusable(true);
                         Row.constraintSize({ minHeight: OPERATE_ITEM_LENGTH });
                         Row.justifyContent(FlexAlign.End);
-                        Row.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                        Row.onHover((y5) => {
-                            if (y5) {
+                        Row.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Row.onHover((x3) => {
+                            if (x3) {
                                 this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                             }
                             else {
-                                this.buttonBgColor = { 'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
+                                this.buttonBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                             }
                         });
-                        Row.onSizeChange((w5, x5) => {
-                            this.buttonStyleWidth = Number(x5.width);
-                            this.buttonStyleHeight = Number(x5.height);
+                        Row.onSizeChange((v3, w3) => {
+                            this.buttonStyleWidth = Number(w3.width);
+                            this.buttonStyleHeight = Number(w3.height);
                         });
                     }, Row);
-                    this.observeComponentCreation2((q5, r5) => {
-                        Text.create(c5.value);
+                    this.observeComponentCreation2((r3, s3) => {
+                        Text.create(l3.value);
                         __Text__secondaryTitleStyles({
                             fontWeight: FontWeight.Medium,
                             maxLines: DOUBLE_LINE_NUM,
@@ -1195,7 +1051,7 @@ export class SubHeader extends ViewPU {
                     }, Text);
                     Text.pop();
                     Row.pop();
-                    this.observeComponentCreation2((o5, p5) => {
+                    this.observeComponentCreation2((p3, q3) => {
                         Text.create();
                         Text.focusable(true);
                         Text.width(this.buttonStyleWidth);
@@ -1203,31 +1059,19 @@ export class SubHeader extends ViewPU {
                         Text.hitTestBehavior(HitTestMode.None);
                         ViewStackProcessor.visualState('focused');
                         Text.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            width: { 'id': -1, 'type': 10002, params: ['sys.float.outline_extra_larger'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            width: { 'id': -1, 'type': 10002, params: ['sys.float.outline_extra_larger'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             color: this.subHeaderTheme.borderFocusColor,
                         });
                         ViewStackProcessor.visualState('pressed');
-                        Text.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         ViewStackProcessor.visualState('disabled');
-                        Text.opacity({ 'id': -1, 'type': 10002, params: ['sys.float.interactive_disable'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.opacity({ 'id': -1, 'type': 10002, params: ['sys.float.interactive_disable'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         ViewStackProcessor.visualState('normal');
                         Text.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            width: { 'id': -1, 'type': 10002, params: ['sys.float.border_none'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            color: {
-                                'id': -1,
-                                'type': 10001,
-                                params: ['sys.color.ohos_id_color_focused_outline_transparent'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            width: { 'id': -1, 'type': 10002, params: ['sys.float.border_none'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                         ViewStackProcessor.visualState();
                     }, Text);
@@ -1244,6 +1088,9 @@ export class SubHeader extends ViewPU {
         Row.pop();
     }
     leftIconMargin() {
+        if (this.titleBuilder) {
+            return LengthMetrics.vp(0);
+        }
         if (this.icon && Util.isSymbolResource(this.icon)) {
             return this.ageing ? LengthMetrics.vp((this.iconSymbolOptions?.fontSize ?
             Util.numberToSize(this.iconSymbolOptions?.fontSize) : LEFT_ICON_SIZE_NUMBER) +
@@ -1254,74 +1101,55 @@ export class SubHeader extends ViewPU {
                 LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
         }
     }
-    TextArrowStyle(y3, z3 = null) {
-        this.observeComponentCreation2((a5, b5) => {
+    TextArrowStyle(s2, t2 = null) {
+        this.observeComponentCreation2((j3, k3) => {
             Row.create();
             Row.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.subHeaderModifier));
             Row.focusable(true);
             Row.justifyContent(this.ageing ? FlexAlign.SpaceBetween : FlexAlign.End);
             Row.margin({
-                start: LengthMetrics.resource(this.ageing ?
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: LengthMetrics.resource(this.ageing ?
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
-                    { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                start: LengthMetrics.resource(this.ageing ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: LengthMetrics.resource(this.ageing ? { 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
         }, Row);
-        this.observeComponentCreation2((w4, x4) => {
+        this.observeComponentCreation2((g3, h3) => {
             Stack.create();
             Stack.margin({
                 start: this.leftIconMargin(),
             });
-            Stack.onHover((z4) => {
-                if (z4) {
+            Stack.onHover((i3) => {
+                if (i3) {
                     this.textArrowBgColor = this.subHeaderTheme.textArrowHoverBgColor;
                 }
                 else {
-                    this.textArrowBgColor = {
-                        'id': -1,
-                        'type': 10001,
-                        params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                        'bundleName': '__harDefaultBundleName__',
-                        'moduleName': '__harDefaultModuleName__'
-                    };
+                    this.textArrowBgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                 }
             });
         }, Stack);
-        this.observeComponentCreation2((r4, s4) => {
+        this.observeComponentCreation2((c3, d3) => {
             Row.create();
             Row.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.subHeaderModifier));
             Row.alignItems(VerticalAlign.Center);
-            Row.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Row.focusable(true);
             Row.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
             Row.constraintSize({ minHeight: OPERATE_ITEM_LENGTH });
             Row.padding({
                 start: this.getTextArrowPaddingLeft(),
-                top: this.ageing ? LengthMetrics.vp(0) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
-                bottom: this.ageing ? LengthMetrics.vp(0) :
-                LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                bottom: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
-            Row.onSizeChange((u4, v4) => {
-                this.textArrowStyleWidth = Number(v4.width);
-                this.textArrowStyleHeight = Number(v4.height);
+            Row.onSizeChange((e3, f3) => {
+                this.textArrowStyleWidth = Number(f3.width);
+                this.textArrowStyleHeight = Number(f3.height);
             });
         }, Row);
-        this.observeComponentCreation2((k4, l4) => {
+        this.observeComponentCreation2((y2, z2) => {
             If.create();
-            if (y3) {
+            if (s2) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((p4, q4) => {
-                        Text.create(y3.value);
+                    this.observeComponentCreation2((a3, b3) => {
+                        Text.create(s2.value);
                         __Text__secondaryTitleStyles({
                             maxLines: DOUBLE_LINE_NUM,
                             fontWeight: FontWeight.Regular,
@@ -1342,7 +1170,7 @@ export class SubHeader extends ViewPU {
         }, If);
         If.pop();
         Row.pop();
-        this.observeComponentCreation2((i4, j4) => {
+        this.observeComponentCreation2((w2, x2) => {
             Row.create();
             Row.justifyContent(FlexAlign.End);
             Row.height(this.textArrowStyleHeight);
@@ -1350,32 +1178,24 @@ export class SubHeader extends ViewPU {
             Row.hitTestBehavior(HitTestMode.None);
             ViewStackProcessor.visualState('focused');
             Row.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: { 'id': -1, 'type': 10002, params: ['sys.float.outline_extra_larger'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                width: { 'id': -1, 'type': 10002, params: ['sys.float.outline_extra_larger'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 color: this.subHeaderTheme.borderFocusColor,
             });
             ViewStackProcessor.visualState('pressed');
-            Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             ViewStackProcessor.visualState('disabled');
-            Row.opacity({ 'id': -1, 'type': 10002, params: ['sys.float.interactive_disable'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Row.opacity({ 'id': -1, 'type': 10002, params: ['sys.float.interactive_disable'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             ViewStackProcessor.visualState('normal');
             Row.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: { 'id': -1, 'type': 10002, params: ['sys.float.border_none'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline_transparent'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                width: { 'id': -1, 'type': 10002, params: ['sys.float.border_none'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             });
             ViewStackProcessor.visualState();
         }, Row);
-        this.observeComponentCreation2((g4, h4) => {
-            Image.create({ 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_arrow_right'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.observeComponentCreation2((u2, v2) => {
+            Image.create({ 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_arrow_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Image.fillColor(this.subHeaderTheme.iconArrowColor);
             Image.width(ARROW_ICON_WIDTH);
             Image.height(OPERATE_ITEM_LENGTH);
@@ -1387,82 +1207,63 @@ export class SubHeader extends ViewPU {
         Stack.pop();
         Row.pop();
     }
-    IconGroupStyle(r2, s2 = null) {
-        this.observeComponentCreation2((w3, x3) => {
+    IconGroupStyle(y1, z1 = null) {
+        this.observeComponentCreation2((q2, r2) => {
             Row.create();
             Row.justifyContent(FlexAlign.End);
             Row.focusable(true);
         }, Row);
-        this.observeComponentCreation2((v2, w2) => {
+        this.observeComponentCreation2((a2, b2) => {
             ForEach.create();
-            const x2 = (z2, a3) => {
-                const b3 = z2;
-                this.observeComponentCreation2((d3, e3) => {
+            const c2 = (d2, e2) => {
+                const f2 = d2;
+                this.observeComponentCreation2((g2, h2) => {
                     If.create();
-                    if (Util.isResourceType(b3.value)) {
+                    if (Util.isResourceType(f2.value)) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((i3, j3) => {
+                            this.observeComponentCreation2((i2, j2) => {
                                 If.create();
-                                if (a3 <= INDEX_TWO) {
+                                if (e2 <= INDEX_TWO) {
                                     this.ifElseBranchUpdateFunction(0, () => {
-                                        this.observeComponentCreation2((u3, v3) => {
+                                        this.observeComponentCreation2((o2, p2) => {
                                             __Common__.create();
                                             __Common__.margin({
-                                                start: LengthMetrics.resource({
-                                                    'id': -1,
-                                                    'type': 10002,
-                                                    params: ['sys.float.padding_level4'],
-                                                    'bundleName': '__harDefaultBundleName__',
-                                                    'moduleName': '__harDefaultModuleName__'
-                                                }),
-                                                bottom: LengthMetrics.resource({
-                                                    'id': -1,
-                                                    'type': 10002,
-                                                    params: ['sys.float.padding_level3'],
-                                                    'bundleName': '__harDefaultBundleName__',
-                                                    'moduleName': '__harDefaultModuleName__'
-                                                }),
+                                                start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                                                bottom: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
                                             });
                                         }, __Common__);
                                         {
-                                            this.observeComponentCreation2((o3, p3) => {
-                                                if (p3) {
-                                                    let q3 = new SingleIconStyle(
-                                                        ViewPU.__proto__ !== NativeViewPartialUpdate &&
-                                                            s2 instanceof PUV2ViewBase ? s2 : this, {
+                                            this.observeComponentCreation2((k2, l2) => {
+                                                if (l2) {
+                                                    let m2 = new SingleIconStyle(this, {
                                                         item: {
                                                             iconOptions: {
-                                                                icon: b3.value,
-                                                                symbolicIconOption: this.operationSymbolOptions &&
-                                                                    this.operationSymbolOptions.length > a3 ?
-                                                                this.operationSymbolOptions[a3] : null,
+                                                                icon: f2.value,
+                                                                symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > e2 ?
+                                                                this.operationSymbolOptions[e2] : null,
                                                             },
-                                                            action: b3.action,
+                                                            action: f2.action,
                                                         },
                                                         isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
-                                                    }, undefined, o3, () => { }, {
-                                                        page: 'library/src/main/ets/components/mainpage/MainPage.ets',
-                                                        line: 761, col: 13 });
-                                                    ViewPU.create(q3);
-                                                    let r3 = () => {
+                                                    }, undefined, k2, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 796, col: 13 });
+                                                    ViewPU.create(m2);
+                                                    let n2 = () => {
                                                         return {
                                                             item: {
                                                                 iconOptions: {
-                                                                    icon: b3.value,
-                                                                    symbolicIconOption: this.operationSymbolOptions &&
-                                                                        this.operationSymbolOptions.length > a3 ?
-                                                                    this.operationSymbolOptions[a3] : null,
+                                                                    icon: f2.value,
+                                                                    symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > e2 ?
+                                                                    this.operationSymbolOptions[e2] : null,
                                                                 },
-                                                                action: b3.action,
+                                                                action: f2.action,
                                                             },
-                                                            isSingleIcon: this.operationItem?.length ===
-                                                                SINGLE_ICON_NUMBER
+                                                            isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER
                                                         };
                                                     };
-                                                    q3.paramsGenerator_ = r3;
+                                                    m2.paramsGenerator_ = n2;
                                                 }
                                                 else {
-                                                    this.updateStateVarsOfChildByElmtId(o3, {});
+                                                    this.updateStateVarsOfChildByElmtId(k2, {});
                                                 }
                                             }, { name: 'SingleIconStyle' });
                                         }
@@ -1484,37 +1285,33 @@ export class SubHeader extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(v2, r2, x2, undefined, true, false);
+            this.forEachUpdateFunction(a2, y1, c2, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
     }
-    LoadingProcessStyle(k2 = null) {
-        this.observeComponentCreation2((p2, q2) => {
+    LoadingProcessStyle(t1 = null) {
+        this.observeComponentCreation2((w1, x1) => {
             Row.create();
             Row.justifyContent(FlexAlign.End);
             Row.padding({
-                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             });
             Row.margin({
-                start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'],
-                    'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
+                start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             });
         }, Row);
-        this.observeComponentCreation2((n2, o2) => {
+        this.observeComponentCreation2((u1, v1) => {
             LoadingProgress.create();
             LoadingProgress.width(OPERATE_ITEM_LENGTH);
             LoadingProgress.height(OPERATE_ITEM_LENGTH);
-            LoadingProgress.color({ 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            LoadingProgress.color({ 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
         }, LoadingProgress);
         Row.pop();
     }
-    dummyFunction(f2 = null) {
-        this.observeComponentCreation2((h2, i2) => {
+    dummyFunction(q1 = null) {
+        this.observeComponentCreation2((r1, s1) => {
             Row.create();
             Row.onAppear(() => {
                 this.changeFlexAlign(FlexAlign.End);
@@ -1522,56 +1319,50 @@ export class SubHeader extends ViewPU {
         }, Row);
         Row.pop();
     }
-    changeFlexAlign(e2) {
-        if (this.flexAlign === e2) {
+    changeFlexAlign(p1) {
+        if (this.flexAlign === p1) {
             return;
         }
-        this.flexAlign = e2;
+        this.flexAlign = p1;
     }
     rerender() {
         this.updateDirtyElements();
     }
 }
 class SingleIconStyle extends ViewPU {
-    constructor(y1, z1, a2, b2 = -1, c2 = undefined, d2) {
-        super(y1, a2, b2, d2);
-        if (typeof c2 === 'function') {
-            this.paramsGenerator_ = c2;
+    constructor(j1, k1, l1, m1 = -1, n1 = undefined, o1) {
+        super(j1, l1, m1, o1);
+        if (typeof n1 === 'function') {
+            this.paramsGenerator_ = n1;
         }
-        this.__bgColor = new ObservedPropertyObjectPU({
-            'id': -1,
-            'type': 10001,
-            params: ['sys.color.ohos_id_color_sub_background_transparent'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }, this, 'bgColor');
+        this.__bgColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'bgColor');
         this.__isFocus = new ObservedPropertySimplePU(false, this, 'isFocus');
         this.item = null;
         this.__subHeaderTheme = this.initializeConsume('subHeaderTheme', 'subHeaderTheme');
         this.isSingleIcon = true;
-        this.setInitiallyProvidedValue(z1);
+        this.setInitiallyProvidedValue(k1);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(x1) {
-        if (x1.bgColor !== undefined) {
-            this.bgColor = x1.bgColor;
+    setInitiallyProvidedValue(i1) {
+        if (i1.bgColor !== undefined) {
+            this.bgColor = i1.bgColor;
         }
-        if (x1.isFocus !== undefined) {
-            this.isFocus = x1.isFocus;
+        if (i1.isFocus !== undefined) {
+            this.isFocus = i1.isFocus;
         }
-        if (x1.item !== undefined) {
-            this.item = x1.item;
+        if (i1.item !== undefined) {
+            this.item = i1.item;
         }
-        if (x1.isSingleIcon !== undefined) {
-            this.isSingleIcon = x1.isSingleIcon;
+        if (i1.isSingleIcon !== undefined) {
+            this.isSingleIcon = i1.isSingleIcon;
         }
     }
-    updateStateVars(w1) {
+    updateStateVars(h1) {
     }
-    purgeVariableDependenciesOnElmtId(v1) {
-        this.__bgColor.purgeDependencyOnElmtId(v1);
-        this.__isFocus.purgeDependencyOnElmtId(v1);
-        this.__subHeaderTheme.purgeDependencyOnElmtId(v1);
+    purgeVariableDependenciesOnElmtId(g1) {
+        this.__bgColor.purgeDependencyOnElmtId(g1);
+        this.__isFocus.purgeDependencyOnElmtId(g1);
+        this.__subHeaderTheme.purgeDependencyOnElmtId(g1);
     }
     aboutToBeDeleted() {
         this.__bgColor.aboutToBeDeleted();
@@ -1583,27 +1374,27 @@ class SingleIconStyle extends ViewPU {
     get bgColor() {
         return this.__bgColor.get();
     }
-    set bgColor(u1) {
-        this.__bgColor.set(u1);
+    set bgColor(f1) {
+        this.__bgColor.set(f1);
     }
     get isFocus() {
         return this.__isFocus.get();
     }
-    set isFocus(t1) {
-        this.__isFocus.set(t1);
+    set isFocus(e1) {
+        this.__isFocus.set(e1);
     }
     get subHeaderTheme() {
         return this.__subHeaderTheme.get();
     }
-    set subHeaderTheme(s1) {
-        this.__subHeaderTheme.set(s1);
+    set subHeaderTheme(d1) {
+        this.__subHeaderTheme.set(d1);
     }
     initialRender() {
-        this.observeComponentCreation2((f1, g1) => {
+        this.observeComponentCreation2((w, x) => {
             If.create();
             if (this.item && this.item.iconOptions) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((k1, l1) => {
+                    this.observeComponentCreation2((y, z) => {
                         Row.create();
                         Row.focusable(true);
                         Row.width(SINGLE_ICON_ZONE_SIZE);
@@ -1612,82 +1403,46 @@ class SingleIconStyle extends ViewPU {
                         Row.backgroundColor(ObservedObject.GetRawObject(this.bgColor));
                         ViewStackProcessor.visualState('normal');
                         Row.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            width: { 'id': -1, 'type': 10002, params: ['sys.float.border_none'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            color: {
-                                'id': -1,
-                                'type': 10001,
-                                params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            width: { 'id': -1, 'type': 10002, params: ['sys.float.border_none'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                         ViewStackProcessor.visualState('focused');
                         Row.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            width: { 'id': -1, 'type': 10002, params: ['sys.float.outline_extra_larger'],
-                                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            width: { 'id': -1, 'type': 10002, params: ['sys.float.outline_extra_larger'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             color: this.subHeaderTheme.borderFocusColor,
                             style: BorderStyle.Solid,
                         });
                         ViewStackProcessor.visualState('pressed');
-                        Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Row.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         ViewStackProcessor.visualState('disabled');
-                        Row.opacity({ 'id': -1, 'type': 10002, params: ['sys.float.interactive_disable'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Row.opacity({ 'id': -1, 'type': 10002, params: ['sys.float.interactive_disable'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         ViewStackProcessor.visualState();
-                        Row.onTouch((r1) => {
-                            if (r1.type === TouchType.Down || TouchType.Cancel) {
-                                this.bgColor = {
-                                    'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.interactive_pressed'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
+                        Row.onTouch((c1) => {
+                            if (c1.type === TouchType.Down || TouchType.Cancel) {
+                                this.bgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                             }
-                            if (r1.type === TouchType.Up) {
-                                this.bgColor = {
-                                    'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
+                            if (c1.type === TouchType.Up) {
+                                this.bgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                             }
                         });
-                        Row.onHover((q1) => {
-                            if (q1) {
-                                this.bgColor = {
-                                    'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.interactive_hover'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
+                        Row.onHover((b1) => {
+                            if (b1) {
+                                this.bgColor = { 'id': -1, 'type': 10001, params: ['sys.color.interactive_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                             }
                             else {
-                                this.bgColor = {
-                                    'id': -1,
-                                    'type': 10001,
-                                    params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                };
+                                this.bgColor = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                             }
                         });
                         Row.responseRegion(this.iconResponseRegion());
-                        Row.onClick((p1) => {
+                        Row.onClick((a1) => {
                             if (this.item?.action) {
                                 this.item?.action();
                             }
                         });
                     }, Row);
-                    this.IconZone.bind(this)(this);
+                    this.IconZone.bind(this)();
                     Row.pop();
                 });
             }
@@ -1704,25 +1459,24 @@ class SingleIconStyle extends ViewPU {
         }
         return { x: ICON_REGION_X, y: ICON_REGION_Y, width: MULTI_ICON_REGION_WIDTH, height: MIN_HOT_AREA_LENGTH };
     }
-    fontSizeValue(d1) {
-        return d1.iconOptions?.symbolicIconOption?.fontSize ?
-        Util.symbolFontSize(d1.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE;
+    fontSizeValue(v) {
+        return v.iconOptions?.symbolicIconOption?.fontSize ?
+        Util.symbolFontSize(v.iconOptions?.symbolicIconOption?.fontSize) : RIGHT_SINGLE_ICON_SIZE;
     }
     IconZone(m = null) {
-        this.observeComponentCreation2((o, p) => {
+        this.observeComponentCreation2((n, o) => {
             If.create();
             if (this.item && this.item.iconOptions) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((t, u) => {
+                    this.observeComponentCreation2((p, q) => {
                         If.create();
                         if (Util.isSymbolResource(this.item.iconOptions.icon)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b1, c1) => {
+                                this.observeComponentCreation2((t, u) => {
                                     SymbolGlyph.create(this.item.iconOptions?.icon);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.fontSize(this.fontSizeValue(this.item));
-                                    SymbolGlyph.fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ??
-                                        [this.subHeaderTheme.rightIconColor]);
+                                    SymbolGlyph.fontColor(this.item.iconOptions?.symbolicIconOption?.fontColor ?? [this.subHeaderTheme.rightIconColor]);
                                     SymbolGlyph.fontWeight(this.item.iconOptions?.symbolicIconOption?.fontWeight);
                                     SymbolGlyph.renderingStrategy(this.item.iconOptions?.symbolicIconOption?.renderingStrategy);
                                     SymbolGlyph.effectStrategy(this.item.iconOptions?.symbolicIconOption?.effectStrategy);
@@ -1731,7 +1485,7 @@ class SingleIconStyle extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((x, y) => {
+                                this.observeComponentCreation2((r, s) => {
                                     Image.create(this.item?.iconOptions?.icon);
                                     Image.fillColor(this.subHeaderTheme.rightIconColor);
                                     Image.width(RIGHT_SINGLE_ICON_SIZE);
@@ -1799,7 +1553,7 @@ class Util {
             return b;
         }
         else {
-            return resourceManager.getSystemResourceManager().getNumber(b);
+            return getContext().resourceManager.getNumber(b);
         }
     }
     static symbolFontSize(a) {
