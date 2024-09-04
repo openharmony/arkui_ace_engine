@@ -4467,11 +4467,13 @@ struct ArkUIRichEditorControllerModifier {
 };
 
 struct ArkUILinearIndicatorModifier {
-    void (*setLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
+    void (*setLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node, ArkUI_Float32 space, ArkUI_Int32 unit);
     void (*resetLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorStyleStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 strokeWidth);
+    void (*setLinearIndicatorIndicatorStyleStrokeWidth)(
+        ArkUINodeHandle node, ArkUI_Float32 strokeWidth, ArkUI_Int32 unit);
     void (*resetLinearIndicatorIndicatorStyleStrokeWidth)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorStyleStrokeRadius)(ArkUINodeHandle node, ArkUI_Float32 strokeRadius);
+    void (*setLinearIndicatorIndicatorStyleStrokeRadius)(
+        ArkUINodeHandle node, ArkUI_Float32 strokeRadius, ArkUI_Int32 unit);
     void (*resetLinearIndicatorIndicatorStyleStrokeRadius)(ArkUINodeHandle node);
     void (*setLinearIndicatorIndicatorStyleTrackBackgroundColor)(
         ArkUINodeHandle node, ArkUI_Uint32 trackBackgroundColor);

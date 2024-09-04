@@ -8350,19 +8350,11 @@ class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
       getUINativeModule().linearIndicator.resetIndicatorStyle(node);
     }
     else {
-      getUINativeModule().linearIndicator.setIndicatorStyle(node,
-        this.value.space, this.value.strokeWidth, this.value.strokeRadius
-        , this.value.trackBackgroundColor, this.value.trackColor);
+      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
     }
   }
   checkObjectDiff() {
-    return
-    this.stageValue.space !== this.value.space
-      || this.stageValue.strokeWidth !== this.value.strokeWidth
-      || this.stageValue.strokeRadius !== this.value.strokeRadius
-      || this.stageValue.trackBackgroundColor !== this.value.trackBackgroundColor
-      || this.stageValue.trackColor !== this.value.trackColor
-      ;
+    return this.stageValue !== this.value;
   }
 }
 LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
