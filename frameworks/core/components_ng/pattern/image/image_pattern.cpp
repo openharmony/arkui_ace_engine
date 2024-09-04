@@ -449,6 +449,9 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
 
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
+    if (!dstSize.IsPositive()) {
+        return;
+    }
     // if layout size has not decided yet, resize target can not be calculated
     auto host = GetHost();
     CHECK_NULL_VOID(host);
