@@ -1542,21 +1542,21 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto windowRect = pipelineContext->GetCurrentWindowRect();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
 #ifdef PREVIEW
-    windowRect = pipelineContext->GetDisplayWindowRectInfo();
+    rootWidth = pipelineContext->GetDisplayWindowRectInfo().Width();
 #endif
-    if (GreatOrEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+    if (GreatOrEqual(rootWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
         if (sheetStyle.sheetType.has_value()) {
             sheetType = sheetStyle.sheetType.value();
         } else {
             sheetType = SheetType::SHEET_POPUP;
         }
-    } else if (GreatOrEqual(windowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
-               LessNotEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+    } else if (GreatOrEqual(rootWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+               LessNotEqual(rootWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
         if (sheetStyle.sheetType.has_value()) {
             sheetType = sheetStyle.sheetType.value();
         } else {
