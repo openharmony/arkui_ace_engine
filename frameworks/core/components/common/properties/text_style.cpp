@@ -31,12 +31,13 @@ TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSi
 bool TextStyle::operator==(const TextStyle& rhs) const
 {
     return fontFamilies_ == rhs.fontFamilies_ && fontFeatures_ == rhs.fontFeatures_ &&
-           textDecorationStyle_ == rhs.textDecorationStyle_ && preferFontSizes_ == rhs.preferFontSizes_ &&
-           fontSize_ == rhs.fontSize_ && adaptMinFontSize_ == rhs.adaptMinFontSize_ &&
-           adaptMaxFontSize_ == rhs.adaptMaxFontSize_ && adaptFontSizeStep_ == rhs.adaptFontSizeStep_ &&
-           lineHeight_ == rhs.lineHeight_ && fontWeight_ == rhs.fontWeight_ && fontStyle_ == rhs.fontStyle_ &&
-           textBaseline_ == rhs.textBaseline_ && textOverflow_ == rhs.textOverflow_ && textAlign_ == rhs.textAlign_ &&
-           textColor_ == rhs.textColor_ && textDecoration_ == rhs.textDecoration_ && textShadows_ == rhs.textShadows_ &&
+           textDecorationStyle_ == rhs.textDecorationStyle_ &&
+           preferFontSizes_ == rhs.preferFontSizes_ && fontSize_ == rhs.fontSize_ &&
+           adaptMinFontSize_ == rhs.adaptMinFontSize_ && adaptMaxFontSize_ == rhs.adaptMaxFontSize_ &&
+           adaptFontSizeStep_ == rhs.adaptFontSizeStep_ && lineHeight_ == rhs.lineHeight_ &&
+           fontWeight_ == rhs.fontWeight_ && fontStyle_ == rhs.fontStyle_ && textBaseline_ == rhs.textBaseline_ &&
+           textOverflow_ == rhs.textOverflow_ && textAlign_ == rhs.textAlign_ && textColor_ == rhs.textColor_ &&
+           textDecoration_ == rhs.textDecoration_ && textShadows_ == rhs.textShadows_ &&
            letterSpacing_ == rhs.letterSpacing_ && maxLines_ == rhs.maxLines_ && adaptTextSize_ == rhs.adaptTextSize_ &&
            allowScale_ == rhs.allowScale_ && wordBreak_ == rhs.wordBreak_ &&
            textDecorationColor_ == rhs.textDecorationColor_ && textCase_ == rhs.textCase_ &&
@@ -76,6 +77,12 @@ void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json,
     exportStyle.backgroundRadius->ToJsonValue(radiusJson, styleJson, filter);
 
     json->PutExtAttr("textBackgroundStyle", styleJson, filter);
+}
+
+void TextStyle::UpdateColorByResourceId()
+{
+    textColor_.UpdateColorByResourceId();
+    textDecorationColor_.UpdateColorByResourceId();
 }
 
 std::string TextStyle::ToString() const
