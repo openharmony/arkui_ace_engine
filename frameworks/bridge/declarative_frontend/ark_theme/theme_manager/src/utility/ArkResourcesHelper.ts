@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 class ArkResourcesHelper {
     static COLOR: number = 10001;
     static FLOAT: number = 10002;
