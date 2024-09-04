@@ -18,7 +18,8 @@
 namespace OHOS::Ace::NG {
 void MockAnimationManager::CancelAnimations()
 {
-    for (auto&& prop : activeProps_) {
+    const auto props = std::move(activeProps_);
+    for (const auto& prop : props) {
         auto it = propToAnimation_.find(prop);
         if (it == propToAnimation_.end()) {
             continue;
@@ -42,7 +43,7 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
     }
     // capture active props in animation
     std::vector<RefPtr<MockImplicitAnimation>> res;
-    for (auto&& prop : activeProps_) {
+    for (const auto& prop : activeProps_) {
         auto anim = propToAnimation_[prop].Upgrade();
         if (anim) {
             // update existing animation instead
@@ -91,5 +92,15 @@ void MockAnimationManager::Reset()
     params_.Reset();
     ticks_ = 1;
     inScope_ = false;
+}
+
+void MockAnimationManager::SetParams(const AnimationOption& option, AnimationCallbacks&& cbs)
+{
+    params_.callbacks = std::move(cbs);
+    if (AceType::InstanceOf<InterpolatingSpring>(option.GetCurve()) || option.GetDuration() > 0) {
+        params_.type = AnimationOperation::PLAY;
+    } else {
+        params_.type = AnimationOperation::CANCEL;
+    }
 }
 } // namespace OHOS::Ace::NG
