@@ -437,13 +437,15 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
         ImageSourceInfo sourceInfo;
-        if (session_->GetScenePersistence()->IsSavingSnapshot()) {
+        auto scenePersistence = session_->GetScenePersistence();
+        CHECK_NULL_VOID(scenePersistence);
+        if (scenePersistence->IsSavingSnapshot()) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
+            sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath());
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         ClearImageCache(sourceInfo);
