@@ -51,9 +51,6 @@ void FfiOHOSAceFrameworkTextInputCreate(const char* placeholder, const char* tex
 int64_t FfiOHOSAceFrameworkTextInputControllerCtor()
 {
     auto controller = FFIData::Create<NGNativeTextInputController>();
-    if (controller == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return controller->GetID();
 }
 

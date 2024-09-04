@@ -236,9 +236,6 @@ void FfiOHOSAceFrameworkScrollOnScrollEnd(void (*callback)())
 int64_t FfiOHOSAceFrameworkScrollerCtor()
 {
     auto nativeScroller = FFIData::Create<NativeNGScroller>();
-    if (nativeScroller == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return nativeScroller->GetID();
 }
 

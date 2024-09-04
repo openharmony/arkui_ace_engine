@@ -176,9 +176,6 @@ extern "C" {
 int64_t FfiOHOSAceFrameworkCustomDialogControllerCtor(NativeCustomDialogControllerOptions options)
 {
     auto controller = FFIData::Create<NativeCustomDialogController>(options);
-    if (controller == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return controller->GetID();
 }
 
