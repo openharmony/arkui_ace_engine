@@ -154,6 +154,7 @@ public:
     void UpdateCaretWidth(float width)
     {
         caretInfo_.rect.SetWidth(width);
+        caretInfo_.originalRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     }
 
     HandleInfoNG GetFirstHandleInfo() const
@@ -197,7 +198,6 @@ public:
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
-    void UpdateSecondHandleOffset(const OffsetF& offset);
     void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
     void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
     void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM,
@@ -234,6 +234,8 @@ private:
     bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
     bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
     const TimeStamp& GetLastClickTime();
+    void UpdateCaretOriginalRect(const OffsetF& offset);
+    void SetCaretRectAtEmptyValue();
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);

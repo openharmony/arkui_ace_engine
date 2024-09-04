@@ -7209,20 +7209,19 @@ int32_t TextFieldPattern::GetLineCount() const
 
 void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
 {
-    if (SelectOverlayIsOn() && !selectOverlay_->IsSingleHandle()) {
-        selectController_->UpdateFirstHandleOffset();
+    if (SelectOverlayIsOn()) {
         selectController_->UpdateSecondHandleOffset();
-        selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
-        selectOverlay_->UpdateAllHandlesOffset();
-        return;
+        if (!selectOverlay_->IsSingleHandle()) {
+            selectController_->UpdateFirstHandleOffset();
+            selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
+            selectOverlay_->UpdateAllHandlesOffset();
+        } else {
+            selectController_->UpdateCaretOffset(IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+            selectOverlay_->UpdateSecondHandleOffset();
+        }
+    } else {
+        selectController_->UpdateCaretOffset(IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
     }
-    // 修改光标和单手柄位置
-    auto moveOffset = IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f);
-    auto caretOffset = selectController_->GetCaretRect().GetOffset() + moveOffset;
-    auto secondHandleOffset = selectController_->GetSecondHandleOffset() + moveOffset;
-    selectController_->UpdateCaretOffset(caretOffset);
-    selectController_->UpdateSecondHandleOffset(secondHandleOffset);
-    selectOverlay_->UpdateSecondHandleOffset();
 }
 
 void TextFieldPattern::CloseHandleAndSelect()
