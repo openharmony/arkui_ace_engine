@@ -46,7 +46,8 @@ const int32_t CHILD_INDEX_SECOND = 1;
 const int32_t CHILD_INDEX_THIRD = 2;
 const int32_t CHILD_INDEX_FOURTH = 3;
 constexpr float DISABLE_ALPHA = 0.6f;
-const int32_t FOCUS_PADDING_COUNT = 2;
+const Dimension FOCUS_OFFSET = 2.0_vp;
+const int32_t RATE = 2;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -1144,21 +1145,17 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
-    auto pickerThemeWidth = dividerSpacing * 2;
+    auto pickerThemeWidth = dividerSpacing * RATE;
 
     CHECK_EQUAL_VOID(childSize, 0);
-    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth) / RATE + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx();
     auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
-    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
+        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
     if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth;
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            centerX = leftTotalColumnWidth - PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
-        } else {
-            centerX = leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx() / FOCUS_PADDING_COUNT;
-        }
+        piantRectWidth = columnWidth - FOCUS_OFFSET.ConvertToPx() * RATE;
+        centerX = leftTotalColumnWidth + FOCUS_OFFSET.ConvertToPx();
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
