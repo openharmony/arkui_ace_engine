@@ -799,15 +799,15 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
         auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, startIndex);
-        if (layoutDirection == LayoutDirection::FORWARD) {
-            LayoutForward(layoutWrapper, startIndex, startPos);
-            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
-                LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
-            }
-        } else if (layoutDirection == LayoutDirection::BACKWARD) {
+        if (layoutDirection == LayoutDirection::BACKWARD) {
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
+            }
+        } else {
+            LayoutForward(layoutWrapper, startIndex, startPos);
+            if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
+                LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
         }
     } else {
@@ -1627,12 +1627,12 @@ void ListLayoutAlgorithm::OffScreenLayoutDirection(LayoutWrapper* layoutWrapper)
         return;
     }
     auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, GetStartIndex());
-    if (layoutDirection == LayoutDirection::FORWARD) {
-        forwardFeature_ = true;
-        backwardFeature_ = false;
-    } else if (layoutDirection == LayoutDirection::BACKWARD) {
+    if (layoutDirection == LayoutDirection::BACKWARD) {
         forwardFeature_ = false;
         backwardFeature_ = true;
+    } else {
+        forwardFeature_ = true;
+        backwardFeature_ = false;
     }
 }
 
