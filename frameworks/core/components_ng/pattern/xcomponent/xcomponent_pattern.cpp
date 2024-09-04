@@ -1979,4 +1979,10 @@ void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         renderSurface_->DumpInfo(json);
     }
 }
+
+void XComponentPattern::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
+}
 } // namespace OHOS::Ace::NG

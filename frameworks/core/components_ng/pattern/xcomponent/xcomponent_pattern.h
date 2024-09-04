@@ -310,6 +310,7 @@ public:
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
+    void SetRenderFit(RenderFit renderFit);
 
 private:
     void OnAttachToFrameNode() override;

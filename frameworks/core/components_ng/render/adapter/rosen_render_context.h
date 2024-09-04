@@ -272,6 +272,7 @@ public:
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
+    void SetRenderFit(RenderFit renderFit) override;
     PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;

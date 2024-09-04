@@ -56,6 +56,7 @@ public:
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
+    void SetRenderFit(RenderFit renderFit) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
