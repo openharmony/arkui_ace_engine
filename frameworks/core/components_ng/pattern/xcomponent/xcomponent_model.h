@@ -79,6 +79,7 @@ public:
     virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
     virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
+    virtual void SetRenderFit(RenderFit renderFit) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;
