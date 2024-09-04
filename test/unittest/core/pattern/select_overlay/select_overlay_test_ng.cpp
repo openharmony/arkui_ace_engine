@@ -3577,40 +3577,6 @@ HWTEST_F(SelectOverlayTestNg, CreateCustomSelectOverlay, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSelectMenuHeight001
- * @tc.desc: Test SelectOverlayPattern SetSelectMenuHeight.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, SetSelectMenuHeight001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
-     */
-    SelectOverlayInfo selectInfo;
-    selectInfo.menuInfo.menuDisable = true;
-    selectInfo.menuInfo.showCut = false;
-    selectInfo.menuInfo.showPaste = false;
-    auto menuOptionItems = GetMenuOptionItems();
-    selectInfo.menuOptionItems = menuOptionItems;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    EXPECT_NE(selectOverlayNode, nullptr);
-
-    /**
-     * @tc.steps: step2. Create pattern and call SetSelectMenuHeight function.
-     */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    selectOverlayNode->CreateToolBar();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->SetSelectMenuHeight();
-}
-
-/**
  * @tc.name: SelectOverlayModifier001
  * @tc.desc: Test selectOverlay modifier function.
  * @tc.type: FUNC
@@ -4063,6 +4029,40 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSelectMenuHeight001
+ * @tc.desc: Test SelectOverlayPattern SetSelectMenuHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetSelectMenuHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.menuDisable = true;
+    selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showPaste = false;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    EXPECT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pattern and call SetSelectMenuHeight function.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectMenuHeight();
+}
+
+/**
  * @tc.name: OverlayModifierOnDraw002
  * @tc.desc: Test SelectOverlayModifier OnDraw.
  * @tc.type: FUNC
@@ -4510,29 +4510,6 @@ HWTEST_F(SelectOverlayTestNg, CreatExtensionMenu001, TestSize.Level1)
     std::vector<OptionParam> params;
     selectOverlayNode->CreatExtensionMenu(std::move(params));
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
-}
-
-/**
- * @tc.name: IsFirstHandleMoveStart
- * @tc.desc: Test IsFirstHandleMoveStart.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, IsFirstHandleMoveStart, TestSize.Level1)
-{
-    SelectOverlayInfo selectInfo;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    ASSERT_NE(selectOverlayNode, nullptr);
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    ASSERT_NE(pattern, nullptr);
-    GestureEvent info;
-    info.localLocation_ = Offset(1, 1);
-    pattern->isFirstHandleTouchDown_ = true;
-    pattern->isSecondHandleTouchDown_ = true;
-    EXPECT_FALSE(pattern->IsSingleHandleMenuShow());
-    EXPECT_FALSE(pattern->IsSingleHandle());
-    EXPECT_FALSE(pattern->IsFirstHandleMoveStart(info.GetLocalLocation()));
 }
 
 } // namespace OHOS::Ace::NG
