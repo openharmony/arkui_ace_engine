@@ -259,10 +259,10 @@ private:
     float paddingBottom_ = 0.0f;
     float optionPadding_ = 0.0f;
 
-    double top_ = 0.0;
-    double bottom_ = 0.0;
-    double left_ = 0.0;
-    double right_ = 0.0;
+    float top_ = 0.0;
+    float bottom_ = 0.0;
+    float left_ = 0.0;
+    float right_ = 0.0;
     double width_ = 0.0;
     double height_ = 0.0;
 

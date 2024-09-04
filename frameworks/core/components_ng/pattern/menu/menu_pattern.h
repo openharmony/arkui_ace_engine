@@ -481,7 +481,7 @@ public:
 
     void SetHoverMode(bool enableFold)
     {
-        this->enableFold_ = enableFold;
+        enableFold_ = enableFold;
     }
 
     bool GetHoverMode() const

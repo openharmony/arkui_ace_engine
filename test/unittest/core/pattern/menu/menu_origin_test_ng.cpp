@@ -946,17 +946,17 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate005, TestSize.Level1)
      * @tc.expected: enableFold is ture
      */
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_EQ(menuPattern->enableFold, true);
-    ASSERT_EQ(menuPattern->GetFold(), true);
+    ASSERT_EQ(menuPattern->enableFold_, true);
+    ASSERT_EQ(menuPattern->GetHoverMode(), true);
 
     /**
      * @tc.steps: step4: menu pattern SetFold
      * @tc.expected: enableFold is fasle/ture
      */
-    menuPattern->SetFold(true);
-    ASSERT_EQ(menuPattern->enableFold, true);
-    menuPattern->SetFold(false);
-    ASSERT_EQ(menuPattern->enableFold, false);
+    menuPattern->SetHoverMode(true);
+    ASSERT_EQ(menuPattern->enableFold_, true);
+    menuPattern->SetHoverMode(false);
+    ASSERT_EQ(menuPattern->enableFold_, false);
 }
 
 /**

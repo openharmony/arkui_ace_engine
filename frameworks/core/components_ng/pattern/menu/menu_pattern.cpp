@@ -227,7 +227,6 @@ void MenuPattern::OnAttachToFrameNode()
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
 {
     // register when hoverMode enabled
-    CHECK_NULL_VOID(menuNode);
     auto pipelineContext = menuNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, 0);
     int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(

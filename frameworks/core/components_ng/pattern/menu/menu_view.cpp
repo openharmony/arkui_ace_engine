@@ -1160,7 +1160,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
-    menuPattern->SetFold(menuParam.enableHoverMode);
+    menuPattern->SetHoverMode(menuParam.enableHoverMode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
