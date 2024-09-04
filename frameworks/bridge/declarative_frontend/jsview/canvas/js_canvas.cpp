@@ -66,7 +66,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
                 jsContext->SetInstanceId(Container::CurrentId());
                 jsContext->SetCanvasPattern(pattern);
                 jsContext->SetAntiAlias();
-                jsContext->TransferCanvasDensity();
+                jsContext->SetDensity();
             }
         }
     }
