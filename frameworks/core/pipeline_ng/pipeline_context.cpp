@@ -3480,11 +3480,36 @@ void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId)
     }
 }
 
+void PipelineContext::RegisterPageChangedCallback(int32_t pageId, WeakPtr<FrameNode> notifiedNode)
+{
+    CHECK_RUN_ON(UI);
+    auto node = notifiedNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    pageNotifiedNodes_[pageId][node->GetId()] = notifiedNode;
+}
+
+void PipelineContext::UnregisterPageChangedCallback(int32_t pageId, int32_t nodeId)
+{
+    CHECK_RUN_ON(UI);
+    auto it = pageNotifiedNodes_.find(pageId);
+    if (it != pageNotifiedNodes_.end() && !it->second.empty()) {
+        it->second.erase(nodeId);
+    }
+}
+
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
 {
     CHECK_RUN_ON(UI);
     for (auto navigationNode : pageToNavigationNodes_[pageId]) {
         NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true);
+    }
+    for (auto& notifiedNodePair : pageNotifiedNodes_[pageId]) {
+        auto node = notifiedNodePair.second.Upgrade();
+        if (node) {
+            auto pattern = node->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnPageChanged(pageId, isOnShow);
+        }
     }
 }
 
