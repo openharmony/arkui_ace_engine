@@ -140,6 +140,15 @@ float GetMainAxisMargin(const RefPtr<LayoutWrapper>& child, FlexDirection direct
     return childMainAxisMargin;
 }
 
+bool CheckFlexMainAxisSizeAuto(FlexDirection direction, const std::unique_ptr<MeasureProperty>& propertyPtr)
+{
+    if (!propertyPtr || !propertyPtr->selfIdealSize) {
+        return false;
+    }
+    return IsHorizontal(direction) ? propertyPtr->selfIdealSize->IsWidthDimensionUnitAuto()
+                                   : propertyPtr->selfIdealSize->IsHeightDimensionUnitAuto();
+}
+
 } // namespace
 
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -917,7 +926,11 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      * For Row and Column, the main axis size is wrapContent.
      * And, FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass LinearLayout.
      */
-    if (isInfiniteLayout_) {
+    bool flexNeedSelfAdaptive = false;
+    if (rawConstraint) {
+        flexNeedSelfAdaptive = CheckFlexMainAxisSizeAuto(direction_, rawConstraint);
+    }
+    if (isInfiniteLayout_ || flexNeedSelfAdaptive) {
         mainAxisSize_ = allocatedSize_;
     }
 
