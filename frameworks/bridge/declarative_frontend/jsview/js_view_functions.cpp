@@ -92,6 +92,10 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
 
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
+    if (result->IsUndefined()) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
+        return;
+    }
 
     CalcDimension measureWidth;
     CalcDimension measureHeight;
