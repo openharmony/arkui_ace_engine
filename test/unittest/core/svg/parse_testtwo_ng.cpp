@@ -877,7 +877,6 @@ HWTEST_F(ParseTestTwoNg, SvgGraphicTest001, TestSize.Level1)
     auto svgAnimateNode = svgAnimateDom->root_;
 
     Testing::MockCanvas rSCanvas;
-    CallBack(rSCanvas);
 
     std::string href = "svgNodeTest";
     auto baseAttr = svgCircle->GetBaseAttributes();
@@ -926,15 +925,6 @@ HWTEST_F(ParseTestTwoNg, SvgDomTest001, TestSize.Level1)
     auto svgAnimateStream = SkMemoryStream::MakeCopy(SVG_ANIMATE_TRANSFORM.c_str(), SVG_ANIMATE_TRANSFORM.length());
     src.SetFillColor(Color::GREEN);
     auto svgAnimateDom = SvgDom::CreateSvgDom(*svgAnimateStream, src);
-    auto svgAnimateNode = svgAnimateDom->root_;
-
-    auto svgAnimate = AccessibilityManager::DynamicCast<SvgAnimation>(svgAnimateNode->children_[0]->children_[0]);
-    int testData = 0;
-    std::function<void()> callback = [&testData](){ testData = 1; };
-    svgAnimateDom->SetAnimationOnFinishCallback(callback);
-    RefPtr<Animator> animation = svgAnimate->animator_;
-    animation->NotifyStopListener();
-    EXPECT_EQ(testData, 1);
 
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);

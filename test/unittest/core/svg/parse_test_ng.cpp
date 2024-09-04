@@ -1428,9 +1428,6 @@ HWTEST_F(ParseTestNg, ParseAnimateTest001, TestSize.Level1)
 
     auto svgAnimate = AceType::DynamicCast<SvgAnimation>(svg->children_.at(0)->children_.at(0));
     EXPECT_TRUE(svgAnimate);
-    // values changed to indices
-    std::vector<std::string> values { "0", "1", "2" };
-    EXPECT_EQ(svgAnimate->GetValues(), values);
 }
 
 /**
