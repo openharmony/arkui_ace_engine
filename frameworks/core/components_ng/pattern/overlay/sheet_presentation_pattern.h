@@ -576,6 +576,22 @@ public:
     void ChangeSheetPage(float height);
     void DumpAdvanceInfo() override;
 
+    uint32_t GetDetentsIndex() const
+    {
+        return detentsFinalIndex_;
+    }
+
+    bool IsSheetBottomStyle()
+    {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
+            sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
+        }
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
+
+    float GetTitleHeight();
+
     // Nestable Scroll
     Axis GetAxis() const override
     {
@@ -587,21 +603,6 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
-
-    bool IsSheetBottomStyle()
-    {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-            sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
-        }
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
-    }
-    
-    uint32_t GetDetentsIndex() const
-    {
-        return detentsFinalIndex_;
-    }
-
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

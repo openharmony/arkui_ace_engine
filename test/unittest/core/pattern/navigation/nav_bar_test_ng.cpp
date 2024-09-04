@@ -18,6 +18,9 @@
 #define protected public
 #define private public
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/utils/system_properties.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components/select/select_theme.h"
@@ -675,8 +678,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::TABLET);
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     SystemProperties::SetDeviceType(DeviceType::PHONE);
-
-    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1164,14 +1165,14 @@ HWTEST_F(NavBarTestNg, NavBarPattern022, TestSize.Level1)
     ASSERT_NE(navBarNode, nullptr);
     auto navBarpattern = navBarNode->GetPattern<NavBarPattern>();
     ASSERT_NE(navBarpattern, nullptr);
-
+ 
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
     auto opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
     .edges = SAFE_AREA_TYPE_NONE});
     EXPECT_EQ(opts.type, SAFE_AREA_TYPE_NONE);
     EXPECT_EQ(opts.edges, SAFE_AREA_TYPE_NONE);
-
+ 
     navBarLayoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
     opts = navBarLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
         .edges = SAFE_AREA_TYPE_NONE});
@@ -1214,8 +1215,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern023, TestSize.Level1)
         FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(buttonNode, nullptr);
     buttonNode->MountToParent(menuNode);
-    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(
+        FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<BarItemPattern>());
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
