@@ -178,7 +178,9 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key)
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
         auto child = it->second.item->GetFrameChildByIndex(0, false);
-        child->OnReuse();
+        if (child) {
+            child->OnReuse();
+        }
     }
 }
 
@@ -193,7 +195,9 @@ void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key)
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
         auto child = it->second.item->GetFrameChildByIndex(0, false);
-        child->OnRecycle();
+        if (child) {
+            child->OnRecycle();
+        }
     }
 }
 
