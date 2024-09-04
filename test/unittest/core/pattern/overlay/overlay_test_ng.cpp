@@ -1241,9 +1241,9 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     auto toastInfo = NG::ToastInfo { .message = MESSAGE,
         .duration = DURATION,
         .bottom = BOTTOMSTRING,
-        .showMode = NG::ToastShowMode::TOP_MOST,
-        .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+        .isRightToLeft = true,
+        .showMode = NG::ToastShowMode::TOP_MOST };
+    overlayManager->ShowToast(toastInfo);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. Test Toast showMode and offset.
@@ -1292,7 +1292,7 @@ HWTEST_F(OverlayTestNg, ToastTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.
@@ -1331,7 +1331,7 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.

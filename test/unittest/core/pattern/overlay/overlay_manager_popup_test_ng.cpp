@@ -1855,7 +1855,7 @@ HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 }
 } // namespace OHOS::Ace::NG

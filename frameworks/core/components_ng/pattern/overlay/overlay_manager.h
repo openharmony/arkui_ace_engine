@@ -163,8 +163,7 @@ public:
 
     void ClearToastInSubwindow();
     void ClearToast();
-    void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
-    void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
+    void ShowToast(const NG::ToastInfo& toastInfo);
 
     void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
 

@@ -241,7 +241,7 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 
     auto builderFunc = []() -> RefPtr<UINode> {
