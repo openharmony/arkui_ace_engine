@@ -2525,6 +2525,18 @@ void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callbac
         moduleName_.c_str(), instanceId_);
 }
 
+void UIContentImpl::SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddLatestFrameLayoutFinishTask(std::move(callback));
+    LOGI("[%{public}s][%{public}s][%{public}d]: SetLatestFrameLayoutFinishCallback", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_);
+}
+
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: NotifyMemoryLevel: %{public}d",

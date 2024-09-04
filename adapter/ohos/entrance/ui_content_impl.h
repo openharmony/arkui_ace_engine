@@ -122,6 +122,9 @@ public:
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
+    // Set UIContent callback after latest layout finish
+    void SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
+
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
 
