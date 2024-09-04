@@ -2728,9 +2728,11 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
-void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool isFingerSelected)
+void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool)
 {
-    if (IsSelected() && (!isFingerSelected || selectOverlay_->IsBothHandlesShow())) {
+    CHECK_NULL_VOID(sourceTool != SourceTool::FINGER);
+    CHECK_NULL_VOID(sourceTool != SourceTool::PEN);
+    if (IsSelected()) {
         return;
     }
     auto textRect = GetTextRect();
@@ -2755,7 +2757,7 @@ void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool
             TextPattern::CloseSelectOverlay(false);
         }
         auto focusHub = GetFocusHub();
-        if (focusHub && !isFingerSelected) {
+        if (focusHub && sourceTool != SourceTool::FINGER) {
             auto isSuccess = focusHub->RequestFocusImmediately();
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only image selected, textSelector=[%{public}d, %{public}d], "
                 "requestFocus=%{public}d, isFocus=%{public}d",
@@ -2911,7 +2913,9 @@ void RichEditorPattern::HandleBlurEvent()
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
-    CloseSelectOverlay();
+    if (IsSelected()) {
+        selectOverlay_->ProcessOverlay({ .menuIsShow = false});
+    }
     isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     if (reason != BlurReason::WINDOW_BLUR) {
         lastSelectionRange_.reset();
@@ -2924,9 +2928,11 @@ void RichEditorPattern::HandleFocusEvent()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent/%{public}d", frameId_);
     UseHostToUpdateTextFieldManager();
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "preview longpress, closeKeyboard");
-        CloseKeyboard(true);
+    if (previewLongPress_ || isOnlyRequestFocus_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
+            "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
+        isOnlyRequestFocus_ = false;
+        IF_TRUE(previewLongPress_, CloseKeyboard(true));
         return;
     }
     if (textSelector_.SelectNothing()) {
@@ -6152,6 +6158,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info);
+        HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool());
     } else if (touchType == TouchType::UP) {
         isOnlyImageDrag_ = false;
         HandleTouchUp();
@@ -6332,7 +6339,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
-    HandleOnlyImageSelected(info.GetLocalLocation(), false);
+    HandleOnlyImageSelected(info.GetLocalLocation(), SourceTool::MOUSE);
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;

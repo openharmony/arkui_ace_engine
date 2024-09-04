@@ -354,15 +354,15 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         if (IsTextAreaSelectAll()) {
             menuPosition.SetY(singleHandle.Top());
-        } else {
-            bool isChangeToBottom = !info_->isSingleHandle;
-            isChangeToBottom = isChangeToBottom || (safeAreaManager &&
-                IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText) &&
-                safeAreaManager->GetSystemSafeArea().top_.Length() > singleHandle.Top());
-            if (isChangeToBottom) {
+        } else if (info_->isSingleHandle &&
+            IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText)) {
+            if (safeAreaManager && safeAreaManager->GetSystemSafeArea().top_.Length() > singleHandle.Top()) {
                 menuPosition.SetY(
                     static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
             }
+        } else {
+            menuPosition.SetY(
+                static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
     auto spaceBetweenViewPort = menuSpacingBetweenText + menuSpacingBetweenHandle;

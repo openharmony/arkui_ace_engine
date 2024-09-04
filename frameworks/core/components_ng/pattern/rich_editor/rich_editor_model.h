@@ -89,6 +89,7 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        isInitDecoration = false;
 
         updateSymbolColor.reset();
         updateSymbolFontSize.reset();
@@ -119,6 +120,7 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
+    bool isInitDecoration = false;
     
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<CalcDimension> updateSymbolFontSize = std::nullopt;
