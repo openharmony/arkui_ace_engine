@@ -55,6 +55,16 @@ To OptValue()
     };
 }
 
+struct EventsTracker {
+    static inline GENERATED_ArkUISwiperEventsReceiver swiperEventReceiver {};
+
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl {
+        .getSwiperEventsReceiver = [] () -> const GENERATED_ArkUISwiperEventsReceiver* {
+            return &swiperEventReceiver;
+        }
+    };
+}; // EventsTracker
+
 static const Ark_Boolean ABOOL_TRUE(true);
 static const Ark_Boolean ABOOL_FALSE(false);
 static const Ark_Int32 AINT32_POS(1234);
@@ -107,23 +117,12 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
 std::string GetStringAttribute(const std::string &strWithJson, const std::string &name)
 {
     auto jsonVal = JsonUtil::ParseJsonData(strWithJson.c_str());
-    return GetStringAttribute(jsonVal, name);
+    return OHOS::Ace::NG::GetStringAttribute(jsonVal, name);
 }
-
-struct EventsTracker {
-    static inline GENERATED_ArkUISwiperEventsReceiver swiperEventReceiver {};
-
-    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        .getSwiperEventsReceiver = [] () -> const GENERATED_ArkUISwiperEventsReceiver* {
-            return &swiperEventReceiver;
-        }
-    };
-}; // EventsTracker
 } // namespace
 
 class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
-    &GENERATED_ArkUINodeModifiers::getSwiperModifier, GENERATED_ARKUI_SWIPER>
-{
+    &GENERATED_ArkUINodeModifiers::getSwiperModifier, GENERATED_ARKUI_SWIPER> {
 public:
     static void SetUpTestCase()
     {
@@ -247,8 +246,7 @@ HWTEST_F(SwiperModifierTest, setAutoPlayTest, TestSize.Level1)
 HWTEST_F(SwiperModifierTest, setIntervalTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("interval");
-    static const std::string DEFAULT_VALUE("3000"); // corrrsponds to
-    // DEFAULT_SWIPER_AUTOPLAY_INTERVAL in frameworks/core/components/declaration/swiper/swiper_declaration.h
+    static const std::string DEFAULT_VALUE(std::to_string(static_cast<int>(DEFAULT_SWIPER_AUTOPLAY_INTERVAL)));
     ASSERT_NE(modifier_->setInterval, nullptr);
 
     auto checkInitial = GetStringAttribute(node_, PROP_NAME);
@@ -600,7 +598,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
-    static const std::string DEFAULT_VALUE(Color::TRANSPARENT.ToString());// ??? THEME_SWIPER_INDICATOR_COLOR.ToString());
+    static const std::string DEFAULT_VALUE(Color::TRANSPARENT.ToString());
     static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
@@ -1102,14 +1100,12 @@ HWTEST_F(SwiperModifierTest, setCachedCountTest, TestSize.Level1)
 HWTEST_F(SwiperModifierTest, setDisplayCountTestNumber, TestSize.Level1)
 {
     static const std::string PROP_NAME("displayCount");
-    static const std::string DEFAULT_VALUE("1"); // corrrsponds to
-    // DEFAULT_SWIPER_DISPLAY_COUNT in frameworks/core/components/declaration/swiper/swiper_declaration.h
+    static const std::string DEFAULT_VALUE(std::to_string(DEFAULT_SWIPER_DISPLAY_COUNT));
     ASSERT_NE(modifier_->setDisplayCount, nullptr);
 
     auto checkInitial = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    // Type_SwiperAttribute_displayCount_Arg0 numberInt = {.selector = 0, .value0 = ArkNum(123456)};
     auto numberInt = ArkUnion<Type_SwiperAttribute_displayCount_Arg0, Ark_Number>(123456);
     modifier_->setDisplayCount(node_, &numberInt, nullptr);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);

@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef TEST_MOCK_CORE_COMMON_MOCK_THEME_STYLE_H
-#define TEST_MOCK_CORE_COMMON_MOCK_THEME_STYLE_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_MOCK_CORE_COMMON_MOCK_THEME_STYLE_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_TEST_MOCK_CORE_COMMON_MOCK_THEME_STYLE_H
 
 #include "core/components/theme/theme_style.h"
 
-namespace OHOS::Ace
-{
-class MockThemeStyle: public ThemeStyle {
+namespace OHOS::Ace {
+class MockThemeStyle : public ThemeStyle {
 public:
-    static RefPtr<ThemeStyle> GetInstance() {
+    static RefPtr<ThemeStyle> GetInstance()
+    {
         static RefPtr<ThemeStyle> instance = AceType::MakeRefPtr<ThemeStyle>();
         return instance;
     }
 };
 }
-#endif // TEST_MOCK_CORE_COMMON_MOCK_THEME_STYLE_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_TEST_MOCK_CORE_COMMON_MOCK_THEME_STYLE_H

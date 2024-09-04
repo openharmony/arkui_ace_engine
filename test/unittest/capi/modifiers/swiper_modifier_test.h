@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_SWIPER_MODIFIER_TEST_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_MODIFIERS_SWIPER_MODIFIER_TEST_H
+
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 
@@ -34,3 +37,5 @@ inline void AssignArkValue(Ark_SwiperAutoFill& dst, const Ark_VP& src)
     dst.minSize = src;
 }
 } // namespace OHOS::Ace::NG::Converter
+
+#endif
