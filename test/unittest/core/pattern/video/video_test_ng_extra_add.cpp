@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,7 +173,7 @@ RefPtr<FrameNode> VideoTestExtraAddNg::CreateVideoNode(TestProperty& g_testPrope
         .WillRepeatedly(Return(true));
 
     if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value());
+        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
     }
     if (g_testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());
@@ -867,11 +867,13 @@ HWTEST_F(VideoTestExtraAddNg, OnModifyDone001, TestSize.Level1)
     videoPattern->OnModifyDone();
     EXPECT_TRUE(videoPattern->isInitialState_);
 
-    layoutProperty->UpdateVideoSource(VIDEO_SRC);
+    auto videoSrcInfo = layoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo.src = VIDEO_SRC;
+    layoutProperty->UpdateVideoSource(videoSrcInfo);
     videoPattern->OnModifyDone();
     EXPECT_TRUE(videoPattern->isInitialState_);
 
-    videoPattern->src_ = VIDEO_SRC;
+    videoPattern->videoSrcInfo_.src = VIDEO_SRC;
     videoPattern->OnModifyDone();
     EXPECT_TRUE(videoPattern->isInitialState_);
 

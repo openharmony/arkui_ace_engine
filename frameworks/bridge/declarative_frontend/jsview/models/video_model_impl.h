@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 class VideoModelImpl : public OHOS::Ace::VideoModel {
 public:
     void Create(const RefPtr<VideoControllerV2>& videoController) override;
-    void SetSrc(const std::string& src) override;
+    void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetProgressRate(double progressRate) override;
     void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
         const std::string &moduleName) override;
