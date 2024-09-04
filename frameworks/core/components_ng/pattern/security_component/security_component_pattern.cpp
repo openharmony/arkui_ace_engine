@@ -213,7 +213,9 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
         auto jsonNode = JsonUtil::Create(true);
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         int32_t res;
-        if (buttonPattern->IsParentMenu(frameNode)) {
+        // if info.GetPointerEvent() is null, device may in screen read mode
+        // otherwise, this event should be dropped in menu
+        if (buttonPattern->IsParentMenu(frameNode) && info.GetPointerEvent() != nullptr) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else {
             res = buttonPattern->ReportSecurityComponentClickEvent(info);
