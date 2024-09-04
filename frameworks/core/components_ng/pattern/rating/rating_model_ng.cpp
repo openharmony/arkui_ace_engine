@@ -33,8 +33,14 @@ void RatingModelNG::Create(double rating, bool indicator)
 
 void RatingModelNG::SetRatingScore(double value)
 {
-    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
-    ACE_UPDATE_PAINT_PROPERTY(RatingRenderProperty, RatingScore, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintPropertyPtr<RatingRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasRatingScore() && !NearEqual(paintProperty->GetRatingScore().value(), value)) {
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
+    }
+    paintProperty->UpdateRatingScore(value);
 }
 
 void RatingModelNG::SetIndicator(bool value)
