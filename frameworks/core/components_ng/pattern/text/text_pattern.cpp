@@ -941,7 +941,29 @@ void TextPattern::HandleSpanSingleClickEvent(GestureEvent& info, RectF textConte
 
 bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
 {
-    auto aiRects = pManager_->GetRects(aiSpan.start, aiSpan.end);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    int32_t start = aiSpan.start;
+    int32_t end = aiSpan.end;
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS) {
+        auto range = pManager_->GetEllipsisTextRange();
+        int32_t ellipsisStart = static_cast<int32_t>(range.first);
+        int32_t ellipsisEnd = static_cast<int32_t>(range.second);
+        if (ellipsisStart != -1 && ellipsisEnd > 0 && ellipsisStart < ellipsisEnd) {
+            if (ellipsisStart <= aiSpan.start && ellipsisEnd >= aiSpan.end) {
+                // ellipsisTextRange contains [aispan.start, aispan.end)
+                return false;
+            } else if (ellipsisStart <= aiSpan.start && ellipsisEnd >= aiSpan.start) {
+                // ellipsisTextRange covers [aispan.start, ellipsisEnd)
+                start = ellipsisEnd;
+            } else if (ellipsisStart <= aiSpan.end && ellipsisEnd >= aiSpan.end) {
+                // ellipsisTextRange covers [ellipsisStart, aiSpan.end);
+                end = ellipsisStart;
+            }
+        }
+    }
+
+    auto aiRects = pManager_->GetRects(start, end);
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
             dataDetectorAdapter_->hasClickedAISpan_ = true;
