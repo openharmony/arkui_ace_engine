@@ -2813,8 +2813,8 @@ HWTEST_F(WebPatternTestNg, NotifyFillRequestSuccess002, TestSize.Level1)
     EXPECT_CALL(*viewDataWrap, GetPageNodeInfoWraps()).WillOnce(ReturnRef(nodeInfoWraps));
     EXPECT_CALL(*nodeWrap, GetAutoFillType()).WillOnce(Return(AceAutoFillType::ACE_UNSPECIFIED));
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(false));
-    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(Return(metadata));
-    EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(Return(value));
+    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(metadata));
+    EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(ReturnRef(value));
     EXPECT_CALL(*viewDataWrap, GetPageUrl()).WillOnce(ReturnRef(pageUrl));
     EXPECT_CALL(*viewDataWrap, GetOtherAccount()).WillOnce(Return(true));
     AceAutoFillType autoFillType = AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET;
@@ -2851,8 +2851,8 @@ HWTEST_F(WebPatternTestNg, NotifyFillRequestSuccess003, TestSize.Level1)
     EXPECT_CALL(*nodeWrap, GetAutoFillType())
         .WillOnce(Return(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET));
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
-    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(Return(metadata));
-    EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(Return(value));
+    EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(metadata));
+    EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(ReturnRef(value));
     EXPECT_CALL(*viewDataWrap, GetPageUrl()).WillOnce(ReturnRef(pageUrl));
     EXPECT_CALL(*viewDataWrap, GetOtherAccount()).WillOnce(Return(true));
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
