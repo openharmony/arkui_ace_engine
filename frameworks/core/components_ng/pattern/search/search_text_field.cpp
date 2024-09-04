@@ -123,8 +123,8 @@ void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
     searchRequestStopTwinkling_ = false;
 }
 
-bool SearchTextFieldPattern::IsSearchTextField()
+bool SearchTextFieldPattern::IsNeedProcessAutoFill()
 {
-    return true;
+    return false;
 }
 } // namespace OHOS::Ace::NG
