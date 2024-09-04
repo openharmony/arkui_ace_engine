@@ -1064,10 +1064,10 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
-var MenuType;
+let MenuType;
 (function (MenuType) {
-  MenuType[MenuType["SELECTION_MENU"] = 0] = "SELECTION_MENU";
-  MenuType[MenuType["PREVIEW_MENU"] = 1] = "PREVIEW_MENU";
+  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
+  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
 })(MenuType || (MenuType = {}));
 
 var MenuPreviewMode;
