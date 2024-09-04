@@ -125,7 +125,8 @@ void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     }
     windowMode_ = context->GetWindowManager()->GetWindowMode();
     hasDeco_ = hasDeco;
-    LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d",
+        isShow, windowMode_, hasDeco_);
     if (!hasDeco_) {
         isShow = false;
     }
@@ -390,16 +391,16 @@ void ContainerModalElement::Update()
 bool ContainerModalElement::CanShowFloatingTitle()
 {
     if (!floatingTitleDisplay_ || !controller_) {
-        LOGI("Show floating title failed, floatingTitleDisplay or controller is null.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Show floating title failed, floatingTitleDisplay or controller is null.");
         return false;
     }
     if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN && windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
         windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        LOGI("Window is not full screen or split screen, can not show floating title.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Window is not full screen or split screen, can not show floating title.");
         return false;
     }
     if (floatingTitleDisplay_->GetVisible()) {
-        LOGI("Floating tittle is visible now, no need to show again.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Floating tittle is visible now, no need to show again.");
         return false;
     }
     return true;
@@ -408,11 +409,11 @@ bool ContainerModalElement::CanShowFloatingTitle()
 bool ContainerModalElement::CanHideFloatingTitle()
 {
     if (!floatingTitleDisplay_ || !controller_) {
-        LOGI("Hide floating title failed, floatingTitleDisplay or controller is null.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Hide floating title failed, floatingTitleDisplay or controller is null.");
         return false;
     }
     if (!floatingTitleDisplay_->GetVisible()) {
-        LOGI("Hide floating title failed, title is not visible.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Hide floating title failed, title is not visible.");
         return false;
     }
     return true;
@@ -534,7 +535,7 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     auto textComponent = containerModalComponent_->GetTitleLabel();
     CHECK_NULL_VOID(textComponent);
     if (textComponent->GetData() == title) {
-        LOGI("set same title, skip, title is %{public}s", title.c_str());
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "set same title, skip, title is %{public}s", title.c_str());
         return;
     }
     textComponent->SetData(title);
@@ -543,8 +544,9 @@ void ContainerModalElement::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(renderTitle);
     renderTitle->Update(textComponent);
     renderTitle->MarkNeedRender();
-    LOGI("set app title successfully, title:%{public}s, isFloatingTitle:%{public}d", title.c_str(),
-        static_cast<int>(isFloatingTitle));
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "set app title successfully, title:%{public}s, isFloatingTitle:%{public}d",
+        title.c_str(), static_cast<int>(isFloatingTitle));
 }
 
 void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
@@ -559,7 +561,9 @@ void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
     CHECK_NULL_VOID(renderIcon);
     renderIcon->Update(imageComponent);
     renderIcon->MarkNeedRender();
-    LOGI("set app icon successfully, isFloatingTitle:%{public}d", static_cast<int>(isFloatingTitle));
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "set app icon successfully, isFloatingTitle:%{public}d",
+        static_cast<int>(isFloatingTitle));
 }
 
 RefPtr<RenderText> ContainerModalElement::GetTitleRender(bool isFloatingTitle)
@@ -572,7 +576,7 @@ RefPtr<RenderText> ContainerModalElement::GetTitleRender(bool isFloatingTitle)
     CHECK_NULL_RETURN(renderRow, nullptr);
     const auto& children = renderRow->GetChildren();
     if (children.size() <= TITLE_POSITION) {
-        LOGW("row children size is wrong");
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "row children size is wrong");
         return nullptr;
     }
     auto iterator = renderRow->GetChildren().begin();
