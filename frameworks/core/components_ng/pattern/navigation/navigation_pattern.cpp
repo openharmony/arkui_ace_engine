@@ -659,10 +659,6 @@ void NavigationPattern::RefreshNavDestination()
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    isBackPage_ = newTopNavPath.has_value() ?
-        navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
-#endif
     std::string navDestinationName = "";
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
@@ -672,10 +668,6 @@ void NavigationPattern::RefreshNavDestination()
     if (isChanged_ && focusHub->IsFocusableWholePath()) {
         InputMethodManager::GetInstance()->CloseKeyboard();
     }
-#endif
-
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    navigationStack_->SetLastNavPathList(navPathList);
 #endif
 
     /* if first navDestination is removed, the new one will be refreshed */
@@ -2248,14 +2240,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
-    bool isNotNeedAnimation = !isAnimated;
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    isNotNeedAnimation = !isAnimated ||
-        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 && !isBackPage_);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
-        navigationMode_, isNotNeedAnimation);
-#endif
-    if (isNotNeedAnimation) {
+    if (!isAnimated) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
