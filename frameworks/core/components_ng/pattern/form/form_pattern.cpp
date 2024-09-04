@@ -681,14 +681,15 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
-    PostBgTask([weak = WeakClaim(this), info, host] {
+    RefPtr<PipelineContext> pipeline = host->GetContextRefPtr();
+    PostBgTask([weak = WeakClaim(this), info, pipeline] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->AddFormComponentTask(info, host);
+            pattern->AddFormComponentTask(info, pipeline);
         }, "ArkUIAddFormComponent");
 }
 
-void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host)
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline)
 {
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
@@ -705,9 +706,9 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::F
         return;
     }
 #if OHOS_STANDARD_SYSTEM
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
+    formManagerBridge_->AddForm(pipeline, info, formInfo);
 #else
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+    formManagerBridge_->AddForm(pipeline, info);
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
@@ -722,12 +723,12 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::F
 
 void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    PostUITask([weak = WeakClaim(this), host, isTransparencyEnabled, info, isJsCard = isJsCard_] {
+    PostUITask([weak = WeakClaim(this), isTransparencyEnabled, info, isJsCard = isJsCard_] {
         ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         pattern->CreateCardContainer();
         if (host->IsDraggable()) {
             pattern->EnableDrag();
