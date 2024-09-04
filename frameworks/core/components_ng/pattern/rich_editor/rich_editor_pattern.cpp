@@ -9296,18 +9296,6 @@ bool RichEditorPattern::CursorMoveLineEnd()
     return true;
 }
 
-void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
-{
-    if (textSelector_.SelectNothing() || isSpanStringMode_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    UpdateSelectSpanStyle(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), code);
-    StopTwinkling();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
 void RichEditorPattern::HandleOnShowMenu()
 {
     CHECK_NULL_VOID(overlayMod_);
@@ -9468,40 +9456,6 @@ void RichEditorPattern::AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosi
     if (aiPosStart < 0 || aiPosEnd < 0) {
         aiPosition = GetCaretPosition();
     }
-}
-
-bool RichEditorPattern::HandleOnDeleteComb(bool backward)
-{
-    CloseSelectOverlay();
-    ResetSelection();
-    int32_t startPosition = 0;
-    int32_t endPosition = 0;
-    int32_t index = GetCaretPosition();
-    int32_t aiContentStart = 0;
-    int32_t aiContentEnd = GetTextContentLength();
-
-    if (backward) {
-        aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-        AIDeleteComb(aiContentStart, index, startPosition, backward);
-        if (startPosition == caretPosition_) {
-            return false;
-        }
-        DeleteBackward(caretPosition_ - startPosition);
-        SetCaretPosition(startPosition);
-    } else {
-        aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-        AIDeleteComb(index, aiContentEnd, endPosition, backward);
-        if (endPosition == caretPosition_) {
-            return false;
-        }
-        DeleteForward(endPosition - caretPosition_);
-    }
-    MoveCaretToContentRect();
-    StartTwinkling();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    return true;
 }
 
 float RichEditorPattern::GetSelectedMaxWidth()

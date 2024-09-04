@@ -24,7 +24,6 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
-const Ace::TextDecoration TEXT_DECORATION_VALUE_2 = Ace::TextDecoration::UNDERLINE;
 const Dimension LETTER_SPACING_2 = Dimension(12, DimensionUnit::PX);
 const Dimension LINE_HEIGHT_VALUE_2 = Dimension(30, DimensionUnit::PX);
 const Dimension IMAGE_WIDTH = 50.0_vp;
@@ -1147,104 +1146,6 @@ HWTEST_F(RichEditorClickTestNg, JudgeContentDraggable, TestSize.Level1)
 }
 
 /**
- * @tc.name: RichEditorKeyBoardShortCuts205
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts205, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. initialize style and add text span
-     */
-    TextStyle style;
-    style.SetFontWeight(FONT_WEIGHT_BOLD);
-    style.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
-    style.SetTextDecoration(TEXT_DECORATION_VALUE_2);
-
-    TextSpanOptions textOptions;
-    textOptions.value = INIT_VALUE_1;
-    textOptions.style = style;
-    richEditorController->AddTextSpan(textOptions);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
-
-    /**
-     * @tc.steps: step3. test HandleSelectFontStyle when select nothing
-     */
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
-    ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(newSpan1->GetFontWeight(), Ace::FontWeight::BOLD);
-
-    /**
-     * @tc.steps: step4. test HandleSelectFontStyle again when select text
-     */
-    richEditorPattern->textSelector_.Update(0, 6);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
-    ASSERT_NE(newSpan2, nullptr);
-    EXPECT_EQ(newSpan2->GetTextDecoration(), TextDecoration::NONE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(newSpan2->GetItalicFontStyle(), OHOS::Ace::FontStyle::NORMAL);
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::NORMAL);
-}
-
-/**
- * @tc.name: RichEditorKeyBoardShortCuts206
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts206, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add text span without setting style
-     */
-    AddSpan(INIT_VALUE_2);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-    richEditorPattern->textSelector_.Update(0, 6);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-
-    /**
-     * @tc.steps: step3. test HandleSelectFontStyle
-     */
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
-}
-
-/**
  * @tc.name: RichEditorKeyBoardShortCuts207 about Handle Select FontStyle
  * @tc.desc: test the text font style
  * @tc.type: FUNC
@@ -1271,26 +1172,5 @@ HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level1)
 
     richEditorPattern->textSelector_.Update(4, 10);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
-
-    /**
-     * @tc.steps: step3. test HandleSelectFontStyle
-     */
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
-    ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(3));
-    ASSERT_NE(newSpan2, nullptr);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_R);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
 }
 } // namespace OHOS::Ace::NG
