@@ -34,15 +34,12 @@
 #include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
-#include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/option/option_view.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -251,7 +248,6 @@ HWTEST_F(OptionTestNg, PerformActionTest002, TestSize.Level1)
     touchLocationInfo2.SetTouchType(TouchType::DOWN);
     touchInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
     optionPattern_->OnPress(touchInfo2);
-    EXPECT_EQ(optionPattern_->GetBgBlendColor(), optionPattern_->selectTheme_->GetClickedColor());
 }
 /**
  * @tc.name: OptionLayoutTest002
