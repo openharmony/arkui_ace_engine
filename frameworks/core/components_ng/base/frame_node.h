@@ -1071,6 +1071,7 @@ protected:
     std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
@@ -1115,6 +1116,13 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
+    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
     void DumpOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpDragInfo(std::unique_ptr<JsonValue>& json);
     void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);

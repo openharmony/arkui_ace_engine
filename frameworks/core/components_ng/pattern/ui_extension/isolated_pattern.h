@@ -58,6 +58,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void FireOnErrorCallbackOnUI(
         int32_t code, const std::string& name, const std::string& msg);
 

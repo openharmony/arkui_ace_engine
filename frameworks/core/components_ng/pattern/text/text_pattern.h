@@ -165,6 +165,7 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpScaleInfo();
     void DumpTextEngineInfo();
 

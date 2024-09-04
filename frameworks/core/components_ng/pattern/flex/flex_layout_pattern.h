@@ -86,6 +86,8 @@ public:
         DumpLog::GetInstance().AddDesc(std::string("Type: ").append(isWrap_ ? "Wrap" : "NoWrap"));
     }
 
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+
     bool GetIsWrap() const
     {
         return isWrap_;
