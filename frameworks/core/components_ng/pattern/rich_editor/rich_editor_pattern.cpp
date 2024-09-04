@@ -4256,13 +4256,12 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
     IF_PRESENT(typingStyle_, UpdateColorByResourceId());
 
-    auto scrollbarTheme = GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID(scrollbarTheme);
+    IF_PRESENT(magnifierController_, SetColorModeChange(true));
     auto scrollBar = GetScrollBar();
-    CHECK_NULL_VOID(scrollBar);
+    auto scrollbarTheme = GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollBar && scrollbarTheme);
     scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
     scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
-    IF_PRESENT(magnifierController_, SetColorModeChange(true));
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
@@ -7511,7 +7510,7 @@ void RichEditorPattern::InitScrollablePattern()
     }
     SetAxis(Axis::VERTICAL);
     AddScrollEvent();
-    SetScrollBar(DisplayMode::AUTO);
+    SetScrollBar(barDisplayMode_);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -7669,6 +7668,9 @@ float RichEditorPattern::MoveTextRect(float offset)
     richTextRect_.SetOffset(OffsetF(richTextRect_.GetX(), scrollOffset_));
     UpdateScrollBarOffset();
     UpdateChildrenOffset();
+    if (auto host = GetHost(); host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
     return offset;
 }
 
