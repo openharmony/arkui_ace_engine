@@ -322,7 +322,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displaycount);
     if (swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displaycount);
-        rightArrowIsHidden = (index_ == (swiperPattern->DisplayIndicatorTotalCount() - 1) * displaycount);
+        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displaycount);
     }
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);
