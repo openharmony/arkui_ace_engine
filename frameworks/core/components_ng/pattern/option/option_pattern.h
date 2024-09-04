@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class OptionPattern : public Pattern {
@@ -96,7 +97,14 @@ public:
     void SetFontWeight(const FontWeight& value);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
-
+    void SetSelected(int32_t selected)
+    {
+        rowSelected_ = selected;
+    }
+    void SetBorderColor(const Color& color);
+    Color GetBorderColor();
+    void SetBorderWidth(const Dimension& value);
+    Dimension GetBorderWidth();
     Color GetBgColor();
     // get font props
     Dimension GetFontSize();
@@ -124,7 +132,23 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern{ FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        if (!theme->IsFocusBoxGlow()) {
+            return focusPattern;
+        }
+
+        auto selectTheme_ = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(selectTheme_, focusPattern);
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusWidthVp());
+        focusPaintParam.SetFocusPadding(selectTheme_->GetOptionFocusedBoxPadding());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam};
     }
 
     void UpdateNextNodeDivider(bool needDivider);
@@ -195,6 +219,16 @@ public:
         return hasOptionWidth_;
     }
 
+    void SetIsBGColorSetByUser(bool isSet)
+    {
+        isBGColorSetByUser_ = isSet;
+    }
+
+    void SetIsTextColorSetByUser(bool isSet)
+    {
+        isTextColorSetByUser_ = isSet;
+    }
+
     const RefPtr<SelectTheme>& GetSelectTheme() const
     {
         return selectTheme_;
@@ -235,8 +269,13 @@ private:
     bool UpdateOptionFocus(KeyCode code);
     void SetAccessibilityAction();
     void UpdatePasteFontColor(const Color& fontColor);
-
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     std::optional<Color> bgColor_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
@@ -257,6 +296,11 @@ private:
     bool hasOptionWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
+    bool isBGColorSetByUser_ = false;
+    bool isTextColorSetByUser_ = false;
+    bool focusEventInitialized_ = false;
+    bool isFocusShadowSet_ = false;
+    int32_t rowSelected_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

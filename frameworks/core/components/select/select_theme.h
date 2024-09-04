@@ -34,6 +34,8 @@ constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr uint32_t CONTENT_ALIGN_LEFT = 4;
+constexpr double SELECT_FOCUS_SCALE = 1.0;
+constexpr double NONE_SHADOW_VALUE = 6.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
@@ -113,6 +115,7 @@ public:
             theme->spinnerSource_ = themeConstants->GetSymbolByName("sys.symbol.arrowtriangle_down_fill");
             ParsePartOne(theme, pattern);
             ParsePartTwo(theme, pattern);
+            ParsePartThree(theme, pattern);
         }
 
         void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SelectTheme>& theme) const
@@ -257,6 +260,56 @@ public:
             theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
         }
 
+        void ParsePartThree(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->selectNormalBorderWidth_ = pattern->GetAttr<Dimension>("select_normal_border_width", 0.0_vp);
+            theme->selectNormalBorderColor_ = pattern->GetAttr<Color>("select_normal_border_color", Color::TRANSPARENT);
+            theme->selectNormalShadow_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("select_normal_shadow", NONE_SHADOW_VALUE));
+            theme->selectFocusedShadow_ =
+            static_cast<uint32_t>(pattern->GetAttr<double>("select_focused_shadow", NONE_SHADOW_VALUE));
+            theme->selectFocusedScale_ =
+            pattern->GetAttr<double>("select_focused_scale", SELECT_FOCUS_SCALE);
+            theme->selectFocusedTextColor_ = pattern->GetAttr<Color>("select_focused_text_color", Color(0xff182431));
+            theme->selectFocusedBackgroundColor_ =
+                pattern->GetAttr<Color>("select_focused_back_ground_color", Color::TRANSPARENT);
+            theme->menuNormalBorderWidth_ = pattern->GetAttr<Dimension>("menu_normal_border_width", 0.0_vp);
+            theme->menuNormalBorderColor_ = pattern->GetAttr<Color>("menu_normal_border_color", Color::TRANSPARENT);
+            theme->menuNormalBackgroundBlurStyle_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("menu_normal_back_ground_blur_type", 0));
+            theme->optionNormalTopBottomMargin_ =
+                pattern->GetAttr<Dimension>("option_normal_top_bottom_margin", 0.0_vp);
+            theme->optionContentNormalLeftRightPadding_ =
+                pattern->GetAttr<Dimension>("option_content_normal_left_right_padding", 0.0_vp);
+            theme->optionContentNormalAlign_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("option_content_normal_align", CONTENT_ALIGN_LEFT));
+            theme->optionFocusedLeftRightMargin_ =
+                pattern->GetAttr<Dimension>("option_focused_left_right_margin", 0.0_vp);
+            theme->optionFocusedBackgroundColor_ =
+                pattern->GetAttr<Color>("option_focused_back_ground_color", Color::TRANSPARENT);
+            theme->optionFocusedShadow_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("option_focus_shadow", NONE_SHADOW_VALUE));
+            theme->optionFocusedFontColor_ = pattern->GetAttr<Color>("option_focused_font_color", Color(0xff182431));
+            theme->shadowNormal_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("option_default_shadow", NONE_SHADOW_VALUE));
+            theme->optionSelectedBorderColor_ =
+                pattern->GetAttr<Color>("option_selected_border_color", Color::TRANSPARENT);
+            theme->optionSelectedBorderWidth_ = pattern->GetAttr<Dimension>("option_selected_border_width", 0.0_vp);
+            theme->optionNormalWidth_ = pattern->GetAttr<Dimension>("option_normal_width", 156.0_vp);
+            theme->selectedFontSizeText = pattern->GetAttr<Dimension>("select_font_size_text", 16.0_fp);
+            theme->selectNormalLeftRightMargin_ =
+        pattern->GetAttr<Dimension>("select_normal_left_right_margin", 8.0_vp);
+            theme->menuBlendBgColor_ = pattern->GetAttr<int>("menu_is_blend_bg_color", 0);
+        theme->optionFocusedBoxPadding_ =
+                pattern->GetAttr<Dimension>("option_focused_box_padding", 0.0_vp);
+            theme->spinnerFocusedSymbolColor_ =
+                pattern->GetAttr<Color>("select_focused_symbol_color", theme->spinnerFocusedSymbolColor_);
+            theme->spinnerFocusedColor_ =
+                pattern->GetAttr<Color>("select_focused_icon_color", theme->spinnerFocusedColor_);
+            theme->optionApplyFocusedStyle_ = pattern->GetAttr<int>("option_is_apply_focus_style", 0);
+            theme->isSlideMoreOffset_ = pattern->GetAttr<int>("select_slide_more_offset", 0);
+        }
+
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
         {
             theme->titleLeftPadding_ = Dimension(TITLE_LEFT_PADDING, DimensionUnit::VP);
@@ -310,6 +363,7 @@ public:
         ClonePartOne(theme);
         ClonePartTwo(theme);
         ClonePartThree(theme);
+        ClonePartFour(theme);
         return theme;
     }
 
@@ -423,6 +477,39 @@ public:
         theme->menuDefaultRadius_ = menuDefaultRadius_;
         theme->menuDefaultInnerRadius_ = menuDefaultInnerRadius_;
         theme->menuTextColor_ = menuTextColor_;
+    }
+
+    void ClonePartFour(RefPtr<SelectTheme>& theme)
+    {
+        theme->selectNormalBorderWidth_ = selectNormalBorderWidth_;
+        theme->selectNormalBorderColor_ = selectNormalBorderColor_;
+        theme->selectNormalShadow_ = selectNormalShadow_;
+        theme->selectFocusedShadow_ = selectFocusedShadow_;
+        theme->selectFocusedScale_ = selectFocusedScale_;
+        theme->selectFocusedTextColor_ = selectFocusedTextColor_;
+        theme->selectFocusedBackgroundColor_ = selectFocusedBackgroundColor_;
+        theme->menuNormalBorderWidth_ = menuNormalBorderWidth_;
+        theme->menuNormalBorderColor_ = menuNormalBorderColor_;
+        theme->menuNormalBackgroundBlurStyle_ = menuNormalBackgroundBlurStyle_;
+        theme->optionNormalTopBottomMargin_ = optionNormalTopBottomMargin_;
+        theme->optionContentNormalLeftRightPadding_ = optionContentNormalLeftRightPadding_;
+        theme->optionContentNormalAlign_ = optionContentNormalAlign_;
+        theme->optionFocusedLeftRightMargin_ = optionFocusedLeftRightMargin_;
+        theme->optionFocusedBackgroundColor_ = optionFocusedBackgroundColor_;
+        theme->optionFocusedShadow_ = optionFocusedShadow_;
+        theme->optionFocusedFontColor_ = optionFocusedFontColor_;
+        theme->shadowNormal_ = shadowNormal_;
+        theme->optionSelectedBorderColor_ = optionSelectedBorderColor_;
+        theme->optionSelectedBorderWidth_ = optionSelectedBorderWidth_;
+        theme->optionNormalWidth_ = optionNormalWidth_;
+        theme->selectedFontSizeText = selectedFontSizeText;
+        theme->selectNormalLeftRightMargin_ = selectNormalLeftRightMargin_;
+        theme->menuBlendBgColor_ = menuBlendBgColor_;
+        theme->optionFocusedBoxPadding_ = optionFocusedBoxPadding_;
+        theme->spinnerFocusedSymbolColor_ = spinnerFocusedSymbolColor_;
+        theme->spinnerFocusedColor_ = spinnerFocusedColor_;
+        theme->optionApplyFocusedStyle_ = optionApplyFocusedStyle_;
+        theme->isSlideMoreOffset_ = isSlideMoreOffset_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1112,6 +1199,150 @@ public:
         return menuItemContentAlign_;
     }
 
+    const Dimension& GetSelectNormalBorderWidth() const
+    {
+        return selectNormalBorderWidth_;
+    }
+
+    const Color& GetSelectNormalBorderColor() const
+    {
+        return selectNormalBorderColor_;
+    }
+
+    uint32_t GetSelectNormalShadow() const
+    {
+        return selectNormalShadow_;
+    }
+
+    uint32_t GetSelectFocusedShadow() const
+    {
+        return selectFocusedShadow_;
+    }
+
+    double GetSelectFocusedScale() const
+    {
+        return selectFocusedScale_;
+    }
+
+    const Color& GetSelectFocusedBackground() const
+    {
+        return selectFocusedBackgroundColor_;
+    }
+
+    const Color& GetSelectFocusTextColor() const
+    {
+        return selectFocusedTextColor_;
+    }
+
+    const Dimension& GetMenuNormalBorderWidth() const
+    {
+        return menuNormalBorderWidth_;
+    }
+
+    const int& GetMenuNormalBackgroundBlurStyle() const
+    {
+        return menuNormalBackgroundBlurStyle_;
+    }
+
+    const Color& GetMenuNormalBorderColor() const
+    {
+        return menuNormalBorderColor_;
+    }
+
+    const Dimension& GetOptionNormalTopBottomMargin() const
+    {
+        return optionNormalTopBottomMargin_;
+    }
+
+    const Dimension& GetOptionFocusedLeftRightMargin() const
+    {
+        return optionFocusedLeftRightMargin_;
+    }
+
+    const Color& GetOptionFocusedBackgroundColor() const
+    {
+        return optionFocusedBackgroundColor_;
+    }
+
+    uint32_t GetOptionFocusedShadow() const
+    {
+        return optionFocusedShadow_;
+    }
+
+    const Color& GetOptionFocusedFontColor() const
+    {
+        return optionFocusedFontColor_;
+    }
+
+    const Dimension& GetOptionContentNormalLeftRightPadding() const
+    {
+        return optionContentNormalLeftRightPadding_;
+    }
+
+    const uint32_t& GetOptionContentNormalAlign() const
+    {
+        return optionContentNormalAlign_;
+    }
+
+    uint32_t GetShadowNormal() const
+    {
+        return shadowNormal_;
+    }
+
+    const Color& GetOptionSelectedBorderColor() const
+    {
+        return optionSelectedBorderColor_;
+    }
+
+    const Dimension& GetOptionSelectedBorderWidth() const
+    {
+        return optionSelectedBorderWidth_;
+    }
+
+    Dimension GetMenuNormalWidth() const
+    {
+        return optionNormalWidth_;
+    }
+
+    Dimension GetSelectFontSizeText() const
+    {
+        return selectedFontSizeText;
+    }
+
+    Dimension GetSelectNormalLeftRightMargin() const
+    {
+        return selectNormalLeftRightMargin_;
+    }
+
+    bool GetMenuBlendBgColor() const
+    {
+        return menuBlendBgColor_;
+    }
+
+    const Dimension& GetOptionFocusedBoxPadding() const
+    {
+        return optionFocusedBoxPadding_;
+    }
+
+    const Color& GetSpinnerFocusedSymbolColor() const
+    {
+        return spinnerFocusedSymbolColor_;
+    }
+
+    const Color& GetSpinnerFocusedColor() const
+    {
+        return spinnerFocusedColor_;
+    }
+
+    const bool& GetoptionApplyFocusedStyle() const
+    {
+        return optionApplyFocusedStyle_;
+    }
+
+    const bool& GetScrollSlideMoreOffset() const
+    {
+        return isSlideMoreOffset_;
+    }
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1233,6 +1464,35 @@ private:
     Dimension menuDefaultInnerRadius_;
     Color menuTextColor_;
     uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
+    Dimension selectNormalBorderWidth_;
+    Color selectNormalBorderColor_;
+    Color selectFocusedTextColor_;
+    Color selectFocusedBackgroundColor_;
+    uint32_t selectNormalShadow_;
+    uint32_t selectFocusedShadow_;
+    double selectFocusedScale_;
+    Dimension menuNormalBorderWidth_;
+    Color menuNormalBorderColor_;
+    int menuNormalBackgroundBlurStyle_;
+    Dimension optionNormalTopBottomMargin_;
+    Dimension optionContentNormalLeftRightPadding_;
+    uint32_t optionContentNormalAlign_;
+    Dimension optionFocusedLeftRightMargin_;
+    Color optionFocusedBackgroundColor_;
+    uint32_t optionFocusedShadow_;
+    Color optionFocusedFontColor_;
+    uint32_t shadowNormal_;  // no shadow
+    Color optionSelectedBorderColor_;
+    Dimension optionSelectedBorderWidth_;
+    Dimension optionNormalWidth_;
+    Dimension selectedFontSizeText;
+    Dimension selectNormalLeftRightMargin_  = 8.0_vp;
+    bool menuBlendBgColor_ = false;
+    Dimension optionFocusedBoxPadding_ = 0.0_vp;
+    Color spinnerFocusedSymbolColor_ = Color(0xff182431);
+    Color spinnerFocusedColor_ = Color(0xE5182431);
+    bool optionApplyFocusedStyle_ = false;
+    bool isSlideMoreOffset_ = false;
 };
 
 } // namespace OHOS::Ace
