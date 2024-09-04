@@ -113,4 +113,38 @@ void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrat
         default: LOGE("Unexpected enum value in Ark_ColoringStrategy: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src)
+{
+    switch (src) {
+        case ARK_SCROLL_STATE_IDLE: dst = ScrollState::IDLE; break;
+        case ARK_SCROLL_STATE_SCROLL: dst = ScrollState::SCROLL; break;
+        case ARK_SCROLL_STATE_FLING: dst = ScrollState::FLING; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollState: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
+{
+    switch (src) {
+        case ARK_GRID_DIRECTION_ROW: dst = FlexDirection::ROW; break;
+        case ARK_GRID_DIRECTION_COLUMN: dst = FlexDirection::COLUMN; break;
+        case ARK_GRID_DIRECTION_ROW_REVERSE: dst = FlexDirection::ROW_REVERSE; break;
+        case ARK_GRID_DIRECTION_COLUMN_REVERSE: dst = FlexDirection::COLUMN_REVERSE; break;
+        default: LOGE("Unexpected enum value in Ark_GridDirection: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
+{
+    switch (src) {
+        case ARK_EDGE_EFFECT_SPRING: dst = EdgeEffect::SPRING; break;
+        case ARK_EDGE_EFFECT_FADE: dst = EdgeEffect::FADE; break;
+        case ARK_EDGE_EFFECT_NONE: dst = EdgeEffect::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_EdgeEffect: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

@@ -176,17 +176,6 @@ inline void AssignCast(std::optional<SwiperDisplayMode>& dst, const Ark_SwiperDi
 }
 
 template<>
-inline void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
-{
-    switch (src) {
-        case static_cast<Ark_EdgeEffect>(EdgeEffect::SPRING): dst = EdgeEffect::SPRING; break;
-        case static_cast<Ark_EdgeEffect>(EdgeEffect::FADE): dst = EdgeEffect::FADE; break;
-        case static_cast<Ark_EdgeEffect>(EdgeEffect::NONE): dst = EdgeEffect::NONE; break;
-        default: LOGE("Unexpected enum value in Ark_EdgeEffect: %{public}d", src);
-    }
-}
-
-template<>
 inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_SwiperNestedScrollMode& src)
 {
     switch (src) {
