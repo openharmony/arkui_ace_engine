@@ -386,6 +386,7 @@ public:
     void GetAxisDumpInfo();
     void GetPanDirectionDumpInfo();
     void DumpAdvanceInfo();
+    void StopFlingAnimation();
 
 protected:
     void InitTheme();

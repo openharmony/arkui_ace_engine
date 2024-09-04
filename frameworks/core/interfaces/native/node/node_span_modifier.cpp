@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "draw/canvas.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -484,9 +485,11 @@ void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam)
         event.kind = ArkUIAPINodeFlags::CUSTOM_MEASURE;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.numberData[0].f32 = customSpanMeasureInfo.fontSize;
+        event.numberReturnData[0].f32 = 0.0f;
+        event.numberReturnData[1].f32 = 0.0f;
         SendArkUIAsyncCustomEvent(&event);
-        float width = event.numberReturnData[0].f32;
-        float height = event.numberReturnData[1].f32;
+        float width = std::max(event.numberReturnData[0].f32, 0.0f);
+        float height = std::max(event.numberReturnData[1].f32, 0.0f);
         return { width, height };
     };
     frameNode->GetSpanItem()->onMeasure = onMeasureFunc;
@@ -512,7 +515,12 @@ void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam)
         event.numberData[1].f32 = customSpanOptions.lineTop;
         event.numberData[2].f32 = customSpanOptions.lineBottom;
         event.numberData[3].f32 = customSpanOptions.baseline;
+        // clip
+        context.canvas.Save();
+        auto clipInnerRect = RSRect(0, 0, context.width, context.height);
+        context.canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         SendArkUIAsyncCustomEvent(&event);
+        context.canvas.Restore();
     };
     frameNode->GetSpanItem()->onDraw = onDrawFunc;
 }

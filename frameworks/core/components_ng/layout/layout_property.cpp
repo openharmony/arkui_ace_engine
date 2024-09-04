@@ -755,7 +755,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    host->NotifyVisibleChange(visible == VisibleType::VISIBLE);
+    host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
@@ -860,13 +860,11 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id,
         geometryTransitionOld->Update(host_, nullptr);
         // register node into new geometry transition
         if (geometryTransitionNew && !geometryTransitionNew->Update(nullptr, host_)) {
-            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid: %{public}s",
-                host->GetId(), id.c_str());
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid", host->GetId());
         }
     } else if (geometryTransitionNew) {
         if (geometryTransitionNew->IsInAndOutValid()) {
-            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid: %{public}s",
-                host->GetId(), id.c_str());
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid", host->GetId());
         }
         geometryTransitionNew->Build(host_, true);
     }

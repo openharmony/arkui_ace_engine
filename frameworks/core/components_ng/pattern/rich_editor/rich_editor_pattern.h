@@ -856,6 +856,8 @@ public:
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
 
+    bool IsTextEditableForStylus() const override;
+
 protected:
     bool CanStartAITask() override;
 
@@ -1038,6 +1040,7 @@ private:
     bool IsReachedBoundary(float offset);
     void UpdateScrollBarOffset() override;
     void CheckScrollable();
+    void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
     void ScheduleAutoScroll(AutoScrollParam param);
     void OnAutoScroll(AutoScrollParam param);

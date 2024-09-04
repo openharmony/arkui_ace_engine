@@ -206,7 +206,7 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateSelBackgroundPath(float offset)
 {
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     std::vector<TextPoint> points;
-    GenerateBackgroundPoints(points, offset, false);
+    GenerateBackgroundPoints(points, offset);
     CalculateLine(points, path);
     return path;
 }

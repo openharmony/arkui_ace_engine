@@ -182,7 +182,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
             jsRenderContext->SetUnit(CanvasUnit::PX);
         }
     }
-    jsRenderContext->SetCanvasDensity(density);
+    jsRenderContext->SetDensity();
 }
 
 void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* context)

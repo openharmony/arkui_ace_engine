@@ -158,7 +158,7 @@ size_t EncodeUTF8(uint32_t codePoint, uint8_t* utf8, size_t len, size_t index)
         return 0;
     }
     for (size_t j = size - 1; j > 0; j--) {
-        uint8_t cont = ((codePoint | byteMark) & byteMask);
+        uint8_t cont = ((codePoint | BYTE_MARK) & BYTE_MASK);
         utf8[index + j] = cont;
         codePoint >>= UTF8_OFFSET;
     }
@@ -271,7 +271,7 @@ bool IsUTF8(std::string& data)
 void ConvertIllegalStr(std::string& str)
 {
     if (IsUTF8(str)) {
-        uint8_t* buf8 = (uint8_t*)str.c_str();
+        uint8_t* buf8 =  reinterpret_cast<uint8_t*>(const_cast<char*>(str.c_str()));
         size_t utf8Len = str.size();
         auto utf16Len = MUtf8ToUtf16Size(buf8, utf8Len);
         std::unique_ptr<uint16_t[]> buf16 = std::make_unique<uint16_t[]>(utf16Len);

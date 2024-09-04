@@ -1533,12 +1533,14 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         std::string urlName = url.substr(0, pos) + bin_ext;
 #if !defined(PREVIEW)
         if (IsModule()) {
-            if (engineInstance_->IsPlugin()) {
+            if (!engineInstance_->IsPlugin()) {
+                LoadJsWithModule(urlName);
+                return;
+            }
+            if (!pluginModuleName_.empty()) {
                 LoadPluginJsWithModule(urlName);
                 return;
             }
-            LoadJsWithModule(urlName);
-            return;
         }
 #endif
         if (isMainPage) {
@@ -2518,6 +2520,7 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
     }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
         return;
     }
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;

@@ -27,20 +27,6 @@
 #include "frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace::NG {
-struct MagnifierRect {
-    bool isChildNode = false;
-    int32_t childNodeId = 0;
-    float startX = 0.0f;
-    float startY = 0.0f;
-    float endX = 0.0f;
-    float endY = 0.0f;
-    OffsetF localOffset;
-    OffsetF cursorOffset;
-    SizeF contentSize;
-    OffsetF contentOffset;
-    RefPtr<PixelMap> pixelMap = nullptr;
-    WeakPtr<Pattern> parent = nullptr;
-};
 
 class MagnifierController : public virtual AceType {
     DECLARE_ACE_TYPE(MagnifierController, AceType);
@@ -52,7 +38,11 @@ public:
     void OpenMagnifier();
     void CloseMagnifier();
 
-    RefPtr<PixelMap> GetPixelMap();
+    bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, const OffsetF& basePaintOffset,
+        const RefPtr<FrameNode>& host);
+    bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, const OffsetF& basePaintOffset,
+        const RefPtr<FrameNode>& host);
+    bool UpdateMagnifierOffset();
 
     void UpdateShowMagnifier(bool isShowMagnifier = false);
 
@@ -61,20 +51,11 @@ public:
         return isShowMagnifier_;
     }
 
-    void SetMagnifierRect(MagnifierRect magnifierRect)
-    {
-        magnifierRect_ = magnifierRect;
-    }
-
-    MagnifierRect GetMagnifierRect()
-    {
-        return magnifierRect_;
-    }
-
     void SetLocalOffset(OffsetF localOffset)
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
+        magnifierNodeExist_ = true;
         UpdateShowMagnifier(true);
     }
 
@@ -83,15 +64,44 @@ public:
         return localOffset_;
     }
 
-private:
-    void CreateMagnifierChildNode();
-    void SetMagnifierRect(const RefPtr<Pattern>& childPattern);
+    RefPtr<FrameNode> GetMagnifierNode() const
+    {
+        return magnifierFrameNode_;
+    }
+    void ChangeMagnifierVisibility(const bool& visible);
 
+    void InitMagnifierParams();
+
+    uint32_t ArgbToRgba(const uint32_t& color);
+
+    void RemoveMagnifierFrameNode();
+
+    void SetColorModeChange(const bool& colorModeChange)
+    {
+        colorModeChange_ = colorModeChange;
+    }
+    RefPtr<FrameNode> GetRootNode();
+
+    RefPtr<UINode> FindWindowScene(const RefPtr<FrameNode>& targetNode);
+
+    bool GetMagnifierNodeExist() const
+    {
+        return magnifierNodeExist_;
+    }
+private:
+    MagnifierParams params_;
+    bool visible_ = false;
+    void CreateMagnifierChildNode();
+
+    RefPtr<FrameNode> magnifierFrameNode_ = nullptr;
     bool isShowMagnifier_ = false;
-    MagnifierRect magnifierRect_;
     OffsetF localOffset_;
     WeakPtr<Pattern> pattern_;
-    RefPtr<FrameNode> magnifierFrameNode_ = nullptr;
+    bool removeFrameNode_ = false;
+    bool colorModeChange_ = false;
+    bool magnifierNodeExist_ = false;
+    Dimension magnifierNodeWidth_;
+    Dimension magnifierNodeHeight_;
 };
 } // namespace OHOS::Ace::NG
 

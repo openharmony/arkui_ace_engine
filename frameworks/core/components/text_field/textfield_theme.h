@@ -109,6 +109,13 @@ public:
             theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
+            theme->glassOutlinePrimaryColor_ =
+                pattern->GetAttr<Color>("glass_material_outline_primary", Color(0xffffff));
+            theme->glassOutlineSecondaryColor_ =
+                pattern->GetAttr<Color>("glass_material_outline_secondary", Color(0xf0f0f0));
+            theme->glassMaskPrimaryColor_ = pattern->GetAttr<Color>("glass_material_mask_primary", Color(0x00808080));
+            theme->glassMaskSecondaryColor_ =
+                pattern->GetAttr<Color>("glass_material_mask_secondary", Color(0x26808080));
         }
 
         void ParsePatternSubSecondPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
@@ -505,6 +512,26 @@ public:
         return overCounterColor_;
     }
 
+    const Color& GetGlassOutlinePrimaryColor() const
+    {
+        return glassOutlinePrimaryColor_;
+    }
+
+    const Color& GetGlassOutlineSecondaryColor() const
+    {
+        return glassOutlineSecondaryColor_;
+    }
+
+    const Color& GetGlassMaskPrimaryColor() const
+    {
+        return glassMaskPrimaryColor_;
+    }
+
+    const Color& GetGlassMaskSecondaryColor() const
+    {
+        return glassMaskSecondaryColor_;
+    }
+
     const Dimension& GetInsertCursorOffset() const
     {
         return insertCursorOffset_;
@@ -629,6 +656,10 @@ private:
     Color inlineBorderColor_;
     Color defaultCounterColor_;
     Color overCounterColor_;
+    Color glassOutlinePrimaryColor_;
+    Color glassOutlineSecondaryColor_;
+    Color glassMaskPrimaryColor_;
+    Color glassMaskSecondaryColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;

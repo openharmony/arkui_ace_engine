@@ -190,9 +190,9 @@ void SheetPresentationPattern::InitScrollProps()
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);
 
-    // real-time refresh should set scroll always enabled,
-    // because sheet will be not draggable when sheet init height is less than content height
-    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS);
+    // When sheet content height is larger than sheet height,
+    // the sheet height should set scroll always enabled.
+    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable());
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -446,6 +446,7 @@ void SheetPresentationPattern::InitPanEvent()
 
 void SheetPresentationPattern::HandleDragStart()
 {
+    InitScrollProps();
     SetIsDragging(true);
     if (animation_ && isAnimationProcess_) {
         AnimationUtils::StopAnimation(animation_);
@@ -2134,6 +2135,7 @@ void SheetPresentationPattern::FireOnTypeDidChange()
 
 void SheetPresentationPattern::OnScrollStartRecursive(float position, float velocity)
 {
+    InitScrollProps();
     if (animation_ && isAnimationProcess_) {
         AnimationUtils::StopAnimation(animation_);
         isAnimationBreak_ = true;
@@ -2187,7 +2189,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
     // the sheet height should be updated.
     // When dragging up the sheet, and sheet height is less than or equal to sheet content height,
     // the sheet content should scrolling.
-    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight && IsScrollable()) {
+    if ((NearZero(currentOffset_)) && isDraggingUp && isReachMaxSheetHeight) {
         isSheetNeedScroll_ = false;
         return {scrollOffset, true};
     }

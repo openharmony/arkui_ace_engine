@@ -65,4 +65,25 @@ void SearchTextFieldPattern::ApplyNormalTheme()
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     }
 }
+
+bool SearchTextFieldPattern::IsTextEditableForStylus() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto focusHub = parentFrameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusable() || !parentFrameNode->IsVisible()) {
+        return false;
+    }
+    auto renderContext = parentFrameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto opacity = renderContext->GetOpacity();
+    // if opacity is 0.0f, no need to hit frameNode.
+    if (NearZero(opacity.value_or(1.0f))) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

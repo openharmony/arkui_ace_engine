@@ -721,6 +721,16 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     parentHitNodes_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
+
+void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    if (container && (container->IsScenceBoardWindow() || container->IsUIExtensionWindow())) {
+        return;
+    }
+    preTargetFrameNode_ = nullptr;
+}
+
 void DragDropManager::DoDragReset()
 {
     dragDropState_ = DragDropMgrState::IDLE;
@@ -1144,8 +1154,6 @@ void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr
 
 void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
 
@@ -1155,8 +1163,8 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
+    itemDragInfo.SetX(windowX);
+    itemDragInfo.SetY(windowY);
 
     // use -1 for grid item not in eventGrid
     auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
@@ -1208,15 +1216,13 @@ float DragDropManager::GetWindowScale() const
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
     dragDropState_ = DragDropMgrState::IDLE;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     auto windowX = globalX * windowScale;
     auto windowY = globalY * windowScale;
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
+    itemDragInfo.SetX(windowX);
+    itemDragInfo.SetY(windowY);
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY);
     if (!dragFrameNode) {

@@ -97,6 +97,19 @@ void FFICJVectorNativeTextShadowDelete(VectorNativeTextShadow vec)
     delete actualVec;
 }
 
+void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId)
+{
+    auto textClock = TextClockModel::GetInstance()->Create();
+    TextClockModel::GetInstance()->SetHoursWest(NAN);
+
+    auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
+    if (controller != nullptr) {
+        controller->SetController(textClock);
+    } else {
+        LOGE("textClockControllerId is invalid ");
+    }
+}
+
 void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId)
 {
     auto textClock = TextClockModel::GetInstance()->Create();

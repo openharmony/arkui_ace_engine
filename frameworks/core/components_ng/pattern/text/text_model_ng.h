@@ -171,7 +171,6 @@ public:
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
-    static bool GetHalfLeading(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
-class MagnifierPainter;
 class RichEditorOverlayModifier : public TextOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorOverlayModifier, TextOverlayModifier)
 
@@ -67,7 +66,6 @@ private:
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<PropertySizeF> frameSize_;
-    RefPtr<MagnifierPainter> magnifierPainter_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RefPtr<PropertyFloat> previewTextUnderlineWidth_;
     RefPtr<PropertyBool> showPreviewTextDecoration_;
