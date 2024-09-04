@@ -171,6 +171,7 @@ private:
     void FlushDialogMonthData(ObtainedMonth& obtainedMonth);
     void InitSwiperChangeDoneEvent();
     void ReadTitleNode();
+    void ClearChildrenFocus();
 
     std::optional<int32_t> titleId_;
     RefPtr<CalendarControllerNg> calendarControllerNg_;
