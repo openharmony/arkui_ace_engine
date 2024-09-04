@@ -242,8 +242,8 @@ public:
     void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
     void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
     void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
-    GestureEventFunc urlOnClick;
-    std::function<void()> urlOnRelease;
+    std::function<void(const std::string& address)> urlOnClick;
+    std::function<void(const std::string& address)> urlOnRelease;
     std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
     std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
     void SetUrlAddress(const std::string& address)
@@ -254,7 +254,7 @@ public:
     {
         return address_;
     }
-    void SetUrlOnReleaseEvent(std::function<void()>&& urlOnRelease_)
+    void SetUrlOnReleaseEvent(std::function<void(const std::string& address)>&& urlOnRelease_)
     {
         urlOnRelease = std::move(urlOnRelease_);
     }
@@ -263,7 +263,7 @@ public:
     {
         urlOnHover = std::move(urlOnHover_);
     }
-    void SetUrlOnClickEvent(GestureEventFunc&& urlOnClick_)
+    void SetUrlOnClickEvent(std::function<void(const std::string& address)>&& urlOnClick_)
     {
         urlOnClick = std::move(urlOnClick_);
     }
