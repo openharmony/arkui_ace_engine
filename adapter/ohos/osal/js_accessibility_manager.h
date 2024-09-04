@@ -94,6 +94,15 @@ public:
         lastFrameNode_ = node;
     }
 
+    void SaveCurrentFocusNodeSize(const RefPtr<NG::FrameNode>& currentFocusNode)
+    {
+        if (currentFocusNode->IsAccessibilityVirtualNode()) {
+            auto oldGeometryNode = currentFocusNode->GetGeometryNode();
+            CHECK_NULL_VOID(oldGeometryNode);
+            oldGeometrySize_ = oldGeometryNode->GetFrameSize();
+        }
+    }
+
     bool SubscribeToastObserver();
     bool UnsubscribeToastObserver();
     bool SubscribeStateObserver(int eventType);
@@ -481,6 +490,7 @@ private:
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;
+    NG::SizeF oldGeometrySize_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     mutable std::mutex componentSACallbackMutex_;
