@@ -224,7 +224,7 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest010
     containerModalNode->AddChild(
         FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 2, AceType::MakeRefPtr<ButtonPattern>()));
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
-    containerPattern->SetContainerButtonHide(true, true, false);
+    containerPattern->SetContainerButtonHide(true, true, false, false);
     auto result = containerPattern->GetIsFocus();
     EXPECT_FALSE(result);
 }
@@ -241,7 +241,7 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest011
     containerModalNode->AddChild(
         FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 2, AceType::MakeRefPtr<ButtonPattern>()));
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
-    containerPattern->SetContainerButtonHide(true, false, true);
+    containerPattern->SetContainerButtonHide(true, false, true, false);
     auto result = containerPattern->GetIsFocus();
     EXPECT_FALSE(result);
 }

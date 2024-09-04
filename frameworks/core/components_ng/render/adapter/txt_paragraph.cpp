@@ -656,6 +656,16 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
     GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects, RectHeightPolicy::COVER_LINE);
 }
 
+std::pair<size_t, size_t> TxtParagraph::GetEllipsisTextRange()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, std::make_pair(std::numeric_limits<size_t>::max(), 0));
+    const auto& range = paragrah->GetEllipsisTextRange();
+    auto start = std::min(range.leftIndex, range.rightIndex);
+    auto end = std::max(range.leftIndex, range.rightIndex);
+    return std::make_pair(start, end);
+}
+
 void TxtParagraph::GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
 {
     auto adjustStart = AdjustIndexForEmoji(start);

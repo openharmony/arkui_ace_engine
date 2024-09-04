@@ -23,6 +23,7 @@
 #include "parameter.h"
 #include "parameters.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -360,10 +361,10 @@ std::pair<float, float> GetPercent()
 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
+std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
 bool SystemProperties::imageFrameworkEnable_ = IsImageFrameworkEnabled();
-bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
-bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
+std::atomic<bool> SystemProperties::traceInputEventEnable_(IsTraceInputEventEnabled() && developerModeOn_);
+std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
@@ -397,7 +398,7 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
-bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled() && developerModeOn_;
+std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
@@ -418,7 +419,7 @@ bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
-bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -553,9 +554,9 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled() && developerModeOn_;
-    traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
-    stateManagerEnable_ = IsStateManagerEnable();
+    layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
+    traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
+    stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
@@ -571,7 +572,7 @@ void SystemProperties::InitDeviceInfo(
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
-    acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+    acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -764,6 +765,52 @@ void SystemProperties::RemoveWatchSystemParameter(
     RemoveParameterWatcher(key, callback, context);
 }
 
+void SystemProperties::EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetInputEventTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback(
+    const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetSecurityDevelopermodeLayoutTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetStateManagerEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void SystemProperties::EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
+{
+    bool isDebugBoundary = strcmp(value, "true") == 0;
+    SetDebugBoundaryEnabled(isDebugBoundary);
+    auto container = reinterpret_cast<Platform::AceContainer*>(context);
+    CHECK_NULL_VOID(container);
+    container->RenderLayoutBoundary(isDebugBoundary);
+}
+
+void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value,
+    void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SetPerformanceMonitorEnabled(strcmp(value, "true") == 0);
+    }
+}
+
 float SystemProperties::GetDefaultResolution()
 {
     float density = 1.0f;
@@ -776,22 +823,27 @@ float SystemProperties::GetDefaultResolution()
 
 void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
 {
-    layoutTraceEnable_ = layoutTraceEnable && developerModeOn_;
+    layoutTraceEnable_.store(layoutTraceEnable && developerModeOn_);
 }
 
 void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
 {
-    traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
+    traceInputEventEnable_.store(inputEventTraceEnable && developerModeOn_);
 }
 
 void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
 {
-    layoutTraceEnable_ = layoutTraceEnable && IsLayoutTraceEnabled();
+    layoutTraceEnable_.store(layoutTraceEnable && IsLayoutTraceEnabled());
 }
 
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
-    debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
+    debugBoundaryEnabled_.store(debugBoundaryEnabled && developerModeOn_);
+}
+
+void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
+{
+    acePerformanceMonitorEnable_.store(performanceMonitorEnable);
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
@@ -828,5 +880,10 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto type = std::stoi(foldScreenTypeStr);
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
+}
+
+std::string SystemProperties::GetWebDebugRenderMode()
+{
+    return OHOS::system::GetParameter("web.debug.renderMode", "");
 }
 } // namespace OHOS::Ace

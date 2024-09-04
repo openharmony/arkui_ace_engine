@@ -998,9 +998,32 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     NG::SelectMenuParam menuParam;
     int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
-        JSText::ParseMenuParam(info, info[requiredParamCount], menuParam);
+        JSRef<JSObject> menuOptions = info[requiredParamCount];
+        JSText::ParseMenuParam(info, menuOptions, menuParam);
+        auto menuType = menuOptions->GetProperty("menuType");
+        bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+        bool bindImagePreviewMenu = isPreviewMenu
+            && responseType == NG::TextResponseType::LONG_PRESS
+            && editorType == NG::TextSpanType::IMAGE;
+        if (bindImagePreviewMenu) {
+            SetImagePreviewMenu(buildFunc, menuParam);
+            return;
+        }
     }
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
+}
+
+void JSRichEditor::SetImagePreviewMenu(std::function<void()>& builder, const NG::SelectMenuParam& selectMenuParam)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenu");
+    NG::MenuParam menuParam;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.onDisappear = selectMenuParam.onDisappear;
+    if (selectMenuParam.onAppear) {
+        menuParam.onAppear = [onAppear = selectMenuParam.onAppear]() { onAppear(-1, -1); };
+    }
+    RichEditorModel::GetInstance()->SetImagePreviewMenuParam(builder, menuParam);
 }
 
 JSRef<JSVal> JSRichEditor::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
@@ -1084,7 +1107,7 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
         JSRef<JSVal> colorVal = object->GetProperty("fontColor");
         Color fontColor;
         if (!colorVal->IsNull() && JSContainerBase::ParseJsColor(colorVal, fontColor)) {
-            options.fontColor = DynamicColor(fontColor, ParseColorResourceId(colorVal));
+            options.fontColor = fontColor;
         }
     }
     auto textTheme = pipelineContext->GetTheme<TextTheme>();
@@ -1166,18 +1189,15 @@ void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    DynamicColor dynamicColor;
     JSRef<JSVal> colorVal = info[0];
     if (!ParseJsColor(colorVal, color)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
         CHECK_NULL_VOID(theme);
-        dynamicColor = theme->GetCaretColor();
-    } else {
-        dynamicColor = DynamicColor(color, ParseColorResourceId(colorVal));
+        color = theme->GetCaretColor();
     }
-    RichEditorModel::GetInstance()->SetCaretColor(dynamicColor);
+    RichEditorModel::GetInstance()->SetCaretColor(color);
 }
 
 void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -1187,18 +1207,15 @@ void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    DynamicColor dynamicSelectedColor;
     JSRef<JSVal> colorVal = info[0];
     if (!ParseJsColor(colorVal, selectedColor)) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
         CHECK_NULL_VOID(theme);
-        dynamicSelectedColor = theme->GetSelectedBackgroundColor();
-    } else {
-        dynamicSelectedColor = DynamicColor(selectedColor, ParseColorResourceId(colorVal));
+        selectedColor = theme->GetSelectedBackgroundColor();
     }
-    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(dynamicSelectedColor);
+    RichEditorModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
 void JSRichEditor::SetEnterKeyType(const JSCallbackInfo& info)
@@ -1263,18 +1280,6 @@ void JSRichEditor::SetOnSubmit(const JSCallbackInfo& info)
     CreateJsRichEditorCommonEvent(info);
 }
 
-std::optional<uint32_t> JSRichEditor::ParseColorResourceId(JSRef<JSVal> colorVal)
-{
-    CHECK_NULL_RETURN(colorVal->IsObject(), std::nullopt);
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colorVal);
-    JSViewAbstract::CompleteResourceObject(jsObj);
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    CHECK_NULL_RETURN(resId->IsNumber(), std::nullopt);
-    auto type = jsObj->GetPropertyValue<int32_t>("type", -1);
-    CHECK_NULL_RETURN(type == static_cast<int32_t>(ResourceType::COLOR), std::nullopt);
-    return resId->ToNumber<uint32_t>();
-}
-
 void JSRichEditor::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info.Length() > 0);
@@ -1295,6 +1300,17 @@ void JSRichEditor::SetEnableHapticFeedback(const JSCallbackInfo& info)
         return;
     }
     RichEditorModel::GetInstance()->SetEnableHapticFeedback(jsValue->ToBoolean());
+}
+
+void JSRichEditor::SetBarState(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(!jsValue->IsUndefined() && jsValue->IsNumber());
+    int32_t barState = jsValue->ToNumber<int32_t>();
+    CHECK_NULL_VOID(barState >= static_cast<int32_t>(DisplayMode::OFF));
+    CHECK_NULL_VOID(barState <= static_cast<int32_t>(DisplayMode::ON));
+    RichEditorModel::GetInstance()->SetBarState(static_cast<DisplayMode>(barState));
 }
 
 void JSRichEditor::JSBind(BindingTarget globalObj)
@@ -1339,6 +1355,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);
+    JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -2236,9 +2253,8 @@ void JSRichEditorBaseController::ParseJsTextStyle(
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
-        DynamicColor dynamicColor = DynamicColor(textColor, JSRichEditor::ParseColorResourceId(fontColor));
-        style.SetTextColor(dynamicColor);
-        updateSpanStyle.updateTextColor = dynamicColor;
+        style.SetTextColor(textColor);
+        updateSpanStyle.updateTextColor = textColor;
         updateSpanStyle.useThemeFontColor = false;
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
@@ -2356,9 +2372,8 @@ void JSRichEditorBaseController::ParseTextDecoration(
         JSRef<JSVal> color = decorationObject->GetProperty("color");
         Color decorationColor;
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
-            DynamicColor dynamicColor = DynamicColor(decorationColor, JSRichEditor::ParseColorResourceId(color));
-            updateSpanStyle.updateTextDecorationColor = dynamicColor;
-            style.SetTextDecorationColor(dynamicColor);
+            updateSpanStyle.updateTextDecorationColor = decorationColor;
+            style.SetTextDecorationColor(decorationColor);
             updateSpanStyle.useThemeDecorationColor = false;
         }
         JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
@@ -2367,10 +2382,11 @@ void JSRichEditorBaseController::ParseTextDecoration(
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
         }
-        if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
-            updateSpanStyle.updateTextDecorationColor = style.GetDynamicTextColor();
-            style.SetTextDecorationColor(style.GetDynamicTextColor());
-        }
+        updateSpanStyle.isInitDecoration = true;
+    }
+    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
+        updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
+        style.SetTextDecorationColor(style.GetTextColor());
     }
 }
 
@@ -2431,7 +2447,7 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         decorationObj->SetProperty<int32_t>("style",
             static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
     }
-    if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
+    if (typingStyle.isInitDecoration) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);
     }
     if (typingStyle.updateTextShadows.has_value()) {

@@ -45,12 +45,9 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     PerformMeasureSelf(layoutWrapper);
     // match parent.
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    if (LessOrEqual(frameSize.Width(), 0.0f) || LessOrEqual(frameSize.Height(), 0.0f)) {
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
+    if (pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
         auto parentNode = host->GetAncestorNodeOfFrame();
         CHECK_NULL_VOID(parentNode);
         auto parentGeo = parentNode->GetGeometryNode();
@@ -357,15 +354,15 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         if (IsTextAreaSelectAll()) {
             menuPosition.SetY(singleHandle.Top());
-        } else {
-            bool isChangeToBottom = !info_->isSingleHandle;
-            isChangeToBottom = isChangeToBottom || (safeAreaManager &&
-                IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText) &&
-                safeAreaManager->GetSystemSafeArea().top_.Length() > singleHandle.Top());
-            if (isChangeToBottom) {
+        } else if (info_->isSingleHandle &&
+            IsMenuAreaSmallerHandleArea(singleHandle, menuHeight, menuSpacingBetweenText)) {
+            if (safeAreaManager && safeAreaManager->GetSystemSafeArea().top_.Length() > singleHandle.Top()) {
                 menuPosition.SetY(
                     static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
             }
+        } else {
+            menuPosition.SetY(
+                static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
     auto spaceBetweenViewPort = menuSpacingBetweenText + menuSpacingBetweenHandle;

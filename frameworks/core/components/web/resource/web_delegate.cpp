@@ -5221,6 +5221,11 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         result = webCom->OnContextMenuShow(info.get());
 #endif
     }, "ArkUIWebContextMenuShow");
+    if (result) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, result);
+        webPattern->DestroyAnalyzerOverlay();
+    }
     return result;
 }
 

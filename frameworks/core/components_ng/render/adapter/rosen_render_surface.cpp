@@ -319,7 +319,9 @@ bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
     int32_t bufferWidth = surfaceNode->buffer_->GetSurfaceBufferWidth();
     int32_t bufferHeight = surfaceNode->buffer_->GetSurfaceBufferHeight();
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
-
+    CHECK_NULL_RETURN(pipeline, true);
+    ACE_SCOPED_TRACE("Web CompareBufferSize (width %d, height %d, bufferWidth %d, bufferHeight %d)" \
+        " pipeline freeze status = %d", width, height, bufferWidth, bufferHeight, pipeline->IsFreezeFlushMessage());
     if (bufferWidth > SIZE_LIMIT || bufferHeight > SIZE_LIMIT
         || (abs(height - bufferHeight) < PERMITTED_DIFFERENCE && abs(width - bufferWidth) < PERMITTED_DIFFERENCE)) {
         failTimes_ = 0;
@@ -373,6 +375,9 @@ void RosenRenderSurface::ConsumeWebBuffer()
     }
     LOGD("ConsumeWebBuffer x : %{public}f, y : %{public}f, width : %{public}d, height : %{public}d",
         orgin_.GetX(), orgin_.GetY(), bufferWidth, bufferHeight);
+    ACE_SCOPED_TRACE("RosenRenderSurface::ConsumeWebBuffer, bufferWidth %d, bufferHeight %d, orign_x %f, orign_y %f",
+        bufferWidth, bufferHeight, orgin_.GetX(), orgin_.GetY());
+
     std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;
     {
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);

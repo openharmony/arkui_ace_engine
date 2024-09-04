@@ -29,7 +29,7 @@ struct TextPickerDialog {
     uint32_t selectedValue;
     std::vector<std::string> getRangeVector;
     bool isDefaultHeight;
-    bool enableHoverMode;
+    bool enableHoverMode = false;
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;

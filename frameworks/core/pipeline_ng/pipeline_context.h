@@ -233,6 +233,8 @@ public:
 
     void SetAppBgColor(const Color& color) override;
 
+    void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) override;
+
     void SetAppTitle(const std::string& title) override;
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
@@ -444,7 +446,7 @@ public:
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -971,7 +973,7 @@ private:
     void DumpFocus(bool hasJson) const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
-
+    void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const

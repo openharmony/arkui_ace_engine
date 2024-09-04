@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 
-#include <securec.h>
-
 #include "adapter/ohos/entrance/ace_container.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 

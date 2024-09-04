@@ -30,6 +30,7 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
+
     : // each ttype incl default has own L2 cache size
       cacheCountL24ttype_(cacheCountL24ttype),
       // request TS to create new sub-tree for given index or update existing
@@ -149,7 +150,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
         // STATE_MGMT_NOTE: Can not just del like this?
         // how to fix: call to RepeatVirtualScrollNode::DropFromL1
         node4key_.erase(key.value());
-        activeNodeKeysInL1_.erase(key.value());
+        RemoveKeyFromL1(key.value());
         return nullptr;
     }
 
@@ -165,6 +166,37 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 
     return node4Key.value().item;
 }
+
+void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key)
+{
+    if (IsInL1Cache(key)) {
+        return;
+    }
+    activeNodeKeysInL1_.emplace(key);
+
+    // fire UINode::OnReuse to trigger node pattern handlers
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        auto child = it->second.item->GetFrameChildByIndex(0, false);
+        child->OnReuse();
+    }
+}
+
+void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key)
+{
+    if (!IsInL1Cache(key)) {
+        return;
+    }
+    activeNodeKeysInL1_.erase(key);
+
+    // fire UINode::OnRecycle to trigger node pattern handlers
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        auto child = it->second.item->GetFrameChildByIndex(0, false);
+        child->OnRecycle();
+    }
+}
+
 
 /** scenario:
  *         Repeat gets updated due to data change.
@@ -346,7 +378,7 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
         ACE_SCOPED_TRACE(
             "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
 
-        activeNodeKeysInL1_.erase(keyIter->second);
+        RemoveKeyFromL1(keyIter->second);
     }
 }
 
@@ -369,7 +401,7 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
         const auto& cacheItem = node4key_[key];
         int32_t index = static_cast<int32_t>(indexIter->second);
         if (cbFunc(index, cacheItem.item)) {
-            activeNodeKeysInL1_.emplace(key);
+            AddKeyToL1(key);
         } else {
             modified = true;
         }
@@ -384,7 +416,7 @@ bool RepeatVirtualScrollCaches::RebuildL1WithKey(const std::function<bool(const 
     bool modified = false;
     for (const auto& key : l1Copy) {
         if (cbFunc(key)) {
-            activeNodeKeysInL1_.emplace(key);
+            AddKeyToL1(key);
         } else {
             modified = true;
         }
@@ -399,7 +431,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(const std::string& key)
         return nullptr;
     }
     auto uiNode = cacheItem4Key.value().item;
-    activeNodeKeysInL1_.erase(key);
+    RemoveKeyFromL1(key);
     return uiNode;
 }
 

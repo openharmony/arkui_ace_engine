@@ -14,18 +14,11 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#include "base/log/ace_scoring_log.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
-#include "core/components_ng/pattern/security_component/security_component_theme.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
 #endif
@@ -280,8 +273,7 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
         json->PutExtAttr("fontFamily", "HarmonyOS Sans", filter);
         json->PutExtAttr("fontStyle",
             static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
-        json->PutExtAttr("fontColor",
-            textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
+        json->PutExtAttr("fontColor", textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
     }
     auto paddingJson = JsonUtil::Create(true);
     paddingJson->Put("top", layoutProperty->GetBackgroundTopPadding().value_or(Dimension(0.0)).ToString().c_str());
@@ -569,7 +561,7 @@ void SecurityComponentPattern::UnregisterSecurityComponent()
     if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
         SecurityComponentHandler::UnregisterSecurityComponent(scId_);
     } else {
-        LOGW("security component has not registered, regStatus %{public}d.", regStatus_);
+        LOGI("security component has not registered, regStatus %{public}d.", regStatus_);
     }
     regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     scId_ = -1;

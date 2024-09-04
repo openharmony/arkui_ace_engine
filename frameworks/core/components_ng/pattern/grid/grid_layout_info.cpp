@@ -14,9 +14,6 @@
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
-#include <numeric>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -158,7 +155,8 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 {
     const bool atOrOutOfStart = reachStart_ && NonNegative(currentOffset_);
     if (irregular) {
-        return !atOrOutOfStart && Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
+        return !atOrOutOfStart &&
+               Negative(GetDistanceToBottom(lastMainSize_ - contentEndPadding_, totalHeightOfItemsInView_, mainGap));
     }
     const float endPos = currentOffset_ + totalHeightOfItemsInView_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&

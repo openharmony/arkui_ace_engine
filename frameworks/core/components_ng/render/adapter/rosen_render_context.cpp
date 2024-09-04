@@ -3623,7 +3623,6 @@ void RosenRenderContext::PaintFocusState(
             accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = accessibilityFocusStateModifier_;
-        modifier->SetRoundRect(paintRect, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     } else {
         if (!focusStateModifier_) {
@@ -3631,11 +3630,11 @@ void RosenRenderContext::PaintFocusState(
             focusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = focusStateModifier_;
-        modifier->SetRoundRect(paintRect, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     }
-    modifier->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(modifier);
+    modifier->SetRoundRect(paintRect, borderWidthPx);
+    modifier->SetPaintTask(std::move(paintTask));
     RequestNextFrame();
 }
 
@@ -4468,6 +4467,7 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
         rsNode_->AddModifier(gradientStyleModifier_);
     }
     gradientStyleModifier_->SetGradient(gradient);
+    gradientStyleModifier_->SetSizeF(frameSize);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)

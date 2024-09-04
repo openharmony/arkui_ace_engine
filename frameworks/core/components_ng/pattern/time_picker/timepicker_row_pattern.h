@@ -580,7 +580,7 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
-    void CalcLeftTotalColumnWith(const RefPtr<FrameNode>& host, float &leftTotalColumnWith, float childSize);
+    void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
                           int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);

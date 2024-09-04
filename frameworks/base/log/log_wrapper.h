@@ -203,10 +203,10 @@ enum AceLogTag : uint8_t {
     ACE_VISUAL_EFFECT,        // C03955
     ACE_SECURITY_COMPONENT,   // C03956
     ACE_LAYOUT_INSPECTOR,     // C03957
-    ACE_BADGE,                // C03958
-    ACE_QRCODE,               // C03959
-    ACE_PROGRESS,             // C0395A
-   
+    ACE_MEDIA_QUERY,          // C03958
+    ACE_BADGE,                // C03959
+    ACE_QRCODE,               // C0395A
+    ACE_PROGRESS,             // C0395B
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };

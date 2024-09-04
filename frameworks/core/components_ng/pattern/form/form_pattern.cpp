@@ -25,6 +25,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
+#include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "core/common/form_manager.h"
@@ -49,6 +50,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -604,6 +606,10 @@ void FormPattern::OnModifyDone()
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
+
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -647,12 +653,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        PostBgTask(
-            [weak = WeakClaim(this), info] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->AddFormComponent(info);
-            }, "ArkUIHandleFormComponent");
+        AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
     }
@@ -680,6 +681,16 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
+    RefPtr<PipelineContext> pipeline = host->GetContextRefPtr();
+    PostBgTask([weak = WeakClaim(this), info, pipeline] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddFormComponentTask(info, pipeline);
+        }, "ArkUIAddFormComponent");
+}
+
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline)
+{
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
     if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
@@ -695,9 +706,9 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         return;
     }
 #if OHOS_STANDARD_SYSTEM
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
+    formManagerBridge_->AddForm(pipeline, info, formInfo);
 #else
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+    formManagerBridge_->AddForm(pipeline, info);
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
@@ -712,12 +723,12 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 
 void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    PostUITask([weak = WeakClaim(this), host, isTransparencyEnabled, info, isJsCard = isJsCard_] {
+    PostUITask([weak = WeakClaim(this), isTransparencyEnabled, info, isJsCard = isJsCard_] {
         ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         pattern->CreateCardContainer();
         if (host->IsDraggable()) {
             pattern->EnableDrag();
@@ -1727,6 +1738,14 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
 
+    RemoveDelayResetManuallyClickFlagTask();
+    if (!isManuallyClick_) {
+        EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
+            cardInfo_.moduleName, cardInfo_.dimension);
+    } else {
+        isManuallyClick_ = false;
+    }
+
     if ("router" == type) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1772,6 +1791,10 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
 
+    if (OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN == pointerEvent->GetPointerAction()) {
+        isManuallyClick_ = true;
+        DelayResetManuallyClickFlag();
+    }
     if (!isVisible_) {
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -1983,5 +2006,36 @@ bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
     return formManagerBridge_->CheckFormBundleForbidden(bundleName);
+}
+
+void FormPattern::DelayResetManuallyClickFlag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->isManuallyClick_ = false;
+        },
+        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG,
+        std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+}
+
+void FormPattern::RemoveDelayResetManuallyClickFlagTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
 }
 } // namespace OHOS::Ace::NG

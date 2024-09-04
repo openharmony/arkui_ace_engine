@@ -71,7 +71,7 @@ public:
         RefPtr<NG::PipelineContext> &context);
     void GetElementInfoForThird(int64_t elementId, AccessibilityElementInfo &info);
     void SendThirdAccessibilityAsyncEvent(
-        const AccessibilityEvent &accessibilityEvent, 
+        const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::FrameNode>& hostNode);
 
     void SetHandlerForThird(const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager)

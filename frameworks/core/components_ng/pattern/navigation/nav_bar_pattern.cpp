@@ -329,8 +329,10 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
     if (navBarLayoutProperty->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        toolBarNode->SetActive(false);
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        toolBarNode->SetActive(true);
 
         auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
         if (opts) {

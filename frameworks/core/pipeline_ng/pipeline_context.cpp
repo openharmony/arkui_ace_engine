@@ -2434,36 +2434,31 @@ void PipelineContext::DumpInspector(const std::vector<std::string>& params, bool
     }
 }
 
-void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+void PipelineContext::DumpData(
+    const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
-    if (params.size() > 1 && params[1] == "-lastpage") {
-        auto lastPage = stageManager_->GetLastPage();
-        if (hasJson) {
-            if (params.size() < USED_JSON_PARAM && lastPage) {
-                lastPage->DumpTree(0, hasJson);
-                DumpLog::GetInstance().PrintEndDumpInfoNG(true);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() > USED_JSON_PARAM && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM], true)) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        } else {
-            if (params.size() < USED_ID_FIND_FLAG && lastPage) {
-                lastPage->DumpTree(0, hasJson);
-                DumpLog::GetInstance().OutPutBySize();
-            }
-            if (params.size() > USED_ID_FIND_FLAG && lastPage && !lastPage->DumpTreeById(0, params[PARAM_NUM])) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-        }
-    } else {
-        rootNode_->DumpTree(0, hasJson);
+    CHECK_NULL_VOID(node);
+    int32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
+    if (params.size() < used_id_flag) {
+        node->DumpTree(0, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
+    }
+    if (params.size() == used_id_flag && !node->DumpTreeById(0, params[PARAM_NUM], hasJson)) {
+        DumpLog::GetInstance().Print(
+            "There is no id matching the ID in the parameter,please check whether the id is correct");
+    }
+}
+
+void PipelineContext::DumpElement(const std::vector<std::string>& params, bool hasJson) const
+{
+    if (params.size() > 1 && params[1] == "-lastpage") {
+        auto lastPage = stageManager_->GetLastPage();
+        DumpData(lastPage, params, hasJson);
+    } else {
+        DumpData(rootNode_, params, hasJson);
     }
 }
 
@@ -2553,7 +2548,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        rootNode_->DumpTree(0);
+        rootNode_->DumpTree(0, true);
         DumpLog::GetInstance().OutPutDefault();
     }
     return true;
@@ -3355,6 +3350,7 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
@@ -3770,7 +3766,7 @@ bool PipelineContext::GetRestoreInfo(int32_t restoreId, std::string& restoreInfo
     return false;
 }
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("Set app icon failed, Window modal is not container.");
@@ -3781,7 +3777,21 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+    containerPattern->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
+}
+
+void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("Set app icon failed, Window modal is not container.");
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetWindowContainerColor(activeColor, inactiveColor);
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node)

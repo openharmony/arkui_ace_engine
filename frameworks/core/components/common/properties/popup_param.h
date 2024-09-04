@@ -191,6 +191,16 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool EnableHoverMode() const
+    {
+        return enableHoverMode_;
+    }
+
+    void SetEnableHoverMode(bool enableHoverMode)
+    {
+        enableHoverMode_ = enableHoverMode;
+    }
+
     bool IsBlockEvent() const
     {
         return blockEvent_;
@@ -495,6 +505,7 @@ private:
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
+    bool enableHoverMode_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

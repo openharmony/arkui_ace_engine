@@ -53,7 +53,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 #if defined(PIXEL_MAP_SUPPORTED)
-constexpr int32_t CREATE_PIXELMAP_TIME = 80;
+constexpr int32_t CREATE_PIXELMAP_TIME = 30;
 constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
@@ -253,6 +253,10 @@ void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>
         externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
         externalParallelRecognizer_[parallelIndex]->AttachFrameNode(WeakPtr<FrameNode>(host));
         externalParallelRecognizer_[parallelIndex]->SetTargetComponent(targetComponent);
+        current = externalParallelRecognizer_[parallelIndex];
+        parallelIndex++;
+    } else if (static_cast<int32_t>(externalParallelRecognizer_.size()) > parallelIndex) {
+        externalParallelRecognizer_[parallelIndex]->BeginReferee(touchId);
         current = externalParallelRecognizer_[parallelIndex];
         parallelIndex++;
     } else if (recognizers.size() == 1) {
@@ -656,6 +660,8 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
     if (!NearEqual(targetScale, 1.0f)) {
         preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
     }
+#else
+    preScaledPixelMap = defaultPixelMap;
 #endif
     return preScaledPixelMap;
 }
@@ -853,28 +859,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
-        auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
-                            frameNode, dragDropInfo, event](
-                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
-            ContainerScope scope(id);
-            TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
-            if (pixelMap != nullptr) {
-                dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-            }
-            auto taskScheduler = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(taskScheduler);
-            taskScheduler->PostTask(
-                [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
-                    CHECK_NULL_VOID(gestureEventHubPtr);
-                    CHECK_NULL_VOID(frameNode);
-                    gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
-        };
-        SnapshotParam param;
-        param.delay = CREATE_PIXELMAP_TIME;
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
-        PrintBuilderNode(dragPreviewInfo.customNode);
+        StartDragForCustomBuilder(info, pipeline, frameNode, dragDropInfo, event);
         return;
     }
 #endif
@@ -1061,6 +1046,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
     dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
     dragPreviewPixelMap_ = nullptr;
+    CHECK_NULL_VOID(pixelMapDuplicated);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
@@ -1102,6 +1088,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             SubwindowManager::GetInstance()->HidePreviewNG();
             overlayManager->RemovePixelMap();
         }
+        DragNotifyMsg notifyMessage;
+        notifyMessage.isInnerAndOuterTriggerBothNeeded = false;
+        auto dragCallBack = GetDragCallback(pipeline, eventHub);
+        CHECK_NULL_VOID(dragCallBack);
+        dragCallBack(notifyMessage);
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
@@ -1597,7 +1588,9 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }
-                eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+                if (notifyMessage.isInnerAndOuterTriggerBothNeeded) {
+                    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
+                }
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
@@ -2023,6 +2016,40 @@ void GestureEventHub::CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes)
         }
     }
 }
+
+void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+    const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event)
+{
+    SnapshotParam param;
+    param.delay = CREATE_PIXELMAP_TIME;
+    std::shared_ptr<Media::PixelMap> pixelMap = ComponentSnapshot::CreateSync(dragDropInfo.customNode, param);
+    if (pixelMap != nullptr) {
+        dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Snapshot createSync failed, get thumbnail by async.");
+    auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
+                        frameNode, dragDropInfo, event](
+                        std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
+        ContainerScope scope(id);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail callback executed.");
+        if (pixelMap != nullptr) {
+            dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+        }
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
+                CHECK_NULL_VOID(gestureEventHubPtr);
+                CHECK_NULL_VOID(frameNode);
+                gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
+    };
+    NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
+    PrintBuilderNode(dragDropInfo.customNode);
+}
 #endif
 
 void GestureEventHub::SetMouseDragMonitorState(bool state)
@@ -2047,5 +2074,17 @@ bool GestureEventHub::IsAllowedDrag(const RefPtr<FrameNode>& frameNode)
         return frameNode->IsDraggable() && eventHub->HasOnDragStart();
     }
     return gestureEventHub->IsAllowedDrag(eventHub);
+}
+
+void GestureEventHub::SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode)
+{
+    if (setIsShow) {
+        bindMenuStatus_.isBindCustomMenu = true;
+        bindMenuStatus_.isShow = isShow;
+        bindMenuStatus_.isShowPreviewMode = previewMode;
+    } else {
+        bindMenuStatus_.isBindLongPressMenu = true;
+        bindMenuStatus_.longPressPreviewMode = previewMode;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -414,6 +414,10 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
+    bool IsDisappearing() const override
+    {
+        return isDisappearing_;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

@@ -91,6 +91,9 @@ public:
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
+
     /**
      * those items with index in cachedItems are marked active
      * those items with index in cachedItems are marked inactive
@@ -154,6 +157,11 @@ public:
         }
     }
 
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
 private:
     void PostIdleTask();
 
@@ -181,6 +189,9 @@ private:
 
     // size of data source when all data items loaded
     uint32_t totalCount_ = 0;
+
+    // loop property of the parent container
+    bool isLoop_ = false;
 
     // caches:
     mutable RepeatVirtualScrollCaches caches_;

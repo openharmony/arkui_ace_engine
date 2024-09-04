@@ -1016,4 +1016,110 @@ HWTEST_F(BubbleTestOneNg, UpdateClipOffset001, TestSize.Level1)
     layoutAlgorithm->UpdateClipOffset(frameNode);
     ASSERT_NE(layoutAlgorithm->bCaretMode_, true);
 }
+
+/**
+ * @tc.name: GetErrorPositionType001
+ * @tc.desc: Test GetErrorPositionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, GetErrorPositionType001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    SizeF tstSize(100.0f, 100.0f);
+    OffsetF tstOffset(9.0f, 2.0f);
+    PointF tstPoint(tstOffset.GetX(), tstOffset.GetY());
+    layoutAlgorithm->top_ = 1.0f;
+    layoutAlgorithm->bottom_ = 1.0f;
+    layoutAlgorithm->selfSize_.SetHeight(10.0f);
+    layoutAlgorithm->selfSize_.SetWidth(20.0f);
+    auto tstRet = layoutAlgorithm->GetErrorPositionType(tstOffset, tstSize);
+    EXPECT_TRUE(tstRet == BubbleLayoutAlgorithm::ErrorPositionType::BOTTOM_RIGHT_ERROR);
+}
+
+/**
+ * @tc.name: FitToScreen001
+ * @tc.desc: Test FitToScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, FitToScreen001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create node
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2.RectF::IsInRegion(109, 102)==false.
+     * @tc.expected: childPosition.x = selfSize_.width_ - tstSize.width_ - HORIZON_SPACING_WITH_SCREEN.ConvertToPx()
+     */
+    SizeF tstSize(100.0f, 100.0f);
+    OffsetF tstOffset(9.0f, 2.0f);
+    layoutAlgorithm->top_ = 1.0f;
+    layoutAlgorithm->bottom_ = 1.0f;
+    layoutAlgorithm->selfSize_.SetHeight(10.0f);
+    layoutAlgorithm->selfSize_.SetWidth(20.0f);
+    auto tstChildPosition = layoutAlgorithm->FitToScreen(tstOffset, tstSize);
+    EXPECT_LT(tstChildPosition.GetX(), 0.0f);
+    /**
+     * @tc.steps: step2.RectF::IsInRegion(9.0f, 2.0f)==true.
+     * @tc.expected: childPosition.x = tstOffset.GetX()
+     */
+    tstSize.Reset();
+    tstChildPosition = layoutAlgorithm->FitToScreen(tstOffset, tstSize);
+    EXPECT_GT(tstChildPosition.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: GetChildPosition001
+ * @tc.desc: Test GetChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, GetChildPosition001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto layoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(bubblePattern->CreateLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    SizeF tstChildSize(0.0f, 0.0f);
+    layoutAlgorithm->placement_ = Placement::TOP;
+    layoutAlgorithm->GetChildPosition(tstChildSize, layoutProperty, false);
+    EXPECT_TRUE(layoutAlgorithm->arrowPlacement_ == Placement::TOP);
+    layoutAlgorithm->placement_ = Placement::TOP_LEFT;
+    layoutAlgorithm->GetChildPosition(tstChildSize, layoutProperty, false);
+    EXPECT_TRUE(layoutAlgorithm->arrowPlacement_ == Placement::TOP);
+    layoutAlgorithm->placement_ = Placement::TOP_RIGHT;
+    layoutAlgorithm->GetChildPosition(tstChildSize, layoutProperty, true);
+    EXPECT_TRUE(layoutAlgorithm->arrowPlacement_ == Placement::TOP);
+}
 } // namespace OHOS::Ace::NG

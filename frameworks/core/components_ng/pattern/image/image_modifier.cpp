@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/image/image_modifier.h"
 
-#include <cstdlib>
-
 namespace OHOS::Ace::NG {
 ImageModifier::ImageModifier()
 {

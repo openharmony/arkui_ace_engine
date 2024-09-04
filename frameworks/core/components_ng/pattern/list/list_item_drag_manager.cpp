@@ -15,10 +15,8 @@
 
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {

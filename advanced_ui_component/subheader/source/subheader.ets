@@ -397,6 +397,7 @@ export struct SubHeader {
     Button({ type: ButtonType.Normal, stateEffect: false }) {
       this.rightArea();
     }
+    .focusable(this.operationItem ? true : false)
     .align(Alignment.BottomEnd)
     .rightAreaClickEvent()
     .rightAreaParentStyles()

@@ -249,32 +249,6 @@ HWTEST_F(TextTestThreeNg, ApplyIndents003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDraggable001
- * @tc.desc: test text_model_ng.cpp SetDraggable function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, SetDraggable001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-
-    /**
-     * @tc.steps: step3. construct 2 groups cases and corresponding expected results.
-     * @tc.expected: Running SetDraggable function and check the result with expected results.
-     */
-    std::vector<bool> cases = { true, false };
-    std::vector<bool> expectResult = { true, false };
-    for (uint32_t turn = 0; turn < cases.size(); ++turn) {
-        textModelNG.SetDraggable(cases[turn]);
-        EXPECT_EQ(frameNode->IsDraggable(), expectResult[turn]);
-    }
-}
-
-/**
  * @tc.name: ClearOnClick001
  * @tc.desc: test text_model_ng.cpp ClearOnClick function
  * @tc.type: FUNC
@@ -1857,7 +1831,6 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty002, TestSize.Level1)
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     auto node = frameNode.rawPtr_;
     TextModelNG::SetAdaptMinFontSize(node, ADAPT_MIN_FONT_SIZE_VALUE);
-    TextModelNG::SetDraggable(node, true);
     TextModelNG::SetAdaptMaxFontSize(node, ADAPT_MAX_FONT_SIZE_VALUE);
     TextModelNG::SetFontFamily(node, FONT_FAMILY_VALUE);
     TextModelNG::SetCopyOption(node, CopyOptions::Distributed);

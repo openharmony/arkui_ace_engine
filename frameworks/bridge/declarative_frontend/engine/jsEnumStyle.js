@@ -902,8 +902,8 @@ var DialogAlignment;
 
 let HoverModeAreaType;
 (function (HoverModeAreaType) {
-  HoverModeAreaType[HoverModeAreaType["TOP_SCREEN"] = 0] = "TOP_SCREEN";
-  HoverModeAreaType[HoverModeAreaType["BOTTOM_SCREEN"] = 1] = "BOTTOM_SCREEN";
+  HoverModeAreaType.TOP_SCREEN = 0;
+  HoverModeAreaType.BOTTOM_SCREEN = 1;
 })(HoverModeAreaType || (HoverModeAreaType = {}));
 
 var DialogButtonStyle;
@@ -1064,6 +1064,12 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+let MenuType;
+(function (MenuType) {
+  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
+  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
+})(MenuType || (MenuType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
@@ -1130,8 +1136,6 @@ var SourceTool;
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
-  SourceTool[SourceTool["Finger"] = 1] = "Finger";
-  SourceTool[SourceTool["Pen"] = 2] = "Pen";
   SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
   SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
   SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";

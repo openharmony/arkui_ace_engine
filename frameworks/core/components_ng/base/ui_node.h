@@ -109,7 +109,8 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    virtual void DetachFromMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
+    virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -397,12 +398,6 @@ public:
             return AceType::DynamicCast<T>(uiNode);
         }
         return nullptr;
-    }
-
-    void ChildrenUpdatedFrom(int32_t index);
-    int32_t GetChildrenUpdated() const
-    {
-        return childrenUpdatedFrom_;
     }
 
     // utility function for adding child to disappearingChildren_
@@ -750,7 +745,20 @@ public:
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
 
-    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
+    enum class NotificationType : int32_t {
+        START_CHANGE_POSITION = 0,
+        END_CHANGE_POSITION = 1,
+        START_AND_END_CHANGE_POSITION = 2
+    };
+    /**
+     * @brief For a DataChange happened in child [id], notify the corresponding change position to parent.
+     *
+     * @param changeIdx change index in child [id].
+     * @param count change of item count.
+     * @param id the accessibilityId of child who call this function.
+     * @param notificationType the type of notification.
+     */
+    virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -818,6 +826,15 @@ protected:
     void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
 
     PipelineContext* context_ = nullptr;
+
+    /**
+     * @brief Transform the [changeIdx] given by child [id] to corresponding position in [this] node.
+     *
+     * @param changeIdx change index in child [id].
+     * @param id the accessibilityId of child.
+     */
+    int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -850,7 +867,6 @@ private:
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };
 
-    int32_t childrenUpdatedFrom_ = -1;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;

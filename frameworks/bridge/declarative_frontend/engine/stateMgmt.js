@@ -9694,15 +9694,13 @@ const Consumer = (aliasName) => {
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
         const providerName = (aliasName === undefined || aliasName === null ||
             (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
-        let providerInfo;
         let retVal = this[varName];
+        let providerInfo;
         Reflect.defineProperty(proto, varName, {
             get() {
-                if (!providerInfo) {
-                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
-                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-                    }
+                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
                 }
                 return retVal;
             },
@@ -10287,7 +10285,7 @@ class __Repeat {
         return this;
     }
     virtualScroll(options) {
-        if (options && options.totalCount && Number.isInteger(options.totalCount)) {
+        if (Number.isInteger(options === null || options === void 0 ? void 0 : options.totalCount)) {
             this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
         }

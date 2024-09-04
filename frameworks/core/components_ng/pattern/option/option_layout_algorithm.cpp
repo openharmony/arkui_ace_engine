@@ -60,7 +60,13 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto idealWidth = GetIdealWidth(layoutWrapper);
     if (idealWidth.has_value()) {
-        idealSize.SetWidth(idealWidth.value());
+        auto optionPaintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+        if (optionPaintProperty && (optionPaintProperty->GetIdealWidthForWeb() > 0) &&
+            (idealWidth.value() < optionPaintProperty->GetIdealWidthForWeb())) {
+            idealSize.SetWidth(optionPaintProperty->GetIdealWidthForWeb());
+        } else {
+            idealSize.SetWidth(idealWidth.value());
+        }
     }
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {

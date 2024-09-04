@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t selected)

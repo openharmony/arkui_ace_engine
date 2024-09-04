@@ -167,6 +167,7 @@ public:
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+    void DumpParagraphsInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -665,7 +666,7 @@ public:
 
     void DumpRecord(const std::string& record)
     {
-        frameRecord_.append(record);
+        frameRecord_ = record;
     }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)

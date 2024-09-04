@@ -210,6 +210,10 @@ declare class ArkCheckboxComponent extends ArkComponent {}
 
 declare class ArkCheckboxGroupComponent extends ArkComponent {}
 
+declare class ArkRadioComponent extends ArkComponent {}
+
+declare class ArkRatingComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

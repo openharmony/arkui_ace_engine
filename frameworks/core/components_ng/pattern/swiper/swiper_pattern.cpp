@@ -38,30 +38,18 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
-#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
-#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
-#include "core/components_ng/pattern/tabs/tabs_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -372,6 +360,7 @@ void SwiperPattern::OnModifyDone()
     InitCapture();
     CheckSpecialItemCount();
     SetLazyLoadIsLoop();
+    SetRepeatLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
@@ -489,10 +478,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StartAutoPlay();
         InitArrow();
     }
-    if (userSetCurrentIndex < 0 || userSetCurrentIndex >= TotalCount() || GetDisplayCount() >= TotalCount()) {
-        UpdateCurrentIndex(0);
-    } else if (!IsLoop() && userSetCurrentIndex > TotalCount() - GetDisplayCount()) {
-        UpdateCurrentIndex(TotalCount() - GetDisplayCount());
+    auto index = CheckIndexRange(userSetCurrentIndex);
+    if (index != userSetCurrentIndex) {
+        UpdateCurrentIndex(index);
     } else if (oldIndex != userSetCurrentIndex) {
         currentIndex_ = userSetCurrentIndex;
         propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
@@ -1782,12 +1770,10 @@ void SwiperPattern::ShowPrevious()
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
-    auto displayCount = GetDisplayCount();
-    if (index < 0 || index >= TotalCount()) {
-        index = 0;
-    }
+    index = CheckIndexRange(index);
     auto itemCount = TotalCount();
-    auto loopCount = std::abs(currentIndex_ / itemCount);
+    auto displayCount = GetDisplayCount();
+    auto loopCount = itemCount == 0 ? 0 : std::abs(currentIndex_ / itemCount);
     auto targetIndex = currentIndex_ >= 0 ? loopCount * itemCount + index : -(loopCount + 1) * itemCount + index;
     targetIndex = IsSwipeByGroup() ? SwiperUtils::ComputePageIndex(targetIndex, displayCount) : targetIndex;
     if (targetIndex_.has_value() && targetIndex_.value() == targetIndex) {
@@ -2588,13 +2574,20 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
         groupTurnPageRate = 0.0f;
     }
 
+    if (IsHorizontalAndRightToLeft()) {
+        groupTurnPageRate = std::abs(groupTurnPageRate) <= 1.0f ? std::abs(groupTurnPageRate) - 1.0f : 0.0f;
+    }
+
     return (groupTurnPageRate == FLT_MAX ? groupTurnPageRate_ : groupTurnPageRate);
 }
 
 std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 {
-    int32_t itemCount = (IsSwipeByGroup() ? TotalCount() : RealTotalCount());
-    int32_t step = (IsSwipeByGroup() ? GetDisplayCount() : 1);
+    auto displaycount = GetDisplayCount();
+
+    int32_t itemCount = (IsSwipeByGroup() ? TotalCount() : DisplayIndicatorTotalCount());
+    int32_t step = (IsSwipeByGroup() ? displaycount : 1);
+
     return { itemCount, step };
 }
 
@@ -4456,6 +4449,18 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     }
 }
 
+void SwiperPattern::SetRepeatLoadIsLoop() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FindRepeatVirtualNode(host);
+    if (targetNode.has_value()) {
+        auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
+        CHECK_NULL_VOID(repeatVirtualScrollNode);
+        repeatVirtualScrollNode->SetIsLoop(IsLoop());
+    }
+}
+
 void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
 {
     if (cachedItems_.empty()) {
@@ -5422,7 +5427,18 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
     auto currentIndex = GetLoopIndex(currentIndex_);
-    bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
+    auto totalCount = TotalCount();
+    auto displayCount = GetDisplayCount();
+    bool commTouchBottom = (currentFirstIndex == totalCount - 1);
+    bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
+    bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
+    bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
+    if (IsSwipeByGroup()) {
+        commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
+        releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
+        releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
+        releaseLeftTouchBottomEnd = (currentFirstIndex <= displayCount);
+    }
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
     if (followTouchBottom) {
@@ -5434,13 +5450,13 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
         return;
     }
 
-    if (currentFirstIndex == 0 && currentIndex == TotalCount() - 1 &&
+    if (releaseLeftTouchBottomEnd && releaseLeftTouchBottomStart &&
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
         return;
     }
 
-    if (currentFirstIndex == TotalCount() - 1 && currentIndex == 0 &&
+    if (releaseRightTouchBottom && currentIndex == 0 &&
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         return;
@@ -5752,6 +5768,23 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     return std::nullopt;
 }
 
+std::optional<RefPtr<UINode>> SwiperPattern::FindRepeatVirtualNode(RefPtr<UINode> baseNode, bool isSelfNode) const
+{
+    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
+        return baseNode;
+    }
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+    for (const auto& child : baseNode->GetChildren()) {
+        auto targetNode = FindRepeatVirtualNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+    return std::nullopt;
+}
+
 RefPtr<NodePaintMethod> SwiperPattern::CreateNodePaintMethod()
 {
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
@@ -5935,6 +5968,18 @@ void SwiperPattern::CheckSpecialItemCount() const
     CHECK_NULL_VOID(swiperNode);
     swiperNode->SetSpecialItemCount(indicatorId_.has_value() + leftButtonId_.has_value() + rightButtonId_.has_value() +
                                     leftCaptureId_.has_value() + rightCaptureId_.has_value());
+}
+
+int32_t SwiperPattern::CheckIndexRange(int32_t index) const
+{
+    auto itemCount = TotalCount();
+    auto displayCount = GetDisplayCount();
+    if (index < 0 || index >= itemCount || displayCount >= itemCount) {
+        index = 0;
+    } else if (!IsLoop() && index > itemCount - displayCount) {
+        index = itemCount - displayCount;
+    }
+    return index;
 }
 
 void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

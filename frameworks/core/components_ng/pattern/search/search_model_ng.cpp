@@ -31,6 +31,9 @@
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -39,10 +42,11 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr int32_t DIVIDER_INDEX = 5;
 constexpr float MAX_FONT_SCALE = 2.0f;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
-    "Button__" };
+    "Button__", "Divider__" };
 const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr Dimension ICON_HEIGHT = 16.0_vp;
 
@@ -59,6 +63,7 @@ void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
     updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
     updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
     updateInspectorCallback(frameNode, BUTTON_INDEX);
+    updateInspectorCallback(frameNode, DIVIDER_INDEX);
 }
 } // namespace
 
@@ -87,6 +92,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     bool hasTextFieldNode = frameNode->HasTextFieldNode();
     bool hasButtonNode = frameNode->HasButtonNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
+    bool hasDividerNode = frameNode->HasDividerNode();
 
     CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
 
@@ -99,6 +105,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     pattern->CreateCancelIcon();
     CreateCancelButton(frameNode, hasCancelButtonNode);
     CreateButton(frameNode, hasButtonNode);
+    CreateDivider(frameNode, hasDividerNode);
 
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
@@ -216,6 +223,7 @@ void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
 void SearchModelNG::SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->SetSearchIconSymbol(iconSymbol);
@@ -274,6 +282,7 @@ void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
 void SearchModelNG::SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->SetCancelIconSymbol(iconSymbol);
@@ -842,6 +851,36 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
+}
+
+void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode)
+{
+    if (hasDividerNode) {
+        return;
+    }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
+    auto nodeId = parentNode->GetDividerId();
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    CHECK_NULL_VOID(dividerNode);
+
+    auto pipeline = dividerNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto searchDividerColor = searchTheme->GetSearchDividerColor();
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(searchDividerColor);
+    auto searchDividerWidth = Dimension(searchTheme->GetSearchDividerWidth().ConvertToPx());
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(true);
+    dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
+
+    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
+    dividerNode->MountToParent(parentNode);
+    dividerNode->MarkModifyDone();
 }
 
 void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode)

@@ -15,14 +15,6 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_paint_method.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/point.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/property/geometry_property.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

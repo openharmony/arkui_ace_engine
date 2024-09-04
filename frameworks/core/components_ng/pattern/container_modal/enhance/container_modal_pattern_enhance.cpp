@@ -69,7 +69,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus_));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     // only floating window show border
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
@@ -210,7 +210,7 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
-    floatingContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
+    floatingContext->UpdateBackgroundColor(GetContainerColor(isFocus));
     // update floating custom title label
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
@@ -224,7 +224,13 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
     ContainerModalPattern::ChangeTitleButtonIcon(buttonNode, icon, isFocus, isCloseBtn);
 }
 
-void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+Color ContainerModalPatternEnhance::GetContainerColor(bool isFocus)
+{
+    return ContainerModalPattern::GetContainerColor(isFocus);
+}
+
+void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize,
+    bool hideClose)
 {
     auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsNode);
@@ -243,6 +249,9 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     minimizeBtn->MarkDirtyNode();
 
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+        CHECK_NULL_VOID(closeBtn);
+        closeBtn->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
+        closeBtn->MarkDirtyNode();
     InitTitleRowLayoutProperty(GetCustomTitleRow());
 }
 

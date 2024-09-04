@@ -511,7 +511,7 @@ HWTEST_F(ListCommonTestNg, FocusStep009, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), groupHeight);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 2, 1));
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 100);
     // change focus in same group
     ClearOldNodes();
     CreateList();

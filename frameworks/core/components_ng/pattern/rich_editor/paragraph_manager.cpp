@@ -15,12 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
-#include <iterator>
-#include <ostream>
-
-#include "base/utils/utils.h"
-#include "core/components/common/properties/text_layout_info.h"
-
 namespace OHOS::Ace::NG {
 float ParagraphManager::GetHeight() const
 {
@@ -289,6 +283,17 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
         y += info.paragraph->GetHeight();
     }
     return resultTextBoxes;
+}
+
+std::pair<size_t, size_t> ParagraphManager::GetEllipsisTextRange()
+{
+    std::pair<size_t, size_t> range = {std::numeric_limits<size_t>::max(), 0};
+    for (auto&& info : paragraphs_) {
+        const auto& ellipsisTextRange = info.paragraph->GetEllipsisTextRange();
+        range.first = std::min(range.first, ellipsisTextRange.first);
+        range.second = std::max(range.second, ellipsisTextRange.second);
+    }
+    return range;
 }
 
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const

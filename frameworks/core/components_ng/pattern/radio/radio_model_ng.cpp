@@ -220,6 +220,14 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     pattern->SetRadioChecked(value);
 }
 
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (indicator.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    }
+}
+
 bool RadioModelNG::GetChecked(FrameNode* frameNode)
 {
     bool value = false;

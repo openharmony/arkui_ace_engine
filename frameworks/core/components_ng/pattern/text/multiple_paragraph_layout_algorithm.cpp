@@ -227,7 +227,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextPattern>();
             CHECK_NULL_VOID(pattern);

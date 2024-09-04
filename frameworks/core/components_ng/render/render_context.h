@@ -713,6 +713,11 @@ public:
         return 0;
     }
 
+    virtual bool IsDisappearing() const
+    {
+        return false;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

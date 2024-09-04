@@ -26,7 +26,7 @@ type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
 type RepeatTemplateOptions =  { cachedCount?: number };
-type RepeatTemplateImplOptions =  { cachedCountSpecified: boolean, cachedCount?: number };
+type RepeatTemplateImplOptions = { cachedCountSpecified: boolean, cachedCount?: number };
 type OnMoveHandler = (from: number, to: number) => void;
 
 /*

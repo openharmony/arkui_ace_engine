@@ -334,6 +334,8 @@ public:
         appBgColor_ = color;
     }
 
+    virtual void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) {}
+
     virtual void ChangeDarkModeBrightness() {}
 
     void SetFormRenderingMode(int8_t renderMode)
@@ -360,7 +362,7 @@ public:
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
     virtual void RefreshRootBgColor() const {}
 

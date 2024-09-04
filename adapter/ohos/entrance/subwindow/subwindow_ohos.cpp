@@ -290,13 +290,14 @@ void SubwindowOhos::ResizeWindow()
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
+void SubwindowOhos::SetRect(const NG::RectF& rect)
+{
+    windowRect_ = rect;
+}
+
 NG::RectF SubwindowOhos::GetRect()
 {
-    NG::RectF rect;
-    CHECK_NULL_RETURN(window_, rect);
-    rect.SetRect(
-        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
-    return rect;
+    return windowRect_;
 }
 
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
@@ -908,8 +909,6 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     }
-    SubwindowManager::GetInstance()->SetDialogSubWindowId(
-        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ResizeWindow();
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
@@ -943,8 +942,6 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     }
-    SubwindowManager::GetInstance()->SetDialogSubWindowId(
-        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ResizeWindow();
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
@@ -992,8 +989,6 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, GetSubwindowId());
     }
-    SubwindowManager::GetInstance()->SetDialogSubWindowId(
-        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ResizeWindow();
     ShowWindow();
     CHECK_NULL_VOID(window_);

@@ -42,6 +42,7 @@ HWTEST_F(GridLayoutRangeTest, SolveForward001, TestSize.Level1)
 
     info.currentOffset_ = 0.0f;
     info.startMainLineIndex_ = 3;
+    info.startIndex_ = 4;
     auto res = solver.FindStartingRow(1.0f);
     EXPECT_EQ(res.row, 3);
     EXPECT_EQ(res.idx, 4);

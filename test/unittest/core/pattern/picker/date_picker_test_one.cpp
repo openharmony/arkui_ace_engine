@@ -322,9 +322,12 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue003, TestSize.Level1)
 
     Dimension fontSizeValue = 20.0_vp;
     Dimension fontSizeLimit = 40.0_vp;
-
+    /**
+     * @tc.steps: step2. fontSizeValue's unit is VP and fontSizeValue is less than fontSizeLimit.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect equal fontSizeValue.
+     */
     auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, true);
-    EXPECT_EQ((int)result.Value(), 40);
+    EXPECT_EQ(result.Value(), fontSizeValue.Value());
 }
 
 /**
@@ -340,9 +343,15 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue004, TestSize.Level1)
 
     Dimension fontSizeValue = 20.0_px;
     Dimension fontSizeLimit = 40.0_px;
-
+    /**
+     * @tc.steps: step2. fontSizeValue's unit is NOT VP and isUserSetFont is true.
+     * fontSizeValue is greater than fontSizeLimit.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect equal fontSizeLimit / fontSizeScale.
+     */
     auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, true);
-    EXPECT_EQ((int)result.Value(), 12);
+    float fontSizeScale = pipeline->GetFontScale();
+    auto fontSizeValueResult = fontSizeLimit / fontSizeScale;
+    EXPECT_EQ(result.Value(), fontSizeValueResult.Value());
 }
 
 /**
@@ -358,9 +367,12 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue005, TestSize.Level1)
 
     Dimension fontSizeValue = 20.0_vp;
     Dimension fontSizeLimit = 40.0_vp;
-
+    /**
+     * @tc.steps: step2. fontSizeValue's unit is VP and isUserSetFont is false.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect equal fontSizeValue.
+     */
     auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, false);
-    EXPECT_EQ((int)result.Value(), 40);
+    EXPECT_EQ(result.Value(), fontSizeValue.Value());
 }
 
 /**
@@ -376,9 +388,15 @@ HWTEST_F(DatePickerTestOne, ConvertFontScaleValue006, TestSize.Level1)
 
     Dimension fontSizeValue = 20.0_px;
     Dimension fontSizeLimit = 40.0_px;
-
+    /**
+     * @tc.steps: step2. fontSizeValue's unit is NOT VP and isUserSetFont is false.
+     * fontSizeScale is greater than ThirdFontScale and call GetIsUserSetTextProperties
+     * @tc.expected: result expect equal fontSizeValue - fontSizeLimit / fontSizeScale.
+     */
     auto result = DatePickerDialogView::ConvertFontScaleValue(fontSizeValue, fontSizeLimit, false);
-    EXPECT_EQ((int)result.Value(), 12);
+    float fontSizeScale = pipeline->GetFontScale();
+    auto fontSizeValueResult = fontSizeLimit / fontSizeScale;
+    EXPECT_EQ((int)result.Value(), (fontSizeValue - fontSizeValueResult).Value());
 }
 
 /**

@@ -427,8 +427,14 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
-    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId)
+    {
+        SetPropertyInfoContainer();
+    }
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId)
+    {
+        SetPropertyInfoContainer();
+    }
     ~SpanNode() override = default;
 
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
@@ -494,13 +500,13 @@ public:
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -550,21 +556,22 @@ public:
 
     void AddPropertyInfo(PropertyInfo value)
     {
-        propertyInfo_.insert(value);
+        propertyInfoContainer_.erase(value);
     }
 
     void CleanPropertyInfo()
     {
-        propertyInfo_.clear();
+        propertyInfoContainer_.clear();
     }
+
+    void SetPropertyInfoContainer();
 
     void MarkTextDirty() override
     {
         RequestTextFlushDirty();
     }
 
-    std::set<PropertyInfo> CalculateInheritPropertyInfo();
-
+    std::set<PropertyInfo> GetInheritPropertyInfo();
 
     void UpdateSpanTextColor(Color color)
     {
@@ -586,7 +593,7 @@ protected:
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
-    std::set<PropertyInfo> propertyInfo_;
+    std::set<PropertyInfo> propertyInfoContainer_;
     bool hasUserFontWeight_ = false;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 

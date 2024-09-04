@@ -203,6 +203,7 @@ public:
         return 0;
     }
 
+    virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

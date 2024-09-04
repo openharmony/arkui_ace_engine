@@ -873,7 +873,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     }
     Dimension endFontSize;
     Color endColor;
-    if (isDown) {
+    if (GreatNotEqual(scrollDelta_, 0.0)) {
         endFontSize = animationProperties_[index].downFontSize;
         endColor = animationProperties_[index].downColor;
         if (GreatOrEqual(scale, FONTWEIGHT)) {
@@ -889,7 +889,7 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLay
     Dimension updateSize = LinearFontSize(startFontSize, endFontSize, percent);
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
-    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, percent);
+    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, std::abs(percent));
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
         textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
@@ -1478,6 +1478,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if ((std::abs(dragDelta) >= std::abs(shiftDistance)) && !isOverScroll) {
         int32_t shiftDistanceCount = static_cast<int>(std::abs(dragDelta) / std::abs(shiftDistance));
         double additionalShift = dragDelta - shiftDistanceCount * shiftDistance;
+        if (GreatNotEqual(std::abs(additionalShift), std::abs(dragDelta))) {
+            additionalShift = dragDelta + shiftDistanceCount * shiftDistance;
+        }
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);

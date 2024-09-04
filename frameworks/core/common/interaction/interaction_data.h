@@ -65,6 +65,7 @@ struct DragNotifyMsg {
     int32_t targetPid = -1;
     DragRet result { DragRet::DRAG_FAIL };
     DragBehavior dragBehavior { DragBehavior::UNKNOWN };
+    bool isInnerAndOuterTriggerBothNeeded = true;
 };
 
 struct DragDropRet {
