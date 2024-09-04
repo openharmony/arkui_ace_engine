@@ -453,13 +453,8 @@ bool PatternLockPattern::CheckAutoReset() const
 
 void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 {
-#ifdef PREVIEW
-    auto locationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto locationY = static_cast<float>(info.GetGlobalLocation().GetY());
-#else
-    auto locationX = static_cast<float>(info.GetScreenLocation().GetX());
-    auto locationY = static_cast<float>(info.GetScreenLocation().GetY());
-#endif
+    auto locationX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto locationY = static_cast<float>(info.GetLocalLocation().GetY());
     screenTouchPoint_.SetX(locationX);
     screenTouchPoint_.SetY(locationY);
 
@@ -486,13 +481,8 @@ void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 
 void PatternLockPattern::OnTouchMove(const TouchLocationInfo& info)
 {
-#ifdef PREVIEW
-    auto locationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto locationY = static_cast<float>(info.GetGlobalLocation().GetY());
-#else
-    auto locationX = static_cast<float>(info.GetScreenLocation().GetX());
-    auto locationY = static_cast<float>(info.GetScreenLocation().GetY());
-#endif
+    auto locationX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto locationY = static_cast<float>(info.GetLocalLocation().GetY());
     screenTouchPoint_.SetX(locationX);
     screenTouchPoint_.SetY(locationY);
     if (!isMoveEventValid_) {
@@ -848,7 +838,7 @@ void PatternLockPattern::CalculateCellCenter()
         }
         cellCenter_ = GetLastChoosePointOffset();
     } else {
-        cellCenter_ = GetTouchOffsetToNode();
+        cellCenter_ = screenTouchPoint_;
     }
 }
 
