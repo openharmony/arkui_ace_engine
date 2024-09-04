@@ -276,6 +276,11 @@ public:
 
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
 
+    virtual bool AllowVisibleAreaCheck() const
+    {
+        return false;
+    }
+
     virtual bool IsRootPattern() const
     {
         return false;
