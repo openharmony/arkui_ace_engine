@@ -778,7 +778,6 @@ private:
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
-    void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
