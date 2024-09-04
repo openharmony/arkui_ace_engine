@@ -670,7 +670,7 @@ public:
     void AddWatchSystemParameter();
     void RemoveWatchSystemParameter();
 
-    std::vector<std::string> GetUieParams() const
+    const std::vector<std::string>& GetUieParams() const
     {
         return paramUie_;
     }
@@ -770,7 +770,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
 
-    // for Ui Extension dump
+    // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
 };
 
