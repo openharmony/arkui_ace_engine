@@ -62,11 +62,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     if (isInlineStyle) {
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
-    }
-    if (showPlaceHolder_) {
+    } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+    } else {
+        return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
-    return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

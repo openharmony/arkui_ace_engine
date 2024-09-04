@@ -96,8 +96,8 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     return true;
 }
 
-void TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize,
-    double& minFontSize, const LayoutConstraintF& contentConstraint)
+void TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+    const LayoutConstraintF& contentConstraint)
 {
     maxFontSize = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
