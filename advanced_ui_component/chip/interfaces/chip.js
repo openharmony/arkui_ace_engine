@@ -1302,7 +1302,7 @@ export class ChipComponent extends ViewPU {
             this.isSetBg = false;
             this.chipNodeBackgroundColor = this.theme.chipNode.backgroundColor;
         }
-        if (this.chipNodeActivatedBackgroundColor && this.chipActivated) {
+        if (this.chipNodeActivatedBackgroundColor) {
             this.isSetActiveBg = true;
         }
         else {
@@ -1338,7 +1338,7 @@ export class ChipComponent extends ViewPU {
         }
     }
     isSetBackgroundColor() {
-        return this.isSetBg || this.isSetActiveBg;
+        return this.isSetBg || (this.isSetActiveBg && this.chipActivated);
     }
     getShadowStyles() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {

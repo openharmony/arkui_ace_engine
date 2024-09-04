@@ -1032,7 +1032,7 @@ export struct ChipComponent {
       this.isSetBg = false;
       this.chipNodeBackgroundColor = this.theme.chipNode.backgroundColor;
     }
-    if (this.chipNodeActivatedBackgroundColor && this.chipActivated) {
+    if (this.chipNodeActivatedBackgroundColor) {
       this.isSetActiveBg = true;
     } else {
       this.isSetActiveBg = false;
@@ -1068,7 +1068,7 @@ export struct ChipComponent {
   }
 
   private isSetBackgroundColor(): boolean{
-    return this.isSetBg || this.isSetActiveBg;
+    return this.isSetBg || (this.isSetActiveBg && this.chipActivated);
   }
 
   private getShadowStyles(): ShadowStyle | undefined{
