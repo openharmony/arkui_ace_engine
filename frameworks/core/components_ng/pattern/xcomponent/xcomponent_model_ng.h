@@ -60,7 +60,7 @@ public:
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(
-        int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
+        int32_t nodeId, const std::string& id, XComponentType type, const std::optional<std::string>& libraryname);
     static RefPtr<FrameNode> CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params);
     static void InitXComponent(FrameNode* frameNode);
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
