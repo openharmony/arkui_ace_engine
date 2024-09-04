@@ -606,7 +606,7 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
     Push(uri, params, nullptr);
 }
 
-void FrontendDelegateImpl::PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
+void FrontendDelegateImpl::PushWithCallback(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     Push(uri, params, errorCallback);
@@ -658,7 +658,7 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     Replace(uri, params, nullptr);
 }
 
-void FrontendDelegateImpl::ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
+void FrontendDelegateImpl::ReplaceWithCallback(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     Push(uri, params, errorCallback);

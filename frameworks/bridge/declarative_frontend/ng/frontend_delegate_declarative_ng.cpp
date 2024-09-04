@@ -387,65 +387,64 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
-    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Push(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushNamedRoute(const std::string& uri, const std::string& params,
-    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceNamedRoute(const std::string& uri, const std::string& params,
-    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -1185,24 +1184,16 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
-std::string FrontendDelegateDeclarativeNG::GetContentInfo(ContentInfoType type)
+std::string FrontendDelegateDeclarativeNG::GetContentInfo()
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
     CHECK_NULL_RETURN(pageRouterManager_, "");
-    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo(type));
-    if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
-        auto namedRouterInfo = pageRouterManager_->GetNamedRouterInfo();
-        if (namedRouterInfo) {
-            jsonContentInfo->Put("namedRouterInfo", std::move(namedRouterInfo));
-        }
-    }
+    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
 
-    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
-        auto pipelineContext = pipelineContextHolder_.Get();
-        CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
-        jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
-    }
+    auto pipelineContext = pipelineContextHolder_.Get();
+    CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
+    jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
 
     return jsonContentInfo->ToString();
 }
