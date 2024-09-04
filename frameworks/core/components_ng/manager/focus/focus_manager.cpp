@@ -435,7 +435,10 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
+        auto focusDepend = rootFocusHub->GetFocusDependence();
+        rootFocusHub->SetFocusDependence(FocusDependence::SELF);
         rootFocusHub->RequestFocusImmediately();
+        rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
 }
