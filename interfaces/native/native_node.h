@@ -2025,18 +2025,6 @@ typedef enum {
     NODE_TEXT_CONTENT_WITH_STYLED_STRING,
 
     /**
-     * @brief 设置文本居中显示。
-     *
-     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：文本是否居中，默认值false。\n
-     * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
-     * .value[0].i32：文本是否居中。\n
-     *
-     */
-    NODE_TEXT_HALF_LEADING = 1029,
-
-    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
