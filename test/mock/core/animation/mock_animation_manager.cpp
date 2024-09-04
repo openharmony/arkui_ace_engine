@@ -58,29 +58,35 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
     return res;
 }
 
-void MockAnimationManager::Tick()
+namespace {
+void PruneAnimation(std::list<RefPtr<MockImplicitAnimation>>& animations)
 {
-    for (auto it = animations_.begin(); it != animations_.end();) {
+    for (auto it = animations.begin(); it != animations.end();) {
         auto&& anim = *it;
         if (!anim || anim->Finished()) {
-            it = animations_.erase(it);
+            it = animations.erase(it);
         } else {
-            anim->Next();
             ++it;
         }
+    }
+}
+} // namespace
+
+void MockAnimationManager::Tick()
+{
+    PruneAnimation(animations_);
+    const auto anims = animations_;
+    for (const auto& anim : anims) {
+        anim->Next();
     }
 }
 
 void MockAnimationManager::TickByVelocity(float velocity)
 {
-    for (auto it = animations_.begin(); it != animations_.end();) {
-        auto&& anim = *it;
-        if (!anim || anim->Finished()) {
-            it = animations_.erase(it);
-        } else {
-            anim->ForceUpdate(velocity);
-            ++it;
-        }
+    PruneAnimation(animations_);
+    const auto anims = animations_;
+    for (const auto& anim : anims) {
+        anim->ForceUpdate(velocity);
     }
 }
 
@@ -92,6 +98,12 @@ void MockAnimationManager::Reset()
     params_.Reset();
     ticks_ = 1;
     inScope_ = false;
+}
+
+bool MockAnimationManager::AllFinished()
+{
+    PruneAnimation(animations_);
+    return animations_.empty();
 }
 
 void MockAnimationManager::SetParams(const AnimationOption& option, AnimationCallbacks&& cbs)

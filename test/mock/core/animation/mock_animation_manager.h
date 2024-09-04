@@ -92,6 +92,8 @@ public:
 
     void Reset();
 
+    bool AllFinished();
+
 private:
     void CancelAnimations();
 
