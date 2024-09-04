@@ -48,8 +48,6 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -70,6 +68,8 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -202,24 +202,6 @@ public:
         return true;
     }
 
-    void SetBlurOnSubmit(bool blurOnSubmit)
-    {
-        textInputBlurOnSubmit_ = blurOnSubmit;
-        textAreaBlurOnSubmit_ = blurOnSubmit;
-    }
-
-    bool GetBlurOnSubmit()
-    {
-        return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
-    }
-
-    bool NeedToRequestKeyboardOnFocus() const override
-    {
-        return needToRequestKeyboardOnFocus_;
-    }
-
-    bool CheckBlurReason();
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -250,6 +232,23 @@ public:
         return MakeRefPtr<TextInputLayoutAlgorithm>();
     }
 
+    void SetBlurOnSubmit(bool blurOnSubmit)
+    {
+        textInputBlurOnSubmit_ = blurOnSubmit;
+        textAreaBlurOnSubmit_ = blurOnSubmit;
+    }
+
+    bool GetBlurOnSubmit()
+    {
+        return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
+    }
+
+    bool NeedToRequestKeyboardOnFocus() const override
+    {
+        return needToRequestKeyboardOnFocus_;
+    }
+
+    bool CheckBlurReason();
     void OnModifyDone() override;
     void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
@@ -323,9 +322,6 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
-        value.text = contentController_->GetTextValue();
-        value.hint = GetPlaceHolder();
-        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
@@ -345,8 +341,8 @@ public:
         selectController_->UpdateCaretIndex(caretPosition);
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
-    bool IsReachedBoundary(float offset);
 
+    bool IsReachedBoundary(float offset);
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
@@ -361,7 +357,6 @@ public:
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
-    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -729,7 +724,6 @@ public:
     }
 
     void UpdateEditingValueToRecord();
-
     void UpdateScrollBarOffset() override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
@@ -1016,11 +1010,6 @@ public:
         return isTextInput_;
     }
 
-    void SetTextInputFlag(bool isTextInput)
-    {
-        isTextInput_ = isTextInput;
-    }
-
     void SetSingleLineHeight(float height)
     {
         inlineSingleLineHeight_ = height;
@@ -1049,6 +1038,11 @@ public:
     bool IsFillRequestFinish()
     {
         return isFillRequestFinish_;
+    }
+
+    void SetTextInputFlag(bool isTextInput)
+    {
+        isTextInput_ = isTextInput;
     }
 
     bool IsNormalInlineState() const;
@@ -1111,7 +1105,7 @@ public:
 
     bool HasCustomKeyboard()
     {
-        return customKeyboard_ != nullptr || customKeyboardBuilder_ != nullptr;
+        return customKeyboardBuilder_ != nullptr || customKeyboard_ != nullptr;
     }
 
     void DumpInfo() override;
@@ -1174,6 +1168,24 @@ public:
         return showSelect_;
     }
 
+    bool HasFocus() const;
+    void StopTwinkling();
+    void StartTwinkling();
+
+    bool IsModifyDone()
+    {
+        return isModifyDone_;
+    }
+    void SetModifyDoneStatus(bool value)
+    {
+        isModifyDone_ = value;
+    }
+
+    const TimeStamp& GetLastClickTime()
+    {
+        return lastClickTimeStamp_;
+    }
+
     void ShowSelect()
     {
         showSelect_ = true;
@@ -1198,30 +1210,11 @@ public:
     {
         selectOverlay_->HandleOnShowMenu();
     }
-    bool HasFocus() const;
-    void StopTwinkling();
-    void StartTwinkling();
-
-    bool IsModifyDone()
-    {
-        return isModifyDone_;
-    }
-    void SetModifyDoneStatus(bool value)
-    {
-        isModifyDone_ = value;
-    }
-
-    const TimeStamp& GetLastClickTime()
-    {
-        return lastClickTimeStamp_;
-    }
 
     void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
 
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-
-    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     OffsetF GetTextPaintOffset() const override;
 
@@ -1232,10 +1225,9 @@ public:
         needToRequestKeyboardInner_ = true;
     }
 
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
     void CleanNodeResponseKeyEvent();
 
-    void ScrollPage(bool reverse, bool smooth = false,
-        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void InitScrollBarClickEvent() override {}
     bool IsUnderlineMode();
     bool IsInlineMode();
@@ -1264,6 +1256,22 @@ public:
         auto transformContentRect = contentRect_;
         selectOverlay_->GetLocalRectWithTransform(transformContentRect);
         return transformContentRect;
+    }
+
+    RefPtr<UINode> GetCustomKeyboard()
+    {
+        return customKeyboard_;
+    }
+
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
+
+    void SetShowKeyBoardOnFocus(bool value);
+    bool GetShowKeyBoardOnFocus()
+    {
+        return showKeyBoardOnFocus_;
     }
 
     bool ProcessAutoFill(bool& isPopup, bool isFromKeyBoard = false, bool isNewPassWord = false);
@@ -1315,22 +1323,6 @@ public:
     void ReceivePreviewTextStyle(const std::string& style) override;
 
     PreviewTextStyle GetPreviewTextStyle() const;
-
-    RefPtr<UINode> GetCustomKeyboard()
-    {
-        return customKeyboard_;
-    }
-
-    bool GetCustomKeyboardOption()
-    {
-        return keyboardAvoidance_;
-    }
-
-    void SetShowKeyBoardOnFocus(bool value);
-    bool GetShowKeyBoardOnFocus()
-    {
-        return showKeyBoardOnFocus_;
-    }
 
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
@@ -1427,7 +1419,6 @@ protected:
     void OnTextGenstureSelectionEnd() override;
 
     bool IsTextEditableForStylus() const override;
-
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::string& insertValue, int32_t offset);
@@ -1550,15 +1541,15 @@ private:
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
-
     bool IsOnUnitByPosition(const Offset& globalOffset);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
     void UpdateSelectController();
-    void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
+    void UpdateHandlesOffsetOnScroll(float offset);
+
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
     void PaintTextRect();
@@ -1600,10 +1591,10 @@ private:
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
     void RequestKeyboardAfterLongPress();
-    void UpdatePasswordModeState();
+    void UpdateBlurReason();
     void InitDragDropCallBack();
     void InitDragDropEventWithOutDragStart();
-    void UpdateBlurReason();
+    void UpdatePasswordModeState();
     AceAutoFillType TextContentTypeToAceAutoFillType(const TextContentType& type);
     bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
@@ -1626,6 +1617,7 @@ private:
     bool ParseFillContentJsonValue(const std::unique_ptr<JsonValue>& jsonObject,
         std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>& map);
     void HandleContentSizeChange(const RectF& textRect);
+
     void UpdatePreviewIndex(int32_t start, int32_t end)
     {
         previewTextStart_ = start;
@@ -1789,8 +1781,8 @@ private:
     RefPtr<TextSelectController> selectController_;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
-    RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     std::string lastAutoFillTextValue_;
+    RefPtr<TextInputResponseArea> cleanNodeResponseArea_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
@@ -1806,16 +1798,16 @@ private:
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
+    bool textInputBlurOnSubmit_ = true;
+    bool textAreaBlurOnSubmit_ = false;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     bool autoFillOtherAccount_ = false;
     uint32_t autoFillSessionId_ = 0;
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
 
-    bool textInputBlurOnSubmit_ = true;
-    bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
-
+    bool showKeyBoardOnFocus_ = true;
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
@@ -1824,7 +1816,6 @@ private:
     int32_t previewTextEnd_ = -1;
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
-    bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
