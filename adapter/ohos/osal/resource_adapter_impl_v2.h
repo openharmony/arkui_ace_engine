@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "resource_manager.h"
+
 #include "base/image/pixel_map.h"
 #include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
