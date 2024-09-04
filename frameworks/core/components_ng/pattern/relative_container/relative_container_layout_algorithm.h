@@ -37,8 +37,10 @@ class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     RelativeContainerLayoutAlgorithm() = default;
-    ~RelativeContainerLayoutAlgorithm() override = default;
-
+    ~RelativeContainerLayoutAlgorithm()
+    {
+        std::lock_guard<std::mutex> lock(relativeContainerMutex_);
+    }
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
@@ -153,6 +155,7 @@ private:
     std::unordered_map<std::string, ChainParam> verticalChains_;
     std::unordered_map<std::string, std::string> horizontalChainNodeMap_;
     std::unordered_map<std::string, std::string> verticalChainNodeMap_;
+    std::mutex relativeContainerMutex_;
     PaddingPropertyF padding_;
     SizeF containerSizeWithoutPaddingBorder_;
 };
