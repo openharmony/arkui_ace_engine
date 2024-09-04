@@ -514,6 +514,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
+    int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
     float totalOffset_ = 0.0f;
