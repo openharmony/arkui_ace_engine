@@ -149,12 +149,14 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        activeFingers_.remove(event.id);
         return;
     }
 
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        activeFingers_.remove(event.id);
         return;
     }
 
