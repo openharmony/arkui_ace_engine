@@ -83,28 +83,28 @@ void ArcIndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (int32_t i = 0; i < childCount; i++) {
         const auto& child = layoutWrapper->GetChildByIndex(i);
         CHECK_NULL_VOID(child);
-        auto offset = CalcArcItemPosition(i);
+        auto offset = CalcArcItemPosition(layoutWrapper, i);
         child->GetHostNode()->GetRenderContext()->UpdatePosition(offset);
         child->Layout();
     }
 }
 
-OffsetT<Dimension> ArcIndexerLayoutAlgorithm::CalcArcItemPosition(int32_t index)
+OffsetT<Dimension> ArcIndexerLayoutAlgorithm::CalcArcItemPosition(LayoutWrapper* layoutWrapper, int32_t index)
 {
-    Offset position;
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingWithoutBorder();
     float itemAngle = (startAngle_ + stepAngle_ * index) * M_PI / HALF_CIRCLE_ANGLE;
-    position.SetX(arcCenter_.GetX() + arcRadius_ * cos(itemAngle) - itemRadius_);
-    position.SetY(arcCenter_.GetY() + arcRadius_ * sin(itemAngle) - itemRadius_);
-    auto offset = OffsetT<Dimension>(Dimension(position.GetX()), Dimension(position.GetY()));
-    return offset;
+    auto positionX = arcCenter_.GetX() + arcRadius_ * cos(itemAngle) - itemRadius_ - padding.left.value_or(0);
+    auto positionY = arcCenter_.GetY() + arcRadius_ * sin(itemAngle) - itemRadius_ - padding.top.value_or(0);
+    return OffsetT<Dimension>(Dimension(positionX), Dimension(positionY));
 }
 
-OffsetT<Dimension> ArcIndexerLayoutAlgorithm::GetPositionOfPopupNode(
-    LayoutWrapper* layoutWrapper)
+OffsetT<Dimension> ArcIndexerLayoutAlgorithm::GetPositionOfPopupNode(LayoutWrapper* layoutWrapper)
 {
     auto bubbleSize = Dimension(ARC_BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto positionX = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() * HALF - bubbleSize * HALF;
-    auto positionY = Dimension(ARC_BUBBLE_POSITION_Y, DimensionUnit::VP).ConvertToPx();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingWithoutBorder();
+    auto popupDistance = Dimension(ARC_BUBBLE_POSITION_Y, DimensionUnit::VP).ConvertToPx();
+    auto positionX = arcCenter_.GetX() - bubbleSize * HALF - padding.left.value_or(0);
+    auto positionY = arcCenter_.GetY() - arcRadius_ - itemRadius_ +  popupDistance - padding.left.value_or(0);
     return OffsetT<Dimension>(Dimension(positionX), Dimension(positionY));
 }
 
@@ -122,20 +122,24 @@ void ArcIndexerLayoutAlgorithm::MeasurePopup(LayoutWrapper* layoutWrapper, uint3
 void ArcIndexerLayoutAlgorithm::MeasureArc(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = DynamicCast<ArcIndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto positionX = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() * HALF;
-    auto positionY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() * HALF;
-    arcCenter_.SetX(positionX);
-    arcCenter_.SetY(positionY);
+    auto width = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto height = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
+
+    const auto& paddingAndBorder = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(0, 0, 0, 0);
+    auto verticalPadding = paddingAndBorder.top.value_or(0) + paddingAndBorder.bottom.value_or(0);
+    auto horizontalPadding = paddingAndBorder.left.value_or(0.0f) + paddingAndBorder.right.value_or(0.0f);
+    auto centerX = (width - horizontalPadding) * HALF + paddingAndBorder.left.value_or(0);
+    auto centerY = (height - verticalPadding) * HALF + paddingAndBorder.top.value_or(0);
+    arcCenter_.SetX(centerX);
+    arcCenter_.SetY(centerY);
 
     itemRadius_ = itemSize_ * HALF ;
-    BorderWidthProperty currentBorderWidth;
-    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
-        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
+    if (width - horizontalPadding < height - verticalPadding) {
+        arcRadius_ = width * HALF - itemRadius_ - horizontalPadding * HALF;
     } else {
-        currentBorderWidth.SetBorderWidth(Dimension(0.0));
+        arcRadius_ = height * HALF - itemRadius_ - verticalPadding * HALF;
     }
-    auto borderWidth = currentBorderWidth.rightDimen.value_or(Dimension(0.0f)).ConvertToPx();
-    arcRadius_ = positionX < positionY ? positionX - itemRadius_ - borderWidth: positionY - itemRadius_ - borderWidth;
+
     stepAngle_ = DOUBLE * atan2f(itemRadius_, arcRadius_) * HALF_CIRCLE_ANGLE / M_PI;
     auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
     if (autoCollapse && fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {

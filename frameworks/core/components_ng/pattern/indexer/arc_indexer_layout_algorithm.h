@@ -69,7 +69,7 @@ public:
 
 private:
     OffsetT<Dimension> GetPositionOfPopupNode(LayoutWrapper* layoutWrapper);
-    OffsetT<Dimension> CalcArcItemPosition(int32_t index);
+    OffsetT<Dimension> CalcArcItemPosition(LayoutWrapper* layoutWrapper, int32_t index);
     void MeasurePopup(LayoutWrapper* layoutWrapper, uint32_t childCount);
     void MeasureArc(LayoutWrapper* layoutWrapper);
     int32_t itemCount_ = 0;
