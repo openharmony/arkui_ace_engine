@@ -2554,8 +2554,7 @@ void PipelineContext::FlushTouchEvents()
     CHECK_NULL_VOID(rootNode_);
     {
         std::unordered_set<int32_t> moveEventIds;
-        std::list<TouchEvent> touchEvents;
-        CollectTouchEventsBeforeVsync(touchEvents);
+        decltype(touchEvents_) touchEvents(std::move(touchEvents_));
         if (touchEvents.empty()) {
             canUseLongPredictTask_ = true;
             return;
