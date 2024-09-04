@@ -124,7 +124,8 @@ public:
     float GetSwitchWidth(const SizeF& contentSize) const;
     float CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap);
     void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset);
-    void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize, double& actualGap);
+    void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset,
+        const SizeF& contentSize, const double& actualGap);
 
     void SetUserActiveColor(const Color& color)
     {
@@ -292,7 +293,7 @@ private:
     Color focusBoardColor_;
     Dimension hoverRadius_ = 8.0_vp;
     Dimension focusRadius_ = 8.0_vp;
-    bool isDiffPointColor_ = false;
+    bool isUseDiffPointColor_ = false;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;

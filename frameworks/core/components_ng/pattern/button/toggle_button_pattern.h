@@ -122,6 +122,7 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<ToggleButtonPaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_;
+    RefPtr<PipelineContext> pipeline_;
     RefPtr<ToggleTheme> toggleTheme_;
     std::optional<bool> isOn_;
     Color checkedColor_;

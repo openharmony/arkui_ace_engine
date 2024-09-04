@@ -121,9 +121,9 @@ void ToggleButtonPattern::HandleOverlayStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    toggleTheme_ = pipeline->GetTheme<ToggleTheme>();
+    pipeline_ = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline_);
+    toggleTheme_ = pipeline_->GetTheme<ToggleTheme>();
     renderContext_ = host->GetRenderContext();
     paintProperty_ = host->GetPaintProperty<ToggleButtonPaintProperty>();
 
@@ -136,22 +136,21 @@ void ToggleButtonPattern::HandleBorderAndShadow()
     CHECK_NULL_VOID(toggleTheme_);
     CHECK_NULL_VOID(renderContext_);
     CHECK_NULL_VOID(paintProperty_);
-    BorderColorProperty borderColor;
-    BorderWidthProperty borderWidth;
-    Dimension width = toggleTheme_->GetBorderWidth();
-    Color color = paintProperty_->GetIsOnValue(false) ?
-        toggleTheme_->GetBorderColorChecked() : toggleTheme_->GetBorderColorUnchecked();
-    borderColor.SetColor(color);
-    borderWidth.SetBorderWidth(width);
 
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderWidth()) {
+            BorderWidthProperty borderWidth;
+            borderWidth.SetBorderWidth(toggleTheme_->GetBorderWidth());
             layoutProperty->UpdateBorderWidth(borderWidth);
             renderContext_->UpdateBorderWidth(borderWidth);
         }
         if (!renderContext_->HasBorderColor()) {
+            BorderColorProperty borderColor;
+            Color color = paintProperty_->GetIsOnValue(false) ?
+                toggleTheme_->GetBorderColorChecked() : toggleTheme_->GetBorderColorUnchecked();
+            borderColor.SetColor(color);
             renderContext_->UpdateBorderColor(borderColor);
         }
     }
@@ -180,20 +179,14 @@ void ToggleButtonPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+    CHECK_NULL_VOID(pipeline_);
+    pipeline_->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void ToggleButtonPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+    CHECK_NULL_VOID(pipeline_);
+    pipeline_->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 
 
@@ -255,14 +248,15 @@ void ToggleButtonPattern::SetFocusButtonStyle(
     CHECK_NULL_VOID(graphics);
     auto&& transform = renderContext_->GetOrCreateTransform();
     CHECK_NULL_VOID(transform);
-    float sacleFocus = toggleTheme_->GetScaleFocus();
-    VectorF scale(sacleFocus, sacleFocus);
+
     isTextColor_ = textLayoutProperty->GetTextColor() == toggleTheme_->GetTextColor();
     if (isTextColor_) {
         textLayoutProperty->UpdateTextColor(toggleTheme_->GetTextColorFocus());
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
     }
+    float sacleFocus = toggleTheme_->GetScaleFocus();
+    VectorF scale(sacleFocus, sacleFocus);
     if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
         isScale_ = true;
         renderContext_->SetScale(sacleFocus, sacleFocus);
@@ -316,14 +310,11 @@ void ToggleButtonPattern::HandleFocusStyle()
 
 void ToggleButtonPattern::HandleFocusEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(pipeline_);
 
     SetIsFocus(true);
     AddIsFocusActiveUpdateEvent();
-    if (pipelineContext->GetIsFocusActive()) {
+    if (pipeline_->GetIsFocusActive()) {
         UpdateButtonStyle();
     }
 }
@@ -574,12 +565,11 @@ void ToggleButtonPattern::HandleOnOffStyle(bool isOnToOff, bool isFocus)
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
+    CHECK_NULL_VOID(toggleTheme_);
     auto&& graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
     if (isFocus) {
-        ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme->GetShadowFocus());
+        ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowFocus());
         Shadow shadow = Shadow::CreateShadow(focusShadowStyle);
         auto isShadow = !graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow;
         isOnToOff ? isShadow_ = isShadow : isCheckedShadow_ = isShadow;
@@ -587,21 +577,21 @@ void ToggleButtonPattern::HandleOnOffStyle(bool isOnToOff, bool isFocus)
             renderContext->UpdateBackShadow(shadow);
         }
         if (isbgColorFocus_) {
-            renderContext->UpdateBackgroundColor(isOnToOff ? toggleTheme->GetBackgroundColorFocusUnchecked() :
-                toggleTheme->GetBackgroundColorFocusChecked());
+            renderContext->UpdateBackgroundColor(isOnToOff ? toggleTheme_->GetBackgroundColorFocusUnchecked() :
+                toggleTheme_->GetBackgroundColorFocusChecked());
         }
     } else {
         Shadow shadowNone = Shadow::CreateShadow(ShadowStyle::None);
-        Shadow normalShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme->GetShadowNormal()));
+        Shadow normalShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal()));
         if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == (isOnToOff ? normalShadow : shadowNone)) {
             renderContext->UpdateBackShadow(isOnToOff ? shadowNone : normalShadow);
         }
     }
     BorderColorProperty borderColor;
-    borderColor.SetColor(isOnToOff ? toggleTheme->GetBorderColorChecked() : toggleTheme->GetBorderColorUnchecked());
+    borderColor.SetColor(isOnToOff ? toggleTheme_->GetBorderColorChecked() : toggleTheme_->GetBorderColorUnchecked());
     if (!renderContext->HasBorderColor() || renderContext->GetBorderColor() == borderColor) {
         BorderColorProperty color;
-        color.SetColor(isOnToOff ? toggleTheme->GetBorderColorUnchecked() : toggleTheme->GetBorderColorChecked());
+        color.SetColor(isOnToOff ? toggleTheme_->GetBorderColorUnchecked() : toggleTheme_->GetBorderColorChecked());
         renderContext->UpdateBorderColor(color);
     }
 }

@@ -62,22 +62,6 @@ public:
     {
         return width_;
     }
-
-    const Color& GetFocusBoardColor() const
-    {
-        return focusBoardColor_;
-    }
-
-    const Color& GetBorderFocusedColor() const
-    {
-        return borderFocusedColor_;
-    }
-
-    const Color& GetFocusedBGColorUnselected() const
-    {
-        return focusedBGColorUnselected_;
-    }
-
     const Dimension& GetHeight() const
     {
         return height_;
@@ -477,9 +461,9 @@ public:
         return isUseDiffPointColor_;
     }
 
-    bool GetSwitchFocuPadding() const
+    const Dimension& GetSwitchFocuPadding() const
     {
-        return focusPadding_ ;
+        return focusPadding_;
     }
 
 private:
@@ -488,12 +472,12 @@ private:
     Color interactiveHoverColor_;
     Color interactivePressedColor_;
     bool isUseDiffPointColor_ = false;
-    bool focusPadding_  = false;
     Color focusedPointColorUnselected_;
     Color pointColorUnchecked_;
     Dimension focusBoardWidth_;
     Dimension focusBoardHeight_;
     Dimension focusBoardRadius_;
+    Dimension focusPadding_;
 };
 
 class RadioTheme : public CheckableTheme {

@@ -91,7 +91,7 @@ void SwitchModifier::InitializeParam()
     colorAnimationDuration_ = switchTheme->GetColorAnimationDuration();
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
     pointColorUnchecked_ = switchTheme->GetPointColorUnchecked();
-    isDiffPointColor_ = switchTheme->GetSwitchDifferentPointColor();
+    isUseDiffPointColor_ = switchTheme->GetSwitchUseDiffPointColor();
     focusBoardColor_ = switchTheme->GetFocusBoardColor();
 }
 
@@ -140,32 +140,32 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     focusRadius_ = switchTheme->GetFocusBoardRadius();
     float idealHeight =
         (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+    float boardIdealHeight =
+        (switchTheme->GetFocusBoardHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
     if (animateTrackRadius_->Get() < 0 && idealHeight != 0) {
         focusRadius_ = focusRadius_ * height / idealHeight;
-    } else {
-        focusRadius_ = focusRadius_ * height / (switchTheme->GetFocusBoardHeight() -
-            switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+    } else if (boardIdealHeight != 0) {
+        focusRadius_ = focusRadius_ * height / boardIdealHeight;
     }
 
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
 
-    OffsetF focusBoardOffset;
-    focusBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
-    focusBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
+    OffsetF focusBoardOffset = hoverBoardOffset;
     DrawFocusBoard(canvas, focusBoardOffset);
     DrawRectCircle(canvas, contentOffset, contentSize, actualGap);
 }
 
 void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize,
-    double& actualGap)
+    const double& actualGap)
 {
     auto xOffset = contentOffset.GetX();
     auto yOffset = contentOffset.GetY();
     auto height = contentSize.Height();
+    auto radius = height / NUM_TWO;
     auto trackRadius =
-        (animateTrackRadius_->Get() < 0) ? (height / NUM_TWO) : animateTrackRadius_->Get();
+        (animateTrackRadius_->Get() < 0) ? radius : animateTrackRadius_->Get();
     RSRect rect = RSRect(xOffset, yOffset, xOffset + contentSize.Width(), yOffset + height);
     RSRoundRect roundRect(rect, trackRadius, trackRadius);
 
@@ -193,7 +193,7 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
         brush.SetColor(ToRSColor(animatePointColor_->Get()));
     }
 
-    if (isDiffPointColor_ && !hasPointColor_) {
+    if (isUseDiffPointColor_ && !hasPointColor_) {
         if (isFocused_->Get()) {
             brush.SetColor(ToRSColor(isSelect_->Get() ? animatePointColor_->Get() : LinearColor(pointColor_)));
         } else {
@@ -208,7 +208,7 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     } else {
         point.SetX(xOffset + pointOffset_->Get());
     }
-    point.SetY(yOffset + height / 2);
+    point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
     canvas.DetachBrush();
 }

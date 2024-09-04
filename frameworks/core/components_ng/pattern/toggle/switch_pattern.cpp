@@ -101,6 +101,7 @@ void SwitchPattern::InitFocusEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    pipeline_ = host->GetContextRefPtr();
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto focusTask = [weak = WeakClaim(this)]() {
@@ -122,8 +123,6 @@ void SwitchPattern::InitFocusEvent()
 
 void SwitchPattern::HandleBlurEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     RemoveIsFocusActiveUpdateEvent();
     OnIsFocusActiveUpdate(false);
     UpdateSwitchStyle();
@@ -131,13 +130,10 @@ void SwitchPattern::HandleBlurEvent()
 
 void SwitchPattern::HandleFocusEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(pipeline_);
 
     AddIsFocusActiveUpdateEvent();
-    if (pipelineContext->GetIsFocusActive()) {
+    if (pipeline_->GetIsFocusActive()) {
         OnIsFocusActiveUpdate(true);
         UpdateSwitchStyle();
     }
@@ -149,9 +145,8 @@ void SwitchPattern::UpdateSwitchStyle()
     CHECK_NULL_VOID(host);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(pipeline_);
+    auto switchTheme = pipeline_->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
@@ -186,16 +181,14 @@ void SwitchPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+    CHECK_NULL_VOID(pipeline_);
+    pipeline_->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void SwitchPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+    CHECK_NULL_VOID(pipeline_);
+    pipeline_->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 
 void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)

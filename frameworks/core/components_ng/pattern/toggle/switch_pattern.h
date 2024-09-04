@@ -93,6 +93,7 @@ public:
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
         CHECK_NULL_RETURN(switchTheme, FocusPattern());
+
         auto focusPaintcolor = switchTheme->GetActiveColor();
         focusPaintParams.SetPaintColor(focusPaintcolor);
         focusPaintParams.SetFocusPadding(switchTheme->GetSwitchFocuPadding());
@@ -193,6 +194,7 @@ private:
     void FireBuilder();
 
     RefPtr<FrameNode> BuildContentModifierNode();
+    RefPtr<PipelineContext> pipeline_;
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
 
