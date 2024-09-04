@@ -480,6 +480,16 @@ public:
         }
     }
 
+    bool GetAccessibilityFocusState() const
+    {
+        return isAccessibilityFocused_;
+    }
+
+    void SetAccessibilityFocusState(bool state)
+    {
+        isAccessibilityFocused_ = state;
+    }
+
     void SetAccessibilityGroup(bool accessibilityGroup)
     {
         accessibilityGroup_ = accessibilityGroup;
@@ -729,6 +739,7 @@ protected:
     ActionsImpl actionsImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
+    bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
