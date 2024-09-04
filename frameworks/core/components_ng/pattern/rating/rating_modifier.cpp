@@ -41,6 +41,9 @@ RatingModifier::RatingModifier()
     AttachProperty(contentSize_);
     AttachProperty(boardColor_);
     AttachProperty(reverse_);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    ratingTheme_ = pipeline->GetTheme<RatingTheme>();
 }
 
 void RatingModifier::onDraw(DrawingContext& context)
@@ -113,7 +116,13 @@ void RatingModifier::PaintStar(DrawingContext& context)
     // step3: draw the foreground images.
     canvas.Save();
     auto offsetTemp = offset;
-    auto contentSize = SizeF(singleStarWidth, singleStarHeight);
+    CHECK_NULL_VOID(ratingTheme_);
+    auto distance = ratingTheme_->GetIconBoardDistance();
+    offsetTemp.SetX((static_cast<float>(offsetTemp.GetX() + distance)));
+    offsetTemp.SetY((static_cast<float>(offsetTemp.GetY() + distance)));
+    auto size = ratingTheme_->GetIconSubSize();
+    auto contentSize = SizeF(singleStarWidth - size, singleStarHeight - size);
+
     // step2.1: calculate the clip area in order to display the secondary image.
     auto clipRect1 = RSRect(offset.GetX(), offsetTemp.GetY(),
         static_cast<float>(offset.GetX() + singleStarWidth * drawScore), offset.GetY() + singleStarHeight);
