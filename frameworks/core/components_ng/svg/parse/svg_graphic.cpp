@@ -19,6 +19,10 @@
 #include "core/components_ng/svg/parse/svg_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr double HALF = 0.5;
+} // namespace
+
 void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -114,7 +118,7 @@ void SvgGraphic::SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gr
 
     gradientInfo.r = ConvertDimensionToPx(radialGradient.radialHorizontalSize ?
         Dimension(radialGradient.radialHorizontalSize.value().Value(),
-        radialGradient.radialHorizontalSize.value().Unit()) : 0.5_pct, sqrt(width * height));
+        radialGradient.radialHorizontalSize.value().Unit()) : 0.5_pct, std::max(width, height));
     gradientInfo.cx = ConvertDimensionToPx(radialGradient.radialCenterX ?
         Dimension(radialGradient.radialCenterX.value().Value(),
         radialGradient.radialCenterX.value().Unit()) : 0.5_pct, width) + bounds.Left();
@@ -187,6 +191,48 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     return true;
 }
 
+void SvgGraphic::SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& gradient,
+    std::vector<RSScalar> pos, std::vector<RSColorQuad> colors)
+{
+    RSMatrix result;
+    auto info = gradient->GetRadialGradientInfo();
+    auto center = RSPoint(static_cast<RSScalar>(info.cx), static_cast<RSScalar>(info.cy));
+    auto focal = RSPoint(static_cast<RSScalar>(info.fx), static_cast<RSScalar>(info.fy));
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        auto bounds = path_.GetBounds();
+        auto maxBounds = std::max(bounds.GetWidth(), bounds.GetHeight());
+        if (maxBounds != 0) {
+            RSMatrix m, t;
+            auto scaleX = bounds.GetWidth() / maxBounds;
+            auto scaleY = bounds.GetHeight() / maxBounds;
+            auto transX = (1 - scaleX) * (bounds.GetLeft() + bounds.GetWidth()* HALF);
+            auto transY = (1 - scaleY) * (bounds.GetTop() + bounds.GetHeight()* HALF);
+            m.SetScale(scaleX, scaleY);
+            t.Translate(transX, transY);
+            t.PreConcat(m);
+            result = t;
+        }
+        if (center == focal) {
+            fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+        } else {
+            fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod()),
+                &result));
+        }
+    } else {
+        if (center == focal) {
+            fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
+        } else {
+            RSMatrix matrix;
+            fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
+                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod()),
+                &matrix));
+        }
+    }
+}
+
 bool SvgGraphic::SetGradientStyle(double opacity)
 {
     auto gradient = fillState_.GetGradient();
@@ -211,18 +257,7 @@ bool SvgGraphic::SetGradientStyle(double opacity)
             pts[0], pts[1], colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
     }
     if (gradient->GetType() == OHOS::Ace::GradientType::RADIAL) {
-        auto info = gradient->GetRadialGradientInfo();
-        auto center = RSPoint(static_cast<RSScalar>(info.cx), static_cast<RSScalar>(info.cy));
-        auto focal = RSPoint(static_cast<RSScalar>(info.fx), static_cast<RSScalar>(info.fx));
-        if (center == focal) {
-            fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(center,
-                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod())));
-        } else {
-            RSMatrix matrix;
-            fillBrush_.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(focal, 0, center,
-                static_cast<RSScalar>(info.r), colors, pos, static_cast<RSTileMode>(gradient->GetSpreadMethod()),
-                &matrix));
-        }
+        SetGradientFillStyle(gradient, pos, colors);
     }
 #endif
     return true;

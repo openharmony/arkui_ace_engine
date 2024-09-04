@@ -145,6 +145,8 @@ protected:
     void UpdateLineDash();
     void SetLinearGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
     void SetRadialGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient);
+    void SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& gradient, std::vector<RSScalar> pos,
+        std::vector<RSColorQuad> colors);
 
 #ifndef USE_ROSEN_DRAWING
     SkPath path_;
