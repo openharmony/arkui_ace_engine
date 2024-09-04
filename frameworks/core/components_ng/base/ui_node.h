@@ -682,6 +682,8 @@ public:
         return rootNodeType_;
     }
 
+    virtual void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false);
+
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
 
     virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)

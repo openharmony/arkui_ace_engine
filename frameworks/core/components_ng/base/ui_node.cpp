@@ -1609,6 +1609,13 @@ void UINode::GetInspectorValue()
     }
 }
 
+void UINode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
+{
+    for (const auto& child : GetChildren()) {
+        child->ClearSubtreeLayoutAlgorithm(includeSelf, clearEntireTree);
+    }
+}
+
 void UINode::NotifyWebPattern(bool isRegister)
 {
     for (const auto& item : GetChildren()) {
