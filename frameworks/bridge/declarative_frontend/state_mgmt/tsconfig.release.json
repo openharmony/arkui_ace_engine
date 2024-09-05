@@ -80,6 +80,7 @@
     "src/lib/partial_update/pu_builder_proxy.ts",
 
     // 'new' stateMgmt vers 2
+    "src/lib/v2/v2_observed_proxy.ts",
     "src/lib/v2/v2_change_observation.ts",
     "src/lib/v2/v2_decorated_variables.ts",
     "src/lib/v2/v2_monitor.ts",
