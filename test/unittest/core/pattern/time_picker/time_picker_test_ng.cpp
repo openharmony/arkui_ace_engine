@@ -24,8 +24,8 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"

@@ -226,7 +226,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest003, Te
     ASSERT_NE(paintProperty, nullptr);
     auto json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("checkboxShape"), "0");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
 
     /**
      * @tc.steps: step4. Call UpdateCheckBoxGroupSelectedStyle and ToJsonValue
@@ -235,7 +235,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest003, Te
     paintProperty->UpdateCheckBoxGroupSelectedStyle(CheckBoxStyle::SQUARE_STYLE);
     json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -270,7 +270,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest004, Te
     ASSERT_NE(paintProperty, nullptr);
     auto json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("checkboxShape"), "0");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
 
     /**
      * @tc.steps: step4. Call UpdateCheckBoxGroupSelectedStyle and ToJsonValue
@@ -279,7 +279,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest004, Te
     paintProperty->UpdateCheckBoxGroupSelectedStyle(CheckBoxStyle::SQUARE_STYLE);
     json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -328,7 +328,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest005, Test
     auto json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
-    EXPECT_EQ(json->GetString("checkboxShape"), "0");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
 
     /**
      * @tc.steps: step4. Call UpdateCheckBoxGroupSelectedStyle and ToJsonValue
@@ -338,7 +338,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest005, Test
     json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
-    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -397,7 +397,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest006, Test
     auto json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
-    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
 
     /**
      * @tc.steps: step6. Call UpdateCheckBoxGroupSelectedStyle and ToJsonValue
@@ -407,7 +407,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest006, Test
     json = JsonUtil::Create(true);
     paintProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
-    EXPECT_EQ(json->GetString("checkboxShape"), "0");
+    EXPECT_EQ(json->GetString("checkboxShape"), "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
