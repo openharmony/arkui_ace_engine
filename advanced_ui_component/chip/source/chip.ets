@@ -16,14 +16,11 @@
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
-import resourceManager from '@ohos.resourceManager';
 import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
-
-const resourceFn = resourceManager.getSystemResourceManager();
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -379,13 +376,10 @@ export struct ChipComponent {
       return this.label.fontSize;
     }
     let size = this.theme.label.smallFontSize as Resource;
-    let defaultSize = this.theme.label.defaultFontSize as Resource;
-    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-      return this.verifyResource(size, defaultSize);
-    } else {
+    if (this.isChipSizeEnum() && this.chipSize !== ChipSize.SMALL) {
       size = this.theme.label.normalFontSize as Resource;
-      return this.verifyResource(size, defaultSize);
     }
+    return this.sizeToVp(size);
   }
 
   private getIconSize(): Resource{
@@ -414,7 +408,7 @@ export struct ChipComponent {
       (resourceValue.params as string[])[0] && (resourceValue.params as string[])[0].includes('.') &&
       (resourceValue.params as string[])[0].split('.').length > 2) {
       try {
-        let getNum = resourceFn.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
+        let getNum = getContext(this).resourceManager.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
         return getNum;
       } catch (error) {
         return defaultValue;
@@ -458,8 +452,7 @@ export struct ChipComponent {
         case LengthUnit.VP:
           return lengthMetrics.value
         case LengthUnit.FP:
-          px2vp(fp2px(lengthMetrics.value))
-          break
+          return px2vp(fp2px(lengthMetrics.value));
         case LengthUnit.PERCENT:
           return Number.NEGATIVE_INFINITY
         case LengthUnit.LPX:
@@ -1032,7 +1025,7 @@ export struct ChipComponent {
       this.isSetBg = false;
       this.chipNodeBackgroundColor = this.theme.chipNode.backgroundColor;
     }
-    if (this.chipNodeActivatedBackgroundColor && this.chipActivated) {
+    if (this.chipNodeActivatedBackgroundColor) {
       this.isSetActiveBg = true;
     } else {
       this.isSetActiveBg = false;
@@ -1068,7 +1061,7 @@ export struct ChipComponent {
   }
 
   private isSetBackgroundColor(): boolean{
-    return this.isSetBg || this.isSetActiveBg;
+    return this.isSetBg || (this.isSetActiveBg && this.chipActivated);
   }
 
   private getShadowStyles(): ShadowStyle | undefined{
