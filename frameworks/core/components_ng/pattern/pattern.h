@@ -614,8 +614,6 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual void OnPageChanged(int32_t pageId, bool isOnShow) {}
-
     virtual bool OnAccessibilityHoverEvent(const PointF& point)
     {
         return false;

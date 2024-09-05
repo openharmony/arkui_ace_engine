@@ -1091,9 +1091,20 @@ void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isS
     CHECK_NULL_VOID(wrapperPattern);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_VOID(menu);
-    auto pattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SendMenuAccessibilityMessage(isShow);
+    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityIsShow(isShow);
+    if (isShow) {
+        menu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
+    } else {
+        menu->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_CLOSE));
+    }
 }
 
 void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
