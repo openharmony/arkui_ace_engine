@@ -855,7 +855,9 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
     if (!isTypedNode_ && isNativeXComponent_ && !needFireNativeEvent) {
         return;
     }
-    OnSurfaceChanged(surfaceRect);
+    // When creating the surface for the first time, needFireNativeEvent = false, other time needFireNativeEvent = true
+    // the first time change size no need to resize nativeWindow
+    OnSurfaceChanged(surfaceRect, needFireNativeEvent);
 }
 
 void XComponentPattern::InitNativeNodeCallbacks()
@@ -1663,22 +1665,24 @@ void XComponentPattern::OnSurfaceCreated()
     }
 }
 
-void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect)
+void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow)
 {
     CHECK_RUN_ON(UI);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isNativeXComponent_) {
-        CHECK_NULL_VOID(nativeXComponent_);
-        CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto width = surfaceRect.Width();
+    auto height = surfaceRect.Height();
+    if (needResizeNativeWindow) {
         CHECK_NULL_VOID(renderSurface_);
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto viewScale = context->GetViewScale();
-        auto width = surfaceRect.Width();
-        auto height = surfaceRect.Height();
-        renderSurface_->AdjustNativeWindowSize(static_cast<uint32_t>(width * viewScale),
-            static_cast<uint32_t>(height * viewScale));
+        renderSurface_->AdjustNativeWindowSize(
+            static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
+    }
+    if (isNativeXComponent_) {
+        CHECK_NULL_VOID(nativeXComponent_);
+        CHECK_NULL_VOID(nativeXComponentImpl_);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());

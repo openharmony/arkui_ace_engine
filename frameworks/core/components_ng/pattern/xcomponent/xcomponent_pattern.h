@@ -334,7 +334,7 @@ private:
     void OnNativeUnload(FrameNode* frameNode);
 
     void OnSurfaceCreated();
-    void OnSurfaceChanged(const RectF& surfaceRect);
+    void OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow);
 
     void NativeSurfaceShow();
     void NativeSurfaceHide();
