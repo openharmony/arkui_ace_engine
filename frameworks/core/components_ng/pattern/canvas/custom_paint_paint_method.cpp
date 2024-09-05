@@ -1134,19 +1134,14 @@ void CustomPaintPaintMethod::Save()
 
 void CustomPaintPaintMethod::Restore()
 {
-    if (rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) {
-        if (!saveStates_.empty()) {
-            state_ = saveStates_.back();
-            saveStates_.pop_back();
-        }
-        if (!saveColorFilter_.empty()) {
-            colorFilter_ = saveColorFilter_.back();
-            saveColorFilter_.pop_back();
-        }
-        if (!saveBlurFilter_.empty()) {
-            blurFilter_ = saveBlurFilter_.back();
-            saveBlurFilter_.pop_back();
-        }
+    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
+        (!saveBlurFilter_.empty())) {
+        state_ = saveStates_.back();
+        saveStates_.pop_back();
+        colorFilter_ = saveColorFilter_.back();
+        saveColorFilter_.pop_back();
+        blurFilter_ = saveBlurFilter_.back();
+        saveBlurFilter_.pop_back();
         rsCanvas_->Restore();
     }
 }
