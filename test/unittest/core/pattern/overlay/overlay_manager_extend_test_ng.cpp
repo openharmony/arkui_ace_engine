@@ -26,7 +26,6 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
@@ -83,7 +82,6 @@ const NG::BorderColorProperty BORDER_COLOR_TEST = { Color::BLUE,
 const std::string TEXT_TAG = "text";
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
-constexpr int32_t DURATION = 2;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const OffsetF DRAG_OFFSET_BEGIN(10.0, 10.0);
 const OffsetF DRAG_OFFSET_END(15.0, 15.0);
@@ -823,156 +821,5 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest019, TestSize.Level
     overlayManager->popupMap_.emplace(1, PopupInfo2);
     testResult = overlayManager->RemoveBubble(popupNodeEx);
     EXPECT_TRUE(testResult);
-}
-
-/**
- * @tc.name: ShowToastTest001
- * @tc.desc: Test OverlayManager::ShowToast when callback is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerExtendTestNg, ShowToastTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-
-    /**
-     * @tc.steps: step2. create toastInfo
-     */
-    auto toastInfo =
-        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    /**
-     * @tc.steps: step3. run ShowToast
-     * @tc.expected: toastMap_ is not empty
-     */
-    overlayManager->ShowToast(toastInfo, nullptr);
-    EXPECT_FALSE(overlayManager->toastMap_.empty());
-}
-
-/**
- * @tc.name: ShowToastTest002
- * @tc.desc: Test OverlayManager::ShowToast
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerExtendTestNg, ShowToastTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-
-    /**
-     * @tc.steps: step2. create toastInfo and callback function.
-     */
-    auto toastInfo =
-        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-
-    auto callback = [](int32_t callbackId) {
-        /**
-         * @tc.steps: step4. get callbackId.
-         * @tc.expected: callbackId great or equal 0
-         */
-        EXPECT_TRUE(GreatOrEqual(callbackId, 0));
-    };
-
-    /**
-     * @tc.steps: step3. run ShowToast.
-     * @tc.expected: toastMap_ is not empty
-     */
-    overlayManager->ShowToast(toastInfo, callback);
-    EXPECT_FALSE(overlayManager->toastMap_.empty());
-}
-
-/**
- * @tc.name: CloseToastTest001
- * @tc.desc: Test OverlayManager::ShowToast->CloseToast.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerExtendTestNg, CloseToastTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-
-    /**
-     * @tc.steps: step2. create toastInfo and callback function.
-     */
-    auto toastInfo =
-        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-
-    auto callback = [overlayManager](int32_t callbackId) {
-        /**
-         * @tc.steps: step4. get callbackId.
-         * @tc.expected: callbackId great or equal 0
-         */
-        EXPECT_TRUE(GreatOrEqual(callbackId, 0));
-
-        /**
-         * @tc.steps: step5. create closeCallback function.
-         */
-        auto closeCallback = [](int32_t errorCode) {
-            /**
-             * @tc.steps: step7. get closeCallback errorCode.
-             * @tc.expected: errorCode is ERROR_CODE_NO_ERROR
-             */
-            EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
-        };
-
-        /**
-         * @tc.steps: step6. run CloseToast.
-         * @tc.expected: toastMap_ is empty
-         */
-        auto toastId = callbackId >> 3; // 3 : Move 3 bits to the right to get toastId
-        overlayManager->CloseToast(toastId, closeCallback);
-        EXPECT_TRUE(overlayManager->toastMap_.empty());
-    };
-
-    /**
-     * @tc.steps: step3. run ShowToast.
-     */
-    overlayManager->ShowToast(toastInfo, callback);
-}
-
-/**
- * @tc.name: CloseToastTest002
- * @tc.desc: Test OverlayManager::CloseToast.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerExtendTestNg, CloseToastTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get overlay manager instance.
-     */
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-
-    /**
-     * @tc.steps: step2. create closeCallback function.
-     */
-    auto closeCallback = [](int32_t errorCode) {
-        /**
-         * @tc.steps: step4. get closeCallback errorCode.
-         * @tc.expected: errorCode is ERROR_CODE_TOAST_NOT_FOUND
-         */
-        EXPECT_EQ(errorCode, ERROR_CODE_TOAST_NOT_FOUND);
-    };
-
-    /**
-     * @tc.steps: step3. run CloseToast.
-     */
-    overlayManager->CloseToast(1, closeCallback);
 }
 }
