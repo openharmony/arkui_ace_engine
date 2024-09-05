@@ -241,13 +241,13 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     textPattern->CalculateHandleOffsetAndShowOverlay();
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
+    overlayManager->ShowOptionMenu();
     overlayManager->MarkInfoChange((isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                                    DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
     if (textPattern->CheckSelectedTypeChange()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
         ProcessOverlay({ .animation = true });
     }
-    overlayManager->ShowOptionMenu();
     overlayManager->SetHandleCircleIsShow(isFirst, true);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
@@ -333,6 +333,28 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     CHECK_NULL_VOID(textPattern);
     textPattern->CopySelectionMenuParams(overlayInfo);
     OnUpdateOnCreateMenuCallback(overlayInfo);
+    auto scrollableParent = FindScrollableParent();
+    if (scrollableParent) {
+        auto weakParent = WeakClaim(AceType::RawPtr(scrollableParent));
+        overlayInfo.onHandlePanMove = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event, false);
+        };
+        overlayInfo.onHandlePanEnd = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event, true);
+        };
+        overlayInfo.getDeltaHandleOffset = [weak = WeakClaim(this)]() {
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_RETURN(overlay, OffsetF());
+            auto hostPaintOffset = overlay->GetHotPaintOffset();
+            auto deltaOffset = overlay->hostPaintOffset_ - hostPaintOffset;
+            overlay->hostPaintOffset_ = hostPaintOffset;
+            return deltaOffset;
+        };
+    }
 }
 
 void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -355,11 +377,14 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
 void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
     if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR ||
         reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
-        auto textPattern = GetPattern<TextPattern>();
-        CHECK_NULL_VOID(textPattern);
         textPattern->ResetSelection();
+    }
+    if (textPattern->GetMagnifierController()) {
+        textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
 }
 
@@ -375,14 +400,27 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 
 void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
+    auto isDragging = GetIsHandleDragging();
     if (IsAncestorNodeGeometryChange(flag)) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->UpdateParentGlobalOffset();
         textPattern->CalculateHandleOffsetAndShowOverlay();
+        if (isDragging && isDraggingFirstHandle_) {
+            UpdateViewPort();
+            UpdateSecondHandleOffset();
+            return;
+        }
+        if (isDragging && !isDraggingFirstHandle_) {
+            UpdateViewPort();
+            UpdateFirstHandleOffset();
+            return;
+        }
         UpdateAllHandlesOffset();
     }
-    BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+    if (!isDragging) {
+        BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+    }
 }
 
 void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
@@ -403,6 +441,8 @@ void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->SetHandleCircleIsShow(isFirst, false);
+    isDraggingFirstHandle_ = isFirst;
+    hostPaintOffset_ = GetHotPaintOffset();
 }
 
 void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
@@ -435,5 +475,59 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
     RectF frameRect;
     clipNode->GetVisibleRect(visibleRect, frameRect);
     rect.SetHeight(visibleRect.Bottom() - rect.Top());
+}
+
+void TextSelectOverlay::TriggerScrollableParentToScroll(
+    const RefPtr<ScrollablePattern> scrollablePattern, const GestureEvent& event, bool isStopAutoScroll)
+{
+    CHECK_NULL_VOID(scrollablePattern);
+    auto scrollAxis = scrollablePattern->GetAxis();
+    if (!scrollablePattern->IsScrollable() || (scrollAxis != Axis::VERTICAL && scrollAxis != Axis::HORIZONTAL)) {
+        return;
+    }
+    auto scrollableHost = scrollablePattern->GetHost();
+    CHECK_NULL_VOID(scrollableHost);
+    auto scrollableFrameRect = scrollableHost->GetPaintRectWithTransform();
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto hostRect = host->GetPaintRectWithTransform();
+    auto hostSize = hostRect.Height();
+    auto scrollableParentSize = scrollableFrameRect.Height();
+    if (scrollAxis == Axis::HORIZONTAL) {
+        hostSize = hostRect.Width();
+        scrollableParentSize = scrollableFrameRect.Width();
+    }
+    if (LessOrEqual(hostSize, scrollableParentSize)) {
+        return;
+    }
+    RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    notifyDragEvent->SetX(event.GetGlobalLocation().GetX());
+    notifyDragEvent->SetY(event.GetGlobalLocation().GetY());
+    scrollablePattern->HandleOnDragStatusCallback(
+        isStopAutoScroll ? DragEventType::DROP : DragEventType::MOVE, notifyDragEvent);
+}
+
+const RefPtr<ScrollablePattern> TextSelectOverlay::FindScrollableParent()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto scrollablePattern = parent->GetPattern<ScrollablePattern>();
+        if (scrollablePattern) {
+            return scrollablePattern;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return nullptr;
+}
+
+OffsetF TextSelectOverlay::GetHotPaintOffset()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, hostPaintOffset_);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, hostPaintOffset_);
+    return renderContext->GetPaintRectWithTransform().GetOffset();
 }
 } // namespace OHOS::Ace::NG
