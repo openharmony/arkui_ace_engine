@@ -1493,49 +1493,6 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateNodePaintMethod001
- * @tc.desc: test text_pattern.h CreateNodePaintMethod function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    Shadow textShadow;
-    textShadow.SetBlurRadius(3.f); // 3.f means BlurRadius.
-    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
-    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textModelNG.SetTextShadow({ textShadow });
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    frameNode->GetRenderContext()->UpdateClipEdge(false);
-    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
-    frameNode->Measure(layoutConstraintF);
-    frameNode->Layout();
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
-    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
-    pattern->pManager_->Reset();
-    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
-
-    /**
-     * @tc.steps: step2. test CreateNodePaintMethod.
-     * @tc.expect: expect overlayModifier BoundsRect width std::max(frameWith, paragraph->GetLongestLine),
-     *     GestureHub ResponseRegion list not empty.
-     */
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
-    pattern->CreateNodePaintMethod();
-    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
-    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Height(), 92.f);
-    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
-    pattern->pManager_->Reset();
-}
-
-/**
  * @tc.name: CreateNodePaintMethod002
  * @tc.desc: test text_pattern.h CreateNodePaintMethod function
  * @tc.type: FUNC

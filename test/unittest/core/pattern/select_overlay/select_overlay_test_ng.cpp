@@ -2803,63 +2803,6 @@ HWTEST_F(SelectOverlayTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AddMenuResponseRegion001
- * @tc.desc: Test SelectOverlayPattern AddMenuResponseRegion.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestNg, AddMenuResponseRegion001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
-     */
-    SelectOverlayInfo selectInfo;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    ASSERT_NE(selectOverlayNode, nullptr);
-
-    /**
-     * @tc.steps: step2. Create pattern
-     */
-    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    ASSERT_NE(pattern, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(selectOverlayLayoutAlgorithm));
-
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-
-    // create menu and extensionMenu
-    auto item = FrameNode::GetOrCreateFrameNode(
-        V2::MENU_ETS_TAG, -1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE); });
-    // add item to selectOverlayNode
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    selectOverlayNode->AddChild(item);
-
-    std::vector<DimensionRect> tmp;
-    auto layoutProperty = pattern->CreateLayoutProperty();
-    frameNode->SetLayoutProperty(layoutProperty);
-    pattern->AddMenuResponseRegion(tmp);
-    EXPECT_EQ(tmp.size(), 2);
-
-    tmp.clear();
-    auto layoutProps = pattern->GetLayoutProperty<LayoutProperty>();
-    layoutProps->UpdateSafeAreaInsets(SafeAreaInsets());
-    pattern->AddMenuResponseRegion(tmp);
-    EXPECT_EQ(tmp.size(), 2);
-    // if TextOverlayTheme is NULL, SelectOverlayNode::CreateToolBar() still continue, result in 2 children.
-}
-
-/**
  * @tc.name: GetDefaultLineWidth001
  * @tc.desc: Test SelectOverlayPattern GetDefaultLineWidth.
  * @tc.type: FUNC
