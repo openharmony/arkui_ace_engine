@@ -398,6 +398,10 @@ public:
 
     void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
+    void RegisterPageChangedCallback(int32_t pageId, WeakPtr<FrameNode> notifiedNode);
+
+    void UnregisterPageChangedCallback(int32_t pageId, int32_t nodeId);
+
     void FirePageChanged(int32_t pageId, bool isOnShow);
 
     bool HasDifferentDirectionGesture() const;
@@ -1101,6 +1105,7 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
     std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
+    std::unordered_map<int32_t, std::unordered_map<int32_t, WeakPtr<FrameNode>>> pageNotifiedNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
     std::list<FrameInfo> dumpFrameInfos_;
