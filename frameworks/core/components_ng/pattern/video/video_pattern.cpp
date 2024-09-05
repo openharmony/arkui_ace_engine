@@ -1858,6 +1858,7 @@ RefPtr<VideoPattern> VideoPattern::GetTargetVideoPattern()
     if (patternIsFullScreen) {
         // current is full screen,need to be released
         auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(this);
+        CHECK_NULL_RETURN(fullScreenPattern, nullptr);
         return fullScreenPattern->GetVideoPattern();
     }
     // current node is origin video node, need to operate full screen node
