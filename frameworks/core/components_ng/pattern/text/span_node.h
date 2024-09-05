@@ -590,6 +590,7 @@ public:
 protected:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

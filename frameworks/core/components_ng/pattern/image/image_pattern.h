@@ -211,6 +211,7 @@ public:
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpLayoutInfo();
     void DumpLayoutInfo(std::unique_ptr<JsonValue>& json);
     void DumpRenderInfo();

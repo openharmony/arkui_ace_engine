@@ -322,6 +322,7 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void OnAttachContext(PipelineContext *context) override;
