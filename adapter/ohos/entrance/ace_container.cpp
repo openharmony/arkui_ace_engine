@@ -2447,16 +2447,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 

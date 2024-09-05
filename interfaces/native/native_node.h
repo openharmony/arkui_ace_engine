@@ -7382,6 +7382,73 @@ int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData
 */
 ArkUI_ContextHandle OH_ArkUI_GetContextByNode(ArkUI_NodeHandle node);
 
+/**
+ * @brief The event called when the system color mode changes.
+ *        Only one system color change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onColorModeChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemColorModeChangeEvent(
+    ArkUI_NodeHandle node, void* userData, void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system color mode changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief The event called when the system font style changes.
+ *        Only one system font change callback can be registered for the same component.
+ *
+ * @param node Indicates the target node.
+ * @param userData Indicates the custom data to be saved.
+ * @param onFontStyleChange Callback Events.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED} The component does not support this event.
+ * @since 12
+ */
+int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node, void* userData,
+    void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData));
+
+/**
+ * @brief Unregister the event callback when the system font style changes.
+ *
+ * @param node Indicates the target node.
+ * @since 12
+ */
+void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node);
+
+/**
+ * @brief Retrieve the font size value for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return Updated system font size. -1 indicates a retrieval error.
+ * @since 12
+ */
+int32_t OH_ArkUI_SystemFontStyleEvent_GetFontSize(const ArkUI_SystemFontStyleEvent* event);
+
+/**
+ * @brief Retrieve the font thickness values for system font change events.
+ *
+ * @param event Indicates a pointer to the current system font change event.
+ * @return Updated system font thickness, return value type {@link ArkUI_fontWeight},
+ * default value:ARKUI_FONT_WEIGHT_W100。
+ * @since 12
+ */
+int32_t OH_ArkUI_SystemFontStyleEvent_GetFontWeight(const ArkUI_SystemFontStyleEvent* event);
+
 #ifdef __cplusplus
 };
 #endif

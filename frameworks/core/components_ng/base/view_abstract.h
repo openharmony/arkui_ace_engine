@@ -636,6 +636,8 @@ public:
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
 
+    static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
+    static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
     static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);

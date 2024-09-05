@@ -4944,4 +4944,17 @@ void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
 }
+
+void ViewAbstract::SetSystemColorModeChangeEvent(
+    FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKColorModeUpdateCallback(std::move(onColorModeChange));
+}
+
+void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
+}
 } // namespace OHOS::Ace::NG

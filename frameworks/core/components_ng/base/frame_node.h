@@ -506,6 +506,17 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+    {
+        ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+    {
+        ndkFontUpdateCallback_ = callback;
+    }
+
     bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
@@ -1147,6 +1158,8 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
     bool AllowVisibleAreaCheck() const;
 
     // sort in ZIndex.
@@ -1156,6 +1169,8 @@ private:
     std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
 
+    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
+    std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -1213,6 +1228,8 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    ColorMode colorMode_;
 
     bool draggable_ = false;
     bool userSet_ = false;
