@@ -1169,7 +1169,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
     popupNode->MarkModifyDone();
     /**
      * @tc.steps: step4. call hover, touch callback.
-     * @tc.expected: after hover callback, isHover_ equal to true.
+     * @tc.expected: now can't callback ButtonOnHover, isHover_ can't change.
      */
     auto buttonRowNode = pattern->GetButtonRowNode();
     ASSERT_NE(buttonRowNode, nullptr);
@@ -1183,7 +1183,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
             event->GetOnHoverEventFunc()(false);
             event->GetOnHoverEventFunc()(true);
         }
-        EXPECT_TRUE(pattern->isHover_);
+        EXPECT_FALSE(pattern->isHover_);
 
         auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
         auto touchEvents = gestureHub->touchEventActuator_->touchEvents_;
