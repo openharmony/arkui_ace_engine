@@ -656,14 +656,14 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         isDragging_ = false;
         point.type = TouchType::UP;
     }
-    ACE_SCOPED_TRACE(
-        "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         CheckUpEvent(event);
         lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
         return false;
     }
+    ACE_SCOPED_TRACE("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
+        point.id, point.x, point.y, (int)point.type);
 
     if (point.type == TouchType::DOWN) {
         refereeNG_->CleanGestureRefereeState(event.id);
@@ -718,10 +718,6 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 
     CheckUpEvent(event);
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
-        FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-        if (ft != nullptr) {
-            ft->SetFrameTraceLimit();
-        }
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         touchTestResults_.erase(point.id);
@@ -905,12 +901,12 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
 {
     CHECK_NULL_RETURN(mainView, false);
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch tab index event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
+        "Dispatch tab index event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
         event.action, mainView->GetTag().c_str(), mainView->GetId());
     auto mainViewFocusHub = mainView->GetFocusHub();
     CHECK_NULL_RETURN(mainViewFocusHub, false);
     if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{public}d/action:%{public}d", event.code,
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event:code:%{private}d/action:%{public}d", event.code,
             event.action);
         return true;
     }
@@ -921,18 +917,18 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
 {
     CHECK_NULL_RETURN(focusNode, false);
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
+        "Dispatch key event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
         event.action, focusNode->GetTag().c_str(), focusNode->GetId());
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleKeyEvent(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{public}d/action:%{public}d",
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{private}d/action:%{public}d",
             event.code, event.action);
         return true;
     }
     if (!isKeyConsumed_) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{private}d/action:%{public}d",
             event.code, event.action);
     }
     return isKeyConsumed_;
@@ -1097,8 +1093,8 @@ void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
     TAG_LOGD(AceLogTag::ACE_MOUSE,
-        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,
-        event.button, event.action);
+        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x,
+        event.y, event.button, event.action);
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
@@ -1236,13 +1232,11 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
                 if (ret && mouseTarget->HandleMouseEvent(event)) {
                     return true;
                 }
-            } else {
-                if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
-                    pressMouseTestResults_.end()) {
-                    // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
-                    if (mouseTarget->HandleMouseEvent(event)) {
-                        return true;
-                    }
+            } else if (std::find(pressMouseTestResults_.begin(), pressMouseTestResults_.end(), mouseTarget) ==
+                pressMouseTestResults_.end()) {
+                // if pressMouseTestResults has isStopPropagation, use pressMouseTestResults as handledResults.
+                if (mouseTarget->HandleMouseEvent(event)) {
+                    return true;
                 }
             }
         }

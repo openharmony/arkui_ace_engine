@@ -286,6 +286,32 @@ public:
     // for recognizer group
     void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
 
+    bool IsSystemGesture() const
+    {
+        if (!gestureInfo_) {
+            return false;
+        }
+        return gestureInfo_->IsSystemGesture();
+    }
+
+    GestureTypeName GetRecognizerType() const
+    {
+        if (!gestureInfo_) {
+            return GestureTypeName::UNKNOWN;
+        }
+        return gestureInfo_->GetRecognizerType();
+    }
+
+    void SetRecognizerType(GestureTypeName trueType)
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
+        gestureInfo_->SetRecognizerType(trueType);
+    }
+
+    virtual void ForceCleanRecognizer() {};
+
     void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
     {
         gestureInfo_ = gestureInfo;
@@ -318,31 +344,6 @@ public:
         }
     }
 
-    bool IsSystemGesture() const
-    {
-        if (!gestureInfo_) {
-            return false;
-        }
-        return gestureInfo_->IsSystemGesture();
-    }
-
-    GestureTypeName GetRecognizerType() const
-    {
-        if (!gestureInfo_) {
-            return GestureTypeName::UNKNOWN;
-        }
-        return gestureInfo_->GetRecognizerType();
-    }
-
-    void SetRecognizerType(GestureTypeName trueType)
-    {
-        if (!gestureInfo_) {
-            gestureInfo_ = MakeRefPtr<GestureInfo>();
-        }
-        gestureInfo_->SetRecognizerType(trueType);
-    }
-
-    virtual void ForceCleanRecognizer() {};
     virtual void CleanRecognizerState() {};
 
     bool AboutToAddCurrentFingers(int32_t touchId);
@@ -357,6 +358,11 @@ public:
         if (gestureInfo_) {
             gestureInfo_->SetUserData(userData);
         }
+    }
+
+    virtual bool IsReady()
+    {
+        return refereeState_ == RefereeState::READY;
     }
 
     void SetDisposeNotifyCallback(std::function<void(void*)>&& callback)
@@ -409,11 +415,6 @@ public:
     void SetResponseLinkRecognizers(const ResponseLinkResult& responseLinkResult);
 
     bool IsInResponseLinkRecognizers();
-
-    virtual bool IsReady()
-    {
-        return refereeState_ == RefereeState::READY;
-    }
 
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
