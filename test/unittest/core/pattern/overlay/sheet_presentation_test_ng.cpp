@@ -593,22 +593,17 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup001, TestSize.Level1)
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    Rect originWindowRect = pipelineContext->GetCurrentWindowRect();
-    Rect windowRect = { 0.0f, 0.0f, 0.0f, 0.0f };
-    MockPipelineContext::SetCurrentWindowRect(windowRect);
-    auto currentWindowRect = pipelineContext->GetCurrentWindowRect();
-    EXPECT_FALSE(GreatOrEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
-    EXPECT_FALSE(GreatOrEqual(currentWindowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    MockPipelineContext::GetCurrent()->rootWidth_ = 100.0f;
+    EXPECT_FALSE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_FALSE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
     SheetType sheetType;
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM_FREE_WINDOW);
 
-    windowRect.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    MockPipelineContext::GetCurrent()->rootWidth_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     AceApplicationInfo::GetInstance().packageName_ = "";
-    currentWindowRect = pipelineContext->GetCurrentWindowRect();
-    EXPECT_TRUE(GreatOrEqual(currentWindowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
-    EXPECT_TRUE(LessNotEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(LessNotEqual(PipelineContext::GetCurrentRootWidth(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
     EXPECT_FALSE(sheetStyle.sheetType.has_value());
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
@@ -622,7 +617,6 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup001, TestSize.Level1)
     EXPECT_TRUE(sheetPattern->sheetKey_.hasValidTargetNode);
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_POPUP);
-    MockPipelineContext::SetCurrentWindowRect(originWindowRect);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -643,12 +637,9 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup002, TestSize.Level1)
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    Rect originWindowRect = pipelineContext->GetCurrentWindowRect();
-    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
-    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    MockPipelineContext::GetCurrent()->rootWidth_ = SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     AceApplicationInfo::GetInstance().packageName_ = "";
-    auto currentWindowRect = pipelineContext->GetCurrentWindowRect();
-    EXPECT_TRUE(GreatOrEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
     EXPECT_FALSE(sheetStyle.sheetType.has_value());
     SheetType sheetType;
     sheetPattern->GetSheetTypeWithPopup(sheetType);
@@ -664,7 +655,6 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup002, TestSize.Level1)
     EXPECT_FALSE(sheetPattern->sheetKey_.hasValidTargetNode);
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
-    MockPipelineContext::SetCurrentWindowRect(originWindowRect);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
