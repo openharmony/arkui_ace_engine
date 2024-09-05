@@ -248,6 +248,9 @@ private:
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
     void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    bool IsTextFadeOut();
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void SetThemeProps(const RefPtr<FrameNode>& host);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
@@ -268,6 +271,11 @@ private:
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
+
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 
     void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
@@ -317,6 +325,12 @@ private:
     bool expandingModeSet_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
+
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isTextFadeOut_ = false;
+    Dimension focusPadding_ = 0.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

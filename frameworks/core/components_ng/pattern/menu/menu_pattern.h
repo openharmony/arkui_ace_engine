@@ -637,6 +637,7 @@ private:
     void ApplyMultiMenuTheme();
 
     void RecordItemsAndGroups();
+    void InitDefaultBorder(const RefPtr<FrameNode>& host);
 
     // Record menu's items and groups at first level,
     // use for group header and footer padding
