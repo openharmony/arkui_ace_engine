@@ -83,11 +83,13 @@ bool JSCanvasImageData::GetImageDataSize(const JSCallbackInfo& args, int32_t& fi
         return false;
     }
     // Integer Overflow.
+    width += DIFF;
+    height += DIFF;
     if ((width > INT32_MAX) || (height > INT32_MAX) || ((width > 0) && (height > (INT32_MAX / width / PIXEL_SIZE)))) {
         return false;
     }
-    finalWidth = static_cast<int32_t>(width + DIFF);
-    finalHeight = static_cast<int32_t>(height + DIFF);
+    finalWidth = static_cast<int32_t>(width);
+    finalHeight = static_cast<int32_t>(height);
     return true;
 }
 
