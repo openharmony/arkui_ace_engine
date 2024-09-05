@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/security_component/security_component_probe.h"
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,11 +43,11 @@ void SecurityComponentProbe::InitProbeTask()
 int32_t SecurityComponentProbe::GetComponentInfo(int32_t nodeId, std::string& compInfoStr)
 {
     if (!taskExec_.has_value()) {
-        LOGW("callback task do not exist.");
+        SC_LOG_WARN("callback task do not exist.");
         return -1;
     }
     if (!tmux_.try_lock_for(std::chrono::milliseconds(MAX_CALLBACK_WAITING_TIME))) {
-        LOGW("callback task timeout.");
+        SC_LOG_WARN("callback task timeout.");
         return -1;
     }
     int taskRes;
@@ -54,20 +55,20 @@ int32_t SecurityComponentProbe::GetComponentInfo(int32_t nodeId, std::string& co
         [nodeId, &compInfoStr, &taskRes] {
             auto node = AceType::DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(nodeId));
             if (!node) {
-                LOGW("node do not exist.");
+                SC_LOG_WARN("node do not exist.");
                 taskRes = -1;
                 return;
             }
 
             if ((node->GetTag() != V2::LOCATION_BUTTON_ETS_TAG) && (node->GetTag() != V2::PASTE_BUTTON_ETS_TAG) &&
                 (node->GetTag() != V2::SAVE_BUTTON_ETS_TAG)) {
-                LOGW("node is not security component.");
+                SC_LOG_WARN("node is not security component.");
                 taskRes = -1;
                 return;
             }
             Security::SecurityComponent::SecCompType scType;
             if (!SecurityComponentHandler::InitButtonInfo(compInfoStr, node, scType)) {
-                LOGW("node init info failed.");
+                SC_LOG_WARN("node init info failed.");
                 taskRes = -1;
                 return;
             }
