@@ -141,12 +141,15 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     CHECK_NULL_VOID(value && styledString_);
     CloseSelectOverlay();
     ResetSelection();
+    styledString_->RemoveCustomSpan();
     auto length = styledString_->GetLength();
     styledString_->ReplaceSpanString(0, length, value);
     SetCaretPosition(styledString_->GetLength());
     MoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    styledString_->AddCustomSpan();
+    styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

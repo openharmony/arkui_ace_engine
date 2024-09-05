@@ -39,7 +39,6 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
     return content.substr(start);
 }
 
-
 SpanString::SpanString(const std::string& text) : text_(text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
@@ -69,6 +68,47 @@ SpanString::SpanString(RefPtr<CustomSpan>& span) : text_(" ")
     spanItem->onDraw = span->GetOnDraw();
     spans_.emplace_back(spanItem);
     spansMap_[SpanType::CustomSpan].emplace_back(span);
+}
+
+void SpanString::AddCustomSpan()
+{
+    auto spanBases = GetSpans(0, GetLength(), SpanType::CustomSpan);
+    for (const auto& spanBase : spanBases) {
+        if (spanBase->GetSpanType() != SpanType::CustomSpan) {
+            continue;
+        }
+        auto customSpan = DynamicCast<CustomSpan>(spanBase);
+        if (!customSpan) {
+            continue;
+        }
+        customSpan->AddStyledString(Referenced::WeakClaim(this));
+    }
+}
+
+void SpanString::RemoveCustomSpan()
+{
+    auto spanBases = GetSpans(0, GetLength(), SpanType::CustomSpan);
+    for (const auto& spanBase : spanBases) {
+        if (spanBase->GetSpanType() != SpanType::CustomSpan) {
+            continue;
+        }
+        auto customSpan = DynamicCast<CustomSpan>(spanBase);
+        if (!customSpan) {
+            continue;
+        }
+        customSpan->RemoveStyledString(Referenced::WeakClaim(this));
+    }
+}
+void SpanString::SetFramNode(const WeakPtr<NG::FrameNode>& frameNode)
+{
+    framNode_ = frameNode;
+}
+
+void SpanString::MarkDirtyFrameNode()
+{
+    auto frameNode = framNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
 }
 
 SpanString::~SpanString()
