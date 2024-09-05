@@ -199,7 +199,11 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    } else {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    }
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
