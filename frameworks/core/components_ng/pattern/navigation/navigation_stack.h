@@ -180,14 +180,6 @@ public:
         navigationNode_ = navigationNode;
     }
 
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    void SetLastNavPathList(const NavPathList& navPathList)
-    {
-        lastNavPathList_ = navPathList;
-    }
-    bool isLastListContains(const std::string& name, const RefPtr<UINode>& navDestinationNode);
-#endif
-
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
     virtual void RecoveryNavigationStack() {}
     virtual bool NeedBuildNewInstance(int32_t index) { return false; }
@@ -220,10 +212,6 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    // backup NavPathList before push or pop
-    NavPathList lastNavPathList_;
-#endif
     // recovery NavPathList
     NavPathList recoveryList_;
     NavPathList cacheNodes_;
