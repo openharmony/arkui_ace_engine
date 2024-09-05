@@ -341,6 +341,7 @@ public:
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void SetFirstShow()
     {
         isFirstShow_ = true;
@@ -511,7 +512,6 @@ public:
     {
         return isStackSubmenu_;
     }
-    void SendMenuAccessibilityMessage(bool isShow);
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -533,9 +533,6 @@ private:
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
-    void OnPageChanged(int32_t pageId, bool isOnShow) override;
 
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
@@ -587,9 +584,6 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;
-    bool isPageChangeClose_ = false;
-    int32_t outterMenuId_ = 0;
-    int32_t pageId_ = 0;
     MenuPreviewAnimationOptions hoverImageAnimationOptions_;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;

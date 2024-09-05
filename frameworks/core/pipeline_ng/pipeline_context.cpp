@@ -2548,8 +2548,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
-        rootNode_->DumpTree(0, true);
-        DumpLog::GetInstance().OutPutDefault();
+        auto root = JsonUtil::Create(true);
+        rootNode_->DumpSimplifyTree(0, root);
+        auto json = root->ToString();
+        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+        DumpLog::GetInstance().Print(json);
     }
     return true;
 }
@@ -3480,36 +3483,11 @@ void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId)
     }
 }
 
-void PipelineContext::RegisterPageChangedCallback(int32_t pageId, WeakPtr<FrameNode> notifiedNode)
-{
-    CHECK_RUN_ON(UI);
-    auto node = notifiedNode.Upgrade();
-    CHECK_NULL_VOID(node);
-    pageNotifiedNodes_[pageId][node->GetId()] = notifiedNode;
-}
-
-void PipelineContext::UnregisterPageChangedCallback(int32_t pageId, int32_t nodeId)
-{
-    CHECK_RUN_ON(UI);
-    auto it = pageNotifiedNodes_.find(pageId);
-    if (it != pageNotifiedNodes_.end() && !it->second.empty()) {
-        it->second.erase(nodeId);
-    }
-}
-
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
 {
     CHECK_RUN_ON(UI);
     for (auto navigationNode : pageToNavigationNodes_[pageId]) {
         NavigationPattern::FireNavigationChange(navigationNode.Upgrade(), isOnShow, true);
-    }
-    for (auto& notifiedNodePair : pageNotifiedNodes_[pageId]) {
-        auto node = notifiedNodePair.second.Upgrade();
-        if (node) {
-            auto pattern = node->GetPattern();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnPageChanged(pageId, isOnShow);
-        }
     }
 }
 

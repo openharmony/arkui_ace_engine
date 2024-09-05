@@ -386,6 +386,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
@@ -613,8 +614,6 @@ public:
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
-
-    virtual void OnPageChanged(int32_t pageId, bool isOnShow) {}
 
     virtual bool OnAccessibilityHoverEvent(const PointF& point)
     {

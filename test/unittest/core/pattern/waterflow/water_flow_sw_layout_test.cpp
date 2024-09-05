@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
-
-#define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#undef private
 
 namespace OHOS::Ace::NG {
 class WaterFlowSWTest : public WaterFlowTestNg {
@@ -324,7 +322,6 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_11);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
 
@@ -336,7 +333,6 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     section.itemsCount += 4;
     section.crossCount = 3;
     secObj->ChangeData(1, 1, { section });
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
@@ -350,7 +346,6 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     section.itemsCount -= 4;
     section.crossCount = 2;
     secObj->ChangeData(1, 1, { section });
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     for (int i = 0; i < 4; ++i) {
         frameNode_->RemoveChildAtIndex(3);
     }
@@ -591,7 +586,6 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     EXPECT_FALSE(info_->IsMisaligned());
@@ -806,7 +800,6 @@ HWTEST_F(WaterFlowSWTest, ResetSections001, TestSize.Level1)
     CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     UpdateCurrentOffset(-205.0f);
@@ -837,7 +830,6 @@ HWTEST_F(WaterFlowSWTest, ChangeLayoutMode001, TestSize.Level1)
     CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     UpdateCurrentOffset(-205.0f);
@@ -956,7 +948,6 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     secObj->ChangeData(2, 2, newSections);
     AddItems(2);
     info_->NotifyDataChange(5, 2);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->newStartIndex_, 13);
 
     /**
@@ -1037,5 +1028,66 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 22), -440.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
+}
+
+/**
+ * @tc.name: Refresh002
+ * @tc.desc: Test WaterFlow nested in refresh. Currently have different friction from TOP_DOWN mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().SetTicks(1);
+    MockAnimationManager::GetInstance().Reset();
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -19.849327);
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -38.809074);
+
+    MockAnimationManager::GetInstance().TickByVelocity(-100.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -138.80908);
+    // swipe in the opposite direction
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -91.843094);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
+    MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 800);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 } // namespace OHOS::Ace::NG

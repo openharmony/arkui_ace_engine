@@ -197,6 +197,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth, bool hasJson = false);
+    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -676,6 +677,8 @@ public:
         return rootNodeType_;
     }
 
+    virtual void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false);
+
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
 
     virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)
@@ -790,6 +793,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}

@@ -65,19 +65,17 @@ public:
         {
             callbacks.finishCb = nullptr;
             callbacks.repeatCb = nullptr;
-            type = AnimationOperation::CANCEL;
+            type = AnimationOperation::PLAY;
         }
     };
 
-    void SetParams(int32_t duration, AnimationCallbacks&& param)
-    {
-        params_.callbacks = std::move(param);
-        params_.type = (duration <= 0) ? AnimationOperation::CANCEL : AnimationOperation::PLAY;
-    }
+    void SetParams(const AnimationOption& option, AnimationCallbacks&& cbs);
 
     void AddActiveProp(const WeakPtr<PropertyBase>& prop)
     {
-        activeProps_.insert(prop);
+        if (inScope_) {
+            activeProps_.insert(prop);
+        }
     }
 
     /**
@@ -93,6 +91,8 @@ public:
     void TickByVelocity(float velocity);
 
     void Reset();
+
+    bool AllFinished();
 
 private:
     void CancelAnimations();

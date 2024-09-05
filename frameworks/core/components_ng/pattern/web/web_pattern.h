@@ -484,6 +484,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
 
     bool IsFocus() const
     {
@@ -683,6 +684,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
         return treeId_;
@@ -773,6 +775,7 @@ private:
     void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnEnabledHapticFeedbackUpdate(bool enable);
     int GetWebId();
 
     void InitEvent();
@@ -1110,6 +1113,7 @@ private:
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
+    bool isEnabledHapticFeedback_ = true;
     NestedScrollOptionsExt nestedScroll_ = {
         .scrollUp = NestedScrollMode::SELF_ONLY,
         .scrollDown = NestedScrollMode::SELF_ONLY,
