@@ -410,7 +410,7 @@ void FocusManager::WindowFocus(bool isFocus)
         return;
     }
     WindowFocusMoveStart();
-    FocusSwitchingStart(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
+    FocusManager::FocusGuard guard(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
     auto curFocusView = GetLastFocusView().Upgrade();
     auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     if (!curFocusViewHub) {
