@@ -227,6 +227,17 @@ inline std::string ToString(const TextAlign& textAlign)
 }
 } // namespace StringUtils
 
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
+enum class MarqueeStartPolicy {
+    DEFAULT = 0,
+    ON_FOCUS,
+};
+
 enum class TextDataDetectType {
     PHONE_NUMBER = 0,
     URL,
