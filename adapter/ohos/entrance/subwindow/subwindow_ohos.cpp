@@ -1815,4 +1815,20 @@ void SubwindowOhos::UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId)
 {
     freeMultiWindowSwitchCallbackMap_.erase(callbackId);
 }
+
+void SubwindowOhos::DestroyToastWindow()
+{
+    CHECK_NULL_VOID(window_);
+    auto windowType = window_->GetType();
+    if (windowType != Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST &&
+        windowType != Rosen::WindowType::WINDOW_TYPE_TOAST) {
+        return;
+    }
+
+    OHOS::Rosen::WMError ret = window_->Destroy();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to destroy the dialog subwindow.");
+        return;
+    }
+}
 } // namespace OHOS::Ace

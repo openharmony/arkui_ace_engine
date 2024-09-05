@@ -154,6 +154,8 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
+    void DestroyToastWindow() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

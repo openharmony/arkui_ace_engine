@@ -315,7 +315,7 @@ public:
 
     bool ParseThemeConfig(const std::string& themeConfig);
 
-    void CheckAndSetFontFamily();
+    void CheckAndSetFontFamily() override;
 
     void OnFinish()
     {
@@ -676,9 +676,6 @@ private:
     void InitializeCallback();
     void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
     void InitWindowCallback();
-    bool IsFontFileExistInPath(std::string path);
-    std::string GetFontFamilyName(std::string path);
-    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);

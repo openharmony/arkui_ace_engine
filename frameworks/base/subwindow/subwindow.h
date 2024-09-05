@@ -151,6 +151,7 @@ public:
     virtual void ResizeWindowForFoldStatus() = 0;
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
     virtual bool Close() = 0;
+    virtual void DestroyToastWindow() = 0;
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
