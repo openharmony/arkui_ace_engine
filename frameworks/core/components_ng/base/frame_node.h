@@ -978,6 +978,8 @@ public:
 
     void ProcessAccessibilityVirtualNode();
 
+    void UpdateAccessibilityNodeRect();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();

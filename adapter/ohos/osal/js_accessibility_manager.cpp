@@ -1707,6 +1707,7 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, true);
         accessibilityProperty->OnAccessibilityFocusCallback(false);
+        accessibilityProperty->SetAccessibilityFocusState(false);
         return true;
     }
     if (elementId == currentFocusNodeId) {
@@ -1727,6 +1728,7 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     accessibilityProperty->OnAccessibilityFocusCallback(true);
+    accessibilityProperty->SetAccessibilityFocusState(true);
     return true;
 }
 
@@ -2030,8 +2032,14 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
 {
     auto frameNode = lastFrameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
+    if (!frameNode->IsAccessibilityVirtualNode()) {
+        return;
+    }
     RefPtr<NG::RenderContext> renderContext;
-    if (frameNode->IsAccessibilityVirtualNode()) {
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    bool frameSizeChange = geometryNode->GetFrameSize() != oldGeometrySize_;
+    if (frameNode->GetAccessibilityId() == currentFocusNodeId_ && frameSizeChange) {
         auto parentUinode = frameNode->GetVirtualNodeParent().Upgrade();
         CHECK_NULL_VOID(parentUinode);
         auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parentUinode);
@@ -2044,6 +2052,9 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
             static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
         renderContext->UpdateAccessibilityFocusRect(rectInt);
         renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetAccessibilityFocusState(true);
     }
 }
 
@@ -4181,6 +4192,7 @@ bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr
         }
         case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS: {
             SaveLast(elementId, frameNode);
+            SaveCurrentFocusNodeSize(frameNode);
             result = ActAccessibilityFocus(elementId, frameNode, context, currentFocusNodeId_, false);
             break;
         }
