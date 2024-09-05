@@ -1413,7 +1413,7 @@ void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
         auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
         if (wrapperFrameNode) {
-            wrapperFrameNode->ResetLayoutAlgorithm();
+            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
         }
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
