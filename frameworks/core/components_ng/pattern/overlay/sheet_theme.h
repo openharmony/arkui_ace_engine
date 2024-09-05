@@ -217,8 +217,8 @@ private:
     Color closeIconColor_;
     Color closeIconImageColor_;
     Color closeIconSymbolColor_;
-    std::string sheetType_;
     std::string sheetBottom_;
+    std::string sheetType_;
     int sheetBackgroundBlurStyle_;
     double sheetNormalScale_;
     double sheetMaxAgingScale_;
