@@ -39,6 +39,7 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } SwiperArrow;
 
+
 RefPtr<SwiperController> SwiperModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -227,6 +228,7 @@ void SwiperModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
     pattern->UpdateAnimationEndEvent(
         [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
 }
+
 
 void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 {
@@ -792,7 +794,7 @@ void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, Swiper
     Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
-    options->margin = prevMargin.Value();
+    options->margin = prevMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     options->ignoreBlank = pattern->GetPrevMarginIgnoreBlank();
@@ -803,7 +805,7 @@ void SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarg
     Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);
-    options->margin = nextMargin.Value();
+    options->margin = nextMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     options->ignoreBlank = pattern->GetNextMarginIgnoreBlank();
@@ -821,9 +823,9 @@ int32_t SwiperModelNG::GetIndicatorType(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     SwiperIndicatorType value = SwiperIndicatorType::DOT;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, IndicatorType,
+        value, frameNode, value);
     return static_cast<int32_t>(value);
-
 }
 
 RefPtr<SwiperController> SwiperModelNG::GetOrCreateSwiperController(FrameNode* frameNode)
