@@ -1445,8 +1445,6 @@ void FrameNode::AdjustGridOffset()
         return;
     }
     if (layoutProperty_->UpdateGridOffset(Claim(this))) {
-        renderContext_->UpdateOffset(OffsetT<Dimension>());
-        renderContext_->UpdateAnchor(OffsetT<Dimension>());
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
     }
 }
