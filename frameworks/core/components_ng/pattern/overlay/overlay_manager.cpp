@@ -1059,8 +1059,12 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
-            overlayManager->SendToAccessibility(menuWK, true);
+            menuWK.Upgrade()->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
+                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+                static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
         });
+
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -1077,23 +1081,6 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     }
     wrapperPattern->SetAniamtinOption(option);
     SetPatternFirstShow(menu);
-}
-
-void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow)
-{
-    auto menuWrapper = node.Upgrade();
-    CHECK_NULL_VOID(menuWrapper);
-    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    auto menu = wrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityIsShow(isShow);
-    menuWrapper->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
-        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
 }
 
 void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
@@ -1227,7 +1214,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->SendToAccessibility(menuWK, false);
+        auto menuWrapper = menuWK.Upgrade();
+        menuWrapper->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
@@ -2029,6 +2021,8 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         ShowMenuAnimation(menu);
         menu->MarkModifyDone();
+        menu->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
@@ -2127,8 +2121,15 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide menu enter");
+    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    bool isShowMenu = wrapperPattern->IsShow();
     PopMenuAnimation(menu);
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    if (isShowMenu) {
+        menu->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    }
     RemoveEventColumn();
     if (isMenuOnTouch) {
         RemovePixelMap();
