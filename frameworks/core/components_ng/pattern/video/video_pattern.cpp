@@ -345,7 +345,7 @@ void VideoPattern::PrepareMediaPlayer()
 
 bool VideoPattern::SetSourceForMediaPlayer()
 {
-    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{public}s", src_.c_str());
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{private}s", src_.c_str());
     CHECK_NULL_RETURN(mediaPlayer_, false);
     return mediaPlayer_->SetSource(src_);
 }
