@@ -107,6 +107,7 @@ constexpr int32_t RIGHT_ANGLE = 90;
 constexpr int32_t STRAIGHT_ANGLE = 180;
 constexpr int32_t REFLEX_ANGLE = 270;
 constexpr int32_t FULL_ROTATION = 360;
+constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
@@ -2547,6 +2548,11 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(
     } else {
         ClearAccessibilityFocus();
     }
+
+    if (accessibilityIdForVirtualNode == ACCESSIBILITY_FOCUS_WITHOUT_EVENT) {
+        return;
+    }
+
     if (accessibilityIdForVirtualNode == INVALID_PARENT_ID) {
         uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                           : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
