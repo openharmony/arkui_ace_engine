@@ -3246,7 +3246,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
         layoutProperty->UpdateVisibility(visible, true);
     }
 
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
