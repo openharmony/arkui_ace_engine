@@ -275,11 +275,11 @@ class UIContext {
     getFilteredInspectorTreeById(id, depth, filter) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof filter === 'undefined') {
-            let result_ = globalThis.getFilteredInspectorTree(id, depth);
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth);
             __JSScopeUtil__.restoreInstanceId();
             return result_;
         } else {
-            let result_ = globalThis.getFilteredInspectorTree(id, depth, filter);
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth, filter);
             __JSScopeUtil__.restoreInstanceId();
             return result_;
         }
