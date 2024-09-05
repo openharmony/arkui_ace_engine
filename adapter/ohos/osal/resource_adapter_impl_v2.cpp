@@ -229,13 +229,6 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     return theme;
 }
 
-RefPtr<TaskExecutor> ResourceAdapterImplV2::GetTaskExecutor()
-{
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(context, nullptr);
-    return context->GetTaskExecutor();
-}
-
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& patternName)
 {
     auto patternStyle = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
