@@ -169,6 +169,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
+        } else if (!snapTrigOnScrollStart_) {
+            OnAnimateStop();
         }
         scrollSnapVelocity_ = 0.0f;
         predictSnapOffset_.reset();
