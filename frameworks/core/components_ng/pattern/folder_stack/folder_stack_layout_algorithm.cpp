@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
+ #include "frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 
 #include "base/memory/ace_type.h"
 #include "base/log/event_report.h"
@@ -121,6 +121,7 @@ void FolderStackLayoutAlgorithm::LayoutControlPartsStack(LayoutWrapper* layoutWr
     auto geometryNode = controlPartsStackWrapper->GetGeometryNode();
     auto controlPartsStackRect = GetControlPartsStackRect();
     geometryNode->SetMarginFrameOffset(controlPartsStackRect);
+
     controlPartsStackWrapper->Layout();
 }
 
@@ -129,8 +130,6 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
-    CHECK_NULL_VOID(pattern);
     const auto& layoutProperty = DynamicCast<FolderStackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
@@ -144,19 +143,7 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OnHoverStatusChange(layoutWrapper);
     if (!isIntoFolderStack_) {
         MeasureByStack(hostNode, layoutWrapper);
-        pattern->SetNeedCallBack(false);
         return;
-    }
-    if (!pattern->GetNeedCallBack()) {
-        pattern->SetNeedCallBack(true);
-        auto displayInfo = pattern->GetDisplayInfo();
-        if (displayInfo) {
-            FolderEventInfo event(displayInfo->GetFoldStatus());
-            auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
-            if (eventHub) {
-                eventHub->OnFolderStateChange(event);
-            }
-        }
     }
     RangeCalculation(hostNode, layoutProperty, size);
     MeasureHoverStack(layoutWrapper, hostNode, layoutProperty, size);
@@ -188,6 +175,7 @@ void FolderStackLayoutAlgorithm::MeasureControlPartsStack(LayoutWrapper* layoutW
     CHECK_NULL_VOID(controlPartsWrapper);
     auto constraint = foldStackLayoutProperty->CreateChildConstraint();
     constraint.selfIdealSize = OptionalSizeF(size.Width(), preControlPartsStackHeight_);
+
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     PaddingProperty controlPartsPadding;
     controlPartsPadding.left = CalcLength(padding.left.value_or(0));
@@ -219,6 +207,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
         creaseY = static_cast<int32_t>(foldCrease.Bottom() - foldCrease.Height());
         creaseHeight = static_cast<int32_t>(foldCrease.Height());
     }
+
     preHoverStackHeight_ = static_cast<float>(creaseY - length);
     preControlPartsStackHeight_ = static_cast<float>(size.Height() - creaseHeight - preHoverStackHeight_);
     controlPartsStackRect_ = OffsetF(0.0f, creaseY - length + creaseHeight);
@@ -361,5 +350,4 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     auto geometryNode = hoverStackWrapper->GetGeometryNode();
     geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
 }
-
 } // namespace OHOS::Ace::NG
