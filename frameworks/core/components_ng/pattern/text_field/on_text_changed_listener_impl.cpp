@@ -157,9 +157,6 @@ void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
         auto manager = pipeline->GetSafeAreaManager();
         CHECK_NULL_VOID(manager);
         manager->SetkeyboardHeightConsideringUIExtension(height);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->CloseAIEntityMenu();
     };
     PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
 }
