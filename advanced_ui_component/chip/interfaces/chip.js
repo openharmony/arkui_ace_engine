@@ -669,14 +669,10 @@ export class ChipComponent extends ViewPU {
             return this.label.fontSize;
         }
         let size = this.theme.label.smallFontSize;
-        let defaultSize = this.theme.label.defaultFontSize;
-        if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-            return this.verifyResource(size, defaultSize);
-        }
-        else {
+        if (this.isChipSizeEnum() && this.chipSize !== ChipSize.SMALL) {
             size = this.theme.label.normalFontSize;
-            return this.verifyResource(size, defaultSize);
         }
+        return this.sizeToVp(size);
     }
     getIconSize() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
@@ -742,8 +738,7 @@ export class ChipComponent extends ViewPU {
                 case LengthUnit.VP:
                     return lengthMetrics.value;
                 case LengthUnit.FP:
-                    px2vp(fp2px(lengthMetrics.value));
-                    break;
+                    return px2vp(fp2px(lengthMetrics.value));
                 case LengthUnit.PERCENT:
                     return Number.NEGATIVE_INFINITY;
                 case LengthUnit.LPX:
