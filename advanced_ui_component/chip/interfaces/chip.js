@@ -15,7 +15,6 @@
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const measure = requireNapi('measure');
 const mediaquery = requireNapi('mediaquery');
-const resourceManager = requireNapi('resourceManager');
 const componentUtils = requireNapi('arkui.componentUtils');
 const hilog = requireNapi('hilog');
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
@@ -27,7 +26,6 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 
-const resourceFn = resourceManager.getSystemResourceManager();
 export var ChipSize;
 (function (ChipSize) {
     ChipSize["NORMAL"] = "NORMAL";
@@ -705,7 +703,7 @@ export class ChipComponent extends ViewPU {
         resourceValue.params[0] && resourceValue.params[0].includes('.') &&
             resourceValue.params[0].split('.').length > 2) {
             try {
-                let getNum = resourceFn.getNumberByName((resourceValue.params[0]).split('.')[2]);
+                let getNum = getContext(this).resourceManager.getNumberByName((resourceValue.params[0]).split('.')[2]);
                 return getNum;
             }
             catch (error) {

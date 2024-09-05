@@ -16,14 +16,11 @@
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
-import resourceManager from '@ohos.resourceManager';
 import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
-
-const resourceFn = resourceManager.getSystemResourceManager();
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -414,7 +411,7 @@ export struct ChipComponent {
       (resourceValue.params as string[])[0] && (resourceValue.params as string[])[0].includes('.') &&
       (resourceValue.params as string[])[0].split('.').length > 2) {
       try {
-        let getNum = resourceFn.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
+        let getNum = getContext(this).resourceManager.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
         return getNum;
       } catch (error) {
         return defaultValue;
