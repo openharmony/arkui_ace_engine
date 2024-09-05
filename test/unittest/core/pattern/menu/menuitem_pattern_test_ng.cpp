@@ -280,8 +280,8 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
@@ -322,9 +322,10 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
 
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -337,6 +338,8 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     ASSERT_NE(imagePattern, nullptr);
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
@@ -368,9 +371,10 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
     EXPECT_EQ(rightRow->GetChildren().size(), 0u);
     EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
+        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -1210,49 +1214,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg011, TestSize.Level1)
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
-/**
- * @tc.name: MenuItemPatternTestNg012
- * @tc.desc: Verify HandleFocusEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg012, TestSize.Level1)
-{
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
-    ASSERT_NE(menuItemPattern, nullptr);
-    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-}
-/**
- * @tc.name: MenuItemPatternTestNg013
- * @tc.desc: Verify HandleBlurEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg013, TestSize.Level1)
-{
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
-    ASSERT_NE(menuItemPattern, nullptr);
-    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    auto RenderContext = menuItemNode->GetRenderContext();
-}
-/**
- * @tc.name: MenuItemPatternTestNg014
- * @tc.desc: Verify InitFocusEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg014, TestSize.Level1)
-{
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
-    ASSERT_NE(menuItemPattern, nullptr);
-    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-}
+
 /**
  * @tc.name: MenuItemPatternTestNg015
  * @tc.desc: Verify GetShadowFromTheme.

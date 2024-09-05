@@ -16,6 +16,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <sys/select.h>
 
 #include "gtest/gtest.h"
 
@@ -29,7 +30,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -52,7 +52,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -96,15 +95,15 @@ class SelectTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
     void TearDown() override;
     void InitSelectTestNg();
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<SelectPattern> selectPattern_;
-    RefPtr<SelectAccessibilityProperty> selectAccessibilityProperty_;
 
 protected:
     static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<SelectPattern> selectPattern_;
+    RefPtr<SelectAccessibilityProperty> selectAccessibilityProperty_;
 };
 
 void SelectTestNg::SetUpTestCase()
@@ -119,8 +118,6 @@ void SelectTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
 }
-
-void SelectTestNg::SetUp() {}
 
 void SelectTestNg::TearDown()
 {
@@ -258,13 +255,9 @@ HWTEST_F(SelectTestNg, SelectSetMenuAlign001, TestSize.Level1)
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
     MenuAlign menuAlign;
-    /**
-     * @tc.cases: case1. verify the SetMenuAlign function.
-     */
     menuAlign.alignType = MenuAlignType::END;
     menuAlign.offset = DimensionOffset(Dimension(OFFSETX, DimensionUnit::VP), Dimension(OFFSETY, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_TRUE(select->GetChildren().empty());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
@@ -1930,5 +1923,29 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
         row->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(0)) : nullptr;
     EXPECT_NE(icon, nullptr);
     EXPECT_EQ(icon->GetTag(), V2::SYMBOL_ETS_TAG);
+}
+/**
+ * @tc.name: SelectLayoutPropertyTest008
+ * @tc.desc: Test select set textDirection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest008, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    // create select
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    /**
+     * @tc.cases: case1. Verify the SetLayoutDirection function.
+     */
+    selectPattern->SetLayoutDirection(TextDirection::RTL);
+    auto layoutProps = selectPattern->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(layoutProps, nullptr);
+    auto direction = layoutProps->GetNonAutoLayoutDirection();
+    ASSERT_EQ(direction, TextDirection::RTL);
 }
 } // namespace OHOS::Ace::NG

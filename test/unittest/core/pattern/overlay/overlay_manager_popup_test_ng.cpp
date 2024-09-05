@@ -1835,7 +1835,7 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest035, TestSize.Level1)
 }
 /**
  * @tc.name: ToastTest001
- * @tc.desc: Test OverlayManager::ClearToast.
+ * @tc.desc: Test OverlayManager::ShowToast.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
@@ -1851,7 +1851,7 @@ HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
     ASSERT_NE(overlayManager, nullptr);
     /**
      * @tc.steps: step2. call ShowToast.
-     * @tc.expected: toastMap_ is empty
+     * @tc.expected: toastMap_ is not empty
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
