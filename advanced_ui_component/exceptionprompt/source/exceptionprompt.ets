@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 import curves from '@ohos.curves';
+import { common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 const START_TIME = 250;
 const END_TIME = 200;
@@ -38,6 +41,8 @@ export interface PromptOptions {
 export struct ExceptionPrompt {
   @Prop options: PromptOptions
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
+  maxAppFontScale: number = 1;
+  isFollowingSystemFontScale: boolean = false;
   onTipClick: () => void = () => {
     // Click the text on the left to change into the connecting state
   }
@@ -56,10 +61,11 @@ export struct ExceptionPrompt {
           .fillColor($r('sys.color.ohos_id_color_warning'))
         Text(this.options.tip)
           .fontSize($r('sys.float.ohos_id_text_size_body1'))
+          .minFontScale(1)
+          .maxFontScale(Math.min(this.updateFontScale(), 2))
           .fontColor($r('sys.color.ohos_id_color_warning'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(2)
-          .lineHeight(24)
           .margin({
             left: $r('sys.float.ohos_id_dialog_margin_end'),
             right: $r('sys.float.ohos_id_dialog_margin_end')
@@ -76,11 +82,13 @@ export struct ExceptionPrompt {
           Row() {
             Text(this.options.actionText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))
+              .minFontScale(1)
+              .maxFontScale(Math.min(this.updateFontScale(), 2))
               .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-              .maxLines(1)
+              .maxLines(2)
               .padding(0)
               .margin({ right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
-              .textAlign(TextAlign.End)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
             Image($r('sys.media.ohos_ic_public_arrow_right'))
               .width('12vp')
               .height('24vp')
@@ -89,7 +97,6 @@ export struct ExceptionPrompt {
         }
         .backgroundColor(this.touchBackgroundColor)
         .width(this.options.actionText ? 144 : 0)
-        .height(24)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
           right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
@@ -144,5 +151,26 @@ export struct ExceptionPrompt {
     .width('100%')
     .position({ y: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
+  }
+
+  aboutToAppear() {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxAppFontScale = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError).code;
+      let message: string = (err as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  updateFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(systemFontScale, this.maxAppFontScale);
   }
 }
