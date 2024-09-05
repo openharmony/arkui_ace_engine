@@ -15,6 +15,10 @@
 
 #include "core/components_ng/base/inspector_filter.h"
 
+#include <algorithm>
+#include <map>
+#include <string>
+
 namespace OHOS::Ace::NG {
 namespace {
 const static std::map<std::string, FixedAttrBit> FIXED_ATTR_MAP = {
