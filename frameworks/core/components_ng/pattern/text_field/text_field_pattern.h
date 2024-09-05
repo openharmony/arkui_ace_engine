@@ -837,9 +837,6 @@ public:
     void HandleFocusEvent();
     void SetFocusStyle();
     void ClearFocusStyle();
-    void AddIsFocusActiveUpdateEvent();
-    void RemoveIsFocusActiveUpdateEvent();
-    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
@@ -1696,7 +1693,6 @@ private:
     std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    std::function<void(bool)> isFocusActiveUpdateEvent_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;

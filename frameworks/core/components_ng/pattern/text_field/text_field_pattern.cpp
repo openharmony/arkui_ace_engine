@@ -861,7 +861,6 @@ void TextFieldPattern::HandleFocusEvent()
         needSelectAll_ = !independentControlKeyboard_;
     }
     SetFocusStyle();
-    AddIsFocusActiveUpdateEvent();
     RequestKeyboardOnFocus();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ?
         PROPERTY_UPDATE_MEASURE_SELF : PROPERTY_UPDATE_MEASURE);
@@ -959,37 +958,6 @@ void TextFieldPattern::ClearFocusStyle()
     }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::AddIsFocusActiveUpdateEvent()
-{
-    if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
-    }
-
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
-}
-
-void TextFieldPattern::RemoveIsFocusActiveUpdateEvent()
-{
-    auto pipline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipline);
-    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
-}
-
-void TextFieldPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
-{
-    if (isFocusAcitve) {
-        SetFocusStyle();
-    } else {
-        ClearFocusStyle();
-    }
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
@@ -1291,7 +1259,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     ClearFocusStyle();
-    RemoveIsFocusActiveUpdateEvent();
     isCursorAlwaysDisplayed_ = false;
 }
 
