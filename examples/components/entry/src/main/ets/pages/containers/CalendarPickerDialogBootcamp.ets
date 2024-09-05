@@ -21,7 +21,7 @@ export struct CalendarPickerDialogBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableAcceptType: boolean = false;
-  @State compAcceptType: ButtonType = ButtonType.Capsule;
+  @State compAcceptType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
   @State enableAcceptStyle: boolean = false;
   @State compAcceptStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED;
   @State enableAcceptRole: boolean = false;
@@ -41,7 +41,7 @@ export struct CalendarPickerDialogBootcamp {
   @State enableAcceptBorderRadius: boolean = false;
   @State compAcceptBorderRadius: number = 10;
   @State enableCancelType: boolean = false;
-  @State compCancelType: ButtonType = ButtonType.Capsule;
+  @State compCancelType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
   @State enableCancelStyle: boolean = false;
   @State compCancelStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED;
   @State enableCancelRole: boolean = false;
@@ -75,6 +75,7 @@ export struct CalendarPickerDialogBootcamp {
         }
       })
     }
+    .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
   }
 
@@ -133,6 +134,8 @@ export struct CalendarPickerDialogBootcamp {
             }
           })
         })
+
+
     }.width('100%')
   }
 
@@ -147,7 +150,8 @@ export struct CalendarPickerDialogBootcamp {
           dataSource: [
             { label: '胶囊按钮', value: ButtonType.Capsule },
             { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle }
+            { label: '圆形按钮', value: ButtonType.Circle },
+            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
         RadioBlock({
@@ -157,7 +161,8 @@ export struct CalendarPickerDialogBootcamp {
           dataSource: [
             { label: '胶囊按钮', value: ButtonType.Capsule },
             { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle }
+            { label: '圆形按钮', value: ButtonType.Circle },
+            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
         RadioBlock({
@@ -280,16 +285,17 @@ export struct CalendarPickerDialogBootcamp {
           max: 100
         })
       }.width('100%')
+
     }.height('50%')
   }
 }
 
 @Preview
 @Component
-struct ToastBootcampPreviewer {
+struct CalendarPickerDialogBootcampPreviewer {
   build() {
     CalendarPickerDialogBootcamp({
-      title: '日历选择器弹窗/Calendarpickerdialog'
+      title: '日历选择器弹窗/CalendarpickerDialog'
     })
   }
 }

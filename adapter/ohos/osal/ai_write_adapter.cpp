@@ -152,6 +152,7 @@ bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
 
 void AIWriteAdapter::CloseModalUIExtension()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CloseModalUIExtension.");
     auto context = pipelineContext_.Upgrade();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
@@ -163,6 +164,7 @@ void AIWriteAdapter::CloseModalUIExtension()
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     std::function<void(std::vector<uint8_t>&)> resultCallback)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ShowModalUIExtension.");
     AAFwk::Want want;
     SetWantParams(info, want);
     Ace::ModalUIExtensionCallbacks callbacks;

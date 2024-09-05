@@ -1247,17 +1247,18 @@ std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& 
 MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const
 {
     MenuItemInfo menuItemInfo;
-    auto menuItem = AceType::DynamicCast<FrameNode>(child);
-    CHECK_NULL_RETURN(menuItem, menuItemInfo);
-    if (menuItem->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+    CHECK_NULL_RETURN(child, menuItemInfo);
+    if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
         menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (menuItem->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto groupChildren = menuItem->GetChildren();
+    } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG
+        || child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
+        ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
-            menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
+            menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
             if (menuItemInfo.isFindTargetId) {
                 return menuItemInfo;
             }

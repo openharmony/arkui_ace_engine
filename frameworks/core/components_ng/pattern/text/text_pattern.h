@@ -165,6 +165,7 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpScaleInfo();
     void DumpTextEngineInfo();
     void DumpParagraphsInfo();
@@ -775,6 +776,7 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void OnForegroundColorUpdate(const Color& value) override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;

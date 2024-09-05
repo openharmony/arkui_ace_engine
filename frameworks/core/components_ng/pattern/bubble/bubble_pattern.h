@@ -235,15 +235,15 @@ public:
         return hostWindowRect_;
     }
 
-    void RegisterPopupStateChangeCallback(const std::function<void(const std::string&)>& callback)
+    void RegisterDoubleBindCallback(const std::function<void(const std::string&)>& callback)
     {
-        onStateChangeCallback_ = callback;
+        doubleBindCallback_ = callback;
     }
 
-    void CallPopupStateChangeCallback(const std::string& value)
+    void CallDoubleBindCallback(const std::string& value)
     {
-        if (onStateChangeCallback_) {
-            onStateChangeCallback_(value);
+        if (doubleBindCallback_) {
+            doubleBindCallback_(value);
         }
     }
 
@@ -335,6 +335,7 @@ private:
     bool enableHoverMode_ = false;
     int32_t halfFoldHoverCallbackId_ = -1;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
+    std::function<void(const std::string&)> doubleBindCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1183,6 +1183,7 @@ public:
     }
 
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
     void DumpTextEngineInfo();
@@ -1527,7 +1528,7 @@ protected:
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
-    virtual bool IsSearchTextField();
+    virtual bool IsNeedProcessAutoFill();
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;

@@ -490,6 +490,16 @@ public:
         return isCaretMode_;
     }
 
+    StateChangeFunc GetDoubleBindCallback()
+    {
+        return doubleBindCallback_;
+    }
+
+    void SetDoubleBindCallback(StateChangeFunc&& callback)
+    {
+        doubleBindCallback_ = callback;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -538,6 +548,7 @@ private:
     OnWillDismiss onWillDismiss_;
     bool hasTransition_ = false;
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
+    StateChangeFunc doubleBindCallback_;
 };
 
 } // namespace OHOS::Ace

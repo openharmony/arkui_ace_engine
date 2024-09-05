@@ -1400,7 +1400,7 @@ HWTEST_F(RichEditorOverlayTestNg, HandleLevel001, TestSize.Level1)
      */
     richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
     richEditorNode_->ProcessFrameNodeChangeFlag();
-    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
+    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
 }
 
 /**

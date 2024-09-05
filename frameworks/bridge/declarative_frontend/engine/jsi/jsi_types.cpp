@@ -439,7 +439,7 @@ JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 
 JsiRef<JsiObject> JsiCallbackInfo::This() const
 {
-    auto obj = JsiObject { info_->GetThisRef() };
+    auto obj = JsiObject { info_->GetVM(), info_->GetThisRef() };
     auto ref = JsiRef<JsiObject>(obj);
     return ref;
 }

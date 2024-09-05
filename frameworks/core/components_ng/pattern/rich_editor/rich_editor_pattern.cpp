@@ -449,6 +449,7 @@ void RichEditorPattern::AfterStyledStringChange(int32_t start, int32_t length, c
 
 void RichEditorPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();

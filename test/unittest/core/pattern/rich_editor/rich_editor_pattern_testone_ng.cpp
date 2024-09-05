@@ -1014,19 +1014,19 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleOnlyImageSelected001, TestSize.Level1
     auto selectInfoSecHandle = selectOverlayInfo->secondHandle;
     selectInfoFirstHandle.isShow = true;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
 
     selectInfoFirstHandle.isShow = false;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
 
     selectInfoFirstHandle.isShow = true;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
 
     selectInfoFirstHandle.isShow = false;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
 
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsBothHandlesShow(), false);
 }

@@ -171,13 +171,11 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
     CHECK_NULL_RETURN(gestureHub, false);
 
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode) ||
-        gestureHub->GetBindMenuStatus().IsNotNeedCollectDragActuator()) {
+        touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d, none long press menu preview is %{public}d",
-            gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet(),
-            gestureHub->GetBindMenuStatus().IsNotNeedCollectDragActuator());
+            "frameNode draggable is %{public}d, custom set is %{public}d,",
+            gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return false;
     }
 
@@ -928,13 +926,18 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     auto frameTag = frameNode->GetTag();
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
-        return;
-    }
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
+        if (dragPreviewOption.options.shadow.has_value()) {
+            auto shadow = dragPreviewOption.options.shadow.value();
+            shadow.SetIsFilled(true);
+            imageContext->UpdateBackShadow(shadow);
+        }
+        return;
+    }
     imageContext->UpdateOpacity(dragPreviewOption.options.opacity);
     if (dragPreviewOption.options.shadow.has_value()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());

@@ -17,6 +17,7 @@ import { Route, RouteGroup } from '../../common/route';
 import { CalendarPickerBootcamp } from './CalendarPickerBootcamp';
 import { CheckboxGroupBootcamp } from '../pickers/CheckboxGroupBootcamp';
 import { RatingBootcamp } from '../pickers/RatingBootcamp';
+import { ToggleBootcamp } from './ToggleBootcamp';
 
 export const pickersRoute: RouteGroup = {
   name: 'pickers',
@@ -25,6 +26,7 @@ export const pickersRoute: RouteGroup = {
     { name: 'calendar', label: '日历选择器/calendar' },
     { name: 'checkbox-group', label: '勾选文本/CheckboxGroup' },
     { name: 'rating', label: '评分条/Rating' },
+    { name: 'toggle', label: '切换按钮/Toggle' }
   ]
 };
 
@@ -36,5 +38,7 @@ export function PickersDestination(name: string, route: Route) {
     CheckboxGroupBootcamp({ title: route.label })
   } else if (name === 'pickers/rating') {
     RatingBootcamp({ title: route.label })
+  } else if (name === 'pickers/toggle') {
+    ToggleBootcamp({ title: route.label })
   }
 }

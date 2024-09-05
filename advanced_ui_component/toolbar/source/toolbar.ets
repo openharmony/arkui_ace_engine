@@ -14,7 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+import { LengthMetrics, LengthUnit, ColorMetrics } from '@ohos.arkui.node';
 import { DividerModifier, SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
@@ -37,6 +37,8 @@ const DIALOG_IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const TEXT_TOOLBAR_DIALOG = '18.3fp';
+const FOCUS_BOX_MARGIN: number = -2;
+const FOCUS_BOX_BORDER_WIDTH: number = 2;
 
 interface MenuController {
   value: ResourceStr;
@@ -50,9 +52,9 @@ export interface ToolBarSymbolGlyphOptions {
 }
 
 class ButtonGestureModifier implements GestureModifier {
-  public longPressTime: number = 500;
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;
-  public minFontSize: number = 1.75;
   public controller: CustomDialogController | null = null;
 
   constructor(controller: CustomDialogController | null) {
@@ -60,9 +62,9 @@ class ButtonGestureModifier implements GestureModifier {
   }
 
   applyGesture(event: UIGestureEvent): void {
-    if (this.fontSize >= this.minFontSize) {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: this.longPressTime })
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
           .onAction(() => {
             if (event) {
               this.controller?.open();
@@ -140,8 +142,7 @@ export struct ToolBar {
     .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
   @Prop moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
-  toolBarItemBackground: ResourceColor[] = [];
-  @State itemBackground: ResourceColor = Color.Transparent;
+  @State toolBarItemBackground: ResourceColor[] = [];
   @State iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
   @State iconActivePrimaryColor: ResourceColor = $r('sys.color.icon_emphasize');
   @State fontPrimaryColor: ResourceColor = $r('sys.color.font_primary');
@@ -163,7 +164,8 @@ export struct ToolBar {
     this.fontActivatedPrimaryColor = theme.colors.fontEmphasize;
   }
 
-  @Builder MoreTabBuilder(index: number) {
+  @Builder
+  MoreTabBuilder(index: number) {
     Button({ type: ButtonType.Normal, stateEffect: false }) {
       Column() {
         Image(PUBLIC_MORE)
@@ -180,6 +182,8 @@ export struct ToolBar {
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
+          .focusable(true)
+          .focusOnTouch(true)
       }
       .width('100%')
       .height('100%')
@@ -190,31 +194,36 @@ export struct ToolBar {
       })
       .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     }
-    .width('100%').height('100%')
+    .focusable(true)
+    .focusOnTouch(true)
+    .focusBox({
+      margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
+      strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
+      strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
+    })
+    .width('100%')
+    .height('100%')
     .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .backgroundColor(this.itemBackground)
+    .backgroundColor(this.toolBarItemBackground[index])
     .onHover((isHover: boolean) => {
       if (isHover) {
         this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_hover');
       } else {
         this.toolBarItemBackground[index] = Color.Transparent;
       }
-      this.itemBackground = this.toolBarItemBackground[index];
     })
     .stateStyles({
       pressed: {
         .backgroundColor((!this.toolBarModifier.stateEffectValue) ?
         this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
-      },
-      normal: {
-        .backgroundColor(this.toolBarItemBackground[index])
       }
     })
     .gestureModifier(this.getItemGestureModifier(this.moreItem, index))
   }
 
-  @Builder TabBuilder(index: number) {
+  @Builder
+  TabBuilder(index: number) {
     Button({ type: ButtonType.Normal, stateEffect: false }) {
       Column() {
         if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
@@ -242,6 +251,8 @@ export struct ToolBar {
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
+          .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+          .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
       }
       .justifyContent(FlexAlign.Center)
       .width('100%')
@@ -258,24 +269,19 @@ export struct ToolBar {
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
-    .backgroundColor(this.itemBackground)
+    .backgroundColor(this.toolBarItemBackground[index])
     .onHover((isHover: boolean) => {
-      if (isHover) {
-        this.toolBarItemBackground[index] = (this.toolBarList[index]?.state === ItemState.DISABLE)
-          ? Color.Transparent : $r('sys.color.ohos_id_color_hover');
+      if (isHover && this.toolBarList[index]?.state !== ItemState.DISABLE) {
+        this.toolBarItemBackground[index] = $r('sys.color.ohos_id_color_hover');
       } else {
         this.toolBarItemBackground[index] = Color.Transparent;
       }
-      this.itemBackground = this.toolBarItemBackground[index];
     })
     .stateStyles({
       pressed: {
         .backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ||
           (!this.toolBarModifier.stateEffectValue) ?
         this.toolBarItemBackground[index] : $r('sys.color.ohos_id_color_click_effect'))
-      },
-      normal: {
-        .backgroundColor(this.toolBarItemBackground[index])
       }
     })
     .onClick(() => {
@@ -382,7 +388,6 @@ export struct ToolBar {
 
   refreshData() {
     this.menuContent = [];
-    this.fontSize = this.getFontSizeScale();
     for (let i = 0; i < this.toolBarList.length; i++) {
       if (i >= this.moreIndex && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
         this.menuContent[i - this.moreIndex] = {
@@ -393,9 +398,20 @@ export struct ToolBar {
       } else {
         this.menuContent = [];
       }
-      this.toolBarItemBackground[i] = Color.Transparent;
+      this.toolBarItemBackground[i] = this.toolBarItemBackground[i] ?? Color.Transparent;
     }
     return true;
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
+    this.fontSize = this.getFontSizeScale();
+    let sizeResult: SizeResult = { height: 0, width: 0 };
+    children.forEach((child) => {
+      let childMeasureResult: MeasureResult = child.measure(constraint);
+      sizeResult.width = childMeasureResult.width;
+      sizeResult.height = childMeasureResult.height;
+    });
+    return sizeResult;
   }
 
   aboutToAppear() {
@@ -409,6 +425,7 @@ export struct ToolBar {
       hilog.error(0x3900, 'Ace', `Faild to toolBar getMaxFontScale, code: ${code}, message: ${message}`);
     }
   }
+
   build() {
     Column() {
       Tabs({ controller: this.controller }) {
@@ -449,7 +466,6 @@ export struct ToolBar {
         this.toolBarModifier.paddingValue : LengthMetrics.resource($r('sys.float.padding_level0')),
       })
     }
-    .backgroundColor($r('sys.color.ohos_id_color_toolbar_bg'))
     .attributeModifier(this.toolBarModifier)
   }
 }

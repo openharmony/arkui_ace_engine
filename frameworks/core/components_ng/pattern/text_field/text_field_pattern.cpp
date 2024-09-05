@@ -1778,7 +1778,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         }
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
-        if (magnifierController_) {
+        if (magnifierController_ && IsOperation()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
         if (selectController_->GetCaretIndex() != preCaretIndex) {
@@ -2297,8 +2297,13 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
 
 void TextFieldPattern::DoProcessAutoFill()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
+    if (!IsNeedProcessAutoFill()) {
+        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK)) {
+            NotifyOnEditChanged(true);
+        }
+        return;
+    }
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
@@ -6693,6 +6698,7 @@ void TextFieldPattern::StopEditing()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ContainerScope scope(host->GetInstanceId());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Stop Editing", host->GetId());
     FocusHub::LostFocusToViewRoot();
     UpdateSelection(selectController_->GetCaretIndex());
@@ -7209,20 +7215,19 @@ int32_t TextFieldPattern::GetLineCount() const
 
 void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
 {
-    if (SelectOverlayIsOn() && !selectOverlay_->IsSingleHandle()) {
-        selectController_->UpdateFirstHandleOffset();
+    if (SelectOverlayIsOn()) {
         selectController_->UpdateSecondHandleOffset();
-        selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
-        selectOverlay_->UpdateAllHandlesOffset();
-        return;
+        if (!selectOverlay_->IsSingleHandle()) {
+            selectController_->UpdateFirstHandleOffset();
+            selectController_->UpdateCaretOffset(TextAffinity::DOWNSTREAM, false);
+            selectOverlay_->UpdateAllHandlesOffset();
+        } else {
+            selectController_->UpdateCaretOffset(IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
+            selectOverlay_->UpdateSecondHandleOffset();
+        }
+    } else {
+        selectController_->UpdateCaretOffset(IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
     }
-    // 修改光标和单手柄位置
-    auto moveOffset = IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f);
-    auto caretOffset = selectController_->GetCaretRect().GetOffset() + moveOffset;
-    auto secondHandleOffset = selectController_->GetSecondHandleOffset() + moveOffset;
-    selectController_->UpdateCaretOffset(caretOffset);
-    selectController_->UpdateSecondHandleOffset(secondHandleOffset);
-    selectOverlay_->UpdateSecondHandleOffset();
 }
 
 void TextFieldPattern::CloseHandleAndSelect()
@@ -8231,7 +8236,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset)
 {
-    if (magnifierController_ && (longPressFingerNum_ == 1)) {
+    if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
         contentScroller_.updateMagniferEpsilon = 0.0f - contentScroller_.updateMagniferEpsilon;
         magnifierController_->SetLocalOffset(
             { localOffset.GetX(), localOffset.GetY() + contentScroller_.updateMagniferEpsilon });
@@ -8560,7 +8565,7 @@ TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
 
 void TextFieldPattern::AddTextFieldInfo()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
+    CHECK_NULL_VOID(IsNeedProcessAutoFill());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -8571,7 +8576,7 @@ void TextFieldPattern::AddTextFieldInfo()
 
 void TextFieldPattern::RemoveTextFieldInfo()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
+    CHECK_NULL_VOID(IsNeedProcessAutoFill());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -8587,7 +8592,7 @@ void TextFieldPattern::RemoveTextFieldInfo()
 
 void TextFieldPattern::UpdateTextFieldInfo()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
+    CHECK_NULL_VOID(IsNeedProcessAutoFill());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -8645,8 +8650,8 @@ bool TextFieldPattern::IsTriggerAutoFillPassword()
     return HasAutoFillPasswordNode();
 }
 
-bool TextFieldPattern::IsSearchTextField()
+bool TextFieldPattern::IsNeedProcessAutoFill()
 {
-    return false;
+    return true;
 }
 } // namespace OHOS::Ace::NG

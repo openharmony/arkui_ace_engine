@@ -18,6 +18,13 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/if_else_node.h"
 
+#define protected public
+#define private public
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
+#undef protected
+#undef private
+
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
 
@@ -353,5 +360,28 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 36), -140.0f);
     EXPECT_EQ(GetChildY(frameNode_, 35), -250.0f);
     EXPECT_EQ(GetChildY(frameNode_, 34), -250.0f);
+}
+
+/**
+ * @tc.name: Remeasure001
+ * @tc.desc: Test triggering measure multiple times on the same Algo object
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Remeasure001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(3);
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    CreateDone();
+
+    auto algo = pattern_->GetCacheLayoutAlgo();
+    ASSERT_TRUE(algo);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    if (auto swAlgo = AceType::DynamicCast<WaterFlowLayoutSW>(algo); swAlgo) {
+        EXPECT_EQ(swAlgo->itemsCrossSize_[0].size(), 2);
+    } else {
+        EXPECT_EQ(AceType::DynamicCast<WaterFlowLayoutAlgorithm>(algo)->itemsCrossSize_.size(), 2);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -430,6 +430,14 @@ void UINode::DoAddChild(
     }
     children_.insert(it, child);
 
+    if (IsAccessibilityVirtualNode()) {
+        auto parentVirtualNode = GetVirtualNodeParent().Upgrade();
+        if (parentVirtualNode) {
+            child->SetAccessibilityNodeVirtual();
+            child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
+
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
@@ -854,6 +862,40 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
+    }
+}
+
+void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
+{
+    current->Put("ID", nodeId_);
+    current->Put("Type", tag_.c_str());
+    auto nodeChildren = GetChildren();
+    DumpSimplifyInfo(current);
+    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
+    if (hasChildren) {
+        current->Put("ChildrenSize", static_cast<int32_t>(nodeChildren.size()));
+        auto array = JsonUtil::CreateArray();
+        if (!nodeChildren.empty()) {
+            for (const auto& item : nodeChildren) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        if (!disappearingChildren_.size()) {
+            for (const auto& [item, index, branch] : disappearingChildren_) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        current->PutRef("Children", std::move(array));
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        auto overlay = JsonUtil::Create();
+        frameNode->GetOverlayNode()->DumpSimplifyTree(depth + 1, overlay);
+        current->PutRef("Overlay", std::move(overlay));
     }
 }
 
@@ -1588,6 +1630,13 @@ void UINode::GetInspectorValue()
 {
     for (const auto& item : GetChildren()) {
         item->GetInspectorValue();
+    }
+}
+
+void UINode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
+{
+    for (const auto& child : GetChildren()) {
+        child->ClearSubtreeLayoutAlgorithm(includeSelf, clearEntireTree);
     }
 }
 

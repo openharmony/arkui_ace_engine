@@ -460,6 +460,7 @@ void CalendarMonthPattern::InitializeCalendarAccessibility()
         margin_ = theme->GetDialogMargin().ConvertToPx();
         selectedTxt_ = sliderTheme->GetSelectedTxt();
         disabledDesc_ = sliderTheme->GetDisabelDesc();
+        deviceOrientation_ = SystemProperties::GetDeviceOrientation();
     }
 }
 
@@ -475,6 +476,12 @@ void CalendarMonthPattern::InitCurrentVirtualNode()
     }
 }
 
+void CalendarMonthPattern::ClearFocusCalendarDay()
+{
+    focusedCalendarDay_.index = 0;
+    deviceOrientation_ = SystemProperties::GetDeviceOrientation();
+}
+
 void CalendarMonthPattern::ClearCalendarVirtualNode()
 {
     auto host = GetHost();
@@ -488,11 +495,16 @@ void CalendarMonthPattern::ClearCalendarVirtualNode()
 
 void CalendarMonthPattern::SetLineNodeSize(RefPtr<FrameNode> lineNode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostLayoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(hostLayoutProperty);
+    auto width = hostLayoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(Infinity<float>());
+    auto height = hostLayoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(Infinity<float>());
     CHECK_NULL_VOID(lineNode);
     auto layoutProperty = lineNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(dayWidth_ * CALENDAR_WEEK_DAYS), CalcLength(dayHeight_ * DAILY_FIVE_ROWSPACE)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
 }
 
 void CalendarMonthPattern::SetFocusNode(int32_t index, bool isDeviceOrientation)
@@ -505,11 +517,11 @@ void CalendarMonthPattern::SetFocusNode(int32_t index, bool isDeviceOrientation)
     auto remainderWeek = index % CALENDAR_WEEK_DAYS;
     int32_t selectedIndex = (textDirection == TextDirection::RTL ?
         CALENDAR_WEEK_DAYS - remainderWeek * 2 + index - 1 : index);
-    if (selectedIndex >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size())) {
-        return;
-    }
     if (isDeviceOrientation) {
         selectedIndex = index;
+    }
+    if (selectedIndex >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size()) || selectedIndex < 0) {
+        return;
     }
     buttonAccessibilityNodeVec_[selectedIndex]->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     selectedIndex_ = selectedIndex;
@@ -544,7 +556,7 @@ bool CalendarMonthPattern::InitCalendarVirtualNode()
     accessibilityProperty->SaveAccessibilityVirtualNode(lineNode);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto deviceOrientation = SystemProperties::GetDeviceOrientation();
-    if (deviceOrientation_ != deviceOrientation) {
+    if (deviceOrientation_ != deviceOrientation && !isFirstEnter_) {
         SetFocusNode(focusedCalendarDay_.index, true);
         deviceOrientation_ = deviceOrientation;
     }
@@ -573,10 +585,11 @@ std::pair<int32_t, int32_t> GetXYByIndex(const int32_t index)
 
 void CalendarMonthPattern::ChangeVirtualNodeState(const CalendarDay& calendarDay)
 {
-    if (selectedIndex_ >= static_cast<int32_t>(accessibilityPropertyVec_.size())) {
+    if (selectedIndex_ >= static_cast<int32_t>(accessibilityPropertyVec_.size()) || selectedIndex_ < 0) {
         return;
     }
-    if (calendarDay.index != selectedIndex_) {
+    if (calendarDay.index != selectedIndex_ &&
+        calendarDay.month.month == obtainedMonth_.month && calendarDay.month.month == obtainedMonth_.month) {
         accessibilityPropertyVec_[selectedIndex_]->SetUserSelected(true);
     }
 }
@@ -803,7 +816,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     auto remainderWeek = calendarDay.index % CALENDAR_WEEK_DAYS;
     int32_t index = (textDirection == TextDirection::RTL ?
         CALENDAR_WEEK_DAYS - remainderWeek * 2 + calendarDay.index - 1 : calendarDay.index);
-    if (index >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size())) {
+    if (index >= static_cast<int32_t>(buttonAccessibilityNodeVec_.size()) || index < 0) {
         return;
     }
     std::string message;

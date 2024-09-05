@@ -381,7 +381,7 @@ public:
 private:
     void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);
-    std::string urlAddress_;
+    std::string urlAddress_ = "";
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H
