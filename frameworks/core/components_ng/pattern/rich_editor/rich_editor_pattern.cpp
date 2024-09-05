@@ -471,6 +471,9 @@ void RichEditorPattern::OnModifyDone()
     }
     instanceId_ = context->GetInstanceId();
     InitMouseEvent();
+    if (CanStartAITask()) {
+        InitAISpanHoverEvent();
+    }
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
@@ -4116,6 +4119,44 @@ void RichEditorPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValu
 #endif
 }
 
+void RichEditorPattern::HandleAISpanHoverEvent(const MouseInfo& info)
+{
+    if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect()) {
+        return;
+    }
+    if (dataDetectorAdapter_->aiSpanRects_.empty()) {
+        for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
+            auto& aiSpan = kv.second;
+            const auto& aiRects = paragraphs_.GetRects(aiSpan.start, aiSpan.end);
+            dataDetectorAdapter_->aiSpanRects_.insert(
+                dataDetectorAdapter_->aiSpanRects_.end(), aiRects.begin(), aiRects.end());
+        }
+    }
+
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    PointF textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto nodeId = host->GetId();
+    for (auto&& rect : dataDetectorAdapter_->aiSpanRects_) {
+        if (!rect.IsInRegion(textOffset)) {
+            continue;
+        }
+        if (currentMouseStyle_ != MouseFormat::HAND_POINTING) {
+            pipeline->ChangeMouseStyle(nodeId, MouseFormat::HAND_POINTING);
+            currentMouseStyle_ = MouseFormat::HAND_POINTING;
+        }
+        return;
+    }
+    if (currentMouseStyle_ != MouseFormat::TEXT_CURSOR) {
+        pipeline->ChangeMouseStyle(nodeId, MouseFormat::TEXT_CURSOR);
+        currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
+    }
+}
+
 void RichEditorPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!mouseEventInitialized_);
@@ -4158,10 +4199,14 @@ void RichEditorPattern::OnHover(bool isHover)
     if (isHover && (!scrollBar || (!scrollBar->IsPressed() && !scrollBar->IsHover()))) {
         SetDefaultMouseStyle(MouseFormat::TEXT_CURSOR);
         pipeline->SetMouseStyleHoldNode(frameId);
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        if (currentMouseStyle_ != MouseFormat::TEXT_CURSOR) {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+            currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
+        }
     } else {
         SetDefaultMouseStyle(MouseFormat::DEFAULT);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
 }
@@ -6643,6 +6688,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         SetDefaultMouseStyle(MouseFormat::DEFAULT);
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
         return;
     }
     SetDefaultMouseStyle(MouseFormat::TEXT_CURSOR);
@@ -7722,6 +7768,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     auto newOffset = MoveTextRect(offset);
     MoveFirstHandle(newOffset);
     MoveSecondHandle(newOffset);
+    dataDetectorAdapter_->aiSpanRects_.clear();
     return true;
 }
 

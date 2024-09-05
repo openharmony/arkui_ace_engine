@@ -995,6 +995,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
