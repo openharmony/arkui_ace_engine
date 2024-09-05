@@ -83,6 +83,7 @@ public:
     void SetAppHasDarkRes(bool hasDarkRes);
     RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
         const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
+
 private:
     std::string GetActualResourceName(const std::string& resName) const;
     bool NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
