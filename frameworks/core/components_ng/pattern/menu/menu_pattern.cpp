@@ -1253,7 +1253,7 @@ MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool i
     } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG
         || child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
         ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
-        auto groupChildren = child->GetChildren();
+        const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
             menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
             if (menuItemInfo.isFindTargetId) {
