@@ -43,6 +43,12 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
     hoverInfo.SetSourceTool(event.sourceTool);
+    if (event.tiltX.has_value()) {
+        hoverInfo.SetTiltX(event.tiltX.value());
+    }
+    if (event.tiltY.has_value()) {
+        hoverInfo.SetTiltY(event.tiltY.value());
+    }
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     onPenHoverEventCallback_(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
