@@ -1778,7 +1778,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         }
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
-        if (magnifierController_) {
+        if (magnifierController_ && IsOperation()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
         if (selectController_->GetCaretIndex() != preCaretIndex) {
@@ -8236,7 +8236,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset)
 {
-    if (magnifierController_ && (longPressFingerNum_ == 1)) {
+    if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
         contentScroller_.updateMagniferEpsilon = 0.0f - contentScroller_.updateMagniferEpsilon;
         magnifierController_->SetLocalOffset(
             { localOffset.GetX(), localOffset.GetY() + contentScroller_.updateMagniferEpsilon });
