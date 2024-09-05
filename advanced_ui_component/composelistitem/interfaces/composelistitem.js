@@ -1119,7 +1119,7 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((l11, m11) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
@@ -1150,7 +1150,7 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((v6, a7) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({

@@ -144,7 +144,9 @@ export struct TipsDialog {
           this.imagePart();
         } else if (index === this.textIndex) {
           Column() {
-            this.textPart();
+            WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+              this.textPart();
+            }
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
@@ -716,7 +718,9 @@ export struct ConfirmDialog {
     ConfirmDialogContentLayout({ minContentHeight: this.minContentHeight, updateTextAlign: this.updateTextAlign }) {
       ForEach([this.textIndex, this.checkboxIndex], (index: number) => {
         if (index === this.textIndex) {
-          this.textBuilder();
+          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+            this.textBuilder();
+          }
         } else if (index === this.checkboxIndex) {
           WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
             this.checkBoxBuilder();
