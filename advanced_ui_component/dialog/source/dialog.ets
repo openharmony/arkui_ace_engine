@@ -1639,11 +1639,11 @@ export struct LoadingDialog {
 }
 
 @Component
-export struct PopupDialog {
-  @Link show: boolean;
-  @Prop popup: PopupDialogOptions;
+export struct PopoverDialog {
+  @Link visible: boolean;
+  @Prop popover: PopoverOptions;
   @BuilderParam targetBuilder: Callback<void>;
-  @State dialogWidth: Dimension | undefined = this.popup.width;
+  @State dialogWidth: Dimension | undefined = this.popover.width;
 
   build() {
     Column() {
@@ -1653,40 +1653,40 @@ export struct PopupDialog {
       let screenSize: display.Display = display.getDefaultDisplaySync();
       let screenWidth: number = px2vp(screenSize.width);
       if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-        this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
+        this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
       } else {
-        this.popup.width = this.dialogWidth;
+        this.popover.width = this.dialogWidth;
       }
-      this.show = !this.show;
+      this.visible = !this.visible;
     })
-    .bindPopup(this.show, {
-      builder: this.popup?.builder,
-      placement: this.popup?.placement ?? Placement.Bottom,
-      popupColor: this.popup?.popupColor,
-      enableArrow: this.popup?.enableArrow ?? true,
-      autoCancel: this.popup?.autoCancel,
-      onStateChange: this.popup?.onStateChange ?? ((e) => {
+    .bindPopup(this.visible, {
+      builder: this.popover?.builder,
+      placement: this.popover?.placement ?? Placement.Bottom,
+      popupColor: this.popover?.popupColor,
+      enableArrow: this.popover?.enableArrow ?? true,
+      autoCancel: this.popover?.autoCancel,
+      onStateChange: this.popover?.onStateChange ?? ((e) => {
         if (!e.isVisible) {
-          this.show = false
+          this.visible = false
         }
       }),
-      arrowOffset: this.popup?.arrowOffset,
-      showInSubWindow: this.popup?.showInSubWindow,
-      mask: this.popup?.mask,
-      targetSpace: this.popup?.targetSpace,
-      offset: this.popup?.offset,
-      width: this.popup?.width,
-      arrowPointPosition: this.popup?.arrowPointPosition,
-      arrowWidth: this.popup?.arrowWidth,
-      arrowHeight: this.popup?.arrowHeight,
-      radius: this.popup?.radius ?? $r('sys.float.corner_radius_level16'),
-      shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-      backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-      focusable: this.popup?.focusable,
-      transition: this.popup?.transition,
-      onWillDismiss: this.popup?.onWillDismiss
+      arrowOffset: this.popover?.arrowOffset,
+      showInSubWindow: this.popover?.showInSubWindow,
+      mask: this.popover?.mask,
+      targetSpace: this.popover?.targetSpace,
+      offset: this.popover?.offset,
+      width: this.popover?.width,
+      arrowPointPosition: this.popover?.arrowPointPosition,
+      arrowWidth: this.popover?.arrowWidth,
+      arrowHeight: this.popover?.arrowHeight,
+      radius: this.popover?.radius ?? $r('sys.float.corner_radius_level16'),
+      shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+      backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+      focusable: this.popover?.focusable,
+      transition: this.popover?.transition,
+      onWillDismiss: this.popover?.onWillDismiss
     })
   }
 }
 
-export declare interface PopupDialogOptions extends CustomPopupOptions {}
+export declare interface PopoverOptions extends CustomPopupOptions {}

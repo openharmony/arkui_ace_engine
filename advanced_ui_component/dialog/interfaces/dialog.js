@@ -4039,117 +4039,117 @@ export class LoadingDialog extends ViewPU {
     }
 }
 
-export class PopupDialog extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+export class PopoverDialog extends ViewPU {
+    constructor(n, o, p, q = -1, r = undefined, s) {
+        super(n, p, q, s);
+        if (typeof r === 'function') {
+            this.paramsGenerator_ = r;
         }
-        this.__show = new SynchedPropertySimpleTwoWayPU(params.show, this, 'show');
-        this.__popup = new SynchedPropertyObjectOneWayPU(params.popup, this, 'popup');
+        this.__visible = new SynchedPropertySimpleTwoWayPU(o.visible, this, 'visible');
+        this.__popover = new SynchedPropertyObjectOneWayPU(o.popover, this, 'popover');
         this.targetBuilder = undefined;
-        this.__dialogWidth = new ObservedPropertyObjectPU(this.popup.width, this, 'dialogWidth');
-        this.setInitiallyProvidedValue(params);
+        this.__dialogWidth = new ObservedPropertyObjectPU(this.popover.width, this, 'dialogWidth');
+        this.setInitiallyProvidedValue(o);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        if (params.targetBuilder !== undefined) {
-            this.targetBuilder = params.targetBuilder;
+    setInitiallyProvidedValue(m) {
+        if (m.targetBuilder !== undefined) {
+            this.targetBuilder = m.targetBuilder;
         }
-        if (params.dialogWidth !== undefined) {
-            this.dialogWidth = params.dialogWidth;
+        if (m.dialogWidth !== undefined) {
+            this.dialogWidth = m.dialogWidth;
         }
     }
 
-    updateStateVars(params) {
-        this.__popup.reset(params.popup);
+    updateStateVars(l) {
+        this.__popover.reset(l.popover);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__show.purgeDependencyOnElmtId(rmElmtId);
-        this.__popup.purgeDependencyOnElmtId(rmElmtId);
-        this.__dialogWidth.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(k) {
+        this.__visible.purgeDependencyOnElmtId(k);
+        this.__popover.purgeDependencyOnElmtId(k);
+        this.__dialogWidth.purgeDependencyOnElmtId(k);
     }
 
     aboutToBeDeleted() {
-        this.__show.aboutToBeDeleted();
-        this.__popup.aboutToBeDeleted();
+        this.__visible.aboutToBeDeleted();
+        this.__popover.aboutToBeDeleted();
         this.__dialogWidth.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
-    get show() {
-        return this.__show.get();
+    get visible() {
+        return this.__visible.get();
     }
 
-    set show(newValue) {
-        this.__show.set(newValue);
+    set visible(j) {
+        this.__visible.set(j);
     }
 
-    get popup() {
-        return this.__popup.get();
+    get popover() {
+        return this.__popover.get();
     }
 
-    set popup(newValue) {
-        this.__popup.set(newValue);
+    set popover(i) {
+        this.__popover.set(i);
     }
 
     get dialogWidth() {
         return this.__dialogWidth.get();
     }
 
-    set dialogWidth(newValue) {
-        this.__dialogWidth.set(newValue);
+    set dialogWidth(h) {
+        this.__dialogWidth.set(h);
     }
 
     initialRender() {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((b, c) => {
             Column.create();
             Column.onClick(() => {
-                let screenSize = display.getDefaultDisplaySync();
-                let screenWidth = px2vp(screenSize.width);
-                if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-                    this.popup.width = this.popup?.width ?? MAX_DIALOG_WIDTH;
+                let f = display.getDefaultDisplaySync();
+                let g = px2vp(f.width);
+                if (g - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+                    this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
                 } else {
-                    this.popup.width = this.dialogWidth;
+                    this.popover.width = this.dialogWidth;
                 }
-                this.show = !this.show;
+                this.visible = !this.visible;
             });
-            Column.bindPopup(this.show, {
-                builder: this.popup?.builder,
-                placement: this.popup?.placement ?? Placement.Bottom,
-                popupColor: this.popup?.popupColor,
-                enableArrow: this.popup?.enableArrow ?? true,
-                autoCancel: this.popup?.autoCancel,
-                onStateChange: this.popup?.onStateChange ?? ((e) => {
+            Column.bindPopup(this.visible, {
+                builder: this.popover?.builder,
+                placement: this.popover?.placement ?? Placement.Bottom,
+                popupColor: this.popover?.popupColor,
+                enableArrow: this.popover?.enableArrow ?? true,
+                autoCancel: this.popover?.autoCancel,
+                onStateChange: this.popover?.onStateChange ?? ((e) => {
                     if (!e.isVisible) {
-                        this.show = false;
+                        this.visible = false;
                     }
                 }),
-                arrowOffset: this.popup?.arrowOffset,
-                showInSubWindow: this.popup?.showInSubWindow,
-                mask: this.popup?.mask,
-                targetSpace: this.popup?.targetSpace,
-                offset: this.popup?.offset,
-                width: this.popup?.width,
-                arrowPointPosition: this.popup?.arrowPointPosition,
-                arrowWidth: this.popup?.arrowWidth,
-                arrowHeight: this.popup?.arrowHeight,
-                radius: this.popup?.radius ?? {
+                arrowOffset: this.popover?.arrowOffset,
+                showInSubWindow: this.popover?.showInSubWindow,
+                mask: this.popover?.mask,
+                targetSpace: this.popover?.targetSpace,
+                offset: this.popover?.offset,
+                width: this.popover?.width,
+                arrowPointPosition: this.popover?.arrowPointPosition,
+                arrowWidth: this.popover?.arrowWidth,
+                arrowHeight: this.popover?.arrowHeight,
+                radius: this.popover?.radius ?? {
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.corner_radius_level16'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 },
-                shadow: this.popup?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-                backgroundBlurStyle: this.popup?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-                focusable: this.popup?.focusable,
-                transition: this.popup?.transition,
-                onWillDismiss: this.popup?.onWillDismiss
+                shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
+                backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
+                focusable: this.popover?.focusable,
+                transition: this.popover?.transition,
+                onWillDismiss: this.popover?.onWillDismiss
             });
         }, Column);
         this.targetBuilder.bind(this)();
@@ -4164,4 +4164,4 @@ export class PopupDialog extends ViewPU {
     }
 }
 
-export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog, PopupDialog };
+export default { TipsDialog, ConfirmDialog, SelectDialog, AlertDialog, LoadingDialog, CustomContentDialog, PopoverDialog };
