@@ -22,14 +22,14 @@
 namespace OHOS::Ace::NG {
 namespace {
 const static std::map<std::string, FixedAttrBit> FIXED_ATTR_MAP = {
-    { "id",           FIXED_ATTR_ID          },
-    { "content",      FIXED_ATTR_CONTENT     },
-    { "src",          FIXED_ATTR_SRC         },
-    { "editable",     FIXED_ATTR_EDITABLE    },
-    { "scrollable",   FIXED_ATTR_SCROLLABLE  },
-    { "selectable",   FIXED_ATTR_SELECTABLE  },
-    { "focusable",    FIXED_ATTR_FOCUSABLE   },
-    { "focused",      FIXED_ATTR_FOCUSED     },
+    { "id",           FIXED_ATTR_ID         },
+    { "content",      FIXED_ATTR_CONTENT    },
+    { "src",          FIXED_ATTR_SRC        },
+    { "editable",     FIXED_ATTR_EDITABLE   },
+    { "scrollable",   FIXED_ATTR_SCROLLABLE },
+    { "selectable",   FIXED_ATTR_SELECTABLE },
+    { "focusable",    FIXED_ATTR_FOCUSABLE  },
+    { "focused",      FIXED_ATTR_FOCUSED    },
 };
 }
 
