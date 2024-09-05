@@ -179,6 +179,10 @@ if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
 }
 
+if (build_variant == "user") {
+  ace_common_defines += [ "IS_RELEASE_VERSION" ]
+}
+
 ace_use_new_skia = true
 
 ace_use_rosen_drawing = false
