@@ -186,6 +186,8 @@ public:
     void RegisterInteractionOperationAsChildTree(uint32_t parentWindowId, int32_t parentTreeId,
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
+    void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) override;
     void DeregisterInteractionOperationAsChildTree() override;
     void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
@@ -489,6 +491,7 @@ private:
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
+    std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
 };
 

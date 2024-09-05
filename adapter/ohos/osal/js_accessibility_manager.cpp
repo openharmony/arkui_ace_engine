@@ -1409,6 +1409,10 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     } else if (node->IsVisible()) {
         auto rect = node->GetTransformRectRelativeToWindow();
+        if ((scaleX_ != 0) && (scaleY_ != 0)) {
+            rect.SetRect(rect.GetX() * scaleX_, rect.GetY() * scaleY_,
+                rect.Width() * scaleX_, rect.Height() * scaleY_);
+        }
         auto left = rect.Left() + commonProperty.windowLeft;
         auto top = rect.Top() + commonProperty.windowTop;
         auto right = rect.Right() + commonProperty.windowLeft;
@@ -4788,6 +4792,12 @@ void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<
     getParentRectHandler_ = std::move(callback);
 }
 
+void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(
+    std::function<void(AccessibilityParentRectInfo &)> &&callback)
+{
+    getParentRectHandlerNew_ = std::move(callback);
+}
+
 void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
 {
     if (!IsRegister()) {
@@ -5475,6 +5485,17 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     }
     if (getParentRectHandler_) {
         getParentRectHandler_(output.windowTop, output.windowLeft);
+    } else if (getParentRectHandlerNew_) {
+        AccessibilityParentRectInfo rectInfo;
+        getParentRectHandlerNew_(rectInfo);
+        output.windowTop = rectInfo.top;
+        output.windowLeft = rectInfo.left;
+        if ((rectInfo.scaleX != 1.0f) || (rectInfo.scaleY != 1.0f)) {
+            scaleX_ = rectInfo.scaleX;
+            scaleY_ = rectInfo.scaleY;
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+                "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
+        }
     } else {
         output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());

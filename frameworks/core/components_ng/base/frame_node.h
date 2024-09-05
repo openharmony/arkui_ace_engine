@@ -440,6 +440,8 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
+    VectorF GetTransformScaleRelativeToWindow() const;
+
     RectF GetTransformRectRelativeToWindow() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;

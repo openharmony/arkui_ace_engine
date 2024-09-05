@@ -2772,6 +2772,18 @@ void UIContentImpl::SetAccessibilityGetParentRectHandler(std::function<void(int3
     accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
 }
 
+void UIContentImpl::SetAccessibilityGetParentRectHandler(
+    std::function<void(AccessibilityParentRectInfo&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
+}
+
 void UIContentImpl::DeregisterAccessibilityChildTree()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);

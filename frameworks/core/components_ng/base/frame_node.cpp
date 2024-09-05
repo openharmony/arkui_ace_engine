@@ -3084,6 +3084,29 @@ OffsetF FrameNode::GetPositionToWindowWithTransform() const
     return offset;
 }
 
+VectorF FrameNode::GetTransformScaleRelativeToWindow() const
+{
+    VectorF finalScale {1.0f, 1.0f};
+    auto context = GetRenderContext();
+    if (context) {
+        auto scale = GetTransformScale();
+        finalScale.x = scale.x;
+        finalScale.y = scale.y;
+    }
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            auto scale = parent->GetTransformScale();
+            finalScale.x *= scale.x;
+            finalScale.y *= scale.y;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return finalScale;
+}
+
 RectF FrameNode::GetTransformRectRelativeToWindow() const
 {
     auto context = GetRenderContext();
