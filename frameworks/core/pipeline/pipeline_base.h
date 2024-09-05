@@ -1062,8 +1062,6 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    virtual void SetupSubRootElement() = 0;
-
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
     void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
