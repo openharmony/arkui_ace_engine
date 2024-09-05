@@ -65,6 +65,7 @@ struct EventSwitch {
     bool pageEnable = true;
     bool exposureEnable = false;
     bool componentEnable = false;
+    bool pageParamEnable = false;
 };
 
 constexpr char KEY_ID[] = "id";
@@ -134,6 +135,7 @@ public:
     static EventRecorder& Get();
 
     bool IsPageRecordEnable() const;
+    bool IsPageParamRecordEnable() const;
     bool IsExposureRecordEnable() const;
     bool IsComponentRecordEnable() const;
     void UpdateEventSwitch(const EventSwitch& eventSwitch);
@@ -166,6 +168,7 @@ private:
     EventSwitch eventSwitch_;
 
     bool pageEnable_ = true;
+    bool pageParamEnable_ = false;
     bool componentEnable_ = true;
     bool exposureEnable_ = true;
 
