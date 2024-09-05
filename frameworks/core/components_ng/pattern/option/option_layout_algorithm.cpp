@@ -67,7 +67,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
-    
+
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);

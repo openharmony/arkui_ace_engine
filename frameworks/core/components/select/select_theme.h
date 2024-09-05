@@ -1219,7 +1219,7 @@ private:
     bool expandDisplay_ = false;
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
-
+    
     Color selectDefaultBgColor_;
     Dimension selectDefaultBorderRadius_;
     std::unordered_map<ControlSize, Dimension> selectMinWidthMap_;

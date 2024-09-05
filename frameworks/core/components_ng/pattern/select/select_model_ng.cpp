@@ -691,7 +691,7 @@ void SelectModelNG::SetOptionWidth(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionWidth(value);
 }
-
+    
 void SelectModelNG::SetOptionHeight(FrameNode* frameNode, const Dimension& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);

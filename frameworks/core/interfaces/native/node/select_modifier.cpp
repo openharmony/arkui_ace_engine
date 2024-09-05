@@ -522,15 +522,12 @@ void SetSelectValue(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* 
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(values);
     CHECK_NULL_VOID(icons);
-    std::vector<SelectParam> params;
+    std::vector<SelectParam> params(length);
     for (uint32_t i = 0; i < length; i++) {
         if (!values[i]) {
             return;
         }
-        SelectParam param;
-        param.text = values[i];
-        param.icon = icons[i];
-        params.emplace_back(param);
+        params[i] = { values[i], icons[i] };
     }
     SelectModelNG::InitSelect(frameNode, params);
 }

@@ -187,7 +187,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
-    
+
     Dimension GetFontSize();
     void SetSelectDefaultTheme();
     void SetOptionWidth(const Dimension& value);
@@ -267,8 +267,8 @@ private:
     void InitSpinner(
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
     void InitSpinner(const RefPtr<FrameNode>& spinner, const RefPtr<SelectTheme>& selectTheme);
-    void ResetParams();
     void UpdateOptionsWidth(float selectWidth);
+    void ResetParams();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
