@@ -5910,6 +5910,9 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
+        CHECK_NULL_VOID(info.GetSourceTool() != SourceTool::FINGER);
+        CHECK_NULL_VOID(info.GetSourceTool() != SourceTool::PEN);
+        HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool() == SourceTool::FINGER);
     } else if (touchType == TouchType::UP) {
         isOnlyImageDrag_ = false;
         HandleTouchUp();
@@ -7882,19 +7885,9 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
-    if (HasFocus()) {
-        auto func = [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->RequestKeyboard(false, true, true);
-            pattern->HandleOnEditChanged(true);
-        };
-        PostTaskToLayutSwap(func);
-    } else {
-        focusHub->RequestFocusImmediately();
-    }
+    focusHub->LostFocusToViewRoot();
     isCursorAlwaysDisplayed_ = false;
-    StartTwinkling();
+    StopTwinkling();
 };
 
 void RichEditorPattern::HandleOnDragStatusCallback(
