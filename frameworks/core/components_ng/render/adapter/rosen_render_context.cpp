@@ -705,6 +705,9 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 
 void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnForegroundColorUpdate(value);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();

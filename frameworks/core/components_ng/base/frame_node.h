@@ -1066,6 +1066,8 @@ public:
 
     void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
 
+    void OnForegroundColorUpdate(const Color& value);
+
 protected:
     void DumpInfo() override;
     std::list<std::function<void()>> destroyCallbacks_;

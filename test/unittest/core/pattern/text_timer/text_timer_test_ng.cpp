@@ -682,7 +682,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetFontStyle(), nullptr);
     EXPECT_EQ(textLayoutProperty->GetTextLineStyle(), nullptr);
     EXPECT_FALSE(textLayoutProperty->HasContent());
-    EXPECT_FALSE(textLayoutProperty->HasForegroundColor());
 
     pattern->textTimerController_ = nullptr;
     pattern->OnModifyDone();

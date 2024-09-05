@@ -5259,6 +5259,13 @@ void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
     pattern->NotifyDataChange(updateFrom, count);
 }
 
+void FrameNode::OnForegroundColorUpdate(const Color& value)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnForegroundColorUpdate(value);
+}
+
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);

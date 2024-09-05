@@ -3403,6 +3403,11 @@ void TextPattern::SetAccessibilityAction()
 
 void TextPattern::OnColorConfigurationUpdate()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(!renderContext->HasForegroundColor());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
@@ -3413,9 +3418,12 @@ void TextPattern::OnColorConfigurationUpdate()
     if (magnifierController_) {
         magnifierController_->SetColorModeChange(true);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
+}
+
+void TextPattern::OnForegroundColorUpdate(const Color& value)
+{
+    UpdateFontColor(value);
 }
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()
@@ -4164,6 +4172,9 @@ bool TextPattern::IsMarqueeOverflow() const
 
 void TextPattern::UpdateFontColor(const Color& value)
 {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(value);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
@@ -4175,6 +4186,7 @@ void TextPattern::UpdateFontColor(const Color& value)
             auto length = paragraph->GetParagraphText().length();
             paragraph->UpdateColor(0, length, value);
         }
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
