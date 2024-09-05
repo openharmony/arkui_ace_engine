@@ -249,7 +249,7 @@ class AsyncAddMonitorV2 {
       .then(AsyncAddMonitorV2.run)
       .catch(error => {
         stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
-        throw error;
+        _arkUIUncaughtPromiseError(error);
       });
     }
     AsyncAddMonitorV2.watches.push([target, name]);
