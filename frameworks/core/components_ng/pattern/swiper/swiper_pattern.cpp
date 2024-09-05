@@ -434,11 +434,6 @@ int32_t SwiperPattern::CheckUserSetIndex(int32_t index)
 
 void SwiperPattern::UpdateIndicatorOnChildChange()
 {
-    if (GetIndicatorType() == SwiperIndicatorType::DOT && RealTotalCount() == 0) {
-        RemoveIndicatorNode();
-        return;
-    }
-
     if (HasIndicatorNode()) {
         StopIndicatorAnimation();
         auto host = GetHost();
@@ -448,8 +443,6 @@ void SwiperPattern::UpdateIndicatorOnChildChange()
             indicatorNode->MarkModifyDone();
             indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
-    } else {
-        InitIndicator();
     }
 }
 
@@ -2007,11 +2000,6 @@ void SwiperPattern::StopFadeAnimation()
 
 void SwiperPattern::InitIndicator()
 {
-    if (GetIndicatorType() == SwiperIndicatorType::DOT && RealTotalCount() == 0) {
-        RemoveIndicatorNode();
-        return;
-    }
-
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
