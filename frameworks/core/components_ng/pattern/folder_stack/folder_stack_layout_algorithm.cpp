@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include "frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
+#include "frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 
 #include "base/memory/ace_type.h"
 #include "base/log/event_report.h"
