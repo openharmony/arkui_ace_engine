@@ -1800,7 +1800,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             subwindow->HideSubWindowNG();
         }
     };
-    popupPattern->CallPopupStateChangeCallback("false");
+    popupPattern->CallDoubleBindCallback("false");
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);

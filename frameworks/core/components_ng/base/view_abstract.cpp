@@ -1791,7 +1791,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
-        popupPattern->RegisterPopupStateChangeCallback(param->GetOnStateChange());
+        popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
