@@ -3666,7 +3666,7 @@ void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
     } else {
         gestureHub->RemoveDragEvent();
     }
-    frameNode->SetDraggable(draggable);
+    frameNode->SetCustomerDraggable(draggable);
 }
 
 void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)

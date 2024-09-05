@@ -68,7 +68,8 @@ private:
     bool hour24_ = SystemProperties::Is24HourClock();
     void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
         const RefPtr<FrameNode> columnNode);
-
+    float GetPickerMaxHeight(
+        const std::optional<LayoutConstraintF>& layoutConstraint, const RefPtr<FrameNode>& pickerNode);
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

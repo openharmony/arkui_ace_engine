@@ -133,14 +133,14 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
     } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
-               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         sheetTopSafeArea = GetBottomSafeArea();
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
                AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetTopSafeArea = 0.0f;
     }
-    // before API13，ignore safeArea height when in landscape
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    // before API14，ignore safeArea height when in landscape
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, 0.0f);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -183,7 +183,7 @@ void SheetPresentationPattern::InitPageHeight()
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
     } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
-               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         sheetTopSafeArea_ = GetBottomSafeArea();
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
@@ -1542,21 +1542,21 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto windowRect = pipelineContext->GetCurrentWindowRect();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
 #ifdef PREVIEW
-    windowRect = pipelineContext->GetDisplayWindowRectInfo();
+    rootWidth = pipelineContext->GetDisplayWindowRectInfo().Width();
 #endif
-    if (GreatOrEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+    if (GreatOrEqual(rootWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
         if (sheetStyle.sheetType.has_value()) {
             sheetType = sheetStyle.sheetType.value();
         } else {
             sheetType = SheetType::SHEET_POPUP;
         }
-    } else if (GreatOrEqual(windowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
-               LessNotEqual(windowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+    } else if (GreatOrEqual(rootWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+               LessNotEqual(rootWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
         if (sheetStyle.sheetType.has_value()) {
             sheetType = sheetStyle.sheetType.value();
         } else {

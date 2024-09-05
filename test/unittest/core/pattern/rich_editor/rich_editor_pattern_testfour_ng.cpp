@@ -940,18 +940,18 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleOnlyImageSelected001, TestSize.Level
     Offset globalOffset;
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->isOnlyImageDrag_ = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
     richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
     auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
     selectOverlayInfo->firstHandle.isShow = true;
     selectOverlayInfo->secondHandle.isShow = true;
     richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
     auto textPattern = AceType::DynamicCast<TextPattern>(richEditorPattern);
     auto children = textPattern->GetAllChildren();
     for (const auto& uinode : children) {
@@ -960,7 +960,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleOnlyImageSelected001, TestSize.Level
         ImageSourceInfo value(" ");
         imageLayoutProperty->UpdateImageSourceInfo(value);
     }
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
     EXPECT_TRUE(richEditorPattern->isOnlyImageDrag_);
 }
 

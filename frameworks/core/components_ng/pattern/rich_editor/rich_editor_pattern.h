@@ -931,6 +931,20 @@ public:
         imagePreviewMenuBuilder_ = builder;
         imagePreviewMenuParam_ = menuParam;
     }
+    void RequestFocusWhenSelected()
+    {
+        CHECK_NULL_VOID(!HasFocus());
+        CHECK_NULL_VOID(IsSelected());
+        auto focusHub = GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
+
+    void SetBarState(DisplayMode mode)
+    {
+        barDisplayMode_ = mode;
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -949,6 +963,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
+    void PasteStr(const RefPtr<RichEditorPattern>& richEditor, const std::string& text);
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
@@ -969,7 +984,7 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
+    void HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
@@ -1160,7 +1175,6 @@ private:
     bool IsTouchAtLineEnd(int32_t caretPos, const Offset& textOffset);
     bool IsTouchBeforeCaret(int32_t caretPos, const Offset& textOffset);
     bool IsClickBoundary(const int32_t position);
-    void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
     RectF GetSelectArea();
@@ -1256,6 +1270,7 @@ private:
     bool usingMouseRightButton_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     bool isClickOnAISpan_ = false;
+    bool isOnlyRequestFocus_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;
@@ -1344,6 +1359,7 @@ private:
     std::function<void()> imagePreviewMenuBuilder_;
     std::optional<MenuParam> imagePreviewMenuParam_ = std::nullopt;
     bool isImageSelfResponseEvent_ = true;
+    DisplayMode barDisplayMode_ = DisplayMode::AUTO;
 };
 } // namespace OHOS::Ace::NG
 

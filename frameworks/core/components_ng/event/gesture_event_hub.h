@@ -133,13 +133,10 @@ struct BindMenuStatus {
     bool isShow = false;
     MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
-    bool IsNotNeedCollectDragActuator() const
-    {
-        return (isBindLongPressMenu && longPressPreviewMode == MenuPreviewMode::NONE);
-    }
     bool IsNotNeedShowPreview() const
     {
-        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
+        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
+            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
     }
 };
 
@@ -729,6 +726,8 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
     static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
 

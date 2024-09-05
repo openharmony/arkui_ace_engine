@@ -168,7 +168,7 @@ private:
     void UpdateConfiguration();
     void HandleFormComponent(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
-    void AddFormComponentTask(const RequestFormInfo& info, RefPtr<NG::FrameNode> host);
+    void AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline);
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);

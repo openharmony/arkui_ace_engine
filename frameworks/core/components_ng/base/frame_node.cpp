@@ -450,6 +450,7 @@ FrameNode::FrameNode(
 
 FrameNode::~FrameNode()
 {
+    ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
@@ -1766,6 +1767,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ContainerScope scope(self->GetInstanceId());
         ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
@@ -5246,19 +5248,30 @@ uint32_t FrameNode::GetWindowPatternType() const
     return pattern_->GetWindowPatternType();
 }
 
-void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, NotificationType notificationType)
 {
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
+    int32_t updateFrom = CalcAbsPosition(index, id);
     auto pattern = GetPattern();
-    pattern->NotifyDataChange(updateFrom, count);
+    switch (notificationType) {
+        case NotificationType::START_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            break;
+        case NotificationType::END_CHANGE_POSITION:
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        case NotificationType::START_AND_END_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        default:
+            break;
+    }
+}
+
+// for Grid refresh GridItems
+void FrameNode::ChildrenUpdatedFrom(int32_t index)
+{
+    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
@@ -5446,6 +5459,17 @@ void FrameNode::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     if (renderContext_) {
         renderContext_->DumpInfo(json);
         renderContext_->DumpAdvanceInfo(json);
+    }
+}
+
+void FrameNode::ResetPredictNodes()
+{
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            frameNode->isLayoutDirtyMarked_ = false;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

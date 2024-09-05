@@ -269,7 +269,7 @@ XComponentType XComponentModelNG::GetType(FrameNode* frameNode)
 }
 
 RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
-    const std::string& libraryname)
+    const std::optional<std::string>& libraryname)
 {
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     auto frameNode = FrameNode::CreateFrameNode(

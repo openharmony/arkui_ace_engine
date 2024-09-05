@@ -255,6 +255,7 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
 
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
+    CHECK_NULL_VOID(layoutProperty);
     layoutConstraint_ = layoutProperty->layoutConstraint_;
     if (layoutProperty->gridProperty_) {
         gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);

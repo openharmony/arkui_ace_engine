@@ -181,6 +181,9 @@ RectF TextFieldSelectOverlay::GetSecondHandleLocalPaintRect()
     CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
     CHECK_NULL_RETURN(controller, RectF());
+    if (IsSingleHandle()) {
+        return controller->GetCaretInfo().originalRect;
+    }
     auto handleRect = controller->GetSecondHandleRect();
     auto contentHeight = pattern->GetTextContentRect().Height();
     auto handleHeight = std::min(handleRect.Height(), contentHeight);

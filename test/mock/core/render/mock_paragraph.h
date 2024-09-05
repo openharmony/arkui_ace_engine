@@ -42,6 +42,7 @@ public:
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetParagraphText, std::u16string());
+    MOCK_METHOD0(GetEllipsisTextRange, std::pair<size_t, size_t>());
     MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));

@@ -846,12 +846,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent0
     locationInfo.SetTouchType(TouchType::DOWN);
     Offset offset(1.0, 1.0);
     locationInfo.SetLocalLocation(offset);
-    TouchEventInfo touch("");
-    touch.AddTouchLocationInfo(std::move(locationInfo));
+    TouchEventInfo info("");
+    info.AddTouchLocationInfo(std::move(locationInfo));
     ASSERT_TRUE(gestureHub->touchEventActuator_ != nullptr);
     ASSERT_TRUE(gestureHub->touchEventActuator_->touchEvents_.size() > 0);
     auto impl = gestureHub->touchEventActuator_->touchEvents_.front()->callback_;
-    impl(touch);
+    impl(info);
     ASSERT_NE(pattern.onTouchListener_, nullptr);
 }
 

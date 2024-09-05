@@ -213,7 +213,9 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
         auto jsonNode = JsonUtil::Create(true);
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         int32_t res;
-        if (buttonPattern->IsParentMenu(frameNode)) {
+        // if info.GetPointerEvent() is null, device may in screen read mode
+        // otherwise, this event should be dropped in menu
+        if (buttonPattern->IsParentMenu(frameNode) && info.GetPointerEvent() != nullptr) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else {
             res = buttonPattern->ReportSecurityComponentClickEvent(info);
@@ -273,8 +275,7 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
         json->PutExtAttr("fontFamily", "HarmonyOS Sans", filter);
         json->PutExtAttr("fontStyle",
             static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
-        json->PutExtAttr("fontColor",
-            textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
+        json->PutExtAttr("fontColor", textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
     }
     auto paddingJson = JsonUtil::Create(true);
     paddingJson->Put("top", layoutProperty->GetBackgroundTopPadding().value_or(Dimension(0.0)).ToString().c_str());
@@ -562,7 +563,7 @@ void SecurityComponentPattern::UnregisterSecurityComponent()
     if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
         SecurityComponentHandler::UnregisterSecurityComponent(scId_);
     } else {
-        LOGW("security component has not registered, regStatus %{public}d.", regStatus_);
+        LOGI("security component has not registered, regStatus %{public}d.", regStatus_);
     }
     regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     scId_ = -1;

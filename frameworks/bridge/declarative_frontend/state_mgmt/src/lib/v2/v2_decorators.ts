@@ -206,17 +206,14 @@ const Consumer = (aliasName?: string) => {
     const providerName = (aliasName === undefined || aliasName === null ||
       (typeof aliasName === 'string' && aliasName.trim() === '')
     ) ? varName : aliasName;
-
-    let providerInfo;
     let retVal = this[varName];
+    let providerInfo;
 
     Reflect.defineProperty(proto, varName, {
       get() {
-        if (!providerInfo) {
-          providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-          if (providerInfo && providerInfo[0] && providerInfo[1]) {
-            retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-          }
+        providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+        if (providerInfo && providerInfo[0] && providerInfo[1]) {
+          retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
         }
         return retVal;
       },

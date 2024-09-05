@@ -430,6 +430,14 @@ void UINode::DoAddChild(
     }
     children_.insert(it, child);
 
+    if (IsAccessibilityVirtualNode()) {
+        auto parentVirtualNode = GetVirtualNodeParent().Upgrade();
+        if (parentVirtualNode) {
+            child->SetAccessibilityNodeVirtual();
+            child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
+
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
@@ -1239,12 +1247,6 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
     return { false, count };
 }
 
-// for Grid refresh GridItems
-void UINode::ChildrenUpdatedFrom(int32_t index)
-{
-    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
-}
-
 bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
@@ -1620,21 +1622,27 @@ void UINode::GetContainerComponentText(std::string& text)
     }
 }
 
-void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
 {
     int32_t updateFrom = 0;
     for (const auto& child : GetChildren()) {
         if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
+            updateFrom += changeIdx;
             break;
         }
         int32_t count = child->FrameCount();
         updateFrom += count;
     }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
     auto accessibilityId = GetAccessibilityId();
     auto parent = GetParent();
     if (parent) {
-        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

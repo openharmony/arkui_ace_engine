@@ -745,6 +745,7 @@ enum ArkUINodeType {
     ARKUI_TEXT_TIMER,
     ARKUI_MARQUEE,
     ARKUI_CHECK_BOX_GROUP,
+    ARKUI_RATING,
 };
 
 enum ArkUIEventCategory {
@@ -3878,6 +3879,7 @@ struct ArkUIRatingModifier {
     void (*resetStars)(ArkUINodeHandle node);
     void (*resetRatingStepSize)(ArkUINodeHandle node);
     void (*resetStarStyle)(ArkUINodeHandle node);
+    void (*setRatingOptions)(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator);
 };
 
 struct ArkUIRowSplitModifier {
@@ -4365,6 +4367,7 @@ struct ArkUIRadioModifier {
     void (*setRadioGroup)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetRadioGroup)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getRadioGroup)(ArkUINodeHandle node);
+    void (*setRadioIndicatorType)(ArkUINodeHandle node, ArkUI_Uint32 indicatorType);
 };
 
 struct ArkUIPatternLockControllerModifier {

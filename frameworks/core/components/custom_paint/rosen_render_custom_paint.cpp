@@ -714,6 +714,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         LOGW("fontCollection is null");
         return Size(0.0, 0.0);
     }
+    ACE_TEXT_SCOPED_TRACE("MeasureTextSizeInner");
 #ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(context.textAlign);

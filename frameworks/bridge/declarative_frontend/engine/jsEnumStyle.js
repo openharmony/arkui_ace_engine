@@ -902,8 +902,8 @@ var DialogAlignment;
 
 let HoverModeAreaType;
 (function (HoverModeAreaType) {
-  HoverModeAreaType[HoverModeAreaType["TOP_SCREEN"] = 0] = "TOP_SCREEN";
-  HoverModeAreaType[HoverModeAreaType["BOTTOM_SCREEN"] = 1] = "BOTTOM_SCREEN";
+  HoverModeAreaType.TOP_SCREEN = 0;
+  HoverModeAreaType.BOTTOM_SCREEN = 1;
 })(HoverModeAreaType || (HoverModeAreaType = {}));
 
 var DialogButtonStyle;
@@ -1064,10 +1064,10 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
-var MenuType;
+let MenuType;
 (function (MenuType) {
-  MenuType[MenuType["SELECTION_MENU"] = 0] = "SELECTION_MENU";
-  MenuType[MenuType["PREVIEW_MENU"] = 1] = "PREVIEW_MENU";
+  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
+  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
 })(MenuType || (MenuType = {}));
 
 var MenuPreviewMode;

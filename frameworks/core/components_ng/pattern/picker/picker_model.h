@@ -35,7 +35,7 @@ struct PickerDialogInfo {
     bool isStartDate;
     bool isEndDate;
     bool isSelectedDate;
-    bool enableHoverMode;
+    bool enableHoverMode = false;
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;

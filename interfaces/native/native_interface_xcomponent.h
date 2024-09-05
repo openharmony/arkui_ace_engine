@@ -48,6 +48,7 @@ extern "C" {
 #endif
 
 #define OH_NATIVE_XCOMPONENT_OBJ ("__NATIVE_XCOMPONENT_OBJ__")
+#define OH_NATIVE_XCOMPONENT_MAX_TOUCH_POINTS_NUMBER 10
 
 const uint32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
 const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
@@ -253,7 +254,7 @@ typedef struct {
     /** Timestamp of the current touch event. */
     int64_t timeStamp;
     /** Array of the current touch points. */
-    OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
+    OH_NativeXComponent_TouchPoint touchPoints[OH_NATIVE_XCOMPONENT_MAX_TOUCH_POINTS_NUMBER];
     /** Number of current touch points. */
     uint32_t numPoints;
 } OH_NativeXComponent_TouchEvent;

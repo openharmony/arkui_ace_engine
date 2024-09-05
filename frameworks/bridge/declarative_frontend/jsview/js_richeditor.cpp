@@ -1302,6 +1302,17 @@ void JSRichEditor::SetEnableHapticFeedback(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetEnableHapticFeedback(jsValue->ToBoolean());
 }
 
+void JSRichEditor::SetBarState(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info.Length() > 0);
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(!jsValue->IsUndefined() && jsValue->IsNumber());
+    int32_t barState = jsValue->ToNumber<int32_t>();
+    CHECK_NULL_VOID(barState >= static_cast<int32_t>(DisplayMode::OFF));
+    CHECK_NULL_VOID(barState <= static_cast<int32_t>(DisplayMode::ON));
+    RichEditorModel::GetInstance()->SetBarState(static_cast<DisplayMode>(barState));
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1344,6 +1355,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);
+    JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -2370,10 +2382,11 @@ void JSRichEditorBaseController::ParseTextDecoration(
                 static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
             style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
         }
-        if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
-            updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
-            style.SetTextDecorationColor(style.GetTextColor());
-        }
+        updateSpanStyle.isInitDecoration = true;
+    }
+    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
+        updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
+        style.SetTextDecorationColor(style.GetTextColor());
     }
 }
 
@@ -2434,7 +2447,7 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
         decorationObj->SetProperty<int32_t>("style",
             static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
     }
-    if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
+    if (typingStyle.isInitDecoration) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);
     }
     if (typingStyle.updateTextShadows.has_value()) {

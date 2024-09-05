@@ -517,7 +517,9 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
     CHECK_NULL_RETURN(host, false);
     auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->DumpRecord(",BuildParagraph id:" + std::to_string(host->GetId()));
+    pattern->DumpRecord("TextLayout BuildParagraph id:" + std::to_string(host->GetId()));
+    ACE_TEXT_SCOPED_TRACE(
+        "BuildParagraph[id:%d][contentConstraint:%s]", host->GetId(), contentConstraint.ToString().c_str());
     if (!textStyle.GetAdaptTextSize() || !spans_.empty()) {
         if (!CreateParagraphAndLayout(
                 textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
