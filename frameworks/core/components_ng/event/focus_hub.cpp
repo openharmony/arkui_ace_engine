@@ -1364,7 +1364,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         if (!HasPaintRect()) {
             return false;
         }
-        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth, false, IsFocusBoxGlow());
+        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
         return true;
     }
 
@@ -1380,9 +1380,9 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     }
     if (HasPaintRect()) {
         renderContext->PaintFocusState(
-            GetPaintRect(), focusPaddingVp, paintColor, paintWidth, { false, IsFocusBoxGlow() });
+            GetPaintRect(), focusPaddingVp, paintColor, paintWidth, { false, appTheme->IsFocusBoxGlow() });
     } else {
-        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth, IsFocusBoxGlow());
+        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth, appTheme->IsFocusBoxGlow());
     }
     return true;
 }
@@ -1468,7 +1468,7 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
-    renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, IsFocusBoxGlow());
+    renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
     return true;
 }
 

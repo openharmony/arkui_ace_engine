@@ -99,9 +99,6 @@ public:
                 buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
                 buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Unit());
             theme->minFontSize_ = buttonPattern->GetAttr<Dimension>("button_min_font_size", 0.0_fp);
-            theme->focusBorderColor_ = buttonPattern->GetAttr<Color>("button_focus_border_color", Color(0xFF007DFF));
-            theme->focusBorderWidth_ = buttonPattern->GetAttr<Dimension>("button_focus_border_width", 2.0_vp);
-            theme->focusBoxGlow_ = static_cast<bool>(buttonPattern->GetAttr<double>("button_focus_effect_type", 0.0));
             ParseAdditionalStylePattern(buttonPattern, theme);
         }
         void ParseAdditionalStylePattern(
@@ -440,21 +437,6 @@ public:
         return agingTextMaxLines_;
     }
 
-    const Dimension& GetFocusBorderWidth() const
-    {
-        return focusBorderWidth_;
-    }
-
-    const Color& GetFocusBorderColor() const
-    {
-        return focusBorderColor_;
-    }
-
-    bool IsFocusBoxGlow() const
-    {
-        return focusBoxGlow_;
-    }
-
 protected:
     ButtonTheme() = default;
 
@@ -476,7 +458,6 @@ private:
     Color downloadTextColor_;
     Color downloadBorderColor_;
     Color downloadProgressColor_;
-    Color focusBorderColor_;
     TextStyle textStyle_;
     Edge padding_;
     Edge minCircleButtonPadding_;
@@ -495,7 +476,6 @@ private:
     Dimension maxCircleButtonIcon_;
     Dimension borderWidth_;
     Dimension downloadHeight_;
-    Dimension focusBorderWidth_;
     std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
     std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;
@@ -510,7 +490,6 @@ private:
     Dimension agingNormalPadding_;
     Dimension agingSmallPadding_;
     uint32_t agingTextMaxLines_ = 2;
-    bool focusBoxGlow_ = false;
 };
 
 } // namespace OHOS::Ace

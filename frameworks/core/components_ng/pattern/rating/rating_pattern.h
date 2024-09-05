@@ -76,15 +76,8 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto theme = pipeline->GetTheme<AppTheme>();
-        CHECK_NULL_RETURN(theme, FocusPattern());
-
         FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(theme->GetFocusColor());
-        focusPaintParams.SetPaintWidth(theme->GetFocusWidthVp());
-        focusPaintParams.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        focusPaintParams.SetPaintWidth(themeBorderWidth_);
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
