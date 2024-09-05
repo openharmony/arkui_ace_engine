@@ -110,7 +110,7 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
     if (itemStart_ && Positive(lanes_[0][0].startPos - TopMargin())) {
         return true;
     }
-    if (offsetEnd_) {
+    if (!itemStart_ && offsetEnd_) {
         return std::all_of(lanes_.back().begin(), lanes_.back().end(), [this](const Lane& lane) {
             return LessNotEqual(lane.endPos + footerHeight_ + BotMargin(), lastMainSize_);
         });

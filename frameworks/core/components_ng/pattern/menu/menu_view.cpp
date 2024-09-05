@@ -664,7 +664,6 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu();
 }
 

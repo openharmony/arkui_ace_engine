@@ -2341,9 +2341,8 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     auto container = Container::Current();
     if (container == nullptr) {
         TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "Get current container is nullptr.");
-        container = Container::GetActive();
+        return false;
     }
-    CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
     return (container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_));

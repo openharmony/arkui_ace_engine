@@ -54,7 +54,6 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SHEET_PAGE_TAG, targetId);
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
-    sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
@@ -126,8 +125,8 @@ void SheetView::CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const R
                           sheetStyle.detents[1] == sheetStyle.detents[SHEET_DETENTS_TWO];
     }
 
-    // 1. showDragBar && not single detents
-    // 2. has SystemTitleBar
+    // 1、showDragBar && not single detents
+    // 2、has SystemTitleBar
     // need set drag bar invisible to occupy place
     if ((!isSingleDetents && showDragIndicator) || sheetStyle.isTitleBuilder.has_value()) {
         dragBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);

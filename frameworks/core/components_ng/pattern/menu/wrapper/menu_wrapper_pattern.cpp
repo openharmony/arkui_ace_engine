@@ -57,7 +57,6 @@ void MenuWrapperPattern::InitFocusEvent()
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to lost focus");
         pattern->HideMenu();
     };
     focusHub->SetOnBlurInternal(std::move(blurTask));
@@ -409,7 +408,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             if (!menuPattern) {
                 continue;
             }
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
             HideMenu(menuPattern, menuWrapperChildNode, position);
         }
     } else if (touch.GetTouchType() == TouchType::MOVE) {

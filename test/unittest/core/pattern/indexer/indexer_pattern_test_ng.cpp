@@ -13,19 +13,148 @@
  * limitations under the License.
  */
 
-#include "indexer_test_ng.h"
+#include <optional>
+
+#include "gtest/gtest.h"
+
+#include "base/geometry/dimension.h"
+
+#define protected public
+#define private public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/common/container.h"
+#include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
+#include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
+using namespace testing;
+using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
-    "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
-std::vector<std::string> CREATE_ARRAY_1 = { "A", "B", "C", "D", "E", "F", "G", "H", "I"};
-std::vector<std::string> CREATE_ARRAY_2 = { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
+std::vector<std::string> CREATE_ARRAY = { "AAAAAAAA", "BBBB", "C", "D", "E", "FFFFF", "G", "H", "I", "J", "K", "L",
+    "MMMMMMMM", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+std::vector<std::string> CREATE_ARRAY_1 = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
+std::vector<std::string> CREATE_ARRAY_2 = { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" };
 } // namespace
- 
-class IndexerPatternTestNg : public IndexerTestNg {
+
+class IndexerPatternTestNg : public TestNG {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
+    void GetInstance();
+
+    void Create(const std::function<void(IndexerModelNG)>& callback = nullptr,
+        std::vector<std::string> arrayValue = CREATE_ARRAY, int32_t selected = 0);
+    float GetFirstChildOffsetY();
+    AssertionResult Selected(int32_t expectSelected);
+    void MoveIndex(GestureEvent gestureEvent);
+    AssertionResult Touch(TouchType touchType, float locationY, int32_t expectSelected);
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<IndexerPattern> pattern_;
+    RefPtr<IndexerEventHub> eventHub_;
+    RefPtr<IndexerLayoutProperty> layoutProperty_;
+    RefPtr<IndexerPaintProperty> paintProperty_;
+    RefPtr<IndexerAccessibilityProperty> accessibilityProperty_;
 };
+
+void IndexerPatternTestNg::SetUpTestSuite()
+{
+    TestNG::SetUpTestSuite();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_INDEXER);
+    auto indexerTheme = IndexerTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(indexerTheme));
+}
+
+void IndexerPatternTestNg::TearDownTestSuite()
+{
+    TestNG::TearDownTestSuite();
+}
+
+void IndexerPatternTestNg::SetUp() {}
+
+void IndexerPatternTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    pattern_ = nullptr;
+    eventHub_ = nullptr;
+    layoutProperty_ = nullptr;
+    paintProperty_ = nullptr;
+    accessibilityProperty_ = nullptr;
+}
+
+void IndexerPatternTestNg::GetInstance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    pattern_ = frameNode_->GetPattern<IndexerPattern>();
+    eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
+    layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
+    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+}
+
+void IndexerPatternTestNg::Create(
+    const std::function<void(IndexerModelNG)>& callback, std::vector<std::string> arrayValue, int32_t selected)
+{
+    IndexerModelNG model;
+    model.Create(arrayValue, selected);
+    model.SetAutoCollapse(false);
+    if (callback) {
+        callback(model);
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+}
+
+float IndexerPatternTestNg::GetFirstChildOffsetY()
+{
+    if (pattern_->itemCount_ > 0) {
+        return GetChildRect(frameNode_, 0).GetY();
+    }
+    return 0.f;
+}
+
+AssertionResult IndexerPatternTestNg::Selected(int32_t expectSelected)
+{
+    return IsEqual(pattern_->GetSelected(), expectSelected);
+}
+
+void IndexerPatternTestNg::MoveIndex(GestureEvent gestureEvent)
+{
+    auto start = pattern_->panEvent_->GetActionStartEventFunc();
+    auto update = pattern_->panEvent_->GetActionUpdateEventFunc();
+    start(gestureEvent);
+    update(gestureEvent);
+}
+
+AssertionResult IndexerPatternTestNg::Touch(TouchType touchType, float locationY, int32_t expectSelected)
+{
+    float firstOffsetY = GetFirstChildOffsetY();
+    TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset(0.f, locationY + firstOffsetY));
+    auto touchFuc = pattern_->touchListener_->GetTouchEventCallback();
+    touchFuc(touchEventInfo);
+    return Selected(expectSelected);
+}
 
 /**
  * @tc.name: IndexerPatternNg001
@@ -37,44 +166,58 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg001, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer and get frameNode.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetSelectedColor(Color(0x00000000));
-    model.SetColor(Color(0x00000000));
-    model.SetPopupColor(Color(0x00000000));
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(true);
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50)); //50 is the horizontal space of popupNode
-    model.SetSelected(0);
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
-    model.SetPopupItemBackground(Color(0x00000000));
-    model.SetPopupSelectedColor(Color(0x00000000));
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(24)); //24 is the fontSize of item
-    model.SetFontWeight(FontWeight::MEDIUM);
-    model.SetAdaptiveWidth(true);
-    model.SetItemSize(20.0_vp); //20.0_vp is the width of item
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color(0x00000000));
+            model.SetColor(Color(0x00000000));
+            model.SetPopupColor(Color(0x00000000));
+            model.SetSelectedBackgroundColor(Color(0x00000000));
+            model.SetPopupBackground(Color(0x00000000));
+            model.SetUsingPopup(true);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50)); //50 is the horizontal space of popupNode
+            model.SetSelected(0);
+            model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
+            model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
+            model.SetPopupItemBackground(Color(0x00000000));
+            model.SetPopupSelectedColor(Color(0x00000000));
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetFontSize(Dimension(24)); //24 is the fontSize of item
+            model.SetFontWeight(FontWeight::MEDIUM);
+            model.SetAdaptiveWidth(true);
+            model.SetItemSize(20.0_vp); //20.0_vp is the width of item
+        },
+        CREATE_ARRAY, 0);
 
     /**
      * @tc.steps: step2.  get layoutWrapper and indexerLayoutAlgorithm.
      * @tc.expected: step2. get layoutWrapper success.
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), CREATE_ARRAY.size());
+    pattern_->OnModifyDone();
     pattern_->ApplyIndexChanged(true, true);
-    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(indexerLayoutAlgorithm, nullptr);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetText(), "AAAAAAAA");
 
     pattern_->selected_ = 5; // 5 is the index of item
-    EXPECT_EQ(accessibilityProperty_->GetText(), "F");
+    EXPECT_EQ(accessibilityProperty->GetText(), "FFFFF");
 
     /**
      * @tc.steps: step3.  get itemSize.
      * @tc.expected: step3. check whether the itemSize value is correct.
      */
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 20);  //20 is the width of item
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 20); //20 is the height of item
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    auto geometryNode = childNode->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
+    EXPECT_EQ(size.Width(), 20);  //20 is the width of item
+    EXPECT_EQ(size.Height(), 20); //20 is the height of item
 }
 
 /**
@@ -87,44 +230,58 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg002, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer and get frameNode.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetSelectedColor(Color(0x00000000));
-    model.SetColor(Color(0x00000000));
-    model.SetPopupColor(Color(0x00000000));
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(true);
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
-    model.SetSelected(5);                                         //5 is the index of item
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
-    model.SetPopupItemBackground(Color(0x00000000));
-    model.SetPopupSelectedColor(Color(0x00000000));
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(24)); //24 is the fontSize of item
-    model.SetFontWeight(FontWeight::MEDIUM);
-    model.SetAdaptiveWidth(true);
-    model.SetItemSize(28.0_vp); //28.0_vp is the itemSize of indexer
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color(0x00000000));
+            model.SetColor(Color(0x00000000));
+            model.SetPopupColor(Color(0x00000000));
+            model.SetSelectedBackgroundColor(Color(0x00000000));
+            model.SetPopupBackground(Color(0x00000000));
+            model.SetUsingPopup(true);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
+            model.SetSelected(5);                                         //5 is the index of item
+            model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
+            model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
+            model.SetPopupItemBackground(Color(0x00000000));
+            model.SetPopupSelectedColor(Color(0x00000000));
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetFontSize(Dimension(24)); //24 is the fontSize of item
+            model.SetFontWeight(FontWeight::MEDIUM);
+            model.SetAdaptiveWidth(true);
+            model.SetItemSize(28.0_vp); //28.0_vp is the itemSize of indexer
+        },
+        CREATE_ARRAY, 0);
 
     /**
      * @tc.steps: step2.  get layoutWrapper and indexerLayoutAlgorithm.
      * @tc.expected: step2. get layoutWrapper success.
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), CREATE_ARRAY.size());
+    pattern_->OnModifyDone();
     pattern_->ApplyIndexChanged(true, true);
-    EXPECT_EQ(accessibilityProperty_->GetText(), "F");
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(indexerLayoutAlgorithm, nullptr);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetText(), "FFFFF");
 
     pattern_->selected_ = 0;
-    EXPECT_EQ(accessibilityProperty_->GetText(), "A");
+    EXPECT_EQ(accessibilityProperty->GetText(), "AAAAAAAA");
 
     /**
      * @tc.steps: step3.  get itemSize.
      * @tc.expected: step3. check whether the itemSize value is correct.
      */
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 28);  //28 is the width of item
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 28); //28 is the height of item
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    auto geometryNode = childNode->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
+    EXPECT_EQ(size.Width(), 28);  //28 is the width of item
+    EXPECT_EQ(size.Height(), 28); //28 is the height of item
 }
 
 /**
@@ -137,44 +294,58 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg003, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer and get frameNode.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetSelectedColor(Color::BLACK);
-    model.SetColor(Color::BLUE);
-    model.SetPopupColor(Color::GRAY);
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(false);
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
-    model.SetSelected(10);                                        //10 is the index of item
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
-    model.SetPopupItemBackground(Color::BLACK);
-    model.SetPopupSelectedColor(Color::RED);
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(24)); //24 is the fontSize of item
-    model.SetFontWeight(FontWeight::MEDIUM);
-    model.SetAdaptiveWidth(true);
-    model.SetItemSize(28.0_vp); //28.0_vp is the itemSize of indexer
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color::BLACK);
+            model.SetColor(Color::BLUE);
+            model.SetPopupColor(Color::GRAY);
+            model.SetSelectedBackgroundColor(Color(0x00000000));
+            model.SetPopupBackground(Color(0x00000000));
+            model.SetUsingPopup(false);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
+            model.SetSelected(10);                                        //10 is the index of item
+            model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
+            model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
+            model.SetPopupItemBackground(Color::BLACK);
+            model.SetPopupSelectedColor(Color::RED);
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetFontSize(Dimension(24)); //24 is the fontSize of item
+            model.SetFontWeight(FontWeight::MEDIUM);
+            model.SetAdaptiveWidth(true);
+            model.SetItemSize(28.0_vp); //28.0_vp is the itemSize of indexer
+        },
+        CREATE_ARRAY, 0);
 
     /**
      * @tc.steps: step2.  get layoutWrapper and indexerLayoutAlgorithm.
      * @tc.expected: step2. get layoutWrapper success.
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), CREATE_ARRAY.size());
+    pattern_->OnModifyDone();
     pattern_->ApplyIndexChanged(true, true);
-    EXPECT_EQ(accessibilityProperty_->GetText(), "K");
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(indexerLayoutAlgorithm, nullptr);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetText(), "K");
 
     pattern_->selected_ = 12; //12 is the index of item
-    EXPECT_EQ(accessibilityProperty_->GetText(), "M");
+    EXPECT_EQ(accessibilityProperty->GetText(), "MMMMMMMM");
 
     /**
      * @tc.steps: step3.  get itemSize.
      * @tc.expected: step3. check whether the itemSize value is correct.
      */
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 28);  //28 is the width of item
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 28); //28 is the height of item
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    auto geometryNode = childNode->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
+    EXPECT_EQ(size.Width(), 28);  //28 is the width of item
+    EXPECT_EQ(size.Height(), 28); //28 is the height of item
 }
 
 /**
@@ -187,44 +358,58 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg004, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer and get frameNode.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetSelectedColor(Color::GRAY);
-    model.SetColor(Color::GRAY);
-    model.SetPopupColor(Color::WHITE);
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(false);
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
-    model.SetSelected(25);                                        //25 is the index of item
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
-    model.SetPopupItemBackground(Color::BLACK);
-    model.SetPopupSelectedColor(Color::RED);
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(24)); //24 is the fontSize of item
-    model.SetFontWeight(FontWeight::MEDIUM);
-    model.SetAdaptiveWidth(true);
-    model.SetItemSize(5.0_vp); //5.0_vp is the itemSize of indexer
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color::GRAY);
+            model.SetColor(Color::GRAY);
+            model.SetPopupColor(Color::WHITE);
+            model.SetSelectedBackgroundColor(Color(0x00000000));
+            model.SetPopupBackground(Color(0x00000000));
+            model.SetUsingPopup(false);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
+            model.SetSelected(25);                                        //25 is the index of item
+            model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
+            model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
+            model.SetPopupItemBackground(Color::BLACK);
+            model.SetPopupSelectedColor(Color::RED);
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetFontSize(Dimension(24)); //24 is the fontSize of item
+            model.SetFontWeight(FontWeight::MEDIUM);
+            model.SetAdaptiveWidth(true);
+            model.SetItemSize(5.0_vp); //5.0_vp is the itemSize of indexer
+        },
+        CREATE_ARRAY, 0);
 
     /**
      * @tc.steps: step2.  get layoutWrapper and indexerLayoutAlgorithm.
      * @tc.expected: step2. get layoutWrapper success.
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), CREATE_ARRAY.size());
+    pattern_->OnModifyDone();
     pattern_->ApplyIndexChanged(true, true);
-    EXPECT_EQ(accessibilityProperty_->GetText(), "Z");
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(indexerLayoutAlgorithm, nullptr);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetText(), "Z");
 
     pattern_->selected_ = 8; //8 is the index of item
-    EXPECT_EQ(accessibilityProperty_->GetText(), "I");
+    EXPECT_EQ(accessibilityProperty->GetText(), "I");
 
     /**
      * @tc.steps: step3.  get itemSize.
      * @tc.expected: step3. check whether the itemSize value is correct.
      */
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 5);  //5 is the width of item
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 5); //5 is the height of item
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    auto geometryNode = childNode->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
+    EXPECT_EQ(size.Width(), 5);  //5 is the width of item
+    EXPECT_EQ(size.Height(), 5); //5 is the height of item
 }
 
 /**
@@ -237,44 +422,58 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg005, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer and get frameNode.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_1, 0);
-    model.SetSelectedColor(Color::GRAY);
-    model.SetColor(Color::GRAY);
-    model.SetPopupColor(Color::WHITE);
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(false);
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
-    model.SetSelected(2);                                         //25 is the index of item
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
-    model.SetPopupItemBackground(Color::BLACK);
-    model.SetPopupSelectedColor(Color::RED);
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(24)); //24 is the fontSize of item
-    model.SetFontWeight(FontWeight::MEDIUM);
-    model.SetAdaptiveWidth(true);
-    model.SetItemSize(15.0_vp); //15.0_vp is the itemSize of indexer
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color::GRAY);
+            model.SetColor(Color::GRAY);
+            model.SetPopupColor(Color::WHITE);
+            model.SetSelectedBackgroundColor(Color(0x00000000));
+            model.SetPopupBackground(Color(0x00000000));
+            model.SetUsingPopup(false);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
+            model.SetSelected(2);                                         //25 is the index of item
+            model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
+            model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
+            model.SetPopupItemBackground(Color::BLACK);
+            model.SetPopupSelectedColor(Color::RED);
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetFontSize(Dimension(24)); //24 is the fontSize of item
+            model.SetFontWeight(FontWeight::MEDIUM);
+            model.SetAdaptiveWidth(true);
+            model.SetItemSize(15.0_vp); //15.0_vp is the itemSize of indexer
+        },
+        CREATE_ARRAY_1, 0);
 
     /**
      * @tc.steps: step2.  get layoutWrapper and indexerLayoutAlgorithm.
      * @tc.expected: step2. get layoutWrapper success.
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), CREATE_ARRAY_1.size());
+    pattern_->OnModifyDone();
     pattern_->ApplyIndexChanged(true, true);
-    EXPECT_EQ(accessibilityProperty_->GetText(), "C");
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(indexerLayoutAlgorithm, nullptr);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetText(), "C");
 
     pattern_->selected_ = 8; //8 is the index of item
-    EXPECT_EQ(accessibilityProperty_->GetText(), "I");
+    EXPECT_EQ(accessibilityProperty->GetText(), "I");
 
     /**
      * @tc.steps: step3.  get itemSize.
      * @tc.expected: step3. check whether the itemSize value is correct.
      */
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 15);  //15 is the width of item
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 15); //15 is the height of item
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    auto geometryNode = childNode->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
+    EXPECT_EQ(size.Width(), 15);  //15 is the width of item
+    EXPECT_EQ(size.Height(), 15); //15 is the height of item
 }
 
 /**
@@ -287,44 +486,58 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg006, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer and get frameNode.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 0);
-    model.SetSelectedColor(Color::BLACK);
-    model.SetColor(Color::BLACK);
-    model.SetPopupColor(Color::BLACK);
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(false);
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
-    model.SetSelected(10);                                        //10 is the index of item
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
-    model.SetPopupItemBackground(Color::BLACK);
-    model.SetPopupSelectedColor(Color::BLACK);
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(14)); //14 is the fontSize of item
-    model.SetFontWeight(FontWeight::MEDIUM);
-    model.SetAdaptiveWidth(true);
-    model.SetItemSize(2.0_vp); //2.0_vp is the itemSize of indexer
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetSelectedColor(Color::BLACK);
+            model.SetColor(Color::BLACK);
+            model.SetPopupColor(Color::BLACK);
+            model.SetSelectedBackgroundColor(Color(0x00000000));
+            model.SetPopupBackground(Color(0x00000000));
+            model.SetUsingPopup(false);
+            model.SetAlignStyle(0);
+            model.SetPopupHorizontalSpace(Dimension(50));                 //50 is the horizontal space of popupNode
+            model.SetSelected(10);                                        //10 is the index of item
+            model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP)); //-96.f is the left space of popupNode
+            model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));  //48.f is the top space of popupNode
+            model.SetPopupItemBackground(Color::BLACK);
+            model.SetPopupSelectedColor(Color::BLACK);
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetFontSize(Dimension(14)); //14 is the fontSize of item
+            model.SetFontWeight(FontWeight::MEDIUM);
+            model.SetAdaptiveWidth(true);
+            model.SetItemSize(2.0_vp); //2.0_vp is the itemSize of indexer
+        },
+        CREATE_ARRAY_2, 0);
 
     /**
      * @tc.steps: step2.  get layoutWrapper and indexerLayoutAlgorithm.
      * @tc.expected: step2. get layoutWrapper success.
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), CREATE_ARRAY_2.size());
+    pattern_->OnModifyDone();
     pattern_->ApplyIndexChanged(true, true);
-    EXPECT_EQ(accessibilityProperty_->GetText(), "J");
+    auto layoutWrapper = frameNode_->CreateLayoutWrapper();
+    EXPECT_NE(layoutWrapper, nullptr);
+    auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(indexerLayoutAlgorithm, nullptr);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto accessibilityProperty = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetText(), "J");
 
     pattern_->selected_ = 0;
-    EXPECT_EQ(accessibilityProperty_->GetText(), "#");
+    EXPECT_EQ(accessibilityProperty->GetText(), "#");
 
     /**
      * @tc.steps: step3.  get itemSize.
      * @tc.expected: step3. check whether the itemSize value is correct.
      */
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 2);  //2 is the width of item
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 2); //2 is the height of item
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetFirstChild());
+    auto geometryNode = childNode->GetGeometryNode();
+    auto size = geometryNode->GetFrameSize();
+    EXPECT_EQ(size.Width(), 2);  //2 is the width of item
+    EXPECT_EQ(size.Height(), 2); //2 is the height of item
 }
 
 /**
@@ -340,11 +553,12 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg007, TestSize.Level1)
      */
     int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 0);
-    model.SetUsingPopup(true);
-    model.SetIndexerBorderRadius(Dimension(5)); //5 is the radius of item
-    CreateDone();
-
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetIndexerBorderRadius(Dimension(5)); //5 is the radius of item
+        },
+        CREATE_ARRAY_2, 0);
     auto definedRadius = paintProperty_->GetIndexerBorderRadiusValue();
     paintProperty_->UpdateIndexerBorderRadius(definedRadius);
     pattern_->OnChildHover(1, true);
@@ -403,14 +617,15 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg008, TestSize.Level1)
      */
     int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 0);
-    model.SetUsingPopup(true);
-    model.SetItemBorderRadius(Dimension(5));       //5 is the radius of item
-    model.SetIndexerBorderRadius(Dimension(5));    //5 is the radius of indexer
-    model.SetPopupItemBorderRadius(Dimension(10)); //10 is the radius of popup item
-    model.SetPopupBorderRadius(Dimension(20));     //20 is the radius of popup
-    CreateDone();
-
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetItemBorderRadius(Dimension(5));       //5 is the radius of item
+            model.SetIndexerBorderRadius(Dimension(5));    //5 is the radius of indexer
+            model.SetPopupItemBorderRadius(Dimension(10)); //10 is the radius of popup item
+            model.SetPopupBorderRadius(Dimension(20));     //20 is the radius of popup
+        },
+        CREATE_ARRAY_2, 0);
     auto definedRadius = paintProperty_->GetIndexerBorderRadiusValue();
     auto definedPopupRadius = paintProperty_->GetPopupBorderRadiusValue();
     paintProperty_->UpdateIndexerBorderRadius(definedRadius);
@@ -473,13 +688,14 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg009, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     BlurStyleOption indexerBlurStyle;
     indexerBlurStyle.blurStyle = BlurStyle::BACKGROUND_THICK;
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 0);
-    model.SetUsingPopup(true);
-    model.SetIndexerBorderRadius(Dimension(10)); //10 is the radius of indexer
-    model.SetPopupBorderRadius(Dimension(30));   //30 is the radius of popup
-    model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
-    CreateDone();
-
+    Create(
+        [&indexerBlurStyle](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetIndexerBorderRadius(Dimension(10)); //10 is the radius of indexer
+            model.SetPopupBorderRadius(Dimension(30));   //30 is the radius of popup
+            model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+        },
+        CREATE_ARRAY_2, 0);
     auto definedRadius = paintProperty_->GetIndexerBorderRadiusValue();
     auto definedPopupRadius = paintProperty_->GetPopupBorderRadiusValue();
     auto blurStyle = paintProperty_->GetPopupBackgroundBlurStyleValue();
@@ -542,12 +758,14 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg010, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     BlurStyleOption indexerBlurStyle;
     indexerBlurStyle.blurStyle = BlurStyle::BACKGROUND_THICK;
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_1, 0);
-    model.SetUsingPopup(true);
-    model.SetIndexerBorderRadius(Dimension(-1)); //-1 is the radius of indexer
-    model.SetPopupBorderRadius(Dimension(-1));   //-1 is the radius of popup
-    model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
-    CreateDone();
+    Create(
+        [&indexerBlurStyle](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetIndexerBorderRadius(Dimension(-1)); //-1 is the radius of indexer
+            model.SetPopupBorderRadius(Dimension(-1));   //-1 is the radius of popup
+            model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+        },
+        CREATE_ARRAY_1, 0);
     auto definedRadius = paintProperty_->GetIndexerBorderRadiusValue();
     auto definedPopupRadius = paintProperty_->GetPopupBorderRadiusValue();
     auto blurStyle = paintProperty_->GetPopupBackgroundBlurStyleValue();
@@ -610,13 +828,15 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg011, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     BlurStyleOption indexerBlurStyle;
     indexerBlurStyle.blurStyle = BlurStyle::BACKGROUND_THICK;
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_1, 0);
-    model.SetUsingPopup(true);
-    model.SetIndexerBorderRadius(Dimension(-1)); //-1 is the radius of indexer
-    model.SetPopupBorderRadius(Dimension(-1));   //-1 is the radius of popup
-    model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
-    model.SetPopupTitleBackground(Color::BLACK);
-    CreateDone();
+    Create(
+        [&indexerBlurStyle](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetIndexerBorderRadius(Dimension(-1)); //-1 is the radius of indexer
+            model.SetPopupBorderRadius(Dimension(-1));   //-1 is the radius of popup
+            model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+            model.SetPopupTitleBackground(Color::BLACK);
+        },
+        CREATE_ARRAY_1, 0);
     pattern_->autoCollapse_ = false;
     auto definedRadius = paintProperty_->GetIndexerBorderRadiusValue();
     auto definedPopupRadius = paintProperty_->GetPopupBorderRadiusValue();
@@ -679,13 +899,14 @@ HWTEST_F(IndexerPatternTestNg, IndexerPatternNg012, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     BlurStyleOption indexerBlurStyle;
     indexerBlurStyle.blurStyle = BlurStyle::COMPONENT_ULTRA_THIN;
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_1, 0);
-    model.SetUsingPopup(true);
-    model.SetIndexerBorderRadius(Dimension(0));
-    model.SetPopupBorderRadius(Dimension(0));
-    model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
-    model.SetPopupTitleBackground(Color::GRAY);
-    CreateDone();
+    Create(
+        [&indexerBlurStyle](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetIndexerBorderRadius(Dimension(0));
+            model.SetPopupBorderRadius(Dimension(0));
+            model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+            model.SetPopupTitleBackground(Color::GRAY);
+        }, CREATE_ARRAY_1, 0);
     pattern_->autoCollapse_ = false;
     auto definedRadius = paintProperty_->GetIndexerBorderRadiusValue();
     auto definedPopupRadius = paintProperty_->GetPopupBorderRadiusValue();

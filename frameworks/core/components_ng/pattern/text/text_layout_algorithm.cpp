@@ -598,21 +598,14 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
     textStyle.SetTextIndent(Dimension(0.0f));
-
     std::string content = layoutProperty->GetContent().value_or("");
     std::replace(content.begin(), content.end(), '\n', ' ');
-    if (!textStyle.GetAdaptTextSize()) {
-        if (!CreateParagraph(textStyle, content, layoutWrapper)) {
-            return std::nullopt;
-        }
-    } else {
-        if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
-            return std::nullopt;
-        }
+    if (!CreateParagraph(textStyle, content, layoutWrapper)) {
+        return std::nullopt;
     }
+
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
-
     // layout the paragraph to the width of text
     paragraph->Layout(std::numeric_limits<float>::max());
     float paragraphWidth = paragraph->GetLongestLine();

@@ -54,7 +54,7 @@ public:
     explicit SubwindowOhos(int32_t instanceId);
     ~SubwindowOhos() = default;
 
-    bool InitContainer() override;
+    void InitContainer() override;
     void ResizeWindow() override;
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
@@ -136,6 +136,7 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    bool CheckHostWindowStatus() const override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -148,6 +149,7 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

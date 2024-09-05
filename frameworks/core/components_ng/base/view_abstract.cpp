@@ -1946,7 +1946,6 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
                 std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         } else {
             auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetNode->GetId());
             SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
         }
         return;
