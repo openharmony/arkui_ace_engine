@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include <memory>
 #include <optional>
@@ -1176,8 +1177,8 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     MenuItemProperties menuItemProps;
     menuItemProps.content = content;
     menuItemProps.endIcon = imageSourceInfo;
-    auto model = new NG::MenuItemModelNG();
-    model->Create(menuItemProps);
+    MenuItemModelNG menuItemModel;
+    menuItemModel.Create(menuItemProps);
     auto stack = ViewStackProcessor::GetInstance();
 
     auto titleItem = AceType::DynamicCast<FrameNode>(stack->Finish());
@@ -1345,7 +1346,6 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
-    UpdateTextOverflow(textProperty);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
@@ -1359,7 +1359,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
             textAlign = TextAlign::START;
         }
     }
-    textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
+    UpdateTextOverflow(textProperty);
 
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());

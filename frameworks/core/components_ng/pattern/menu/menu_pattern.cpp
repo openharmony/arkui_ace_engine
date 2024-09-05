@@ -66,12 +66,12 @@ constexpr double DAMPING = 22.0f;
 constexpr double STACK_MENU_DAMPING = 26.0f;
 const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
-const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
@@ -197,36 +197,20 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
-        // Not handle first change
-        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
-            return;
+        auto menuNode = menuNodeWk.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHide()) {
+            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        AnimationOption option;
-        option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
-        AnimationUtils::Animate(
-            option,
-            [weakPipeline = WeakPtr<PipelineContext>(pipelineContext), weakMenu = menuNodeWk]() {
-                auto menu = weakMenu.Upgrade();
-                CHECK_NULL_VOID(menu);
-                auto menuPattern = menu->GetPattern<MenuPattern>();
-                CHECK_NULL_VOID(menuPattern);
-                auto menuWarpper = menuPattern->GetMenuWrapper();
-                CHECK_NULL_VOID(menuWarpper);
-                auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
-                CHECK_NULL_VOID(warpperPattern);
-                if (!warpperPattern->IsHide()) {
-                    auto pipeline = weakPipeline.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-                    pipeline->FlushUITasks();
-                }
-            });
-        pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
