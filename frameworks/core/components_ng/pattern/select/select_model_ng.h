@@ -73,9 +73,6 @@ public:
     void SetMenuAlign(const MenuAlign& menuAlign) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
-    void SetOptionWidth(const Dimension& value) override;
-    void SetOptionHeight(const Dimension& value) override;
-    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     void SetHasOptionWidth(bool hasOptionWidth) override;
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
@@ -114,13 +111,16 @@ public:
     static void SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    void SetOptionWidth(const Dimension& value) override;
+    void SetOptionHeight(const Dimension& value) override;
+    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
     static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
     static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
-    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
+    static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

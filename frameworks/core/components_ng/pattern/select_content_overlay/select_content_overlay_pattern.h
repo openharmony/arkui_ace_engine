@@ -41,7 +41,11 @@ public:
     void UpdateSelectArea(const RectF& selectArea) override;
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 40c1fa359e (修改差异文件)
 protected:
     void CheckHandleReverse() override;
     void UpdateHandleHotZone() override;

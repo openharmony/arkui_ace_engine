@@ -24,8 +24,8 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -33,7 +33,6 @@ constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
-constexpr uint32_t CONTENT_ALIGN_LEFT = 4;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
@@ -251,7 +250,11 @@ public:
                 theme->expandDisplay_ = false;
             } else {
                 std::string expandDisplay = pattern->GetAttr<std::string>("menu_expand_display", "");
-                theme->expandDisplay_ = (expandDisplay == "true");
+                if (expandDisplay == "true") {
+                    theme->expandDisplay_ = true;
+                } else {
+                    theme->expandDisplay_ = false;
+                }
             }
             theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("max_padding_start", theme->maxPaddingStart_);
             theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
@@ -410,11 +413,11 @@ public:
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
-        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
-        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         theme->expandDisplay_ = expandDisplay_;
         theme->maxPaddingStart_ = maxPaddingStart_;
         theme->maxPaddingEnd_ = maxPaddingEnd_;
+        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
+        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
         theme->menuItemChildMinHeight_ = menuItemChildMinHeight_;
@@ -1213,11 +1216,12 @@ private:
 
     Edge optionPadding_;
 
-    Color selectDefaultBgColor_;
-    Dimension selectDefaultBorderRadius_;
     bool expandDisplay_ = false;
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
+
+    Color selectDefaultBgColor_;
+    Dimension selectDefaultBorderRadius_;
     std::unordered_map<ControlSize, Dimension> selectMinWidthMap_;
     std::unordered_map<ControlSize, Dimension> selectMinHeightMap_;
     std::unordered_map<ControlSize, Dimension> selectBorderRadiusMap_;
@@ -1226,13 +1230,13 @@ private:
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
+    uint32_t menuItemContentAlign_ = 4;
     Dimension menuItemChildMinHeight_;
     Dimension menuItemVerticalPadding_;
     Dimension menuItemGroupTitleTextFontSize_;
     Dimension menuDefaultRadius_;
     Dimension menuDefaultInnerRadius_;
     Color menuTextColor_;
-    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
 };
 
 } // namespace OHOS::Ace

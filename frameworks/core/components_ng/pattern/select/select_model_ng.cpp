@@ -231,8 +231,7 @@ void SelectModelNG::SetSize(Dimension& width, Dimension& height)
     ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SelectModelNG::SetPaddings(
-    const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+void SelectModelNG::SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
     const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right)
 {
     NG::PaddingProperty paddings;
@@ -517,7 +516,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
     menuPattern->SetSelectProperties(params);
-    for (auto && option : options) {
+    for (auto&& option : options) {
         pattern->AddOptionNode(option);
     }
 
@@ -760,14 +759,6 @@ void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::s
     pattern->SetItemSelected(index, value);
 }
 
-void SelectModelNG::SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto hub = frameNode->GetEventHub<SelectEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetSelectEvent(std::move(onSelect));
-}
-
 void SelectModelNG::SetMenuBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
@@ -780,6 +771,14 @@ void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurS
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuBackgroundBlurStyle(blurStyle);
+}
+
+void SelectModelNG::SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto hub = frameNode->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetSelectEvent(std::move(onSelect));
 }
 
 void SelectModelNG::SetLayoutDirection(TextDirection value)

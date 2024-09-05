@@ -187,13 +187,13 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
-    void ShowSelectMenu();
     
     Dimension GetFontSize();
     void SetSelectDefaultTheme();
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
+    void ShowSelectMenu();
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
     void SetDivider(const SelectDivider& divider);

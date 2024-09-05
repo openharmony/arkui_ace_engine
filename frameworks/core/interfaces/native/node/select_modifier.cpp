@@ -483,33 +483,6 @@ void SetControlSize(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetControlSize(ArkUINodeHandle node) {}
 
-void SetSelectValue(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* icons, ArkUI_Uint32 length)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(values);
-    CHECK_NULL_VOID(icons);
-    std::vector<SelectParam> params;
-    for (uint32_t i = 0; i < length; i++) {
-        if (!values[i]) {
-            return;
-        }
-        SelectParam param;
-        param.text = values[i];
-        param.icon = icons[i];
-        params.emplace_back(param);
-    }
-    SelectModelNG::InitSelect(frameNode, params);
-}
-
-void ResetSelectValue(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::vector<SelectParam> params;
-    SelectModelNG::InitSelect(frameNode, params);
-}
-
 void SetMenuBgColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -541,6 +514,33 @@ void ResetMenuBgBlurStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption styleOption;
     SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, styleOption);
+}
+
+void SetSelectValue(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* icons, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(icons);
+    std::vector<SelectParam> params;
+    for (uint32_t i = 0; i < length; i++) {
+        if (!values[i]) {
+            return;
+        }
+        SelectParam param;
+        param.text = values[i];
+        param.icon = icons[i];
+        params.emplace_back(param);
+    }
+    SelectModelNG::InitSelect(frameNode, params);
+}
+
+void ResetSelectValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<SelectParam> params;
+    SelectModelNG::InitSelect(frameNode, params);
 }
 
 void SetSelectDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
@@ -619,8 +619,8 @@ const ArkUISelectModifier* GetSelectModifier()
         ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
         ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
         ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
-        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetSelectValue,
-        ResetSelectValue, SetMenuBgColor, ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectDivider,
+        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetMenuBgColor,
+        ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectValue, ResetSelectValue, SetSelectDivider,
         ResetSelectDivider, ResetSelectDividerNull };
 
     return &modifier;
