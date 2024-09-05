@@ -1690,6 +1690,10 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (!IsUsingMouse()) {
             HandleTouchMove(info);
         }
+    } else if (touchType == TouchType::CANCEL) {
+        if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+            magnifierController_->RemoveMagnifierFrameNode();
+        }
     }
 }
 
