@@ -84,7 +84,7 @@ class ArkThemeScopeManager {
             return;
         }
 
-    
+
         let scope: ArkThemeScope = undefined;
 
         // we need to keep component to the theme scope before first render

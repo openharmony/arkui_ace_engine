@@ -154,8 +154,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     if (propClickEffectLevel_.has_value()) {
         auto clickEffectJsonValue = JsonUtil::Create(true);
         clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
-        clickEffectJsonValue->Put("scale",
-            std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
+        clickEffectJsonValue->Put("scale", std::to_string((float)propClickEffectLevel_.value().scaleNumber).c_str());
         json->PutExtAttr("clickEffect", clickEffectJsonValue, filter);
     }
     ObscuredToJsonValue(json, filter);
