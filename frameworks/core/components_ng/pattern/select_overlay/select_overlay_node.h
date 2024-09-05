@@ -153,7 +153,6 @@ private:
         const std::vector<MenuOptionsParam>& params);
 
     void NotifyUpdateToolBar(bool itemChanged);
-    void SetSelectMenuInnerSize();
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
