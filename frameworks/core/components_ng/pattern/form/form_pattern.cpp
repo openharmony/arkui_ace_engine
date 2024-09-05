@@ -257,6 +257,19 @@ void FormPattern::HandleSnapshot(uint32_t delayTime)
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     snapshotTimestamp_ = GetCurrentTimestamp();
+    if (isDynamic_) {
+        if (formChildrenNodeMap_.find(FormChildNodeType::FORM_STATIC_IMAGE_NODE) != formChildrenNodeMap_.end()) {
+            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormSetNonTransparentAfterRecover");
+            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormDeleteImageNodeAfterRecover");
+            RemoveFrsNode();
+            ReleaseRenderer();
+            UnregisterAccessibility();
+            isSnapshot_ = true;
+            needSnapshotAgain_ = false;
+            return;
+        }
+    }
+
     executor->PostDelayedTask(
         [weak = WeakClaim(this), delayTime]() mutable {
             auto form = weak.Upgrade();
