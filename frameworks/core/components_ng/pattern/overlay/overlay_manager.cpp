@@ -656,8 +656,11 @@ void OverlayManager::UpdateContextMenuDisappearPosition(
 OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset)
 {
     CHECK_NULL_RETURN(menuWrapperNode, OffsetF(0.0f, 0.0f));
+    if (IsContextMenuDragHideFinished()) {
+        return OffsetF(0.0f, 0.0f);
+    }
     UpdateDragMoveVector(offset);
-    if (IsOriginDragMoveVector() || !IsUpdateDragMoveVector()) {
+    if (menuMap_.empty() || IsOriginDragMoveVector() || !IsUpdateDragMoveVector()) {
         return OffsetF(0.0f, 0.0f);
     }
 
