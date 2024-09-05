@@ -44,10 +44,10 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     hoverInfo.SetSourceDevice(event.sourceType);
     hoverInfo.SetSourceTool(event.sourceTool);
     if (event.tiltX.has_value()) {
-        hoverInfo.SetTiltX(event.tiltX.value());
+        hoverInfo.SetTiltX(event.tiltX.value_or(0.0f));
     }
     if (event.tiltY.has_value()) {
-        hoverInfo.SetTiltY(event.tiltY.value());
+        hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     onPenHoverEventCallback_(isHovered, hoverInfo);
