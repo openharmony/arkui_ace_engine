@@ -2297,8 +2297,13 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
 
 void TextFieldPattern::DoProcessAutoFill()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
+    if (!IsNeedProcessAutoFill()) {
+        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK)) {
+            NotifyOnEditChanged(true);
+        }
+        return;
+    }
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
@@ -8560,7 +8565,7 @@ TextFieldInfo TextFieldPattern::GenerateTextFieldInfo()
 
 void TextFieldPattern::AddTextFieldInfo()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
+    CHECK_NULL_VOID(IsNeedProcessAutoFill());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -8571,7 +8576,7 @@ void TextFieldPattern::AddTextFieldInfo()
 
 void TextFieldPattern::RemoveTextFieldInfo()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
+    CHECK_NULL_VOID(IsNeedProcessAutoFill());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -8587,7 +8592,7 @@ void TextFieldPattern::RemoveTextFieldInfo()
 
 void TextFieldPattern::UpdateTextFieldInfo()
 {
-    CHECK_NULL_VOID(!IsSearchTextField());
+    CHECK_NULL_VOID(IsNeedProcessAutoFill());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
@@ -8645,8 +8650,8 @@ bool TextFieldPattern::IsTriggerAutoFillPassword()
     return HasAutoFillPasswordNode();
 }
 
-bool TextFieldPattern::IsSearchTextField()
+bool TextFieldPattern::IsNeedProcessAutoFill()
 {
-    return false;
+    return true;
 }
 } // namespace OHOS::Ace::NG
