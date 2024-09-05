@@ -966,6 +966,7 @@ private:
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
     int32_t GetBufferSizeByDeviceType();
+    void GetTouchpadSlidingStatus(const GestureEvent& event);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1114,6 +1115,7 @@ private:
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
+    bool isTouchpadSliding_ = false;
     NestedScrollOptionsExt nestedScroll_ = {
         .scrollUp = NestedScrollMode::SELF_ONLY,
         .scrollDown = NestedScrollMode::SELF_ONLY,
