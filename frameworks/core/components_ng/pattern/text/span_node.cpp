@@ -1022,6 +1022,9 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
     sameSpan->SetImageSpanOptions(options);
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
     return sameSpan;
 }
 
@@ -1120,6 +1123,9 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     sameSpan->onDraw = onDraw;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
     return sameSpan;
 }
 
