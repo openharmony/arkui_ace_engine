@@ -468,6 +468,9 @@ class ArkBackgroundBlurStyle {
   adaptiveColor: number | undefined;
   scale: number | undefined;
   blurOptions: BlurOptions | undefined;
+  policy?: number;
+  inactiveColor?: ResourceColor;
+  type?: number;
 
   constructor() {
     this.blurStyle = undefined;
@@ -475,6 +478,9 @@ class ArkBackgroundBlurStyle {
     this.adaptiveColor = undefined;
     this.scale = undefined;
     this.blurOptions = undefined;
+    this.policy = undefined;
+    this.inactiveColor = undefined;
+    this.type = undefined;
   }
 
   isEqual(another: ArkBackgroundBlurStyle): boolean {
@@ -483,7 +489,10 @@ class ArkBackgroundBlurStyle {
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
       this.scale === another.scale &&
-      this.blurOptions === another.blurOptions
+      this.blurOptions === another.blurOptions &&
+      this.policy === another.policy &&
+      this.inactiveColor === another.inactiveColor &&
+      this.type === another.type
     );
   }
 }
