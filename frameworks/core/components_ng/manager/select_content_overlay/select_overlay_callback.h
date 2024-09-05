@@ -134,6 +134,7 @@ public:
     virtual bool CheckSwitchToMode(HandleLevelMode mode) {
         return true;
     }
+    virtual void OnHandleIsHidden() {}
 
 private:
     bool isIntercept_ = false;

@@ -127,7 +127,7 @@ void BaseTextSelectOverlay::CloseOverlay(bool animation, CloseReason reason)
 {
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->Close(GetOwnerId(), animation, reason);
+    overlayManager->Close(GetOwnerId(), false, reason);
     AfterCloseOverlay();
 }
 
@@ -223,7 +223,7 @@ bool BaseTextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
 void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
     overlayInfo.isSingleHandle = isSingleHandle_;
-    overlayInfo.isHandleLineShow = isShowHandleLine_ && !isSingleHandle_;
+    overlayInfo.isHandleLineShow = isShowHandleLine_;
     overlayInfo.recreateOverlay = isUsingMouse_;
     overlayInfo.rightClickOffset = mouseMenuOffset_;
     overlayInfo.isUsingMouse = isUsingMouse_;

@@ -1958,12 +1958,12 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     
     pattern->isMoveCaretAnywhere_ = false;
     pattern->ProcessOverlay();
-    pattern->isTouchCaret_ = true;
+    pattern->moveCaretState_.isTouchCaret = true;
     pattern->selectOverlay_->isUsingMouse_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
 
     pattern->ProcessOverlay();
-    pattern->isTouchCaret_ = false;
+    pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchEvent(touchEventInfo);
 }
 
@@ -1990,7 +1990,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern083, TestSize.Level0)
     pattern->isMousePressed_ = true;
     pattern->HandleTouchDown(offset);
     pattern->isMousePressed_ = false;
-    pattern->isTouchCaret_ = false;
+    pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchDown(offset);
 }
 
@@ -2040,7 +2040,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern085, TestSize.Level0)
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
-    pattern->isTouchCaret_ = true;
+    pattern->moveCaretState_.isTouchCaret = true;
     pattern->hasPreviewText_ = true;
     pattern->HandleTouchMove(touchEventInfo);
     pattern->hasPreviewText_ = false;

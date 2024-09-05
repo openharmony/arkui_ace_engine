@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
@@ -66,14 +67,20 @@ struct SpanNodeInfo {
 };
 
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public LayoutInfoInterface {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public virtual Pattern,
+                    public TextDragBase,
+                    public TextBase,
+                    public TextGestureSelector,
+                    public Magnifier,
+                    public LayoutInfoInterface {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
 
 public:
     TextPattern()
     {
         selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
         pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     }
 
     ~TextPattern() override;
@@ -736,6 +743,10 @@ protected:
     {
         isDetachFromMainTree_ = true;
     }
+
+    int32_t GetTouchIndex(const OffsetF& offset) override;
+    void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
+    void OnTextGenstureSelectionEnd() override;
 
     Status status_ = Status::NONE;
     bool contChange_ = false;
