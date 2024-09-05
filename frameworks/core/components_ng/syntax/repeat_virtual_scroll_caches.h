@@ -137,7 +137,7 @@ public:
      */
     RefPtr<UINode> GetCachedNode4Index(uint32_t forIndex);
 
-    void AddKeyToL1(const std::string& key);
+    void AddKeyToL1(const std::string& key, bool shouldTriggerReuse = true);
 
     void RemoveKeyFromL1(const std::string& key);
 

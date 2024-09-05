@@ -167,37 +167,38 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
     return node4Key.value().item;
 }
 
-void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key)
+void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
 {
     if (IsInL1Cache(key)) {
         return;
     }
     activeNodeKeysInL1_.emplace(key);
 
+    if (!shouldTriggerReuse) {
+        return;
+    }
+
     // fire UINode::OnReuse to trigger node pattern handlers
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
         auto child = it->second.item->GetFrameChildByIndex(0, false);
-        if (child) {
-            child->OnReuse();
-        }
+        CHECK_NULL_VOID(child);
+        child->OnReuse();
     }
 }
 
 void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key)
 {
-    if (!IsInL1Cache(key)) {
+    if (activeNodeKeysInL1_.erase(key) == 0) {
         return;
     }
-    activeNodeKeysInL1_.erase(key);
 
     // fire UINode::OnRecycle to trigger node pattern handlers
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
         auto child = it->second.item->GetFrameChildByIndex(0, false);
-        if (child) {
-            child->OnRecycle();
-        }
+        CHECK_NULL_VOID(child);
+        child->OnRecycle();
     }
 }
 
@@ -405,8 +406,9 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
         const auto& cacheItem = node4key_[key];
         int32_t index = static_cast<int32_t>(indexIter->second);
         if (cbFunc(index, cacheItem.item)) {
-            AddKeyToL1(key);
+            AddKeyToL1(key, false);
         } else {
+            RemoveKeyFromL1(key);
             modified = true;
         }
     }
@@ -420,8 +422,9 @@ bool RepeatVirtualScrollCaches::RebuildL1WithKey(const std::function<bool(const 
     bool modified = false;
     for (const auto& key : l1Copy) {
         if (cbFunc(key)) {
-            AddKeyToL1(key);
+            AddKeyToL1(key, false);
         } else {
+            RemoveKeyFromL1(key);
             modified = true;
         }
     }

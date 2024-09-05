@@ -418,7 +418,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
      * @tc.steps: step5. Get children count
      * @tc.expected: Returns number of children. Should be 0
      */
-    RefPtr<UINode> nodes =  repeatNode->CreateOrUpdateFrameChild4Index(5, "Key1");
+    RefPtr<UINode> nodes = repeatNode->caches_.CreateNewNode(5);
     EXPECT_NE(nodes, nullptr);
 }
 
