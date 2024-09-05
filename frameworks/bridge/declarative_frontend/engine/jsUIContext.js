@@ -259,6 +259,32 @@ class UIContext {
         return this.UIInspector_;
     }
 
+    getFilteredInspectorTree(filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTree();
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTree(filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    getFilteredInspectorTreeById(id, depth, filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTree(id, depth);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTree(id, depth, filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
     getComponentSnapshot() {
         this.ComponentSnapshot_ = new ComponentSnapshot(this.instanceId_);
         return this.ComponentSnapshot_;
@@ -589,7 +615,7 @@ class UIContext {
         }
         return this.cursorController_;
     }
-    
+
     getContextMenuController() {
         if (this.contextMenuController_ == null) {
             this.contextMenuController_ = new ContextMenuController(this.instanceId_);
@@ -795,7 +821,7 @@ class CursorController {
         cursorControl.restoreDefault();
         __JSScopeUtil__.restoreInstanceId();
     }
-    
+
     setCursor(value) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         cursorControl.setCursor(value);
