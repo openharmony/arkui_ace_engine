@@ -333,6 +333,10 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 
     napi_value jsDisplaySync = nullptr;
     displaySync->NapiSerializer(env, jsDisplaySync);
+    if (!jsDisplaySync) {
+        delete displaySync;
+        return nullptr;
+    }
 
     napi_property_descriptor resultFuncs[] = {
         DECLARE_NAPI_FUNCTION("setExpectedFrameRateRange", JSSetExpectedFrameRateRange),
@@ -342,7 +346,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         DECLARE_NAPI_FUNCTION("stop", JSStop),
     };
 
-    TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync Id: %{public}" PRIu64 "",
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync Id: %{public}" PRIu64 "",
         uiDisplaySync->GetId());
     NAPI_CALL(env, napi_define_properties(
         env, jsDisplaySync, sizeof(resultFuncs) / sizeof(resultFuncs[0]), resultFuncs));
