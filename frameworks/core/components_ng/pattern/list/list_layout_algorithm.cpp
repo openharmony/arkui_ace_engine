@@ -705,7 +705,11 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     float itemTotalSize = 0.0f;
     float jumpIndexStartPos = 0.0f;
     bool needLayoutBackward = false;
-
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    preStartIndex_ = pattern->GetStartIndex();
     if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
         auto it = itemPosition_.find(jumpIndex_.value());
         if (it != itemPosition_.end()) {
@@ -738,17 +742,12 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         endPos = itemPosition_.rbegin()->second.endPos;
         itemTotalSize = GetEndPosition() - GetStartPosition();
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
-        preStartIndex_ = startIndex;
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         if (GetStartIndex() > totalItemCount_ - 1 && !jumpIndex_.has_value()) {
             jumpIndex_ = totalItemCount_ - 1;
             scrollAlign_ = ScrollAlign::END;
         }
         UpdateSnapCenterContentOffset(layoutWrapper);
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
-        auto pattern = host->GetPattern<ListPattern>();
-        CHECK_NULL_VOID(pattern);
         auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(listLayoutProperty);
         auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
@@ -793,7 +792,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
         needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
-        auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, startIndex);
+        auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, preStartIndex_);
         if (layoutDirection == LayoutDirection::BACKWARD) {
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -1664,7 +1663,7 @@ void ListLayoutAlgorithm::OffScreenLayoutDirection(LayoutWrapper* layoutWrapper)
         backwardFeature_ = false;
         return;
     }
-    auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, GetStartIndex());
+    auto layoutDirection = LayoutDirectionForTargetIndex(layoutWrapper, preStartIndex_);
     if (layoutDirection == LayoutDirection::BACKWARD) {
         forwardFeature_ = false;
         backwardFeature_ = true;
