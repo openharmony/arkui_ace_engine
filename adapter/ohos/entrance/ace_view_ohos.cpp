@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include <memory>
-
 #include "input_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"

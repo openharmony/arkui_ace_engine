@@ -22,9 +22,9 @@
 #include <sstream>
 
 #include "base/log/ace_trace.h"
-#include "base/log/jank_frame_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/log/jank_frame_report.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
