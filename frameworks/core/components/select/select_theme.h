@@ -1035,7 +1035,7 @@ public:
     {
         return contentMargin_;
     }
-
+    
     const Color& GetSelectDefaultBgColor() const
     {
         return selectDefaultBgColor_;
