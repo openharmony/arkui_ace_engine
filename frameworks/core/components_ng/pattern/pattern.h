@@ -514,6 +514,7 @@ public:
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
     virtual void OnFontScaleConfigurationUpdate() {}
+    virtual void OnForegroundColorUpdate(const Color& value) {}
 
     virtual bool ShouldDelayChildPressedState() const
     {

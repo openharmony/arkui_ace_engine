@@ -1079,6 +1079,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    void OnForegroundColorUpdate(const Color& value);
+
 protected:
     void DumpInfo() override;
     std::list<std::function<void()>> destroyCallbacks_;
