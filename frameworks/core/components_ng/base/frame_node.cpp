@@ -5277,6 +5277,22 @@ void FrameNode::GetInspectorValue()
     UINode::GetInspectorValue();
 }
 
+void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
+{
+    // return when reaches a child that has no layoutAlgorithm and no need to clear the entire tree
+    if (!layoutAlgorithm_ && !clearEntireTree) {
+        return;
+    }
+    // include Self might be false for the first ClearSubtreeLayoutAlgorithm enter,
+    // but children should always include themselves
+    if (includeSelf) {
+        layoutAlgorithm_.Reset();
+    }
+    for (const auto& child : GetChildren()) {
+        child->ClearSubtreeLayoutAlgorithm(true, clearEntireTree);
+    }
+}
+
 void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
 {
     if (syncedFramePaintRect_.has_value() && syncedFramePaintRect_.value() != paintRect) {
