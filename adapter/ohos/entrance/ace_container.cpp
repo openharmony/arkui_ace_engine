@@ -1333,6 +1333,9 @@ public:
             if (offset.deltaX > edgeDist) {
                 offset.deltaX = edgeDist;
             }
+            if (edgeDist + size.width > windowRect_.width_) {
+                offset.deltaX = 0;
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
