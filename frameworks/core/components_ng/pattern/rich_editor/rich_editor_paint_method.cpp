@@ -53,7 +53,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetCaretVisible(caretVisible);
     overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
     overlayMod->SetSelectedBackgroundColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
-    constexpr float CARET_WIDTH = 1.5f;
+    constexpr float CARET_WIDTH = 2.0f;
     overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
     SetCaretOffsetAndHeight(paintWrapper);
     std::vector<RectF> selectedRects;
