@@ -3300,12 +3300,12 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
 })(StyledStringKey || (StyledStringKey = {}));
 
-class CustomSpan {
-  type_ = "CustomSpan"
+class CustomSpan extends NativeCustomSpan {
+  type_ = "CustomSpan";
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan"
+  type_ = "ExtSpan";
 }
 
 let FocusPriority;

@@ -3906,9 +3906,13 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     spans_ = value->GetSpanItems();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CloseSelectOverlay();
     ProcessSpanString();
     auto length = styledString_->GetLength();
+    styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, value);
+    styledString_->AddCustomSpan();
+    styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
