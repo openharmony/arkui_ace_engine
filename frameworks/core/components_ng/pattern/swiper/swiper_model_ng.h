@@ -82,9 +82,9 @@ public:
         const std::optional<bool> &ignoreBlank);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
         const std::optional<bool> &ignoreBlank);
-    static void SetIndex(FrameNode* frameNode, uint32_t index);
-    static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
-    static void SetDuration(FrameNode* frameNode, uint32_t duration);
+    static void SetIndex(FrameNode* frameNode, int32_t index);
+    static void SetAutoPlayInterval(FrameNode* frameNode, int32_t interval);
+    static void SetDuration(FrameNode* frameNode, int32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);

@@ -21,44 +21,123 @@
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 
-namespace {
-template <typename T>
-T toAceEnum(Ark_Int32 val, T min, T max)
-{
-    static const Ark_Int32 limitMin = static_cast<Ark_Int32>(min);
-    static const Ark_Int32 limitMax = static_cast<Ark_Int32>(max);
-    return (val >= limitMin && val <= limitMax) ? static_cast<T>(val) : min;
-}
-
-template <typename T>
-T toAceEnum(Ark_Int32 val, T min, T max, T dflt)
-{
-    static const Ark_Int32 limitMin = static_cast<Ark_Int32>(min);
-    static const Ark_Int32 limitMax = static_cast<Ark_Int32>(max);
-    return (val >= limitMin && val <= limitMax) ? static_cast<T>(val) : dflt;
-}
-
-template <typename T>
-Ark_Int32 trimToAceRange(Ark_Int32 val, T min, T max)
-{
-    static const Ark_Int32 limitMin = static_cast<Ark_Int32>(min);
-    static const Ark_Int32 limitMax = static_cast<Ark_Int32>(max);
-    return (val >= limitMin && val <= limitMax) ? val : limitMin;
-}
-
-constexpr int32_t DEFAULT_INTERVAL = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_AUTOPLAY_INTERVAL);
-constexpr int32_t DEFAULT_DURATION = static_cast<int32_t>(OHOS::Ace::DEFAULT_SWIPER_ANIMATION_DURATION);
-constexpr int32_t DEFAULT_CACHED_COUNT = OHOS::Ace::DEFAULT_SWIPER_CACHED_SIZE;
-constexpr int32_t DEFAULT_DISPLAY_COUNT = OHOS::Ace::DEFAULT_SWIPER_DISPLAY_COUNT;
-} // namespace
-
 namespace OHOS::Ace::NG {
+using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
+using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
+using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
 using CurveVariantType = std::variant<std::string, Ark_Curve, Ark_ICurve>;
-using IndicatorVariantType = std::variant<Ark_DotIndicator, Ark_DigitIndicator, bool>;
-using ArrowStyleVariantType = std::variant<Ark_ArrowStyle, bool>;
 }
 
 namespace OHOS::Ace::NG::Converter {
+template<>
+SwiperParameters Convert(const Ark_IndicatorStyle& src)
+{
+    SwiperParameters p;
+    p.dimLeft = Converter::OptConvert<Dimension>(src.left);
+    p.dimTop = Converter::OptConvert<Dimension>(src.top);
+    p.dimRight = Converter::OptConvert<Dimension>(src.right);
+    p.dimBottom = Converter::OptConvert<Dimension>(src.bottom);
+
+    p.itemWidth = p.itemHeight = p.selectedItemWidth = p.selectedItemHeight =
+        Converter::OptConvert<Dimension>(src.size);
+
+    p.maskValue = Converter::OptConvert<bool>(src.mask);
+    p.colorVal = Converter::OptConvert<Color>(src.color);
+    p.selectedColorVal = Converter::OptConvert<Color>(src.selectedColor);
+    return p;
+}
+
+template<>
+IndicatorVariantType Convert(const Ark_DotIndicator& src)
+{
+    SwiperParameters p;
+    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
+    p.dimTop = Converter::OptConvert<Dimension>(src._top);
+    p.dimRight = Converter::OptConvert<Dimension>(src._right);
+    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
+
+    p.dimStart = Converter::OptConvert<Dimension>(src._start);
+    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
+
+    p.itemWidth = Converter::OptConvert<Dimension>(src._itemWidth);
+    p.itemHeight = Converter::OptConvert<Dimension>(src._itemHeight);
+    p.selectedItemWidth = Converter::OptConvert<Dimension>(src._selectedItemWidth);
+    p.selectedItemHeight = Converter::OptConvert<Dimension>(src._selectedItemHeight);
+
+    p.maskValue = Converter::OptConvert<bool>(src._mask);
+    p.colorVal = Converter::OptConvert<Color>(src._color);
+    p.selectedColorVal = Converter::OptConvert<Color>(src._selectedColor);
+    p.maxDisplayCountVal = Converter::OptConvert<int32_t>(src._maxDisplayCount);
+    return p;
+}
+
+template<>
+IndicatorVariantType Convert(const Ark_DigitIndicator& src)
+{
+    SwiperDigitalParameters p;
+    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
+    p.dimTop = Converter::OptConvert<Dimension>(src._top);
+    p.dimRight = Converter::OptConvert<Dimension>(src._right);
+    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
+
+    p.dimStart = Converter::OptConvert<Dimension>(src._start);
+    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
+
+    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._digitFont); font) {
+        std::tie(p.fontSize, p.fontWeight) = *font;
+    }
+    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._selectedDigitFont); font) {
+        std::tie(p.selectedFontSize, p.selectedFontWeight) = *font;
+    }
+
+    p.fontColor = Converter::OptConvert<Color>(src._fontColor);
+    p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
+    return p;
+}
+
+template<>
+IndicatorVariantType Convert(const Ark_Boolean& src)
+{
+    return Convert<bool>(src);
+}
+
+template<>
+ArrowStyleVariantType Convert(const Ark_ArrowStyle& src)
+{
+    SwiperArrowParameters p;
+    p.isShowBackground = Converter::OptConvert<bool>(src.showBackground);
+    p.isSidebarMiddle = Converter::OptConvert<bool>(src.isSidebarMiddle);
+    p.backgroundSize = Converter::OptConvert<Dimension>(src.backgroundSize);
+    p.arrowSize = Converter::OptConvert<Dimension>(src.arrowSize);
+    p.backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
+    p.arrowColor = Converter::OptConvert<Color>(src.arrowColor);
+    return p;
+}
+
+template<>
+ArrowStyleVariantType Convert(const Ark_Boolean& src)
+{
+    return Convert<bool>(src);
+}
+
+template<>
+DisplayCountVariantType Convert(const Ark_Number& src)
+{
+    return Converter::Convert<int32_t>(src);
+}
+
+template<>
+DisplayCountVariantType Convert(const Ark_String& src)
+{
+    return Converter::Convert<std::string>(src);
+}
+
+template<>
+DisplayCountVariantType Convert(const Ark_SwiperAutoFill& src)
+{
+    return src;
+}
+
 template<>
 CurveVariantType Convert(const Ark_String& src)
 {
@@ -78,33 +157,55 @@ CurveVariantType Convert(const Ark_ICurve& src)
 }
 
 template<>
-IndicatorVariantType Convert(const Ark_DotIndicator& src)
+Ark_Function Convert(const Ark_Function& src)
 {
     return src;
 }
 
 template<>
-IndicatorVariantType Convert(const Ark_DigitIndicator& src)
+inline void AssignCast(std::optional<SwiperDisplayMode>& dst, const Ark_SwiperDisplayMode& src)
 {
-    return src;
+    bool newSdk = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN);
+    switch (src) {
+        case SELECTOR_ID_0: dst = SwiperDisplayMode::STRETCH; break;
+        case SELECTOR_ID_1: dst = SwiperDisplayMode::AUTO_LINEAR; break;
+        case SELECTOR_ID_2:
+            if (newSdk) {
+                dst = SwiperDisplayMode::STRETCH;
+            }
+            break;
+        case SELECTOR_ID_3:
+            if (newSdk) {
+                dst = SwiperDisplayMode::AUTO_LINEAR;
+            }
+            break;
+        default: LOGE("Unexpected enum value in Ark_SwiperDisplayMode: %{public}d", src);
+    }
 }
 
 template<>
-IndicatorVariantType Convert(const Ark_Boolean& src)
+inline void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 {
-    return Convert<bool>(src);
+    switch (src) {
+        case static_cast<Ark_EdgeEffect>(EdgeEffect::SPRING): dst = EdgeEffect::SPRING; break;
+        case static_cast<Ark_EdgeEffect>(EdgeEffect::FADE): dst = EdgeEffect::FADE; break;
+        case static_cast<Ark_EdgeEffect>(EdgeEffect::NONE): dst = EdgeEffect::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_EdgeEffect: %{public}d", src);
+    }
 }
 
 template<>
-ArrowStyleVariantType Convert(const Ark_ArrowStyle& src)
+inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_SwiperNestedScrollMode& src)
 {
-    return src;
-}
-
-template<>
-ArrowStyleVariantType Convert(const Ark_Boolean& src)
-{
-    return Convert<bool>(src);
+    switch (src) {
+        case static_cast<Ark_SwiperNestedScrollMode>(NestedScrollMode::SELF_ONLY):
+            dst = NestedScrollMode::SELF_ONLY;
+            break;
+        case static_cast<Ark_SwiperNestedScrollMode>(NestedScrollMode::SELF_FIRST):
+            dst = NestedScrollMode::SELF_FIRST;
+            break;
+        default: LOGE("Unexpected enum value in Ark_SwiperNestedScrollMode: %{public}d", src);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -141,120 +242,56 @@ void IntervalImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto aceVal = Converter::Convert<int32_t>(*value);
-    SwiperModelNG::SetAutoPlayInterval(frameNode, aceVal < 0 ? ::DEFAULT_INTERVAL: aceVal);
+    SwiperModelNG::SetAutoPlayInterval(frameNode, Converter::Convert<int32_t>(*value));
 }
 
 namespace {
-std::optional<OHOS::Ace::Dimension> &CheckDimValid(std::optional<OHOS::Ace::Dimension> &dim)
+std::optional<OHOS::Ace::Dimension> &ResetIfInvalid(std::optional<OHOS::Ace::Dimension> &dimOpt)
 {
-    if (!dim || dim->IsNegative()) {
-        dim->SetValue(0);
-        dim->SetUnit(OHOS::Ace::DimensionUnit::VP);
+    if (dimOpt && dimOpt->IsNegative()) {
+        dimOpt.reset();
     }
-    return dim;
+    return dimOpt;
 }
 
-bool CheckDimCustom(std::optional<Dimension> &dim, const Dimension &defaultDim)
+bool IsCustom(std::optional<Dimension> &dimOpt)
 {
-    bool isCustom = dim && dim->Unit() != DimensionUnit::PERCENT;
-    if (!dim || (isCustom && dim->IsNegative())) {
-        *dim = defaultDim;
-    }
-    return isCustom;
-}
-SwiperParameters ParseDotIndicator(const Ark_DotIndicator& src)
-{
-    SwiperParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
-    p.dimTop = Converter::OptConvert<Dimension>(src._top);
-    p.dimRight = Converter::OptConvert<Dimension>(src._right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
-
-    p.dimStart = Converter::OptConvert<Dimension>(src._start);
-    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
-
-    p.itemWidth = Converter::OptConvert<Dimension>(src._itemWidth);
-    p.itemHeight = Converter::OptConvert<Dimension>(src._itemHeight);
-    p.selectedItemWidth = Converter::OptConvert<Dimension>(src._selectedItemWidth);
-    p.selectedItemHeight = Converter::OptConvert<Dimension>(src._selectedItemHeight);
-
-    p.maskValue = Converter::OptConvert<bool>(src._mask);
-    p.colorVal = Converter::OptConvert<Color>(src._color);
-    p.selectedColorVal = Converter::OptConvert<Color>(src._selectedColor);
-    p.maxDisplayCountVal = Converter::OptConvert<int32_t>(src._maxDisplayCount);
-    return p;
+    return dimOpt && dimOpt->Unit() != DimensionUnit::PERCENT && !dimOpt->IsNegative();
 }
 
-bool CheckSwiperParameters(SwiperParameters& p, const RefPtr<SwiperIndicatorTheme> &theme)
+bool CheckSwiperParameters(SwiperParameters& p)
 {
-    CheckDimValid(p.dimLeft);
-    CheckDimValid(p.dimTop);
-    CheckDimValid(p.dimRight);
-    CheckDimValid(p.dimBottom);
-    CheckDimValid(p.dimStart);
-    CheckDimValid(p.dimEnd);
+    ResetIfInvalid(p.dimLeft);
+    ResetIfInvalid(p.dimTop);
+    ResetIfInvalid(p.dimRight);
+    ResetIfInvalid(p.dimBottom);
+    ResetIfInvalid(p.dimStart);
+    ResetIfInvalid(p.dimEnd);
 
-    Dimension defaultSize(0, DimensionUnit::VP);
-    if (theme) {
-        defaultSize = theme->GetSize();
+    ResetIfInvalid(p.itemWidth);
+    ResetIfInvalid(p.itemHeight);
+    ResetIfInvalid(p.selectedItemWidth);
+    ResetIfInvalid(p.selectedItemHeight);
 
-        // the next should be removed for support of the dynamic Theme changes
-        if (!p.colorVal) {
-            p.colorVal = theme->GetColor();
-        }
-        if (!p.selectedColorVal) {
-            p.selectedColorVal = theme->GetSelectedColor();
-        }
+    if (p.maxDisplayCountVal && *(p.maxDisplayCountVal) < 0) {
+        p.maxDisplayCountVal.reset();
     }
 
-    bool isCustom = CheckDimCustom(p.itemWidth, defaultSize);
-    isCustom = CheckDimCustom(p.itemHeight, defaultSize) || isCustom;
-    isCustom = CheckDimCustom(p.selectedItemWidth, defaultSize) || isCustom;
-    isCustom = CheckDimCustom(p.selectedItemHeight, defaultSize) || isCustom;
-
-    if (p.maxDisplayCountVal && *p.maxDisplayCountVal < 0) {
-        *p.maxDisplayCountVal = 0;
-    }
-    return isCustom;
+    return IsCustom(p.itemWidth) || IsCustom(p.itemHeight) ||
+        IsCustom(p.selectedItemWidth) || IsCustom(p.selectedItemHeight);
 }
 
-SwiperDigitalParameters ParseDigitIndicator(const Ark_DigitIndicator& src,
-    const RefPtr<SwiperIndicatorTheme> &theme)
+void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 {
-    SwiperDigitalParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
-    p.dimTop = Converter::OptConvert<Dimension>(src._top);
-    p.dimRight = Converter::OptConvert<Dimension>(src._right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
+    ResetIfInvalid(p.dimLeft);
+    ResetIfInvalid(p.dimTop);
+    ResetIfInvalid(p.dimRight);
+    ResetIfInvalid(p.dimBottom);
+    ResetIfInvalid(p.dimStart);
+    ResetIfInvalid(p.dimEnd);
 
-    p.dimStart = Converter::OptConvert<Dimension>(src._start);
-    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
-
-    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._digitFont); font) {
-        std::tie(p.fontSize, p.fontWeight) = *font;
-    }
-    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._selectedDigitFont); font) {
-        std::tie(p.selectedFontSize, p.selectedFontWeight) = *font;
-    }
-
-    p.fontColor = Converter::OptConvert<Color>(src._fontColor);
-    p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
-
-    CheckDimValid(p.dimLeft);
-    CheckDimValid(p.dimTop);
-    CheckDimValid(p.dimRight);
-    CheckDimValid(p.dimBottom);
-    CheckDimValid(p.dimStart);
-    CheckDimValid(p.dimEnd);
-
-    if (p.fontSize && p.fontSize->IsNegative()) {
-        p.fontSize.reset();
-    }
-    if (p.selectedFontSize && p.selectedFontSize->IsNegative()) {
-        p.selectedFontSize.reset();
-    }
-    return p;
+    ResetIfInvalid(p.fontSize);
+    ResetIfInvalid(p.selectedFontSize);
 }
 } // namespace
 
@@ -265,69 +302,30 @@ void IndicatorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optIndicator = Converter::OptConvert<IndicatorVariantType>(*value);
-    CHECK_NULL_VOID(optIndicator.has_value());
-    RefPtr<SwiperIndicatorTheme> swiperIndicatorTheme = nullptr;
-    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
-        swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    }
+    CHECK_NULL_VOID(optIndicator);
     auto showIndicator = true;
-    if (std::holds_alternative<Ark_DigitIndicator>(*optIndicator)) {
-        auto params = ParseDigitIndicator(std::get<Ark_DigitIndicator>(*optIndicator), swiperIndicatorTheme);
+    if (auto digitParamPtr = std::get_if<SwiperDigitalParameters>(&(*optIndicator)); digitParamPtr) {
+        CheckSwiperDigitalParameters(*digitParamPtr);
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
-        SwiperModelNG::SetDigitIndicatorStyle(frameNode, params);
+        SwiperModelNG::SetDigitIndicatorStyle(frameNode, *digitParamPtr);
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
     } else {
-        static Ark_DotIndicator defaultArkDot;
-        auto arkDotPtr = std::get_if<Ark_DotIndicator>(&(*optIndicator));
-        auto params = ParseDotIndicator(arkDotPtr ? *arkDotPtr : defaultArkDot);
-        auto isCustomSize = CheckSwiperParameters(params, swiperIndicatorTheme);
-        auto boolIndicatorPtr = std::get_if<bool>(&(*optIndicator));
-        showIndicator = !boolIndicatorPtr || *boolIndicatorPtr;
-        SwiperModelNG::SetIndicatorIsBoolean(frameNode, boolIndicatorPtr && !arkDotPtr);
-        SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
-        SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+        if (auto dotParamPtr = std::get_if<SwiperParameters>(&(*optIndicator)); dotParamPtr) {
+            auto isCustomSize = CheckSwiperParameters(*dotParamPtr);
+            SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
+            SwiperModelNG::SetDotIndicatorStyle(frameNode, *dotParamPtr);
+            SwiperModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+        }
+        if (auto booleanPtr = std::get_if<bool>(&(*optIndicator)); booleanPtr) {
+            SwiperModelNG::SetIndicatorIsBoolean(frameNode, true);
+            SwiperModelNG::SetDotIndicatorStyle(frameNode, SwiperParameters());
+            SwiperModelNG::SetIsIndicatorCustomSize(frameNode, false);
+            showIndicator = *booleanPtr;
+        }
         SwiperModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
     }
     SwiperModelNG::SetShowIndicator(frameNode, showIndicator);
 }
-
-namespace {
-SwiperArrowParameters ParseArrowStyle(const Ark_ArrowStyle& src,
-    const RefPtr<SwiperIndicatorTheme> &theme)
-{
-    SwiperArrowParameters p;
-    p.isShowBackground = Converter::OptConvert<bool>(src.showBackground);
-    p.isSidebarMiddle = Converter::OptConvert<bool>(src.isSidebarMiddle);
-    p.backgroundSize = Converter::OptConvert<Dimension>(src.backgroundSize);
-    p.arrowSize = Converter::OptConvert<Dimension>(src.arrowSize);
-    p.backgroundColor = Converter::OptConvert<Color>(src.backgroundColor);
-    p.arrowColor = Converter::OptConvert<Color>(src.arrowColor);
-    CHECK_NULL_RETURN(theme, p);
-
-    if (!p.isShowBackground) {
-        p.isShowBackground = theme->GetIsShowArrowBackground();
-    }
-    if (!p.isSidebarMiddle) {
-        p.isSidebarMiddle = theme->GetIsSidebarMiddle();
-    }
-    bool isBigArrow = p.isSidebarMiddle.value();
-    if (!p.backgroundSize || (p.backgroundSize->Unit() != DimensionUnit::PERCENT && p.backgroundSize->IsNegative())) {
-        p.backgroundSize = isBigArrow ? theme->GetBigArrowBackgroundSize() : theme->GetSmallArrowBackgroundSize();
-    }
-    if (!p.arrowSize || (p.arrowSize->Unit() != DimensionUnit::PERCENT && p.arrowSize->IsNegative())) {
-        p.arrowSize = isBigArrow ? theme->GetBigArrowSize() : theme->GetSmallArrowSize();
-    }
-    // the next should be removed for support of the dynamic Theme changes
-    if (!p.backgroundColor) {
-        p.backgroundColor =
-            isBigArrow ? theme->GetBigArrowBackgroundColor() : theme->GetSmallArrowBackgroundColor();
-    }
-    if (!p.arrowColor) {
-        p.arrowColor = isBigArrow ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
-    }
-    return p;
-}
-} // namespace
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Type_SwiperAttribute_displayArrow_Arg0* value,
                       const Opt_Boolean* isHoverShow)
@@ -336,7 +334,7 @@ void DisplayArrowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optArrow = Converter::OptConvert<ArrowStyleVariantType>(*value);
-    CHECK_NULL_VOID(optArrow.has_value());
+    CHECK_NULL_VOID(optArrow);
 
     if (isHoverShow) {
         if (auto show = Converter::OptConvert<bool>(*isHoverShow); show) {
@@ -344,21 +342,14 @@ void DisplayArrowImpl(Ark_NativePointer node,
         }
     }
 
-    RefPtr<SwiperIndicatorTheme> swiperIndicatorTheme = nullptr;
-    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
-        swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    }
-
     bool *arrowBoolPtr = std::get_if<bool>(&(*optArrow));
-    if (!swiperIndicatorTheme || (arrowBoolPtr && !*arrowBoolPtr)) {
+    if (arrowBoolPtr && !*arrowBoolPtr) {
         SwiperModelNG::SetDisplayArrow(frameNode, false);
         return;
     }
 
-    static Ark_ArrowStyle defaultArkArrow;
-    const Ark_ArrowStyle *arrowStylePtr = std::get_if<Ark_ArrowStyle>(&(*optArrow));
-    auto params = ParseArrowStyle(arrowStylePtr ? *arrowStylePtr : defaultArkArrow, swiperIndicatorTheme);
-    SwiperModelNG::SetArrowStyle(frameNode, params);
+    auto arrowStylePtr = std::get_if<SwiperArrowParameters>(&(*optArrow));
+    SwiperModelNG::SetArrowStyle(frameNode, arrowStylePtr ? *arrowStylePtr : SwiperArrowParameters());
     SwiperModelNG::SetDisplayArrow(frameNode, true);
 }
 void LoopImpl(Ark_NativePointer node,
@@ -375,8 +366,7 @@ void DurationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto aceVal = Converter::Convert<int32_t>(*value);
-    SwiperModelNG::SetDuration(frameNode, aceVal < 0 ? ::DEFAULT_DURATION : aceVal);
+    SwiperModelNG::SetDuration(frameNode, Converter::Convert<int32_t>(*value));
 }
 void VerticalImpl(Ark_NativePointer node,
                   Ark_Boolean value)
@@ -394,16 +384,16 @@ void ItemSpaceImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto aceOptVal = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(aceOptVal);
-    SwiperModelNG::SetItemSpace(frameNode, *CheckDimValid(aceOptVal));
+    SwiperModelNG::SetItemSpace(frameNode, *aceOptVal);
 }
 void DisplayModeImpl(Ark_NativePointer node,
                      Ark_Int32 value)
 {
-    using namespace OHOS::Ace;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceVal = toAceEnum<SwiperDisplayMode>(value, SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR);
-    SwiperModelNG::SetDisplayMode(frameNode, aceVal);
+    auto dispModeOpt = Converter::OptConvert<SwiperDisplayMode>(value);
+    CHECK_NULL_VOID(dispModeOpt);
+    SwiperModelNG::SetDisplayMode(frameNode, *dispModeOpt);
 }
 void CachedCountImpl(Ark_NativePointer node,
                      const Ark_Number* value)
@@ -411,8 +401,7 @@ void CachedCountImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto aceVal = Converter::Convert<int32_t>(*value);
-    SwiperModelNG::SetCachedCount(frameNode, aceVal < 0 ? ::DEFAULT_CACHED_COUNT : aceVal);
+    SwiperModelNG::SetCachedCount(frameNode, Converter::Convert<int32_t>(*value));
 }
 void DisplayCountImpl(Ark_NativePointer node,
                       const Type_SwiperAttribute_displayCount_Arg0* value,
@@ -421,44 +410,43 @@ void DisplayCountImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    switch (value->selector) {
-        case SELECTOR_ID_0: { // Ark_Number
-            int32_t val = Converter::Convert<int32_t>(value->value0);
-            SwiperModelNG::SetDisplayCount(frameNode, val < DEFAULT_DISPLAY_COUNT ? DEFAULT_DISPLAY_COUNT : val);
-            break;
-        }
-        case SELECTOR_ID_1: { // Ark_String
-            std::string aceVal(value->value1.chars);
-            if (aceVal == "auto") {
-                SwiperModelNG::SetDisplayMode(frameNode, OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
-                SwiperModelNG::ResetDisplayCount(frameNode);
-                break;
-            }
-            int32_t val = StringUtils::StringToInt(aceVal);
-            SwiperModelNG::SetDisplayCount(frameNode, val < DEFAULT_DISPLAY_COUNT ? DEFAULT_DISPLAY_COUNT : val);
-            break;
-        }
-        case SELECTOR_ID_2: { // struct Ark_SwiperAutoFill
-            if (auto aceOptVal = Converter::OptConvert<Dimension>(value->value2.minSize); aceOptVal) {
-                SwiperModelNG::SetMinSize(frameNode, *CheckDimValid(aceOptVal));
-            }
-            break;
+
+    auto optDispCount = Converter::OptConvert<DisplayCountVariantType>(*value);
+    CHECK_NULL_VOID(optDispCount);
+
+    if (swipeByGroup) {
+        if (auto bygroupOpt = Converter::OptConvert<bool>(*swipeByGroup); bygroupOpt) {
+            SwiperModelNG::SetSwipeByGroup(frameNode, *bygroupOpt);
         }
     }
 
-    if (swipeByGroup) {
-        auto aceOptVal = Converter::OptConvert<bool>(*swipeByGroup);
-        SwiperModelNG::SetSwipeByGroup(frameNode, aceOptVal && *aceOptVal);
+    if (auto countPtr = std::get_if<int32_t>(&(*optDispCount)); countPtr) {
+        int32_t val = *countPtr;
+        SwiperModelNG::SetDisplayCount(frameNode, val);
+    } if (auto descPtr = std::get_if<std::string>(&(*optDispCount)); descPtr) {
+        if (descPtr->compare("auto") == 0) {
+            SwiperModelNG::SetDisplayMode(frameNode, OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
+            SwiperModelNG::ResetDisplayCount(frameNode);
+            return;
+        }
+        int32_t val = StringUtils::StringToInt(*descPtr);
+        SwiperModelNG::SetDisplayCount(frameNode, val);
+    } else if (auto autofillPtr = std::get_if<Ark_SwiperAutoFill>(&(*optDispCount)); autofillPtr) {
+        if (auto minsizeOpt = Converter::OptConvert<Dimension>(autofillPtr->minSize); minsizeOpt) {
+            SwiperModelNG::SetMinSize(frameNode, *minsizeOpt);
+        }
+    } else {
+        LOGW("SwiperAttributeModifier::DisplayCountImpl, unknown data, nothing do");
     }
 }
 void EffectModeImpl(Ark_NativePointer node,
                     Ark_Int32 value)
 {
-    using namespace OHOS::Ace;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceVal = toAceEnum<EdgeEffect>(value, EdgeEffect::SPRING, EdgeEffect::NONE);
-    SwiperModelNG::SetEdgeEffect(frameNode, aceVal);
+    auto edgeEffOpt = Converter::OptConvert<EdgeEffect>(value);
+    CHECK_NULL_VOID(edgeEffOpt);
+    SwiperModelNG::SetEdgeEffect(frameNode, *edgeEffOpt);
 }
 void DisableSwipeImpl(Ark_NativePointer node,
                       Ark_Boolean value)
@@ -479,12 +467,10 @@ void CurveImpl(Ark_NativePointer node,
         optCurveVar = Converter::OptConvert<CurveVariantType>(*value);
     }
     if (optCurveVar) {
-        if (std::holds_alternative<std::string>(*optCurveVar)) {
-            auto curveDesc = std::get<std::string>(*optCurveVar);
-            curve = Framework::CreateCurve(curveDesc);
-        } else if (std::holds_alternative<Ark_Curve>(*optCurveVar)) {
-            auto curveType = std::get<Ark_Curve>(*optCurveVar);
-            curve = Framework::CreateCurve(curveType);
+        if (auto curveDescPtr = std::get_if<std::string>(&(*optCurveVar)); curveDescPtr) {
+            curve = Framework::CreateCurve(*curveDescPtr);
+        } else if (auto curveTypePtr = std::get_if<Ark_Curve>(&(*optCurveVar)); curveTypePtr) {
+            curve = Framework::CreateCurve(*curveTypePtr);
         } else {
             LOGE("SwiperAttributeModifier::CurveImpl, the optCurveVar->index()=%{public}zd is not supported",
                 optCurveVar->index());
@@ -509,28 +495,12 @@ void IndicatorStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SwiperParameters params;
-    if (value && value->tag != ARK_TAG_UNDEFINED) {
-        const Ark_IndicatorStyle &dotStyle = value->value;
-        Ark_DotIndicator arkDotPtr = {
-            ._left = dotStyle.left,
-            ._top = dotStyle.top,
-            ._right = dotStyle.right,
-            ._bottom = dotStyle.bottom,
-            ._itemWidth = dotStyle.size,
-            ._itemHeight = dotStyle.size,
-            ._selectedItemWidth = dotStyle.size,
-            ._selectedItemHeight = dotStyle.size,
-            ._mask = dotStyle.mask,
-            ._color = dotStyle.color,
-            ._selectedColor = dotStyle.selectedColor,
-        };
-        params = ParseDotIndicator(arkDotPtr);
+    if (value) {
+        if (auto paramsOpt = Converter::OptConvert<SwiperParameters>(*value); paramsOpt) {
+            params = *paramsOpt;
+            CheckSwiperParameters(params);
+        }
     }
-    RefPtr<SwiperIndicatorTheme> swiperIndicatorTheme = nullptr;
-    if (auto pipelineContext = frameNode->GetContext(); pipelineContext) {
-        swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    }
-    CheckSwiperParameters(params, swiperIndicatorTheme);
     SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelNG::SetDotIndicatorStyle(frameNode, params);
 }
@@ -542,8 +512,8 @@ void PrevMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(optMargin);
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    CheckDimValid(optMargin);
     SwiperModelNG::SetPreviousMargin(frameNode, *optMargin, optIgnore);
 }
 void NextMarginImpl(Ark_NativePointer node,
@@ -554,8 +524,8 @@ void NextMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(optMargin);
     auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    CheckDimValid(optMargin);
     SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
@@ -620,8 +590,9 @@ void NestedScrollImpl(Ark_NativePointer node,
     using namespace OHOS::Ace;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    value = ::trimToAceRange(value, NestedScrollMode::SELF_ONLY, NestedScrollMode::PARALLEL);
-    SwiperModelNG::SetNestedScroll(frameNode, value);
+    auto nestedModeOpt = Converter::OptConvert<NestedScrollMode>(value);
+    CHECK_NULL_VOID(nestedModeOpt);
+    SwiperModelNG::SetNestedScroll(frameNode, static_cast<int>(*nestedModeOpt));
 }
 
 void CustomContentTransitionImpl(Ark_NativePointer node,
@@ -630,14 +601,18 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(transition);
+    auto optTimeout = Converter::OptConvert<Ark_Int32>(transition->timeout);
+    auto optFuncId = Converter::OptConvert<Ark_Function>(transition->transition);
+    CHECK_NULL_VOID(optTimeout || optFuncId);
 
     SwiperContentAnimatedTransition transitionInfo;
-    auto optTimeout = Converter::OptConvert<Ark_Int32>(transition->timeout);
-    transitionInfo.timeout = (!optTimeout || *optTimeout < 0) ? DEFAULT_DURATION : *optTimeout;
+    transitionInfo.timeout = *optTimeout;
 
     // probably, the transition->transition.id should be applied here to obtain the onTransitionFunc pointer
     void (* onTransitionFunc)(const RefPtr<SwiperContentTransitionProxy>& proxy) = nullptr;
+    LOGE("The SwiperAttributeModifier::CustomContentTransitionImpl, transitionInfo.transition stills without value");
     transitionInfo.transition = onTransitionFunc;
+
     SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
 }
 
