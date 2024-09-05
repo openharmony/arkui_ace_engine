@@ -695,10 +695,6 @@ public:
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
     static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
-    double GetPreviewScaleVal() const;
-
-    bool IsPreviewNeedScale() const;
-
     void SetViewPort(RectF viewPort)
     {
         viewPort_ = viewPort;

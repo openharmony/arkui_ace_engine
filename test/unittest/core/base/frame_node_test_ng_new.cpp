@@ -635,76 +635,6 @@ HWTEST_F(FrameNodeTestNg, CollectTouchInfos003, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg_GetPreviewScaleVal001
- * @tc.desc: Test frame node method GetPreviewScaleVal
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal001, TestSize.Level1)
-{
-    auto frameNode = FRAME_NODE;
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    frameNode->isActive_ = true;
-    frameNode->eventHub_->SetEnabled(true);
-    SystemProperties::debugEnabled_ = true;
-
-    /**
-     * @tc.steps: step2. call GetPreviewScaleVal
-     * @tc.expected: expect GetPreviewScaleVal return scale value.
-     */
-    auto geometryNode = frameNode->GetGeometryNode();
-    geometryNode->SetFrameSize(CONTAINER_SIZE_ZERO);
-    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
-
-    double screenWidth = 1216.0;
-    ScreenSystemManager::GetInstance().SetWindowInfo(screenWidth, 1.0, 1.0);
-    geometryNode->SetFrameSize(CONTAINER_SIZE_SMALL);
-    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
-
-    /**
-     * @tc.steps: step3. set a large size and call GetPreviewScaleVal.
-     * @tc.expected: expect GetPreviewScaleVal return scale value.
-     */
-    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-    EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
-}
-
-/**
- * @tc.name: FrameNodeTestNg_GetPreviewScaleVal002
- * @tc.desc: Test frame node method GetPreviewScaleVal
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
-{
-    auto frameNode = FRAME_NODE;
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    frameNode->isActive_ = true;
-    frameNode->eventHub_->SetEnabled(true);
-    SystemProperties::debugEnabled_ = true;
-
-    /**
-     * @tc.steps: step2. set frame size to huge and drag preview options to disable scale then call GetPreviewScaleVal
-     * @tc.expected: expect GetPreviewScaleVal return scale value.
-     */
-    auto geometryNode = frameNode->GetGeometryNode();
-    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-    NG::DragPreviewOption option { false };
-    frameNode->SetDragPreviewOptions(option);
-    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
-
-    /**
-     * @tc.steps: step3. set set drag preview options to auto and call GetPreviewScaleVal.
-     * @tc.expected: expect GetPreviewScaleVal return scale value.
-     */
-    option = { true };
-    frameNode->SetDragPreviewOptions(option);
-    EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
-}
-
-/**
  * @tc.name: FrameNodeTestNg_GetPreviewApplyVal001
  * @tc.desc: Test frame node method GetPreviewApplyVal001
  * @tc.type: FUNC
@@ -729,62 +659,6 @@ HWTEST_F(FrameNodeTestNg, GetPreviewApplyVal001, TestSize.Level1)
     previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {};
     frameNode->SetDragPreviewOptions(previewOption);
     EXPECT_NE(frameNode->GetDragPreviewOption().onApply, nullptr);
-}
-
-/**
- * @tc.name: FrameNodeTestNg_GetPreviewScaleVal003
- * @tc.desc: Test frame node method GetPreviewScaleVal
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal003, TestSize.Level1)
-{
-    auto frameNode = FRAME_NODE_WEB_ETS_TAG;
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    frameNode->isActive_ = true;
-    frameNode->eventHub_->SetEnabled(true);
-    SystemProperties::debugEnabled_ = true;
-
-    /**
-     * @tc.steps: step2. call GetPreviewScaleVal
-     * @tc.expected: expect GetPreviewScaleVal return scale value.
-     */
-    auto geometryNode = frameNode->GetGeometryNode();
-    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-
-    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
-}
-
-/**
- * @tc.name: FrameNodeTestNg_IsPreviewNeedScale001
- * @tc.desc: Test frame node method IsPreviewNeedScale
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, IsPreviewNeedScale001, TestSize.Level1)
-{
-    auto frameNode = FRAME_NODE;
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    FRAME_NODE->isActive_ = true;
-    FRAME_NODE->eventHub_->SetEnabled(true);
-    SystemProperties::debugEnabled_ = true;
-
-    /**
-     * @tc.steps: step2. call IsPreviewNeedScale
-     * @tc.expected: expect IsPreviewNeedScale return false.
-     */
-    auto geometryNode = frameNode->GetGeometryNode();
-    geometryNode->SetFrameSize(CONTAINER_SIZE_SMALL);
-    EXPECT_FALSE(FRAME_NODE->IsPreviewNeedScale());
-
-    /**
-     * @tc.steps: step2. set a large size and call IsPreviewNeedScale.
-     * @tc.expected: expect IsPreviewNeedScale return true.
-     */
-    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-    EXPECT_TRUE(FRAME_NODE->IsPreviewNeedScale());
 }
 
 /**

@@ -3631,24 +3631,6 @@ std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int3
     return nodes;
 }
 
-double FrameNode::GetPreviewScaleVal() const
-{
-    double scale = 1.0;
-    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(GetContextRefPtr());
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, scale);
-    auto width = geometryNode->GetFrameRect().Width();
-    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption_.isScaleEnabled) {
-        scale = maxWidth / width;
-    }
-    return scale;
-}
-
-bool FrameNode::IsPreviewNeedScale() const
-{
-    return GetPreviewScaleVal() < 1.0f;
-}
-
 int32_t FrameNode::GetNodeExpectedRate()
 {
     if (sceneRateMap_.empty()) {

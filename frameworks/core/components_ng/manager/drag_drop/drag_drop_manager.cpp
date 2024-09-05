@@ -1545,7 +1545,7 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
-    DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub)
+    DragPreviewInfo& dragPreviewInfo)
 {
     if (!overlayManager->GetHasDragPixelMap()) {
         return false;
@@ -1556,28 +1556,17 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
-    CHECK_NULL_RETURN(gestureHub, false);
-    auto frameNode = gestureHub->GetFrameNode();
-    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
-    auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
-    auto previewOption = imageNode->GetDragPreviewOption();
-    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
-        dragPreviewInfo.scale = maxWidth / width;
-    } else {
-        dragPreviewInfo.scale = 1.0f;
-    }
 
-    if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
-        dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
+    dragPreviewInfo.scale = GetPreviewNodeScale(*imageNode);
+    if (NearEqual(dragPreviewInfo.scale, 1.0f)) {
+        if (!isMouseDragged_) {
+            dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
+        }
     }
-    auto menuPreviewScale = gestureHub->GetMenuPreviewScale();
-    // use menuPreviewScale only for 1.0f menu scale.
-    if (isDragWithContextMenu_ && NearEqual(menuPreviewScale, 1.0f)) {
-        dragPreviewInfo.scale = menuPreviewScale;
-    }
-    dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
-    dragPreviewInfo.width = static_cast<double>(width);
-    dragPreviewInfo.maxWidth = maxWidth;
+    auto imageRect = imageNode->GetGeometryNode()->GetFrameRect();
+    dragPreviewInfo.height = imageRect.Height();
+    dragPreviewInfo.width = imageRect.Width();
+    dragPreviewInfo.maxWidth = GetMaxDiagnalBaseOnScreen();
     dragPreviewInfo.imageNode = imageNode;
     return true;
 }
@@ -1765,7 +1754,7 @@ void DragDropManager::UpdateDragPreviewScale()
 }
 
 void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
-    const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, bool isSubwindowOverlay)
+    const GestureEvent& event, bool isSubwindowOverlay)
 {
     auto containerId = Container::CurrentId();
     auto deviceId = static_cast<int32_t>(event.GetDeviceId());
@@ -1776,8 +1765,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
         return;
     }
     CHECK_NULL_VOID(overlayManager);
-    CHECK_NULL_VOID(gestureHub);
-    if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub))
+    if (!(GetDragPreviewInfo(overlayManager, info_))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_)) {
         if (isDragWithContextMenu_) {
             UpdateDragPreviewScale();
@@ -2110,33 +2098,67 @@ bool DragDropManager::IsUIExtensionComponent(const RefPtr<NG::UINode>& node)
            (!IsUIExtensionShowPlaceholder(node));
 }
 
-double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline)
+double DragDropManager::GetPreviewNodeScale(const FrameNode& node)
 {
-    auto context = DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_RETURN(context, -1.0f);
-    auto dragDropMgr = context->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropMgr, -1.0f);
-    auto& columnInfo = dragDropMgr->columnInfo_;
-    if (!columnInfo) {
-        columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DRAG_PANEL);
-        auto gridContainer = columnInfo->GetParent();
-        if (gridContainer) {
-            // cannot handle multi-screen
-            gridContainer->BuildColumnWidth(context->GetRootWidth());
+    constexpr float NO_SCALE = 1.0f;
+
+    auto pipeline = node.GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, NO_SCALE);
+    auto dragDropMgr = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropMgr, NO_SCALE);
+
+    if (dragDropMgr->isDragWithContextMenu_ && dragDropMgr->draggedFrameNode_) {
+        auto gestureHub = dragDropMgr->draggedFrameNode_->GetEventHub<EventHub>()->GetGestureEventHub();
+        // use menu preview scale only for 1.0f menu scale.
+        if (gestureHub && NearEqual(gestureHub->GetMenuPreviewScale(), NO_SCALE)) {
+            return NO_SCALE;
         }
-        dragDropMgr->columnInfo_ = columnInfo;
     }
 
-    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
-    if (gridSizeType > GridSizeType::LG) {
-        gridSizeType = GridSizeType::LG;
+    if (node.GetTag() == V2::WEB_ETS_TAG) {
+        return NO_SCALE;
     }
-    if (gridSizeType < GridSizeType::SM) {
-        gridSizeType = GridSizeType::SM;
+    auto rect = node.GetGeometryNode()->GetFrameRect();
+    if (rect.IsEmpty()) {
+        return NO_SCALE;
     }
-    auto columns = columnInfo->GetColumns(gridSizeType);
-    double maxWidth = columnInfo->GetWidth(columns);
-    return maxWidth;
+
+    auto diagnal = rect.Diagnal();
+    float maxWidth = GetMaxDiagnalBaseOnScreen();
+    bool isScaleEnable = node.GetDragPreviewOption().isScaleEnabled;
+    if (isScaleEnable && diagnal > maxWidth && !NearZero(diagnal)) {
+        return maxWidth / diagnal;
+    }
+
+    return NO_SCALE;
+}
+
+float DragDropManager::GetMaxDiagnalBaseOnScreen()
+{
+    auto displayInfo = DisplayInfoUtils::GetInstance().GetDisplayInfo();
+    if (displayInfo) {
+        return -1.0f;
+    }
+    double screenWidth = PipelineBase::Px2VpWithCurrentDensity(displayInfo->GetWidth());
+
+    /* 
+     *  ┌─────────────────────────────────────────────────┐ 
+     *  │    dev-size│  small    medium   large     xlarge│ 
+     *  │     grading│0 ──── 600 ──── 840 ──── 1440 ────  │ 
+     *  │max-diametre│  144      260      396       396   │ 
+     *  └─────────────────────────────────────────────────┘ 
+     */
+    const std::vector<uint16_t> sizeGrading { 0, 600, 840, 1440 };
+    const std::vector<uint16_t> maxRadius { 144, 260, 396, 396 };
+    auto upperBoundIdx = [&sizeGrading](const std::vector<uint16_t>& grading, double val) -> uint32_t {
+        for (uint32_t i = 0; i < grading.size(); ++i) {
+            if (sizeGrading[i] > val) {
+                return (i - 1);
+            }
+        }
+        return sizeGrading.size() - 1;
+    };
+    return PipelineBase::Vp2PxWithCurrentDensity(maxRadius[upperBoundIdx(sizeGrading, screenWidth)]);
 }
 
 const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager(int32_t containerId)
