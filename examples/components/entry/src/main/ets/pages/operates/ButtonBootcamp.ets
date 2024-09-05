@@ -14,33 +14,35 @@
  */
 
 import { Drawer } from '../../components/Drawer';
-import { RadioBlock, SliderBlock } from 'common';
+import { RadioBlock, SliderBlock, useEnabled } from 'common';
 import promptAction from '@ohos.promptAction';
 
 @Component
 export struct ButtonBootcamp {
   @Require @Prop title: ResourceStr;
-  @State showParameters: boolean = false
-  @State enableBtnType: boolean = false
-  @State btnType: ButtonType = ButtonType.Capsule
-  @State enableButtonStyle: boolean = false
-  @State buttonStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED
-  @State enableControlSize: boolean = false
-  @State controlSize: ControlSize = ControlSize.NORMAL
-  @State enableStateEffect: boolean = false
-  @State stateEffect: boolean = true
-  @State enableOverFlow: boolean = false
-  @State overflow: TextOverflow = TextOverflow.Clip
-  @State enableMaxLines: boolean = false
-  @State maxLines: number = 1
-  @State enableCustomSize: boolean = false
-  @State customSize: string = '64*40'
-  @State enableBorderRadius: boolean = false
-  @State btnBorderRadius: number = 30
-  @State enableLabelNum: boolean = false
-  @State labelNum: number = 2
-  @State enableLabelTextSize: boolean = false
-  @State labelTextSize: number = 16
+  @State showParameters: boolean = false;
+  @State enableBtnType: boolean = false;
+  @State btnType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
+  @State enableButtonStyle: boolean = false;
+  @State buttonStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED;
+  @State enableControlSize: boolean = false;
+  @State controlSize: ControlSize = ControlSize.NORMAL;
+  @State enableStateEffect: boolean = false;
+  @State stateEffect: boolean = true;
+  @State enableOverFlow: boolean = false;
+  @State overflow: TextOverflow = TextOverflow.Clip;
+  @State enableMaxLines: boolean = false;
+  @State maxLines: number = 1;
+  @State enableCustomWidth: boolean = false;
+  @State customWidth: string = '64';
+  @State enableCustomHeight: boolean = false;
+  @State customHeight: string = '40';
+  @State enableBorderRadius: boolean = false;
+  @State btnBorderRadius: number = 30;
+  @State enableLabelNum: boolean = false;
+  @State labelNum: number = 2;
+  @State enableLabelTextSize: boolean = false;
+  @State labelTextSize: number = 16;
 
   build() {
     NavDestination() {
@@ -65,20 +67,20 @@ export struct ButtonBootcamp {
       Button(
         this.enableLabelNum ? '按钮'.repeat(this.labelNum / 2) : '按钮',
         {
-          type: this.enableBtnType ? this.btnType : undefined,
-          buttonStyle: this.enableButtonStyle ? this.buttonStyle : undefined,
-          controlSize: this.enableControlSize ? this.controlSize : undefined,
+          type: useEnabled(this.enableBtnType, this.btnType),
+          buttonStyle: useEnabled(this.enableButtonStyle, this.buttonStyle),
+          controlSize: useEnabled(this.enableControlSize, this.controlSize),
         }
       )
-        .stateEffect(this.enableStateEffect ? this.stateEffect : undefined)
+        .stateEffect(useEnabled(this.enableStateEffect, this.stateEffect))
         .labelStyle({
-          overflow: this.enableOverFlow ? this.overflow : undefined,
-          maxLines: this.enableMaxLines ? this.maxLines : undefined,
+          overflow: useEnabled(this.enableOverFlow, this.overflow),
+          maxLines: useEnabled(this.enableMaxLines, this.maxLines),
         })
-        .width(this.enableCustomSize ? this.customSize.split('*')[0] : undefined)
-        .height(this.enableCustomSize ? this.customSize.split('*')[1] : undefined)
-        .borderRadius(this.enableBorderRadius ? this.btnBorderRadius : undefined)
-        .fontSize(this.enableLabelTextSize ? this.labelTextSize : undefined)
+        .width(useEnabled(this.enableCustomWidth, this.customWidth))
+        .height(useEnabled(this.enableCustomHeight, this.customHeight))
+        .borderRadius(useEnabled(this.enableBorderRadius, this.btnBorderRadius))
+        .fontSize(useEnabled(this.enableLabelTextSize, this.labelTextSize))
         .onClick(() => {
           promptAction.showToast({
             message: '按钮被点击！'
@@ -98,7 +100,8 @@ export struct ButtonBootcamp {
           dataSource: [
             { label: '胶囊按钮', value: ButtonType.Capsule },
             { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle }
+            { label: '圆形按钮', value: ButtonType.Circle },
+            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
 
@@ -157,16 +160,20 @@ export struct ButtonBootcamp {
           ]
         })
 
+        SliderBlock({
+          title: '自定义按钮宽度',
+          isEnabled: $enableCustomWidth,
+          value: $customWidth,
+          min: 20,
+          max: 80
+        })
 
-        RadioBlock({
-          title: '自定义按钮尺寸',
-          isEnabled: $enableCustomSize,
-          value: $customSize,
-          dataSource: [
-            { label: '64x40', value: '64*40' },
-            { label: '28x28', value: '28*28' },
-            { label: '300x56', value: '300*56' }
-          ]
+        SliderBlock({
+          title: '自定义按钮高度',
+          isEnabled: $enableCustomHeight,
+          value: $customHeight,
+          min: 20,
+          max: 80
         })
 
         SliderBlock({
