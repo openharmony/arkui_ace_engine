@@ -60,6 +60,20 @@ float GetHoursWest(float hoursWest)
 
     return int32_t(hoursWest);
 }
+
+void RemoveJSController(
+    FrameNode* frameNode, const RefPtr<TextClockController>& controller, Framework::JSTextClockController* jsController)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(controller);
+    CHECK_NULL_VOID(jsController);
+    auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
+    auto preController = static_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
+    if (preController) {
+        preController->removeController(controller);
+    }
+    TextClockModelNG::SetJSTextClockController(frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
+}
 } // namespace
 
 ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -436,18 +450,13 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
         if (jsController) {
             jsController->SetInstanceId(Container::CurrentId());
             if (controller) {
-                auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
-                auto preController = reinterpret_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
-                if (preController) {
-                    preController->removeController(controller);
-                }
-                TextClockModelNG::SetJSTextClockController(frameNode, Referenced::Claim((Referenced*)jsController));
+                RemoveJSController(frameNode, controller, jsController);
                 jsController->AddController(controller);
             }
         }
     } else if (controller) {
         auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
-        auto preController = reinterpret_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
+        auto preController = static_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
         if (preController) {
             preController->removeController(controller);
         }
