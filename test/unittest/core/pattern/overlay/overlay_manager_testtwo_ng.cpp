@@ -432,8 +432,7 @@ HWTEST_F(OverlayManagerTwoTestNg, CloseAIEntityMenu001, TestSize.Level1)
 {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->aiEntityMenuTargetId_ = 2;
-    overlayManager->CloseAIEntityMenu();
+    overlayManager->CloseAIEntityMenu(2);
     EXPECT_FALSE(overlayManager->GetMenuNode(2));
 }
 
