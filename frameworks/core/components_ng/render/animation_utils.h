@@ -78,6 +78,10 @@ public:
 
     static void ReverseInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
+    static void AddInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+        const std::function<void()>& callback);
 };
 } // namespace OHOS::Ace
 

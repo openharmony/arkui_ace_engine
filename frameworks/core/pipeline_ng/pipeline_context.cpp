@@ -4267,4 +4267,13 @@ bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPi
     return false;
 }
 #endif
+
+bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    CHECK_NULL_RETURN(navigationMgr_, false);
+    if (navigationMgr_->IsInteractive()) {
+        return navigationMgr_->AddInteractiveAnimation(animationCallback);
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG
