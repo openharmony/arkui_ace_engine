@@ -8278,6 +8278,8 @@ void TextFieldPattern::OnTextGenstureSelectionEnd()
 
 PositionWithAffinity TextFieldPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
 {
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    CHECK_NULL_RETURN(paragraph_, finalResult);
     Offset offset(x, y);
     return paragraph_->GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
 }
