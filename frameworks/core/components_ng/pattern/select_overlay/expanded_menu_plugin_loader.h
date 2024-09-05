@@ -76,6 +76,17 @@ public:
 #endif
     }
 
+    bool HasCollaborationMenu()
+    {
+#ifndef WINDOWS_PLATFORM
+        CHECK_NULL_RETURN(LoadPlugin(), false);
+        CHECK_NULL_RETURN(createDeviceMenu, false);
+        return true;
+#else
+        return false;
+#endif
+    }
+
     void *expandedMenuPluginHandle;
     CreateDeviceMenuFunc createDeviceMenu;
 };
