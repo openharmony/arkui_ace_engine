@@ -1550,23 +1550,6 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
     }
 }
 
-void PipelineContext::CheckVirtualKeyboardHeight()
-{
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_) {
-        return;
-    }
-#endif
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto keyboardArea = container->GetKeyboardSafeArea();
-    auto keyboardHeight = keyboardArea.bottom_.end - keyboardArea.bottom_.start;
-    if (keyboardHeight > 0) {
-        LOGI("Current View has keyboard.");
-    }
-    OnVirtualKeyboardHeightChange(keyboardHeight);
-}
-
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 {
     auto frameNode = DynamicCast<FrameNode>(uiNode);
