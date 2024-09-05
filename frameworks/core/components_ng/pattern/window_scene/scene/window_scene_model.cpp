@@ -17,7 +17,6 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
@@ -58,10 +57,5 @@ void WindowSceneModel::Create(int32_t persistentId)
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
-}
-
-void WindowSceneModel::SetAttractionEffect(const AttractionEffect& effect)
-{
-    ViewAbstract::SetAttractionEffect(effect);
 }
 } // namespace OHOS::Ace::NG
