@@ -615,7 +615,7 @@ class UIContext {
         }
         return this.cursorController_;
     }
-
+    
     getContextMenuController() {
         if (this.contextMenuController_ == null) {
             this.contextMenuController_ = new ContextMenuController(this.instanceId_);
@@ -821,7 +821,7 @@ class CursorController {
         cursorControl.restoreDefault();
         __JSScopeUtil__.restoreInstanceId();
     }
-
+    
     setCursor(value) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         cursorControl.setCursor(value);
