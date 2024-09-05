@@ -175,14 +175,17 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
 bool GetTaskExecutor(const RefPtr<UINode>& uiNode, RefPtr<PipelineContext>& pipeline, RefPtr<TaskExecutor>& executor)
 {
     if (!uiNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! uiNode is nullptr");
         return false;
     }
     pipeline = uiNode->GetContextRefPtr();
     if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! can't get pipeline");
         return false;
     }
     executor = pipeline->GetTaskExecutor();
     if (!executor) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! can't get executor");
         return false;
     }
 
@@ -256,7 +259,6 @@ void ComponentSnapshot::Create(
     RefPtr<TaskExecutor> executor = nullptr;
     if (!GetTaskExecutor(uiNode, pipeline, executor)) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
         return;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
