@@ -1811,7 +1811,7 @@ void AceContainer::SetLocalStorage(
     NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     ContainerScope scope(instanceId_);
-    taskExecutor_->PostTask(
+    taskExecutor_->PostSyncTask(
         [frontend = WeakPtr<Frontend>(frontend_), storage,
             contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
             sharedRuntime = sharedRuntime_] {
