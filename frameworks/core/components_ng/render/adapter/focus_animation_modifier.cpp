@@ -185,6 +185,9 @@ void FocusAnimationModifier::StartFocusAnimation()
     }
     InitTrajectoryData(roundRect_);
     animating_ = true;
+    if (focusAnimation_) {
+        AnimationUtils::ResumeAnimation(focusAnimation_);
+    }
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
     option.SetDuration(ANIMATION_DURATION);
@@ -201,10 +204,9 @@ void FocusAnimationModifier::StopFocusAnimation()
         return;
     }
     if (focusAnimation_) {
-        AnimationUtils::StopAnimation(focusAnimation_);
+        AnimationUtils::PauseAnimation(focusAnimation_);
     }
     animating_ = false;
-    focusProcessFloat_->Set(0.0f);
 }
 
 void FocusAnimationModifier::onDraw(DrawingContext& context)
