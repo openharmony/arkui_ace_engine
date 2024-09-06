@@ -46,7 +46,8 @@ std::string GetDeclaration(const std::optional<Color>& color, const std::optiona
         "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
     jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
     jsonSpanDeclaration->Put("style",
-        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
+        V2::ConvertWrapTextDecorationStyleToString(textDecorationStyle.value_or(TextDecorationStyle::SOLID))
+            .c_str());
     return jsonSpanDeclaration->ToString();
 }
 inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
@@ -552,8 +553,8 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
-        resultObject.span = WeakClaim(this);
         resultObject.valueString = content;
+        resultObject.span = WeakClaim(this);
         resultObject.isInit = true;
     }
     return resultObject;
@@ -582,13 +583,13 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, 
     INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
     INHERIT_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
     INHERIT_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
-    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
     INHERIT_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
     INHERIT_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
     INHERIT_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
     INHERIT_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
     INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
+    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
     INHERIT_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
     if (!GetHasUserFontWeight()) {
@@ -907,7 +908,6 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
-    textStyle = TextStyle();
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
     if (!NearZero(placeholderStyle.baselineOffset)) {
@@ -1025,7 +1025,6 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle, bool /* isMarquee*/)
 {
     CHECK_NULL_RETURN(builder, -1);
-    textStyle = TextStyle();
     PlaceholderRun run;
     run.width = placeholderStyle.width;
     run.height = placeholderStyle.height;
@@ -1067,10 +1066,11 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+        PropertyInfo::MIN_FONT_SCALE, PropertyInfo::MAX_FONT_SCALE,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
-        PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
-        PropertyInfo::MAX_FONT_SCALE, PropertyInfo::VARIABLE_FONT_WEIGHT, PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT };
+        PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::VARIABLE_FONT_WEIGHT,
+        PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

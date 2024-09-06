@@ -2008,20 +2008,20 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getTextEllipsisMode)(ArkUINodeHandle node);
     void (*setTextFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextFontFeature)(ArkUINodeHandle node);
-    void (*setTextLineSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
-    ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
-    void (*resetTextLineSpacing)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextFontFeature)(ArkUINodeHandle node);
     ArkUI_Int32 (*getEnableDataDetector)(ArkUINodeHandle node);
     void (*setTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Uint32* values, ArkUI_Int32 size);
     ArkUI_Int32 (*getTextDataDetectorConfig)(ArkUINodeHandle node, ArkUI_Int32 (*values)[32]);
     void (*resetTextDataDetectorConfig)(ArkUINodeHandle node);
-    void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
-    void (*resetLineBreakStrategy)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
+    void (*setTextLineSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
+    void (*resetTextLineSpacing)(ArkUINodeHandle node);
     void (*setTextSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     ArkUI_Uint32 (*getTextSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*resetTextSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setLineBreakStrategy)(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy);
+    void (*resetLineBreakStrategy)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextLineBreakStrategy)(ArkUINodeHandle node);
     void (*setTextContentWithStyledString)(ArkUINodeHandle node, ArkUI_StyledString* styledString);
     void (*resetTextContentWithStyledString)(ArkUINodeHandle node);
     void (*setTextSelection)(ArkUINodeHandle node, ArkUI_Int32 startIndex, ArkUI_Int32 endIndex);
@@ -2035,15 +2035,17 @@ struct ArkUITextModifier {
     void (*resetTextOnCopy)(ArkUINodeHandle node);
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setTextSelectionMenuOptions)(
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+    void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetTextMinFontScale)(ArkUINodeHandle node);
     void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetTextMaxFontScale)(ArkUINodeHandle node);
-    void (*setTextSelectionMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
-    void (*resetTextSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextHalfLeading)(ArkUINodeHandle node);
+    void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
+    void (*resetTextOnClick)(ArkUINodeHandle node);
     void (*setTextResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 lengthk);
     void (*resetTextResponseRegion)(ArkUINodeHandle node);

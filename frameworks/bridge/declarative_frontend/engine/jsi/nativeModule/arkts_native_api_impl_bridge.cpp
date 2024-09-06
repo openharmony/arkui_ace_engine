@@ -1241,14 +1241,16 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEnableDataDetector));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEnableDataDetector));
-    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontFeature));
-    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontFeature));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextForegroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetForegroundColor));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextForegroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetForegroundColor));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetFontFeature));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetFontFeature));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetContent));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelection"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetSelection));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelection"),
@@ -1277,6 +1279,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetHalfLeading));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHalfLeading"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetHalfLeading));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnClick));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnClick));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetResponseRegion));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
