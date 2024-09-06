@@ -1293,8 +1293,6 @@ public:
         return false;
     }
 
-    virtual void CheckVirtualKeyboardHeight() {}
-
     virtual void StartWindowAnimation() {}
 
     virtual void StopWindowAnimation() {}
