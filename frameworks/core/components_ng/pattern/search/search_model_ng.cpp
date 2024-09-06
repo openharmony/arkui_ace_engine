@@ -59,6 +59,7 @@ void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
             currentNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id);
         }
     };
+    updateInspectorCallback(frameNode, TEXTFIELD_INDEX);
     updateInspectorCallback(frameNode, IMAGE_INDEX);
     updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
     updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
@@ -739,7 +740,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
-    
+    auto parentInspector = parentNode->GetInspectorIdValue("");
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {

@@ -938,7 +938,7 @@ void JSNativeCustomSpan::Destructor(JSNativeCustomSpan* customSpan)
 
 void JSNativeCustomSpan::Invalidate(const JSCallbackInfo& info)
 {
-    for (const auto& styledStringWeakPtr : set_) {
+    for (const auto& styledStringWeakPtr : spanStringBaseSet_) {
         auto styledString = AceType::DynamicCast<SpanString>(styledStringWeakPtr.Upgrade());
         if (!styledString) {
             continue;
@@ -956,12 +956,12 @@ void JSNativeCustomSpan::JSBind(BindingTarget globalObj)
 
 void JSNativeCustomSpan::AddStyledString(const WeakPtr<SpanStringBase>& spanString)
 {
-    set_.insert(spanString);
+    spanStringBaseSet_.insert(spanString);
 }
 
 void JSNativeCustomSpan::RemoveStyledString(const WeakPtr<SpanStringBase>& spanString)
 {
-    set_.erase(spanString);
+    spanStringBaseSet_.erase(spanString);
 }
 
 // JSCustomSpan
