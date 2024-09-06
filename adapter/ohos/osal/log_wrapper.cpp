@@ -124,7 +124,6 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_MOVING_PHOTO, "AceMovingPhoto" },
     { AceLogTag::ACE_ARK_COMPONENT, "AceArkComponent" },
     { AceLogTag::ACE_WINDOW, "AceWindow" },
-    { AceLogTag::ACE_WINDOW_PIPELINE, "AceWindowPipeline" },
     { AceLogTag::ACE_INPUTKEYFLOW, "InputKeyFlow"},
     { AceLogTag::ACE_APPBAR, "AceAppBar"},
     { AceLogTag::ACE_SELECT_OVERLAY, "AceSelectOverlay"},
