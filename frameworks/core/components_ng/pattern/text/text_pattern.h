@@ -827,14 +827,20 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    void SetDefaultMouseStyle(MouseFormat mouseStyle)
+    {
+        defaultMouseStyle_ = mouseStyle;
+    }
+    virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
+    void InitUrlHoverEvent();
 
 private:
+    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitTouchEvent();
-    void InitUrlHoverEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);

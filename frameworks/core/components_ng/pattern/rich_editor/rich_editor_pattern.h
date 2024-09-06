@@ -958,6 +958,8 @@ protected:
         return pipelineContext->GetTheme<T>();
     }
 
+    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+
 private:
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
