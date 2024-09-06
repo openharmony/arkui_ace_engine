@@ -312,7 +312,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
-    for (auto const& recognizer : gestureHierarchy_) {
+    auto userRecognizers = gestureHierarchy_;
+    auto userModifierRecognizers = modifierGestureHierarchy_;
+    userRecognizers.splice(userRecognizers.end(), userModifierRecognizers);
+    for (auto const& recognizer : userRecognizers) {
         if (!recognizer) {
             continue;
         }
@@ -354,7 +357,7 @@ void GestureEventHub::UpdateGestureHierarchy()
 {
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
-    bool success = (gestures_.size() + modifierGestures_.size()) == gestureHierarchy_.size() && !needRecollect_;
+    bool success = gestures_.size() == gestureHierarchy_.size();
     if (success) {
         auto iter = gestures_.begin();
         auto recognizerIter = gestureHierarchy_.begin();
@@ -373,16 +376,39 @@ void GestureEventHub::UpdateGestureHierarchy()
 
     gestureHierarchy_.clear();
     for (const auto& gesture : gestures_) {
-        AddGestureToGestureHierarchy(gesture);
+        AddGestureToGestureHierarchy(gesture, false);
     }
-    for (const auto& gesture : modifierGestures_) {
-        AddGestureToGestureHierarchy(gesture);
-    }
-    needRecollect_ = false;
     gestures_.clear();
 }
 
-void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture)
+void GestureEventHub::UpdateModifierGestureHierarchy()
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    bool success = modifierGestures_.size() == modifierGestureHierarchy_.size() && !needRecollect_;
+    if (success) {
+        auto iter = modifierGestures_.begin();
+        auto recognizerIter = modifierGestureHierarchy_.begin();
+        for (; iter != modifierGestures_.end(); iter++, recognizerIter++) {
+            auto newRecognizer = (*iter)->CreateRecognizer();
+            success = success && (*recognizerIter)->ReconcileFrom(newRecognizer);
+            if (!success) {
+                break;
+            }
+        }
+    }
+    if (success) {
+        return;
+    }
+
+    modifierGestureHierarchy_.clear();
+    for (const auto& gesture : modifierGestures_) {
+        AddGestureToGestureHierarchy(gesture, true);
+    }
+    needRecollect_ = false;
+}
+
+void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture, bool isModifier)
 {
     if (!gesture) {
         return;
@@ -412,6 +438,10 @@ void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& ge
     auto gestureMask = gesture->GetGestureMask();
     recognizer->SetPriority(priority);
     recognizer->SetPriorityMask(gestureMask);
+    if (isModifier) {
+        modifierGestureHierarchy_.emplace_back(recognizer);
+        return;
+    }
     gestureHierarchy_.emplace_back(recognizer);
 }
 
@@ -1656,6 +1686,7 @@ void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHu
     gestures_ = gestureEventHub->backupGestures_;
     modifierGestures_ = gestureEventHub->backupModifierGestures_;
     recreateGesture_ = true;
+    UpdateModifierGestureHierarchy();
 }
 
 void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
@@ -1929,9 +1960,8 @@ void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
         }
     }
     if (needRecollect) {
-        recreateGesture_ = true;
         needRecollect_ = true;
-        OnModifyDone();
+        UpdateModifierGestureHierarchy();
     }
 }
 
@@ -1939,8 +1969,7 @@ void GestureEventHub::ClearModifierGesture()
 {
     modifierGestures_.clear();
     backupModifierGestures_.clear();
-    recreateGesture_ = true;
-    OnModifyDone();
+    UpdateModifierGestureHierarchy();
 }
 
 void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
