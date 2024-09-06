@@ -277,7 +277,7 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
     return !alignTypeEQ || !dxEQ || !dyEQ;
   }
 
-  private isEqual(stageValue: Length, value: Length) {
+  private isEqual(stageValue: Length, value: Length): boolean {
     if ((!isUndefined(stageValue) && isResource(stageValue)) &&
       (!isUndefined(value) && isResource(value))) {
       return !isResourceEqual(stageValue, value);

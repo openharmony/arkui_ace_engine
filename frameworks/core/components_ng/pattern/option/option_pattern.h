@@ -199,17 +199,6 @@ public:
     {
         return selectTheme_;
     }
-
-    void SetSelected(bool selected)
-    {
-        selected_ = selected;
-    }
-
-    bool IsSelected()
-    {
-        return selected_;
-    }
-
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -253,7 +242,6 @@ private:
     bool isHover_ = false;
     bool isWidthModifiedBySelect_ = false;
     bool isSelectOption_ = false;
-    bool selected_ = false;
     bool hasOptionWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
