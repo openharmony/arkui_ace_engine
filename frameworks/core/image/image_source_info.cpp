@@ -22,6 +22,7 @@ namespace {
 
 constexpr uint32_t FILE_SUFFIX_LEN = 4;
 constexpr uint32_t APNG_FILE_SUFFIX_LEN = 5;
+constexpr uint32_t MAX_BASE64_LENGTH = 50; // prevent the Base64 image format from too long.
 
 bool CheckSvgExtension(const std::string& src)
 {
@@ -216,7 +217,7 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 void ImageSourceInfo::GenerateCacheKey()
 {
     auto colorMode = GetColorModeToString();
-    auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
+    auto name = GetSrc() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
     cacheKey_ =
         std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_)) + colorMode;
     if (srcType_ == SrcType::BASE64) {
@@ -362,6 +363,11 @@ std::string ImageSourceInfo::ToString() const
 {
     auto& src = GetSrc();
     if (!src.empty()) {
+        // Check if the src is a base64 image
+        if (srcType_ == SrcType::BASE64) {
+            // Return the first 50 characters of the base64 image string
+            return src.substr(0, MAX_BASE64_LENGTH) + "...(truncated)";
+        }
         return src;
     }
     if (resourceId_ != InternalResource::ResourceId::NO_ID) {

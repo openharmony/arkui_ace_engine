@@ -133,10 +133,6 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
             return MakeRefPtr<AstcImageLoader>();
         }
         default: {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "Image source type not supported! srcType: %{public}d, src: %{private}s. nodeId = "
-                "%{public}d-%{public}" PRId64,
-                srcType, imageSourceInfo.ToString().c_str(), imageDfx.nodeId_, imageDfx.accessibilityId_);
             return nullptr;
         }
     }

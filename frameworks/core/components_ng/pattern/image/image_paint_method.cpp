@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
+#include "base/utils/utils.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
@@ -122,19 +123,13 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    if (!canvasImage_) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE,
-            "canvasImage is null id = %{public}d, accessId = %{public}lld, src = %{public}s.", imageDfxConfig_.nodeId_,
-            static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
-        return nullptr;
-    }
-    auto contentSize = paintWrapper->GetContentSize();
-    auto&& paintConfig = canvasImage_->GetPaintConfig();
-
+    CHECK_NULL_RETURN(canvasImage_, nullptr);
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
+    auto contentSize = paintWrapper->GetContentSize();
+    auto&& paintConfig = canvasImage_->GetPaintConfig();
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
         svgCanvas->SetFillColor(paintConfig.svgFillColor_);
