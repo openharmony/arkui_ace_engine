@@ -888,10 +888,28 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     }
 
     result.offset.Reset();
-    result.height = paragrah->GetHeight();
-    auto lineHeight = paraStyle_.lineHeight;
-    if (lineHeight.IsValid()) {
-        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto boxes = paragrah->GetRectsForRange(0, 1, txt::Paragraph::RectHeightStyle::kMax,
+        txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragrah->GetTextRectsByBoundary(0, 1, Rosen::TextRectHeightStyle::TIGHT,
+        Rosen::TextRectWidthStyle::TIGHT);
+#endif
+    if (boxes.empty()) {
+        result.height = paragrah->GetHeight();
+        auto lineHeight = paraStyle_.lineHeight;
+        if (lineHeight.IsValid()) {
+            result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+        }
+    } else {
+        const auto& textBox = boxes.back();
+#ifndef USE_GRAPHIC_TEXT_GINE
+        result.height = textBox.rect.fBottom - textBox.rect.fTop;
+        result.offset.SetY(textBox.rect.fTop);
+#else
+        result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+        result.offset.SetY(textBox.rect.GetTop());
+#endif
     }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);
