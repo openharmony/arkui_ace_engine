@@ -25,7 +25,6 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/toast/toast_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
@@ -41,11 +40,6 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
-    }
-
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ToastAccessibilityProperty>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
