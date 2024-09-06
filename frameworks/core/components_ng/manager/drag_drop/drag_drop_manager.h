@@ -30,6 +30,7 @@
 
 namespace OHOS::Ace {
 class UnifiedData;
+class GridColumnInfo;
 }
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
@@ -299,7 +300,7 @@ public:
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
     void DragMoveAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, Point point);
     void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
-        const GestureEvent& event, bool isSubwindowOverlay = false);
+        const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, bool isSubwindowOverlay = false);
     void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, Point point = { 1, 1 });
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
@@ -457,10 +458,7 @@ public:
     {
         dampingOverflowCount_++;
     }
-
-    static double GetPreviewNodeScale(const FrameNode& node);
-
-    static float GetMaxDiagnalBaseOnScreen();
+    static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
     RefPtr<FrameNode> GetMenuWrapperNode()
     {
@@ -481,7 +479,7 @@ private:
         bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId);
     void UpdateDragPreviewScale();
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
-        DragPreviewInfo& dragPreviewInfo);
+        DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
     const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
@@ -576,6 +574,7 @@ private:
     OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
     uint32_t dampingOverflowCount_ = 0;
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
+    RefPtr<GridColumnInfo> columnInfo_;
     WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

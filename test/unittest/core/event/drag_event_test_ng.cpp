@@ -853,7 +853,12 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     EXPECT_NE(overlayManager, nullptr);
     dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
     EXPECT_EQ(overlayManager->hasPixelMap_, true);
+    /**
+     * @tc.steps: step4. Invoke SetPreviewDefaultAnimateProperty function.
+     * @tc.expected: cover branch IsPreviewNeedScale() == true.
+     */
     imageNode->GetGeometryNode()->frame_.rect_.width_ = IMAGE_INVALID_RECT_WIDTH;
+    EXPECT_EQ(imageNode->IsPreviewNeedScale(), false);
     dragEventActuator->SetPreviewDefaultAnimateProperty(imageNode);
     TranslateOptions result = imageContext->GetTransformTranslate().value_or(TranslateOptions());
     TranslateOptions expectValue { 0.0f, 0.0f, 0.0f };
