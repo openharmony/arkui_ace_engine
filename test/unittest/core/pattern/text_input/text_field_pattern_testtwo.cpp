@@ -1397,12 +1397,12 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateCaretByTouchMove001, TestSize.Level0)
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
 
     auto magnifierController = pattern->magnifierController_;
     pattern->magnifierController_ = nullptr;
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
     pattern->magnifierController_ = magnifierController;
 
     /* Make the GetIsPreviewText function return true */
@@ -1413,7 +1413,7 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateCaretByTouchMove001, TestSize.Level0)
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateMaxLines(1);
 
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
     EXPECT_EQ(pattern->selectController_->GetCaretIndex(), 0);
 }
 

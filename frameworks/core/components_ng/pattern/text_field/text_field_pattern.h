@@ -189,6 +189,7 @@ struct TouchAndMoveCaretState {
     bool isMoveCaret = false;
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
+    int32_t touchFingerId = -1;
 };
 
 struct ContentScroller {
@@ -1579,8 +1580,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleTouchMove(const TouchEventInfo& info);
-    void UpdateCaretByTouchMove(const TouchEventInfo& info);
+    void HandleTouchMove(const TouchLocationInfo& info);
+    void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
@@ -1797,6 +1798,7 @@ private:
     std::optional<float> CalcAutoScrollStepOffset(const Offset& localOffset);
     void SetDragMovingScrollback();
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
+    std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
 
     RectF frameRect_;
     RectF textRect_;
