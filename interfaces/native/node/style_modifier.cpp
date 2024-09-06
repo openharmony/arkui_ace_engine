@@ -1335,7 +1335,7 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     for (int i = 0; i < size; i++) {
         colors[i * NUM_3 + NUM_0].u32 = colorStop->colors[i];
         colors[i * NUM_3 + NUM_1].i32 = true;
-        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i] < 0 ? 0 : colorStop->stops[i];
+        colors[i * NUM_3 + NUM_2].f32 = colorStop->stops[i];
     }
 
     auto isCustomDirection = item->value[NUM_1].i32 == static_cast<ArkUI_Int32>(ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM);
