@@ -300,7 +300,7 @@ public:
     void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString);
 
 private:
-    std::set<WeakPtr<SpanStringBase>> set_;
+    std::set<WeakPtr<SpanStringBase>> spanStringBaseSet_;
 };
 
 class JSCustomSpan : public CustomSpan {
