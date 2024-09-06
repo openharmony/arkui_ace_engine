@@ -2000,9 +2000,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern085, TestSize.Level0)
 
     pattern->moveCaretState_.isTouchCaret = true;
     pattern->hasPreviewText_ = true;
-    pattern->HandleTouchMove(touchEventInfo);
+    pattern->HandleTouchMove(touchLocationInfo);
     pattern->hasPreviewText_ = false;
-    pattern->HandleTouchMove(touchEventInfo);
+    pattern->HandleTouchMove(touchLocationInfo);
 }
 
 /**
@@ -2028,7 +2028,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
     pattern->hasPreviewText_ = true;
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
 }
 
 /**
