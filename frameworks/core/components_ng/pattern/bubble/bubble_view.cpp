@@ -283,6 +283,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
+            styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
         }
         if (param->GetShadow().has_value()) {
@@ -377,6 +378,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
+            styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             columnRenderContext->UpdateBackBlurStyle(styleOption);
         }
         if (param->GetShadow().has_value()) {
@@ -615,14 +617,18 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
     if (renderContext) {
+        auto popupTheme = GetPopupTheme();
+        CHECK_NULL_VOID(popupTheme);
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             renderContext->UpdateBackgroundColor(
-                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+                popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
         } else {
-            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
             styleOption.blurStyle = param->GetBlurStyle();
+            styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
         }
     }
