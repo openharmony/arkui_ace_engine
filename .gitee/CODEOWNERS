@@ -1788,7 +1788,6 @@ frameworks/core/common/page_url_checker.h @arkui_superman
 frameworks/core/common/platform_bridge.cpp @arkuiframework
 frameworks/core/common/platform_bridge.h @arkuiframework
 frameworks/core/common/platform_res_register.h @arkuiframework
-frameworks/core/common/platformview/ 
 frameworks/core/common/platform_window.h @arkuiframework
 frameworks/core/common/plugin_manager.cpp @arkuilayout
 frameworks/core/common/plugin_manager.h @arkuilayout

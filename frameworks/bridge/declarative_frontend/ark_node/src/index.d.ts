@@ -63,8 +63,7 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE,
-  PLATFORM_VIEW = 999
+  TEXTURE
 }
 
 declare interface XComponentController { }
