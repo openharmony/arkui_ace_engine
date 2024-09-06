@@ -448,7 +448,7 @@ bool WebPattern::NeedSoftKeyboard() const
 
 void WebPattern::OnAttachToMainTree()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree");
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree WebId %{public}d", GetWebId());
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
@@ -456,7 +456,7 @@ void WebPattern::OnAttachToMainTree()
 
 void WebPattern::OnDetachFromMainTree()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnDetachFromMainTree");
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnDetachFromMainTree WebId %{public}d", GetWebId());
     // report component is in background.
     delegate_->OnRenderToBackground();
 }
@@ -4978,7 +4978,7 @@ void WebPattern::UpdateLocale()
 
 void WebPattern::OnWindowShow()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowShow WebId : %{public}d", GetWebId());
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
@@ -4987,13 +4987,23 @@ void WebPattern::OnWindowShow()
         return;
     }
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    componentVisibility_ = layoutProperty->GetVisibility().value_or(VisibleType::GONE);
+    // When the visibility of web component is invisible, the window notification is not processed
+    if (componentVisibility_ == VisibleType::INVISIBLE) {
+        ACE_SCOPED_TRACE("WebPattern::OnWindowShow visibility of web component is invisible, WebId %d", GetWebId());
+        return;
+    }
     delegate_->ShowWebView();
     isWindowShow_ = true;
 }
 
 void WebPattern::OnWindowHide()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnWindowHide WebId : %{public}d", GetWebId());
     CHECK_NULL_VOID(delegate_);
     delegate_->OnRenderToBackground();
 

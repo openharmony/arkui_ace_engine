@@ -29,6 +29,7 @@
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_event.h"
@@ -1120,6 +1121,7 @@ private:
         .scrollLeft = NestedScrollMode::SELF_ONLY,
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
+    VisibleType componentVisibility_ = VisibleType::VISIBLE;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
