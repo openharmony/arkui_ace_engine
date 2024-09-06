@@ -198,10 +198,5 @@ void DialogTheme::Builder::ParseNewPattern(
         dialogPattern->GetAttr<int>("dialog_scroll_flex_align", DEFAULT_DIALOG_SCROLL_FLEX_ALIGN));
     theme->columnMeasureType_ = static_cast<NG::MeasureType>(
         dialogPattern->GetAttr<int>("dialog_column_measure_type", DEFAULT_DIALOG_COLUMN_MEASURE_TYPE));
-    theme->dialogDoubleBorderEnable_ = dialogPattern->GetAttr<int>("dialog_double_border_enable", 0);
-    theme->dialogOuterBorderColor_ = dialogPattern->GetAttr<Color>("dialog_outer_border_color", Color::TRANSPARENT);
-    theme->dialogOuterBorderWidth_ = dialogPattern->GetAttr<double>("dialog_outer_border_width", 0.0f);
-    theme->dialogInnerBorderColor_ = dialogPattern->GetAttr<Color>("dialog_inner_border_color", Color::TRANSPARENT);
-    theme->dialogInnerBorderWidth_ = dialogPattern->GetAttr<double>("dialog_inner_border_width", 0.0f);
 }
 } // namespace OHOS::Ace
