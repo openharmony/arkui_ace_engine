@@ -3194,6 +3194,14 @@ void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetFocusType(FrameNode* frameNode, FocusType focusType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(focusType);
+}
+
 void ViewAbstract::SetTouchable(FrameNode* frameNode, bool touchable)
 {
     CHECK_NULL_VOID(frameNode);
