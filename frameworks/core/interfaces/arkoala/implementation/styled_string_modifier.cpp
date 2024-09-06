@@ -47,6 +47,18 @@ Ark_NativePointer SubStyledStringImpl(StyledStringPeer* peer,
 {
     return 0;
 }
+Ark_NativePointer FromHtmlImpl(const Ark_String* html)
+{
+    return 0;
+}
+Ark_NativePointer MarshallingImpl(const Ark_Materialized* styledString)
+{
+    return 0;
+}
+Ark_NativePointer UnmarshallingImpl(const Ark_ArrayBuffer* buffer)
+{
+    return 0;
+}
 Ark_Int32 GetLengthImpl(StyledStringPeer* peer)
 {
     return 0;
@@ -61,6 +73,9 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringModifier::GetStylesImpl,
         StyledStringModifier::EqualsImpl,
         StyledStringModifier::SubStyledStringImpl,
+        StyledStringModifier::FromHtmlImpl,
+        StyledStringModifier::MarshallingImpl,
+        StyledStringModifier::UnmarshallingImpl,
         StyledStringModifier::GetLengthImpl,
     };
     return &StyledStringAccessorImpl;

@@ -129,6 +129,10 @@ void FrictionImpl(Ark_NativePointer node,
                   const Type_GridAttribute_friction_Arg0* value)
 {
 }
+void AlignItemsImpl(Ark_NativePointer node,
+                    const Opt_GridItemAlignment* alignment)
+{
+}
 void OnScrollImpl(Ark_NativePointer node,
                   Ark_Function event)
 {
@@ -184,6 +188,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::NestedScrollImpl,
         GridAttributeModifier::EnableScrollInteractionImpl,
         GridAttributeModifier::FrictionImpl,
+        GridAttributeModifier::AlignItemsImpl,
         GridAttributeModifier::OnScrollImpl,
         GridAttributeModifier::OnReachStartImpl,
         GridAttributeModifier::OnReachEndImpl,

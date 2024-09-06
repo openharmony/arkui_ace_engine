@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FolderStackInterfaceModifier {
 void SetFolderStackOptionsImpl(Ark_NativePointer node,
-                               const Opt_Type_FolderStackInterface_setFolderStackOptions_Arg0* value)
+                               const Opt_FolderStackOptions* options)
 {
 }
 } // FolderStackInterfaceModifier

@@ -195,8 +195,13 @@ void ForegroundColorImpl(Ark_NativePointer node,
                          const Type_CommonMethod_foregroundColor_Arg0* value)
 {
 }
-void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event)
+void OnClick0Impl(Ark_NativePointer node,
+                  Ark_Function event)
+{
+}
+void OnClick1Impl(Ark_NativePointer node,
+                  Ark_Function event,
+                  const Ark_Number* distanceThreshold)
 {
 }
 void OnHoverImpl(Ark_NativePointer node,
@@ -568,6 +573,11 @@ void BlendModeImpl(Ark_NativePointer node,
                    const Opt_BlendApplyType* type)
 {
 }
+void AdvancedBlendModeImpl(Ark_NativePointer node,
+                           const Type_CommonMethod_advancedBlendMode_Arg0* effect,
+                           const Opt_BlendApplyType* type)
+{
+}
 void Clip0Impl(Ark_NativePointer node,
                Ark_Boolean value)
 {
@@ -809,7 +819,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OutlineColorImpl,
         CommonMethodModifier::OutlineRadiusImpl,
         CommonMethodModifier::ForegroundColorImpl,
-        CommonMethodModifier::OnClickImpl,
+        CommonMethodModifier::OnClick0Impl,
+        CommonMethodModifier::OnClick1Impl,
         CommonMethodModifier::OnHoverImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
         CommonMethodModifier::HoverEffectImpl,
@@ -899,6 +910,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::MotionPathImpl,
         CommonMethodModifier::ShadowImpl,
         CommonMethodModifier::BlendModeImpl,
+        CommonMethodModifier::AdvancedBlendModeImpl,
         CommonMethodModifier::Clip0Impl,
         CommonMethodModifier::Clip1Impl,
         CommonMethodModifier::ClipShapeImpl,

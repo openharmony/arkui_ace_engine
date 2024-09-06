@@ -27,8 +27,13 @@ void TitleImpl(Ark_NativePointer node,
                const Opt_NavigationTitleOptions* options)
 {
 }
-void HideTitleBarImpl(Ark_NativePointer node,
-                      Ark_Boolean value)
+void HideTitleBar0Impl(Ark_NativePointer node,
+                       Ark_Boolean value)
+{
+}
+void HideTitleBar1Impl(Ark_NativePointer node,
+                       Ark_Boolean hide,
+                       Ark_Boolean animated)
 {
 }
 void OnShownImpl(Ark_NativePointer node,
@@ -90,7 +95,8 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
     static const GENERATED_ArkUINavDestinationModifier ArkUINavDestinationModifierImpl {
         NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
         NavDestinationAttributeModifier::TitleImpl,
-        NavDestinationAttributeModifier::HideTitleBarImpl,
+        NavDestinationAttributeModifier::HideTitleBar0Impl,
+        NavDestinationAttributeModifier::HideTitleBar1Impl,
         NavDestinationAttributeModifier::OnShownImpl,
         NavDestinationAttributeModifier::OnHiddenImpl,
         NavDestinationAttributeModifier::OnBackPressedImpl,

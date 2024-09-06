@@ -34,6 +34,11 @@ void EdgeEffectImpl(Ark_NativePointer node,
                     const Opt_EdgeEffectOptions* options)
 {
 }
+void FadingEdgeImpl(Ark_NativePointer node,
+                    const Opt_Boolean* enabled,
+                    const Opt_FadingEdgeOptions* options)
+{
+}
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
 {
@@ -86,6 +91,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::ScrollBarColorImpl,
         ScrollableCommonMethodModifier::ScrollBarWidthImpl,
         ScrollableCommonMethodModifier::EdgeEffectImpl,
+        ScrollableCommonMethodModifier::FadingEdgeImpl,
         ScrollableCommonMethodModifier::NestedScrollImpl,
         ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::FrictionImpl,

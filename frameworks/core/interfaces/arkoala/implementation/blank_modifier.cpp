@@ -13,33 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/arkoala/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {
 void SetBlankOptionsImpl(Ark_NativePointer node,
                          const Opt_Type_BlankInterface_setBlankOptions_Arg0* min)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    std::tuple<Ark_Float32, Ark_Int32> dimension = Converter::ConvertOrDefault(
-        *min, std::make_tuple(0.0f, (int)DimensionUnit::PX));
-    BlankModelNG::SetBlankMin(frameNode, CalcDimension(std::get<0>(dimension), (DimensionUnit)std::get<1>(dimension)));
 }
 } // BlankInterfaceModifier
-
 namespace BlankAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
                const ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    BlankModelNG::SetColor(frameNode, Converter::ConvertOrDefault(*value, Color()));
 }
 } // BlankAttributeModifier
-
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()
 {
     static const GENERATED_ArkUIBlankModifier ArkUIBlankModifierImpl {

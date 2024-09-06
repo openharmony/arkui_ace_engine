@@ -424,7 +424,7 @@ void LayoutModeImpl(Ark_NativePointer node,
 {
 }
 void NestedScrollImpl(Ark_NativePointer node,
-                      const Ark_NestedScrollOptions* value)
+                      const Type_WebAttribute_nestedScroll_Arg0* value)
 {
 }
 void EnableNativeEmbedModeImpl(Ark_NativePointer node,
@@ -438,6 +438,10 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
 }
 void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
                                       Ark_Function callback)
+{
+}
+void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
+                                       Ark_Function callback)
 {
 }
 void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
@@ -490,6 +494,10 @@ void OnAdsBlockedImpl(Ark_NativePointer node,
 }
 void KeyboardAvoidModeImpl(Ark_NativePointer node,
                            Ark_Int32 mode)
+{
+}
+void EditMenuOptionsImpl(Ark_NativePointer node,
+                         const Ark_Materialized* editMenu)
 {
 }
 } // WebAttributeModifier
@@ -601,6 +609,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::EnableNativeEmbedModeImpl,
         WebAttributeModifier::RegisterNativeEmbedRuleImpl,
         WebAttributeModifier::OnNativeEmbedLifecycleChangeImpl,
+        WebAttributeModifier::OnNativeEmbedVisibilityChangeImpl,
         WebAttributeModifier::OnNativeEmbedGestureEventImpl,
         WebAttributeModifier::CopyOptionsImpl,
         WebAttributeModifier::OnOverrideUrlLoadingImpl,
@@ -614,6 +623,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::OnInterceptKeyboardAttachImpl,
         WebAttributeModifier::OnAdsBlockedImpl,
         WebAttributeModifier::KeyboardAvoidModeImpl,
+        WebAttributeModifier::EditMenuOptionsImpl,
     };
     return &ArkUIWebModifierImpl;
 }

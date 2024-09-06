@@ -26,7 +26,7 @@ Ark_NativePointer GetFinalizerImpl()
     return 0;
 }
 void ScrollToImpl(ScrollerPeer* peer,
-                  const Literal_Union_Number_String_xOffset_yOffset_Opt_Union_ScrollAnimationOptions_Boolean_animation* value)
+                  const Ark_ScrollOptions* options)
 {
 }
 void ScrollEdgeImpl(ScrollerPeer* peer,
@@ -71,6 +71,12 @@ Ark_NativePointer GetItemRectImpl(ScrollerPeer* peer,
 {
     return 0;
 }
+Ark_Int32 GetItemIndexImpl(ScrollerPeer* peer,
+                           const Ark_Number* x,
+                           const Ark_Number* y)
+{
+    return 0;
+}
 } // ScrollerModifier
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
 {
@@ -87,6 +93,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
         ScrollerModifier::ScrollByImpl,
         ScrollerModifier::IsAtEndImpl,
         ScrollerModifier::GetItemRectImpl,
+        ScrollerModifier::GetItemIndexImpl,
     };
     return &ScrollerAccessorImpl;
 }

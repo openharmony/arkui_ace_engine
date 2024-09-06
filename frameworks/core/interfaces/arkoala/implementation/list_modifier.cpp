@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListInterfaceModifier {
 void SetListOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_ListInterface_setListOptions_Arg0* value)
+                        const Opt_ListOptions* options)
 {
 }
 } // ListInterfaceModifier
@@ -43,10 +43,6 @@ void ScrollBarImpl(Ark_NativePointer node,
 void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_Int32 value,
                     const Opt_EdgeEffectOptions* options)
-{
-}
-void FadingEdgeImpl(Ark_NativePointer node,
-                    const Opt_Boolean* value)
 {
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
@@ -103,6 +99,10 @@ void FrictionImpl(Ark_NativePointer node,
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Ark_Materialized* value)
+{
+}
+void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
+                                        Ark_Boolean enabled)
 {
 }
 void OnScrollImpl(Ark_NativePointer node,
@@ -175,7 +175,6 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::ListDirectionImpl,
         ListAttributeModifier::ScrollBarImpl,
         ListAttributeModifier::EdgeEffectImpl,
-        ListAttributeModifier::FadingEdgeImpl,
         ListAttributeModifier::ContentStartOffsetImpl,
         ListAttributeModifier::ContentEndOffsetImpl,
         ListAttributeModifier::DividerImpl,
@@ -190,6 +189,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::EnableScrollInteractionImpl,
         ListAttributeModifier::FrictionImpl,
         ListAttributeModifier::ChildrenMainSizeImpl,
+        ListAttributeModifier::MaintainVisibleContentPositionImpl,
         ListAttributeModifier::OnScrollImpl,
         ListAttributeModifier::OnScrollIndexImpl,
         ListAttributeModifier::OnScrollVisibleContentChangeImpl,

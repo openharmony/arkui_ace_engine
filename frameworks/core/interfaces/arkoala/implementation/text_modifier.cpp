@@ -24,8 +24,13 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 }
 } // TextInterfaceModifier
 namespace TextAttributeModifier {
-void FontImpl(Ark_NativePointer node,
-              const Ark_Font* value)
+void Font0Impl(Ark_NativePointer node,
+               const Ark_Font* value)
+{
+}
+void Font1Impl(Ark_NativePointer node,
+               const Ark_Font* fontValue,
+               const Opt_FontSettingOptions* options)
 {
 }
 void FontColorImpl(Ark_NativePointer node,
@@ -56,8 +61,13 @@ void FontStyleImpl(Ark_NativePointer node,
                    Ark_Int32 value)
 {
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Type_TextAttribute_fontWeight_Arg0* value)
+void FontWeight0Impl(Ark_NativePointer node,
+                     const Type_TextAttribute_fontWeight_Arg0* value)
+{
+}
+void FontWeight1Impl(Ark_NativePointer node,
+                     const Type_TextAttribute_fontWeight1_Arg0* weight,
+                     const Opt_FontSettingOptions* options)
 {
 }
 void LineSpacingImpl(Ark_NativePointer node,
@@ -164,14 +174,6 @@ void FontFeatureImpl(Ark_NativePointer node,
                      const Ark_String* value)
 {
 }
-void MarqueeOptionsImpl(Ark_NativePointer node,
-                        const Opt_MarqueeOptions* value)
-{
-}
-void OnMarqueeStateChangeImpl(Ark_NativePointer node,
-                              Ark_Function callback)
-{
-}
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           Ark_Boolean supported)
 {
@@ -184,12 +186,17 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_Materialized* editMenu)
 {
 }
+void HalfLeadingImpl(Ark_NativePointer node,
+                     Ark_Boolean halfLeading)
+{
+}
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()
 {
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
         TextInterfaceModifier::SetTextOptionsImpl,
-        TextAttributeModifier::FontImpl,
+        TextAttributeModifier::Font0Impl,
+        TextAttributeModifier::Font1Impl,
         TextAttributeModifier::FontColorImpl,
         TextAttributeModifier::FontSizeImpl,
         TextAttributeModifier::MinFontSizeImpl,
@@ -197,7 +204,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::MinFontScaleImpl,
         TextAttributeModifier::MaxFontScaleImpl,
         TextAttributeModifier::FontStyleImpl,
-        TextAttributeModifier::FontWeightImpl,
+        TextAttributeModifier::FontWeight0Impl,
+        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::LineSpacingImpl,
         TextAttributeModifier::TextAlignImpl,
         TextAttributeModifier::LineHeightImpl,
@@ -223,11 +231,10 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::BindSelectionMenuImpl,
         TextAttributeModifier::OnTextSelectionChangeImpl,
         TextAttributeModifier::FontFeatureImpl,
-        TextAttributeModifier::MarqueeOptionsImpl,
-        TextAttributeModifier::OnMarqueeStateChangeImpl,
         TextAttributeModifier::PrivacySensitiveImpl,
         TextAttributeModifier::TextSelectableImpl,
         TextAttributeModifier::EditMenuOptionsImpl,
+        TextAttributeModifier::HalfLeadingImpl,
     };
     return &ArkUITextModifierImpl;
 }

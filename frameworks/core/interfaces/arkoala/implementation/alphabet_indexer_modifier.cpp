@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlphabetIndexerInterfaceModifier {
 void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
-                                   const Type_AlphabetIndexerInterface_setAlphabetIndexerOptions_Arg0* value)
+                                   const Ark_AlphabetIndexerOptions* options)
 {
 }
 } // AlphabetIndexerInterfaceModifier

@@ -40,6 +40,13 @@ Ark_NativePointer GetLineMetricsImpl(LayoutManagerPeer* peer,
 {
     return 0;
 }
+Ark_NativePointer GetRectsForRangeImpl(LayoutManagerPeer* peer,
+                                       const Ark_TextRange* range,
+                                       const Ark_CustomObject* widthStyle,
+                                       const Ark_CustomObject* heightStyle)
+{
+    return 0;
+}
 } // LayoutManagerModifier
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
 {
@@ -49,6 +56,7 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
         LayoutManagerModifier::GetLineCountImpl,
         LayoutManagerModifier::GetGlyphPositionAtCoordinateImpl,
         LayoutManagerModifier::GetLineMetricsImpl,
+        LayoutManagerModifier::GetRectsForRangeImpl,
     };
     return &LayoutManagerAccessorImpl;
 }

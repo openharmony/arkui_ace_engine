@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StackInterfaceModifier {
 void SetStackOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_StackInterface_setStackOptions_Arg0* value)
+                         const Opt_StackOptions* options)
 {
 }
 } // StackInterfaceModifier

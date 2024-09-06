@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowInterfaceModifier {
 void SetRowOptionsImpl(Ark_NativePointer node,
-                       const Opt_Type_RowInterface_setRowOptions_Arg0* value)
+                       const Opt_RowOptions* options)
 {
 }
 } // RowInterfaceModifier
@@ -35,6 +35,10 @@ void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
 }
+void ReverseImpl(Ark_NativePointer node,
+                 const Opt_Boolean* isReversed)
+{
+}
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()
 {
@@ -43,6 +47,7 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
         RowAttributeModifier::AlignItemsImpl,
         RowAttributeModifier::JustifyContentImpl,
         RowAttributeModifier::PointLightImpl,
+        RowAttributeModifier::ReverseImpl,
     };
     return &ArkUIRowModifierImpl;
 }

@@ -22,10 +22,17 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
 {
 }
 } // ScrollBarInterfaceModifier
+namespace ScrollBarAttributeModifier {
+void EnableNestedScrollImpl(Ark_NativePointer node,
+                            const Opt_Boolean* enabled)
+{
+}
+} // ScrollBarAttributeModifier
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
 {
     static const GENERATED_ArkUIScrollBarModifier ArkUIScrollBarModifierImpl {
         ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
+        ScrollBarAttributeModifier::EnableNestedScrollImpl,
     };
     return &ArkUIScrollBarModifierImpl;
 }
