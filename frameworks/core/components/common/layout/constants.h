@@ -728,9 +728,6 @@ enum class XComponentType {
     COMPONENT,
     TEXTURE,
     NODE,
-#ifdef PLATFORM_VIEW_SUPPORTED
-    PLATFORM_VIEW = 999,
-#endif
 };
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
