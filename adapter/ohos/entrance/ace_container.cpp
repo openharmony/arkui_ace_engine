@@ -1700,6 +1700,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
+    paramUie_.assign(params.begin(), params.end());
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));

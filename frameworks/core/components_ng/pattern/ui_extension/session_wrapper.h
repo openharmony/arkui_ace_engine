@@ -140,6 +140,10 @@ public:
 
     // The interface to update viewport config
     virtual void UpdateSessionViewportConfig() {}
+
+    // The interface for UEC dump
+    virtual uint32_t GetReasonDump() const = 0;
+    virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

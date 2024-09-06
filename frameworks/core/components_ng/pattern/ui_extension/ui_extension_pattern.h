@@ -188,6 +188,7 @@ public:
     {
         return sessionViewportConfig_;
     }
+    void DumpInfo() override;
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -288,6 +289,12 @@ private:
     bool needReDispatchDisplayArea_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
+
+    // UEC dump info
+    bool focusState_ = false;
+    uint32_t focusWindowId_ = 0;
+    uint32_t realHostWindowId_ = 0;
+    std::string want_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

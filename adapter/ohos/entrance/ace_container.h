@@ -670,6 +670,11 @@ public:
     void AddWatchSystemParameter();
     void RemoveWatchSystemParameter();
 
+    const std::vector<std::string>& GetUieParams() const
+    {
+        return paramUie_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -761,6 +766,9 @@ private:
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
+
+    // for Ui Extension dump param get
+    std::vector<std::string> paramUie_;
 };
 
 } // namespace OHOS::Ace::Platform
