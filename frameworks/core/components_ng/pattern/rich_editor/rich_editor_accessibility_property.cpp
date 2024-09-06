@@ -15,9 +15,15 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 
+<<<<<<< .mine
 #include "core/components_ng/base/frame_node.h"
 
 
+=======
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+
+
+>>>>>>> .theirs
 namespace OHOS::Ace::NG {
 
 bool RichEditorAccessibilityProperty::IsEditable() const
@@ -25,4 +31,12 @@ bool RichEditorAccessibilityProperty::IsEditable() const
     return true;
 }
 
+std::string RichEditorAccessibilityProperty::GetHintText() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, "");
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, "");
+    return richEditorPattern->GetPlaceHolder();
+}
 } // namespace OHOS::Ace::NG
