@@ -68,8 +68,8 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -273,6 +273,7 @@ public:
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
+    void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
 
@@ -362,6 +363,7 @@ public:
 
     void OnHandleAreaChanged() override;
     void OnVisibleChange(bool isVisible) override;
+    void ClearEditingValue();
     void HandleCounterBorder();
     std::wstring GetWideText()
     {
@@ -1111,7 +1113,6 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpPlaceHolderInfo();
-    void DumpTextEngineInfo();
     void DumpScaleInfo();
     std::string GetDumpTextValue() const;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
@@ -1170,7 +1171,6 @@ public:
 
     bool HasFocus() const;
     void StopTwinkling();
-    void StartTwinkling();
 
     bool IsModifyDone()
     {
@@ -1197,6 +1197,7 @@ public:
 
     bool HandleSpaceEvent();
 
+    void SavePreUnderLineState();
     virtual void ApplyNormalTheme();
     void ApplyUnderlineTheme();
     void ApplyInlineTheme();
@@ -1210,11 +1211,9 @@ public:
     {
         selectOverlay_->HandleOnShowMenu();
     }
+    void StartTwinkling();
 
     void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
-
-    void HandleOnDragStatusCallback(
-        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
     OffsetF GetTextPaintOffset() const override;
 
@@ -1227,8 +1226,6 @@ public:
 
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
     void CleanNodeResponseKeyEvent();
-
-    void InitScrollBarClickEvent() override {}
     bool IsUnderlineMode();
     bool IsInlineMode();
     bool IsShowError();
@@ -1363,7 +1360,6 @@ public:
     }
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
-    void HiddenMenu();
 
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
@@ -1403,6 +1399,7 @@ public:
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
     }
 
+    bool IsTextEditableForStylus() const override;
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1424,7 +1421,6 @@ protected:
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
 
-    bool IsTextEditableForStylus() const override;
 private:
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::string& insertValue, int32_t offset);
@@ -1449,9 +1445,6 @@ private:
     void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
-    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool HasStateStyle(UIState state) const;
 
     void OnTextInputScroll(float offset);
@@ -1576,9 +1569,7 @@ private:
 
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
-    void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
-    bool IsMouseOverScrollBar(const GestureEvent& info);
 
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
@@ -1692,7 +1683,6 @@ private:
     bool contChange_ = false;
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
-    bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1737,11 +1727,10 @@ private:
     std::string dragValue_;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
-    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
+    DragStatus dragRecipientStatus_ = DragStatus::NONE;
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
-    std::vector<NG::MenuOptionsParam> menuOptionItems_;
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;
@@ -1785,6 +1774,7 @@ private:
     bool isEdit_ = false;
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
+    CaretStatus caretStatus_ = CaretStatus::NONE;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
     std::string lastAutoFillTextValue_;
@@ -1798,11 +1788,11 @@ private:
     bool initTextRect_ = false;
     bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
+    bool lockRecord_ = false;
     bool isFillRequestFinish_ = false;
-    bool keyboardAvoidance_ = false;
-    bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
+    bool keyboardAvoidance_ = false;
     OffsetF movingCaretOffset_;
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;
