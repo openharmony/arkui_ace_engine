@@ -1040,6 +1040,18 @@ typedef enum {
 } ArkUI_ColorMode;
 
 /**
+ * @brief Enumerates the system color modes.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Light color mode. */
+    ARKUI_SYSTEM_COLOR_MODE_LIGHT = 0,
+    /** Dark color mode. */
+    ARKUI_SYSTEM_COLOR_MODE_DARK,
+} ArkUI_SystemColorMode;
+
+/**
  * @brief Enumerates the blur styles.
  *
  * @since 12
@@ -2017,6 +2029,13 @@ typedef enum {
     /** Tail area. */
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
+
+/**
+ * @brief Defines parameter used by the system font style callback event.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
 
 typedef struct {
     float x;

@@ -70,6 +70,7 @@ struct _ArkUIFont;
 struct _ArkUIXComponentController;
 struct _ArkUINodeAdapter;
 struct _ArkUINodeContent;
+struct ArkUI_SystemFontStyleEvent;
 struct ArkUI_WaterFlowSectionOption;
 struct ArkUI_ListItemSwipeActionOption;
 struct ArkUI_ListItemSwipeActionItem;
@@ -85,6 +86,7 @@ typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 typedef _ArkUINodeContent* ArkUINodeContentHandle;
+
 
 struct ArkUICanvasArcOptions {
     ArkUI_Float32 x;
@@ -1396,6 +1398,12 @@ struct ArkUIDragAction {
 typedef struct ArkUI_Params {
     ArkUINodeType nodeType;
 } ArkUI_Params;
+
+struct ArkUI_SystemFontStyleEvent {
+    ArkUI_Float64 fontSize;
+    ArkUI_Float64 fontWeight;
+};
+typedef ArkUI_SystemFontStyleEvent* ArkUISystemFontStyleEvent;
 
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
@@ -4526,6 +4534,10 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getFirstUINode)(ArkUINodeHandle node);
     void (*getLayoutSize)(ArkUINodeHandle node, ArkUI_Int32* size);
     ArkUI_Float32* (*getLayoutPositionWithoutMargin)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setSystemColorModeChangeEvent)(ArkUINodeHandle node, void* userData, void* onColorModeChange);
+    void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
+    void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {
