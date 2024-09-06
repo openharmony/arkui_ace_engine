@@ -78,7 +78,7 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
 void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode> frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -851,9 +851,6 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonRenderContext->UpdateClipEdge(true);
-    // auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    // CHECK_NULL_VOID(buttonPattern);
-    // buttonPattern->SetApplyShadow(false);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     std::string defaultText = "Search";

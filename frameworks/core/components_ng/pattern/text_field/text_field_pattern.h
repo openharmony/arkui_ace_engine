@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components/theme/app_theme.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -358,6 +359,13 @@ public:
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        if (theme->NeedFocusBox()) {
+            focusPattern.SetStyleType(FocusStyleType::OUTER_BORDER);
+        }
         return focusPattern;
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
@@ -1618,6 +1626,7 @@ private:
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetTextInputFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();

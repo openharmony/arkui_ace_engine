@@ -230,6 +230,8 @@ public:
             theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
             theme->hoverAndPressBgColorEnabled_ =
                 static_cast<uint32_t>(pattern->GetAttr<int>("textfield_hover_press_bg_color_enabled", 0));
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("text_input_need_focus_box", 0.0));
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("text_input_focus_padding", 0.0_vp);
         }
     };
 
@@ -688,6 +690,16 @@ public:
         return errorTextInputBorderWidth_;
     }
 
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -804,6 +816,8 @@ private:
     std::string hiddenPasswordPromptInformation_;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
+    bool needFocusBox_ = false;
+    Dimension focusPadding_;
 };
 
 } // namespace OHOS::Ace

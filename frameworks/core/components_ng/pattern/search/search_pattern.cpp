@@ -1052,17 +1052,6 @@ FocusPattern SearchPattern::GetFocusPattern() const
 {
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     focusPattern.SetIsFocusActiveWhenFocused(true);
-    // auto host = GetHost();
-    // CHECK_NULL_RETURN(host, FocusPattern());
-    // auto pipeline = host->GetContext();
-    // CHECK_NULL_RETURN(pipeline, FocusPattern());
-    // auto appTheme = pipeline->GetTheme<AppTheme>();
-    // CHECK_NULL_RETURN(appTheme, FocusPattern());
-    // FocusPaintParam focusPaintParam;
-    // focusPaintParam.SetPaintColor(appTheme->GetFocusBorderColor());
-    // focusPaintParam.SetPaintWidth(appTheme->GetFocusBorderWidth());
-    // focusPaintParam.SetFocusBoxGlow(appTheme->IsFocusBoxGlow());
-    // focusPattern.SetFocusPaintParams(focusPaintParam);
     return focusPattern;
 }
 
@@ -1264,11 +1253,6 @@ void SearchPattern::InitSearchTheme()
     normalPlaceholderColor_ = searchTheme->GetPlaceholderColor();
     focusPlaceholderColor_ = searchTheme->GetFocusPlaceholderColor();
     normalIconColor_ = searchTheme->GetSymbolIconColor();
-    // if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-    //     normalIconColor_ = searchTheme->GetSymbolIconColor();
-    // } else {
-    //     normalIconColor_ = searchTheme->GetSearchIconColor();
-    // }
 }
 
 void SearchPattern::InitHoverEvent()

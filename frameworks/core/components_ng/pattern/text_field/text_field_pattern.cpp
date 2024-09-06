@@ -7429,7 +7429,43 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
             auto unitRect = unitNode->GetGeometryNode()->GetFrameRect();
             paintRect.SetRect(unitRect);
         }
+    } else {
+        GetTextInputFocusPaintRect(paintRect);
     }
+}
+
+void TextFieldPattern::GetTextInputFocusPaintRect(RoundRect& paintRect)
+{
+    auto textfieldTheme = GetTheme();
+    CHECK_NULL_VOID(textfieldTheme);
+    auto isNeedFocusBox = textfieldTheme->NeedFocusBox();
+    if (!isNeedFocusBox) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textInputSize = geometryNode->GetFrameSize();
+    auto focusPaintPadding = textfieldTheme->GetFocusPadding().ConvertToPx();
+    float width = textInputSize.Width() + 2 * focusPaintPadding;
+    float height = textInputSize.Height() + 2 * focusPaintPadding;
+    paintRect.SetRect({ -focusPaintPadding, -focusPaintPadding, width, height });
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPaintPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPaintPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPaintPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding));
 }
 
 void TextFieldPattern::PaintCancelRect()
