@@ -345,6 +345,10 @@ public:
         void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
         {
             RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
+            if (!checkboxPattern) {
+                LOGE("Pattern of checkbox is null, please check!");
+                return;
+            }
             theme->focusBoardColor_ = checkboxPattern->GetAttr<Color>("color_focused_bg", Color(0xffff0000));
             theme->focusBoardSize_ = checkboxPattern->GetAttr<Dimension>("size_focused_bg", 2.0_vp);
             theme->borderFocusedColor_ = checkboxPattern->GetAttr<Color>("focused_border_color", Color(0xffff0000));
@@ -392,58 +396,40 @@ public:
                 return theme;
             }
             ParsePattern(themeConstants, theme);
+            ParseSubStylePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwitchTheme>& theme) const
-        {
-            RefPtr<ThemeStyle> switchPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWITCH);
-            if (!switchPattern) {
-                LOGE("Pattern of switch is null, please check!");
-                return;
-            }
-            theme->width_ = switchPattern->GetAttr<Dimension>("switch_pattern_width", 0.0_vp);
-            theme->height_ = switchPattern->GetAttr<Dimension>("switch_pattern_height", 0.0_vp);
-            theme->hotZoneHorizontalPadding_ =
-                switchPattern->GetAttr<Dimension>("switch_hotzone_horizontal_padding", 0.0_vp);
-            theme->hotZoneVerticalPadding_ =
-                switchPattern->GetAttr<Dimension>("switch_hotzone_vertical_padding", 0.0_vp);
-            theme->aspectRatio_ = switchPattern->GetAttr<double>("switch_aspect_ratio", 0.0);
-            theme->backgroundSolid_ =
-                static_cast<bool>(switchPattern->GetAttr<double>("switch_inactive_background_solid", 0.0));
-            theme->defaultWidth_ = switchPattern->GetAttr<Dimension>("switch_default_width", 0.0_vp);
-            theme->defaultHeight_ = switchPattern->GetAttr<Dimension>("switch_default_height", 0.0_vp);
-            theme->needFocus_ = static_cast<bool>(switchPattern->GetAttr<double>("switch_need_focus", 0.0));
-            theme->borderWidth_ = switchPattern->GetAttr<Dimension>("switch_border_width", 0.0_vp);
-            theme->shadowColor_ = switchPattern->GetAttr<Color>("switch_shadow_color", Color());
-            theme->shadowWidth_ = switchPattern->GetAttr<Dimension>("switch_pattern_shadow_width", 0.0_vp);
-            theme->pointColor_ = switchPattern->GetAttr<Color>("fg_color_checked", Color::RED);
-            theme->activeColor_ = switchPattern->GetAttr<Color>("bg_color_checked", Color::RED);
-            theme->inactiveColor_ = switchPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
-            theme->focusColor_ = switchPattern->GetAttr<Color>("focus_border_color", Color::RED);
-            theme->hoverColor_ = switchPattern->GetAttr<Color>("hover_border_color", Color::RED);
-            theme->hoverRadius_ = switchPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
-            theme->inactivePointColor_ = switchPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
-            theme->clickEffectColor_ = switchPattern->GetAttr<Color>("click_effect_color", Color::RED);
-            theme->focusPaintPadding_ = switchPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
-            theme->hoverDuration_ = switchPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = switchPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
-            theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
-            theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
-            theme->pointAnimationDuration_ = switchPattern->GetAttr<double>("point_animation_duration", 0.0);
-            theme->interactiveHoverColor_ = switchPattern->GetAttr<Color>("interactive_hover", Color::RED);
-            theme->interactivePressedColor_ = switchPattern->GetAttr<Color>("interactive_pressed", Color::RED);
-            if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
-                return;
-            }
-            theme->width_ = switchPattern->GetAttr<Dimension>(SWITCH_WIDTH, 40.0_vp);
-            theme->height_ = switchPattern->GetAttr<Dimension>(SWITCH_HEIGHT, 26.0_vp);
-            theme->shadowWidth_ = switchPattern->GetAttr<Dimension>(SWITCH_SHADOW_WIDTH, 2.0_vp);
-            theme->hotZoneHorizontalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_HORIZONTAL_PADDING, 4.0_vp);
-            theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
-        }
+        void ParseSubStylePattern(const RefPtr<ThemeConstants>& themeConstants,
+            const RefPtr<SwitchTheme>& theme) const;
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwitchTheme>& theme) const;
     };
+
+    const Color& GetPointColorUnselectedFocus() const
+    {
+        return focusedPointColorUnselected_;
+    }
+
+    const Color& GetPointColorUnchecked() const
+    {
+        return pointColorUnchecked_;
+    }
+
+    const Dimension& GetFocusBoardWidth() const
+    {
+        return focusBoardWidth_;
+    }
+
+    const Dimension& GetFocusBoardHeight() const
+    {
+        return focusBoardHeight_;
+    }
+
+    const Dimension& GetFocusBoardRadius() const
+    {
+        return focusBoardRadius_;
+    }
 
     float GetRatio() const
     {
@@ -470,11 +456,28 @@ public:
         return interactivePressedColor_;
     }
 
+    bool GetSwitchUseDiffPointColor() const
+    {
+        return isUseDiffPointColor_;
+    }
+
+    bool GetSwitchIsFocusBoxGlow() const
+    {
+        return isFocusBoxGlow_;
+    }
+
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
     Color interactiveHoverColor_;
     Color interactivePressedColor_;
+    bool isUseDiffPointColor_ = false;
+    bool isFocusBoxGlow_ = false;
+    Color focusedPointColorUnselected_;
+    Color pointColorUnchecked_;
+    Dimension focusBoardWidth_;
+    Dimension focusBoardHeight_;
+    Dimension focusBoardRadius_;
 };
 
 class RadioTheme : public CheckableTheme {

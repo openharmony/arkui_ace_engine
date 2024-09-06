@@ -165,8 +165,7 @@ void CheckBoxModifier::DrawFocusBoard(RSCanvas& canvas, const SizeF& size, const
     float originY = offset.GetY() - bgSizeOffset;
     float endX = offset.GetX() + bgSizeOffset + size.Width();
     float endY = offset.GetY() + bgSizeOffset + size.Height();
-    float useFocusBoardRadoius = borderRadius_ + bgSizeOffset;
-    auto rrect = RSRoundRect({ originX, originY, endX, endY }, useFocusBoardRadoius, useFocusBoardRadoius);
+    auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
 
     canvas.AttachBrush(brush);
     DrawRectOrCircle(canvas, rrect);
