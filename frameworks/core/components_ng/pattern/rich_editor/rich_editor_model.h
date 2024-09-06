@@ -95,13 +95,13 @@ struct UpdateSpanStyle {
         isSymbolStyle = false;
     }
 
-    std::optional<DynamicColor> updateTextColor = std::nullopt;
+    std::optional<Color> updateTextColor = std::nullopt;
     std::optional<CalcDimension> updateFontSize = std::nullopt;
     std::optional<FontStyle> updateItalicFontStyle = std::nullopt;
     std::optional<FontWeight> updateFontWeight = std::nullopt;
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
-    std::optional<DynamicColor> updateTextDecorationColor = std::nullopt;
+    std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
@@ -118,9 +118,27 @@ struct UpdateSpanStyle {
     std::optional<ImageFit> updateImageFit = std::nullopt;
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
     bool isSymbolStyle = false;
+
+    void UpdateColorByResourceId()
+    {
+        if (updateTextColor) {
+            updateTextColor->UpdateColorByResourceId();
+        }
+        if (updateTextDecorationColor) {
+            updateTextDecorationColor->UpdateColorByResourceId();
+        }
+        if (updateTextShadows) {
+            auto& shadows = updateTextShadows.value();
+            std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+        }
+        if (updateSymbolColor) {
+            auto& colors = updateSymbolColor.value();
+            std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+        }
+    }
 
     std::string ToString() const
     {
@@ -140,8 +158,8 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateImageFit);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceFontColor);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         JSON_STRING_PUT_BOOL(jsonValue, isSymbolStyle);
         return jsonValue->ToString();
     }
@@ -191,8 +209,8 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
-    bool hasResourceFontColor = false;
-    bool hasResourceDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
 
     std::string ToString() const
     {
@@ -201,8 +219,8 @@ struct TextSpanOptions : SpanOptionBase {
         JSON_STRING_PUT_STRING(jsonValue, value);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, style);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paraStyle);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceFontColor);
-        JSON_STRING_PUT_BOOL(jsonValue, hasResourceDecorationColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
+        JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
         return jsonValue->ToString();
     }
 };
@@ -227,7 +245,7 @@ struct PlaceholderOptions {
     std::optional<std::string> value;
     std::optional<FontWeight> fontWeight;
     std::optional<Dimension> fontSize;
-    std::optional<DynamicColor> fontColor;
+    std::optional<Color> fontColor;
     std::optional<FontStyle> fontStyle;
     std::vector<std::string> fontFamilies;
 
@@ -264,6 +282,7 @@ public:
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
+    virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
@@ -327,8 +346,8 @@ public:
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
     virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
-    virtual void SetSelectedBackgroundColor(const DynamicColor& selectedColor) = 0;
-    virtual void SetCaretColor(const DynamicColor& color) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
+    virtual void SetCaretColor(const Color& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
