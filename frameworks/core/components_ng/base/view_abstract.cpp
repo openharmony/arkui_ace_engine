@@ -229,7 +229,7 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color& color)
+void ViewAbstract::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
 }
@@ -249,7 +249,7 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
-void ViewAbstract::SetBackgroundImage(FrameNode *frameNode, const ImageSourceInfo& src)
+void ViewAbstract::SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
 }
@@ -262,7 +262,7 @@ void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
 }
 
-void ViewAbstract::SetBackgroundImageRepeat(FrameNode *frameNode, const ImageRepeat& imageRepeat)
+void ViewAbstract::SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
 }
@@ -275,7 +275,7 @@ void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
-void ViewAbstract::SetBackgroundImageSize(FrameNode *frameNode, const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
 }
@@ -288,7 +288,7 @@ void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgI
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
 }
 
-void ViewAbstract::SetBackgroundImagePosition(FrameNode *frameNode, const BackgroundImagePosition& bgImgPosition)
+void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
@@ -316,7 +316,7 @@ void ViewAbstract::SetForegroundEffect(float radius)
     }
 }
 
-void ViewAbstract::SetMotionBlur(const MotionBlurOption& motionBlurOption)
+void ViewAbstract::SetMotionBlur(const MotionBlurOption &motionBlurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -630,7 +630,7 @@ void ViewAbstract::SetBorderStyle(const BorderStyle& value)
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, borderStyle);
 }
 
-void ViewAbstract::SetBorderStyle(FrameNode *frameNode, const BorderStyle& value)
+void ViewAbstract::SetBorderStyle(FrameNode* frameNode, const BorderStyle& value)
 {
     BorderStyleProperty borderStyle;
     borderStyle.SetBorderStyle(value);
@@ -645,7 +645,7 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
 }
 
-void ViewAbstract::SetBorderStyle(FrameNode *frameNode, const BorderStyleProperty& value)
+void ViewAbstract::SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderStyle, value, frameNode);
 }
@@ -1197,22 +1197,23 @@ void ViewAbstract::SetOnDisappear(std::function<void()>&& onDisappear)
     eventHub->SetOnDisappear(std::move(onDisappear));
 }
 
-void ViewAbstract::SetOnAttach(std::function<void()>&& onAttach)
+void ViewAbstract::SetOnAttach(std::function<void()> &&onAttach)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAttach(std::move(onAttach));
 }
 
-void ViewAbstract::SetOnDetach(std::function<void()>&& onDetach)
+void ViewAbstract::SetOnDetach(std::function<void()> &&onDetach)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDetach(std::move(onDetach));
 }
 
-void ViewAbstract::SetOnAreaChanged(std::function<void(const RectF& oldRect, const OffsetF& oldOrigin,
-    const RectF& rect, const OffsetF& origin)>&& onAreaChanged)
+void ViewAbstract::SetOnAreaChanged(
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
+        onAreaChanged)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1222,7 +1223,7 @@ void ViewAbstract::SetOnAreaChanged(std::function<void(const RectF& oldRect, con
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
-void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1231,8 +1232,8 @@ void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF& oldRect, con
     frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
 }
 
-void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange,
-    const std::vector<double>& ratioList)
+void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
+    const std::vector<double> &ratioList)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1482,7 +1483,7 @@ void ViewAbstract::SetAlign(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
-void ViewAbstract::SetAlign(FrameNode *frameNode, Alignment alignment)
+void ViewAbstract::SetAlign(FrameNode* frameNode, Alignment alignment)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
 }
@@ -1659,7 +1660,7 @@ void ViewAbstract::SetScale(const NG::VectorF& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformScale, value);
 }
 
-void ViewAbstract::SetScale(FrameNode *frameNode, const NG::VectorF& value)
+void ViewAbstract::SetScale(FrameNode* frameNode, const NG::VectorF& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformScale, value, frameNode);
 }
@@ -1672,7 +1673,7 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetPivot(FrameNode *frameNode, const DimensionOffset& value)
+void ViewAbstract::SetPivot(FrameNode* frameNode, const DimensionOffset& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformCenter, value, frameNode);
 }
@@ -1685,7 +1686,7 @@ void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
 }
 
-void ViewAbstract::SetTranslate(FrameNode *frameNode, const NG::TranslateOptions& value)
+void ViewAbstract::SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformTranslate, value, frameNode);
 }
@@ -1698,7 +1699,7 @@ void ViewAbstract::SetRotate(const NG::Vector5F& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
 }
 
-void ViewAbstract::SetRotate(FrameNode *frameNode, const NG::Vector5F& value)
+void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
 }
@@ -1711,8 +1712,8 @@ void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
     ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
 }
 
-void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
-    const RefPtr<UINode>& customNode)
+void ViewAbstract::BindPopup(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind popup enter");
     CHECK_NULL_VOID(targetNode);
@@ -1822,8 +1823,8 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
         return;
     }
     if (!popupInfo.isCurrentOnShow) {
-        targetNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        targetNode->OnAccessibilityEvent(
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
@@ -1987,7 +1988,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2059,7 +2060,7 @@ void ViewAbstract::SetDynamicDim(float DimDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
 }
 
-void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2079,7 +2080,7 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
 }
 
-void ViewAbstract::SetBackShadow(FrameNode *frameNode, const Shadow& shadow)
+void ViewAbstract::SetBackShadow(FrameNode* frameNode, const Shadow& shadow)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
 }
@@ -2227,7 +2228,7 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
     }
 }
 
-void ViewAbstract::SetClipShape(FrameNode *frameNode, const RefPtr<BasicShape>& basicShape)
+void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2256,7 +2257,7 @@ void ViewAbstract::SetClipEdge(bool isClip)
     }
 }
 
-void ViewAbstract::SetClipEdge(FrameNode *frameNode, bool isClip)
+void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2311,7 +2312,7 @@ void ViewAbstract::SetBrightness(const Dimension& brightness)
     ACE_UPDATE_RENDER_CONTEXT(FrontBrightness, brightness);
 }
 
-void ViewAbstract::SetBrightness(FrameNode *frameNode, const Dimension& brightness)
+void ViewAbstract::SetBrightness(FrameNode* frameNode, const Dimension& brightness)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness, frameNode);
 }
@@ -2324,7 +2325,7 @@ void ViewAbstract::SetGrayScale(const Dimension& grayScale)
     ACE_UPDATE_RENDER_CONTEXT(FrontGrayScale, grayScale);
 }
 
-void ViewAbstract::SetGrayScale(FrameNode *frameNode, const Dimension& grayScale)
+void ViewAbstract::SetGrayScale(FrameNode* frameNode, const Dimension& grayScale)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontGrayScale, grayScale, frameNode);
 }
@@ -2337,7 +2338,7 @@ void ViewAbstract::SetContrast(const Dimension& contrast)
     ACE_UPDATE_RENDER_CONTEXT(FrontContrast, contrast);
 }
 
-void ViewAbstract::SetContrast(FrameNode *frameNode, const Dimension& contrast)
+void ViewAbstract::SetContrast(FrameNode* frameNode, const Dimension& contrast)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast, frameNode);
 }
@@ -2350,7 +2351,7 @@ void ViewAbstract::SetSaturate(const Dimension& saturate)
     ACE_UPDATE_RENDER_CONTEXT(FrontSaturate, saturate);
 }
 
-void ViewAbstract::SetSaturate(FrameNode *frameNode, const Dimension& saturate)
+void ViewAbstract::SetSaturate(FrameNode* frameNode, const Dimension& saturate)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSaturate, saturate, frameNode);
 }
@@ -2363,7 +2364,7 @@ void ViewAbstract::SetSepia(const Dimension& sepia)
     ACE_UPDATE_RENDER_CONTEXT(FrontSepia, sepia);
 }
 
-void ViewAbstract::SetSepia(FrameNode *frameNode, const Dimension& sepia)
+void ViewAbstract::SetSepia(FrameNode* frameNode, const Dimension& sepia)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontSepia, sepia, frameNode);
 }
@@ -2376,7 +2377,7 @@ void ViewAbstract::SetInvert(const InvertVariant& invert)
     ACE_UPDATE_RENDER_CONTEXT(FrontInvert, invert);
 }
 
-void ViewAbstract::SetInvert(FrameNode *frameNode, const InvertVariant& invert)
+void ViewAbstract::SetInvert(FrameNode* frameNode, const InvertVariant& invert)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
 }
@@ -2402,7 +2403,7 @@ void ViewAbstract::SetHueRotate(float hueRotate)
     ACE_UPDATE_RENDER_CONTEXT(FrontHueRotate, hueRotate);
 }
 
-void ViewAbstract::SetHueRotate(FrameNode *frameNode, float hueRotate)
+void ViewAbstract::SetHueRotate(FrameNode* frameNode, float hueRotate)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontHueRotate, hueRotate, frameNode);
 }
@@ -2415,7 +2416,7 @@ void ViewAbstract::SetColorBlend(const Color& colorBlend)
     ACE_UPDATE_RENDER_CONTEXT(FrontColorBlend, colorBlend);
 }
 
-void ViewAbstract::SetColorBlend(FrameNode *frameNode, const Color& colorBlend)
+void ViewAbstract::SetColorBlend(FrameNode* frameNode, const Color& colorBlend)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontColorBlend, colorBlend, frameNode);
 }
@@ -2587,8 +2588,8 @@ void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
     ACE_UPDATE_RENDER_CONTEXT(MotionPath, motionPath);
 }
 
-void ViewAbstract::SetSharedTransition(const std::string& shareId,
-    const std::shared_ptr<SharedTransitionOption>& option)
+void ViewAbstract::SetSharedTransition(
+    const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -2675,8 +2676,8 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
-void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
-    std::function<void()>&& onKeyboardShortcutAction)
+void ViewAbstract::SetKeyboardShortcut(
+    const std::string& value, const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2701,8 +2702,8 @@ void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vect
     eventManager->AddKeyboardShortcutNode(AceType::WeakClaim(frameNode));
 }
 
-void ViewAbstract::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-    const std::function<void(float)>& onCallbackEvent)
+void ViewAbstract::CreateAnimatablePropertyFloat(
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -2725,8 +2726,8 @@ void ViewAbstract::CreateAnimatableArithmeticProperty(const std::string& propert
     frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
 }
 
-void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-    RefPtr<CustomAnimatableArithmetic>& value)
+void ViewAbstract::UpdateAnimatableArithmeticProperty(
+    const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -2790,12 +2791,12 @@ void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
     ACE_UPDATE_RENDER_CONTEXT(AttractionEffect, effect);
 }
 
-void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value)
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, value, frameNode);
 }
 
-void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const Dimension& value)
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
@@ -2803,13 +2804,13 @@ void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const Dimension& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
 }
 
-void ViewAbstract::SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value)
+void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, value, frameNode);
 }
 
-void ViewAbstract::SetBorderWidth(FrameNode *frameNode, const Dimension& value)
+void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
 {
     BorderWidthProperty borderWidth;
     if (Negative(value.Value())) {
@@ -2822,19 +2823,19 @@ void ViewAbstract::SetBorderWidth(FrameNode *frameNode, const Dimension& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
 }
 
-void ViewAbstract::SetBorderColor(FrameNode *frameNode, const BorderColorProperty& value)
+void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, value, frameNode);
 }
 
-void ViewAbstract::SetBorderColor(FrameNode *frameNode, const Color& value)
+void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
 {
     BorderColorProperty borderColor;
     borderColor.SetColor(value);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
 }
 
-void ViewAbstract::SetWidth(FrameNode *frameNode, const CalcLength& width)
+void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -2848,7 +2849,7 @@ void ViewAbstract::SetWidth(FrameNode *frameNode, const CalcLength& width)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
-void ViewAbstract::SetHeight(FrameNode *frameNode, const CalcLength& height)
+void ViewAbstract::SetHeight(FrameNode* frameNode, const CalcLength& height)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -2861,7 +2862,7 @@ void ViewAbstract::SetHeight(FrameNode *frameNode, const CalcLength& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
-void ViewAbstract::ClearWidthOrHeight(FrameNode *frameNode, bool isWidth)
+void ViewAbstract::ClearWidthOrHeight(FrameNode* frameNode, bool isWidth)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -2902,12 +2903,12 @@ void ViewAbstract::ResetPosition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetTransformMatrix(FrameNode *frameNode, const Matrix4& matrix)
+void ViewAbstract::SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
 }
 
-void ViewAbstract::SetHitTestMode(FrameNode *frameNode, HitTestMode hitTestMode)
+void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
 {
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -2915,17 +2916,17 @@ void ViewAbstract::SetHitTestMode(FrameNode *frameNode, HitTestMode hitTestMode)
     gestureHub->SetHitTestMode(hitTestMode);
 }
 
-void ViewAbstract::SetOpacity(FrameNode *frameNode, double opacity)
+void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);
 }
 
-void ViewAbstract::SetZIndex(FrameNode *frameNode, int32_t value)
+void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(ZIndex, value, frameNode);
 }
 
-void ViewAbstract::SetLinearGradient(FrameNode *frameNode, const NG::Gradient& gradient)
+void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
@@ -3507,7 +3508,7 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
     }
 }
 
-void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption)
+void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -3704,7 +3705,7 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeRef));
 }
 
-void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()>&& onAppear)
+void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()> &&onAppear)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -3712,7 +3713,7 @@ void ViewAbstract::SetOnAppear(FrameNode* frameNode, std::function<void()>&& onA
     eventHub->SetOnAppear(std::move(onAppear));
 }
 
-void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()>&& onDisappear)
+void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -3720,7 +3721,7 @@ void ViewAbstract::SetOnDisappear(FrameNode* frameNode, std::function<void()>&& 
     eventHub->SetOnDisappear(std::move(onDisappear));
 }
 
-void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()>&& onAttach)
+void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -3728,7 +3729,7 @@ void ViewAbstract::SetOnAttach(FrameNode* frameNode, std::function<void()>&& onA
     eventHub->SetOnAttach(std::move(onAttach));
 }
 
-void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onDetach)
+void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -3737,7 +3738,7 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onD
 }
 
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
-    const OffsetF& oldOrigin, const RectF &rect, const OffsetF& origin)>&& onAreaChanged)
+    const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -3746,14 +3747,14 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
-void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc&& onFocusCallback)
+void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     focusHub->SetOnFocusCallback(std::move(onFocusCallback));
 }
 
-void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc&& onBlurCallback)
+void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -3771,28 +3772,28 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
     focusHub->SetFocusable(true, false);
 }
 
-void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
+void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
-void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
+void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
-void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc&& onHoverEventFunc)
+void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
-void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc&& onKeyCallback)
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -4693,7 +4694,6 @@ void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const 
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
 }
-
 void ViewAbstract::SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc&& touchInterceptFunc)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -4789,7 +4789,7 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 }
 
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
-    const std::vector<double>& ratioList)
+    const std::vector<double> &ratioList)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
