@@ -137,6 +137,11 @@ void MagnifierController::OpenMagnifier()
     }
     CHECK_NULL_VOID(UpdateMagnifierOffset());
     ChangeMagnifierVisibility(true);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textBase = DynamicCast<TextBase>(pattern);
+    CHECK_NULL_VOID(textBase);
+    textBase->SetIsTextDraggable(false);
 }
 
 RefPtr<FrameNode> MagnifierController::GetRootNode()

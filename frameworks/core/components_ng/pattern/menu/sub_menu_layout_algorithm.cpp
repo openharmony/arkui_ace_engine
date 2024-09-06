@@ -39,6 +39,9 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
     InitHierarchicalParameters(props->GetShowInSubWindowValue(false), menuPattern);
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    InitializePadding(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         ModifySubMenuWrapper(layoutWrapper);
     }

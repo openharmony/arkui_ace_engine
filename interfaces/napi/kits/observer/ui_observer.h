@@ -79,7 +79,7 @@ public:
         const std::optional<std::string>& navigationId, napi_value callback);
     static void HandleNavDestinationSwitch(
         const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo);
-
+    
     static void RegisterWillClickCallback(
         napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
     static void RegisterWillClickCallback(
@@ -133,8 +133,7 @@ private:
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infosForRouterPage_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDensityListeners_;
-    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedDrawListeners_;
-    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedLayoutListeners_;
+    
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextWillClickListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
@@ -146,6 +145,9 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> tabContentStateListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedTabContentStateListeners_;
+
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedDrawListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>> specifiedLayoutListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;
