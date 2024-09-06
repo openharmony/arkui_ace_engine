@@ -178,7 +178,7 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-
+    
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
@@ -683,6 +683,7 @@ public:
     }
 
     virtual void SetSurfaceRotation(bool isLock) {}
+    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
     void SetHandleChildBounds(bool value) {
         handleChildBounds_ = value;
@@ -692,8 +693,6 @@ public:
     {
         return Matrix4();
     }
-
-    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
