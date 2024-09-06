@@ -788,7 +788,7 @@ protected:
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
+    virtual void OnDetachFromMainTree(bool recursive = false);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
