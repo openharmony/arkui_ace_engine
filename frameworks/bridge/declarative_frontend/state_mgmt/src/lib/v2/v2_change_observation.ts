@@ -134,11 +134,6 @@ class ObserveV2 {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
-  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
-    const trackedKey = ObserveV2.OB_PREFIX + prop;
-    return (parentObj && typeof (parentObj) === 'object' && trackedKey in parentObj);
-  }
-
   public static getCurrentRecordedId(): number {
     const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
     return bound ? bound[0] : -1;
