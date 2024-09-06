@@ -187,8 +187,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     MockPipelineContext::pipeline_ = pipeline_bak;
 
     InspectorFilter filter;
-    std::string filterId = "test";
-    filter.SetFilterID(filterId);
+    std::string testId = "test";
+    filter.SetFilterID(testId);
     bool needThrow = false;
     auto test6 = Inspector::GetInspector(false, filter, needThrow);
     auto rootNode = context1->GetStageManager()->GetLastPage();
@@ -499,11 +499,11 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
 HWTEST_F(InspectorTestNg, InspectorTestNg013, TestSize.Level1)
 {
     const char* hello = "hi";
-    std::string filterId = "id";
+    std::string id = "id";
     InspectorFilter testFilter;
     EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
     testFilter.SetFilterDepth(1);
-    testFilter.SetFilterID(filterId);
+    testFilter.SetFilterID(id);
     testFilter.filterExt.emplace_back("abc");
     testFilter.AddFilterAttr("focusable");
     testFilter.AddFilterAttr("abc");
