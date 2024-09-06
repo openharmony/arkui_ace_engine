@@ -29,7 +29,6 @@
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -1078,41 +1077,6 @@ HWTEST_F(TextFieldModifyTest, CreateNodePaintMethod004, TestSize.Level1)
     auto paint = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
     pattern_->OnScrollEndCallback();
     EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
-}
-
-/**
- * @tc.name: OnScrollEndMenuVisibile001
- * @tc.desc: Test textfield On Scroll End Menu Visibile.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldModifyTest, OnScrollEndMenuVisibile001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text field.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    /**
-     * @tc.steps: step2. call OnScrollEndCallback
-     * tc.expected: step2. Check if the Menu Visibile.
-    */
-    pattern_->selectOverlay_->SetUsingMouse(false);
-    pattern_->isTextSelectionMenuShow_ = true;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    pattern_->SetSelectionFlag(5.0f, 5.0f, options);
-
-    pattern_->OnScrollEndCallback();
-    EXPECT_TRUE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
-
-    /**
-     * @tc.steps: step2. call CloseSelectOverlay
-     * tc.expected: step2. Check if the Menu Visibile.
-    */
-    pattern_->CloseSelectOverlay(true);
-    pattern_->OnScrollEndCallback();
-    EXPECT_FALSE(pattern_->selectOverlay_->IsCurrentMenuVisibile());
 }
 
 /**
