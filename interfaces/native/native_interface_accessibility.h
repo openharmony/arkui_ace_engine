@@ -318,7 +318,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
     */
-    int32_t (*FindAccessibilityNodeInfosById)(int64_t elementId, ArkUI_AccessibilitySearchMode mode,
+    int32_t (*findAccessibilityNodeInfosById)(int64_t elementId, ArkUI_AccessibilitySearchMode mode,
         int32_t requestId, ArkUI_AccessibilityElementInfoList* elementList);
     /**
     * @brief Called to obtain element information based on a specified node and text content.
@@ -330,7 +330,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
     */
-    int32_t (*FindAccessibilityNodeInfosByText)(int64_t elementId, const char* text, int32_t requestId,
+    int32_t (*findAccessibilityNodeInfosByText)(int64_t elementId, const char* text, int32_t requestId,
         ArkUI_AccessibilityElementInfoList* elementList);
     /**
     * @brief Called to obtain focused element information based on a specified node.
@@ -342,7 +342,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
     */
-    int32_t (*FindFocusedAccessibilityNode)(int64_t elementId, ArkUI_AccessibilityFocusType focusType,
+    int32_t (*findFocusedAccessibilityNode)(int64_t elementId, ArkUI_AccessibilityFocusType focusType,
         int32_t requestId, ArkUI_AccessibilityElementInfo* elementInfo);
     /**
     * @brief Called to find the next focusable node based on the reference node.
@@ -354,7 +354,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
     */
-    int32_t (*FindNextFocusAccessibilityNode)(
+    int32_t (*findNextFocusAccessibilityNode)(
         int64_t elementId, ArkUI_AccessibilityFocusMoveDirection direction,
         int32_t requestId, ArkUI_AccessibilityElementInfo* elementInfo);
     /**
@@ -367,7 +367,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
     */
-    int32_t (*ExecuteAccessibilityAction)(int64_t elementId, ArkUI_Accessibility_ActionType action,
+    int32_t (*executeAccessibilityAction)(int64_t elementId, ArkUI_Accessibility_ActionType action,
         ArkUI_AccessibilityActionArguments *actionArguments, int32_t requestId);
     /**
     * @brief Called to clear the focus state of the current focused node.
@@ -375,7 +375,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_FAILED} if the operation is failed.
     */
-    int32_t (*ClearFocusedFocusAccessibilityNode)();
+    int32_t (*clearFocusedFocusAccessibilityNode)();
     /**
     * @brief Called to query the current cursor position of the specified node.
     *
@@ -385,7 +385,7 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
     * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
     *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
     */
-    int32_t (*GetAccessibilityNodeCursorPosition)(int64_t elementId, int32_t requestId, int32_t* index);
+    int32_t (*getAccessibilityNodeCursorPosition)(int64_t elementId, int32_t requestId, int32_t* index);
 } ArkUI_AccessibilityProviderCallbacks;
 
 /**

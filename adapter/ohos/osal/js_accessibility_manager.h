@@ -63,9 +63,9 @@ struct ActionStrTable {
 };
 
 struct FillEventInfoParam {
-    int64_t elementId;
-    int64_t stackNodeId;
-    uint32_t windowId;
+    int64_t elementId = 0;
+    int64_t stackNodeId = 0;
+    uint32_t windowId = 0;
 };
 
 struct AccessibilityActionParam {
