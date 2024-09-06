@@ -257,6 +257,7 @@ private:
     void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool IsSquareStyleBox();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;

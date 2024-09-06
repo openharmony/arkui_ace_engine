@@ -29,7 +29,6 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -737,6 +736,22 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
 }
 
+bool CheckBoxPattern::IsSquareStyleBox()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+    } else {
+        checkboxStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ?
+            CheckBoxStyle::CIRCULAR_STYLE : CheckBoxStyle::SQUARE_STYLE;
+    }
+    return checkboxStyle == CheckBoxStyle::SQUARE_STYLE;
+}
+
 void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -745,6 +760,12 @@ void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(checkBoxTheme);
     auto borderRadius = checkBoxTheme->GetFocusRadius().ConvertToPx();
     auto focusPaintPadding = checkBoxTheme->GetFocusPaintPadding().ConvertToPx();
+    auto isSquare = IsSquareStyleBox();
+    auto squareFocusBoardSize = checkBoxTheme->GetFocusBoardSize();
+    auto roundFocusBoardSize = checkBoxTheme->GetRoundFocusBoardSize();
+    if ((squareFocusBoardSize > roundFocusBoardSize) && isSquare) {
+        focusPaintPadding += (squareFocusBoardSize.ConvertToPx() - roundFocusBoardSize.ConvertToPx());
+    }
     float originX = offset_.GetX() - focusPaintPadding;
     float originY = offset_.GetY() - focusPaintPadding;
     float width = size_.Width() + 2 * focusPaintPadding;
