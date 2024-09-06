@@ -112,6 +112,7 @@ struct MouseEvent final {
     int32_t touchEventId = 0;
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
+    std::vector<MouseEvent> history;
     bool isInjected = false;
     bool isPrivacyMode = false;
 
