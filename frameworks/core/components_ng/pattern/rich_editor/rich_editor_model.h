@@ -24,7 +24,6 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/common/ime/text_input_action.h"
-#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -116,6 +115,7 @@ struct UpdateSpanStyle {
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
     std::optional<ImageFit> updateImageFit = std::nullopt;
+
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool useThemeFontColor = true;
@@ -287,7 +287,7 @@ public:
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
+        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
 };
