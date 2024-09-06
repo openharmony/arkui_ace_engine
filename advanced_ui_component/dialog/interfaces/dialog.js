@@ -350,7 +350,14 @@ export class TipsDialog extends ViewPU {
                                                         }
                                                     });
                                                 }, Column);
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
                                                 this.textPart.bind(this)();
+                                                WithTheme.pop();
                                                 Column.pop();
                                             });
                                         } else {
@@ -1757,7 +1764,14 @@ export class ConfirmDialog extends ViewPU {
                                         If.create();
                                         if (index === this.textIndex) {
                                             this.ifElseBranchUpdateFunction(0, () => {
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    WithTheme.create({
+                                                        theme: this.theme,
+                                                        colorMode: this.themeColorMode
+                                                    });
+                                                }, WithTheme);
                                                 this.textBuilder.bind(this)();
+                                                WithTheme.pop();
                                             });
                                         } else if (index === this.checkboxIndex) {
                                             this.ifElseBranchUpdateFunction(1, () => {

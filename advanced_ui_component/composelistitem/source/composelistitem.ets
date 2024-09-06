@@ -597,7 +597,7 @@ struct OperateItemStruct {
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor(this.secondaryTextColor)
             .focusable(true)
             .draggable(false)
             .constraintSize({
@@ -618,7 +618,7 @@ struct OperateItemStruct {
         Row({ space: SPECICAL_ROW_SPACE }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor(this.secondaryTextColor)
             .focusable(true)
             .draggable(false)
             .constraintSize({
