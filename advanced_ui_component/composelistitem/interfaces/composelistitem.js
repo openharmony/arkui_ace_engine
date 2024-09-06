@@ -17,6 +17,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const measure = requireNapi('measure');
 export var IconType;
 (function (IconType) {
     IconType[IconType["BADGE"] = 1] = "BADGE";
@@ -56,7 +57,7 @@ const TEXT_ARROW_HEIGHT = 32;
 const SAFE_LIST_PADDING = 32;
 const HEADSCULPTURE_SIZE = 40;
 const BUTTON_SIZE = 28;
-const APP_ICON_SIZE = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_app_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value;
+const APP_ICON_SIZE = 64;
 const PREVIEW_SIZE = 96;
 const LONGITUDINAL_SIZE = 96;
 const VERTICAL_SIZE = 96;
@@ -102,6 +103,7 @@ const FOCUSED_SHADOW = LengthMetrics.resource({ "id": -1, "type": 10002, params:
     .value;
 const NORMAL_SHADOW = LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_shadow_attribute'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })
     .value;
+const PADDING = { "id": -1, "type": 10002, params: ['sys.float.composeListItem_padding'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 class ContentItemStruct extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -122,13 +124,17 @@ class ContentItemStruct extends ViewPU {
         this.__parentDirection = new SynchedPropertySimpleOneWayPU(params.parentDirection, this, "parentDirection");
         this.__itemDirection = new SynchedPropertySimpleOneWayPU(params.itemDirection, this, "itemDirection");
         this.__isFocus = new SynchedPropertySimpleOneWayPU(params.isFocus, this, "isFocus");
-        this.__primaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_left_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextSize");
+        this.__primaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextSize");
         this.__primaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColors");
         this.__itemHeight = new SynchedPropertyObjectOneWayPU(params.itemHeight, this, "itemHeight");
         this.__iconColor = new ObservedPropertyObjectPU(null, this, "iconColor");
         this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
         this.__secondaryThirdTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_left_secondary_description_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryThirdTextSize");
         this.__descriptionColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColors");
+        this.__isWrapText = new SynchedPropertyObjectTwoWayPU(params.isWrapText, this, "isWrapText");
+        this.__isWrapFristText = new ObservedPropertyObjectPU(false, this, "isWrapFristText");
+        this.__isWrapSecondText = new ObservedPropertyObjectPU(false, this, "isWrapSecondText");
+        this.__isWrapThirdText = new ObservedPropertyObjectPU(false, this, "isWrapThirdText");
         this.setInitiallyProvidedValue(params);
         this.declareWatch("iconStyle", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
@@ -136,6 +142,9 @@ class ContentItemStruct extends ViewPU {
         this.declareWatch("secondaryText", this.onPropChange);
         this.declareWatch("description", this.onPropChange);
         this.declareWatch("isFocus", this.onPropChange);
+        this.declareWatch("isWrapFristText", this.onWrapChange);
+        this.declareWatch("isWrapSecondText", this.onWrapChange);
+        this.declareWatch("isWrapThirdText", this.onWrapChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -193,6 +202,15 @@ class ContentItemStruct extends ViewPU {
         if (params.descriptionColors !== undefined) {
             this.descriptionColors = params.descriptionColors;
         }
+        if (params.isWrapFristText !== undefined) {
+            this.isWrapFristText = params.isWrapFristText;
+        }
+        if (params.isWrapSecondText !== undefined) {
+            this.isWrapSecondText = params.isWrapSecondText;
+        }
+        if (params.isWrapThirdText !== undefined) {
+            this.isWrapThirdText = params.isWrapThirdText;
+        }
     }
     updateStateVars(params) {
         this.__iconStyle.reset(params.iconStyle);
@@ -229,6 +247,10 @@ class ContentItemStruct extends ViewPU {
         this.__secondaryTextColors.purgeDependencyOnElmtId(rmElmtId);
         this.__secondaryThirdTextSize.purgeDependencyOnElmtId(rmElmtId);
         this.__descriptionColors.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapText.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapFristText.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapSecondText.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapThirdText.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__iconStyle.aboutToBeDeleted();
@@ -252,6 +274,10 @@ class ContentItemStruct extends ViewPU {
         this.__secondaryTextColors.aboutToBeDeleted();
         this.__secondaryThirdTextSize.aboutToBeDeleted();
         this.__descriptionColors.aboutToBeDeleted();
+        this.__isWrapText.aboutToBeDeleted();
+        this.__isWrapFristText.aboutToBeDeleted();
+        this.__isWrapSecondText.aboutToBeDeleted();
+        this.__isWrapThirdText.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -381,6 +407,30 @@ class ContentItemStruct extends ViewPU {
     set descriptionColors(newValue) {
         this.__descriptionColors.set(newValue);
     }
+    get isWrapText() {
+        return this.__isWrapText.get();
+    }
+    set isWrapText(newValue) {
+        this.__isWrapText.set(newValue);
+    }
+    get isWrapFristText() {
+        return this.__isWrapFristText.get();
+    }
+    set isWrapFristText(newValue) {
+        this.__isWrapFristText.set(newValue);
+    }
+    get isWrapSecondText() {
+        return this.__isWrapSecondText.get();
+    }
+    set isWrapSecondText(newValue) {
+        this.__isWrapSecondText.set(newValue);
+    }
+    get isWrapThirdText() {
+        return this.__isWrapThirdText.get();
+    }
+    set isWrapThirdText(newValue) {
+        this.__isWrapThirdText.set(newValue);
+    }
     onWillApplyTheme(theme) {
         this.primaryTextColor = theme.colors.fontPrimary;
         this.secondaryTextColor = theme.colors.fontSecondary;
@@ -394,8 +444,11 @@ class ContentItemStruct extends ViewPU {
             this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
         }
         this.primaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.primaryTextColor;
-        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_secondary_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
-        this.descriptionColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.descriptionColor;
+        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_left_secondary_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
+        this.descriptionColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_left_secondary_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.descriptionColor;
+    }
+    onWrapChange() {
+        this.isWrapText = this.isWrapFristText || this.isWrapSecondText || this.isWrapThirdText;
     }
     getIconFillColor() {
         switch (this.iconStyle) {
@@ -406,6 +459,18 @@ class ContentItemStruct extends ViewPU {
             default:
                 return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         }
+    }
+    judgeIsWrap(text, sizeResource, newHeight) {
+        let singleRowHeight = this.getSingleRowTextHeight(text, sizeResource);
+        return newHeight > singleRowHeight;
+    }
+    getSingleRowTextHeight(text, sizeResource) {
+        let singleRowHeight = px2vp(measure.measureTextSize({
+            textContent: text,
+            fontSize: sizeResource,
+            maxLines: TEXT_MAX_LINE
+        }).height);
+        return singleRowHeight;
     }
     aboutToAppear() {
         this.onPropChange();
@@ -482,6 +547,9 @@ class ContentItemStruct extends ViewPU {
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
+            Text.onSizeChange((oldValue, newValue) => {
+                this.isWrapFristText = this.judgeIsWrap(ObservedObject.GetRawObject(this.primaryText), ObservedObject.GetRawObject(this.primaryTextSize), newValue.height);
+            });
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -497,6 +565,9 @@ class ContentItemStruct extends ViewPU {
                         TextOverflow.Ellipsis });
                         Text.focusable(true);
                         Text.draggable(false);
+                        Text.onSizeChange((oldValue, newValue) => {
+                            this.isWrapSecondText = this.judgeIsWrap(ObservedObject.GetRawObject(this.secondaryText), ObservedObject.GetRawObject(this.secondaryThirdTextSize), newValue.height);
+                        });
                     }, Text);
                     Text.pop();
                 });
@@ -520,6 +591,9 @@ class ContentItemStruct extends ViewPU {
                         TextOverflow.Ellipsis });
                         Text.focusable(true);
                         Text.draggable(false);
+                        Text.onSizeChange((oldValue, newValue) => {
+                            this.isWrapThirdText = this.judgeIsWrap(ObservedObject.GetRawObject(this.description), ObservedObject.GetRawObject(this.secondaryThirdTextSize), newValue.height);
+                        });
                     }, Text);
                     Text.pop();
                 });
@@ -602,7 +676,7 @@ class OperateItemStruct extends ViewPU {
         this.__parentDirection = new SynchedPropertySimpleTwoWayPU(params.parentDirection, this, "parentDirection");
         this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, "rowSpace");
         this.__isFocus = new SynchedPropertySimpleTwoWayPU(params.isFocus, this, "isFocus");
-        this.__secondaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextSize");
+        this.__secondaryTextSize = new ObservedPropertyObjectPU({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextSize");
         this.__secondaryTextColors = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColors");
         this.__iconColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "iconColor");
         this.__isChecked = new SynchedPropertySimpleTwoWayPU(params.isChecked, this, "isChecked");
@@ -938,7 +1012,6 @@ class OperateItemStruct extends ViewPU {
         this.activedColor = theme.colors.interactiveActive;
     }
     onFocusChange() {
-        this.secondaryTextSize = this.isFocus ? { "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_right_text_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
         this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
         this.iconColor = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     }
@@ -1564,10 +1637,12 @@ export class ComposeListItem extends ViewPU {
         this.maxFontScale = this.getUIContext().getMaxFontScale();
         this.__isFocus = new ObservedPropertySimplePU(false, this, "isFocus");
         this.__isChecked = new ObservedPropertySimplePU(false, this, "isChecked");
+        this.__isWrapText = new ObservedPropertySimplePU(false, this, "isWrapText");
         this.setInitiallyProvidedValue(params);
         this.declareWatch("contentItem", this.onPropChange);
         this.declareWatch("operateItem", this.onPropChange);
         this.declareWatch("fontSizeScale", this.onFontSizeScaleChange);
+        this.declareWatch("isWrapText", this.onWrapChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -1640,6 +1715,9 @@ export class ComposeListItem extends ViewPU {
         if (params.isChecked !== undefined) {
             this.isChecked = params.isChecked;
         }
+        if (params.isWrapText !== undefined) {
+            this.isWrapText = params.isWrapText;
+        }
     }
     updateStateVars(params) {
         this.__contentItem.reset(params.contentItem);
@@ -1667,6 +1745,7 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(rmElmtId);
         this.__isFocus.purgeDependencyOnElmtId(rmElmtId);
         this.__isChecked.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapText.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1690,6 +1769,7 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset.aboutToBeDeleted();
         this.__isFocus.aboutToBeDeleted();
         this.__isChecked.aboutToBeDeleted();
+        this.__isWrapText.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1819,11 +1899,20 @@ export class ComposeListItem extends ViewPU {
     set isChecked(newValue) {
         this.__isChecked.set(newValue);
     }
+    get isWrapText() {
+        return this.__isWrapText.get();
+    }
+    set isWrapText(newValue) {
+        this.__isWrapText.set(newValue);
+    }
     onWillApplyTheme(theme) {
         this.hoveringColor = theme.colors.interactiveHover;
         this.touchDownColor = theme.colors.interactivePressed;
         this.activedColor = theme.colors.interactiveActive;
         this.focusOutlineColor = theme.colors.interactiveFocus;
+    }
+    onWrapChange() {
+        this.containerPadding = this.getPadding();
     }
     onPropChange() {
         if (this.contentItem === undefined) {
@@ -1922,36 +2011,30 @@ export class ComposeListItem extends ViewPU {
             return FlexDirection.Row;
         }
     }
-    setContainerPadding(top, bottom) {
-        this.containerPadding = {
-            top: LengthMetrics.resource(top),
-            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.titlebar_icon_background_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-            bottom: LengthMetrics.resource(bottom),
-            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.titlebar_icon_background_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
-        };
-    }
-    getContainerPadding() {
-        if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
-            this.setContainerPadding({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_top3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, { "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_bottom3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-        }
-        else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
-            this.setContainerPadding({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_top2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, { "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_bottom2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-        }
-        else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
-            this.setContainerPadding({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_top1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, { "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_bottom1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-        }
-        else {
-            this.containerPadding = undefined;
-            if (IS_CLOSE_CHILD_FOCUS) {
-                return;
-            }
-            this.setContainerPadding({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_top'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, { "id": -1, "type": 10002, params: ['sys.float.composeListItem_single_line_list_left_text_bottom'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-        }
-    }
     onFontSizeScaleChange() {
         this.containerDirection = this.decideContainerDirection();
         this.contentItemDirection = this.decideContentItemDirection();
-        this.getContainerPadding();
+        if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
+            this.containerPadding = {
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            };
+        }
+        else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
+            this.containerPadding = {
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            };
+        }
+        else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
+            this.containerPadding = {
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            };
+        }
+        else {
+            this.containerPadding = this.getPadding();
+        }
     }
     isSingleLine() {
         return !this.contentItem?.secondaryText && !this.contentItem?.description;
@@ -1993,6 +2076,17 @@ export class ComposeListItem extends ViewPU {
         }
         return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
     }
+    getPadding() {
+        let paddingNum = LengthMetrics.resource(PADDING).value;
+        let compareSize = paddingNum > LISTITEM_PADDING;
+        let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
+        if (!IS_CLOSE_CHILD_FOCUS && this.isWrapText) {
+            return { top: paddingNum, bottom: paddingNum, left: horizontalPadding, right: horizontalPadding };
+        }
+        else {
+            return { left: paddingNum, right: paddingNum };
+        }
+    }
     onMeasureSize(selfLayoutInfo, children, constraint) {
         this.fontSizeScale = this.decideFontSizeScale();
         let sizeResult = { height: 0, width: 0 };
@@ -2014,7 +2108,7 @@ export class ComposeListItem extends ViewPU {
                 this.isFocus = false;
                 this.frontColor = NORMAL_BG;
             });
-            Stack.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_radio'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Stack.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Stack.onClick(() => {
                 if (!IS_CLOSE_CHILD_FOCUS) {
                     this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
@@ -2045,7 +2139,7 @@ export class ComposeListItem extends ViewPU {
                 minHeight: this.itemHeight
             });
             Flex.focusable(IS_CLOSE_CHILD_FOCUS);
-            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_radio'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
             Flex.onFocus(() => {
                 this.canFocus = true;
@@ -2080,14 +2174,14 @@ export class ComposeListItem extends ViewPU {
             });
             ViewStackProcessor.visualState("focused");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.composeListItem_focused_circular_bead'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { "id": -1, "type": 10002, params: ['sys.float.composeListItem_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 width: ITEM_BORDER_SHOWN,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState("normal");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_radio'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: { "id": -1, "type": 10002, params: ['sys.float.composeListItem_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 color: { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_stroke_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
                 width: { "id": -1, "type": 10002, params: ['sys.float.composeListItem_normal_stroke_thickness'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
             });
@@ -2101,10 +2195,14 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             if (isInitialRender) {
-                                let componentCall = new ContentItemStruct(this, {}, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1075, col: 11 });
+                                let componentCall = new ContentItemStruct(this, {
+                                    isWrapText: this.__isWrapText
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem.ets", line: 1117, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
-                                    return {};
+                                    return {
+                                        isWrapText: this.isWrapText
+                                    };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
                             }
@@ -2140,7 +2238,8 @@ export class ComposeListItem extends ViewPU {
                                     itemDirection: this.contentItemDirection,
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
-                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1078, col: 11 });
+                                    isWrapText: this.__isWrapText
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem.ets", line: 1122, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -2154,7 +2253,8 @@ export class ComposeListItem extends ViewPU {
                                         parentDirection: this.containerDirection,
                                         itemDirection: this.contentItemDirection,
                                         isFocus: this.isFocus,
-                                        itemHeight: this.itemHeight
+                                        itemHeight: this.itemHeight,
+                                        isWrapText: this.isWrapText
                                     };
                                 };
                                 componentCall.paramsGenerator_ = paramsLambda;
@@ -2222,7 +2322,7 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.__containerDirection,
                                     isFocus: this.__isFocus,
                                     isChecked: this.__isChecked,
-                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem_hebin.ets", line: 1093, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/composelistitem.ets", line: 1138, col: 11 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

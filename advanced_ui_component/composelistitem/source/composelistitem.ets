@@ -16,6 +16,7 @@
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
+import measure from '@ohos.measure';
 
 export enum IconType {
   BADGE = 1,
@@ -90,7 +91,7 @@ const TEXT_ARROW_HEIGHT = 32;
 const SAFE_LIST_PADDING = 32;
 const HEADSCULPTURE_SIZE = 40;
 const BUTTON_SIZE = 28;
-const APP_ICON_SIZE = LengthMetrics.resource($r('sys.float.composeListItem_app_icon_size')).value;
+const APP_ICON_SIZE = 64;
 const PREVIEW_SIZE = 96;
 const LONGITUDINAL_SIZE = 96;
 const VERTICAL_SIZE = 96;
@@ -136,6 +137,7 @@ const FOCUSED_SHADOW = LengthMetrics.resource($r('sys.float.composeListItem_focu
   .value as ShadowStyle;
 const NORMAL_SHADOW = LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute'))
   .value as ShadowStyle;
+const PADDING = $r('sys.float.composeListItem_padding');
 
 @Component
 struct ContentItemStruct {
@@ -153,13 +155,17 @@ struct ContentItemStruct {
   @Prop parentDirection: FlexDirection;
   @Prop itemDirection: FlexDirection;
   @Prop @Watch('onPropChange') isFocus: boolean = false;
-  @State primaryTextSize: string | number | Resource = $r('sys.float.composeListItem_normal_left_text_size');
+  @State primaryTextSize: string | number | Resource = $r('sys.float.ohos_id_text_size_body1');
   @State primaryTextColors: ResourceColor = $r('sys.color.font_primary');
   @Prop itemHeight: number | null = null;
   @State iconColor: ResourceColor | null = null;
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State secondaryThirdTextSize: string | number | Resource = $r('sys.float.composeListItem_left_secondary_description_text_size');
   @State descriptionColors: ResourceColor = $r('sys.color.font_tertiary');
+  @Link isWrapText: Boolean;
+  @State @Watch('onWrapChange') isWrapFristText: Boolean = false;
+  @State @Watch('onWrapChange') isWrapSecondText: Boolean = false;
+  @State @Watch('onWrapChange') isWrapThirdText: Boolean = false;
 
   onWillApplyTheme(theme: Theme): void {
     this.primaryTextColor = theme.colors.fontPrimary;
@@ -174,11 +180,15 @@ struct ContentItemStruct {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
     }
     this.primaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_text_color') : this.primaryTextColor;
-    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_secondary_text_color') : this.secondaryTextColor;
-    this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_description_text_color') : this.descriptionColor;
+    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_left_secondary_description_text_color') : this.secondaryTextColor;
+    this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_left_secondary_description_text_color') : this.descriptionColor;
   }
 
-  getIconFillColor():ResourceColor{
+  onWrapChange(){
+    this.isWrapText = this.isWrapFristText || this.isWrapSecondText || this.isWrapThirdText;
+  }
+
+  getIconFillColor(): ResourceColor{
     switch (this.iconStyle) {
       case IconType.BADGE:
         return $r('sys.color.composeListItem_badge_color');
@@ -187,6 +197,20 @@ struct ContentItemStruct {
       default:
         return $r('sys.color.ohos_id_color_secondary');
     }
+  }
+
+  judgeIsWrap(text: ResourceStr, sizeResource: Length, newHeight: number): boolean{
+    let singleRowHeight = this.getSingleRowTextHeight(text, sizeResource);
+    return newHeight > singleRowHeight;
+  }
+
+  getSingleRowTextHeight(text: ResourceStr, sizeResource: Length): number{
+    let singleRowHeight = px2vp(measure.measureTextSize({
+      textContent: text,
+      fontSize: sizeResource,
+      maxLines: TEXT_MAX_LINE
+    }).height as number);
+    return singleRowHeight;
   }
 
   aboutToAppear() {
@@ -236,6 +260,10 @@ struct ContentItemStruct {
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
+        .onSizeChange((oldValue: Area, newValue: Area) => {
+          this.isWrapFristText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
+            newValue.height as number);
+        })
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize(this.secondaryThirdTextSize)
@@ -245,6 +273,10 @@ struct ContentItemStruct {
             TextOverflow.Ellipsis })
           .focusable(true)
           .draggable(false)
+          .onSizeChange((oldValue: Area, newValue: Area) => {
+            this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
+              newValue.height as number);
+          })
       }
       if (this.description != null) {
         Text(this.description)
@@ -255,6 +287,10 @@ struct ContentItemStruct {
             TextOverflow.Ellipsis })
           .focusable(true)
           .draggable(false)
+          .onSizeChange((oldValue: Area, newValue: Area) => {
+            this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
+              newValue.height as number);
+          })
       }
     }
     .flexShrink(1)
@@ -332,7 +368,7 @@ struct OperateItemStruct {
   @Link parentDirection: FlexDirection;
   @State rowSpace: number = DEFAULT_ROW_SPACE;
   @Link @Watch('onFocusChange') isFocus: boolean;
-  @State secondaryTextSize: Length = $r('sys.float.composeListItem_normal_right_text_size');
+  @State secondaryTextSize: Length = $r('sys.float.ohos_id_text_size_body2');
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_normal_right_icon_color');
   @Link @Watch('onPropChange') isChecked: boolean;
@@ -344,7 +380,6 @@ struct OperateItemStruct {
   }
 
   onFocusChange(){
-    this.secondaryTextSize = this.isFocus ? $r('sys.float.composeListItem_focused_right_text_size') : $r('sys.float.composeListItem_normal_right_text_size');
     this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_right_text_color') : this.secondaryTextColor;
     this.iconColor = this.isFocus ? $r('sys.color.composeListItem_focused_right_icon_color') : $r('sys.color.composeListItem_normal_right_icon_color');
   }
@@ -368,7 +403,7 @@ struct OperateItemStruct {
     }
   }
 
-  getUnselectedColor():ResourceColor{
+  getUnselectedColor(): ResourceColor{
     if (IS_CLOSE_CHILD_FOCUS) {
       return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
     }
@@ -882,12 +917,17 @@ export struct ComposeListItem {
   private maxFontScale = this.getUIContext().getMaxFontScale();
   @State isFocus: boolean = false;
   @State isChecked: boolean = false;
+  @State @Watch('onWrapChange') isWrapText: boolean = false;
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
     this.touchDownColor = theme.colors.interactivePressed;
     this.activedColor = theme.colors.interactiveActive;
     this.focusOutlineColor = theme.colors.interactiveFocus;
+  }
+
+  onWrapChange(){
+    this.containerPadding = this.getPadding();
   }
 
   onPropChange() {
@@ -899,7 +939,6 @@ export struct ComposeListItem {
       }
       return
     }
-
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
@@ -917,7 +956,6 @@ export struct ComposeListItem {
     } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT
     }
-
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
@@ -982,35 +1020,27 @@ export struct ComposeListItem {
     }
   }
 
-  setContainerPadding(top:Resource, bottom:Resource){
-    this.containerPadding = {
-      top: LengthMetrics.resource(top),
-      end: LengthMetrics.resource($r('sys.float.titlebar_icon_background_width')),
-      bottom: LengthMetrics.resource(bottom),
-      start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_width')),
-    };
-  }
-
-  getContainerPadding(){
-    if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
-      this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top3'), $r('sys.float.composeListItem_single_line_list_left_text_bottom3'));
-    } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
-      this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top2'), $r('sys.float.composeListItem_single_line_list_left_text_bottom2'));
-    } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
-      this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top1'), $r('sys.float.composeListItem_single_line_list_left_text_bottom1'));
-    } else {
-      this.containerPadding = undefined;
-      if (IS_CLOSE_CHILD_FOCUS) {
-        return;
-      }
-      this.setContainerPadding($r('sys.float.composeListItem_single_line_list_left_text_top'), $r('sys.float.composeListItem_single_line_list_left_text_bottom'))
-    }
-  }
-
   onFontSizeScaleChange() {
     this.containerDirection = this.decideContainerDirection();
     this.contentItemDirection = this.decideContentItemDirection();
-    this.getContainerPadding();
+    if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
+      this.containerPadding = {
+        top: $r('sys.float.padding_level12'),
+        bottom: $r('sys.float.padding_level12'),
+      };
+    } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
+      this.containerPadding = {
+        top: $r('sys.float.padding_level10'),
+        bottom: $r('sys.float.padding_level10'),
+      };
+    } else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
+      this.containerPadding = {
+        top: $r('sys.float.padding_level8'),
+        bottom: $r('sys.float.padding_level8'),
+      };
+    } else {
+      this.containerPadding = this.getPadding();
+    }
   }
 
   isSingleLine(): boolean {
@@ -1061,6 +1091,17 @@ export struct ComposeListItem {
     )
   }
 
+  getPadding(): Padding{
+    let paddingNum = LengthMetrics.resource(PADDING).value;
+    let compareSize = paddingNum > LISTITEM_PADDING;
+    let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
+    if (!IS_CLOSE_CHILD_FOCUS && this.isWrapText) {
+      return { top: paddingNum, bottom: paddingNum, left: horizontalPadding, right: horizontalPadding };
+    } else {
+      return { left: paddingNum, right: paddingNum };
+    }
+  }
+
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     this.fontSizeScale = this.decideFontSizeScale();
     let sizeResult: SizeResult = { height: 0, width: 0 };
@@ -1076,7 +1117,9 @@ export struct ComposeListItem {
     Stack() {
       Flex(this.getFlexOptions()) {
         if (this.contentItem === null) {
-          ContentItemStruct({})
+          ContentItemStruct({
+            isWrapText: this.isWrapText
+          })
         }
         if (this.contentItem !== null) {
           ContentItemStruct({
@@ -1091,6 +1134,7 @@ export struct ComposeListItem {
             itemDirection: this.contentItemDirection,
             isFocus: this.isFocus,
             itemHeight: this.itemHeight,
+            isWrapText: this.isWrapText
           });
         }
         if (this.operateItem !== null) {
@@ -1128,7 +1172,7 @@ export struct ComposeListItem {
         minHeight: this.itemHeight
       })
       .focusable(IS_CLOSE_CHILD_FOCUS)
-      .borderRadius($r('sys.float.composeListItem_normal_radio'))
+      .borderRadius($r('sys.float.composeListItem_radius'))
       .backgroundColor(this.frontColor)
       .onFocus(() => {
         this.canFocus = true
@@ -1164,7 +1208,7 @@ export struct ComposeListItem {
       .stateStyles({
         focused: {
           .border({
-            radius: $r('sys.float.composeListItem_focused_circular_bead'),
+            radius: $r('sys.float.composeListItem_radius'),
             width: ITEM_BORDER_SHOWN,
             color: this.focusOutlineColor,
             style: BorderStyle.Solid
@@ -1172,7 +1216,7 @@ export struct ComposeListItem {
         },
         normal: {
           .border({
-            radius: $r('sys.float.composeListItem_normal_radio'),
+            radius: $r('sys.float.composeListItem_radius'),
             color: $r('sys.color.composeListItem_normal_stroke_color'),
             width: $r('sys.float.composeListItem_normal_stroke_thickness'),
           })
@@ -1187,7 +1231,7 @@ export struct ComposeListItem {
       this.isFocus = false;
       this.frontColor = NORMAL_BG
     })
-    .borderRadius($r('sys.float.composeListItem_normal_radio'))
+    .borderRadius($r('sys.float.composeListItem_radius'))
     .onClick(() => {
       if (!IS_CLOSE_CHILD_FOCUS) {
         this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
