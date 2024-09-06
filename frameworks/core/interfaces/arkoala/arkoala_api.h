@@ -4369,7 +4369,7 @@ struct ArkUIRadioModifier {
     void (*setRadioGroup)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetRadioGroup)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getRadioGroup)(ArkUINodeHandle node);
-    void (*setRadioIndicatorType)(ArkUINodeHandle node, ArkUI_Uint32 indicatorType);
+    void (*setRadioOptions)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType);
 };
 
 struct ArkUIPatternLockControllerModifier {
