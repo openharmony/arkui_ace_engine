@@ -1558,6 +1558,11 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     }
 
     dragPreviewInfo.scale = GetPreviewNodeScale(*imageNode);
+    if (NearEqual(dragPreviewInfo.scale, 1.0f)) {
+        if (!isMouseDragged_) {
+            dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
+        }
+    }
     auto imageRect = imageNode->GetGeometryNode()->GetFrameRect();
     dragPreviewInfo.height = imageRect.Height();
     dragPreviewInfo.width = imageRect.Width();
@@ -2110,13 +2115,12 @@ double DragDropManager::GetPreviewNodeScale(const FrameNode& node)
         }
     }
 
-    float scale = dragDropMgr->isMouseDragged_ ? NO_SCALE : TOUCH_DRAG_PIXELMAP_SCALE;
     if (node.GetTag() == V2::WEB_ETS_TAG) {
-        return scale;
+        return NO_SCALE;
     }
     auto rect = node.GetGeometryNode()->GetFrameRect();
     if (rect.IsEmpty()) {
-        return scale;
+        return NO_SCALE;
     }
 
     auto diagnal = rect.Diagnal();
@@ -2126,7 +2130,7 @@ double DragDropManager::GetPreviewNodeScale(const FrameNode& node)
         return maxWidth / diagnal;
     }
 
-    return scale;
+    return NO_SCALE;
 }
 
 float DragDropManager::GetMaxDiagnalBaseOnScreen()
