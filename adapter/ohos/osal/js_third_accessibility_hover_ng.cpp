@@ -311,10 +311,10 @@ void AccessibilityHoverManagerForThirdNG::DeregisterJsThirdProviderInteractionOp
 
 namespace {
 enum class DumpMode {
-        TREE,
-        NODE,
-        HANDLE_EVENT,
-        HOVER_TEST
+    TREE,
+    NODE,
+    HANDLE_EVENT,
+    HOVER_TEST
 };
 
 struct DumpInfoArgument {
