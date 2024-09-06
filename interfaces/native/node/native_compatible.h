@@ -224,7 +224,8 @@ typedef struct {
     /** Whether to prevent propagation of the event to the parent node. */
     bool stopPropagation;
 
-    /** Whether to prevent the default event processing behavior of the current node and allow propagation of the event. */
+    /** Whether to prevent the default event processing behavior of
+    * the current node and allow propagation of the event. */
     bool preventDefault;
 } ArkUI_NodeTouchEvent;
 
