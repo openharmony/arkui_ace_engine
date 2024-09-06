@@ -702,11 +702,6 @@ public:
         isNeedAnimate_ = isNeedAnimate;
     }
 
-    virtual uint64_t GetNodeId() const
-    {
-        return 0;
-    }
-
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
