@@ -226,6 +226,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
                 LOGE("create minBtn callback func failed,windowManager is null!");
                 return;
             }
+            bool isMoving = windowManager->GetWindowStartMoveFlag();
             if (isMoving) {
                 LOGI("window is moving, minimization is not supported.");
                 return;
@@ -245,6 +246,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
                 LOGE("create closeBtn callback func failed,windowManager is null!");
                 return;
             }
+            bool isMoving = windowManager->GetWindowStartMoveFlag();
             if (isMoving) {
                 LOGI("window is moving, closing is not supported");
                 return;
