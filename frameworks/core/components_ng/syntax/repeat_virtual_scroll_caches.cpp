@@ -169,39 +169,54 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
 
 void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTriggerReuse)
 {
-    if (IsInL1Cache(key)) {
-        return;
-    }
     activeNodeKeysInL1_.emplace(key);
 
     if (!shouldTriggerReuse) {
         return;
     }
 
-    // fire UINode::OnReuse to trigger node pattern handlers
+    RefPtr<UINode> child;
     const auto& it = node4key_.find(key);
     if (it != node4key_.end() && it->second.item) {
-        auto child = it->second.item->GetFrameChildByIndex(0, false);
-        CHECK_NULL_VOID(child);
-        child->OnReuse();
+        child = it->second.item->GetFrameChildByIndex(0, false);
     }
-}
+    CHECK_NULL_VOID(child);
 
-void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key)
-{
-    if (activeNodeKeysInL1_.erase(key) == 0) {
+    // if node is already reused, do nothing
+    if (reusedNodeIds.emplace(child->GetId()).second == false) {
         return;
     }
 
-    // fire UINode::OnRecycle to trigger node pattern handlers
-    const auto& it = node4key_.find(key);
-    if (it != node4key_.end() && it->second.item) {
-        auto child = it->second.item->GetFrameChildByIndex(0, false);
-        CHECK_NULL_VOID(child);
-        child->OnRecycle();
-    }
+    // fire OnReuse to trigger node pattern handlers
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "OnReuse() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
+    child->OnReuse();
 }
 
+
+ void RepeatVirtualScrollCaches::RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle)
+ {
+    activeNodeKeysInL1_.erase(key);
+
+    if (!shouldTriggerRecycle) {
+        return;
+    }
+
+    RefPtr<UINode> child;
+    const auto& it = node4key_.find(key);
+    if (it != node4key_.end() && it->second.item) {
+        child = it->second.item->GetFrameChildByIndex(0, false);
+    }
+    CHECK_NULL_VOID(child);
+
+    // if node is not reused currently, do nothing
+    if (reusedNodeIds.erase(child->GetId()) == 0) {
+        return;
+    }
+
+    // fire OnRecycle to trigger node pattern handlers
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "OnRecycle() nodeId:%{public}d key:%{public}s", child->GetId(), key.c_str());
+    child->OnRecycle();
+}
 
 /** scenario:
  *         Repeat gets updated due to data change.
@@ -383,7 +398,8 @@ void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
         ACE_SCOPED_TRACE(
             "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
 
-        RemoveKeyFromL1(keyIter->second);
+        // don't fire OnRecycle here, as we manage reuse/recycle indepedently
+        RemoveKeyFromL1(keyIter->second, false);
     }
 }
 
