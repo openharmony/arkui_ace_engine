@@ -31,20 +31,19 @@ constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
 // Obtain the last three digits of the full path
-constexpr int32_t PATH_DEPTH = 3;
+constexpr uint32_t PATH_DEPTH = 3;
 
 std::string ParsePageUrl(const std::string& pagePath)
 {
     std::string res;
     std::vector<std::string> paths;
     StringUtils::StringSplitter(pagePath, '/', paths);
-    if (paths.empty() || paths.size() < PATH_DEPTH) {
+    uint32_t pathSize = paths.size();
+    if (pathSize < PATH_DEPTH) {
         return pagePath;
     }
-    vector<string>::iterator it = paths.end();
-    for (int i = 0; i < PATH_DEPTH; i++) {
-        it--;
-        res = '/' + *it + res;
+    for (uint32_t i = pathSize - PATH_DEPTH; i < pathSize; i++) {
+        res = res + "/" + paths[i];
     }
     return res;
 }
