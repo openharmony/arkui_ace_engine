@@ -768,7 +768,6 @@ void NavigationPattern::CheckTopNavPathChange(
             if (!newTopNavDestination) {
                 break;
             }
-            auto focusHub = newTopNavDestination->GetFocusHub();
             if (!GetIsFocusable(newTopNavDestination)) {
                 break;
             }
@@ -799,7 +798,6 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageShow(pageInfo->GetPageUrl());
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto focusHub = navBarNode->GetFocusHub();
         if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarFocusView);
