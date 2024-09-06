@@ -44,7 +44,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    NONE = 40000
 };
 class ArkTSUtils {
 public:
