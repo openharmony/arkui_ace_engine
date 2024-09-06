@@ -69,10 +69,7 @@ static void ParseParams(napi_env env, napi_value params, std::string& paramsStri
     napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
     napi_value funcArgv[1] = { params };
     napi_value returnValue;
-    if (napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue) != napi_ok) {
-        TAG_LOGE(AceLogTag::ACE_ROUTER,
-            "Router parse param failed, probably caused by invalid format of JSON object 'params'");
-    }
+    napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
     size_t len = 0;
     napi_get_value_string_utf8(env, returnValue, nullptr, 0, &len);
     std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len + 1);

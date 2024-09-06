@@ -86,9 +86,8 @@ public:
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
-        paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
+        paintMethod->SetItemCount(swiperPattern->TotalCount());
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
-        paintMethod->SetItemCount(swiperPattern->RealTotalCount());
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         gestureState_ = swiperPattern->GetGestureState();
         paintMethod->SetGestureState(gestureState_);
@@ -121,8 +120,9 @@ public:
 
             SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
             return CreateDotIndicatorPaintMethod(swiperPattern);
+        } else {
+            return nullptr;
         }
-        return nullptr;
     }
 
     RefPtr<FrameNode> GetSwiperNode() const

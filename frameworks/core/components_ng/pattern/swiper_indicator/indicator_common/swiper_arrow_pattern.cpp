@@ -319,7 +319,8 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(swiperPattern);
     auto leftIndex = 0;
     auto rightIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
-    if (swiperPattern->IsHorizontalAndRightToLeft()) {
+    if (swiperArrowLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL &&
+        swiperArrowLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
         leftIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
         rightIndex = 0;
     }
@@ -327,7 +328,6 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == rightIndex)) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
-            host->SetActive(false);
             hostFocusHub->SetParentFocusable(false);
             hostFocusHub->LostSelfFocus();
             return;
@@ -341,7 +341,6 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         visible = true;
     }
     renderContext->SetVisible(visible);
-    host->SetActive(visible);
 }
 
 void SwiperArrowPattern::UpdateArrowContent()

@@ -48,6 +48,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -502,6 +503,11 @@ public:
         return draggable_;
     }
 
+    const Dimension& GetInsertCursorOffset() const
+    {
+        return insertCursorOffset_;
+    }
+
     const Color& GetDefaultCounterColor() const
     {
         return defaultCounterColor_;
@@ -530,11 +536,6 @@ public:
     const Color& GetGlassMaskSecondaryColor() const
     {
         return glassMaskSecondaryColor_;
-    }
-
-    const Dimension& GetInsertCursorOffset() const
-    {
-        return insertCursorOffset_;
     }
 
     const Dimension& GetPasswordTypeHeight() const

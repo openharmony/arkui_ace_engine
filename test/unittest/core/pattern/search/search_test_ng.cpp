@@ -673,7 +673,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
      * OnColorConfigurationUpdate.
      */
     pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(pattern->cancelButtonNode_.Upgrade());
+    EXPECT_TRUE(pattern->cancelButtonNode_);
 }
 
 /**
@@ -700,7 +700,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
     pattern->SetTextFieldNode(nullptr);
     pattern->SetCancelButtonNode(nullptr);
     pattern->OnColorConfigurationUpdate();
-    EXPECT_EQ(pattern->cancelButtonNode_.Upgrade(), nullptr);
+    EXPECT_EQ(pattern->cancelButtonNode_, nullptr);
 }
 
 /**
@@ -1522,9 +1522,9 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pattern->OnColorConfigurationUpdate();
-    auto cancelButtonNode = pattern->cancelButtonNode_.Upgrade();
+    auto cancelButtonNode = pattern->cancelButtonNode_;
     ASSERT_NE(cancelButtonNode, nullptr);
-    auto textField = pattern->textField_.Upgrade();
+    auto textField = pattern->textField_;
     ASSERT_NE(textField, nullptr);
     auto textFieldLayoutProperty =
         textField->GetLayoutProperty<TextFieldLayoutProperty>();

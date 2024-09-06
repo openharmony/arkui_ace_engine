@@ -142,6 +142,8 @@ TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
     return event.time;
 }
 
+void UpdatePressedKeyCodes(std::vector<KeyCode>& pressedKeyCodes) {}
+
 EventDispatcher::EventDispatcher() {}
 
 EventDispatcher::~EventDispatcher() = default;

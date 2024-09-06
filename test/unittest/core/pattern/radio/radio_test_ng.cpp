@@ -65,7 +65,6 @@ const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr Color NORMAL_COLOR = Color(0xff0000ff);
 constexpr Color ERROR_COLOR = Color();
 const std::optional<int32_t> INDICATOR_TYPE_TICK = 0;
-const OHOS::Ace::NG::TouchHoverAnimationType INVALID_TOUCH_HOVER_ANIMARION_TYPE = TouchHoverAnimationType(100);
 constexpr double NUM_TWO = 2.0;
 const SizeF CHILD_FRAME_SIZE = SizeF(50.0, 50.0);
 } // namespace
@@ -353,7 +352,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->preCheck_ = false;
     pattern->UpdateUncheckStatus(frameNode);
     EXPECT_EQ(isChecked, false);
 }
@@ -379,11 +377,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
-
-    /**
-     * @tc.cases: case. cover branch preCheck_ is true.
-     */
-    pattern->preCheck_ = true;
     pattern->UpdateUncheckStatus(frameNode);
     EXPECT_NE(radioPaintProperty->GetRadioCheckValue(), CHECKED);
 }
@@ -473,7 +466,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
     auto groupManager = pageEventHub->GetGroupManager();
-    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, true);
+    pattern0->UpdateGroupCheckStatus(frameNode0, groupManager, false);
     auto radioPaintProperty1 = frameNode1->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty1, nullptr);
     EXPECT_EQ(radioPaintProperty1->GetRadioCheckValue(), CHECKED);
@@ -881,13 +874,6 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest005, TestSize.Level1)
     radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
     radioModifier->UpdateAnimatableProperty();
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
-
-    /**
-     * @tc.cases: case. cover branch default touchHoverType_.
-     */
-    radioModifier->touchHoverType_ = INVALID_TOUCH_HOVER_ANIMARION_TYPE;
-    radioModifier->UpdateAnimatableProperty();
-    EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 
 /**
@@ -1077,14 +1063,6 @@ HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
     auto size = radioLayoutAlgorithm.MeasureContent(layoutConstraintSize, &layoutWrapper);
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-    layoutProperty->calcLayoutConstraint_->selfIdealSize->Reset();
-    layoutProperty->calcLayoutConstraint_->selfIdealSize->width_ = CalcLength(COMPONENT_WIDTH);
-    pattern->GetChildContentSize();
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(size.value(), SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
 }
@@ -1384,9 +1362,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     /**
      * fire touch event
      */
-    auto touchCallback = [](TouchEventInfo& info) {};
-    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchEvent);
     auto touchEventActuator = gesture->touchEventActuator_;
     ASSERT_NE(touchEventActuator, nullptr);
     auto events = touchEventActuator->touchEvents_;
@@ -1607,6 +1582,8 @@ HWTEST_F(RadioTestNg, RadioPatternTest031, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto host = pattern->GetHost();
     pattern->OnModifyDone();
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 

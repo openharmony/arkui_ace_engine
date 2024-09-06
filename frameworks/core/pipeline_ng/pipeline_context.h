@@ -103,7 +103,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement() override;
+    void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
@@ -841,12 +841,15 @@ public:
         return homePageConfig_;
     }
 
+    bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
+
     bool IsWindowFocused() const override
     {
         return isWindowHasFocused_ && GetOnFoucs();
     }
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

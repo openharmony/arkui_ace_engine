@@ -659,10 +659,6 @@ void NavigationPattern::RefreshNavDestination()
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    isBackPage_ = newTopNavPath.has_value() ?
-        navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
-#endif
     std::string navDestinationName = "";
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
@@ -672,10 +668,6 @@ void NavigationPattern::RefreshNavDestination()
     if (isChanged_ && focusHub->IsFocusableWholePath()) {
         InputMethodManager::GetInstance()->CloseKeyboard();
     }
-#endif
-
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    navigationStack_->SetLastNavPathList(navPathList);
 #endif
 
     /* if first navDestination is removed, the new one will be refreshed */
@@ -906,8 +898,8 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
             }
             auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
             CHECK_NULL_VOID(eventHub);
-            auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ?
-            navigationPattern->navigationStack_->GetRouteParam() : "";
+            auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ?
+                navigationPattern->navigationStack_->GetRouteParam() : "";
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
             navDestinationPattern->SetIsOnShow(true);
             NavigationPattern::FireNavigationChange(curDestination, true, false);
@@ -1753,12 +1745,16 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
         };
-        auto addAnimationCallback = [proxy, navigationTransition]() {
-            navigationTransition.transition(proxy);
-        };
+        auto pipelineContext = hostNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto navigationManager = pipelineContext->GetNavigationManager();
+        CHECK_NULL_RETURN(navigationManager, false);
+        navigationManager->SetInteractive(hostNode->GetId());
         proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(
-            addAnimationCallback, finishCallback), finishCallback);
+            nullptr, finishCallback), finishCallback);
+        navigationTransition.transition(proxy);
         isFinishInteractiveAnimation_ = false;
+        navigationManager->FinishInteractiveAnimation();
         proxy->StartAnimation();
     } else {
         navigationStack_->ClearRecoveryList();
@@ -2184,7 +2180,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     const RefPtr<NavDestinationContext>& to, NavigationOperation operation)
 {
     auto host = GetHost();
-    if (!host) {
+    auto NavdestinationSwitchFunc =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
+    if (!host || !NavdestinationSwitchFunc) {
         return;
     }
 
@@ -2248,14 +2246,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
-    bool isNotNeedAnimation = !isAnimated;
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    isNotNeedAnimation = !isAnimated ||
-        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 && !isBackPage_);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
-        navigationMode_, isNotNeedAnimation);
-#endif
-    if (isNotNeedAnimation) {
+    if (!isAnimated) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
@@ -2314,8 +2305,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         return;
     }
     if (lifecycle == NavDestinationLifecycle::ON_SHOW) {
-        auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ?
-            navigationStack_->GetRouteParam() : "";
+        auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         NotifyPageShow(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(true);

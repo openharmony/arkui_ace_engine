@@ -28,7 +28,7 @@ class JSCanvasRenderer;
 
 #define DELETE_RETURN_NULL(var) \
     do {                        \
-        if (!(var)) {             \
+        if ((var)) {             \
             delete var;         \
             var = nullptr;      \
         }                       \

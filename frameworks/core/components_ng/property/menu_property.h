@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {

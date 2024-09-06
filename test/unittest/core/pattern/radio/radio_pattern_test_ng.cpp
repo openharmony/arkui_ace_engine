@@ -34,8 +34,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -710,10 +708,6 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest067, TestSize.Level1)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    auto groupManager = pageEventHub->GetGroupManager();
-    groupManager->UpdateRadioGroupValue(GROUP_NAME, 1);
-    pattern->groupManager_ = groupManager;
     pattern->UpdateState();
     auto val = pattern->isGroupChanged_;
     ASSERT_EQ(val, false);
@@ -734,16 +728,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest068, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
 
-    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    auto groupManager = pageEventHub->GetGroupManager();
-    groupManager->UpdateRadioGroupValue(GROUP_NAME, 1);
-    pattern->groupManager_ = groupManager;
-    pattern->preGroup_ = GROUP_NAME;
-    paintProperty->UpdateRadioCheck(true);
-    pattern->isGroupChanged_ = true;
     pattern->UpdateState();
     auto val = pattern->isGroupChanged_;
     ASSERT_EQ(val, false);
@@ -764,14 +749,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest069, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    
-    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    auto groupManager = pageEventHub->GetGroupManager();
-    groupManager->UpdateRadioGroupValue(GROUP_NAME, 1);
-    pattern->groupManager_ = groupManager;
-    paintProperty->ResetRadioCheck();
+
     pattern->UpdateState();
     auto val = pattern->isGroupChanged_;
     ASSERT_EQ(val, false);
@@ -1845,21 +1823,5 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest118, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     pattern->CheckPageNode();
-}
-
-/**
- * @tc.name: RadioPatternTest119
- * @tc.desc: Radio test LoadBuilder.
- */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest119, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    radioModelNG.SetChecked(true);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->OnAfterModifyDone();
 }
 } // namespace OHOS::Ace::NG

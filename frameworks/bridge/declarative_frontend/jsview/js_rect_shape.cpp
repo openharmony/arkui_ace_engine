@@ -122,10 +122,14 @@ void JSRectShape::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, co
         if (!radiusItem->IsArray()) {
             break;
         }
-        
         JSRef<JSArray> radiusArray = JSRef<JSArray>::Cast(radiusItem);
         if (radiusArray->Length() != LENGTH_RADIUS_ARRAY) {
-            break;
+            CalcDimension radiusXYValue(0.0f);
+            if (!ParseJsDimensionVpNG(radiusItem, radiusXYValue)) {
+                radiusXYValue.SetValue(0.0f);
+            }
+            SetRadiusValue(shapeRect, radiusXYValue, radiusXYValue, i);
+            continue;
         }
 
         JSRef<JSVal> radiusX = radiusArray->GetValueAt(0);

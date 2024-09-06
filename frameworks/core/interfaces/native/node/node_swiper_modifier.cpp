@@ -957,6 +957,7 @@ void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetSwiperToIndex(frameNode, (*values)[0], (*values)[1]);
 }
+
 void GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1001,6 +1002,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
     int32_t type = SwiperModelNG::GetIndicatorType(frameNode);
     props->type = static_cast<ArkUISwiperIndicatorType>(type);
     auto params = SwiperModelNG::GetDotIndicator(frameNode);
+    CHECK_NULL_VOID(params);
     bool hasValue = false;
     float value = ZERO_F;
     ParseIndicatorAttribute(params->dimLeft, hasValue, value);
@@ -1153,7 +1155,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperNextMargin, SetSwiperIndicatorStyle, GetSwiperIndicator, GetSwiperController,
         SetSwiperOnChange, ResetSwiperOnChange, SetSwiperOnAnimationStart, ResetSwiperOnAnimationStart,
         SetSwiperOnAnimationEnd, ResetSwiperOnAnimationEnd, SetSwiperOnGestureSwipe, ResetSwiperOnGestureSwipe,
-        SetOnContentDidScroll, ResetOnContentDidScroll, GetIndicatorInteractive };
+        SetOnContentDidScroll, ResetOnContentDidScroll,
+        GetIndicatorInteractive };
     return &modifier;
 }
 
