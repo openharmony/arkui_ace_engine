@@ -142,7 +142,7 @@ private:
     bool isFromReset_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
-    const uint8_t* pixmapBuffer_;
+    const uint8_t* pixmapBuffer_ = nullptr;
 
     // image source type for example:FILE, ASSET, NETWORK, MEMORY, BASE64, INTERNAL, RESOURCE or DATA_ABILITY,
     SrcType srcType_ = SrcType::UNSUPPORTED;
