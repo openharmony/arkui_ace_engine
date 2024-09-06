@@ -183,16 +183,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest001, TestSize.Level
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -273,16 +263,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest002, TestSize.Level
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
@@ -402,18 +382,6 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(CONTAINER_SIZE);
     EXPECT_FALSE(geometryNode == nullptr);
-
-    /**
-     * add selfIdealSize for frameNode
-     */
-    std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
-    std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = CalcSize(width, height);
-    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
-
     layoutWrapper.GetGeometryNode()->SetFrameSize(CONTAINER_SIZE);
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
@@ -664,11 +632,11 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest004, TestSize.Level
     /**
     corresponding ets code:
        RelativeContainer() {
-            }.width(200).height(200).backgroundColor(Color.Orange)
+            }.width('300px').height('300px').backgroundColor(Color.Orange)
     */
     relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 }
 
