@@ -5722,13 +5722,6 @@ void WebDelegate::HideHandleAndQuickMenuIfNecessary(bool hide)
     webPattern->HideHandleAndQuickMenuIfNecessary(hide);
 }
 
-void WebDelegate::ChangeVisibilityOfQuickMenu()
-{
-    auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->ChangeVisibilityOfQuickMenu();
-}
-
 void WebDelegate::OnQuickMenuDismissed()
 {
 #ifdef NG_BUILD
