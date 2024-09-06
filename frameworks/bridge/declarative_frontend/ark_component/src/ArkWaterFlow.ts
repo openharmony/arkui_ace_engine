@@ -16,9 +16,6 @@
 /// <reference path='./import.ts' />
 
 class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
-  constructor(value: ArkConstraintSizeOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('itemConstraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -97,9 +94,6 @@ class WaterFlowClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class RowsGapModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('rowsGap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -109,14 +103,15 @@ class RowsGapModifier extends ModifierWithKey<number | string> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class ColumnsGapModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('columnsGap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -126,7 +121,11 @@ class ColumnsGapModifier extends ModifierWithKey<number | string> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -159,9 +158,6 @@ class NestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions> {
 }
 
 class FrictionModifier extends ModifierWithKey<number | Resource> {
-  constructor(value: number | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('friction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -171,7 +167,11 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
