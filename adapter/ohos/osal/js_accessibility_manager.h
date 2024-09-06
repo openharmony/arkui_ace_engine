@@ -523,8 +523,8 @@ private:
     void NotifyAccessibilitySAStateChange(bool state);
     void DumpTreeNodeInfoInJson(
         const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
-    void CreateNodeInfoJson(
-        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json);
+    void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        std::unique_ptr<JsonValue>& json, int32_t childSize);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

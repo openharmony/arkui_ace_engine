@@ -5610,11 +5610,12 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
     }
 }
 
-void JsAccessibilityManager::CreateNodeInfoJson(
-    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json)
+void JsAccessibilityManager::CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+    std::unique_ptr<JsonValue>& json, int32_t childSize)
 {
     CHECK_NULL_VOID(node);
     auto child = JsonUtil::Create(true);
+    child->Put("childSize", childSize);
     child->Put("ID", node->GetAccessibilityId());
     child->Put("compid", node->GetInspectorId().value_or("").c_str());
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -5652,7 +5653,7 @@ void JsAccessibilityManager::DumpTreeNodeInfoInJson(
     const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
 {
     auto json = JsonUtil::Create(true);
-    CreateNodeInfoJson(node, commonProperty, json);
+    CreateNodeInfoJson(node, commonProperty, json, childSize);
     std::string content = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
     std::string prefix = DumpLog::GetInstance().GetPrefix(depth);
     std::string fulljson = prefix.append(content);
