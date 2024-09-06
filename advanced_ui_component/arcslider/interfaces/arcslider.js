@@ -317,7 +317,7 @@ class MyFullDrawModifier extends DrawModifier {
         const canvas = context.canvas;
         const pen = new drawing.Pen();
         pen.setAntiAlias(true);
-        pen.setColor(this.parseColorString(this.parameters.selectedColor));
+        pen.setColor(this.parseColorString(this.parameters.trackColor));
         pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
         pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
         canvas.attachPen(pen);
