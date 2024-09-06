@@ -56,12 +56,19 @@ TouchPointSnapshot::TouchPointSnapshot(const TouchEvent& event)
 void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
 {
     std::stringstream oss;
+#ifdef IS_RELEASE_VERSION
+    oss << "id: " << id << ", "
+        << "type: " << GestureSnapshot::TransTouchType(type) << ", "
+        << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
+        << "isInjected: " << isInjected;
+#else
     oss << "id: " << id << ", "
         << "point: " << point.ToString() << ", "
         << "screenPoint: " << screenPoint.ToString() << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
         << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
         << "isInjected: " << isInjected;
+#endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 
