@@ -244,7 +244,7 @@ ActionType ConvertAceAction(AceAction aceAction)
 
 inline RangeInfo ConvertAccessibilityValue(const AccessibilityValue& value)
 {
-    return RangeInfo(value.min, value.max, value.current);
+    return RangeInfo(static_cast<int>(value.min), static_cast<int>(value.max), static_cast<int>(value.current));
 }
 
 int64_t ConvertToCardAccessibilityId(int64_t nodeId, int64_t cardId, int64_t rootNodeId)
@@ -1197,7 +1197,8 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
 {
     nodeInfo.SetContent(node->GetContent());
     nodeInfo.SetAccessibilityText(node->GetContent());
-    RangeInfo rangeInfo(node->GetRangeInfoMin(), node->GetRangeInfoMax(), node->GetRangeInfoCurrent());
+    RangeInfo rangeInfo(static_cast<int32_t>(node->GetRangeInfoMin()), static_cast<int32_t>(node->GetRangeInfoMax()),
+        static_cast<int32_t>(node->GetRangeInfoCurrent()));
     nodeInfo.SetRange(rangeInfo);
     nodeInfo.SetHint(node->GetHint());
     nodeInfo.SetHinting(node->GetIsHinting());
