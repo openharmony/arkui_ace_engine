@@ -86,6 +86,15 @@ public:
         CHECK_NULL_VOID(node);
         node->UpdateInspectorId(id);
     }
+
+    static void CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle);
+    static void CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+    static void CreateOrUpdateNavMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+    static void CreateOrUpdateNavSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
     
 private:
     static RefPtr<FrameNode> CreatePopupDialogNode(

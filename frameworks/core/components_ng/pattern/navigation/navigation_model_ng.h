@@ -89,8 +89,8 @@ public:
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
-    static void ParseCommonTitle(FrameNode* frameNode, bool hasSubTitle, bool hasMainTitle,
-        const std::string& subtitle, const std::string& title, bool ignoreMainTitle = false);
+    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
+        bool ignoreMainTitle = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
     static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);

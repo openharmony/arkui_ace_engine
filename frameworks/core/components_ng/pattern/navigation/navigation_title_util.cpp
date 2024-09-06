@@ -678,4 +678,143 @@ void NavigationTitleUtil::InitLongPressEvent(const RefPtr<GestureEventHub>& gest
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
 }
+
+void NavigationTitleUtil::CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+    const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    if (ignoreMainTitle) {
+        return;
+    }
+    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (!titleInfo.hasMainTitle) {
+        // remove main title if any.
+        titleBarNode->RemoveChild(mainTitle);
+        titleBarNode->SetTitle(nullptr);
+        return;
+    }
+
+    if (mainTitle) {
+        // update main title
+        auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxLines(titleInfo.hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+        textLayoutProperty->UpdateContent(titleInfo.title);
+        return;
+    }
+    // create and init main title
+    mainTitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateContent(titleInfo.title);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetNeedResetMainTitleProperty(true);
+    titleBarNode->SetTitle(mainTitle);
+    titleBarNode->AddChild(mainTitle);
+}
+
+void NavigationTitleUtil::CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+    const NG::NavigationTitleInfo& titleInfo)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (!titleInfo.hasSubTitle) {
+        // remove subtitle if any.
+        titleBarNode->RemoveChild(subTitle);
+        titleBarNode->SetSubtitle(nullptr);
+        return;
+    }
+    if (subTitle) {
+        // update subtitle
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(titleInfo.subtitle);
+        auto renderContext = subTitle->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateOpacity(1.0);
+    } else {
+        // create and init subtitle
+        subTitle = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateContent(titleInfo.subtitle);
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
+        titleBarNode->SetSubtitle(subTitle);
+        titleBarNode->AddChild(subTitle);
+    }
+}
+
+void NavigationTitleUtil::CreateOrUpdateNavMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+    const NG::NavigationTitleInfo& titleInfo)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    if (titleInfo.hasMainTitle) {
+        if (mainTitle) {
+            // update main title
+            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateMaxLines(titleInfo.hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateHeightAdaptivePolicy(titleInfo.hasSubTitle ?
+                TextHeightAdaptivePolicy::MAX_LINES_FIRST : TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+            }
+            textLayoutProperty->UpdateContent(titleInfo.title);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
+        } else {
+            // create and init main title
+            mainTitle = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateContent(titleInfo.title);
+            auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+            CHECK_NULL_VOID(titleBarPattern);
+            titleBarPattern->SetNeedResetMainTitleProperty(true);
+            titleBarNode->SetTitle(mainTitle);
+            titleBarNode->AddChild(mainTitle);
+        }
+    } else {
+        // remove main title if any.
+        titleBarNode->RemoveChild(mainTitle);
+        titleBarNode->SetTitle(nullptr);
+    }
+}
+
+void NavigationTitleUtil::CreateOrUpdateNavSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+    const NG::NavigationTitleInfo& titleInfo)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    if (!titleInfo.hasSubTitle) {
+        // remove subtitle if any.
+        titleBarNode->RemoveChild(subTitle);
+        titleBarNode->SetSubtitle(nullptr);
+        return;
+    }
+    if (subTitle) {
+        // update subtitle
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(titleInfo.subtitle);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
+    } else {
+        // create and init subtitle
+        subTitle = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateContent(titleInfo.subtitle);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        titleBarPattern->SetNeedResetSubTitleProperty(true);
+        titleBarNode->SetSubtitle(subTitle);
+        titleBarNode->AddChild(subTitle);
+    }
+}
 } // namespace OHOS::Ace::NG
