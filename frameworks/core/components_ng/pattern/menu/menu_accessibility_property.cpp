@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -50,5 +53,12 @@ void MenuAccessibilityProperty::SetSpecificSupportAction()
             }
         }
     }
+}
+
+void MenuAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    extraElementInfo.SetExtraElementInfo("SideBarContainerStates", static_cast<int32_t>(isShow_));
+#endif
 }
 } // namespace OHOS::Ace::NG
