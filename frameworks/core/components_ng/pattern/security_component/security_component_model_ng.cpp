@@ -377,11 +377,6 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundBottomPadding, bottom.value());
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    property->UpdateHasCustomPadding(true);
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& padding)
