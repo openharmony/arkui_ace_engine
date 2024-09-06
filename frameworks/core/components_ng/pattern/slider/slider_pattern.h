@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
-#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class SliderPattern : public Pattern {
@@ -106,12 +105,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPattern focusPattern { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, focusPattern);
-        auto theme = pipeline->GetTheme<AppTheme>();
-        CHECK_NULL_RETURN(theme, focusPattern);
-        return focusPattern;
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
     const OffsetF& GetBlockCenter() const
