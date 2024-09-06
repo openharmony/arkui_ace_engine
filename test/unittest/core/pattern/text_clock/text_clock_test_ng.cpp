@@ -290,7 +290,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
      * @tc.steps: step1. Initialize the format property of textClock.
      */
     TestProperty testProperty;
-    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.format = std::make_optional("M-d-yy-y E EEEE HH:mm:ss.SSS aa");
 
     /**
      * @tc.steps: step2. create frameNode to get layout properties.
@@ -312,6 +312,26 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
     EXPECT_EQ(std::isnan(pattern->GetHoursWest()), true);
     textClockLayoutProperty->UpdateHoursWest(HOURS_WEST);
     EXPECT_EQ(pattern->GetHoursWest(), HOURS_WEST);
+    /**
+     * @tc.steps: step4. call the format and datetime split, and datetime splice function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->ParseInputFormat();
+    std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
+    std::string dateTimeValue = "2023/07/08, 下午8:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "7/8/2023, 8:35:07.67 am";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "07/08/2023, 20:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    pattern->SpliceDateTime(curDateTime);
+    pattern->CheckDateTimeElement(curDateTime, 'y', 0, true);
+    pattern->CheckDateTimeElement(curDateTime, 'M', 1, true);
+    pattern->CheckDateTimeElement(curDateTime, 'd', 2, true);
+    pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 13, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 8, true);
+    EXPECT_EQ(pattern->is24H_, true);
 }
 
 /**
