@@ -169,16 +169,8 @@ inline void AssignCast(std::optional<SwiperDisplayMode>& dst, const Ark_SwiperDi
     switch (src) {
         case SELECTOR_ID_0: dst = SwiperDisplayMode::STRETCH; break;
         case SELECTOR_ID_1: dst = SwiperDisplayMode::AUTO_LINEAR; break;
-        case SELECTOR_ID_2:
-            if (newSdk) {
-                dst = SwiperDisplayMode::STRETCH;
-            }
-            break;
-        case SELECTOR_ID_3:
-            if (newSdk) {
-                dst = SwiperDisplayMode::AUTO_LINEAR;
-            }
-            break;
+        case SELECTOR_ID_2: newSdk ? dst = SwiperDisplayMode::STRETCH : dst = std::nullopt; break;
+        case SELECTOR_ID_3: newSdk ? dst = SwiperDisplayMode::AUTO_LINEAR : dst = std::nullopt; break;
         default: LOGE("Unexpected enum value in Ark_SwiperDisplayMode: %{public}d", src);
     }
 }
@@ -423,7 +415,7 @@ void DisplayCountImpl(Ark_NativePointer node,
     if (auto countPtr = std::get_if<int32_t>(&(*optDispCount)); countPtr) {
         int32_t val = *countPtr;
         SwiperModelNG::SetDisplayCount(frameNode, val);
-    } if (auto descPtr = std::get_if<std::string>(&(*optDispCount)); descPtr) {
+    } else if (auto descPtr = std::get_if<std::string>(&(*optDispCount)); descPtr) {
         if (descPtr->compare("auto") == 0) {
             SwiperModelNG::SetDisplayMode(frameNode, OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
             SwiperModelNG::ResetDisplayCount(frameNode);
