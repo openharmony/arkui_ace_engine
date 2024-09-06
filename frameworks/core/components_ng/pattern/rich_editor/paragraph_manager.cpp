@@ -245,7 +245,7 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
-        if (lineCount > 0 && lineNumber > lineCount - 1) {
+        if (lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
             paragraphsHeight += info.paragraph->GetHeight();
             auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);

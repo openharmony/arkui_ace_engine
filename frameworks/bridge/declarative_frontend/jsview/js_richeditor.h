@@ -56,7 +56,6 @@ public:
     static void SetOnDidChange(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
     static JSRef<JSVal> CreateJSSelectionRange(const SelectionRangeInfo& selectRange);
@@ -67,9 +66,10 @@ public:
     static JSRef<JSObject> CreateJSLayoutStyle(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
+    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
