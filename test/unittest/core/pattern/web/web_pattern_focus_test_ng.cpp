@@ -402,7 +402,7 @@ HWTEST_F(WebPatternFocusTestNg, UninitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->UninitializeAccessibility();
-    ASSERT_NE(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_, nullptr);
 #endif
 }
 

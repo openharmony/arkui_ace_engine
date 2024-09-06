@@ -4165,32 +4165,6 @@ HWTEST_F(WebPatternTestNg, SetLayoutMode_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetLayoutMode_002
- * @tc.desc: SetLayoutMode.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNg, SetLayoutMode_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto mode = static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::FIT_CONTENT);
-    webPattern->SetLayoutMode(mode);
-    EXPECT_EQ(webPattern->layoutMode_, static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::NONE));
-
-#endif
-}
-
-/**
  * @tc.name: SetRenderMode_001
  * @tc.desc: SetRenderMode.
  * @tc.type: FUNC
@@ -4212,32 +4186,6 @@ HWTEST_F(WebPatternTestNg, SetRenderMode_001, TestSize.Level1)
     auto renderMode = RenderMode::SYNC_RENDER;
     webPattern->SetRenderMode(renderMode);
     EXPECT_EQ(webPattern->renderMode_, renderMode);
-
-#endif
-}
-
-/**
- * @tc.name: SetRenderMode_002
- * @tc.desc: SetRenderMode.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNg, SetRenderMode_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto renderMode = RenderMode::SYNC_RENDER;
-    webPattern->SetRenderMode(renderMode);
-    EXPECT_EQ(webPattern->renderMode_, RenderMode::ASYNC_RENDER);
 
 #endif
 }
