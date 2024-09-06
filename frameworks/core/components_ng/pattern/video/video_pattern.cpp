@@ -27,6 +27,9 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/common/ace_view.h"
+#endif
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/video/video_theme.h"
