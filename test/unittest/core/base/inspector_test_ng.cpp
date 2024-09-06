@@ -498,11 +498,11 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
  */
 HWTEST_F(InspectorTestNg, InspectorTestNg013, TestSize.Level1)
 {
-    const char* hello = "hi";
-    std::string id = "id";
+    const char* hello = "hi";    
     InspectorFilter testFilter;
     EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
     testFilter.SetFilterDepth(1);
+    std::string id = "id";
     testFilter.SetFilterID(id);
     testFilter.filterExt.emplace_back("abc");
     testFilter.AddFilterAttr("focusable");
