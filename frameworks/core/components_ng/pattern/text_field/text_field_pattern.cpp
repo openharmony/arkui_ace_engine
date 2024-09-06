@@ -1741,7 +1741,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
-        if (magnifierController_) {
+        if (magnifierController_ && IsOperation()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
     }
@@ -2960,8 +2960,17 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
-        selectController_->UpdateSelectByOffset(localOffset);
+        selectController_->UpdateSelectWithBlank(localOffset);
     }
+    StopTwinkling();
+    SetIsSingleHandle(!IsSelected());
+    auto start = selectController_->GetStartIndex();
+    auto end = selectController_->GetEndIndex();
+    CloseSelectOverlay();
+    if (magnifierController_ && IsOperation()) {
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+    }
+    StartGestureSelection(start, end, localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -7836,7 +7845,7 @@ int32_t TextFieldPattern::GetTouchIndex(const OffsetF& offset)
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
     auto localOffset = info.GetTouches().front().GetLocalLocation();
-    if (magnifierController_) {
+    if (magnifierController_ && IsOperation()) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();
@@ -7860,6 +7869,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::OnTextGenstureSelectionEnd()
 {
+    SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }

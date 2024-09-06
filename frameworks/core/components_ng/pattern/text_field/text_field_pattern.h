@@ -1396,6 +1396,12 @@ public:
     }
 
     void ShowCaretAndStopTwinkling();
+    bool IsLTRLayout()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, true);
+        return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
 
 protected:
     virtual void InitDragEvent();
