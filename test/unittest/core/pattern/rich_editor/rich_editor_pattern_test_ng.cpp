@@ -372,7 +372,7 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, Te
     UpdateSpanStyle updateSpanStyle;
     TextStyle textStyle;
 
-    updateSpanStyle.hasResourceFontColor = false;
+    updateSpanStyle.useThemeFontColor = false;
 
     auto typingStyle = richEditorPattern->typingStyle_;
     auto typingTextStyle = richEditorPattern->typingTextStyle_;
@@ -380,20 +380,20 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, Te
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = std::nullopt;
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->hasResourceFontColor, true);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = updateSpanStyle;
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->hasResourceFontColor, true);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = textStyle;
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->hasResourceFontColor, true);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     richEditorPattern->typingStyle_ = updateSpanStyle;
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->hasResourceFontColor, false);
+    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, false);
 
     richEditorPattern->typingStyle_ = typingStyle;
     richEditorPattern->typingTextStyle_ = typingTextStyle;

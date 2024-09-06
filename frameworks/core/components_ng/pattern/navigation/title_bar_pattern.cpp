@@ -740,7 +740,6 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanSpringAnimation();
-            pattern->SetIsTitleMoving(false);
         });
 }
 
@@ -809,7 +808,6 @@ void TitleBarPattern::AnimateTo(float offset)
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->CleanAnimation();
-            pattern->SetIsTitleMoving(false);
         });
 }
 
@@ -1031,7 +1029,6 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
 {
     float lastOffset = coordScrollOffset_;
     coordScrollOffset_ += offset;
-    isTitleMoving_ = true;
 
     float offsetHandled = 0.0f;
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
@@ -1064,7 +1061,6 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
 void TitleBarPattern::OnCoordScrollEnd()
 {
     if (NearZero(coordScrollOffset_)) {
-        isTitleMoving_ = false;
         return;
     }
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());

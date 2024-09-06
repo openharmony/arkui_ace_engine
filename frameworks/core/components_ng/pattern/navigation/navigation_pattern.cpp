@@ -2180,7 +2180,9 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     const RefPtr<NavDestinationContext>& to, NavigationOperation operation)
 {
     auto host = GetHost();
-    if (!host) {
+    auto NavdestinationSwitchFunc =
+        UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
+    if (!host || !NavdestinationSwitchFunc) {
         return;
     }
 

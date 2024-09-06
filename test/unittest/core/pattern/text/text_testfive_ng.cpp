@@ -427,48 +427,6 @@ HWTEST_F(TextTestFiveNg, GetSpansInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSelectedText001
- * @tc.desc: test text_pattern.cpp GetSelectedText function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, GetSelectedText001, TestSize.Level1)
-{
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-
-    auto textSpanNode1 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
-    ASSERT_NE(textSpanNode1, nullptr);
-    textPattern->AddChildSpanItem(textSpanNode1);
-    auto textSpanNode2 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
-    ASSERT_NE(textSpanNode2, nullptr);
-    textSpanNode2->UpdateContent(1);
-    textPattern->AddChildSpanItem(textSpanNode2);
-    auto textSpanNode3 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
-    ASSERT_NE(textSpanNode3, nullptr);
-    textSpanNode3->UpdateContent(1);
-    textSpanNode3->spanItem_->position = 1;
-    textPattern->AddChildSpanItem(textSpanNode3);
-    auto textSpanNode4 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
-    ASSERT_NE(textSpanNode4, nullptr);
-    textSpanNode4->spanItem_->placeholderIndex = 0;
-    textPattern->AddChildSpanItem(textSpanNode4);
-    auto textSpanNode5 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
-    ASSERT_NE(textSpanNode5, nullptr);
-    textSpanNode5->spanItem_->position = 1;
-    textSpanNode5->spanItem_->placeholderIndex = 0;
-    textPattern->AddChildSpanItem(textSpanNode5);
-    auto textSpanNode6 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
-    ASSERT_NE(textSpanNode6, nullptr);
-    textSpanNode6->spanItem_->position = 1;
-    textPattern->AddChildSpanItem(textSpanNode6);
-
-    auto selectedText = textPattern->GetSelectedText(0, 10);
-    ASSERT_EQ(selectedText, "");
-}
-
-/**
  * @tc.name: GetTextHeight001
  * @tc.desc: test text_pattern.cpp GetTextHeight function
  * @tc.type: FUNC

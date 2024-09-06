@@ -3194,6 +3194,14 @@ void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetFocusType(FrameNode* frameNode, FocusType focusType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(focusType);
+}
+
 void ViewAbstract::SetTouchable(FrameNode* frameNode, bool touchable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -4942,5 +4950,18 @@ void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetSystemColorModeChangeEvent(
+    FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKColorModeUpdateCallback(std::move(onColorModeChange));
+}
+
+void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
 } // namespace OHOS::Ace::NG

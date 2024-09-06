@@ -238,7 +238,7 @@ void CJFrontendAbstract::ShowToast(
             .showMode = showMode,
             .alignment = -1,
             .offset = std::nullopt };
-        overlayManager->ShowToast(toastInfo, nullptr);
+        overlayManager->ShowToast(toastInfo);
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
 }

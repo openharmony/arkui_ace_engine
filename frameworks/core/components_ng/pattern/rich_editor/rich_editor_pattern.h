@@ -73,6 +73,20 @@ struct TextConfig;
     } while (false)
 #define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
 
+#define IF_TRUE(cond, func) \
+    do {                    \
+        if (cond) {         \
+            func;           \
+        }                   \
+    } while (false)
+
+#define IF_PRESENT(opt, func) \
+    do {                      \
+        if (opt) {            \
+            opt->func;        \
+        }                     \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
@@ -162,6 +176,22 @@ public:
         bool IsValid() const
         {
             return !previewContent.empty() && isPreviewTextInputting && startOffset >= 0 && endOffset >= startOffset;
+        }
+    };
+
+    struct TouchAndMoveCaretState {
+        bool isTouchCaret = false;
+        bool isMoveCaret = false;
+        Offset touchDownOffset;
+        OffsetF touchDownPaintOffset;
+        const Dimension minDinstance = 5.0_vp;
+
+        void Reset()
+        {
+            isTouchCaret = false;
+            isMoveCaret = false;
+            touchDownOffset.Reset();
+            touchDownPaintOffset.Reset();
         }
     };
 
@@ -466,6 +496,7 @@ public:
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
+    std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
     void DisableDrag(RefPtr<ImageSpanNode> imageNode);
@@ -719,19 +750,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const DynamicColor& caretColor)
+    void SetCaretColor(const Color& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    DynamicColor GetCaretColor();
+    Color GetCaretColor();
 
-    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    DynamicColor GetSelectedBackgroundColor();
+    Color GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void StopEditing();
@@ -835,11 +866,6 @@ public:
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
 
-    bool IsTouchCaret() const
-    {
-        return isTouchCaret_;
-    }
-
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
 
     RectF ExpandDefaultResponseRegion(RectF& rect) override;
@@ -882,8 +908,11 @@ private:
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
+    bool IsShowSingleHandleByClick(const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition,
+        const RectF& lastCaretRect, bool isCaretTwinkling);
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
-    void CreateAndShowSingleHandle(bool isShowMenu = true);
+    bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
+    void CreateAndShowSingleHandle();
     void MoveCaretAndStartFocus(const Offset& offset);
     void HandleDoubleClickEvent(GestureEvent& info);
     bool HandleUserClickEvent(GestureEvent& info);
@@ -898,6 +927,7 @@ private:
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
     void StartTwinkling();
+    void ShowCaretWithoutTwinkling();
     void StopTwinkling();
     void UpdateFontFeatureTextStyle(
         RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
@@ -927,7 +957,9 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
+    void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
+    void UpdateCaretByTouchMove(const Offset& offset);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
@@ -1097,7 +1129,6 @@ private:
     void ShowCaretNoTwinkling(const Offset& textOffset);
     bool CheckTripClickEvent(GestureEvent& info);
     void HandleSelect(GestureEvent& info, int32_t selectStart, int32_t selectEnd);
-    void SwitchState();
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
@@ -1140,6 +1171,8 @@ private:
         tasks_.emplace(std::forward<std::function<void()>>(task));
     }
 
+    OffsetF GetGlobalOffset() const;
+
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -1174,7 +1207,6 @@ private:
     OffsetF selectionMenuOffsetByMouse_;
     OffsetF selectionMenuOffsetClick_;
     OffsetF lastClickOffset_;
-    OffsetF lastOffsetInScreenByTouchCaret_;
     std::string pasteStr_;
 
     // still in progress
@@ -1193,8 +1225,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<DynamicColor> caretColor_;
-    std::optional<DynamicColor> selectedBackgroundColor_;
+    std::optional<Color> caretColor_;
+    std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
@@ -1218,7 +1250,7 @@ private:
     bool isOnlyImageDrag_ = false;
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
-    bool isTouchCaret_ = false;
+    TouchAndMoveCaretState moveCaretState_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
@@ -1231,6 +1263,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
     int32_t richEditorInstanceId_ = -1;
+    int32_t frameId_ = -1;
     bool contentChange_ = false;
     PreviewTextRecord previewTextRecord_;
     bool isTextPreviewSupported_ = true;

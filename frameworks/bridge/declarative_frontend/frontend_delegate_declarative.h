@@ -191,8 +191,7 @@ public:
     double MeasureText(MeasureContext context) override;
     Size MeasureTextSize(MeasureContext context) override;
 
-    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback = nullptr) override;
-    void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback = nullptr) override;
+    void ShowToast(const NG::ToastInfo& toastInfo) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,

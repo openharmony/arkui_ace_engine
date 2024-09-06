@@ -558,6 +558,12 @@ public:
     void SetParentFocusable(bool parentFocusable);
 
     void SetFocusable(bool focusable, bool isExplicit = true);
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
     void SetShow(bool show);
     void SetEnabled(bool enabled);
 

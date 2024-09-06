@@ -692,7 +692,8 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
-    overlay->ShowToast({ category, 2000, "", true }, nullptr);
+    auto toastInfo = NG::ToastInfo { .message = category, .duration = 2000, .bottom = "", .isRightToLeft = true };
+    overlay->ShowToast(toastInfo);
     info_ = nullptr;
     return 0;
 }

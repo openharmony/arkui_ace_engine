@@ -275,7 +275,6 @@ private:
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     void UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
-    bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
     std::list<TouchRegion> hoverRegions_;
 
