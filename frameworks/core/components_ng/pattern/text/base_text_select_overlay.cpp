@@ -365,6 +365,7 @@ bool BaseTextSelectOverlay::CheckHandleIsVisibleWithTransform(
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, true);
     auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
     auto contentRect = geometryNode->GetContentRect();
@@ -904,9 +905,6 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             return false;
         }
-        if (renderContext->HasMotionPath()) {
-            return true;
-        }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
             !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
@@ -1021,10 +1019,6 @@ bool BaseTextSelectOverlay::CheckHasTransformAttr()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            break;
-        }
-        if (renderContext->HasMotionPath()) {
-            hasTransform = true;
             break;
         }
         // has rotate.

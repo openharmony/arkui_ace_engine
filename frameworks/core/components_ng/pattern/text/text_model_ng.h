@@ -159,10 +159,10 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
-    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
+    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
