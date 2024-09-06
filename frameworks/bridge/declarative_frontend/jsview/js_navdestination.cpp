@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -208,11 +209,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     }
 
     NG::NavigationTitlebarOptions options;
-    if (info.Length() > 1) {
-        ParseBackgroundOptions(info[1], options.bgOptions);
-        ParseBarOptions(info[1], options.brOptions);
-        ParseTextOptions(info, info[1], options.textOptions);
-    }
+    JSNavigationUtils::ParseTitleBarOptions(info, false, options);
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
 
@@ -349,7 +346,8 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
         if (info[0]->IsUndefined()) {
             menuItems = {};
         } else {
-            JSNavigation::ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            JSNavigationUtils::ParseBarItems(targetNode, info, JSRef<JSArray>::Cast(info[0]), menuItems);
         }
         NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
         return;
