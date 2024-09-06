@@ -1122,7 +1122,7 @@ void SubwindowOhos::ClearToast()
     HideWindow();
 }
 
-void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
+void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
@@ -1153,19 +1153,18 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
         ResizeWindow();
         ShowWindow(false);
     }
-    delegate->ShowToast(toastInfo, std::move(callback));
+    delegate->ShowToast(toastInfo);
 }
 
-void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
+void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo)
 {
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
         return;
     }
-
     SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
-    auto showDialogCallback = [toastInfo, callbackParam = std::move(callback)]() {
+    auto showDialogCallback = [toastInfo]() {
         int32_t posX = 0;
         int32_t posY = 0;
         int32_t width = 0;
@@ -1195,15 +1194,13 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
         ContainerScope scope(childContainerId);
         subwindowOhos->UpdateAceView(width, height, density, childContainerId);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
-            "update ace view width : %{public}d,  height : %{public}d, density : %{public}f,childContainerId : "
-            "%{public}d",
+            "update ace view width: %{public}d, height: %{public}d, density: %{public}f, childContainerId: %{public}d",
             width, height, density, childContainerId);
         auto container = Platform::DialogContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
-        Platform::DialogContainer::ShowToast(childContainerId, toastInfo.message, toastInfo.duration, toastInfo.bottom,
-            std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
+        Platform::DialogContainer::ShowToast(childContainerId, toastInfo.message, toastInfo.duration, toastInfo.bottom);
     };
     if (!handler_->PostTask(showDialogCallback)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
@@ -1211,35 +1208,13 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
     }
 }
 
-void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
+void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        ShowToastForService(toastInfo, std::move(callback));
+        ShowToastForService(toastInfo);
     } else {
-        ShowToastForAbility(toastInfo, std::move(callback));
-    }
-}
-
-void SubwindowOhos::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
-{
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close toast enter");
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
-        auto subwindowOhos =
-            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
-        CHECK_NULL_VOID(subwindowOhos);
-        auto childContainerId = subwindowOhos->GetChildContainerId();
-        CHECK_NULL_VOID(childContainerId);
-        ContainerScope scope(childContainerId);
-        Platform::DialogContainer::CloseToast(childContainerId, toastId, std::move(callback));
-    } else {
-        auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-        CHECK_NULL_VOID(aceContainer);
-        auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
-        auto delegate = engine->GetFrontend();
-        CHECK_NULL_VOID(delegate);
-        ContainerScope scope(childContainerId_);
-        delegate->CloseToast(toastId, std::move(callback));
+        ShowToastForAbility(toastInfo);
     }
 }
 

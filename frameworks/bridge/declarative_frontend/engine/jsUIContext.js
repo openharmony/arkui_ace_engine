@@ -952,19 +952,6 @@ class PromptAction {
         __JSScopeUtil__.restoreInstanceId();
     }
 
-    openToast(options) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let promise = this.ohos_prompt.openToast(options);
-        __JSScopeUtil__.restoreInstanceId();
-        return promise;
-    }
-
-    closeToast(toastId) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_prompt.closeToast(toastId);
-        __JSScopeUtil__.restoreInstanceId();
-    }
-
     showDialog(options, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback !== 'undefined') {

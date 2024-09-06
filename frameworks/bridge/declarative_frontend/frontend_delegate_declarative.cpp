@@ -1547,19 +1547,18 @@ Size FrontendDelegateDeclarative::MeasureTextSize(MeasureContext context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
+void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     NG::ToastInfo updatedToastInfo = toastInfo;
     updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+        auto task = [updatedToastInfo, containerId = Container::CurrentId()](
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(
-                updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
+            overlayManager->ShowToast(updatedToastInfo);
         };
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
         return;
@@ -1571,20 +1570,6 @@ void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std:
                 updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIShowToast");
-}
-
-void FrontendDelegateDeclarative::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
-{
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
-
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)

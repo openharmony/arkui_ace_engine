@@ -65,8 +65,7 @@ public:
     MOCK_CONST_METHOD0(GetUIExtensionHostWindowRect, Rect());
     MOCK_CONST_METHOD0(CheckHostWindowStatus, bool());
     MOCK_METHOD0(ClearToast, void());
-    MOCK_METHOD2(ShowToast, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
-    MOCK_METHOD2(CloseToast, void(int32_t toastId, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD1(ShowToast, void(const NG::ToastInfo& toastInfo));
     MOCK_METHOD6(ShowDialog,
         void(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
             bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));

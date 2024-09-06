@@ -20,7 +20,7 @@ namespace OHOS::Ace::NG {
 namespace {
 bool removeOverlayFlag = false;
 } // namespace
-void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>& callback)
+void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo)
 {}
 
 void OverlayManager::ClearToastInSubwindow() {}
