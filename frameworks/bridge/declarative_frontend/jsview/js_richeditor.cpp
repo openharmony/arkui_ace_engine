@@ -1006,24 +1006,11 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
             && responseType == NG::TextResponseType::LONG_PRESS
             && editorType == NG::TextSpanType::IMAGE;
         if (bindImagePreviewMenu) {
-            SetImagePreviewMenu(buildFunc, menuParam);
+            RichEditorModel::GetInstance()->SetImagePreviewMenuParam(buildFunc, menuParam);
             return;
         }
     }
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
-}
-
-void JSRichEditor::SetImagePreviewMenu(std::function<void()>& builder, const NG::SelectMenuParam& selectMenuParam)
-{
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenu");
-    NG::MenuParam menuParam;
-    menuParam.previewMode = MenuPreviewMode::IMAGE;
-    menuParam.type = NG::MenuType::CONTEXT_MENU;
-    menuParam.onDisappear = selectMenuParam.onDisappear;
-    if (selectMenuParam.onAppear) {
-        menuParam.onAppear = [onAppear = selectMenuParam.onAppear]() { onAppear(-1, -1); };
-    }
-    RichEditorModel::GetInstance()->SetImagePreviewMenuParam(builder, menuParam);
 }
 
 JSRef<JSVal> JSRichEditor::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
