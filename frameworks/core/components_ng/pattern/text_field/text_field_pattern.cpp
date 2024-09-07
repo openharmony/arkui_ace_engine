@@ -7805,6 +7805,7 @@ void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, 
 
 void TextFieldPattern::OnTextGenstureSelectionEnd()
 {
+    SetIsSingleHandle(!IsSelected());
     if (!IsContentRectNonPositive()) {
         ProcessOverlay({ .animation = true });
     }
