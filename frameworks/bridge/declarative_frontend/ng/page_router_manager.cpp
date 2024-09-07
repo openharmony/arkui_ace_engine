@@ -1139,7 +1139,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         }
     }
 
-    LoadPage(GenerateNextPageId(), info, true, true, true);
+    LoadPage(GenerateNextPageId(), info);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pageUrlChecker = container->GetPageUrlChecker();
