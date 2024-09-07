@@ -2782,14 +2782,6 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 
-void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
-{
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        return;
-    }
-    ACE_UPDATE_RENDER_CONTEXT(AttractionEffect, effect);
-}
-
 void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, value, frameNode);
