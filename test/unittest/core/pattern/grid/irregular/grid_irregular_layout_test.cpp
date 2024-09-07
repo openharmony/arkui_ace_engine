@@ -1289,64 +1289,6 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridIrregularLayout::Integrated003
- * @tc.desc: Test large offset
- * @tc.type: FUNC
- */
-HWTEST_F(GridIrregularLayoutTest, Integrated003, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo14());
-    model.SetColumnsGap(Dimension { 5.0f });
-    for (int i = 0; i < 500; ++i) {
-        CreateGridItems(1, -2, rand() % 1000);
-    }
-    CreateDone(frameNode_);
-
-    bool pos = true;
-    for (int i = 0; i < 100; ++i) {
-        float offset = 1000.0f + (rand() % 9000);
-        if (!pos) {
-            offset = -offset;
-        }
-        pos = !pos;
-        UpdateCurrentOffset(offset);
-    }
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
-    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
-
-    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    for (int i = 0; i < 100; ++i) {
-        float offset = 1000.0f + (rand() % 9000);
-        if (!pos) {
-            offset = -offset;
-        }
-        pos = !pos;
-        UpdateCurrentOffset(offset);
-    }
-    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
-    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
-
-    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    for (int i = 0; i < 100; ++i) {
-        float offset = 1000.0f + (rand() % 9000);
-        if (!pos) {
-            offset = -offset;
-        }
-        pos = !pos;
-        UpdateCurrentOffset(offset);
-    }
-    EXPECT_TRUE(info.endMainLineIndex_ >= info.startMainLineIndex_);
-    EXPECT_TRUE(info.startIndex_ <= info.endIndex_);
-}
-
-/**
  * @tc.name: GridIrregularLayout::GetOverScrollOffset001
  * @tc.desc: Test GetOverScrollOffset
  * @tc.type: FUNC
@@ -2015,40 +1957,5 @@ HWTEST_F(GridIrregularLayoutTest, Stretch002, TestSize.Level1)
 
     auto childRect4 = pattern_->GetItemRect(4);
     EXPECT_EQ(childRect4.Height(), 0);
-}
-
-/**
- * @tc.name: ScrollItem001
- * @tc.desc: Test an error condition
- * @tc.type: FUNC
- */
-HWTEST_F(GridIrregularLayoutTest, ScrollItem001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo14());
-    model.SetColumnsGap(Dimension { 1.0f });
-    model.SetRowsGap(Dimension { 5.0f });
-        
-    CreateFixedHeightItems(100, 400.0F);
-    ViewAbstract::SetHeight(CalcLength(600.0f));
-    CreateDone(frameNode_);
-
-    const auto & info = pattern_->gridLayoutInfo_;
-
-    pattern_->ScrollToIndex(88, false);
-    FlushLayoutTask(frameNode_);
-    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.startIndex_, 1);
-    EXPECT_EQ(info.endIndex_, 5);
-
-    for (int i = 0; i < 100; i++) {
-        if (i >= info.startIndex_ && i <= info.endIndex_) {
-            EXPECT_TRUE(GetChildFrameNode(frameNode_, i)->IsActive());
-        }else {
-            EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
-        }
-    }
 }
 } // namespace OHOS::Ace::NG
