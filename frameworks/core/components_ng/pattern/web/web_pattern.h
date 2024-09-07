@@ -1089,6 +1089,8 @@ private:
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
     double startPageScale_ = 1.0;
+    bool isResizeContentAvoid_ = false;
+    float heightAfterAvoid_ = 0.0;
     bool zoomOutSwitch_ = false;
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;

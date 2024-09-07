@@ -1968,14 +1968,21 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
 void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
-    if (!config.contentSizeChange || isInWindowDrag_) {
-        return;
-    }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto heightBeforeUpdate = rect.Height();
+    if (isResizeContentAvoid_ && frameNode->SelfExpansive()) {
+        rect.SetHeight(heightAfterAvoid_);
+        frameNode->GetRenderContext()->UpdatePaintRect(rect);
+        rect.SetHeight(heightBeforeUpdate);
+    }
+    
+    if (!config.contentSizeChange || isInWindowDrag_) {
+        return;
+    }
     auto drawSize = Size(rect.Width(), rect.Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return;
@@ -2026,6 +2033,8 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
             drawSize_.SetHeight(newHeight);
             visibleViewportSize_.SetWidth(-1.0);
             visibleViewportSize_.SetHeight(-1.0);
+            isResizeContentAvoid_ = true;
+            heightAfterAvoid_ = newHeight;
         }
         UpdateWebLayoutSize(width, height, true, isUpdate);
     }
@@ -2864,6 +2873,7 @@ bool WebPattern::IsNeedResizeVisibleViewport()
 
 bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled)
 {
+    isResizeContentAvoid_ = false;
     isKeyboardInSafeArea_ = false;
     if (safeAreaEnabled) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
