@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,34 +13,34 @@
  * limitations under the License.
  */
 
-#include "core/components/plugin/hap_asset_provider_impl.h"
+#include "core/components/plugin/hap_asset_provider.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Plugin {
-bool HapAssetProviderImpl::Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths)
+bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths)
 {
     ACE_SCOPED_TRACE("Initialize");
     if (hapPath.empty() || assetBasePaths.empty()) {
-        LOGE("the packagePath or assetBasePath is empty");
         return false;
     }
 
     bool newCreate = false;
     runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(hapPath, newCreate);
-    CHECK_NULL_RETURN(runtimeExtractor_, false);
+    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     return true;
 }
 
-bool HapAssetProviderImpl::IsValid() const
+bool HapAssetProvider::IsValid() const
 {
     return true;
 }
 
-std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::string& assetName) const
+std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& assetName) const
 {
     ACE_SCOPED_TRACE("GetAsMapping");
     std::lock_guard<std::mutex> lock(mutex_);
@@ -56,12 +56,12 @@ std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::stri
         if (!hasFile) {
             continue;
         }
-        return std::make_unique<HapAssetImplMapping>(osStream);
+        return std::make_unique<HapAssetMapping>(osStream);
     }
     return nullptr;
 }
 
-std::string HapAssetProviderImpl::GetAssetPath(const std::string& assetName, bool isAddHapPath)
+std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     CHECK_NULL_RETURN(runtimeExtractor_, "");
@@ -71,16 +71,15 @@ std::string HapAssetProviderImpl::GetAssetPath(const std::string& assetName, boo
         if (!hasFile) {
             continue;
         }
-        return isAddHapPath ? (hapPath_ + "/" + basePath) : fileName;
+        return isAddHapPath? (hapPath_ + "/" + basePath) : fileName;
     }
     return {};
 }
 
-void HapAssetProviderImpl::GetAssetList(const std::string& path, std::vector<std::string>& assetList)
+void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::string>& assetList)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!runtimeExtractor_) {
-        LOGW("RuntimeExtractor null:%{public}s", hapPath_.c_str());
         return;
     }
     for (const auto& basePath : assetBasePaths_) {
@@ -96,7 +95,7 @@ void HapAssetProviderImpl::GetAssetList(const std::string& path, std::vector<std
     }
 }
 
-bool HapAssetProviderImpl::GetFileInfo(const std::string& /* fileName */, MediaFileInfo& /* fileInfo */) const
+bool HapAssetProvider::GetFileInfo(const std::string& /* fileName */, MediaFileInfo& /* fileInfo */) const
 {
     return false;
 }
