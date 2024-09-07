@@ -824,6 +824,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
+            if (overScrollTop && !canOverScroll_ && !overScrollFeature_) {
+                startPos = startMainPos_ + contentStartOffset_;
+            }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
             }
