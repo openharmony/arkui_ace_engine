@@ -168,32 +168,22 @@ std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RS
 }
 #endif
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkImage> ImageDecoder::ResizeSkImage()
-#else
 std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
-#endif
 {
-#ifndef USE_ROSEN_DRAWING
-    auto encodedImage = SkImage::MakeFromEncoded(data_);
-#else
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto rsSkiaData = data_->GetImpl<Rosen::Drawing::SkiaData>();
+    CHECK_NULL_RETURN(rsSkiaData, nullptr);
+    auto skData = rsSkiaData->GetSkData();
     auto encodedImage = std::make_shared<RSImage>();
     if (!encodedImage->MakeFromEncoded(data_)) {
         return nullptr;
     }
-#endif
     CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
 
-#ifndef USE_ROSEN_DRAWING
-    auto codec = SkCodec::MakeFromData(data_);
-#else
     auto codec = SkCodec::MakeFromData(skData);
-#endif
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
 
@@ -205,12 +195,8 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
     // this method would succeed even if the codec doesn't support that size.
     if (forceResize_) {
         info = info.makeWH(width, height);
-#ifndef USE_ROSEN_DRAWING
-        return ForceResizeImage(encodedImage, info);
-#else
         auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
         return ForceResizeImage(encodedImage, imageInfo);
-#endif
     }
 
     if ((info.width() > width && info.height() > height)) {
@@ -224,13 +210,6 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         }
 
         info = info.makeWH(idealSize.width(), idealSize.height());
-#ifndef USE_ROSEN_DRAWING
-        SkBitmap bitmap;
-        bitmap.allocPixels(info);
-        auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes());
-        CHECK_NULL_RETURN(res == SkCodec::kSuccess, encodedImage);
-        return SkImage::MakeFromBitmap(bitmap);
-#else
         auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
         RSBitmap bitmap;
         bitmap.Build(imageInfo);
@@ -239,7 +218,6 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         auto image = std::make_shared<RSImage>();
         image->BuildFromBitmap(bitmap);
         return image;
-#endif
     }
     return encodedImage;
 }

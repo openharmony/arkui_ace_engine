@@ -74,8 +74,12 @@ public:
     ScrollSpringMotion(double start, double end, double velocity, const RefPtr<SpringProperty>& spring);
 
     ~ScrollSpringMotion() override = default;
+    
+    void Move(float offsetTime) override;
 
     bool IsCompleted() override;
+
+    double GetCurrentPosition() override;
 };
 
 } // namespace OHOS::Ace

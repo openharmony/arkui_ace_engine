@@ -134,6 +134,9 @@ public:
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
+        if (!task) {
+            return false;
+        }
         std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
         task->OnSuccess(
             [downloadCondition, downloadResult](const NetStackRequest& request, const NetStackResponse& response) {
@@ -182,12 +185,13 @@ public:
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
+        if (!task) {
+            return false;
+        }
         task->OnSuccess(
             [successCallback = downloadCallback.successCallback, failCallback = downloadCallback.failCallback,
                 instanceId](const NetStackRequest& request, const NetStackResponse& response) {
                 if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
-                    LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.",
-                        request.GetURL().c_str(), response.GetResponseCode());
                     std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
                                            std::to_string(response.GetResponseCode());
                     failCallback(errorMsg, true, instanceId);
@@ -235,6 +239,9 @@ public:
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
         std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
+        if (!task) {
+            return false;
+        }
         task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
             LOGI("Sync http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
                 response.GetResponseCode());
@@ -271,7 +278,8 @@ public:
     static void OnFail(std::shared_ptr<DownloadCondition> downloadCondition, const NetStackRequest& request,
         const NetStackResponse& response, const NetStackError& error)
     {
-        LOGI("Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
+        LOGI(
+            "Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
             request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
         {
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);

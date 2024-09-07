@@ -723,9 +723,8 @@ void JSText::Create(const JSCallbackInfo& info)
         return;
     }
 
-    JSRef<JSVal> args = info[0];
-    if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
-        auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>()) {
+        auto *spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
         if (spanString == nullptr) {
             return;
         }
@@ -736,7 +735,7 @@ void JSText::Create(const JSCallbackInfo& info)
             TextModel::GetInstance()->Create(data);
         }
     } else {
-        ParseJsString(args, data);
+        ParseJsString(info[0], data);
         TextModel::GetInstance()->Create(data);
     }
 
@@ -785,7 +784,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
                            targetNode = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -820,7 +819,7 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -836,7 +835,7 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -852,7 +851,7 @@ void JSText::JsOnDragLeave(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -900,6 +899,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto tmpInfo = info[0];
@@ -914,6 +914,7 @@ void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     JSRef<JSVal> args = info[0];

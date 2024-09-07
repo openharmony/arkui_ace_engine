@@ -114,13 +114,14 @@ private:
     void HandleTouchUpEvent(const AxisEvent& event) override;
     void HandleTouchMoveEvent(const AxisEvent& event) override;
     void HandleTouchCancelEvent(const AxisEvent& event) override;
+    void UpdateTouchEventInfo(const TouchEvent& event);
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
-    void UpdateTouchEventInfo(const TouchEvent& event);
+
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);

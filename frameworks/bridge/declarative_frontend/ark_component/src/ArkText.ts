@@ -955,7 +955,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
   }
-  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
     return this;

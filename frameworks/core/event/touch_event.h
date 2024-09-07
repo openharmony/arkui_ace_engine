@@ -305,8 +305,8 @@ struct TouchEvent final : public UIInputEvent {
         event.isInterpolated = isInterpolated;
         event.pointers = std::move(pointers);
         event.pointerEvent = std::move(pointerEvent);
+        event.pressedKeyCodes_ = std::move(pressedKeyCodes_);
         event.originalId = originalId;
-        event.pressedKeyCodes_ = pressedKeyCodes_;
         event.isInjected = isInjected;
         event.isPrivacyMode = isPrivacyMode;
         event.inputXDeltaSlope = inputXDeltaSlope;

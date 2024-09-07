@@ -645,8 +645,13 @@ RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 
-void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& info)
+void JSSpanString::FromHtml(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
+    if (info.Length() != 1 || !info[0]->IsString()) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
     std::string arg = info[0]->ToString();
     auto container = Container::CurrentSafely();
     if (!container) {
@@ -654,10 +659,7 @@ void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& inf
         return;
     }
     auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
-        return;
-    }
+    CHECK_NULL_VOID(taskExecutor);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -665,13 +667,13 @@ void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& inf
     auto asyncContext = std::make_shared<HtmlConverterAsyncCtx>();
     asyncContext->instanceId = Container::CurrentIdSafely();
     asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value result = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &result);
     taskExecutor->PostTask(
         [htmlStr = arg, asyncContext]() mutable {
             ContainerScope scope(asyncContext->instanceId);
             // FromHtml may cost much time because of pixelmap.
             // Therefore this function should be called in Background thread.
-            LOGI("begin to convert html");
             auto styledString = HtmlUtils::FromHtml(htmlStr);
             auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
             CHECK_NULL_VOID(container);
@@ -692,17 +694,6 @@ void JSSpanString::FromHtmlBackTask(napi_value result, const JSCallbackInfo& inf
                 TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
         },
         TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
-}
-
-void JSSpanString::FromHtml(const JSCallbackInfo& info)
-{
-    ContainerScope scope(Container::CurrentIdSafely());
-    if (info.Length() != 1 || !info[0]->IsString()) {
-        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
-        return;
-    }
-    napi_value result = nullptr;
-    FromHtmlBackTask(result, info);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));

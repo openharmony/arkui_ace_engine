@@ -203,8 +203,8 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe axis end, state: %{public}d",
-        event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Id:%{public}d, swipe axis end, state: %{public}d", event.touchEventId, refereeState_);
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = TouchEvent();
     UpdateTouchPointWithAxisEvent(event);

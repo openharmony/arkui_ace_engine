@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <mutex>
 
 #include "base/utils/macros.h"
 
@@ -54,6 +55,7 @@ public:
     virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
 private:
     static std::unique_ptr<ForEachModel> instance;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace::NG
 

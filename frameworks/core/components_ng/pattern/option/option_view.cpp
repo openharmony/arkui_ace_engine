@@ -282,7 +282,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const Option
 
 #ifdef OHOS_PLATFORM
     constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE) || value.isPasteOption) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);

@@ -232,6 +232,24 @@ void ParseDialogTitleAndMessage(DialogProperties& properties, JSRef<JSObject> ob
     }
 }
 
+void ParseTextStyle(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto textStyleObj = obj->GetProperty("textStyle");
+    if (textStyleObj->IsNull() || !textStyleObj->IsObject()) {
+        return;
+    }
+    auto textStyle = JSRef<JSObject>::Cast(textStyleObj);
+    auto args = textStyle->GetProperty("wordBreak");
+    int32_t index = 1;
+    if (args->IsNumber()) {
+        index = args->ToNumber<int32_t>();
+    }
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        index = 1;
+    }
+    properties.wordBreak = WORD_BREAK_TYPES[index];
+}
+
 void ParseAlertShadow(DialogProperties& properties, JSRef<JSObject> obj)
 {
     // Parse shadow.
@@ -256,15 +274,6 @@ void ParseAlertBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject>
             borderColor.SetColor(Color::BLACK);
             properties.borderColor = borderColor;
         }
-    }
-}
-
-void ParseAlertRadius(DialogProperties& properties, JSRef<JSObject> obj)
-{
-    auto cornerRadiusValue = obj->GetProperty("cornerRadius");
-    NG::BorderRadiusProperty radius;
-    if (JSAlertDialog::ParseBorderRadius(cornerRadiusValue, radius)) {
-        properties.borderRadius = radius;
     }
 }
 
@@ -295,6 +304,15 @@ void UpdateAlertAlignment(DialogAlignment& alignment)
         if (isRtl) {
             alignment = DialogAlignment::BOTTOM_START;
         }
+    }
+}
+
+void ParseAlertRadius(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto cornerRadiusValue = obj->GetProperty("cornerRadius");
+    NG::BorderRadiusProperty radius;
+    if (JSAlertDialog::ParseBorderRadius(cornerRadiusValue, radius)) {
+        properties.borderRadius = radius;
     }
 }
 
@@ -330,24 +348,6 @@ void ParseAlertOffset(DialogProperties& properties, JSRef<JSObject> obj)
     }
 }
 
-void ParseTextStyle(DialogProperties& properties, JSRef<JSObject> obj)
-{
-    auto textStyleObj = obj->GetProperty("textStyle");
-    if (textStyleObj->IsNull() || !textStyleObj->IsObject()) {
-        return;
-    }
-    auto textStyle = JSRef<JSObject>::Cast(textStyleObj);
-    auto args = textStyle->GetProperty("wordBreak");
-    int32_t index = 1;
-    if (args->IsNumber()) {
-        index = args->ToNumber<int32_t>();
-    }
-    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
-        index = 1;
-    }
-    properties.wordBreak = WORD_BREAK_TYPES[index];
-}
-
 void ParseAlertMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
 {
     // Parse maskRect.
@@ -380,12 +380,12 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
 
         ParseDialogTitleAndMessage(properties, obj);
         ParseButtons(execContext, properties, obj);
+        ParseTextStyle(properties, obj);
         ParseAlertShadow(properties, obj);
         ParseAlertBorderWidthAndColor(properties, obj);
         ParseAlertRadius(properties, obj);
         ParseAlertAlignment(properties, obj);
         ParseAlertOffset(properties, obj);
-        ParseTextStyle(properties, obj);
         ParseAlertMaskRect(properties, obj);
 
         auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,

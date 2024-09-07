@@ -237,7 +237,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
-    auto container = Container::Current();
+    auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
