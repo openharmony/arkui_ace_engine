@@ -17,7 +17,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"

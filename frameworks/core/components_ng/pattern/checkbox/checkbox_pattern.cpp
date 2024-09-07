@@ -66,6 +66,7 @@ void CheckBoxPattern::UpdateIndicator()
                 SetBuilderNodeHidden();
             }
         } else {
+            paintProperty->UpdateCheckBoxSelect(false);
             SetBuilderNodeHidden();
         }
     } else if (builderNode_) {
