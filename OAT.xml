@@ -105,6 +105,27 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="examples/components/entry/src/main/resources/base/media/startIcon.png" desc="检视应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/components/entry/src/main/resources/base/media/foreground.png" desc="检视应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/components/entry/src/main/resources/base/media/background.png" desc="检视应用工程自带的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/.*/entry/src/main/resources/base/media/startIcon.png" desc=" 测试工程自带的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/.*/entry/src/main/resources/rawfile/TESTFONT.TTF" desc="用于测试的假字体文件，是空文本文件"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/navigation/entry/src/main/resources/base/media/test_image.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/navigation/entry/src/main/resources/base/media/Tab.jpg" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/miscellaneous/entry/src/main/resources/base/media/foreground.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/miscellaneous/entry/src/main/resources/base/media/background.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/ets/pages/image/image_one.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/ets/pages/image/image_two.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/ets/pages/image_animator/imageAnimator_one.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/base/media/test_image.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/base/media/test_icon.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/base/media/run_icon.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/base/media/city_icon.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/graphic_drawing/entry/src/main/ets/pages/image_bitmap/image.jpg" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video1.mp4" desc=" 自研的二进制视频"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video2.mp4" desc=" 自研的二进制视频"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/ets/pages/slider/StarYellow.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/ets/pages/rating/StarBlue.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/ets/pages/rating/StarOrange.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/resources/base/media/foreground.png" desc=" 自研的二进制图片"/>
+				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/resources/base/media/background.png" desc=" 自研的二进制图片"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>
