@@ -5019,7 +5019,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     } else if (status == OPINC_PARENT_POSSIBLE) {
         std::list<RefPtr<FrameNode>> childrens;
         GenerateOneDepthVisibleFrame(childrens);
-        for (auto child : childrens) {
+        for (auto& child : childrens) {
             if (child) {
                 status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
             }
