@@ -450,7 +450,7 @@ public:
 
     uint32_t GetDampingOverflowCount() const
     {
-        return dampingOverflowCount_ ;
+        return dampingOverflowCount_;
     }
 
     void SetDampingOverflowCount()
