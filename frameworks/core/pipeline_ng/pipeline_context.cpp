@@ -3529,7 +3529,7 @@ void PipelineContext::OnHide()
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
     AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CHANGE;
+    event.type = AccessibilityEventType::PAGE_CLOSE;
     SendEventToAccessibility(event);
 }
 
