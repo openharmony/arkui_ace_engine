@@ -34,8 +34,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
   }
-  navBarPosition(value: number): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, NavBarPositionModifier.identity, NavBarPositionModifier, value);
+  navBarPosition(value: NavBarPosition): NavigationAttribute {
+    modifier(this._modifiers, NavBarPositionModifier, value);
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
@@ -47,8 +47,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
 
     return this;
   }
-  mode(value: number): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, ModeModifier.identity, ModeModifier, value);
+  mode(value: NavigationMode): NavigationAttribute {
+    modifier(this._modifiers, ModeModifier, value);
     return this;
   }
   backButtonIcon(value: any): NavigationAttribute {
@@ -56,26 +56,26 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this;
   }
   hideNavBar(value: boolean): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
+    modifier(this._modifiers, HideNavBarModifier, isBoolean(value) ? value : false);
     return this;
   }
   title(value: any): NavigationAttribute {
     throw new Error('Method not implemented.');
   }
   subTitle(value: string): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
+    modifier(this._modifiers, SubTitleModifier, value);
     return this;
   }
   hideTitleBar(value: boolean): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
+    modifier(this._modifiers, NavigationHideTitleBarModifier, isBoolean(value) ? value : false);
     return this;
   }
   hideBackButton(value: boolean): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, HideBackButtonModifier.identity, HideBackButtonModifier, value);
+    modifier(this._modifiers, HideBackButtonModifier, isBoolean(value) ? value : false);
     return this;
   }
   titleMode(value: NavigationTitleMode): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
+    modifier(this._modifiers, TitleModeModifier, value);
     return this;
   }
   menus(value: any): NavigationAttribute {
@@ -88,7 +88,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     throw new Error('Method not implemented.');
   }
   hideToolBar(value: boolean): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
+    modifier(this._modifiers, HideToolBarModifier, isBoolean(value) ? value : false);
     return this;
   }
   onTitleModeChange(callback: (titleMode: NavigationTitleMode) => void): NavigationAttribute {
@@ -147,9 +147,6 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
 }
 
 class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
-  constructor(value: boolean | object) {
-    super(value);
-  }
   static identity: Symbol = Symbol('backButtonIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -160,14 +157,15 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
-  constructor(value: [Dimension, Dimension]) {
-    super(value);
-  }
   static identity: Symbol = Symbol('navBarWidthRange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -178,14 +176,15 @@ class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class MinContentWidthModifier extends ModifierWithKey<Dimension> {
-  constructor(value: Dimension) {
-    super(value);
-  }
   static identity: Symbol = Symbol('minContentWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -197,14 +196,15 @@ class MinContentWidthModifier extends ModifierWithKey<Dimension> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class NavBarWidthModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('navBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -216,14 +216,15 @@ class NavBarWidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
-class NavBarPositionModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class NavBarPositionModifier extends Modifier<number> {
   static identity: Symbol = Symbol('navBarPosition');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -235,10 +236,7 @@ class NavBarPositionModifier extends ModifierWithKey<number> {
   }
 }
 
-class ModeModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class ModeModifier extends Modifier<number> {
   static identity: Symbol = Symbol('mode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -250,10 +248,7 @@ class ModeModifier extends ModifierWithKey<number> {
   }
 }
 
-class HideToolBarModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class HideToolBarModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('hideToolBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -265,10 +260,7 @@ class HideToolBarModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TitleModeModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class TitleModeModifier extends Modifier<number> {
   static identity: Symbol = Symbol('titleMode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -280,10 +272,7 @@ class TitleModeModifier extends ModifierWithKey<number> {
   }
 }
 
-class HideBackButtonModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class HideBackButtonModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('hideBackButton');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -295,10 +284,7 @@ class HideBackButtonModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class SubTitleModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
-    super(value);
-  }
+class SubTitleModifier extends Modifier<string> {
   static identity: Symbol = Symbol('subTitle');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -310,10 +296,7 @@ class SubTitleModifier extends ModifierWithKey<string> {
   }
 }
 
-class NavigationHideTitleBarModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class NavigationHideTitleBarModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -325,10 +308,7 @@ class NavigationHideTitleBarModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class HideNavBarModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class HideNavBarModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('hideNavBar');
 
   applyPeer(node: KNode, reset: boolean): void {
