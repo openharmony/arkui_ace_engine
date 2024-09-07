@@ -179,7 +179,7 @@ void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
         auto padding = buttonTheme->GetPadding(controlSize.value());
         PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
             CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding, frameNode);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(frameNode, fontSize);
     }
@@ -250,7 +250,7 @@ void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
     if (layoutProperty->GetPaddingProperty()) {
         return;
     }
-    auto context = frameNode->GetContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -409,7 +409,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto context = textNode->GetContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);

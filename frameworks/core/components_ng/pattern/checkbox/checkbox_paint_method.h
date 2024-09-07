@@ -123,6 +123,9 @@ public:
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
         checkboxModifier_->UpdateAnimatableProperty();
+        checkboxModifier_->SetCheckboxStyle(checkBoxStyle_);
+        checkboxModifier_->SetUseContentModifier(useContentModifier_);
+        checkboxModifier_->SetHasBuilder(hasBuilder_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
