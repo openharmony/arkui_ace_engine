@@ -1231,12 +1231,14 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         std::string urlName = url.substr(0, pos) + bin_ext;
 #if !defined(PREVIEW)
         if (IsModule()) {
-            if (engineInstance_->IsPlugin()) {
+            if (!engineInstance_->IsPlugin()) {
+                LoadJsWithModule(urlName);
+                return;
+            }
+            if (!pluginModuleName_.empty()) {
                 LoadPluginJsWithModule(urlName);
                 return;
             }
-            LoadJsWithModule(urlName);
-            return;
         }
 #endif
         if (isMainPage) {
