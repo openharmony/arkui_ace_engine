@@ -123,6 +123,8 @@ public:
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
+    static void ClearOnClick(FrameNode* frameNode);
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);

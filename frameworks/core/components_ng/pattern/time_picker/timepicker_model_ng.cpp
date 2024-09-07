@@ -471,7 +471,6 @@ void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& 
 {
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetSelectedTime(value);
 }
 

@@ -388,6 +388,21 @@ struct GestureInnerData {
     void* gesture;
 };
 
+ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum)
+{
+    int32_t fingers = DEFAULT_PAN_FINGERS;
+    if (fingersNum < DEFAULT_PAN_FINGERS || fingersNum > MAX_PAN_FINGERS) {
+        fingers = DEFAULT_PAN_FINGERS;
+    } else {
+        fingers = fingersNum;
+    }
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr, nullptr };
+    auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
+        fingers, mask, distanceNum, ndkGesture);
+    ndkGesture->gesture = gesture;
+    return ndkGesture;
+}
+
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
@@ -456,21 +471,6 @@ ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirect
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
         directions, speedNum, ndkGesture);
-    ndkGesture->gesture = gesture;
-    return ndkGesture;
-}
-
-ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirectionMask mask, double distanceNum)
-{
-    int32_t fingers = DEFAULT_PAN_FINGERS;
-    if (fingersNum < DEFAULT_PAN_FINGERS || fingersNum > MAX_PAN_FINGERS) {
-        fingers = DEFAULT_PAN_FINGERS;
-    } else {
-        fingers = fingersNum;
-    }
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr, nullptr };
-    auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, mask, distanceNum, ndkGesture);
     ndkGesture->gesture = gesture;
     return ndkGesture;
 }

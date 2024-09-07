@@ -224,6 +224,26 @@ void JSSelect::Value(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetValue(value);
 }
 
+void ResetFont(void)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
+    } else {
+        auto controlSize = SelectModel::GetInstance()->GetControlSize();
+        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
+    }
+    SelectModel::GetInstance()->SetFontWeight(FontWeight::MEDIUM);
+    SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    return;
+}
+
 void JSSelect::Font(const JSCallbackInfo& info)
 {
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
@@ -318,12 +338,7 @@ void JSSelect::ResetFontSize(SelectFontType type)
         SelectModel::GetInstance()->SetSelectedOptionFontSize(selectTheme->GetMenuFontSize());
         return;
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
-    } else {
-        auto controlSize = SelectModel::GetInstance()->GetControlSize();
-        SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize(controlSize));
-    }
+    SelectModel::GetInstance()->SetFontSize(selectTheme->GetFontSize());
 }
 
 void JSSelect::ResetFontWeight(SelectFontType type)

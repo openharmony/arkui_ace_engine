@@ -303,10 +303,6 @@ void RadioModifier::PaintUnselectedIndicator(
     pen.SetWidth(borderWidth_);
     brush.SetAntiAlias(true);
     auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto radioTheme = pipeline->GetTheme<RadioTheme>();
-    CHECK_NULL_VOID(radioTheme);
     if (!enabled_->Get()) {
         brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(alphaCalculate)));
         pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(alphaCalculate)));

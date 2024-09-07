@@ -640,7 +640,7 @@ bool RichEditorEventHub::HasOnStyledStringWillChange() const
     return static_cast<bool>(onStyledStringWillChange_);
 }
 
-void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)> && func)
+void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)>&& func)
 {
     onStyledStringDidChange_ = std::move(func);
 }

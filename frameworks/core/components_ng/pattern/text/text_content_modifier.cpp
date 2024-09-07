@@ -389,7 +389,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             auto paintOffsetY = paintOffset_.GetY();
             textPattern->DumpRecord(",Paint id:" + std::to_string(host->GetId()));
             auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
+            for (auto && info : paragraphs) {
                 auto paragraph = info.paragraph;
                 CHECK_NULL_VOID(paragraph);
                 paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);

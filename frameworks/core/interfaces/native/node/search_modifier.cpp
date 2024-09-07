@@ -804,11 +804,16 @@ void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallb
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+    } else {
+        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 
 void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
@@ -817,7 +822,8 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
 namespace NodeModifier {

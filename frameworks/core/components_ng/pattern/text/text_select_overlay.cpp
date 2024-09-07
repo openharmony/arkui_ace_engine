@@ -22,7 +22,6 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -192,7 +191,6 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         bool isUseHandleTop = (isFirst != IsHandleReverse());
         handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
     }
-
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -399,5 +397,12 @@ void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->SetHandleCircleIsShow(isFirst, false);
+}
+
+void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
+{
+    if (!IsSingleHandle()) {
+        ToggleMenu();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -96,13 +96,12 @@ public:
         json->PutExtAttr("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("isModal", propIsModal_.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("isScenceBoardDialog",
-            propIsScenceBoardDialog_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("isScenceBoardDialog", propIsScenceBoardDialog_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
                                          .c_str(), filter);
-        json->PutExtAttr("width", propWidth_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-        json->PutExtAttr("height", propHeight_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("width", propWidth_.value_or(CalcDimension(Dimension(-1))).Value(), filter);
+        json->PutExtAttr("height", propHeight_.value_or(CalcDimension(Dimension(-1))).Value(), filter);
     }
 
 private:

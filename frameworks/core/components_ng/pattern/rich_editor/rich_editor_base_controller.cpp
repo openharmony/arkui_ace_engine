@@ -82,11 +82,11 @@ void RichEditorBaseController::StopEditing()
 }
 
 void RichEditorBaseController::SetSelection(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
+    richEditorPattern->SetSelection(selectionStart, selectionEnd, options);
 }
 
 const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const

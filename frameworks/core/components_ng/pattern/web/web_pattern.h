@@ -507,6 +507,8 @@ public:
         bool& isNewAvoid);
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide);
+    void ChangeVisibilityOfQuickMenu();
+    bool IsQuickMenuShow();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -823,6 +825,10 @@ private:
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
 
     void HandleTouchCancel(const TouchEventInfo& info);
+
+    void OnSelectHandleStart(bool isFirst);
+    void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
+    void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
 
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);

@@ -191,7 +191,6 @@ private:
     bool isBackgroundImageInfoFromTheme_ = false;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

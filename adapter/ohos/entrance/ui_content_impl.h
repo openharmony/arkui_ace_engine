@@ -38,6 +38,7 @@
 #include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/popup_param.h"
+#include "iremote_object.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -312,24 +313,24 @@ public:
     void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
-    void SetFormRenderingMode(int8_t renderMode) override;
-
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void SetFormRenderingMode(int8_t renderMode) override;
+
     void PreLayout() override;
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
+    void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+
+    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;
     }
-    
-    void SetStatusBarItemColor(uint32_t color) override;
-
-    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
-
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
-
-    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     UIContentErrorCode InitializeInner(
@@ -353,10 +354,10 @@ private:
 
     void RenderLayoutBoundary(bool isDebugBoundary);
     static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;

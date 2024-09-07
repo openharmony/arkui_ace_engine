@@ -1463,8 +1463,8 @@ class LengthMetrics {
         if (unit in LengthUnit) {
             this.unit = unit;
             this.value = value;
-        }
-        else {
+        } else {
+
             this.unit = LengthUnit.VP;
             this.value = unit === undefined ? value : 0;
         }
@@ -2274,6 +2274,8 @@ class Content {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
+
 class ComponentContent extends Content {
     constructor(uiContext, builder, params, options) {
         super();
@@ -2376,6 +2378,5 @@ class NodeContent extends Content {
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter
+    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, typeNode, NodeAdapter
 };

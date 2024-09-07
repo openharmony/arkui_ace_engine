@@ -356,47 +356,27 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
 }
 
 /**
- * @tc.name: RichEditorPatternTestCreateTextSpanNode001
- * @tc.desc: test CreateTextSpanNode
+ * @tc.name: RichEditorPatternTestSpanNodeFission001
+ * @tc.desc: test SpanNodeFission
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestSpanNodeFission001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanNode> spanNode;
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
+    ASSERT_NE(spanNode, nullptr);
 
-    TextInsertValueInfo info;
     std::string insertValue;
-    UpdateSpanStyle updateSpanStyle;
-    TextStyle textStyle;
+    TextInsertValueInfo info;
 
-    updateSpanStyle.useThemeFontColor = false;
+    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
+    ASSERT_EQ(spanNode->GetSpanItem()->position, -1);
 
-    auto typingStyle = richEditorPattern->typingStyle_;
-    auto typingTextStyle = richEditorPattern->typingTextStyle_;
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = textStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, false);
-
-    richEditorPattern->typingStyle_ = typingStyle;
-    richEditorPattern->typingTextStyle_ = typingTextStyle;
+    insertValue = "hello\n";
+    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
+    ASSERT_EQ(spanNode->GetSpanItem()->position, 0);
 }
 
 /**

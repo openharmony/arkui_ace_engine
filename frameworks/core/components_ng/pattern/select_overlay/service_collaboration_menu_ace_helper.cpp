@@ -227,7 +227,8 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     rowContext->UpdateBorderColor(borderColorProperty);
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH)), CalcLength(static_cast<float>(MENUITEM_HEIGHT))));
-    rowProperty->UpdatePadding({.right = CalcLength(0.0f)});
+    PaddingProperty rowpadding {.right = CalcLength(static_cast<float>(PANDDING_ZERO))};
+    rowProperty->UpdatePadding(rowpadding);
     MarginProperty margin;
     margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
     rowProperty->UpdateMargin(margin);
@@ -616,7 +617,7 @@ void ServiceCollaborationAceCallback::RemovePopupNode()
     CHECK_NULL_VOID(info_->pattern.Upgrade()->GetHost());
     auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
     CHECK_NULL_VOID(pattern);
-    pattern->RegisterCaretChangeListener(nullptr);
+    pattern->RegisiterCaretChangeListener(nullptr);
     auto targetId = info_->pattern.Upgrade()->GetHost()->GetId();
     auto popupInfo = overlay->GetPopupInfo(targetId);
     popupInfo.markNeedUpdate = true;
@@ -664,7 +665,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
                 info_ = nullptr;
             }
         };
-        pattern->RegisterCaretChangeListener(std::move(func));
+        pattern->RegisiterCaretChangeListener(std::move(func));
         auto row = CreateCustomPopUpNode(category, "");
         CHECK_NULL_RETURN(row, -1);
         ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);

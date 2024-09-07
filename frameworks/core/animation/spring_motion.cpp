@@ -106,6 +106,27 @@ bool ScrollSpringMotion::IsCompleted()
     return NearZero(currentPosition_ - endPosition_, accuracy_);
 }
 
+double ScrollSpringMotion::GetCurrentPosition()
+{
+    return currentPosition_;
+}
+
+void ScrollSpringMotion::Move(float offsetTime)
+{
+    if (model_ == nullptr) {
+        LOGE("SpringModel is nullptr.");
+        return;
+    }
+    // change millisecond to second.
+    float offsetTimeInSecond = offsetTime / UNIT_CONVERT;
+    currentPosition_ = endPosition_ + model_->Position(offsetTimeInSecond);
+    currentVelocity_ = model_->Velocity(offsetTimeInSecond);
+    if (IsCompleted()) {
+        currentPosition_ = endPosition_;
+        currentVelocity_ = 0.0;
+    }
+}
+
 std::string SpringMotion::GetMotionType() const
 {
     return "spring";

@@ -109,7 +109,8 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    virtual void DetachFromMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
+    virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -605,21 +606,6 @@ public:
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
-    virtual bool HasVirtualNodeAccessibilityProperty()
-    {
-        return false;
-    }
-
-    void AddFlag(uint32_t flag)
-    {
-        nodeFlag_ |= flag;
-    }
-
-    bool IsNodeHasFlag(uint32_t flag) const
-    {
-        return (flag & nodeFlag_) == flag;
-    }
-
     void SetAccessibilityNodeVirtual()
     {
         isAccessibilityVirtualNode_ = true;
@@ -659,6 +645,11 @@ public:
     void SetRootNodeId(int32_t rootNodeId)
     {
         rootNodeId_ = rootNodeId;
+    }
+    
+    virtual bool HasVirtualNodeAccessibilityProperty()
+    {
+        return false;
     }
 
     int32_t GetRootNodeId() const
@@ -746,11 +737,20 @@ public:
         return updateNodeConfig_;
     }
 
+    void AddFlag(uint32_t flag)
+    {
+        nodeFlag_ |= flag;
+    }
+
+    bool IsNodeHasFlag(uint32_t flag) const
+    {
+        return (flag & nodeFlag_) == flag;
+    }
+
+    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
     virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
-
-    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -815,6 +815,7 @@ protected:
     void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
 
     PipelineContext* context_ = nullptr;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -844,7 +845,7 @@ private:
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
-    int32_t instanceId_ = -1;
+
     uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
@@ -859,6 +860,7 @@ private:
 
     std::string debugLine_;
     std::string viewId_;
+    int32_t instanceId_ = -1;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
     // Other components cannot be masked above the modal uiextension,

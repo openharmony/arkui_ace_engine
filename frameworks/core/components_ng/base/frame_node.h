@@ -1027,7 +1027,6 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
-    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {
@@ -1146,8 +1145,6 @@ private:
 
     void TriggerShouldParallelInnerWith(
         const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
-
-    void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
