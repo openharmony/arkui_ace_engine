@@ -56,8 +56,8 @@ public:
     bool IsBothHandlesShow();
     bool IsHandleShow();
     void OnHandleMoveStart(bool isFirst) override;
-    void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
+    void UpdateHandleOffset();
     void ToggleMenu();
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;

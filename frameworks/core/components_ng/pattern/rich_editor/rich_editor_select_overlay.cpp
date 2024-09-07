@@ -190,6 +190,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
     } else {
+        pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
             auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
