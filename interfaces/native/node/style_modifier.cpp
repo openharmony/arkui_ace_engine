@@ -1052,14 +1052,8 @@ int32_t SetMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     ArkUISizeType top, right, bottom, left;
-    left.value = NUM_0;
-    bottom.value = NUM_0;
-    right.value = NUM_0;
-    top.value = NUM_0;
-    left.unit = GetDefaultUnit(node, UNIT_VP);
-    bottom.unit = left.unit;
-    right.unit = left.unit;
-    top.unit = left.unit;
+    top.value = right.value = bottom.value = left.value = NUM_0;
+    top.unit = right.unit = bottom.unit = left.unit = GetDefaultUnit(node, UNIT_VP);
     if (item->size == NUM_1) {
         top.value = right.value = bottom.value = left.value = item->value[NUM_0].f32;
     } else if (item->size == NUM_4) {
@@ -1319,8 +1313,7 @@ void ResetBlur(ArkUI_NodeHandle node)
 
 int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    auto actualSize = CheckAttributeItemArray(item, REQUIRED_THREE_PARAM);
-    if (actualSize < 0) {
+    if (item->size < NUM_3) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (item->object == nullptr) {
@@ -7575,7 +7568,7 @@ const ArkUI_AttributeItem* GetDatePickerStart(ArkUI_NodeHandle node)
 
 int32_t SetDatePickerStart(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item || !item->string) {
+    if (!item->string) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
@@ -7645,7 +7638,7 @@ const ArkUI_AttributeItem* GetDatePickerSelected(ArkUI_NodeHandle node)
 
 int32_t SetDatePickerSelected(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item || !item->string) {
+    if (!item->string) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
