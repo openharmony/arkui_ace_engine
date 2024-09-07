@@ -480,7 +480,6 @@ SelectOverlayManager::~SelectOverlayManager()
     if (pipeline) {
         auto fontManager = pipeline->GetFontManager();
         if (fontManager) {
-            fontManager->RemoveFontChangeObserver(WeakClaim(this));
         }
     }
 }

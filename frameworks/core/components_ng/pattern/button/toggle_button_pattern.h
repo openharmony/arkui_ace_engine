@@ -116,6 +116,7 @@ private:
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
+
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };
 } // namespace OHOS::Ace::NG
