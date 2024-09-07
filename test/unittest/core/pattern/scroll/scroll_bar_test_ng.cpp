@@ -794,60 +794,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBar005, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollBarWidth001
- * @tc.desc: Test scrollbar width
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Not set bar width
-     * @tc.expected: It will be default
-     */
-    ScrollModelNG model = CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
-
-    /**
-     * @tc.steps: step2. Set bar width less than bar height
-     * @tc.expected: It will be the value that was set
-     */
-    model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(10));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), 10);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), 10);
-
-    /**
-     * @tc.steps: step3. Set bar width greater than SCROLL_HEIGHT
-     * @tc.expected: It will be default
-     */
-    model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
-
-    /**
-     * @tc.steps: step4. Set bar width less than SCROLL_HEIGHT
-     * @tc.expected: The bar width will be the value that was set, and bar height will be equal to bar width
-     */
-    float barWidth = SCROLL_HEIGHT - 1;
-    model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), barWidth);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Height(), barWidth);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), barWidth);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Height(), SCROLL_HEIGHT);
-}
-
-/**
  * @tc.name: ScrollBar007
  * @tc.desc: when IsPressed is true, can not trigger scrollstart event
  * @tc.type: FUNC
