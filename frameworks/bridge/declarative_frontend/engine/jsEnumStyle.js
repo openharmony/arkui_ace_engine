@@ -1610,7 +1610,7 @@ var SheetMode;
   SheetMode[SheetMode["EMBEDDED"] = 1] = "EMBEDDED";
 })(SheetMode || (SheetMode = {}));
 
-var ScrollSizeMode ;
+var ScrollSizeMode;
 (function (ScrollSizeMode ) {
   ScrollSizeMode[ScrollSizeMode["FOLLOW_DETENT"] = 0] = "FOLLOW_DETENT";
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
@@ -1736,7 +1736,7 @@ class SubTabBarStyle {
 }
 
 class DrawModifier {
-  invalidate() { }
+  invalidate() {}
 }
 
 class ProgressMask {
@@ -2370,7 +2370,7 @@ class NavPathStack {
     return pathInfo;
   }
   popTo(name, animated) {
-    popToName(name, animated);
+    this.popToName(name, animated);
   }
   popToName(name, result, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -2451,7 +2451,7 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
   }
   clear(animated) {
-    if (this.pathArray.length == 0) {
+    if (this.pathArray.length === 0) {
       return;
     }
     this.pathArray.splice(0);
@@ -2469,7 +2469,7 @@ class NavPathStack {
     }
     let originLength = this.pathArray.length;
     this.pathArray = this.pathArray.filter((item, index) => {
-      return item && !indexes.includes(index)
+      return item && !indexes.includes(index);
     });
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
@@ -2876,9 +2876,9 @@ var SaveDescription;
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
   SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
-  SaveDescription[SaveDescription['EXPORT_TO_GALLERY'] = 9] = 'EXPORT_TO_GALLERY';
-  SaveDescription[SaveDescription['QUICK_SAVE_TO_GALLERY'] = 10] = 'QUICK_SAVE_TO_GALLERY';
-  SaveDescription[SaveDescription['RESAVE_TO_GALLERY'] = 11] = 'RESAVE_TO_GALLERY';
+  SaveDescription[SaveDescription["EXPORT_TO_GALLERY"] = 9] = "EXPORT_TO_GALLERY";
+  SaveDescription[SaveDescription["QUICK_SAVE_TO_GALLERY"] = 10] = "QUICK_SAVE_TO_GALLERY";
+  SaveDescription[SaveDescription["RESAVE_TO_GALLERY"] = 11] = "RESAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;
@@ -3066,18 +3066,6 @@ var DisturbanceFieldShape;
   DisturbanceFieldShape[DisturbanceFieldShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(DisturbanceFieldShape || (DisturbanceFieldShape = {}));
 
-var SwiperNestedScrollMode;
-(function (SwiperNestedScrollMode) {
-  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
-  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
-})(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
-
-var CheckBoxStyle;
-(function (CheckBoxStyle) {
-  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
-  CheckBoxStyle["SQUARE_STYLE"] = 1;
-})(CheckBoxStyle || (CheckBoxStyle = {}));
-
 var ModelType;
 (function (ModelType) {
   ModelType[ModelType["TEXTURE"] = 0] = "TEXTURE";
@@ -3098,6 +3086,18 @@ var ModelAnimationStates;
   ModelAnimationStates[ModelAnimationStates["PAUSE"] = 1] = "PAUSE";
   ModelAnimationStates[ModelAnimationStates["STOP"] = 2] = "STOP";
 })(ModelAnimationStates || (ModelAnimationStates = {}));
+
+var SwiperNestedScrollMode;
+(function (SwiperNestedScrollMode) {
+  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+})(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
+
+var CheckBoxStyle;
+(function (CheckBoxStyle) {
+  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
+  CheckBoxStyle["SQUARE_STYLE"] = 1;
+})(CheckBoxStyle || (CheckBoxStyle = {}));
 
 var SwipeActionState;
 (function (SwipeActionState) {
@@ -3236,6 +3236,30 @@ let ButtonRole;
   ButtonRole['ERROR'] = 1;
 })(ButtonRole || (ButtonRole = {}));
 
+var StyledStringKey;
+(function (StyledStringKey) {
+  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
+  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
+  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
+  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
+  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
+  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
+  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
+  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
+  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
+})(StyledStringKey || (StyledStringKey = {}));
+
+class CustomSpan {
+  type_ = "CustomSpan"
+}
+
+class UserDataSpan {
+  type_ = "ExtSpan"
+}
+
 let MenuPolicy;
 (function (MenuPolicy) {
   MenuPolicy['DEFAULT'] = 0;
@@ -3264,42 +3288,18 @@ let DataOperationType;
   DataOperationType['RELOAD'] = "reload";
 })(DataOperationType || (DataOperationType = {}));
 
-var StyledStringKey;
-(function (StyledStringKey) {
-  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
-  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
-  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
-  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
-  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
-  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
-  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
-  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
-  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
-})(StyledStringKey || (StyledStringKey = {}));
-
-class CustomSpan {
-  type_ = "CustomSpan"
-}
-
-class UserDataSpan {
-  type_ = "ExtSpan"
-}
-
 let FocusPriority;
 (function (FocusPriority) {
   FocusPriority[FocusPriority["AUTO"] = 0] = "AUTO";
   FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
   FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
 })(FocusPriority || (FocusPriority = {}));
-var SubMenuExpandingMode;
-(function (SubMenuExpandingMode) {
-  SubMenuExpandingMode[SubMenuExpandingMode["SIDE_EXPAND"] = 0] = "SIDE";
-  SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
-  SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
-})(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
+
+var TextDeleteDirection;
+(function (TextDeleteDirection) {
+    TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
+    TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
+})(TextDeleteDirection || (TextDeleteDirection = {}));
 
 var ViewportFit;
 (function (ViewportFit) {
@@ -3307,12 +3307,12 @@ var ViewportFit;
   ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
   ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
 })(ViewportFit || (ViewportFit = {}));
-
-var TextDeleteDirection;
-(function (TextDeleteDirection) {
-    TextDeleteDirection[TextDeleteDirection["BACKWARD"] = 0] = "BACKWARD";
-    TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
-})(TextDeleteDirection || (TextDeleteDirection = {}));
+var SubMenuExpandingMode;
+(function (SubMenuExpandingMode) {
+  SubMenuExpandingMode[SubMenuExpandingMode["SIDE_EXPAND"] = 0] = "SIDE";
+  SubMenuExpandingMode[SubMenuExpandingMode["EMBEDDED_EXPAND"] = 1] = "EMBEDDED";
+  SubMenuExpandingMode[SubMenuExpandingMode["STACK_EXPAND"] = 2] = "STACK";
+})(SubMenuExpandingMode || (SubMenuExpandingMode = {}));
 
 var GestureRecognizerState;
 (function (GestureRecognizerState) {
