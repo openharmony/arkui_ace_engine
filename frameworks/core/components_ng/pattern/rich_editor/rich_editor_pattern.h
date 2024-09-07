@@ -223,6 +223,15 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    struct OneStepDragParam {
+        std::function<void()> menuBuilder = nullptr;
+        std::function<void()> previewBuilder = nullptr;
+        std::function<void(int32_t, int32_t)> onAppear = nullptr;
+        MenuParam menuParam;
+        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
+        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
+    };
+
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
 
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
@@ -926,12 +935,7 @@ public:
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
 
-    void SetImagePreviewMenuParam(std::function<void()>& builder, const MenuParam& menuParam)
-    {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenuParam");
-        imagePreviewMenuBuilder_ = builder;
-        imagePreviewMenuParam_ = menuParam;
-    }
+    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
     void RequestFocusWhenSelected()
     {
         CHECK_NULL_VOID(!HasFocus());
@@ -1246,6 +1250,7 @@ private:
     void SetImageSelfResponseEvent(bool isEnable);
     void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
+    void UpdateImagePreviewParam();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1359,8 +1364,8 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
-    std::function<void()> imagePreviewMenuBuilder_;
-    std::optional<MenuParam> imagePreviewMenuParam_ = std::nullopt;
+    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
+    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
     DisplayMode barDisplayMode_ = DisplayMode::AUTO;
 };
