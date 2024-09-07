@@ -966,7 +966,7 @@ private:
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
     int32_t GetBufferSizeByDeviceType();
-    void GetTouchpadSlidingStatus(const GestureEvent& event);
+    void UpdateTouchpadSlidingStatus(const GestureEvent& event);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

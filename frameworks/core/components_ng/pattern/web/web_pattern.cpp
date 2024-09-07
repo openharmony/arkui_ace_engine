@@ -595,7 +595,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (!pattern->GetIsFixedNestedScrollMode() || !pattern->GetNestedScrollParent()) {
             pattern->SetParentScrollable();
         }
-        pattern->GetTouchpadSlidingStatus(event);
+        pattern->UpdateTouchpadSlidingStatus(event);
         pattern->GetParentAxis();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
@@ -6522,7 +6522,7 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
     }
 }
 
-void WebPattern::GetTouchpadSlidingStatus(const GestureEvent& event)
+void WebPattern::UpdateTouchpadSlidingStatus(const GestureEvent& event)
 {
     isTouchpadSliding_ = false;
     if ((event.GetInputEventType() == InputEventType::AXIS) &&
