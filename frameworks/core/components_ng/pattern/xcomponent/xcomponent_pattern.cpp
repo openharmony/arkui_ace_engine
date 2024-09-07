@@ -225,8 +225,18 @@ void XComponentPattern::InitSurface()
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
+    if (type_ == XComponentType::TEXTURE) {
+        renderSurface_->RegisterBufferCallback();
+    }
     surfaceId_ = renderSurface_->GetUniqueId();
 
+    UpdateTransformHint();
+}
+
+void XComponentPattern::UpdateTransformHint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
