@@ -275,7 +275,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // notify owning ViewPU and peers of a variable assignment
   // also property/item changes to  ObservedObjects of class object type, which use compat mode
   // Date and Array are notified as if there had been an assignment.
-  protected notifyPropertyHasChangedPU() {
+  protected notifyPropertyHasChangedPU() : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {

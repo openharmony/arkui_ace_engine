@@ -96,7 +96,7 @@ public:
     {
         return false;
     }
-
+    
     virtual bool CheckCustomAvoidKeyboard() const
     {
         return false;
@@ -376,7 +376,8 @@ public:
         return UnsafeRawPtr(frameNode_);
     }
 
-    PipelineContext* GetContext() {
+    PipelineContext* GetContext()
+    {
         auto frameNode = GetUnsafeHostPtr();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
@@ -510,14 +511,6 @@ public:
     virtual void OnFontConfigurationUpdate() {}
     virtual void OnFontScaleConfigurationUpdate() {}
 
-    virtual bool ShouldDelayChildPressedState() const
-    {
-        return false;
-    }
-
-    virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
-    virtual void FireAndCleanScrollingListener() {}
-    virtual void CleanScrollingListener() {}
     virtual void ResetDragOption() {}
 
     virtual int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
@@ -548,6 +541,15 @@ public:
     {
         return -1;
     }
+
+    virtual bool ShouldDelayChildPressedState() const
+    {
+        return false;
+    }
+
+    virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
+    virtual void FireAndCleanScrollingListener() {}
+    virtual void CleanScrollingListener() {}
 
     GestureEventFunc GetLongPressEventRecorder()
     {
@@ -613,11 +615,6 @@ public:
         return false;
     }
 
-    virtual uint32_t GetWindowPatternType() const
-    {
-        return 0;
-    }
-    
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -627,7 +624,7 @@ public:
     {
         return RectF();
     }
-
+    
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
     virtual bool TriggerAutoSaveWhenInvisible()

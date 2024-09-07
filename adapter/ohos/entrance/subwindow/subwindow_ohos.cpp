@@ -201,6 +201,11 @@ void SubwindowOhos::InitContainer()
     subPipelineContextNG->SetupSubRootElement();
     subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContextNG->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
+    subPipelineContextNG->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
+    subPipelineContextNG->SetFollowSystem(parentPipeline->IsFollowSystem());
+    if (!parentPipeline->IsFollowSystem()) {
+        subPipelineContextNG->SetFontScale(1.0f);
+    }
 #else
     if (container->IsCurrentUseNewPipeline()) {
         auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
@@ -211,6 +216,11 @@ void SubwindowOhos::InitContainer()
         subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
         subPipelineContextNG->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
         subPipelineContextNG->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
+        subPipelineContextNG->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
+        subPipelineContextNG->SetFollowSystem(parentPipeline->IsFollowSystem());
+        if (!parentPipeline->IsFollowSystem()) {
+            subPipelineContextNG->SetFontScale(1.0f);
+        }
         return;
     }
     auto subPipelineContext =
@@ -221,6 +231,11 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
     subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
+    subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
+    subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
+    if (!parentPipeline->IsFollowSystem()) {
+        subPipelineContext->SetFontScale(1.0f);
+    }
 #endif
 }
 

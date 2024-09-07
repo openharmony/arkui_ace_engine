@@ -151,6 +151,7 @@ private:
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickEvent_;
@@ -191,7 +192,6 @@ private:
     bool isBackgroundImageInfoFromTheme_ = false;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

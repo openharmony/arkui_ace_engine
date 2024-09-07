@@ -141,12 +141,6 @@ public:
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
-    uint64_t GetNodeId() const override
-    {
-        CHECK_NULL_RETURN(rsNode_, 0);
-        return static_cast<uint64_t>(rsNode_->GetId());
-    }
-
     void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
@@ -487,7 +481,6 @@ protected:
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
-    void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);

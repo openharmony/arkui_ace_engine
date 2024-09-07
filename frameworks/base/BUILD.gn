@@ -35,6 +35,11 @@ template("ace_base_source_set") {
     ]
     external_deps = []
     include_dirs = []
+    if (is_arkui_x) {
+      deps += [ "//third_party/cJSON:cjson_static" ]
+    } else {
+      external_deps += [ "cJSON:cjson" ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -97,12 +102,6 @@ template("ace_base_source_set") {
       ]
     } else {
       external_deps += [ "graphic_2d:librender_service_client" ]
-    }
-
-    if (is_arkui_x) {
-      deps += [ "//third_party/cJSON:cjson_static" ]
-    } else {
-      external_deps += [ "cJSON:cjson" ]
     }
 
     cflags_cc = []

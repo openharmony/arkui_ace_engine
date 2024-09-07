@@ -133,12 +133,12 @@ public:
         return irregularItemInfo_;
     }
 
-    void DumpAdvanceInfo() override;
-
     void ResetGridItemInfo()
     {
         irregularItemInfo_.reset();
     }
+
+    void DumpAdvanceInfo() override;
 
 protected:
     void OnModifyDone() override;

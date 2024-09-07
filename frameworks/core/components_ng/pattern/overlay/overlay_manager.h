@@ -165,8 +165,6 @@ public:
     void ClearToast();
     void ShowToast(const NG::ToastInfo& toastInfo);
 
-    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
-
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
         return dialogMap_;
@@ -425,6 +423,7 @@ public:
     {
         return modalStack_.empty();
     }
+    bool HasModalPage();
     void DismissSheet();
     void DismissContentCover();
     void SheetSpringBack();
@@ -777,6 +776,8 @@ private:
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
+
+    void FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

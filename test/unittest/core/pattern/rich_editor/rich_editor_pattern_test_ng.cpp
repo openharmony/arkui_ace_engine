@@ -298,44 +298,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCloseCustomKeyboard001, T
 }
 
 /**
- * @tc.name: RichEditorPatternTestUpdatePreviewText001
- * @tc.desc: test UpdatePreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string previewTextValue = INIT_VALUE_1;
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-
-    previewRange.start = 0;
-    previewRange.end = -1;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
-
-    previewRange.start = -1;
-    previewRange.end = 0;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
-
-    previewRange.start = 0;
-    previewRange.end = 0;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-
-    previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
-    previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-}
-
-/**
  * @tc.name: RichEditorPatternTestInsertDiffStyleValueInSpan001
  * @tc.desc: test InsertDiffStyleValueInSpan
  * @tc.type: FUNC
@@ -356,47 +318,27 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInsertDiffStyleValueInSpa
 }
 
 /**
- * @tc.name: RichEditorPatternTestCreateTextSpanNode001
- * @tc.desc: test CreateTextSpanNode
+ * @tc.name: RichEditorPatternTestSpanNodeFission001
+ * @tc.desc: test SpanNodeFission
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCreateTextSpanNode001, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestSpanNodeFission001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanNode> spanNode;
+    auto spanNode = AceType::MakeRefPtr<SpanNode>(testSpanNodeId);
+    ASSERT_NE(spanNode, nullptr);
 
-    TextInsertValueInfo info;
     std::string insertValue;
-    UpdateSpanStyle updateSpanStyle;
-    TextStyle textStyle;
+    TextInsertValueInfo info;
 
-    updateSpanStyle.useThemeFontColor = false;
+    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
+    ASSERT_EQ(spanNode->GetSpanItem()->position, -1);
 
-    auto typingStyle = richEditorPattern->typingStyle_;
-    auto typingTextStyle = richEditorPattern->typingTextStyle_;
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = textStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
-
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue, false);
-    EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, false);
-
-    richEditorPattern->typingStyle_ = typingStyle;
-    richEditorPattern->typingTextStyle_ = typingTextStyle;
+    insertValue = "hello\n";
+    richEditorPattern->SpanNodeFission(spanNode, insertValue, info);
+    ASSERT_EQ(spanNode->GetSpanItem()->position, 0);
 }
 
 /**

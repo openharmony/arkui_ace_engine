@@ -89,8 +89,14 @@ template("ace_ohos_standard_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs = [ "$ace_root/interfaces/inner_api/ui_session" ]
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      configs += [
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
+      ]
+    }
 
+    include_dirs = [ "$ace_root/interfaces/inner_api/ui_session" ]
     deps = [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
@@ -118,6 +124,7 @@ template("ace_ohos_standard_source_set") {
       "eventhandler:libeventhandler",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
+      "hilog:libhilog",
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",
@@ -136,10 +143,6 @@ template("ace_ohos_standard_source_set") {
       "zlib:shared_libz",
     ]
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
-    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      external_deps += [ "graphic_2d:librender_service_base" ]
-    }
-
     if (form_fwk_enable) {
       external_deps += [
         "form_fwk:fmskit_native",

@@ -55,6 +55,7 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
+    RefPtr<SpanItem> GetFirstTextSpanItem() const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
 
@@ -72,6 +73,7 @@ private:
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

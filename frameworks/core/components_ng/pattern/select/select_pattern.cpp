@@ -69,22 +69,6 @@ constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
 
 constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 
-static std::string ConvertControlSizeToString(ControlSize controlSize)
-{
-    std::string result;
-    switch (controlSize) {
-        case ControlSize::SMALL:
-            result = "ControlSize.SMALL";
-            break;
-        case ControlSize::NORMAL:
-            result = "ControlSize.NORMAL";
-            break;
-        default:
-            break;
-    }
-    return result;
-}
-
 void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& value)
 {
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -100,6 +84,22 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
             Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, value, index);
         }
     }
+}
+
+static std::string ConvertControlSizeToString(ControlSize controlSize)
+{
+    std::string result;
+    switch (controlSize) {
+        case ControlSize::SMALL:
+            result = "ControlSize.SMALL";
+            break;
+        case ControlSize::NORMAL:
+            result = "ControlSize.NORMAL";
+            break;
+        default:
+            break;
+    }
+    return result;
 }
 } // namespace
 
@@ -776,7 +776,6 @@ void SelectPattern::ResetOptionProps()
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetSelected(false);
         pattern->SetBgColor(optionBgColor_.value_or(selectTheme->GetBackgroundColor()));
         pattern->SetFontSize(optionFont_.FontSize.value_or(selectTheme->GetMenuFontSize()));
         pattern->SetItalicFontStyle(optionFont_.FontStyle.value_or(textTheme->GetTextStyle().GetFontStyle()));
@@ -804,7 +803,6 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
 
         lastSelected->SetBgColor(newSelected->GetBgColor());
-        lastSelected->SetSelected(false);
         lastSelected->UpdateNextNodeDivider(true);
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
@@ -855,7 +853,6 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         auto selectedColor = theme->GetSelectedColor();
         newSelected->SetBgColor(selectedColor);
     }
-    newSelected->SetSelected(true);
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
@@ -960,7 +957,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
-    
+
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
@@ -1253,7 +1250,6 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             if (onSelect) {
                 onSelect(index, value);
             }
-            
         },
         TaskExecutor::TaskType::UI, "ArkUISelectLanguageConfigUpdate");
 }

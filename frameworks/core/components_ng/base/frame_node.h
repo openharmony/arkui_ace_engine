@@ -485,7 +485,7 @@ public:
 
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
@@ -1027,7 +1027,6 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
-    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {
@@ -1146,8 +1145,6 @@ private:
 
     void TriggerShouldParallelInnerWith(
         const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
-
-    void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 

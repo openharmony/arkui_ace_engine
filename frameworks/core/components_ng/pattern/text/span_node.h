@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,9 +175,9 @@ struct CustomSpanPlaceholderInfo {
         return result;
     }
 };
+
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
-
 public:
     SpanItem() = default;
     virtual ~SpanItem()
@@ -206,8 +206,8 @@ public:
     // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
-    bool useThemeFontColor = false;
-    bool useThemeDecorationColor = false;
+    bool useThemeFontColor = true;
+    bool useThemeDecorationColor = true;
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
@@ -316,13 +316,13 @@ enum class PropertyInfo {
     LINE_BREAK_STRATEGY,
     FONTFEATURE,
     BASELINE_OFFSET,
+    MIN_FONT_SCALE,
+    MAX_FONT_SCALE,
     LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
     HALFLEADING,
     VARIABLE_FONT_WEIGHT,
     ENABLE_VARIABLE_FONT_WEIGHT,
-    MIN_FONT_SCALE,
-    MAX_FONT_SCALE,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {

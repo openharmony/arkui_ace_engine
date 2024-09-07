@@ -199,7 +199,6 @@ enum AceLogTag : uint8_t {
     ACE_INPUTKEYFLOW,         // C03951
     ACE_APPBAR,               // C03952
     ACE_SELECT_OVERLAY,       // C03953
-    ACE_CLIPBOARD,            // C03954
     ACE_SECURITY_COMPONENT,   // C03956
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add

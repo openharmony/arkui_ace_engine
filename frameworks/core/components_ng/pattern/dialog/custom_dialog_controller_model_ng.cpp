@@ -158,7 +158,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         } else {
             overlayManager->CloseDialog(dialog);
-            dialogs.pop_back();
         }
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");

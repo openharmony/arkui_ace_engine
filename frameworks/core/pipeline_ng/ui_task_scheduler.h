@@ -118,8 +118,7 @@ public:
         return frameId_;
     }
 
-    bool IsLayouting() const
-    {
+    bool IsLayouting() const {
         return isLayouting_;
     }
 

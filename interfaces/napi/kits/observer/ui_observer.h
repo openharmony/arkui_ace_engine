@@ -133,7 +133,7 @@ private:
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infosForRouterPage_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDensityListeners_;
-    
+
     static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
         abilityContextWillClickListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>

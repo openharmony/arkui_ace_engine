@@ -63,8 +63,7 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE,
-  PLATFORM_VIEW = 999
+  TEXTURE
 }
 
 declare interface XComponentController { }
@@ -78,7 +77,7 @@ declare abstract class ViewPU {
   aboutToReuseInternal(param?: Object): void;
   aboutToRecycleInternal(): void;
   updateDirtyElements(): void;
-  forceCompleteRerender(deep?: boolean): void
+  forceCompleteRerender(deep?: boolean): void;
 }
 
 /**

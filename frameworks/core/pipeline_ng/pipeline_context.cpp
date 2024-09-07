@@ -84,9 +84,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
-#endif
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -620,7 +617,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
-    FlushWindowPatternInfo();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
@@ -646,26 +642,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
-}
-
-void PipelineContext::FlushWindowPatternInfo()
-{
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (!container->IsScenceBoardWindow()) {
-        return;
-    }
-    auto screenNode = screenNode_.Upgrade();
-    if (!screenNode) {
-        return;
-    }
-    ACE_SCOPED_TRACE("FlushWindowPatternInfo");
-    auto instance = WindowSceneLayoutManager::GetInstance();
-    if (instance != nullptr) {
-        instance->FlushWindowPatternInfo(screenNode);
-    }
-#endif
 }
 
 void PipelineContext::InspectDrew()
@@ -1032,7 +1008,6 @@ void PipelineContext::SetupRootElement()
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    fontManager_->AddFontObserver(selectOverlayManager_);
     if (!privacySensitiveManager_) {
         privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     }
@@ -1102,7 +1077,6 @@ void PipelineContext::SetupSubRootElement()
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    fontManager_->AddFontObserver(selectOverlayManager_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = GetOrCreateFocusManager();
     postEventManager_ = MakeRefPtr<PostEventManager>();
@@ -1548,23 +1522,6 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
             node->MarkDirtyNode(needMeasure ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_LAYOUT);
         }
     }
-}
-
-void PipelineContext::CheckVirtualKeyboardHeight()
-{
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_) {
-        return;
-    }
-#endif
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto keyboardArea = container->GetKeyboardSafeArea();
-    auto keyboardHeight = keyboardArea.bottom_.end - keyboardArea.bottom_.start;
-    if (keyboardHeight > 0) {
-        LOGI("Current View has keyboard.");
-    }
-    OnVirtualKeyboardHeightChange(keyboardHeight);
 }
 
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
@@ -2327,13 +2284,9 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     }
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
-    // The page path may not be obtained in the container, use the node tag as the page path.
-    if (node) {
-        const auto& nodeTag = node->GetTag();
-        if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
-            viewDataWrap->SetPageUrl(nodeTag);
-            return true;
-        }
+    if (node && node->GetTag() == V2::DIALOG_ETS_TAG) {
+        viewDataWrap->SetPageUrl(node->GetTag());
+        return true;
     }
     CHECK_NULL_RETURN(pageNode, false);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
@@ -3237,6 +3190,7 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();

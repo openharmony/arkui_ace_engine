@@ -34,7 +34,6 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -178,7 +177,7 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-
+    
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
@@ -651,9 +650,6 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    // AttractionEffect
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
-
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
@@ -683,6 +679,7 @@ public:
     }
 
     virtual void SetSurfaceRotation(bool isLock) {}
+    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
     void SetHandleChildBounds(bool value) {
         handleChildBounds_ = value;
@@ -693,19 +690,12 @@ public:
         return Matrix4();
     }
 
-    virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
-
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
     void SetNeedAnimateFlag(bool isNeedAnimate)
     {
         isNeedAnimate_ = isNeedAnimate;
-    }
-
-    virtual uint64_t GetNodeId() const
-    {
-        return 0;
     }
 
 protected:
@@ -799,7 +789,6 @@ protected:
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
-    virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
     friend class ViewAbstract;

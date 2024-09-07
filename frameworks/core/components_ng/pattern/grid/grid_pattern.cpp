@@ -1544,8 +1544,8 @@ float GridPattern::GetEndOffset()
 {
     auto& info = gridLayoutInfo_;
     float contentHeight = info.lastMainSize_ - info.contentEndPadding_;
-    float mainGap = GetMainGap();
     bool regular = !UseIrregularLayout();
+    float mainGap = GetMainGap();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, regular);
 
     if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
@@ -1878,7 +1878,6 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
 void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     if (UseIrregularLayout() && scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(LAST_ITEM, smooth);
         // for irregular layout, last item might not be at bottom
         gridLayoutInfo_.jumpIndex_ = JUMP_TO_BOTTOM_EDGE;
         auto host = GetHost();

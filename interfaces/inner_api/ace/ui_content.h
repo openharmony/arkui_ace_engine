@@ -407,6 +407,12 @@ public:
     virtual void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
+    virtual void SetStatusBarItemColor(uint32_t color) {};
+
+    virtual void PreLayout() {};
+
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+
     virtual void SetContentNodeGrayScale(float grayscale) {};
     
     virtual sptr<IRemoteObject> GetRemoteObj()
@@ -414,11 +420,6 @@ public:
         return {};
     }
 
-    virtual void PreLayout() {};
-    
-    virtual void SetStatusBarItemColor(uint32_t color) {};
-
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
 };
 
 } // namespace OHOS::Ace
