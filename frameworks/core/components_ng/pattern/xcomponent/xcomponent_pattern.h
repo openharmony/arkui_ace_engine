@@ -375,6 +375,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void UpdateTransformHint();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
 #ifdef OHOS_PLATFORM
