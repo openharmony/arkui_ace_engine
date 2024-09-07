@@ -5849,14 +5849,6 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
-{
-    ACE_DCHECK(nweb_ != nullptr);
-    if (nweb_) {
-        nweb_->SendAccessibilityHoverEvent(x, y);
-    }
-}
-
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
 {
     auto context = context_.Upgrade();
@@ -6562,8 +6554,7 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
-    const std::map<std::string, std::string>& actionArguments)
+void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
 {
     if (!accessibilityState_) {
         return;
@@ -6572,11 +6563,11 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
+        [weak = WeakClaim(this), accessibilityId, nwebAction]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
+            delegate->nweb_->ExecuteAction(accessibilityId, nwebAction);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
 }

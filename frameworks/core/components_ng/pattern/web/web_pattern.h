@@ -604,8 +604,7 @@ public:
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
-        const std::map<std::string, std::string>& actionArguments) const;
+    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
@@ -656,7 +655,6 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const

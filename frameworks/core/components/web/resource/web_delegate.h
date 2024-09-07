@@ -794,7 +794,6 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -943,8 +942,7 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
-        const std::map<std::string, std::string>& actionArguments);
+    void ExecuteAction(int64_t accessibilityId, AceAction action);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
