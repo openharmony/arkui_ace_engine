@@ -734,11 +734,4 @@ void SelectOverlayPattern::SetContentModifierBounds(const RefPtr<SelectOverlayCo
     boundsRect.SetHeight(frameRect.Height() + handleDiameter * 3.0f);
     modifier->SetBoundsRect(boundsRect);
 }
-
-void SelectOverlayPattern::OnDpiConfigurationUpdate()
-{
-    auto host = DynamicCast<SelectOverlayNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    host->UpdateToolBar(true, true);
-}
 } // namespace OHOS::Ace::NG
