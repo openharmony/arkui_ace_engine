@@ -15,7 +15,7 @@
 
 #include "scroll_test_ng.h"
 
-#include "test/mock/base/mock_task_executor.h"
+#include "mock_task_executor.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -42,7 +42,6 @@ void ScrollTestNg::SetUpTestSuite()
     scrollBarTheme->touchWidth_ = Dimension(DEFAULT_TOUCH_WIDTH, DimensionUnit::VP);
     scrollBarTheme->activeWidth_ = Dimension(DEFAULT_ACTIVE_WIDTH, DimensionUnit::VP);
     scrollBarTheme->normalWidth_ = Dimension(DEFAULT_NORMAL_WIDTH, DimensionUnit::VP);
-    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockAnimationManager::Enable(true);
 }
 
@@ -62,7 +61,9 @@ void ScrollTestNg::TearDown()
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     positionController_ = nullptr;
+    contentChildren_.clear();
     scrollBar_ = nullptr;
+    scrollable_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     MockAnimationManager::GetInstance().Reset();
@@ -78,6 +79,14 @@ void ScrollTestNg::GetScroll()
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ScrollAccessibilityProperty>();
     positionController_ = pattern_->GetScrollPositionController();
+}
+
+RefPtr<PaintWrapper> ScrollTestNg::CreateScrollDone(const RefPtr<FrameNode>& frameNode)
+{
+    auto paintWrapper = CreateDone(frameNode);
+    scrollBar_ = pattern_->GetScrollBar();
+    scrollable_ = pattern_->GetScrollableEvent()->GetScrollable();
+    return paintWrapper;
 }
 
 ScrollModelNG ScrollTestNg::CreateScroll()
@@ -101,7 +110,7 @@ void ScrollTestNg::CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimen
     ViewAbstract::SetHeight(CalcLength(800.f));
     model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
     CreateContent(3000.f);
-    CreateDone();
+    CreateScrollDone();
 }
 
 void ScrollTestNg::CreateContent(float mainSize)
@@ -130,36 +139,14 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
     }
 }
 
-void ScrollTestNg::Touch(TouchType touchType, Offset offset, SourceType sourceType)
+void ScrollTestNg::MouseOnScroll(MouseButton mouseButton, MouseAction mouseAction, Offset localLocation)
 {
-    TouchLocationInfo locationInfo(1);
-    locationInfo.SetTouchType(touchType);
-    locationInfo.SetLocalLocation(offset);
-    TouchEventInfo eventInfo("touch");
-    eventInfo.SetSourceDevice(sourceType);
-    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
-    auto touchEvent = pattern_->GetScrollBar()->touchEvent_->GetTouchEventCallback();
-    touchEvent(eventInfo);
-}
-
-void ScrollTestNg::Mouse(Offset location, MouseButton mouseButton, MouseAction mouseAction)
-{
+    auto mouseEvent = pattern_->mouseEvent_->GetOnMouseEventFunc();
     MouseInfo mouseInfo;
-    mouseInfo.SetLocalLocation(location);
     mouseInfo.SetButton(mouseButton);
     mouseInfo.SetAction(mouseAction);
-    auto mouseEventHub = frameNode_->GetOrCreateInputEventHub();
-    RefPtr<InputEvent> inputEvent = mouseEventHub->mouseEventActuator_->inputEvents_.front();
-    auto mouseEvent = inputEvent->GetOnMouseEventFunc();
+    mouseInfo.SetLocalLocation(localLocation);
     mouseEvent(mouseInfo);
-}
-
-void ScrollTestNg::Hover(bool isHover)
-{
-    auto hoverEventHub = frameNode_->GetOrCreateInputEventHub();
-    RefPtr<InputEvent> inputEvent = hoverEventHub->hoverEventActuator_->inputEvents_.front();
-    auto hoverEvent = inputEvent->GetOnHoverEventFunc();
-    hoverEvent(isHover);
 }
 
 bool ScrollTestNg::OnScrollCallback(float offset, int32_t source)
@@ -200,6 +187,16 @@ AssertionResult ScrollTestNg::VerifyTickPosition(float expectOffset)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     return IsEqual(GetChildY(frameNode_, 0), expectOffset);
+}
+
+void ScrollTestNg::TouchOnScroll(TouchType touchType)
+{
+    TouchLocationInfo locationInfo(1);
+    locationInfo.SetTouchType(touchType);
+    TouchEventInfo eventInfo("touch");
+    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
+    auto touchEvent = pattern_->touchEvent_->GetTouchEventCallback();
+    touchEvent(eventInfo);
 }
 
 void ScrollTestNg::DragStart(GestureEvent& gesture)
@@ -250,7 +247,7 @@ HWTEST_F(ScrollTestNg, HandleDrag001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -260,7 +257,7 @@ HWTEST_F(ScrollTestNg, HandleDrag001, TestSize.Level1)
     DragStart(gesture);
 
     /**
-     * @tc.steps: step2. DragUpdate over scroll
+     * @tc.steps: step2. DragUpdate
      * @tc.expected: Scroll with drag
      */
     const float dragDelta = -10.f;
@@ -272,7 +269,7 @@ HWTEST_F(ScrollTestNg, HandleDrag001, TestSize.Level1)
      * @tc.steps: step3. DragEnd
      * @tc.expected: Scroll back with animation
      */
-    gesture.SetMainVelocity(DRAG_VELOCITY);
+    gesture.SetMainVelocity(-DRAG_VELOCITY);
     DragEnd(gesture);
     EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
 }
@@ -287,7 +284,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step1. DragStart
@@ -326,7 +323,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll002, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -376,7 +373,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll003, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent(SCROLL_HEIGHT);
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
 
@@ -421,7 +418,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll004, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     CreateContent(SCROLL_HEIGHT);
-    CreateDone();
+    CreateScrollDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
 
@@ -465,7 +462,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll005, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step2. DragStart
@@ -504,7 +501,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll006, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -549,7 +546,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll007, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step2. DragStart
@@ -587,7 +584,7 @@ HWTEST_F(ScrollTestNg, HandleDragOverScroll008, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -632,7 +629,7 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
 
     /**
@@ -642,7 +639,7 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
 
     /**
@@ -652,7 +649,7 @@ HWTEST_F(ScrollTestNg, AttrScrollable001, TestSize.Level1)
     model = CreateScroll();
     model.SetAxis(Axis::NONE);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
 }
 
@@ -668,7 +665,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
      * @tc.expected: currentOffset would not change
      */
     CreateScroll();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE, 0.f));
 
     /**
@@ -678,7 +675,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
     ClearOldNodes();
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE, 0.f));
 
     /**
@@ -688,7 +685,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
     ClearOldNodes();
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->currentOffset_ = 10.f;
     EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_MAIN_SIZE, SCROLL_FROM_UPDATE, 0.f));
 }
@@ -705,7 +702,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
     EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_MAIN_SIZE, SCROLL_FROM_BAR, 0.f));
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_ROTATE, ITEM_MAIN_SIZE));
@@ -719,7 +716,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
     EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_MAIN_SIZE, SCROLL_FROM_BAR, 0.f));
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_ROTATE, ITEM_MAIN_SIZE));
@@ -733,7 +730,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->SetDirection(FlexDirection::ROW_REVERSE);
     FlushLayoutTask(frameNode_, true);
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
@@ -749,7 +746,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_FALSE(pattern_->IsRestrictBoundary());
     EXPECT_TRUE(UpdateAndVerifyPosition(-ITEM_MAIN_SIZE, SCROLL_FROM_JUMP, ITEM_MAIN_SIZE));
     EXPECT_TRUE(UpdateAndVerifyPosition(ITEM_MAIN_SIZE, SCROLL_FROM_BAR, 0.f));
@@ -785,7 +782,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset003, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     pattern_->isAnimationStop_ = false;
 
     /**
@@ -820,7 +817,7 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset004, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     /**
      * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
      * @tc.expected: the return value of UpdateCurrentOffset is true.
@@ -846,7 +843,7 @@ HWTEST_F(ScrollTestNg, Layout001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::NONE);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     layoutProperty_->UpdateAlignment(Alignment::CENTER);
     FlushLayoutTask(frameNode_);
     auto col = frameNode_->GetChildAtIndex(0);
@@ -871,7 +868,7 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
     CreateScroll();
     CreateContent();
     CreateContentChild();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(ScrollToNode(contentChildren_[3], 0));
     EXPECT_TRUE(ScrollToNode(contentChildren_[4], ITEM_MAIN_SIZE));
     EXPECT_TRUE(ScrollToNode(contentChildren_[5], ITEM_MAIN_SIZE * 2));
@@ -897,7 +894,7 @@ HWTEST_F(ScrollTestNg, ScrollToNode002, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
     CreateContentChild();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(ScrollToNode(contentChildren_[3], 160.f));
     EXPECT_TRUE(ScrollToNode(contentChildren_[4], 260.f));
     EXPECT_TRUE(ScrollToNode(contentChildren_[5], 360.f));
@@ -919,7 +916,7 @@ HWTEST_F(ScrollTestNg, ScrollToNode003, TestSize.Level1)
     CreateScroll();
     CreateContent();
     CreateContentChild();
-    CreateDone();
+    CreateScrollDone();
     pattern_->isAnimationStop_ = false;
     EXPECT_FALSE(pattern_->AnimateStoped());
     EXPECT_TRUE(ScrollToNode(contentChildren_[8], 0.f));
@@ -934,23 +931,22 @@ HWTEST_F(ScrollTestNg, Pattern003, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step1. When scrollBar is not OFF
      * @tc.expected: outBoundary_ would be set
      */
     pattern_->HandleScrollBarOutBoundary(100.f);
-    auto scrollBar = pattern_->GetScrollBar();
-    EXPECT_EQ(scrollBar->outBoundary_, 100.f);
+    EXPECT_EQ(scrollBar_->outBoundary_, 100.f);
 
     /**
      * @tc.steps: step1. When scrollBar is OFF
      * @tc.expected: outBoundary_ would not be set
      */
-    scrollBar->displayMode_ = DisplayMode::OFF;
+    scrollBar_->displayMode_ = DisplayMode::OFF;
     pattern_->HandleScrollBarOutBoundary(200.f);
-    EXPECT_EQ(scrollBar->outBoundary_, 100.f);
+    EXPECT_EQ(scrollBar_->outBoundary_, 100.f);
 }
 
 /**
@@ -962,7 +958,7 @@ HWTEST_F(ScrollTestNg, Test001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent(600.f);
-    CreateDone();
+    CreateScrollDone();
 
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
     OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
@@ -1036,7 +1032,7 @@ HWTEST_F(ScrollTestNg, ScrollTest006, TestSize.Level1)
     auto scrollProxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(scrollProxy);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
 
@@ -1091,7 +1087,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     double friction = -1;
     ScrollModelNG model = CreateScroll();
     model.SetFriction(friction);
-    CreateDone();
+    CreateScrollDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
 
     /**
@@ -1102,7 +1098,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     ClearOldNodes();
     model = CreateScroll();
     model.SetFriction(friction);
-    CreateDone();
+    CreateScrollDone();
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), friction);
 }
 
@@ -1471,7 +1467,7 @@ HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     // need dpi to be 1
     /**
@@ -1502,7 +1498,7 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step2. Get invalid ScrollItem Rect.
@@ -1515,7 +1511,7 @@ HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
      * @tc.steps: step3. Get valid ScrollItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, CONTENT_MAIN_SIZE, FILL_LENGTH.Value() * SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, CONTENT_MAIN_SIZE, SCROLL_HEIGHT)));
 }
 
 /**
@@ -1532,7 +1528,7 @@ HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     float scrollWidth = 150.0f;
     EXPECT_FALSE(layoutProperty_->GetScrollWidth().has_value());
     layoutProperty_->UpdateScrollWidth(scrollWidth);
@@ -1554,7 +1550,7 @@ HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_FALSE(pattern_->IsWidthModifiedBySelect());
     EXPECT_FALSE(pattern_->IsSelectScroll());
     /**
@@ -1582,7 +1578,7 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     pattern_->SetIsSelectScroll(true);
     FlushLayoutTask(frameNode_);
@@ -1608,7 +1604,7 @@ HWTEST_F(ScrollTestNg, Measure003, TestSize.Level1)
      * @tc.steps: step1. Create scroll without children
      */
     CreateScroll();
-    CreateDone();
+    CreateScrollDone();
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
     auto expectSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
     EXPECT_TRUE(IsEqual(scrollSize, expectSize));
@@ -1640,7 +1636,7 @@ HWTEST_F(ScrollTestNg, SelectScroll002, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     auto ScrollWidth = pattern_->GetSelectScrollWidth();
     ASSERT_NE(ScrollWidth, 0.0);
 }
@@ -1658,7 +1654,7 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEnablePaging(true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     auto viewPortLength = pattern_->GetMainContentSize();
     pattern_->scrollableDistance_ = viewPortLength * 10;
     pattern_->currentOffset_ = -viewPortLength * 5 - 10.0f;
@@ -1725,7 +1721,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEnablePaging(true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
     EXPECT_EQ(pattern_->IsEnablePagingValid(), true);
 
@@ -1746,7 +1742,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     model.SetEnablePaging(true);
     model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
@@ -1758,7 +1754,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
     model.SetEnablePaging(true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
     /**
@@ -1770,7 +1766,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     model.SetEnablePaging(true);
     model.SetEnablePaging(false);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
     EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
 
@@ -1783,7 +1779,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
     model.SetEnablePaging(false);
     model.SetEnablePaging(true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
     EXPECT_EQ(pattern_->IsEnablePagingValid(), true);
 }
@@ -1801,7 +1797,7 @@ HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
      */
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
 
     /**
@@ -1812,7 +1808,7 @@ HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(ITEM_MAIN_SIZE)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -ITEM_MAIN_SIZE);
 
     /**
@@ -1824,7 +1820,7 @@ HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
     model.SetInitialOffset(OffsetT(CalcDimension(ITEM_MAIN_SIZE), CalcDimension(0.f)));
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -ITEM_MAIN_SIZE);
 
     /**
@@ -1836,7 +1832,7 @@ HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
     auto offset = Dimension(0.1, DimensionUnit::PERCENT);
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -SCROLL_HEIGHT * 0.1f);
 
     /**
@@ -1848,7 +1844,7 @@ HWTEST_F(ScrollTestNg, InitialOffset001, TestSize.Level1)
     model.SetInitialOffset(OffsetT(CalcDimension(offset), CalcDimension(0.f)));
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -SCROLL_WIDTH * 0.1f);
 }
 
@@ -1866,7 +1862,7 @@ HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(2 * ITEM_MAIN_SIZE)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -2 * ITEM_MAIN_SIZE);
 
     /**
@@ -1877,7 +1873,7 @@ HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
     model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(100 * ITEM_MAIN_SIZE)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -1888,7 +1884,7 @@ HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
     model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(-ITEM_MAIN_SIZE)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
 
     /**
@@ -1900,7 +1896,7 @@ HWTEST_F(ScrollTestNg, InitialOffset002, TestSize.Level1)
     auto offset = Dimension(100, DimensionUnit::PERCENT);
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->currentOffset_, -VERTICAL_SCROLLABLE_DISTANCE);
 }
 
@@ -1931,7 +1927,7 @@ HWTEST_F(ScrollTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
     EXPECT_EQ(pattern_->IsEnablePagingValid(), false);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
 
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_TOP);
     ScrollTo(ITEM_MAIN_SIZE);
@@ -1963,7 +1959,7 @@ HWTEST_F(ScrollTestNg, Alignment001, TestSize.Level1)
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     CreateScroll();
     CreateContent(100.f); // Set content height less than scroll height
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step1. Set content width less than scroll width
@@ -2014,7 +2010,7 @@ HWTEST_F(ScrollTestNg, Alignment002, TestSize.Level1)
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     CreateScroll();
     CreateContent(); // Set content height less than scroll height
-    CreateDone();
+    CreateScrollDone();
 
     /**
      * @tc.steps: step1. Set content width greater than scroll width
@@ -2064,7 +2060,7 @@ HWTEST_F(ScrollTestNg, ToJsonValue001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(10.f), CalcDimension(20.f)));
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetInitialOffset().GetX().ToString(), "10.00px");
     EXPECT_EQ(pattern_->GetInitialOffset().GetY().ToString(), "20.00px");
 
@@ -2107,6 +2103,6 @@ HWTEST_F(ScrollTestNg, RTL001, TestSize.Level1)
      * @tc.steps: step1. Set content width less than scroll width
      */
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(SCROLL_WIDTH/4, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(SCROLL_WIDTH / 4, 0.f)));
 }
 } // namespace OHOS::Ace::NG
