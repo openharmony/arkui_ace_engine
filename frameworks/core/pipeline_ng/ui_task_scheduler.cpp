@@ -127,11 +127,6 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
-    if (isLayouting_) {
-        LOGF("you are already in flushing layout!");
-        abort();
-    }
-
 #ifdef FFRT_EXISTS
     // Pause GC during long frame
     std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();

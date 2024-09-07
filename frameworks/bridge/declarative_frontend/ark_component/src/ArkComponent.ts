@@ -15,11 +15,19 @@
 
 /// <reference path='./import.ts' />
 const arkUINativeModule = globalThis.getArkUINativeModule();
-function getUINativeModule(): any {
+function getUINativeModule(): Object {
   if (arkUINativeModule) {
     return arkUINativeModule;
   }
-  return arkUINativeModule;
+  return globalThis.getArkUINativeModule();
+}
+ 
+const arkUINativeAdvancedModule = globalThis.getArkUIAdvancedModule();
+function getUINativeAdvancedModule(): Object {
+  if (arkUINativeAdvancedModule) {
+    return arkUINativeAdvancedModule;
+  }
+  return globalThis.getArkUIAdvancedModule();
 }
 
 enum ModifierType {
@@ -102,8 +110,10 @@ const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
 function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode): void {
-  if (modifier.applyPressedAttribute == undefined && modifier.applyFocusedAttribute == undefined &&
-    modifier.applyDisabledAttribute == undefined && modifier.applySelectedAttribute == undefined) {
+  if (modifier.applyPressedAttribute === undefined &&
+    modifier.applyFocusedAttribute === undefined &&
+    modifier.applyDisabledAttribute === undefined &&
+    modifier.applySelectedAttribute === undefined) {
     return;
   }
   let state = 0;
@@ -247,7 +257,11 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -265,7 +279,11 @@ class WidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -334,7 +352,11 @@ class HeightModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -642,7 +664,11 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -762,7 +788,11 @@ class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -1700,7 +1730,11 @@ class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringSt
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -2136,9 +2170,6 @@ class TouchableModifier extends ModifierWithKey<boolean> {
 }
 
 class MarginModifier extends ModifierWithKey<ArkPadding> {
-  constructor(value: ArkPadding) {
-    super(value);
-  }
   static identity: Symbol = Symbol('margin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2158,9 +2189,6 @@ class MarginModifier extends ModifierWithKey<ArkPadding> {
 }
 
 class PaddingModifier extends ModifierWithKey<ArkPadding> {
-  constructor(value: ArkPadding) {
-    super(value);
-  }
   static identity: Symbol = Symbol('padding');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2180,9 +2208,6 @@ class PaddingModifier extends ModifierWithKey<ArkPadding> {
 }
 
 class VisibilityModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('visibility');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2258,9 +2283,6 @@ class AccessibilityDescriptionModifier extends ModifierWithKey<string> {
 }
 
 class DirectionModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('direction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2343,9 +2365,6 @@ class GridOffsetModifier extends ModifierWithKey<number> {
 }
 
 class AlignSelfModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('alignSelf');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2360,9 +2379,6 @@ class AlignSelfModifier extends ModifierWithKey<number> {
 }
 
 class SizeModifier extends ModifierWithKey<SizeOptions> {
-  constructor(value: SizeOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('size');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2379,9 +2395,6 @@ class SizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 class DisplayPriorityModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('displayPriority');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2544,10 +2557,10 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOpt
   }                       
 
   checkObjectDiff(): boolean {
-    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
-      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
-      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree &&
+      this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff &&
+      this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB &&
+      this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
 
@@ -2566,10 +2579,10 @@ class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
-      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
-      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree &&
+      this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff &&
+      this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB &&
+      this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
 
@@ -2588,10 +2601,10 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
   }
 
   checkObjectDiff(): boolean {
-    return !(this.value.mode === this.stageValue.mode
-      && this.value.numberBadge === this.stageValue.numberBadge
-      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
+    return !(this.value.mode === this.stageValue.mode &&
+      this.value.numberBadge === this.stageValue.numberBadge &&
+      this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled &&
+      this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 
@@ -2723,9 +2736,6 @@ class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangl
   }
 }
 class FlexGrowModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('flexGrow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2740,9 +2750,6 @@ class FlexGrowModifier extends ModifierWithKey<number> {
 }
 
 class FlexShrinkModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('flexShrink');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2757,9 +2764,6 @@ class FlexShrinkModifier extends ModifierWithKey<number> {
 }
 
 class AspectRatioModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('aspectRatio');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2774,9 +2778,6 @@ class AspectRatioModifier extends ModifierWithKey<number> {
 }
 
 class ConstraintSizeModifier extends ModifierWithKey<ConstraintSizeOptions> {
-  constructor(value: ConstraintSizeOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('constraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -2796,9 +2797,6 @@ class ConstraintSizeModifier extends ModifierWithKey<ConstraintSizeOptions> {
 }
 
 class FlexBasisModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('flexBasis');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -3089,7 +3087,6 @@ function parseWithDefaultNumber(val, defaultValue) {
   }
   else { return defaultValue; }
 }
-
 function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
   modifiers: Map<Symbol, AttributeModifierWithKey>,
   identity: Symbol,
@@ -3130,6 +3127,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _instanceId: number;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
+    this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
@@ -3592,7 +3590,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       }
     }
     if (!isUndefined(value?.dashGap) && value?.dashGap !== null) {
-      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) || isObject(value.dashGap) && isNumber(value.dashGap.value)) {
+      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) ||
+        isObject(value.dashGap) && isNumber(value.dashGap.value)) {
         arkBorder.arkDashGap.left = value.dashGap;
         arkBorder.arkDashGap.right = value.dashGap;
         arkBorder.arkDashGap.top = value.dashGap;
@@ -3605,7 +3604,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       }
     }
     if (!isUndefined(value?.dashWidth) && value?.dashWidth !== null) {
-      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) || isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
+      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) ||
+        isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
         arkBorder.arkDashWidth.left = value.dashWidth;
         arkBorder.arkDashWidth.right = value.dashWidth;
         arkBorder.arkDashWidth.top = value.dashWidth;
@@ -4446,7 +4446,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       this._modifiersWithKeys, FocusScopePriorityModifier.identity, FocusScopePriorityModifier, arkFocusScopePriority);
     return this;
   }
-  pixelRound(value:PixelRoundPolicy):this {
+
+  pixelRound(value:PixelRoundPolicy): this {
     modifierWithKey(this._modifiersWithKeys, PixelRoundModifier.identity, PixelRoundModifier, value);
   }
   focusBox(value:FocusBoxStyle):this {
@@ -4467,12 +4468,12 @@ const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '
 class UICommonEvent {
   private _nodePtr: Object | null;
   private _instanceId: number;
+  private _onAttachEvent?: () => void;
+  private _onDetachEvent?: () => void;
   private _clickEvent?: (event: ClickEvent) => void;
   private _touchEvent?: (event: TouchEvent) => void;
   private _onAppearEvent?: () => void;
   private _onDisappearEvent?: () => void;
-  private _onAttachEvent?: () => void;
-  private _onDetachEvent?: () => void;
   private _onKeyEvent?: (event: KeyEvent) => void;
   private _onFocusEvent?: () => void;
   private _onBlur?: () => void;
