@@ -78,7 +78,7 @@ declare abstract class ViewPU {
   aboutToReuseInternal(param?: Object): void;
   aboutToRecycleInternal(): void;
   updateDirtyElements(): void;
-  forceCompleteRerender(deep?: boolean): void
+  forceCompleteRerender(deep?: boolean): void;
 }
 
 /**
