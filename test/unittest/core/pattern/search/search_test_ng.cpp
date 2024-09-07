@@ -1504,6 +1504,32 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test Oncolorconfigurationupdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_NE(pattern->cancelButtonNode_, nullptr);
+    auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor(), Color::RED);
+    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(pattern->cancelButtonNode_->GetChildren().front());
+    ASSERT_NE(cancelButtonTextNode, nullptr);
+    auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(cancelButtonTextLayout, nullptr);
+    EXPECT_EQ(cancelButtonTextLayout->GetTextColor(), Color::RED);
+}
+
+/**
  * @tc.name: MaxLength001
  * @tc.desc: test search maxLength
  * @tc.type: FUNC
