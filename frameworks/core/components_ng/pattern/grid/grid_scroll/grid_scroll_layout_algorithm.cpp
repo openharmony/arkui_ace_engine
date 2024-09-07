@@ -353,7 +353,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
                 offset.SetY(crossOffset);
             }
             auto wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
-            if (!wrapper) {
+            if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
             auto frSize = itemsCrossSize_.find(iter.first);
@@ -427,7 +427,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
                 offset.SetY(crossOffset);
             }
             auto wrapper = layoutWrapper->GetChildByIndex(itemIdex, true);
-            if (!wrapper) {
+            if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
                 continue;
             }
             auto frSize = itemsCrossSize_.find(iter.first);
@@ -1838,7 +1838,7 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
 
     auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
     if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
-                                         GetCrossAxisSize(childConstraint.maxSize, axis_))) {
+        GetCrossAxisSize(childConstraint.maxSize, axis_))) {
         auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
         if (layoutAlgorithmWrapper->SkipMeasure()) {
             layoutAlgorithmWrapper->SetNeedMeasure();
@@ -1955,63 +1955,6 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
         }
     }
     return firstIndex;
-}
-
-void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
-{
-    // Save the global variable at this moment.
-    auto tempGridLayoutInfo = gridLayoutInfo_;
-
-    // When the data is supplied again, there is an update of the original global variable gridLayoutInfo_. Therefore,
-    // each time you supply the data, you must re-complete the data based on the current screen data
-    auto startLineIndex = tempGridLayoutInfo.startMainLineIndex_;
-    auto startIndex = tempGridLayoutInfo.startIndex_;
-    auto endLineIndex = tempGridLayoutInfo.endMainLineIndex_;
-    auto endIndex = tempGridLayoutInfo.endIndex_;
-    auto targetIndex = tempGridLayoutInfo.targetIndex_;
-    // Remove redundant data that is visible off-screen. This is the key to completing data accurately
-    DeleteItemsOutOfScope(gridLayoutInfo_.lineHeightMap_, startLineIndex, endLineIndex);
-    DeleteItemsOutOfScope(gridLayoutInfo_.gridMatrix_, startLineIndex, endLineIndex);
-
-    // The continuous grid information is saved and used in the GridPattern to calculate the scroll distance
-    // Complete all data with indexes from startIndex to 0
-    if (startIndex > 0) {
-        // The start line when completing the data
-        currentMainLineIndex_ = startLineIndex;
-        float lineHeight = 0.0f;
-        do {
-            lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
-        } while (GreatOrEqual(lineHeight, 0.0));
-    }
-
-    // Complete the data from endIndex+1 to targetIndex_
-    auto lineHeight = 0.f;
-    if (endIndex < targetIndex) {
-        // The start line when completing the data
-        currentMainLineIndex_ = endLineIndex;
-        int32_t targetLineIndex = 0;
-        do {
-            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-        } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
-    }
-
-    if (gridLayoutInfo_.extraOffset_.has_value() && Negative(gridLayoutInfo_.extraOffset_.value())) {
-        auto extraOffset = -gridLayoutInfo_.extraOffset_.value();
-        gridLayoutInfo_.GetLineIndexByIndex(targetIndex.value(), currentMainLineIndex_);
-        lineHeight = gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_];
-        auto heightForExtralOffset = lineHeight + mainGap_;
-        while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
-            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-            heightForExtralOffset += (lineHeight + mainGap_);
-        }
-        ACE_SCOPED_TRACE(
-            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtralOffset:%f, LineIndexForExtralOffset:%d",
-            extraOffset, heightForExtralOffset, currentMainLineIndex_);
-    }
-
-    // Once the data is completed, the global variables need to be returned
-    scrollGridLayoutInfo_ = gridLayoutInfo_;
-    gridLayoutInfo_ = tempGridLayoutInfo;
 }
 
 void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -2256,6 +2199,63 @@ void GridScrollLayoutAlgorithm::CreateCachedChildConstraint(
     cachedChildConstraint_ = CreateChildConstraint(mainSize, crossSize, gridLayoutProperty, 0, 1);
 }
 
+void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
+{
+    // Save the global variable at this moment.
+    auto tempGridLayoutInfo = gridLayoutInfo_;
+
+    // When the data is supplied again, there is an update of the original global variable gridLayoutInfo_. Therefore,
+    // each time you supply the data, you must re-complete the data based on the current screen data
+    auto startLineIndex = tempGridLayoutInfo.startMainLineIndex_;
+    auto startIndex = tempGridLayoutInfo.startIndex_;
+    auto endLineIndex = tempGridLayoutInfo.endMainLineIndex_;
+    auto endIndex = tempGridLayoutInfo.endIndex_;
+    auto targetIndex = tempGridLayoutInfo.targetIndex_;
+    // Remove redundant data that is visible off-screen. This is the key to completing data accurately
+    DeleteItemsOutOfScope(gridLayoutInfo_.lineHeightMap_, startLineIndex, endLineIndex);
+    DeleteItemsOutOfScope(gridLayoutInfo_.gridMatrix_, startLineIndex, endLineIndex);
+
+    // The continuous grid information is saved and used in the GridPattern to calculate the scroll distance
+    // Complete all data with indexes from startIndex to 0
+    if (startIndex > 0) {
+        // The start line when completing the data
+        currentMainLineIndex_ = startLineIndex;
+        float lineHeight = 0.0f;
+        do {
+            lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
+        } while (GreatOrEqual(lineHeight, 0.0));
+    }
+
+    // Complete the data from endIndex+1 to targetIndex_
+    auto lineHeight = 0.f;
+    if (endIndex < targetIndex) {
+        // The start line when completing the data
+        currentMainLineIndex_ = endLineIndex;
+        int32_t targetLineIndex = 0;
+        do {
+            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+        } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
+    }
+
+    if (gridLayoutInfo_.extraOffset_.has_value() && Negative(gridLayoutInfo_.extraOffset_.value())) {
+        auto extraOffset = -gridLayoutInfo_.extraOffset_.value();
+        gridLayoutInfo_.GetLineIndexByIndex(targetIndex.value(), currentMainLineIndex_);
+        lineHeight = gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_];
+        auto heightForExtralOffset = lineHeight + mainGap_;
+        while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+            heightForExtralOffset += (lineHeight + mainGap_);
+        }
+        ACE_SCOPED_TRACE(
+            "SupplyAllData2ZeroIndex, extraOffset_:%f, heightForExtralOffset:%f, LineIndexForExtralOffset:%d",
+            extraOffset, heightForExtralOffset, currentMainLineIndex_);
+    }
+
+    // Once the data is completed, the global variables need to be returned
+    scrollGridLayoutInfo_ = gridLayoutInfo_;
+    gridLayoutInfo_ = tempGridLayoutInfo;
+}
+
 void GridScrollLayoutAlgorithm::UpdateMainLineOnReload(int32_t startIdx)
 {
     auto& info = gridLayoutInfo_;
@@ -2313,10 +2313,11 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         auto it = gridLayoutInfo_.FindInMatrix(updateIdx);
         it = gridLayoutInfo_.FindStartLineInMatrix(it, updateIdx);
         if (it != gridLayoutInfo_.gridMatrix_.end()) {
-            gridLayoutInfo_.ClearMatrixToEnd(updateIdx, it->first);
-            gridLayoutInfo_.ClearHeightsFromMatrix(it->first);
+            int32_t updateLineIndex = it->first;
+            gridLayoutInfo_.ClearMatrixToEnd(updateIdx, updateLineIndex);
+            gridLayoutInfo_.ClearHeightsFromMatrix(updateLineIndex);
             if (updateIdx <= gridLayoutInfo_.startIndex_) {
-                ReloadFromUpdateIdxToStartIndex(mainSize, crossSize, it->first, layoutWrapper);
+                ReloadFromUpdateIdxToStartIndex(mainSize, crossSize, updateLineIndex, layoutWrapper);
             }
         }
     }
