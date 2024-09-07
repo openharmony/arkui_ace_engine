@@ -1683,7 +1683,7 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         borderColors.topColor = colorProperty.topColor;
     }
     if (colorProperty.bottomColor.has_value()) {
-        borderColors.topColor = colorProperty.bottomColor;
+        borderColors.bottomColor = colorProperty.bottomColor;
     }
     borderColors.multiValued = true;
     target->UpdateBorderColor(borderColors);
