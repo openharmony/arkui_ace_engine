@@ -246,6 +246,7 @@ private:
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
+    LayoutConstraintF layoutConstraint_;
 
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;

@@ -1401,6 +1401,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (auto& pos : itemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
         if (!wrapper) {
+            LOGI("wrapper is out of boundary");
             continue;
         }
         pos.second.startPos -= currentOffset_;
@@ -1448,6 +1449,7 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
         case OHOS::Ace::V2::ListItemAlign::END:
             return delta;
         default:
+            LOGW("Invalid ListItemAlign: %{public}d", listItemAlign_);
             return 0.0f;
     }
 }
