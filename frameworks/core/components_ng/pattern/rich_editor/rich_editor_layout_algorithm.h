@@ -73,6 +73,7 @@ private:
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

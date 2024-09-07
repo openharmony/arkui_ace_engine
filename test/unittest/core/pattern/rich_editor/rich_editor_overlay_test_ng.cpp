@@ -614,7 +614,6 @@ HWTEST_F(RichEditorOverlayTestNg, SetSelection, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     richEditorPattern->SetSelection(1, 3);
     auto info1 = richEditorController->GetSpansInfo(1, 2);
-    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
     for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {

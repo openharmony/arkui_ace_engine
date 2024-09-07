@@ -277,6 +277,7 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
     }
+
     return style;
 }
 
