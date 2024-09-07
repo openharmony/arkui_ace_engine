@@ -643,6 +643,12 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+    {
+        tag_ = tag;
+        tag_type_ = type;
+    }
+
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
     {
         return native_video_player_config_;
@@ -651,12 +657,6 @@ public:
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     {
         native_video_player_config_ = std::make_tuple(enable, shouldOverlay);
-    }
-
-    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
-    {
-        tag_ = tag;
-        tag_type_ = type;
     }
 
     void SetSmoothDragResizeEnabled(bool isEnabled)

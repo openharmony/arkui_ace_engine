@@ -76,7 +76,7 @@ struct WebMenuOptionsParam {
     std::vector<NG::MenuOptionsParam> menuOption;
     bool operator==(const WebMenuOptionsParam& webMenuOption) const
     {
-        return menuOption.data() == webMenuOption.menuOption.data();
+        return false;
     }
 };
 
