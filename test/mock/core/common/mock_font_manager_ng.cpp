@@ -15,7 +15,6 @@
 
 #include "test/mock/core/common/mock_font_manager.h"
 
-#include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
 
 namespace OHOS::Ace {
@@ -64,8 +63,4 @@ const std::string& FontManager::GetAppCustomFont() const
 {
     return appCustomFont_;
 }
-
-void FontManager::AddFontObserver(WeakPtr<FontChangeObserver> node) {}
-
-void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node) {}
 } // namespace OHOS::Ace
