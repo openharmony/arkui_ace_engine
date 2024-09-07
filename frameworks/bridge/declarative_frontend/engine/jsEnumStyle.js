@@ -1629,6 +1629,14 @@ var ScrollSizeMode ;
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
 })(ScrollSizeMode || (ScrollSizeMode = {}));
 
+var SheetKeyboardAvoidMode;
+(function (SheetKeyboardAvoidMode) {
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
