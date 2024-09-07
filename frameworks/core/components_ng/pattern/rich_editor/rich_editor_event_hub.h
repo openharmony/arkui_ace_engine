@@ -136,7 +136,6 @@ public:
     VerticalAlign GetVerticalAlign() const;
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
-
     void SetBorderRadius(const std::string& borderRadius)
     {
         borderRadius_ = borderRadius;
@@ -303,7 +302,7 @@ public:
     void SetOnDeleteComplete(std::function<void()>&& func);
     void FireOnDeleteComplete();
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
-    void SetOnEditingChange(std::function<void(const bool&)> && func);
+    void SetOnEditingChange(std::function<void(const bool&)>&& func);
     void FireOnEditingChange(bool isEditing);
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
     {
@@ -358,20 +357,20 @@ public:
         }
     }
 
-    void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)> && func);
+    void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func);
     bool FireOnWillChange(const RichEditorChangeValue& info);
     bool HasOnWillChange() const;
-    void SetOnDidChange(std::function<void(const RichEditorChangeValue&)> && func);
-    void FireOnDidChange(const RichEditorChangeValue& range);
+    void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func);
+    void FireOnDidChange(const RichEditorChangeValue& info);
     bool HasOnDidChange() const;
-    void SetOnCut(std::function<void(NG::TextCommonEvent&)> && func);
+    void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnCut(NG::TextCommonEvent& value);
-    void SetOnCopy(std::function<void(NG::TextCommonEvent&)> && func);
+    void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnCopy(NG::TextCommonEvent& value);
-    void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func);
+    void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)>&& func);
     bool FireOnStyledStringWillChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringWillChange() const;
-    void SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)> && func);
+    void SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)>&& func);
     void FireOnStyledStringDidChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringDidChange() const;
 
@@ -386,8 +385,8 @@ private:
     std::function<void(const TextRange&)> onDidIMEInput_;
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
-    std::function<void(const bool&)> onEditingChange_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
+    std::function<void(const bool&)> onEditingChange_;
     std::function<bool(const RichEditorChangeValue&)> onWillChange_;
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
     std::function<void(NG::TextCommonEvent&)> onCut_;

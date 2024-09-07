@@ -195,9 +195,9 @@ private:
         }
     }
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override
+    void OnDetachFromMainTree(bool recursive) override
     {
-        UINode::OnDetachFromMainTree(recursive, context);
+        UINode::OnDetachFromMainTree(recursive);
         if (builder_) {
             for (const auto& item : builder_->GetCachedUINodeMap()) {
                 if (item.second.second != nullptr) {

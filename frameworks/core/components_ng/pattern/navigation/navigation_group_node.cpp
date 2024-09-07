@@ -901,9 +901,7 @@ void NavigationGroupNode::TransitionWithReplace(
         auto navigationNode = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigationNode);
         navigationNode->isOnAnimation_ = false;
-        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
-        navigationNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -1079,7 +1077,7 @@ NavigationMode NavigationGroupNode::GetNavigationMode()
     return navigationPattern->GetNavigationMode();
 }
 
-void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (pattern) {
@@ -1087,7 +1085,7 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* 
         pattern->RemoveFromDumpManager();
     }
 
-    GroupNode::OnDetachFromMainTree(recursive, context);
+    GroupNode::OnDetachFromMainTree(recursive);
 }
 
 bool NavigationGroupNode::FindNavigationParent(const std::string& parentName)

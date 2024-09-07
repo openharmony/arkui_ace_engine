@@ -278,7 +278,8 @@ public:
     static void OnFail(std::shared_ptr<DownloadCondition> downloadCondition, const NetStackRequest& request,
         const NetStackResponse& response, const NetStackError& error)
     {
-        LOGI("Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
+        LOGI(
+            "Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
             request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
         {
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);

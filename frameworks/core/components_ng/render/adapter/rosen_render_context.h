@@ -481,7 +481,6 @@ protected:
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
-    void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);

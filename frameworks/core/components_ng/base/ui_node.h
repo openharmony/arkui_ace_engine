@@ -109,7 +109,8 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    virtual void DetachFromMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
+    virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -787,7 +788,7 @@ protected:
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
+    virtual void OnDetachFromMainTree(bool recursive = false);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}

@@ -2228,7 +2228,7 @@ HWTEST_F(TextTestNg, TextContentModifier003, TestSize.Level1)
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
     textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
     SetContentModifier(textContentModifier);
     auto pattern = textFrameNode->GetPattern<Pattern>();
@@ -2303,7 +2303,7 @@ HWTEST_F(TextTestNg, TextContentModifier005, TestSize.Level1)
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
     textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
     SetContentModifier(textContentModifier);
     auto pattern = textFrameNode->GetPattern<Pattern>();

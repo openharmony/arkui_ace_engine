@@ -331,9 +331,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
     while (host) {
         auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
-        //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
             break;
         }
         if ((postEventNodeId == host->GetId()) && isPostEventResult) {

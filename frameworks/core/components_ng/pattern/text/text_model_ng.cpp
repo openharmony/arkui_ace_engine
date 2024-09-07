@@ -899,6 +899,22 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& v
     textPattern->SetTextDetectTypes(value);
 }
 
+void TextModelNG::SetOnClick(FrameNode* frameNode, GestureEventFunc&& click)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(std::move(click));
+}
+
+void TextModelNG::ClearOnClick(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(nullptr);
+}
+
 void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)
 {
     CHECK_NULL_VOID(frameNode);

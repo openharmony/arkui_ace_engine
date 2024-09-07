@@ -21,16 +21,15 @@
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
-
 namespace OHOS::Ace::NG {
 struct SpanItem;
 }
+
 namespace OHOS::Ace {
 namespace {
 Color DEFAULT_SYMBOL_COLOR = Color::BLACK;
@@ -90,9 +89,7 @@ struct SymbolSpanStyle {
         for (const auto& color : style.GetSymbolColorList()) {
             symbolColor += color.ColorToString() + ",";
         }
-        if (symbolColor.size() > 0) {
-            symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
-        }
+        symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
         symbolColor = symbolColor.empty() ? DEFAULT_SYMBOL_COLOR.ColorToString() : symbolColor;
 
         fontFeature = style.GetFontFeatures();
@@ -134,9 +131,9 @@ struct TextStyleResult {
     int32_t decorationType = 0;
     std::string decorationColor;
     int32_t decorationStyle = 0;
-    int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
+    int32_t textAlign = 0;
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
 };

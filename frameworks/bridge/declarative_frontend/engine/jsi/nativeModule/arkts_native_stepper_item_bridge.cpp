@@ -15,20 +15,18 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t CALL_ARG_0 = 0;
-constexpr int32_t CALL_ARG_1 = 1;
 ArkUINativeModuleValue StepperItemBridge::SetNextLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (valueArg->IsUndefined() || valueArg->IsNull()) {
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsUndefined() || secondArg->IsNull()) {
         GetArkUINodeModifiers()->getStepperItemModifier()->resetNextLabel(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string nextLabel = valueArg->ToString(vm)->ToString(vm);
+    std::string nextLabel = secondArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getStepperItemModifier()->setNextLabel(nativeNode, nextLabel.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -37,8 +35,8 @@ ArkUINativeModuleValue StepperItemBridge::ResetNextLabel(ArkUIRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getStepperItemModifier()->resetNextLabel(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -47,8 +45,8 @@ ArkUINativeModuleValue StepperItemBridge::SetPrevLabel(ArkUIRuntimeCallInfo* run
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (valueArg->IsUndefined() || valueArg->IsNull()) {
         GetArkUINodeModifiers()->getStepperItemModifier()->resetPrevLabel(nativeNode);
@@ -63,7 +61,7 @@ ArkUINativeModuleValue StepperItemBridge::ResetPrevLabel(ArkUIRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getStepperItemModifier()->resetPrevLabel(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -73,8 +71,8 @@ ArkUINativeModuleValue StepperItemBridge::SetStatus(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (valueArg->IsUndefined() || !valueArg->IsNumber()) {
         GetArkUINodeModifiers()->getStepperItemModifier()->resetStatus(nativeNode);
@@ -94,7 +92,7 @@ ArkUINativeModuleValue StepperItemBridge::ResetStatus(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getStepperItemModifier()->resetStatus(nativeNode);
     return panda::JSValueRef::Undefined(vm);

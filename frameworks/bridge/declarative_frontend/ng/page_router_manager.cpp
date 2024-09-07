@@ -876,7 +876,7 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
             return entryPageInfo->GetPageUrl() == url;
         });
     if (iter == pageRouterStack_.rend()) {
-        return { INVALID_PAGE_INDEX, nullptr };
+        return { -1, nullptr };
     }
     // Returns to the forward position.
     return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
@@ -955,9 +955,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (!manifestParser_) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGW("Router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
@@ -1338,7 +1336,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
 
-    if (index == static_cast<int32_t>(pageRouterStack_.size()) - 1) {
+    if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
         pageInfo->ReplacePageParams(target.params);
         if (forceShowCurrent) {
             pageNode->GetRenderContext()->ResetPageTransitionEffect();
@@ -1546,15 +1544,21 @@ void PageRouterManager::CleanPageOverlay()
     overlayManager->RemoveOverlay(true, true);
 }
 
+bool PageRouterManager::CheckIndexValid(int32_t index) const
+{
+    if (index > static_cast<int32_t>(pageRouterStack_.size()) || index <= 0) {
+        LOGW("The index is less than or equal to zero or exceeds the maximum length of the page stack");
+        return false;
+    }
+    return true;
+}
+
 void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_ROUTER,
-        "router replace in old lifecycle(API version < 12), replace mode: %{public}d, url: %{public}s",
-        static_cast<int32_t>(info.routerMode), info.url.c_str());
     PopPage("", false, false);
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -1565,15 +1569,6 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         }
     }
     LoadPage(GenerateNextPageId(), info, false, false);
-}
-
-bool PageRouterManager::CheckIndexValid(int32_t index) const
-{
-    if (index > static_cast<int32_t>(pageRouterStack_.size()) || index <= 0) {
-        LOGW("The index is less than or equal to zero or exceeds the maximum length of the page stack");
-        return false;
-    }
-    return true;
 }
 
 bool PageRouterManager::CheckOhmUrlValid(const std::string& ohmUrl)
@@ -1610,13 +1605,15 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+#if defined(ENABLE_SPLIT_MODE)
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
+#endif
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
     auto popNode = GetCurrentPageNode();
-    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size()) - 1;
+    int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);

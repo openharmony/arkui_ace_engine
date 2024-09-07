@@ -74,16 +74,18 @@ void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLi
 
 void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
 {
-    if (!eventTreeList.empty() && eventTreeList.back().touchPoints.size() > MAX_EVENT_TREE_TOUCH_POINT_CNT) {
-        eventTreeList.pop_back();
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "EventTreeList last record touchPoint size is over limit! Last record is cleaned.");
-    }
-    if (!eventTreeList.empty() && event.type == Ace::TouchType::DOWN &&
-        eventTreeList.back().downFingerIds_.count(event.id) > 0) {
-        eventTreeList.pop_back();
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "EventTreeList last record receive DOWN event twice. Last record is cleaned.");
+    if (!eventTreeList.empty()) {
+        if (eventTreeList.back().touchPoints.size() > MAX_EVENT_TREE_TOUCH_POINT_CNT) {
+            eventTreeList.pop_back();
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "EventTreeList last record touchPoint size is over limit! Last record is cleaned.");
+        }
+        if (!eventTreeList.empty() && event.type == Ace::TouchType::DOWN &&
+            eventTreeList.back().downFingerIds_.count(event.id) > 0) {
+            eventTreeList.pop_back();
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "EventTreeList last record receive DOWN event twice. Last record is cleaned.");
+        }
     }
     TouchType type = event.type;
     if (type == Ace::TouchType::DOWN) {

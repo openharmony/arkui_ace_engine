@@ -19,14 +19,15 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
-    float baselineOffset, const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod)
-    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod), pManager_(pManager)
+    float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
+    const RefPtr<TextOverlayModifier>& overlayMod)
+    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod),
+      pManager_(pManager)
 {}
 
 void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)

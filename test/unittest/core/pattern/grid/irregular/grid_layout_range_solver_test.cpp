@@ -326,35 +326,6 @@ HWTEST_F(GridLayoutRangeTest, Solve001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HorizontalOverScroll001
- * @tc.desc: Test horizontal and overScroll
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutRangeTest, Horizontal001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetRowsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo14());
-    model.SetRowsGap(Dimension { 1.0f });
-    model.SetColumnsGap(Dimension { 5.0f });
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateFixedWidthItems(1, 910.0f);
-    CreateFixedWidthItems(1, 300.0f);
-    CreateFixedWidthItems(20, 605.0f);
-    CreateFixedWidthItems(8, 300.0f);
-    CreateDone(frameNode_);
-
-    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
-    UpdateCurrentOffset(FLT_MAX);
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.endIndex_, -1);
-    for (int i = 0; i < 5; ++i) {
-        EXPECT_FALSE(GetChildFrameNode(frameNode_, i)->IsActive());
-    }
-}
-
-/**
  * @tc.name: ChangeTemplate001
  * @tc.desc: Test changing template
  * @tc.type: FUNC
@@ -402,30 +373,6 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Jump001
- * @tc.desc: Test jump to irregular item with extra offset
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo14());
-    model.SetColumnsGap(Dimension { 10.0f });
-    model.SetRowsGap(Dimension { 20.0f });
-    constexpr float itemHeight = 300.0f;
-    CreateFixedHeightItems(22, itemHeight);
-    CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
-    CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
-    pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
-    FlushLayoutTask(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
-    EXPECT_EQ(info.startIndex_, 22);
-}
-
-/**
  * @tc.name: MeasureToTarget001
  * @tc.desc: Test measure to target
  * @tc.type: FUNC
@@ -459,48 +406,6 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
         EXPECT_TRUE(found);
     }
     EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), 11350.0f);
-}
-
-/**
- * @tc.name: MeasureToTarget002
- * @tc.desc: Test measure to target
- * @tc.type: FUNC
- */
-HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr");
-    model.SetLayoutOptions(GetOptionDemo14());
-    model.SetColumnsGap(Dimension { 10.0f });
-    model.SetRowsGap(Dimension { 20.0f });
-    constexpr float itemHeight = 300.0f;
-    CreateFixedHeightItems(22, itemHeight);
-    CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
-    CreateFixedHeightItems(77, itemHeight);
-    CreateDone(frameNode_);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
-    const auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.startIndex_, 91);
-
-    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr");
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-
-    pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
-    const float offset = info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f);
-    UpdateCurrentOffset(pattern_->GetTotalOffset() - offset);
-
-    EXPECT_TRUE(NearEqual(GetChildY(frameNode_, 22), 0.0f));
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 22)->IsActive());
-
-    pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), -1.0f);
-    pattern_->extraOffset_ = 0.0f;
-    EXPECT_FALSE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
 }
 
 /**

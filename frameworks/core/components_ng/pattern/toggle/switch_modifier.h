@@ -72,6 +72,21 @@ public:
         if (!actualSize_.IsPositive()) {
             return;
         }
+        AnimationOption colorOption = AnimationOption();
+        colorOption.SetDuration(colorAnimationDuration_);
+        colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        AnimationUtils::Animate(colorOption, [&]() {
+            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+        });
+        UpdatePointOffsetAnimation();
+    }
+
+    void UpdatePointOffsetAnimation()
+    {
+        AnimationOption pointOption = AnimationOption();
+        pointOption.SetDuration(pointAnimationDuration_);
+        pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        float newPointOffset = 0.0f;
         bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                        : direction_ == TextDirection::RTL;
         auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
@@ -80,17 +95,6 @@ public:
         auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
                                ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
                                : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
-        AnimationOption colorOption = AnimationOption();
-        colorOption.SetDuration(colorAnimationDuration_);
-        colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        AnimationUtils::Animate(colorOption, [&]() {
-            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-        });
-
-        AnimationOption pointOption = AnimationOption();
-        pointOption.SetDuration(pointAnimationDuration_);
-        pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        float newPointOffset = 0.0f;
         if (!isDragEvent_) {
             if (isRtl) {
                 newPointOffset = offsetIsRtl;

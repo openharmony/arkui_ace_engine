@@ -811,22 +811,15 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Test ScrollToEdge func.
-     * @tc.expected: Verify return value. Animation should be stopped
+     * @tc.expected: Verify return value.
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
-
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
-
-    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, LAST_ITEM);
-
-    pattern_->isSmoothScrolling_ = true;
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    EXPECT_FALSE(pattern_->isSmoothScrolling_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 0);
 
     /**
@@ -915,7 +908,7 @@ HWTEST_F(GridScrollerTestNg, PositionController004, TestSize.Level1)
     CreateDone(frameNode_);
     pattern_->SetAxis(Axis::NONE);
     auto controller = pattern_->positionController_;
-    controller->ScrollPage(true, false);
+    controller->ScrollPage(true, true);
     controller->GetCurrentOffset();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }

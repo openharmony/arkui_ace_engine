@@ -125,7 +125,7 @@ private:
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
-    std::string ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month);
+    std::string ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month, int32_t hour);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
     static void UpdateTextLayoutProperty(
@@ -133,7 +133,7 @@ private:
     void ParseInputFormat();
     std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
     void GetDateTimeIndex(const char& element, TextClockFormatElement& tempFormatElement);
-    static std::string GetAmPm(const std::string& dateTimeValue);
+    static std::string GetAmPm(int32_t hour);
     static std::string Abstract(const std::string& strSource, const bool& abstractItem);
     static int32_t GetDigitNumber(const std::string& strSource);
     static std::string GetWeek(const bool& isShortType, const int32_t& week);
@@ -154,6 +154,7 @@ private:
     int32_t nodeId_ = -1;
     RefPtr<TextClockController> textClockController_;
     float hourWest_ = 0.0f;
+    long timeValue_ = 0.0f;
     std::optional<int32_t> textId_;
     bool isStart_ = true;
     bool is24H_ = SystemProperties::Is24HourClock();

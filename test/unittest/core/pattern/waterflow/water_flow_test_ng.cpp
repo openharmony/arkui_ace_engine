@@ -1160,15 +1160,6 @@ HWTEST_F(WaterFlowTestNg, PositionController008, TestSize.Level1)
         FlushLayoutTask(frameNode_);
     }
     EXPECT_TRUE(pattern_->IsAtTop());
-
-    /**
-     * @tc.steps: step8. Scroll forward and scroll backward
-     * @tc.expected: Will trigger ScrollPage func
-     */
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
 namespace {
@@ -1386,27 +1377,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest001, TestSize.Level1)
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_4 = 0;
     EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_4);
-}
-
-/**
- * @tc.name: WaterFlowAccessibilityTest002
- * @tc.desc: Test Accessibility func
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowAccessibilityTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Run Accessibility func.
-     * @tc.expected: Will trigger ScrollPage func
-     */
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(TOTAL_LINE_NUMBER * 2);
-    });
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(IsEqualTotalOffset(0));
 }
 
 /**
