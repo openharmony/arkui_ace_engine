@@ -51,7 +51,7 @@ public:
 
     static void IsCloseKeyboard(const RefPtr<FrameNode>& frameNode);
 
-    static bool GetNeedKeyBoardOnFocusFlag(const RefPtr<FrameNode>& frameNode);
+    static bool GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode);
 
     static void InjectPointerEvent(const std::string& targetNodeName,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
