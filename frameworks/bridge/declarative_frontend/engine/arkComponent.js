@@ -17742,6 +17742,17 @@ class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, undefined);
+    }
+    return this;
+  }
   optionWidth(value) {
     modifierWithKey(this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
     return this;
@@ -17854,6 +17865,40 @@ class ArkSelectComponent extends ArkComponent {
     return this;
   }
 }
+
+class SelectOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.setOptions(node, undefined, undefined, undefined, undefined);
+    } else {
+      const valueArray = [];
+      const iconArray = [];
+      const symbolIconArray = [];
+      const length = this.value?.length;
+      for (let i = 0; i < length; i++) {
+        valueArray.push(this.value[i]?.value);
+        iconArray.push(this.value[i]?.icon);
+        symbolIconArray.push(this.value[i]?.symbolIcon);
+      }
+      getUINativeModule().select.setOptions(node, valueArray, iconArray, symbolIconArray, length);
+    }
+  }
+
+  checkObjectDiff() {
+    return !(Array.isArray(this.stageValue) && Array.isArray(this.value) &&
+    this.stageValue.length === this.value.length &&
+    this.stageValue.every((eachValue, index) => {
+      return isBaseOrResourceEqual(eachValue.value, this.value[index].value) &&
+        isBaseOrResourceEqual(eachValue.icon, this.value[index].icon) &&
+        isBaseOrResourceEqual(eachValue.symbolIcon, this.value[index].symbolIcon);
+    }));
+  }
+}
+SelectOptionsModifier.identity = Symbol('SelectOptions');
+
 class MenuBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19110,6 +19155,17 @@ class ArkSliderComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, undefined);
+    }
+    return this;
+  }
   blockColor(value) {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
     return this;
@@ -19218,6 +19274,31 @@ class ArkSliderComponent extends ArkComponent {
     return this.sliderNode.getFrameNode();
   }
 }
+class SliderOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.setSliderOptions(node, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined);
+    } else {
+      getUINativeModule().slider.setSliderOptions(node, this.value.value, this.value.min, this.value.max,
+        this.value.step, this.value.style, this.value.direction, this.value.reverse);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.min, this.value.min) ||
+      !isBaseOrResourceEqual(this.stageValue.max, this.value.max) ||
+      !isBaseOrResourceEqual(this.stageValue.step, this.value.step) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style) ||
+      !isBaseOrResourceEqual(this.stageValue.direction, this.value.direction) ||
+      !isBaseOrResourceEqual(this.stageValue.reverse, this.value.reverse);
+  }
+}
+SliderOptionsModifier.identity = Symbol('sliderOptions');
 class BlockStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
