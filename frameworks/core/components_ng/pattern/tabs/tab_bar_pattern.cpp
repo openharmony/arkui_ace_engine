@@ -402,19 +402,14 @@ void TabBarPattern::AddIsFocusActiveUpdateEvent()
             pattern->UpdateFocusTabarPageState();
         };
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void TabBarPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
@@ -429,9 +424,7 @@ void TabBarPattern::UpdateFocusTabarPageState()
 
 void TabBarPattern::HandleFocusEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContextRefPtr();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     AddIsFocusActiveUpdateEvent();
     if (context->GetIsFocusActive()) {
