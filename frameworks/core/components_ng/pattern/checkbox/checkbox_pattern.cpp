@@ -608,6 +608,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         }
     }
     const auto& groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(groupPaintProperty);
     if (!groupManager->GetCheckboxGroupIsChange(group) && groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
         return;
     }
@@ -778,6 +779,9 @@ void CheckBoxPattern::FireBuilder()
 
 RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
 {
+    if(!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
+        return nullptr;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();
