@@ -4086,7 +4086,7 @@ void RichEditorPattern::OnHover(bool isHover)
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
-    if (isHover && !scrollBar->IsPressed() && !scrollBar->IsHover()) {
+    if (isHover && (!scrollBar || (!scrollBar->IsPressed() && !scrollBar->IsHover()))) {
         SetDefaultMouseStyle(MouseFormat::TEXT_CURSOR);
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
@@ -7620,16 +7620,16 @@ void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
-    if (!GetScrollBar()) {
-        return;
-    }
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+
     if (isFirstCallOnReady_) {
         isFirstCallOnReady_ = false;
-        GetScrollBar()->ScheduleDisappearDelayTask();
+        scrollBar->ScheduleDisappearDelayTask();
         return;
     }
     if (shouldDisappear) {
-        GetScrollBar()->ScheduleDisappearDelayTask();
+        scrollBar->ScheduleDisappearDelayTask();
     }
 }
 
