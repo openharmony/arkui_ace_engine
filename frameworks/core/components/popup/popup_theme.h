@@ -80,17 +80,15 @@ public:
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            auto popupBorderRadius = pattern->GetAttr<Dimension>("popup_border_radius", BORDER_RADIUS_POPUP);
-            theme->radius_ = Radius(popupBorderRadius, popupBorderRadius);
+
+            theme->radius_ = Radius(BORDER_RADIUS_POPUP, BORDER_RADIUS_POPUP);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp));
             auto popupDoubleBorderEnable = pattern->GetAttr<std::string>("popup_double_border_enable", "0");
             theme->popupDoubleBorderEnable_ = StringUtils::StringToInt(popupDoubleBorderEnable);
-            theme->popupOuterBorderWidth_ = pattern->GetAttr<Dimension>("popup_outer_border_width", 0.8_vp);
             theme->popupOuterBorderColor_ = pattern->GetAttr<Color>("popup_outer_border_color", Color::TRANSPARENT);
-            theme->popupInnerBorderWidth_ = pattern->GetAttr<Dimension>("popup_inner_border_width", 0.8_vp);
             theme->popupInnerBorderColor_ = pattern->GetAttr<Color>("popup_inner_border_color", Color::TRANSPARENT);
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
@@ -293,19 +291,9 @@ public:
         return popupDoubleBorderEnable_;
     }
 
-    Dimension GetPopupOuterBorderWidth() const
-    {
-        return popupOuterBorderWidth_;
-    }
-
     Color GetPopupOuterBorderColor() const
     {
         return popupOuterBorderColor_;
-    }
-
-    Dimension GetPopupInnerBorderWidth() const
-    {
-        return popupInnerBorderWidth_;
     }
 
     Color GetPopupInnerBorderColor() const
@@ -340,9 +328,7 @@ private:
     Color buttonPressColor_ = Color(0x1affffff);
     Color focusColor_ = Color::WHITE;
     int32_t popupDoubleBorderEnable_ = 0;
-    Dimension popupOuterBorderWidth_ = 0.8_vp;
     Color popupOuterBorderColor_ = Color::TRANSPARENT;
-    Dimension popupInnerBorderWidth_ = 0.8_vp;
     Color popupInnerBorderColor_ = Color::TRANSPARENT;
 
     TextStyle textStyle_;
@@ -361,6 +347,7 @@ private:
     Dimension ageButtonLeftPadding_ = 0.0_vp;
     Dimension ageButtonRightPadding_ = 0.0_vp;
     Dimension buttonTextInsideMargin_ = 8.0_vp;
+    Dimension buttonTextSpacing = 12.0_vp;
     Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
     Dimension arrowHeight_ = 8.0_vp;

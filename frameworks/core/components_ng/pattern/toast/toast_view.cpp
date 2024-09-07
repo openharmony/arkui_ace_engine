@@ -134,23 +134,6 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
     toastContext->UpdateBorderRadius(borderRadius);
-    if (toastTheme->GetToastDoubleBorderEnable()) {
-        toastContext->UpdateOuterBorderRadius(borderRadius);
-
-        BorderWidthProperty innerWidthProp;
-        innerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastInnerBorderWidth()));
-        toastContext->UpdateBorderWidth(innerWidthProp);
-        BorderColorProperty innerColorProp;
-        innerColorProp.SetColor(toastTheme->GetToastInnerBorderColor());
-        toastContext->UpdateBorderColor(innerColorProp);
-
-        BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastOuterBorderWidth()));
-        toastContext->UpdateOuterBorderWidth(outerWidthProp);
-        BorderColorProperty outerColorProp;
-        outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
-        toastContext->UpdateOuterBorderColor(outerColorProp);
-    }
     auto toastInfo = pattern->GetToastInfo();
     toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -158,7 +141,6 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
-        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         toastContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

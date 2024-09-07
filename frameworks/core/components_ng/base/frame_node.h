@@ -443,10 +443,6 @@ public:
 
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
 
-    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
-
-    RectF GetPaintRectToWindowWithTransform();
-
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
