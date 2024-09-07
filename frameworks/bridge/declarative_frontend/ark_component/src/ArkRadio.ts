@@ -311,7 +311,7 @@ class RadioContentModifier extends ModifierWithKey<ContentModifier<RadioConfigur
     super(value);
   }
   static identity: Symbol = Symbol('radioContentModifier');
-  applyPeer(node: KNode, reset: boolean, component: ArkComponent):void {
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent): void {
     let radioComponent = component as ArkRadioComponent;
     radioComponent.setContentModifier(this.value); 
   }

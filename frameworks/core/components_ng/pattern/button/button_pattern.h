@@ -131,21 +131,22 @@ public:
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
         auto textStyle = buttonTheme->GetTextStyle();
-        json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
-            ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str(), filter);
+        json->PutExtAttr(
+            "type", host->GetTag() == "Toggle" ? "ToggleType.Button"
+            :ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str(), filter);
         json->PutExtAttr("fontSize",
             layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
                 .ToString()
                 .c_str(), filter);
-        json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
-            layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str(), filter);
+        json->PutExtAttr("fontWeight",
+        V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str(), filter);
         json->PutExtAttr("fontColor", layoutProperty->GetFontColor()
                                    .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
                                    .ColorToString()
                                    .c_str(), filter);
-        json->PutExtAttr("fontStyle",
-            layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ?
-                "FontStyle.Normal" : "FontStyle.Italic", filter);
+        json->PutExtAttr("fontStyle", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                ? "FontStyle.Normal"
+                : "FontStyle.Italic", filter);
         json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
         auto eventHub = host->GetEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
