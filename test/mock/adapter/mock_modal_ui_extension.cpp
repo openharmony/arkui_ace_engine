@@ -30,5 +30,6 @@ int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& /* uiExtNode
 
 void ModalUIExtension::SetBindModalCallback(
     const RefPtr<NG::FrameNode>& uiExtNode, std::function<void()>&& bindModalCallback)
-{}
+{
+}
 } // namespace OHOS::Ace

@@ -413,7 +413,7 @@ bool SessionWrapperImpl::NotifyBackPressedAsync()
 bool SessionWrapperImpl::NotifyPointerEventAsync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     if (session_ && pointerEvent) {
-        UIEXT_LOGI("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d.",
+        UIEXT_LOGD("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d.",
             pointerEvent->GetId(), GetSessionId());
         session_->TransferPointerEvent(pointerEvent);
     }
@@ -601,11 +601,15 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    UIEXT_LOGI("Display area with '%{public}s' notified to uiextension, persistentid = %{public}d.",
+        displayArea_.ToString().c_str(), GetSessionId());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
-    int32_t duration = 0;
+    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d], displayArea [%s]",
+        persistentId, reason, displayArea_.ToString().c_str());
+    UIEXT_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();
@@ -614,15 +618,9 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             transaction = transactionController->GetRSTransaction();
         }
         if (transaction && parentSession) {
-            duration = pipeline->GetSyncAnimationOption().GetDuration();
-            transaction->SetDuration(duration);
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
-    ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d]",
-        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration);
-    UIEXT_LOGI("NotifyDisplayArea displayArea = %{public}s, curWindow = %{public}s, "
-        "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
-        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
         std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
 }
@@ -641,15 +639,7 @@ void SessionWrapperImpl::NotifySizeChangeReason(
 void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyAvoidArea, type: %{public}d, topRect = (%{public}d, %{public}d) - [%{public}d, %{public}d], "
-        "bottomRect = (%{public}d, %{public}d) - [%{public}d, %{public}d], persistentId = %{public}d.",
-        type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
-        (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-        (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_, GetSessionId());
-    ACE_SCOPED_TRACE("NotifyAvoidArea, type: %d, topRect: (%d, %d) - [%d, %d], bottomRect: (%d, %d) - [%d, %d]",
-        type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
-        (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-        (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
+    UIEXT_LOGD("The avoid area is notified to the provider.");
     session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
 
@@ -659,11 +649,13 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto curWindow = pipeline->GetCurrentWindowRect();
     if (keyboardHeight > 0) {
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto curWindow = pipeline->GetCurrentWindowRect();
+        UIEXT_LOGD("keyboardHeight = %{public}d, CurWindow = %{public}s, displayArea_ = %{public}s.",
+            keyboardHeight, curWindow.ToString().c_str(), displayArea_.ToString().c_str());
         if (curWindow.Bottom() >= displayArea_.Bottom()) {
             int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), 0.0);
             keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
@@ -672,9 +664,8 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         }
     }
     info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    UIEXT_LOGI("OcccupiedArea keyboardHeight = %{public}d, displayArea = %{public}s, "
-        "curWindow = %{public}s, persistentid = %{public}d.",
-        keyboardHeight, displayArea_.ToString().c_str(), curWindow.ToString().c_str(), GetSessionId());
+    UIEXT_LOGI("Occcupied area with 'keyboardHeight = %{public}d' notified to uiextension, persistentid = %{public}d.",
+        keyboardHeight, GetSessionId());
     session_->NotifyOccupiedAreaChangeInfo(info);
     return true;
 }
@@ -692,15 +683,15 @@ void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
 /************************************************ Begin: The interface to send the data for ArkTS *********************/
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
-    UIEXT_LOGI("The data is asynchronously send and the session is %{public}s", session_ ? "valid" : "invalid");
+    UIEXT_LOGD("The data is asynchronously send and the session is %{public}s", session_ ? "valid" : "invalid");
     CHECK_NULL_VOID(session_);
     session_->TransferComponentData(params);
 }
 
 int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
+    UIEXT_LOGD("The data is synchronously send and the session is %{public}s", session_ ? "valid" : "invalid");
     Rosen::WSErrorCode transferCode = Rosen::WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
-    UIEXT_LOGI("The data is synchronously send and the session is %{public}s", session_ ? "valid" : "invalid");
     if (session_) {
         transferCode = session_->TransferComponentDataSync(wantParams, reWantParams);
     }
