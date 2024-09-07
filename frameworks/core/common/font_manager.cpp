@@ -19,13 +19,13 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/components_ng/base/frame_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
-#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
+#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
 #endif
 #endif
 #ifdef USE_PLATFORM_FONT
@@ -271,16 +271,6 @@ void FontManager::RebuildFontNodeNG()
             iter = fontNodesNG_.erase(iter);
         }
     }
-    for (auto iter = observers_.begin(); iter != observers_.end();) {
-        auto fontNode = iter->Upgrade();
-        CHECK_NULL_VOID(fontNode);
-        if (fontNode) {
-            fontNode->OnFontChanged();
-            ++iter;
-        } else {
-            iter = observers_.erase(iter);
-        }
-    }
 }
 
 void FontManager::UpdateFontWeightScale()
@@ -372,18 +362,6 @@ void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node)
 void FontManager::RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node)
 {
     variationNodesNG_.erase(node);
-}
-
-void FontManager::AddFontObserver(WeakPtr<FontChangeObserver> node)
-{
-    if (observers_.find(node) == observers_.end()) {
-        observers_.emplace(node);
-    }
-}
-
-void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node)
-{
-    observers_.erase(node);
 }
 
 } // namespace OHOS::Ace
