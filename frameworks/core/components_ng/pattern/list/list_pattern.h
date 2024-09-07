@@ -358,6 +358,7 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
+    void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
