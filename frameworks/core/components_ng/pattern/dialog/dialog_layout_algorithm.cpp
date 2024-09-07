@@ -89,11 +89,11 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
     isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
-    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging() &&
+    isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() && dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
                             GreatOrEqual(pipeline->GetFontScale(), 1.75f);
     auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
-    if (isPickekDiaglog) {
+    if (isPickekDiaglog || customSize_) {
         isSuitableForElderly_ = false;
     }
     if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
