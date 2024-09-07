@@ -161,16 +161,16 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnLargestContentfulPaint, void);
     ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
     ACE_WEB_EVENT_PROPERTY(OnOverScroll, void);
-    ACE_WEB_EVENT_PROPERTY(OnNavigationEntryCommitted, void);
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckResult, void);
+    ACE_WEB_EVENT_PROPERTY(OnNavigationEntryCommitted, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedLifecycleChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessResponding, void);
     ACE_WEB_EVENT_PROPERTY(OnViewportFitChanged, void);
-    ACE_WEB_EVENT_PROPERTY(OnInterceptKeyboardAttach,  WebKeyboardOption);
     ACE_WEB_EVENT_PROPERTY(OnAdsBlocked, void);
+    ACE_WEB_EVENT_PROPERTY(OnInterceptKeyboardAttach,  WebKeyboardOption);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
