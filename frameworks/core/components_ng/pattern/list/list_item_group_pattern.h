@@ -208,6 +208,7 @@ public:
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
 
+    void ClearItemPosition();
     void CalculateItemStartIndex();
     void UpdateActiveChildRange(bool forward, int32_t cacheCount);
     int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
