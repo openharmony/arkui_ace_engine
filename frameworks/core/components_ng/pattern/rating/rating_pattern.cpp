@@ -323,12 +323,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
 
     // step4: Update the ratingScore saved in renderProperty and update render.
     UpdateRatingScore(newDrawScore);
-    std::ostringstream oldScore;
-    std::ostringstream newScore;
-    oldScore << std::fixed << std::setprecision(1) << oldDrawScore;
-    newScore << std::fixed << std::setprecision(1) << newDrawScore;
     if (isDrag) {
-        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, oldScore.str(), newScore.str());
         ratingRenderProperty->UpdateTouchStar(
             static_cast<int32_t>(reverse ? starNum - wholeStarNum - 1 : wholeStarNum));
     }
@@ -379,9 +374,6 @@ void RatingPattern::FireChangeEvent()
 void RatingPattern::HandleDragEnd()
 {
     CHECK_NULL_VOID(!IsIndicator());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     FireChangeEvent();
 }
 
