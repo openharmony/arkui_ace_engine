@@ -16,8 +16,9 @@
 
 #include <cstdint>
 
+#include "effect/color_filter.h"
+
 #include "base/utils/utils.h"
-#include "base/image/drawing_color_filter.h"
 #include "core/common/card_scope.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/image/image_component.h"
@@ -27,8 +28,6 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
-
-#include "effect/color_filter.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,23 +57,9 @@ constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
 constexpr uint32_t ERROR_UINT_CODE = -1;
 constexpr int32_t DEFAULT_FALSE = 0;
-const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
-    ResizableOption::BOTTOM, ResizableOption::LEFT };
+const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT, ResizableOption::BOTTOM,
+    ResizableOption::LEFT };
 std::string g_strValue;
-
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
-};
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options,
     ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
@@ -128,54 +113,6 @@ const char* GetImageSrc(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     g_strValue = ImageModelNG::GetSrc(frameNode).GetSrc();
     return g_strValue.c_str();
-}
-
-RefPtr<ThemeConstants> GetThemeConstants(const char* bundleName, const char* moduleName)
-{
-    auto cardId = CardScope::CurrentId();
-    if (cardId != INVALID_CARD_ID) {
-        auto container = Container::Current();
-        auto weak = container->GetCardPipeline(cardId);
-        auto cardPipelineContext = weak.Upgrade();
-        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
-        auto cardThemeManager = cardPipelineContext->GetThemeManager();
-        CHECK_NULL_RETURN(cardThemeManager, nullptr);
-        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
-    }
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetThemeConstants(bundleName, moduleName);
-}
-
-void SetImageResource(
-    ArkUINodeHandle node, int id, int type, const char* name, const char* bundleName, const char* moduleName)
-{
-    auto themeConstants = GetThemeConstants(bundleName, moduleName);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (!themeConstants) {
-        return;
-    }
-    std::optional<std::string> src;
-    if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
-        src = themeConstants->GetRawfile(name);
-    }
-    if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
-        if (id == -1) {
-            src = themeConstants->GetMediaPathByName(name);
-        } else {
-            src = themeConstants->GetMediaPath(id);
-        }
-    }
-    if (!src.has_value()) {
-        return;
-    }
-
-    ImageModelNG::InitImage(frameNode, src.value());
 }
 
 void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
@@ -449,7 +386,7 @@ void GetColorFilter(ArkUINodeHandle node, ArkUIFilterColorType* colorFilter)
                                   ? static_cast<int32_t>(filterFloatArray.size())
                                   : static_cast<int32_t>(MAX_COLOR_FILTER_SIZE);
     for (size_t i = 0; i < static_cast<size_t>(colorFilter->filterSize) && i < MAX_COLOR_FILTER_SIZE; i++) {
-        *(colorFilter->filterArray+i) = filterFloatArray[i];
+        *(colorFilter->filterArray + i) = filterFloatArray[i];
     }
 }
 
@@ -561,7 +498,6 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetBackBorder(frameNode);
 }
-
 
 void ResetImageBorderRadius(ArkUINodeHandle node)
 {
@@ -726,8 +662,8 @@ void ResetEnhancedImageQuality(ArkUINodeHandle node)
     ImageModelNG::SetEnhancedImageQuality(frameNode, AIImageQuality::NONE);
 }
 
-void SetImageResizable(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
-    ArkUI_Float32 right, ArkUI_Float32 bottom)
+void SetImageResizable(
+    ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -870,43 +806,40 @@ void ResetImageOnFinish(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageModifier* GetImageModifier()
 {
-    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetImageResource, SetCopyOption,
-        ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
-        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
-        ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
-        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation, SetColorFilter,
-        ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit,
-        SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable, ResetImageDraggable,
-        SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder, SetImageOpacity,
-        ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable, ResetResizable,
-        SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality, GetImageSrc,
-        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable,
-        GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap,
-        SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve,
-        AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent, ResetImageSrc,
-        SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
+    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption,
+        SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad,
+        ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize,
+        ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
+        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
+        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
+        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
+        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
+        GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
+        SetPixelMap, SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve,
+        ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent,
+        ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
         ResetImageOnFinish };
     return &modifier;
 }
 
 const CJUIImageModifier* GetCJUIImageModifier()
 {
-    static const CJUIImageModifier modifier = {
-        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
-        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
-        SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
-        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
+    static const CJUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption,
+        SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad,
+        ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize,
+        ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
-        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
-        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
-        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
-        GetDrawingColorFilter, ResetImageSrc, SetInitialPixelMap, SetOnComplete, SetOnError,
-        ResetOnError, SetImageOnFinish, ResetImageOnFinish };
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
+        GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
+        SetPixelMap, SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve,
+        ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageSrc,
+        SetInitialPixelMap, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
     return &modifier;
 }
 
