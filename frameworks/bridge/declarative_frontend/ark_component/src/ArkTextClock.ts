@@ -95,9 +95,6 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
 }
 
 class TextClockFormatModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textClockFormat');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -109,9 +106,6 @@ class TextClockFormatModifier extends ModifierWithKey<string> {
 }
 
 class TextClockFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textClockFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -127,9 +121,6 @@ class TextClockFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextClockFontSizeModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textClockFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -144,9 +135,6 @@ class TextClockFontSizeModifier extends ModifierWithKey<Length> {
 }
 
 class TextClockFontStyleModifier extends ModifierWithKey<FontStyle> {
-  constructor(value: FontStyle) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textClockFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -158,9 +146,6 @@ class TextClockFontStyleModifier extends ModifierWithKey<FontStyle> {
 }
 
 class TextClockFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
-  constructor(value: number | FontWeight | string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textClockFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -237,9 +222,6 @@ class TextClockContentModifier extends ModifierWithKey<ContentModifier<TextClock
 }
 
 class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
-  constructor(value: ResourceStr) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textClockFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

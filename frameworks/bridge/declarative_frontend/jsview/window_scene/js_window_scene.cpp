@@ -22,7 +22,6 @@ void JSWindowScene::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWindowScene>::Declare("WindowScene");
     JSClass<JSWindowScene>::StaticMethod("create", &JSWindowScene::Create, MethodOptions::NONE);
-    JSClass<JSWindowScene>::StaticMethod("attractionEffect", &JSWindowScene::JsAttractionEffect);
 
     JSClass<JSWindowScene>::Inherit<JSInteractableView>();
     JSClass<JSWindowScene>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -44,27 +43,5 @@ void JSWindowScene::Create(const JSCallbackInfo& info)
 
     auto persistentId = static_cast<int32_t>(info[0]->ToNumber<double>());
     NG::WindowSceneModel::Create(persistentId);
-}
-
-void JSWindowScene::JsAttractionEffect(const JSCallbackInfo& info)
-{
-    if (info.Length() < 2) {
-        return;
-    }
-    NG::AttractionEffect property;
-    if (info[0]->IsObject()) {
-        auto point = JSRef<JSObject>::Cast(info[0]);
-        if (!JSViewAbstract::ParseJsDimensionVpNG(point->GetProperty("x"), property.destinationX, false)) {
-            property.destinationX.Reset();
-        }
-        if (!JSViewAbstract::ParseJsDimensionVpNG(point->GetProperty("y"), property.destinationY, false)) {
-            property.destinationY.Reset();
-        }
-    }
-    if (info[1]->IsNumber()) {
-        auto fraction = info[1]->ToNumber<float>();
-        property.fraction = std::clamp(fraction, 0.0f, 1.0f);
-    }
-    NG::WindowSceneModel::SetAttractionEffect(property);
 }
 } // namespace OHOS::Ace::Framework

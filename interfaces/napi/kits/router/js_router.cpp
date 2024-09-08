@@ -405,7 +405,7 @@ static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
-
+ 
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -444,7 +444,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
     }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
     std::string uriString = "";

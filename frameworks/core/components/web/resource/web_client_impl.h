@@ -293,6 +293,8 @@ public:
 
     void OnCursorUpdate(double x, double y, double width, double height) override;
 
+    void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

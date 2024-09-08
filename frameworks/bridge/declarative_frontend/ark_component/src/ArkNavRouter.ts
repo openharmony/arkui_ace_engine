@@ -14,6 +14,8 @@
  */
 
 /// <reference path='./import.ts' />
+const NAV_ROUTE_MODE_RANGE = 2;
+const NAV_ROUTE_MODE_DEFAULT = 0;
 class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -22,15 +24,16 @@ class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     throw new Error('Method not implemented.');
   }
   mode(mode: NavRouteMode): NavRouterAttribute {
-    modifierWithKey(this._modifiersWithKeys, NavRouterModeModifier.identity, NavRouterModeModifier, mode);
+    if (isNumber(mode) && mode >= NAV_ROUTE_MODE_DEFAULT && mode <= NAV_ROUTE_MODE_RANGE) {
+      modifier(this._modifiers, NavRouterModeModifier, mode);
+    } else {
+      modifier(this._modifiers, NavRouterModeModifier, NAV_ROUTE_MODE_DEFAULT);
+    }
     return this;
   }
 }
 
-class NavRouterModeModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class NavRouterModeModifier extends Modifier<number> {
   static identity: Symbol = Symbol('mode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -282,7 +282,7 @@ bool SliderPattern::AtTouchPanArea(const Offset& offsetInFrame)
         circleCenter_.GetY() + sideHotSizeY < offset.GetY());
 }
 
-bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType)
+bool SliderPattern::AtPanArea(const Offset &offset, const SourceType &sourceType)
 {
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, false);
@@ -1451,11 +1451,7 @@ void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
 void SliderPattern::AddIsFocusActiveUpdateEvent()
 {
     if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
-        };
+        isFocusActiveUpdateEvent_ = std::bind(&SliderPattern::OnIsFocusActiveUpdate, this, std::placeholders::_1);
     }
 
     auto pipline = PipelineContext::GetCurrentContext();

@@ -151,6 +151,7 @@ private:
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickEvent_;

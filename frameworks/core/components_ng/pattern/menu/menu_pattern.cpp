@@ -897,15 +897,6 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     scrollProp->UpdatePadding(PaddingProperty());
 }
 
-void MenuPattern::ResetScrollTheme(const RefPtr<FrameNode>& host)
-{
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(scroll);
-    scroll->GetRenderContext()->UpdateClipEdge(false);
-}
-
 void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
 {
     auto renderContext = host->GetRenderContext();
@@ -1749,7 +1740,6 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
     } else {
         return nullptr;
     }
-
 }
 
 bool MenuPattern::IsMenuScrollable() const

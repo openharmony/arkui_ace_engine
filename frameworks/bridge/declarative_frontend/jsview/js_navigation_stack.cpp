@@ -566,7 +566,7 @@ std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param, b
     } else if (param->IsNumber()) {
         double ret = param->ToNumber<double>();
         std::ostringstream oss;
-        oss << ret;
+        oss<< ret;
         return oss.str();
     } else if (param->IsString()) {
         std::string ret = param->ToString();

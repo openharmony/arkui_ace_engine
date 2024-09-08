@@ -47,7 +47,7 @@ constexpr float FONT_SIZE_PERCENT = 1.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr size_t MIXTURE_CHILD_COUNT = 2;
-const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension ICON_SIZE = 24.0_vp;
 const Dimension ICON_TEXT_SPACE = 8.0_vp;
 const std::vector<std::string> FONT_FAMILY_DEFAULT = { "sans-serif" };
@@ -373,8 +373,8 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
             auto pickerItemHeight = 0.0;
             auto pattern = parentNode->GetPattern<TextPickerPattern>();
             CHECK_NULL_VOID(pattern);
-            pickerItemHeight =
-                pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight() : pattern->GetDefaultPickerItemHeight();
+            pickerItemHeight = pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight()
+                                                        : pattern->GetDefaultPickerItemHeight();
             int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
             for (int32_t i = 0; i < itemCounts; i++) {
                 TextPickerOptionProperty& prop = optionProperties_[i];
@@ -1375,8 +1375,8 @@ void TextPickerColumnPattern::SetOptionShiftDistance()
 {
     CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
-    bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
-    for (int32_t i = 0; i < itemCounts; i++) {
+    bool isLanscape = (itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER);
+    for (int32_t i = 0; i < static_cast<int32_t>(itemCounts); i++) {
         TextPickerOptionProperty& prop = optionProperties_[i];
         if (isLanscape) {
             prop.prevDistance = GetShiftDistanceForLandscape(i, ScrollDirection::UP);
@@ -1390,7 +1390,6 @@ void TextPickerColumnPattern::SetOptionShiftDistance()
 
 void TextPickerColumnPattern::UpdateToss(double offsetY)
 {
-    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
 }
 
@@ -1404,8 +1403,6 @@ void TextPickerColumnPattern::TossStoped()
 void TextPickerColumnPattern::TossAnimationStoped()
 {
     yLast_ = 0.0;
-    isTossing_ = false;
-    ScrollOption(0.0);
 }
 
 std::string TextPickerColumnPattern::GetSelectedObject(bool isColumnChange, int32_t status) const

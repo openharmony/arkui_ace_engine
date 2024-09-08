@@ -131,6 +131,7 @@ void ToggleButtonPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->UpdateSelectStatus(false);
     });
+    FireBuilder();
 }
 
 void ToggleButtonPattern::UpdateSelectStatus(bool isSelected)
