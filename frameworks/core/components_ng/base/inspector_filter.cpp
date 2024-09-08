@@ -20,6 +20,18 @@
 #include <string>
 
 namespace OHOS::Ace::NG {
+namespace {
+const static std::map<std::string, FixedAttrBit> FIXED_ATTR_MAP = {
+    { "id",          FIXED_ATTR_ID          },
+    { "content",     FIXED_ATTR_CONTENT     },
+    { "src",         FIXED_ATTR_SRC         },
+    { "editable",    FIXED_ATTR_EDITABLE    },
+    { "scrollable",  FIXED_ATTR_SCROLLABLE  },
+    { "selectable",  FIXED_ATTR_SELECTABLE  },
+    { "focusable",   FIXED_ATTR_FOCUSABLE   },
+    { "focused",     FIXED_ATTR_FOCUSED     },
+};
+}
 
 bool InspectorFilter::CheckFixedAttr(const FixedAttrBit attrBit) const
 {
@@ -69,16 +81,6 @@ bool InspectorFilter::IsFastFilter() const
 
 void InspectorFilter::AddFilterAttr(const std::string& attr)
 {
-    const static std::map<std::string, FixedAttrBit> FIXED_ATTR_MAP = {
-        { "id",          FIXED_ATTR_ID          },
-        { "content",     FIXED_ATTR_CONTENT     },
-        { "src",         FIXED_ATTR_SRC         },
-        { "editable",    FIXED_ATTR_EDITABLE    },
-        { "scrollable",  FIXED_ATTR_SCROLLABLE  },
-        { "selectable",  FIXED_ATTR_SELECTABLE  },
-        { "focusable",   FIXED_ATTR_FOCUSABLE   },
-        { "focused",     FIXED_ATTR_FOCUSED     },
-    };
     auto iter = FIXED_ATTR_MAP.find(attr);
     if (iter != FIXED_ATTR_MAP.end()) {
         filterFixed |= (1ULL << iter->second);  /* this is a fixed attr */

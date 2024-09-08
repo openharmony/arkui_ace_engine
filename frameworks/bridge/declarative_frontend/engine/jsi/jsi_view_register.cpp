@@ -670,7 +670,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("container is null");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "container is nullptr");
         return panda::StringRef::NewFromUtf8(vm, "");
     }
     auto argc = runtimeCallInfo->GetArgsNumber();
@@ -698,13 +698,17 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
-    bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-    if (needThrow) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
-        return panda::StringRef::NewFromUtf8(vm, "");
+    if (container->IsUseNewPipeline()) {
+        bool needThrow = false;
+        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+        if (needThrow) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
+            return panda::StringRef::NewFromUtf8(vm, "");
+        }
+        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
     }
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector tree failed");
+    return panda::StringRef::NewFromUtf8(vm, "");
 }
 
 panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -714,7 +718,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("container is null");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "container is nullptr");
         return panda::StringRef::NewFromUtf8(vm, "");
     }
 
@@ -766,13 +770,17 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
-    bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-    if (needThrow) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
-        return panda::StringRef::NewFromUtf8(vm, "");
+    if (container->IsUseNewPipeline()) {
+        bool needThrow = false;
+        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+        if (needThrow) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
+            return panda::StringRef::NewFromUtf8(vm, "");
+        }
+        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
     }
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector tree failed");
+    return panda::StringRef::NewFromUtf8(vm, "");
 }
 
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)

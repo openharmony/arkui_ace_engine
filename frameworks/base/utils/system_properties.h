@@ -477,7 +477,7 @@ public:
     }
 
     static bool GetTitleStyleEnabled();
-    
+
     static bool GetIsUseMemoryMonitor();
 
     static bool IsFormAnimationLimited();
@@ -504,7 +504,7 @@ public:
     static bool WaterFlowUseSegmentedLayout();
 
     static bool GetGridIrregularLayoutEnabled();
- 
+
     static bool GetSideBarContainerBlurEnable();
 
     static bool GetGridCacheEnabled();

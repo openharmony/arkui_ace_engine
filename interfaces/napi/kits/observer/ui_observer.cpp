@@ -165,12 +165,11 @@ void UIObserver::RegisterScrollEventCallback(const std::shared_ptr<UIObserverLis
 void UIObserver::RegisterScrollEventCallback(
     const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
 {
-    auto iter = specifiedScrollEventListeners_.find(id);
-    if (iter == specifiedScrollEventListeners_.end()) {
-        specifiedScrollEventListeners_.emplace(id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+    if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
+        specifiedScrollEventListeners_[id] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedScrollEventListeners_[id];
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -465,13 +464,11 @@ void UIObserver::RegisterDensityCallback(
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    auto iter = specifiedDensityListeners_.find(uiContextInstanceId);
-    if (iter == specifiedDensityListeners_.end()) {
-        specifiedDensityListeners_.emplace(
-            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
+        specifiedDensityListeners_[uiContextInstanceId] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -484,11 +481,10 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    auto iter = specifiedDensityListeners_.find(uiContextInstanceId);
-    if (iter == specifiedDensityListeners_.end()) {
+    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
     if (callback == nullptr) {
         holder.clear();
         return;
@@ -506,11 +502,10 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
 void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double density)
 {
     auto currentId = Container::CurrentId();
-    auto iter = specifiedDensityListeners_.find(currentId);
-    if (iter == specifiedDensityListeners_.end()) {
+    if (specifiedDensityListeners_.find(currentId) == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedDensityListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnDensityChange(density);
     }
