@@ -88,7 +88,7 @@ void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
@@ -122,7 +122,7 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](

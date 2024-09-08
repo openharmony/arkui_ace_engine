@@ -92,7 +92,7 @@ void InspectorFilter::AddFilterAttr(const std::string& attr)
     }
 }
 
-void InspectorFilter::SetFilterID(const std::string& id)
+void InspectorFilter::SetFilterID(std::string& id)
 {
     filterId = id;
 }
