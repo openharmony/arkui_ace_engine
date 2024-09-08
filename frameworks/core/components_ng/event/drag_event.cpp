@@ -301,6 +301,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     return;
                 }
                 if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
+                    gestureHub->SetIsTextDraggable(true);
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }
@@ -1030,7 +1031,6 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMap(
 {
     // Attempt to retrieve the PixelMap using the inspector ID.
     auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId);
-
     // If a preview PixelMap was found, return it.
     if (previewPixelMap != nullptr) {
         return previewPixelMap;
@@ -2162,10 +2162,6 @@ void DragEventActuator::PrepareShadowParametersForDragData(const RefPtr<FrameNod
     CHECK_NULL_VOID(gestureHub);
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
         gestureHub->GetIsTextDraggable()) {
-        if (frameTag != V2::RICH_EDITOR_ETS_TAG) {
-            arkExtraInfoJson->Put("shadow_enable", false);
-            return;
-        }
         auto stringPath = dragPreviewOption.options.shadowPath;
         RSPath path;
         if (path.BuildFromSVGString(stringPath)) {
