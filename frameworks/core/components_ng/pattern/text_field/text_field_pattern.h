@@ -1654,6 +1654,7 @@ private:
 
     void CalculateDefaultCursor();
     void RequestKeyboardByFocusSwitch();
+    void TextFieldLostFocusToViewRoot();
     bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction() override;
