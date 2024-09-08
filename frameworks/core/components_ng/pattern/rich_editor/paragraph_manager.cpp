@@ -235,7 +235,7 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
 
 TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
 {
-    if (GetLineCount() == 0 || lineNumber > GetLineCount() - 1) {
+    if (lineNumber > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_TEXT,
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();

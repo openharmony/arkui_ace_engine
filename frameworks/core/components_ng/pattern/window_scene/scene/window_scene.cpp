@@ -119,6 +119,7 @@ void WindowScene::OnAttachToFrameNode()
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+        SetSubWindowBufferAvailableCallback(surfaceNode);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSSystem]OnAttachToFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
             session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
@@ -266,7 +267,7 @@ void WindowScene::BufferAvailableCallback()
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
-            auto context = self->startingWindow_->GetRenderContext();
+            auto context = AceType::DynamicCast<RosenRenderContext>(self->startingWindow_->GetRenderContext());
             CHECK_NULL_VOID(context);
             context->SetMarkNodeGroup(true);
             context->SetOpacity(config.opacityStart_);
@@ -424,13 +425,13 @@ void WindowScene::DisposeSnapShotAndBlankWindow()
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
     AddChild(host, appWindow_, appWindowName_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().uiType_, "pc");
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
     if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_, 1.0f)) {
         return;
@@ -607,5 +608,23 @@ void WindowScene::CleanBlankWindow()
     });
     taskExecutor->PostDelayedTask(
         deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_WINDOW_DELAY_TIME, "ArkUICleanBlankWindow");
+}
+
+void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+{
+    CHECK_NULL_VOID(surfaceNode);
+    auto subWindowCallback = [weakSession = wptr(session_), weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "subWindowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+            session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
+        session->SetBufferAvailable(true);
+    };
+    surfaceNode->SetBufferAvailableCallback(subWindowCallback);
 }
 } // namespace OHOS::Ace::NG

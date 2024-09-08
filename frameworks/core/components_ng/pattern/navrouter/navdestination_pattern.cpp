@@ -29,20 +29,20 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+std::atomic<uint64_t> g_navDestinationPatternNextAutoGenId = 0;
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
-std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
-} // namespace
+}
 
 NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
     : shallowBuilder_(shallowBuilder)
 {
-    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+    navDestinationId_ = g_navDestinationPatternNextAutoGenId.fetch_add(1);
 }
 
 NavDestinationPattern::NavDestinationPattern()
 {
-    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+    navDestinationId_ = g_navDestinationPatternNextAutoGenId.fetch_add(1);
 }
 
 NavDestinationPattern::~NavDestinationPattern()
@@ -306,11 +306,11 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
     auto titleBarUINode = hostNode->GetTitleBarNode();
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
     CHECK_NULL_VOID(titleBarNode);
-
+ 
     auto backButtonUINode = titleBarNode->GetBackButton();
     auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
     CHECK_NULL_VOID(backButtonNode);
-
+ 
     auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
@@ -321,10 +321,10 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     gestureHub->SetLongPressEvent(longPressEvent_);
-
+ 
     auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
     CHECK_NULL_VOID(longPressRecognizer);
-
+ 
     auto longPressEndCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -332,7 +332,7 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
 }
-
+ 
 void NavDestinationPattern::HandleLongPress()
 {
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
@@ -372,7 +372,7 @@ void NavDestinationPattern::HandleLongPress()
     ImageSourceInfo imageSourceInfo = backButtonImageLayoutProperty->GetImageSourceInfoValue();
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
 }
-
+ 
 void NavDestinationPattern::HandleLongPressActionEnd()
 {
     CHECK_NULL_VOID(dialogNode_);

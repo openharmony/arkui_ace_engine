@@ -29,27 +29,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
-/**
- * @tc.name: RosenRenderContextTestNew001
- * @tc.desc: OnAttractionEffectUpdate().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    auto pipelineContext = rosenRenderContext->GetPipelineContext();
-    EXPECT_NE(pipelineContext, nullptr);
-    rosenRenderContext->SuggestOpIncNode(false, true);
-    AttractionEffect effect;
-    effect.fraction = 1.0f;
-    effect.destinationX = Dimension(1.0, DimensionUnit::PX);
-    effect.destinationY = Dimension(1.0, DimensionUnit::PX);
-    rosenRenderContext->OnAttractionEffectUpdate(effect);
-    Rosen::Vector2f dstPoint = { 1.0, 1.0 };
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAttractionFractionValue(), 1.0);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAttractionDstPointValue(), dstPoint);
-}
 
 /**
  * @tc.name: RosenRenderContextTestNew002

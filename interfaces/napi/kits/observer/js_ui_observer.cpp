@@ -47,6 +47,9 @@ static constexpr size_t PARAM_INDEX_ONE = 1;
 static constexpr size_t PARAM_INDEX_TWO = 2;
 static constexpr size_t PARAM_INDEX_THREE = 3;
 
+static constexpr uint32_t PARAM_SECOND = 1;
+static constexpr uint32_t PARAM_THIRD = 2;
+
 static constexpr uint32_t ON_SHOWN = 0;
 static constexpr uint32_t ON_HIDDEN = 1;
 static constexpr uint32_t ON_APPEAR = 2;
@@ -70,8 +73,8 @@ static constexpr uint32_t ON_SHOW = 0;
 static constexpr uint32_t ON_HIDE = 1;
 
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
-constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
+constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char DENSITY_UPDATE[] = "densityUpdate";
 constexpr char LAYOUT_DONE[] = "didLayout";
 constexpr char DRAW_COMMAND_SEND[] = "willDraw";
@@ -125,16 +128,6 @@ bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
     napi_value navigationId = nullptr;
     napi_get_named_property(env, obj, "navigationId", &navigationId);
     return ParseStringFromNapi(env, navigationId, navigationStr);
-}
-
-bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
-{
-    napi_value resultId = nullptr;
-    napi_get_named_property(env, obj, "id", &resultId);
-    if (!MatchValueType(env, resultId, napi_string)) {
-        return false;
-    }
-    return ParseStringFromNapi(env, resultId, result);
 }
 
 bool IsNavDestSwitchOptions(napi_env env, napi_value obj, std::string& navigationId)
@@ -310,6 +303,16 @@ bool ParseNavDestSwitchUnRegisterParams(
 
     return true;
 }
+
+bool ParseScrollId(napi_env env, napi_value obj, std::string& result)
+{
+    napi_value resultId = nullptr;
+    napi_get_named_property(env, obj, "id", &resultId);
+    if (!MatchValueType(env, resultId, napi_string)) {
+        return false;
+    }
+    return ParseStringFromNapi(env, resultId, result);
+}
 } // namespace
 
 ObserverProcess::ObserverProcess()
@@ -433,16 +436,16 @@ napi_value ObserverProcess::ProcessScrollEventRegister(napi_env env, napi_callba
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
-    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_SECOND]);
         UIObserver::RegisterScrollEventCallback(listener);
     }
 
-    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
-        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
+        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
         std::string id;
-        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_THIRD]);
             UIObserver::RegisterScrollEventCallback(id, listener);
         }
     }
@@ -459,22 +462,22 @@ napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_call
         UIObserver::UnRegisterScrollEventCallback(nullptr);
     }
 
-    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
-        UIObserver::UnRegisterScrollEventCallback(argv[PARAM_INDEX_ONE]);
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_function)) {
+        UIObserver::UnRegisterScrollEventCallback(argv[PARAM_SECOND]);
     }
 
-    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_SECOND], napi_object)) {
         std::string id;
-        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
             UIObserver::UnRegisterScrollEventCallback(id, nullptr);
         }
     }
 
-    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
-        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_SECOND], napi_object)
+        && MatchValueType(env, argv[PARAM_THIRD], napi_function)) {
         std::string id;
-        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
-            UIObserver::UnRegisterScrollEventCallback(id, argv[PARAM_INDEX_TWO]);
+        if (ParseScrollId(env, argv[PARAM_SECOND], id)) {
+            UIObserver::UnRegisterScrollEventCallback(id, argv[PARAM_THIRD]);
         }
     }
 
@@ -552,19 +555,18 @@ napi_value ObserverProcess::ProcessRouterPageUnRegister(napi_env env, napi_callb
 
 napi_value ObserverProcess::ProcessDensityRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    GET_PARAMS(env, info, 3);
 
-    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
-        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[1]);
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::RegisterDensityCallback(instanceId, listener);
     }
 
-    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
-        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
-        auto context = argv[PARAM_INDEX_ONE];
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        auto context = argv[1];
         if (context) {
-            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            auto listener = std::make_shared<UIObserverListener>(env, argv[2]);
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::RegisterDensityCallback(uiContextInstanceId, listener);
         }
@@ -576,32 +578,31 @@ napi_value ObserverProcess::ProcessDensityRegister(napi_env env, napi_callback_i
 
 napi_value ObserverProcess::ProcessDensityUnRegister(napi_env env, napi_callback_info info)
 {
-    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+    GET_PARAMS(env, info, 3);
 
-    if (argc == PARAM_SIZE_ONE) {
+    if (argc == 1) {
         int32_t instanceId = ContainerScope::CurrentId();
         UIObserver::UnRegisterDensityCallback(instanceId, nullptr);
     }
 
-    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
-        napi_value context = argv[PARAM_INDEX_ONE];
+    if (argc == 2 && MatchValueType(env, argv[1], napi_object)) {
+        napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
             UIObserver::UnRegisterDensityCallback(uiContextInstanceId, nullptr);
         }
     }
 
-    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+    if (argc == 2 && MatchValueType(env, argv[1], napi_function)) {
         int32_t instanceId = ContainerScope::CurrentId();
-        UIObserver::UnRegisterDensityCallback(instanceId, argv[PARAM_INDEX_ONE]);
+        UIObserver::UnRegisterDensityCallback(instanceId, argv[1]);
     }
 
-    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object) &&
-        MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
-        napi_value context = argv[PARAM_INDEX_ONE];
+    if (argc == 3 && MatchValueType(env, argv[1], napi_object) && MatchValueType(env, argv[2], napi_function)) {
+        napi_value context = argv[1];
         if (context) {
             auto uiContextInstanceId = GetUIContextInstanceId(env, context);
-            UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[PARAM_INDEX_TWO]);
+            UIObserver::UnRegisterDensityCallback(uiContextInstanceId, argv[2]);
         }
     }
 

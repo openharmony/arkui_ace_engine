@@ -418,7 +418,6 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
         } else {
             height = sheetStyle_.height->ConvertToPx();
         }
-
         if (height > maxHeight) {
             height = maxHeight;
         } else if (height < 0.0f) {

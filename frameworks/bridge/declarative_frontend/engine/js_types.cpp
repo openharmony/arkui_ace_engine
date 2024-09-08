@@ -17,10 +17,8 @@
 
 namespace OHOS::Ace::Framework {
 
-static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
-    "Rating", "Radio", "Toggle" };
-static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Checkbox", "CheckboxGroup", "Rating",
-    "Radio", "Toggle" };
+static const std::unordered_set<std::string> g_clickPreventDefPattern = {"RichEditor"};
+static const std::unordered_set<std::string> g_touchPreventDefPattern = {};
 
 #ifdef USE_ARK_ENGINE
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)

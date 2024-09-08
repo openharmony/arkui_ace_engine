@@ -522,6 +522,8 @@ UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& 
         if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
             (type == FrontendType::ETS_CARD)) {
             return front->RunPage(url, params);
+        } else {
+            LOGE("Frontend type not supported when runpage");
         }
     }
     return UIContentErrorCode::NULL_POINTER;

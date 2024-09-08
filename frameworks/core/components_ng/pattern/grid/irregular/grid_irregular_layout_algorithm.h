@@ -33,8 +33,8 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo info, bool overScroll = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), info_(gridLayoutInfo_), overScroll_(overScroll) {};
+    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, bool overScroll = false)
+        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), overScroll_(overScroll) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
 
@@ -106,7 +106,6 @@ private:
     // ========================================== MeasureOnJump functions =====================================
 
     void MeasureOnJump(float mainSize);
-    void Jump(float mainSize);
 
     /**
      * @brief Find the line the jumpIdx item resides in. If not in matrix, fill the matrix up to [jumpIdx].
@@ -144,7 +143,6 @@ private:
 
     bool IsIrregularLine(int32_t lineIndex) const override;
 
-    GridLayoutInfo& info_;
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */

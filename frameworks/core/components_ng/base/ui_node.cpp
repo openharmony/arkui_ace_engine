@@ -650,9 +650,8 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive, context);
+    OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
@@ -661,6 +660,14 @@ void UINode::DetachFromMainTree(bool recursive)
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
+}
+
+void UINode::FireCustomDisappear()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        child->FireCustomDisappear();
+    }
 }
 
 void UINode::ProcessOffscreenTask(bool recursive)
@@ -754,7 +761,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
+void UINode::OnDetachFromMainTree(bool) {}
 
 void UINode::OnAttachToMainTree(bool)
 {

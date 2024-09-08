@@ -33,9 +33,6 @@ class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
 }
 
 class QRColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('color');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -46,14 +43,15 @@ class QRColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class QRBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('qrBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -64,14 +62,15 @@ class QRBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class QRContentOpacityModifier extends ModifierWithKey<number | Resource> {
-  constructor(value: number | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('qrContentOpacity');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

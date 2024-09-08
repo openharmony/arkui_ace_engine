@@ -253,11 +253,11 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     return formNode;
 }
 
-void FormNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void FormNode::OnDetachFromMainTree(bool recursive)
 {
     auto eventHub = GetEventHub<FormEventHub>();
     eventHub->FireOnCache();
-    FrameNode::OnDetachFromMainTree(recursive, context);
+    FrameNode::OnDetachFromMainTree(recursive);
 }
 
 void FormNode::InitializeFormAccessibility()

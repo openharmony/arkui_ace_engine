@@ -32,8 +32,16 @@ build_component_ng("base_ng") {
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
   ]
-  if (ace_engine_feature_enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode)) {
+  components_ng_deps = [
+    "animation_ng",
+    "event_ng",
+    "layout_ng",
+    "manager_ng",
+    "pattern_ng",
+    "property_ng",
+    "render_ng",
+  ]
+  if (ace_engine_feature_enable_split_mode && defined(vendor_configs.ace_engine_advanced_split_mode)) {
     sources += vendor_configs.ace_engine_advanced_split_mode
   } else {
     sources += [ "view_advanced_register.cpp" ]

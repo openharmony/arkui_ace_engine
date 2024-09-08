@@ -35,7 +35,6 @@
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnReturnRequest*;
 
       OHOS_ACE_*;
-      GetArkUINodeAPI;
       GetArkUIAnyFullNodeAPI;
       GetCJUIFullNodeAPI;
 
@@ -391,6 +390,7 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      VTT?for?OHOS::Ace::ResourceWrapper;
     };
   local:
     *;

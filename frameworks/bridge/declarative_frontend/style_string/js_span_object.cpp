@@ -33,6 +33,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -521,7 +522,7 @@ void JSGestureSpan::JSBind(BindingTarget globalObj)
 RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args)
 {
     GestureStyle gestureInfo;
-    if (args.Length() <= 0 || !args[0]->IsObject()) {
+    if (args.Length() > 0 && !args[0]->IsObject()) {
         gestureInfo.onClick = std::nullopt;
         gestureInfo.onLongPress = std::nullopt;
         return AceType::MakeRefPtr<GestureSpan>(gestureInfo);
@@ -815,13 +816,13 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
     auto imageSize = JSRef<JSObject>::New();
     auto size = imageAttr->size;
     if (size->width.has_value()) {
-        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
+        imageSize->SetProperty<float>("width", size->width->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("width", 0.0);
     }
 
     if (size->height.has_value()) {
-        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
+        imageSize->SetProperty<float>("height", size->height->ConvertToPx());
     } else {
         imageSize->SetProperty<float>("height", 0.0);
     }

@@ -55,7 +55,7 @@ void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
     UINode::RemoveChildAtIndex(slot);
 }
 
-void NavRouterGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 {
     // remove node in navigation
     do {
@@ -75,7 +75,7 @@ void NavRouterGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* c
             DynamicCast<NavDestinationGroupNode>(navDestinationNode_)->GetPattern());
         stack->Remove(navDestinationPattern->GetName(), navDestinationNode_);
     } while (false);
-    FrameNode::OnDetachFromMainTree(recursive, context);
+    FrameNode::OnDetachFromMainTree(recursive);
 }
 
 void NavRouterGroupNode::OnAttachToMainTree(bool recursive)

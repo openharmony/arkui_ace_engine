@@ -431,7 +431,6 @@ private:
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
 
-    bool isTossing_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;

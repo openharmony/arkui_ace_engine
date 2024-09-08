@@ -245,8 +245,8 @@ private:
     bool showHoverEffect_ = true;
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
+
     RefPtr<RadioModifier> radioModifier_;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG
