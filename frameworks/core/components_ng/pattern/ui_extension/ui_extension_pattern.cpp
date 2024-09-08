@@ -229,25 +229,33 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
-void UIExtensionPattern::MountPlaceholderNode()
+void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
 {
-    if (!isShowPlaceholder_ && placeholderNode_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->AddChild(placeholderNode_, 0);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        isShowPlaceholder_ = true;
+    if (IsShowPlaceholder()) {
+        return;
     }
+    RefPtr<NG::FrameNode> placeholderNode = nullptr;
+    auto it = placeholderMap_.find(type);
+    if (it != placeholderMap_.end()) {
+        placeholderNode = it->second;
+    }
+    CHECK_NULL_VOID(placeholderNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    host->AddChild(placeholderNode, 0);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(type);
 }
 
 void UIExtensionPattern::RemovePlaceholderNode()
 {
-    if (isShowPlaceholder_) {
+    if (IsShowPlaceholder()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChildAtIndex(0);
-        isShowPlaceholder_ = false;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SetCurPlaceholderType(PlaceholderType::NONE);
     }
 }
 
@@ -293,7 +301,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     usage_ = uIExtensionUsage;
     UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
-    MountPlaceholderNode();
+    MountPlaceholderNode(PlaceholderType::INITIAL);
     SessionConfig config;
     config.isAsyncModalBinding = isAsyncModalBinding_;
     config.uiExtensionUsage = uIExtensionUsage;
@@ -380,6 +388,26 @@ void UIExtensionPattern::OnConnect()
     }
     InitializeAccessibility();
     ReDispatchDisplayArea();
+}
+
+void UIExtensionPattern::OnAreaUpdated()
+{
+    CHECK_RUN_ON(UI);
+    RemovePlaceholderNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddChild(contentNode_, 0);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+PlaceholderType UIExtensionPattern::GetSizeChangeReason()
+{
+    CHECK_NULL_RETURN(sessionWrapper_, PlaceholderType::NONE);
+    if (IsFoldStatusChanged()) {
+        SetFoldStatusChanged(false);
+        return PlaceholderType::FOLD_TO_EXPAND;
+    }
+    return static_cast<PlaceholderType>(sessionWrapper_->GetSizeChangeReason());
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
@@ -503,11 +531,17 @@ void UIExtensionPattern::OnAttachToFrameNode()
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
-    callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
+    surfacePositionCallBackId_ =
+        pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->DispatchDisplayArea(true);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->DispatchDisplayArea(true);
+    });
+    foldDisplayCallBackId_ =
+        pipeline->RegisterFoldDisplayModeChangedCallback([weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFoldStatusChanged(true);
     });
     UIEXT_LOGI("OnAttachToFrameNode");
 }
@@ -520,7 +554,8 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowStateChangedCallback(id);
-    pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
+    pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
+    pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -803,9 +838,13 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     CHECK_NULL_VOID(renderContext);
     auto displaySize = renderContext->GetPaintRectWithoutTransform().GetSize();
     auto displayArea = RectF(displayOffset, displaySize);
-    if (displayArea_ != displayArea || isForce) {
+    bool sizeChange = displayArea_ != displayArea;
+    if (sizeChange || isForce) {
         displayArea_ = displayArea;
         if (state_ == AbilityState::FOREGROUND) {
+            if (sizeChange) {
+                MountPlaceholderNode(GetSizeChangeReason());
+            }
             sessionWrapper_->NotifyDisplayArea(displayArea_);
         } else {
             displayAreaChanged_ = true;
@@ -912,7 +951,7 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     state_ = AbilityState::NONE;
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        if (!isShowPlaceholder_) {
+        if (!IsShowPlaceholder()) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             host->RemoveChildAtIndex(0);
