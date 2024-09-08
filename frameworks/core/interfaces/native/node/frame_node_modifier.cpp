@@ -465,7 +465,7 @@ ArkUI_Int32 SetSystemColorModeChangeEvent(ArkUINodeHandle node, void* userData, 
         func(colorMode, userData);
     };
     ViewAbstract::SetSystemColorModeChangeEvent(frameNode, onColorChange);
-    return 1;
+    return 0;
 }
 
 void ResetSystemColorModeChangeEvent(ArkUINodeHandle node)
@@ -488,7 +488,7 @@ ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, 
         func(fontStyle, userData);
     };
     ViewAbstract::SetSystemFontChangeEvent(frameNode, onFontChange);
-    return 1;
+    return 0;
 }
 
 void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
