@@ -695,7 +695,9 @@ namespace OHOS::Ace {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
-
+class FontManager : public AceType {
+    DECLARE_ACE_TYPE(FontManager, AceType);
+};
 void PipelineBase::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}
