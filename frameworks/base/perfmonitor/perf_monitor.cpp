@@ -344,7 +344,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
             if ((it->second)->IsTimeOut(vsyncTime + duration)) {
                 CheckTimeOutOfExceptAnimatorStatus(it->second->sceneId);
                 delete it->second;
-                it = mRecords.erase(it);
+                mRecords.erase(it++);
                 continue;
             }
             if ((it->second)->IsFirstFrame()) {

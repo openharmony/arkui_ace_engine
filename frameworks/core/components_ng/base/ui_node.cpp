@@ -198,7 +198,7 @@ void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
                 GetTag().c_str(), GetId());
         }
         OHOS::Ace::LogBacktrace();
-        
+
         if (withAbort) {
             abort();
         }
@@ -316,7 +316,6 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         }
         ++index;
     }
-
     if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
         children_.clear();
     }
@@ -772,8 +771,7 @@ void UINode::UpdateGeometryTransition()
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
-        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -823,7 +821,6 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
         DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
         if (IsDisappearing()) {
             DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
@@ -1534,7 +1531,6 @@ void UINode::PaintDebugBoundaryTreeAll(bool flag)
 
 void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
 {
-    ACE_SCOPED_TRACE("GetPageNodeCountAndDepth");
     auto children = GetChildren();
     if (*depth < depth_) {
         *depth = depth_;
@@ -1550,6 +1546,7 @@ void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
 
 void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res)
 {
+    CHECK_NULL_VOID(root);
     if (root->GetChildren().empty()) {
         res.emplace_back(root);
     }
@@ -1566,6 +1563,24 @@ bool UINode::IsContextTransparent()
         }
     }
     return true;
+}
+
+void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += index;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+    }
 }
 
 void UINode::GetInspectorValue()
@@ -1595,24 +1610,6 @@ void UINode::GetContainerComponentText(std::string& text)
             break;
         }
         child->GetContainerComponentText(text);
-    }
-}
-
-void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
-{
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
-    auto accessibilityId = GetAccessibilityId();
-    auto parent = GetParent();
-    if (parent) {
-        parent->NotifyDataChange(updateFrom, count, accessibilityId);
     }
 }
 } // namespace OHOS::Ace::NG
