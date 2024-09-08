@@ -164,6 +164,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnNavigationEntryCommitted, void);
     ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckResult, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedLifecycleChange, void);
+    ACE_WEB_EVENT_PROPERTY(OnNativeEmbedVisibilityChange, void);
     ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
     ACE_WEB_EVENT_PROPERTY(OnIntelligentTrackingPreventionResult, void);
     ACE_WEB_EVENT_PROPERTY(OnRenderProcessNotResponding, void);

@@ -71,7 +71,6 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CheckHandleIsShown();
 
     selectOverlayContentModifier_->SetIsUsingMouse(info_.isUsingMouse);
-
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         selectOverlayContentModifier_->SetHandleColor(textOverlayTheme->GetHandleColor());
     } else {
@@ -101,6 +100,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetSecondHandlePaintInfo(info_.secondHandle.paintInfo - offset);
     selectOverlayContentModifier_->SetIsOverlayMode(isOverlayMode);
     selectOverlayContentModifier_->SetScale(info_.scale);
+    selectOverlayContentModifier_->SetFirstCircleIsShow(info_.firstHandle.isCircleShow);
+    selectOverlayContentModifier_->SetSecondCircleIsShow(info_.secondHandle.isCircleShow);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()

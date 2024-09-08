@@ -213,9 +213,6 @@ void FfiOHOSAceFrameworkTextClockFontFeature(const char* fontFeature)
 int64_t FfiOHOSAceFrameworkTextClockControllerCtor()
 {
     auto controller = FFIData::Create<NativeTextClockController>();
-    if (controller == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return controller->GetID();
 }
 

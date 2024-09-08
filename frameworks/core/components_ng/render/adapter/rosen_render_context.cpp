@@ -4311,6 +4311,29 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnMagnifierUpdate(const MagnifierParams& magnifierParams)
+{
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::RSMagnifierParams> rsMagnifierParams(std::make_shared<Rosen::RSMagnifierParams>());
+    rsMagnifierParams->factor_ = magnifierParams.factor_;
+    rsMagnifierParams->width_ = magnifierParams.width_;
+    rsMagnifierParams->height_ = magnifierParams.height_;
+    rsMagnifierParams->borderWidth_ = magnifierParams.borderWidth_;
+    rsMagnifierParams->cornerRadius_ = magnifierParams.cornerRadius_;
+    rsMagnifierParams->offsetX_ = magnifierParams.offsetX_;
+    rsMagnifierParams->offsetY_ = magnifierParams.offsetY_;
+    rsMagnifierParams->shadowOffsetX_ = magnifierParams.shadowOffsetX_;
+    rsMagnifierParams->shadowOffsetY_ = magnifierParams.shadowOffsetY_;
+    rsMagnifierParams->shadowSize_ = magnifierParams.shadowSize_;
+    rsMagnifierParams->shadowStrength_ = magnifierParams.shadowStrength_;
+    rsMagnifierParams->gradientMaskColor1_ = magnifierParams.gradientMaskColor1_;
+    rsMagnifierParams->gradientMaskColor2_ = magnifierParams.gradientMaskColor2_;
+    rsMagnifierParams->outerContourColor1_ = magnifierParams.outerContourColor1_;
+    rsMagnifierParams->outerContourColor2_ = magnifierParams.outerContourColor2_;
+    rsNode_->SetMagnifierParams(rsMagnifierParams);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -6323,14 +6346,6 @@ void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkSuggestOpincNode(isOpincNode, isNeedCalculate);
-}
-
-void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect)
-{
-    CHECK_NULL_VOID(rsNode_);
-    Rosen::Vector2f destinationPoint(effect.destinationX.ConvertToPx(), effect.destinationY.ConvertToPx());
-    rsNode_->SetAttractionEffect(effect.fraction, destinationPoint);
-    RequestNextFrame();
 }
 
 PipelineContext* RosenRenderContext::GetPipelineContext() const

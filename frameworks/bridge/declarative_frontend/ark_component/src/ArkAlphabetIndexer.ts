@@ -54,7 +54,11 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   usingPopup(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, UsingPopupModifier.identity, UsingPopupModifier, value);
+    if (typeof value === 'boolean') {
+      modifier(this._modifiers, UsingPopupModifier, value);
+    } else {
+      modifier(this._modifiers, UsingPopupModifier, undefined);
+    }
     return this;
   }
   selectedFont(value: Font): this {
@@ -70,7 +74,12 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   itemSize(value: string | number): this {
-    modifierWithKey(this._modifiersWithKeys, ItemSizeModifier.identity, ItemSizeModifier, value);
+    if (typeof value !== 'number' && typeof value !== 'string') {
+      modifier(this._modifiers, ItemSizeModifier, undefined);
+    }
+    else {
+      modifier(this._modifiers, ItemSizeModifier, value);
+    }
     return this;
   }
   font(value: Font): this {
@@ -94,7 +103,11 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     throw new Error('Method not implemented.');
   }
   selected(index: number): this {
-    modifierWithKey(this._modifiersWithKeys, AlphabetIndexerSelectedModifier.identity, AlphabetIndexerSelectedModifier, index);
+    if (typeof index === 'number') {
+      modifier(this._modifiers, AlphabetIndexerSelectedModifier, index);
+    } else {
+      modifier(this._modifiers, AlphabetIndexerSelectedModifier, undefined);
+    }
     return this;
   }
   popupPosition(value: Position): this {
@@ -140,9 +153,6 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent)
 };
 
 class PopupItemFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('popupItemFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -162,9 +172,6 @@ class PopupItemFontModifier extends ModifierWithKey<Font> {
 }
 
 class SelectedFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('alphaBetIndexerSelectedFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -184,9 +191,6 @@ class SelectedFontModifier extends ModifierWithKey<Font> {
 }
 
 class PopupFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('popupFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -206,9 +210,6 @@ class PopupFontModifier extends ModifierWithKey<Font> {
 }
 
 class AlphabetIndexerFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('alphaBetIndexerFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -241,7 +242,11 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -259,7 +264,11 @@ class ColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -277,7 +286,11 @@ class PopupColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -295,7 +308,11 @@ class SelectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -313,7 +330,11 @@ class PopupBackgroundModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -331,7 +352,11 @@ class SelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -349,7 +374,11 @@ class PopupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -367,14 +396,15 @@ class PopupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class AlignStyleModifier extends ModifierWithKey<ArkAlignStyle> {
-  constructor(value: ArkAlignStyle) {
-    super(value);
-  }
   static identity = Symbol('alignStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -391,10 +421,7 @@ class AlignStyleModifier extends ModifierWithKey<ArkAlignStyle> {
   }
 }
 
-class UsingPopupModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class UsingPopupModifier extends Modifier<boolean> {
   static identity = Symbol('usingPopup');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -405,10 +432,7 @@ class UsingPopupModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class AlphabetIndexerSelectedModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class AlphabetIndexerSelectedModifier extends Modifier<number> {
   static identity = Symbol('alphabetIndexerSelected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -419,10 +443,7 @@ class AlphabetIndexerSelectedModifier extends ModifierWithKey<number> {
   }
 }
 
-class ItemSizeModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
-    super(value);
-  }
+class ItemSizeModifier extends Modifier<number | string> {
   static identity: Symbol = Symbol('itemSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -434,9 +455,6 @@ class ItemSizeModifier extends ModifierWithKey<number | string> {
 }
 
 class PopupPositionModifier extends ModifierWithKey<Position> {
-  constructor(value: Position) {
-    super(value);
-  }
   static identity: Symbol = Symbol('popupPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

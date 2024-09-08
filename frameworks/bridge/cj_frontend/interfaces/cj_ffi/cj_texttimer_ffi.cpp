@@ -135,9 +135,6 @@ void FfiOHOSAceFrameworkTextTimerSetOnTimer(void (*callback)(int64_t utc, int64_
 int64_t FfiOHOSAceFrameworkTextTimerControllerCtor()
 {
     auto controller = FFIData::Create<NativeTextTimerController>();
-    if (controller == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return controller->GetID();
 }
 

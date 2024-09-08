@@ -59,7 +59,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     axis_ = listLayoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
-    layoutDirection_ = listLayoutProperty_->GetNonAutoLayoutDirection();
+    layoutDirection_ = layoutProperty->GetNonAutoLayoutDirection();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
@@ -953,6 +953,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
     for (auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
+            LOGI("wrapper is out of boundary");
             continue;
         }
 
@@ -1130,6 +1131,7 @@ float ListItemGroupLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, fl
         case OHOS::Ace::V2::ListItemAlign::END:
             return delta;
         default:
+            LOGW("Invalid ListItemAlign: %{public}d", itemAlign_);
             return 0.0f;
     }
 }

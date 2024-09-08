@@ -89,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-
+    
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -103,7 +103,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement() override;
+    void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
@@ -683,8 +683,6 @@ public:
     bool PrintVsyncInfoIfNeed() const override;
     void SetUIExtensionImeShow(bool imeShow);
 
-    void CheckVirtualKeyboardHeight() override;
-
     void StartWindowAnimation() override
     {
         isWindowAnimation_ = true;
@@ -895,7 +893,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-    void FlushWindowPatternInfo();
+
     void FlushFocusView();
     void FlushFocusScroll();
 

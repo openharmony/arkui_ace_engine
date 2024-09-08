@@ -34,7 +34,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
@@ -261,6 +260,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             responseLinkResult.emplace_back(recognizer);
         }
 
+        recognizer->SetNodeId(host->GetId());
         recognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
         recognizer->SetTargetComponent(targetComponent);
         recognizer->SetCoordinateOffset(offset);
@@ -806,7 +806,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
         return;
     }
-
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
             if (dragPreviewPixelMap_ != nullptr) {
@@ -816,7 +815,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
             }
         }
     }
-
     if (dragPreviewInfo.pixelMap != nullptr) {
         dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
@@ -925,12 +923,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         pixelMap = pixelMap_;
     }
     SetDragGatherPixelMaps(info);
+    dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
     auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         recordsSize = badgeNumber.value();
     }
-    dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
     auto windowScale = dragDropManager->GetWindowScale();
@@ -1019,6 +1017,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             }
         }
     }
+    CHECK_NULL_VOID(overlayManager);
     if (!overlayManager->GetIsOnAnimation()) {
         if (dragEventActuator_ != nullptr) {
             dragEventActuator_->SetIsNotInPreviewState(true);
@@ -1669,6 +1668,16 @@ bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
            frameTag == V2::RICH_EDITOR_ETS_TAG;
 }
 
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+{
+    isDragForbidden_ = isDragForbidden;
+}
+
+bool GestureEventHub::IsDragForbidden()
+{
+    return isDragForbidden_;
+}
+
 DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
     DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
@@ -1683,10 +1692,10 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
         onDragStart = eventHub->GetDefaultOnDragStart();
         dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
     }
-    dragEvent->SetPressedKeyCodes(info.GetPressedKeyCodes());
     if (GetTextDraggable() && info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         GenerateMousePixelMap(info);
     }
+    dragEvent->SetPressedKeyCodes(info.GetPressedKeyCodes());
     dragDropInfo = onDragStart(dragEvent, extraParams);
 
     auto frameTag = frameNode->GetTag();
@@ -1752,6 +1761,38 @@ void GestureEventHub::RemoveLastResponseRect()
     }
 }
 
+void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
+{
+    bool needRecollect = false;
+    for (auto iter = modifierGestures_.begin(); iter != modifierGestures_.end();) {
+        auto tag = (*iter)->GetTag();
+        if (tag.has_value() && tag.value() == gestureTag) {
+            iter = modifierGestures_.erase(iter);
+            backupModifierGestures_.remove(*iter);
+            needRecollect = true;
+        } else {
+            auto group = AceType::DynamicCast<GestureGroup>(*iter);
+            if (group) {
+                group->RemoveChildrenByTag(gestureTag, needRecollect);
+            }
+            iter++;
+        }
+    }
+    if (needRecollect) {
+        recreateGesture_ = true;
+        needRecollect_ = true;
+        OnModifyDone();
+    }
+}
+
+void GestureEventHub::ClearModifierGesture()
+{
+    modifierGestures_.clear();
+    backupModifierGestures_.clear();
+    recreateGesture_ = true;
+    OnModifyDone();
+}
+
 void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
 {
     if (!touchEventActuator_) {
@@ -1766,16 +1807,6 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
     }
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
-}
-
-void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
-{
-    isDragForbidden_ = isDragForbidden;
-}
-
-bool GestureEventHub::IsDragForbidden()
-{
-    return isDragForbidden_;
 }
 
 bool GestureEventHub::IsNeedSwitchToSubWindow() const
@@ -1875,38 +1906,6 @@ int32_t GestureEventHub::GetSelectItemSize()
     CHECK_NULL_RETURN(scrollPattern, 0);
     auto children = scrollPattern->GetVisibleSelectedItems();
     return children.size();
-}
-
-void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
-{
-    bool needRecollect = false;
-    for (auto iter = modifierGestures_.begin(); iter != modifierGestures_.end();) {
-        auto tag = (*iter)->GetTag();
-        if (tag.has_value() && tag.value() == gestureTag) {
-            iter = modifierGestures_.erase(iter);
-            backupModifierGestures_.remove(*iter);
-            needRecollect = true;
-        } else {
-            auto group = AceType::DynamicCast<GestureGroup>(*iter);
-            if (group) {
-                group->RemoveChildrenByTag(gestureTag, needRecollect);
-            }
-            iter++;
-        }
-    }
-    if (needRecollect) {
-        recreateGesture_ = true;
-        needRecollect_ = true;
-        OnModifyDone();
-    }
-}
-
-void GestureEventHub::ClearModifierGesture()
-{
-    modifierGestures_.clear();
-    backupModifierGestures_.clear();
-    recreateGesture_ = true;
-    OnModifyDone();
 }
 
 void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)

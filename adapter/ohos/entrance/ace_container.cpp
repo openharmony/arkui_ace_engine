@@ -428,16 +428,6 @@ void AceContainer::InitializeFrontend()
                 jsEngine = loader.CreateJsEngine(instanceId_);
             }
             jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-            auto pageUrlCheckFunc = [id = instanceId_](const std::string& url, const std::function<void()>& callback,
-                const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) {
-                ContainerScope scope(id);
-                auto container = Container::Current();
-                CHECK_NULL_VOID(container);
-                auto pageUrlChecker = container->GetPageUrlChecker();
-                CHECK_NULL_VOID(pageUrlChecker);
-                pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
-            };
-            jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
             EngineHelper::AddEngine(instanceId_, jsEngine);
             declarativeFrontend->SetJsEngine(jsEngine);
             declarativeFrontend->SetPageProfile(pageProfile_);
@@ -1175,7 +1165,7 @@ UIContentErrorCode AceContainer::RunPage(
     }
 
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content, params);
+        return front->RunPageByNamedRouter(content);
     }
 
     return front->RunPage(content, params);
@@ -1487,7 +1477,7 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isEnableArrow = false;
     if (!isNative) {
         // web component will manually destroy the popup
-        customConfig.isAutoCancel = false;
+        customConfig.isAutoCancel = true;
     }
 }
 
@@ -2189,25 +2179,25 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
-std::pair<RouterRecoverRecord, UIContentErrorCode> AceContainer::RestoreRouterStack(
-    int32_t instanceId, const std::string& contentInfo, ContentInfoType type)
+std::pair<std::string, UIContentErrorCode> AceContainer::RestoreRouterStack(
+    int32_t instanceId, const std::string& contentInfo)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER));
+    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER));
-    return front->RestoreRouterStack(contentInfo, type);
+    CHECK_NULL_RETURN(front, std::make_pair("", UIContentErrorCode::NULL_POINTER));
+    return front->RestoreRouterStack(contentInfo);
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
+std::string AceContainer::GetContentInfo(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo(type);
+    return front->GetContentInfo();
 }
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
@@ -2457,16 +2447,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 
@@ -2932,9 +2928,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     currentPointerEvent_ = currentEvent;
     auto pointerAction = currentEvent->GetPointerAction();
     if (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
-        pointerAction == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        pointerAction == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
         return;
     }
     MMI::PointerEvent::PointerItem pointerItem;

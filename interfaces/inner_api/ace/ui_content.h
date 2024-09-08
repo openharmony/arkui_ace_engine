@@ -118,11 +118,10 @@ public:
     virtual void Destroy() = 0;
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
-    // restore
-    virtual UIContentErrorCode Restore(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage,
-        ContentInfoType type = ContentInfoType::CONTINUATION) = 0;
-    virtual std::string GetContentInfo(ContentInfoType type = ContentInfoType::CONTINUATION) const = 0;
+    // distribute
+    virtual UIContentErrorCode Restore(OHOS::Rosen::Window *window, const std::string &contentInfo,
+                                       napi_value storage) = 0;
+    virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
 
     // UI content event process
@@ -408,6 +407,12 @@ public:
     virtual void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
+    virtual void SetStatusBarItemColor(uint32_t color) {};
+
+    virtual void PreLayout() {};
+
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
+
     virtual void SetContentNodeGrayScale(float grayscale) {};
     
     virtual sptr<IRemoteObject> GetRemoteObj()
@@ -415,11 +420,6 @@ public:
         return {};
     }
 
-    virtual void PreLayout() {};
-    
-    virtual void SetStatusBarItemColor(uint32_t color) {};
-
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
 };
 
 } // namespace OHOS::Ace

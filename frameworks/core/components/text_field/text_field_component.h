@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -200,9 +201,6 @@ public:
     void SetIsVisible(bool isVisible);
     bool IsVisible() const;
 
-    void SetOverflowX(const TextFieldOverflowX& overflowX);
-    TextFieldOverflowX& GetOverflowX() const;
-
     void SetResetToStart(bool resetToStart);
     bool GetResetToStart() const;
     bool HasSetResetToStart() const;
@@ -295,8 +293,6 @@ public:
     ACE_DEFINE_COMPONENT_EVENT(OnClick, void(const ClickInfo& clickInfo));
 
     ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOptions, CopyOptions::Distributed);
-
-    ACE_DEFINE_COMPONENT_PROP(ScrollBar, DisplayMode, DisplayMode::OFF);
 
 private:
     RefPtr<TextFieldDeclaration> declaration_;

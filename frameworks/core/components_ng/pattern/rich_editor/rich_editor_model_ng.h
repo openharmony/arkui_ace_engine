@@ -41,8 +41,8 @@ public:
     void SetTextDetectEnable(bool value) override;
     void SetSupportPreviewText(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
-    void SetSelectedBackgroundColor(const DynamicColor& selectedColor) override;
-    void SetCaretColor(const DynamicColor& color) override;
+    void SetSelectedBackgroundColor(const Color& selectedColor) override;
+    void SetCaretColor(const Color& color) override;
     void SetOnEditingChange(std::function<void(const bool&)>&& func) override;
     void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func) override;
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
@@ -59,12 +59,12 @@ public:
     static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
-    static void SetCaretColor(FrameNode* frameNode, const DynamicColor& color);
+    static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
-    static void SetSelectedBackgroundColor(FrameNode* frameNode, const DynamicColor& selectedColor);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);

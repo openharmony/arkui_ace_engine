@@ -18,6 +18,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -663,7 +664,7 @@ ArkUISliderValidSlideRange GetSliderValidSlideRange(ArkUINodeHandle node)
 } // namespace SliderModifier
 
 namespace NodeModifier {
-const ArkUISliderModifier* GetSliderModifier()
+const ArkUISliderModifier *GetSliderModifier()
 {
     static const ArkUISliderModifier modifier = {
         SliderModifier::SetShowTips,

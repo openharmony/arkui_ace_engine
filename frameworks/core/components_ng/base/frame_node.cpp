@@ -20,8 +20,8 @@
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/dimension.h"
@@ -488,8 +488,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false, GetContext());
-        LOGW("%{public}s %{public}d should do detach before destroy function", GetTag().c_str(), GetId());
+        OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -1046,21 +1045,8 @@ void FrameNode::UpdateGeometryTransition()
     }
 }
 
-void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    CHECK_NULL_VOID(renderContext_);
-    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
-    if (callback) {
-        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
-        callback(info);
-    }
-#endif
-}
-
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
@@ -1142,24 +1128,47 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    NotifyConfigurationChangeNdk(configurationChange);
 }
 
-void FrameNode::NotifyVisibleChange(bool isVisible)
+void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)
 {
-    pattern_->OnVisibleChange(isVisible);
-    UpdateChildrenVisible(isVisible);
+    if (ndkColorModeUpdateCallback_ && configurationChange.colorModeUpdate &&
+        colorMode_ != SystemProperties::GetColorMode()) {
+        auto colorModeChange = ndkColorModeUpdateCallback_;
+        colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    if (ndkFontUpdateCallback_ && (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate)) {
+        auto fontChangeCallback = ndkFontUpdateCallback_;
+        auto pipeline = GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
+    }
 }
 
-void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
+void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
+{
+    if ((preVisibility != currentVisibility &&
+            (preVisibility == VisibleType::GONE || currentVisibility == VisibleType::GONE)) &&
+        SelfExpansive()) {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
+}
+
+void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(isVisible);
+    NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
-void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -1174,12 +1183,6 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
-    if (context) {
-        const auto& safeAreaManager = context->GetSafeAreaManager();
-        if (safeAreaManager) {
-            safeAreaManager->RemoveRestoreNode(WeakClaim(this));
-        }
-    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -1463,7 +1466,7 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
-    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    bool isFrameDisappear = !context->GetOnShow() || !AllowVisibleAreaCheck() || !IsVisible();
     if (isFrameDisappear) {
         cachedIsFrameDisappear_ = { timestamp, true };
         return true;
@@ -3469,12 +3472,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first) {
+    if (res.first || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second) {
+    if (res.second || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -4605,13 +4608,18 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
     }
 }
 
+bool FrameNode::AllowVisibleAreaCheck() const
+{
+    return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
+}
+
 void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
     visibleInnerRect = visibleRect;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
-    if (!IsOnMainTree() || !parentUi) {
+    if (!AllowVisibleAreaCheck() || !parentUi) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
         visibleInnerRect.SetWidth(0.0f);
@@ -5108,12 +5116,6 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     }
 #endif
     UINode::NotifyWebPattern(isRegister);
-}
-
-uint32_t FrameNode::GetWindowPatternType() const
-{
-    CHECK_NULL_RETURN(pattern_, 0);
-    return pattern_->GetWindowPatternType();
 }
 
 void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const

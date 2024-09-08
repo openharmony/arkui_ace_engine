@@ -135,7 +135,7 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
             return std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|rem))|(^$))");
+            std::regex blurRegexExpression(R"((\d+(\.\d+)?(px|vp|rem)?)|(^$))");
             return std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
@@ -1206,19 +1206,14 @@ void CustomPaintPaintMethod::Save()
 
 void CustomPaintPaintMethod::Restore()
 {
-    if (rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) {
-        if (!saveStates_.empty()) {
-            state_ = saveStates_.back();
-            saveStates_.pop_back();
-        }
-        if (!saveColorFilter_.empty()) {
-            colorFilter_ = saveColorFilter_.back();
-            saveColorFilter_.pop_back();
-        }
-        if (!saveBlurFilter_.empty()) {
-            blurFilter_ = saveBlurFilter_.back();
-            saveBlurFilter_.pop_back();
-        }
+    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
+        (!saveBlurFilter_.empty())) {
+        state_ = saveStates_.back();
+        saveStates_.pop_back();
+        colorFilter_ = saveColorFilter_.back();
+        saveColorFilter_.pop_back();
+        blurFilter_ = saveBlurFilter_.back();
+        saveBlurFilter_.pop_back();
         rsCanvas_->Restore();
     }
 }
@@ -1726,7 +1721,7 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent)
         return;
     }
     blurFilter_ =
-        RSImageFilter::CreateBlurImageFilter(blurNum * density_, blurNum * density_, RSTileMode::DECAL, nullptr);
+        RSImageFilter::CreateBlurImageFilter(blurNum, blurNum, RSTileMode::DECAL, nullptr);
 }
 
 bool CustomPaintPaintMethod::GetFilterType(const std::string& filterStr, std::vector<FilterProperty>& filters)
@@ -1791,6 +1786,15 @@ double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
         ret = StringUtils::StringToDouble(result);
         return ret;
     }
+
+    // check vp case
+    index = str.find("vp");
+    if (index != std::string::npos) {
+        std::string result = str.substr(0, index);
+        ret = StringUtils::StringToDouble(result);
+        ret = ret * density_;
+        return ret;
+    }
     
     // check rem case
     index = str.find("rem");
@@ -1801,7 +1805,8 @@ double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
         return ret;
     }
 
-    return ret;
+    ret = StringUtils::StringToDouble(str);
+    return ret * density_;
 }
 
 float CustomPaintPaintMethod::PercentStrToFloat(const std::string& percentStr)

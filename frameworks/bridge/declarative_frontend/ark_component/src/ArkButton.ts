@@ -174,7 +174,11 @@ class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 class ButtonStateEffectModifier extends ModifierWithKey<boolean> {
@@ -204,9 +208,6 @@ class ButtonFontStyleModifier extends ModifierWithKey<number> {
   }
 }
 class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
-  constructor(value: string | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('buttonFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -216,13 +217,15 @@ class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
   }
 }
 class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
-  constructor(value: LabelStyle) {
-    super(value);
-  }
   static identity: Symbol = Symbol('buttonLabelStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -286,9 +289,6 @@ class ButtonTypeModifier extends ModifierWithKey<number> {
   }
 }
 class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('buttonFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -299,13 +299,15 @@ class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } 
+    else {
+      return true;
+    }
   }
 }
 class ButtonFontSizeModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('buttonFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -316,7 +318,12 @@ class ButtonFontSizeModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
   }
 }
 class ButtonFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {
@@ -626,7 +633,7 @@ globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Button.contentModifier = function (modifier) {
+globalThis.Button.contentModifier = function (modifier: ContentModifier<ButtonConfiguration>): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

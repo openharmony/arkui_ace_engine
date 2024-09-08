@@ -39,12 +39,21 @@ constexpr int32_t MILLISECONDS_OF_SECOND = 1000;
 constexpr int32_t TOTAL_SECONDS_OF_MINUTE = 60;
 constexpr int32_t STR_SIZE_ONE = 1;
 constexpr int32_t STR_SIZE_TWO = 2;
+constexpr int32_t MAX_LENGTH_OF_MILLIS = 3;
+constexpr int32_t SIZE_OF_AM_PM_STRING = 2;
+constexpr int32_t SIZE_OF_TIME_TEXT = 30;
+constexpr int32_t BOUNDARY_OF_AM_PM = 12;
+constexpr int32_t LOG_INTERVAL_TIME = 60 * 1000;
 constexpr bool ON_TIME_CHANGE = true;
 const char CHAR_0 = '0';
 const char CHAR_9 = '9';
 const std::string STR_0 = "0";
+const std::string STR_PREFIX_24H = " 0";
+const std::string STR_PREFIX_12H = " ";
 const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
 const std::string FORM_FORMAT = "hh:mm";
+const std::string FORMAT_12H = "%Y/%m/%d %I:%M:%S";
+const std::string FORMAT_24H = "%Y/%m/%d %H:%M:%S";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
@@ -239,6 +248,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
+        TAG_LOGE(AceLogTag::ACE_TEXT_CLOCK, "currentTime is empty");
         return;
     }
     if (currentTime != prevTime_ || isTimeChange) {
@@ -304,7 +314,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
-    time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto now = std::chrono::system_clock::now();
+    time_t current = std::chrono::system_clock::to_time_t(now);
     auto* timeZoneTime = std::localtime(&current);
     if (!std::isnan(hourWest_)) {
         current = current - int32_t(hourWest_ * TOTAL_SECONDS_OF_HOUR);
@@ -327,27 +338,39 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     formatElementMap_.clear();
     ParseInputFormat();
 
-    // get date time from third party
-    std::string dateTimeFormat = DEFAULT_FORMAT; // the format to get datetime value from the thirdlib
-    dateTimeFormat = "yyyyMMdd";
-    dateTimeFormat += is24H_ ? "HH" : "hh";
-    dateTimeFormat += "mmss";
-    dateTimeFormat += "SSS";
-    std::string dateTimeValue = Localization::GetInstance()->FormatDateTime(dateTime, dateTimeFormat);
-    std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday, timeZoneTime->tm_mon);
+    char buffer[SIZE_OF_TIME_TEXT] = {};
+    std::string dateTimeFormat = is24H_ ? FORMAT_24H : FORMAT_12H;
+    std::strftime(buffer, sizeof(buffer), dateTimeFormat.c_str(), timeZoneTime);
+    auto duration_cast_to_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto timeValue = duration_cast_to_millis.count();
+    auto millis = std::to_string(timeValue % 1000);
+    auto millisLength = millis.length();
+    if (millisLength < MAX_LENGTH_OF_MILLIS) {
+        millis = std::string(MAX_LENGTH_OF_MILLIS - millisLength, '0') + millis;
+    }
+    std::string dateTimeValue = std::string(buffer) + "." + millis;
+    if (!is24H_) {
+        auto zeroPos = dateTimeValue.find(STR_PREFIX_24H);
+        if (zeroPos != std::string::npos) {
+            dateTimeValue = dateTimeValue.replace(zeroPos, STR_PREFIX_24H.length(), STR_PREFIX_12H);
+        }
+    }
+    std::string outputDateTime = ParseDateTime(dateTimeValue, timeZoneTime->tm_wday, timeZoneTime->tm_mon,
+        timeZoneTime->tm_hour);
+    if (timeValue - timeValue_ > LOG_INTERVAL_TIME) {
+        timeValue_ = timeValue;
+        TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s", outputDateTime.c_str());
+    }
     return outputDateTime;
 }
 
-std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month)
+std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
+    int32_t week, int32_t month, int32_t hour)
 {
     std::string language = Localization::GetInstance()->GetLanguage();
     // parse data time
     std::string tempdateTimeValue = dateTimeValue;
-    std::string strAmPm = GetAmPm(tempdateTimeValue);
-    auto strAmPmPos = tempdateTimeValue.find(strAmPm);
-    if (!strAmPm.empty() && strAmPmPos != std::string::npos) {
-        tempdateTimeValue.replace(strAmPmPos, strAmPm.length(), "");
-    }
+    std::string strAmPm = is24H_ ? "" : GetAmPm(hour);
     std::vector<std::string> curDateTime = ParseDateTimeValue(tempdateTimeValue);
     curDateTime[(int32_t)(TextClockElementIndex::CUR_AMPM_INDEX)] = strAmPm;
 
@@ -485,18 +508,18 @@ void TextClockPattern::GetDateTimeIndex(const char& element, TextClockFormatElem
     }
 }
 
-std::string TextClockPattern::GetAmPm(const std::string& dateTimeValue)
+std::string TextClockPattern::GetAmPm(int32_t hour)
 {
     std::string language = Localization::GetInstance()->GetLanguage();
     std::string curAmPm = "";
-    if (dateTimeValue != "") {
-        std::vector<std::string> amPmStrings = Localization::GetInstance()->GetAmPmStrings();
-        for (std::string amPmString : amPmStrings) {
-            if (dateTimeValue.find(amPmString) != std::string::npos) {
-                curAmPm = amPmString;
-                break;
-            }
-        }
+    std::vector<std::string> amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+    if (amPmStrings.size() < SIZE_OF_AM_PM_STRING) {
+        return curAmPm;
+    }
+    if (hour < BOUNDARY_OF_AM_PM) {
+        curAmPm = amPmStrings[0];
+    } else {
+        curAmPm = amPmStrings[1];
     }
     return curAmPm;
 }

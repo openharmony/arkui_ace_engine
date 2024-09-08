@@ -22,10 +22,7 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-namespace {
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
-} // namespace
-
 /**
  * TextTheme defines color and styles of ThemeComponent. TextTheme should be built
  * using TextTheme::Builder.

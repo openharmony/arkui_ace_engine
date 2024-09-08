@@ -44,7 +44,7 @@ enum class ShadowType {
 enum class ShadowColorStrategy : char {
     NONE,
     AVERAGE,
-    PRIMARY
+    PRIMARY,
 };
 // A style class indicates the way to render shadow effect
 class Shadow final {
@@ -235,6 +235,11 @@ public:
             return elevation_ > 0.0f && elevation_ < LIGHT_HEIGHT;
         }
         return blurRadius_ > 0.0 || spreadRadius_ > 0.0 || offset_ != Offset::Zero();
+    }
+
+    void UpdateColorByResourceId()
+    {
+        color_.UpdateColorByResourceId();
     }
 
 private:

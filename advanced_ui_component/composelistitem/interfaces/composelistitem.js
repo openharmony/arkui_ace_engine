@@ -28,13 +28,19 @@ export var IconType;
     h11[h11["LONGITUDINAL"] = 7] = "LONGITUDINAL";
     h11[h11["VERTICAL"] = 8] = "VERTICAL";
 })(IconType || (IconType = {}));
+var FontSizeScaleLevel;
+(function (y11) {
+    y11[y11["LEVEL1"] = 1.75] = "LEVEL1";
+    y11[y11["LEVEL2"] = 2] = "LEVEL2";
+    y11[y11["LEVEL3"] = 3.2] = "LEVEL3";
+})(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
 var ItemHeight;
-(function (g11) {
-    g11[g11["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
-    g11[g11["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
-    g11[g11["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
-    g11[g11["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
-    g11[g11["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
+(function (x11) {
+    x11[x11["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
+    x11[x11["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
+    x11[x11["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
+    x11[x11["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
+    x11[x11["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
 })(ItemHeight || (ItemHeight = {}));
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
@@ -95,6 +101,9 @@ class ContentItemStruct extends ViewPU {
         this.__primaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColor");
         this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
         this.__descriptionColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColor");
+        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(b11.fontSizeScale, this, "fontSizeScale");
+        this.__parentDirection = new SynchedPropertySimpleOneWayPU(b11.parentDirection, this, "parentDirection");
+        this.__itemDirection = new SynchedPropertySimpleOneWayPU(b11.itemDirection, this, "itemDirection");
         this.setInitiallyProvidedValue(b11);
         this.declareWatch("iconStyle", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
@@ -142,6 +151,9 @@ class ContentItemStruct extends ViewPU {
         this.__secondaryText.reset(y10.secondaryText);
         this.__description.reset(y10.description);
         this.__leftWidth.reset(y10.leftWidth);
+        this.__fontSizeScale.reset(y10.fontSizeScale);
+        this.__parentDirection.reset(y10.parentDirection);
+        this.__itemDirection.reset(y10.itemDirection);
     }
     purgeVariableDependenciesOnElmtId(x10) {
         this.__iconStyle.purgeDependencyOnElmtId(x10);
@@ -154,6 +166,9 @@ class ContentItemStruct extends ViewPU {
         this.__primaryTextColor.purgeDependencyOnElmtId(x10);
         this.__secondaryTextColor.purgeDependencyOnElmtId(x10);
         this.__descriptionColor.purgeDependencyOnElmtId(x10);
+        this.__fontSizeScale.purgeDependencyOnElmtId(x10);
+        this.__parentDirection.purgeDependencyOnElmtId(x10);
+        this.__itemDirection.purgeDependencyOnElmtId(x10);
     }
     aboutToBeDeleted() {
         this.__iconStyle.aboutToBeDeleted();
@@ -166,6 +181,9 @@ class ContentItemStruct extends ViewPU {
         this.__primaryTextColor.aboutToBeDeleted();
         this.__secondaryTextColor.aboutToBeDeleted();
         this.__descriptionColor.aboutToBeDeleted();
+        this.__fontSizeScale.aboutToBeDeleted();
+        this.__parentDirection.aboutToBeDeleted();
+        this.__itemDirection.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -229,6 +247,24 @@ class ContentItemStruct extends ViewPU {
     set descriptionColor(n10) {
         this.__descriptionColor.set(n10);
     }
+    get fontSizeScale() {
+        return this.__fontSizeScale.get();
+    }
+    set fontSizeScale(w11) {
+        this.__fontSizeScale.set(w11);
+    }
+    get parentDirection() {
+        return this.__parentDirection.get();
+    }
+    set parentDirection(v11) {
+        this.__parentDirection.set(v11);
+    }
+    get itemDirection() {
+        return this.__itemDirection.get();
+    }
+    set itemDirection(u11) {
+        this.__itemDirection.set(u11);
+    }
     onWillApplyTheme(m10) {
         this.primaryTextColor = m10.colors.fontPrimary;
         this.secondaryTextColor = m10.colors.fontSecondary;
@@ -260,9 +296,10 @@ class ContentItemStruct extends ViewPU {
                                     Image.width(ICON_SIZE_MAP.get(this.iconStyle));
                                     Image.height(ICON_SIZE_MAP.get(this.iconStyle));
                                     Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(true);
+                                    Image.focusable(false);
                                     Image.draggable(false);
                                     Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Image.flexShrink(0);
                                 }, Image);
                             });
                         }
@@ -278,9 +315,10 @@ class ContentItemStruct extends ViewPU {
                                         maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
                                     });
                                     Image.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                                    Image.focusable(true);
+                                    Image.focusable(false);
                                     Image.draggable(false);
                                     Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                                    Image.flexShrink(0);
                                 }, Image);
                             });
                         }
@@ -299,7 +337,7 @@ class ContentItemStruct extends ViewPU {
         this.observeComponentCreation2((t9, u9) => {
             Column.create({ space: TEXT_COLUMN_SPACE });
             Column.flexShrink(1);
-            Column.margin({
+            Column.margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
                 top: TEXT_SAFE_MARGIN,
                 bottom: TEXT_SAFE_MARGIN
             });
@@ -326,7 +364,6 @@ class ContentItemStruct extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
                     Text.pop();
@@ -348,7 +385,6 @@ class ContentItemStruct extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColor));
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                        Text.focusable(true);
                         Text.draggable(false);
                     }, Text);
                     Text.pop();
@@ -362,17 +398,38 @@ class ContentItemStruct extends ViewPU {
         If.pop();
         Column.pop();
     }
+    isColumnDirection() {
+        return this.itemDirection === FlexDirection.Column;
+    }
+    isParentColumnDirection() {
+        return this.parentDirection === FlexDirection.Column;
+    }
+    getItemSpace() {
+        if (this.isColumnDirection()) {
+            return LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+        }
+        return LengthMetrics.vp(this.itemRowSpace);
+    }
     initialRender() {
         this.observeComponentCreation2((w8, x8) => {
-            Row.create({ space: this.itemRowSpace });
-            Row.margin({ end: LengthMetrics.vp(16) });
-            Row.padding({ start: LengthMetrics.vp(LISTITEM_PADDING) });
-            Row.width(this.leftWidth);
-            Row.flexShrink(1);
-        }, Row);
-        this.createIcon.bind(this)(this);
-        this.createText.bind(this)(this);
-        Row.pop();
+            Flex.create({
+                space: { main: this.getItemSpace() },
+                direction: this.itemDirection,
+                justifyContent: FlexAlign.Start,
+                alignItems: this.isColumnDirection() ? ItemAlign.Start : ItemAlign.Center,
+            });
+            Flex.margin({
+                end: this.isParentColumnDirection() ?
+                LengthMetrics.vp(0) :
+                LengthMetrics.vp(16)
+            });
+            Flex.padding({ start: LengthMetrics.vp(LISTITEM_PADDING) });
+            Flex.width(this.isParentColumnDirection() ? undefined : this.leftWidth);
+            Flex.flexShrink(this.isParentColumnDirection() ? 0 : 1);
+        }, Flex);
+        this.createIcon.bind(this)();
+        this.createText.bind(this)();
+        Flex.pop();
     }
     rerender() {
         this.updateDirtyElements();
@@ -408,6 +465,7 @@ class OperateItemStruct extends ViewPU {
         this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(q8.parentCanHover, this, "parentCanHover");
         this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(q8.parentIsActive, this, "parentIsActive");
         this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(q8.parentFrontColor, this, "parentFrontColor");
+        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(q8.parentDirection, this, "parentDirection");
         this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, "rowSpace");
         this.setInitiallyProvidedValue(q8);
         this.declareWatch("arrow", this.onPropChange);
@@ -509,6 +567,7 @@ class OperateItemStruct extends ViewPU {
         this.__parentCanHover.purgeDependencyOnElmtId(m8);
         this.__parentIsActive.purgeDependencyOnElmtId(m8);
         this.__parentFrontColor.purgeDependencyOnElmtId(m8);
+        this.__parentDirection.purgeDependencyOnElmtId(m8);
         this.__rowSpace.purgeDependencyOnElmtId(m8);
     }
     aboutToBeDeleted() {
@@ -534,6 +593,7 @@ class OperateItemStruct extends ViewPU {
         this.__parentCanHover.aboutToBeDeleted();
         this.__parentIsActive.aboutToBeDeleted();
         this.__parentFrontColor.aboutToBeDeleted();
+        this.__parentDirection.aboutToBeDeleted();
         this.__rowSpace.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -670,6 +730,12 @@ class OperateItemStruct extends ViewPU {
     set parentFrontColor(q7) {
         this.__parentFrontColor.set(q7);
     }
+    get parentDirection() {
+        return this.__parentDirection.get();
+    }
+    set parentDirection(t11) {
+        this.__parentDirection.set(t11);
+    }
     get rowSpace() {
         return this.__rowSpace.get();
     }
@@ -705,11 +771,14 @@ class OperateItemStruct extends ViewPU {
     createButton(z6 = null) {
         this.observeComponentCreation2((h7, i7) => {
             Button.createWithChild();
+            Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Button.hitTestBehavior(HitTestMode.Block);
             Button.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Button.height(BUTTON_SIZE);
+            Button.constraintSize({
+                minHeight: BUTTON_SIZE
+            });
             Button.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
@@ -717,20 +786,20 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onTouch((n7) => {
-                if (n7.type === TouchType.Down) {
+            Button.onTouch((d1) => {
+                if (d1.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (n7.type === TouchType.Up || n7.type === TouchType.Cancel) {
+                if (d1.type === TouchType.Up || d1.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
-            Button.onHover((m7) => {
+            Button.onHover((c1) => {
                 this.parentCanHover = false;
-                if (m7 && this.parentFrontColor === this.hoveringColor) {
+                if (c1 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!m7) {
+                if (!c1) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -787,6 +856,7 @@ class OperateItemStruct extends ViewPU {
                 }
             });
             Button.onClick(m6.icon?.action);
+            Button.flexShrink(0);
         }, Button);
         this.observeComponentCreation2((q6, r6) => {
             Image.create(m6.icon?.value);
@@ -813,7 +883,6 @@ class OperateItemStruct extends ViewPU {
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
-            Text.focusable(true);
             Text.draggable(false);
             Text.flexShrink(1);
         }, Text);
@@ -994,33 +1063,39 @@ class OperateItemStruct extends ViewPU {
                 maxLines: TEXT_MAX_LINE
             });
             Button.backgroundColor(Color.Transparent);
-            Button.height(TEXT_ARROW_HEIGHT);
+            Button.constraintSize({ minHeight: TEXT_ARROW_HEIGHT });
             Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.padding({
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0
+            });
             Button.stateEffect(this.arrow?.action !== undefined);
-            Button.onTouch((m4) => {
+            Button.onTouch((b1) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (m4.type === TouchType.Down) {
+                if (b1.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
-                if (m4.type === TouchType.Up || m4.type === TouchType.Cancel) {
+                if (b1.type === TouchType.Up || b1.type === TouchType.Cancel) {
                     this.parentCanTouch = true;
                 }
             });
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((l4) => {
+            Button.onHover((a1) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
                 this.parentCanHover = false;
-                if (l4) {
+                if (a1) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!l4) {
+                if (!a1) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1031,100 +1106,145 @@ class OperateItemStruct extends ViewPU {
             Button.onClick(this.arrow?.action);
         }, Button);
         this.observeComponentCreation2((e4, f4) => {
-            Row.create({ space: SPECICAL_ROW_SPACE });
-            Row.padding({
-                start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
-                end: LengthMetrics.vp(LISTITEM_PADDING)
-            });
-        }, Row);
-        this.observeComponentCreation2((c4, d4) => {
-            Text.create(this.text);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Text.focusable(true);
-            Text.draggable(false);
-            Text.constraintSize({
-                maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
-            });
-        }, Text);
-        Text.pop();
-        this.observeComponentCreation2((a4, b4) => {
-            Image.create(this.arrow?.value);
-            Image.height(OPERATEITEM_ICONLIKE_SIZE);
-            Image.width(OPERATEITEM_ARROW_WIDTH);
-            Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Image.focusable(true);
-            Image.draggable(false);
-            Image.matchTextDirection(true);
-        }, Image);
-        Row.pop();
+            If.create();
+            if (this.parentDirection === FlexDirection.Column) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((n11, o11) => {
+                        Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
+                        Flex.padding({
+                            start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
+                            end: LengthMetrics.vp(LISTITEM_PADDING)
+                        });
+                    }, Flex);
+                    this.observeComponentCreation2((l11, m11) => {
+                        Text.create(this.text);
+                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.focusable(true);
+                        Text.draggable(false);
+                        Text.constraintSize({
+                            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
+                        });
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((j11, k11) => {
+                        Image.create(this.arrow?.value);
+                        Image.height(OPERATEITEM_ICONLIKE_SIZE);
+                        Image.width(OPERATEITEM_ARROW_WIDTH);
+                        Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.focusable(false);
+                        Image.draggable(false);
+                    }, Image);
+                    Flex.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((b7, j7) => {
+                        Row.create({ space: SPECICAL_ROW_SPACE });
+                        Row.padding({
+                            start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
+                            end: LengthMetrics.vp(LISTITEM_PADDING)
+                        });
+                    }, Row);
+                    this.observeComponentCreation2((v6, a7) => {
+                        Text.create(this.text);
+                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.focusable(true);
+                        Text.draggable(false);
+                        Text.constraintSize({
+                            maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
+                        });
+                    }, Text);
+                    Text.pop();
+                    this.observeComponentCreation2((o6, u6) => {
+                        Image.create(this.arrow?.value);
+                        Image.height(OPERATEITEM_ICONLIKE_SIZE);
+                        Image.width(OPERATEITEM_ARROW_WIDTH);
+                        Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Image.focusable(false);
+                        Image.draggable(false);
+                    }, Image);
+                    Row.pop();
+                });
+            }
+        }, If);
+        If.pop();
         Button.pop();
+    }
+    getFlexOptions() {
+        let n5 = { alignItems: ItemAlign.Center };
+        if (this.parentDirection === FlexDirection.Column) {
+            n5.justifyContent = FlexAlign.SpaceBetween;
+        }
+        else {
+            n5.space = { main: LengthMetrics.vp(this.rowSpace) };
+            n5.justifyContent = FlexAlign.End;
+        }
+        return n5;
     }
     initialRender() {
         this.observeComponentCreation2((t3, u3) => {
-            Row.create({
-                space: this.rowSpace
-            });
-            Row.width(this.rightWidth);
-            Row.flexShrink(1);
-            Row.justifyContent(FlexAlign.End);
-        }, Row);
+            Flex.create(this.getFlexOptions());
+            Flex.width(this.parentDirection === FlexDirection.Column ? undefined : this.rightWidth);
+        }, Flex);
         this.observeComponentCreation2((b3, c3) => {
             If.create();
             if (this.button != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.createButton.bind(this)(this);
+                    this.createButton.bind(this)();
                 });
             }
             else if (this.image != null) {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.createImage.bind(this)(this);
+                    this.createImage.bind(this)();
                 });
             }
             else if (this.icon != null && this.text != null) {
                 this.ifElseBranchUpdateFunction(2, () => {
-                    this.createText.bind(this)(this);
-                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }), this);
+                    this.createText.bind(this)();
+                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
                 });
             }
             else if (this.arrow != null && this.text == null) {
                 this.ifElseBranchUpdateFunction(3, () => {
-                    this.createArrow.bind(this)(this);
+                    this.createArrow.bind(this)();
                 });
             }
             else if (this.arrow != null && this.text != null) {
                 this.ifElseBranchUpdateFunction(4, () => {
-                    this.createTextArrow.bind(this)(this);
+                    this.createTextArrow.bind(this)();
                 });
             }
             else if (this.text != null) {
                 this.ifElseBranchUpdateFunction(5, () => {
-                    this.createText.bind(this)(this);
+                    this.createText.bind(this)();
                 });
             }
             else if (this.radio != null) {
                 this.ifElseBranchUpdateFunction(6, () => {
-                    this.createRadio.bind(this)(this);
+                    this.createRadio.bind(this)();
                 });
             }
             else if (this.checkBox != null) {
                 this.ifElseBranchUpdateFunction(7, () => {
-                    this.createCheckBox.bind(this)(this);
+                    this.createCheckBox.bind(this)();
                 });
             }
             else if (this.switch != null) {
                 this.ifElseBranchUpdateFunction(8, () => {
-                    this.createSwitch.bind(this)(this);
+                    this.createSwitch.bind(this)();
                 });
             }
             else if (this.icon != null) {
                 this.ifElseBranchUpdateFunction(9, () => {
-                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }), this);
+                    this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
                     this.observeComponentCreation2((g3, h3) => {
                         If.create();
                         if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__subIcon"] ? this["__subIcon"] : this["subIcon"]) }), this);
+                                this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__subIcon"] ? this["__subIcon"] : this["subIcon"]) }));
                             });
                         }
                         else {
@@ -1141,7 +1261,7 @@ class OperateItemStruct extends ViewPU {
             }
         }, If);
         If.pop();
-        Row.pop();
+        Flex.pop();
     }
     rerender() {
         this.updateDirtyElements();
@@ -1167,9 +1287,17 @@ export class ComposeListItem extends ViewPU {
         this.__touchDownColor = new ObservedPropertyObjectPU('#1a000000', this, "touchDownColor");
         this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
         this.__focusOutlineColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "focusOutlineColor");
+        this.__fontSizeScale = new ObservedPropertySimplePU(1, this, "fontSizeScale");
+        this.__containerDirection = new ObservedPropertySimplePU(FlexDirection.Row, this, "containerDirection");
+        this.__contentItemDirection = new ObservedPropertySimplePU(FlexDirection.Row, this, "contentItemDirection");
+        this.__containerPadding = new ObservedPropertyObjectPU(undefined, this, "containerPadding");
+        this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
+        this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
+        this.maxFontScale = this.getUIContext().getMaxFontScale();
         this.setInitiallyProvidedValue(u2);
         this.declareWatch("contentItem", this.onPropChange);
         this.declareWatch("operateItem", this.onPropChange);
+        this.declareWatch("fontSizeScale", this.onFontSizeScaleChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(s2) {
@@ -1215,6 +1343,27 @@ export class ComposeListItem extends ViewPU {
         if (s2.focusOutlineColor !== undefined) {
             this.focusOutlineColor = s2.focusOutlineColor;
         }
+        if (s2.fontSizeScale !== undefined) {
+            this.fontSizeScale = s2.fontSizeScale;
+        }
+        if (s2.containerDirection !== undefined) {
+            this.containerDirection = s2.containerDirection;
+        }
+        if (s2.contentItemDirection !== undefined) {
+            this.contentItemDirection = s2.contentItemDirection;
+        }
+        if (s2.containerPadding !== undefined) {
+            this.containerPadding = s2.containerPadding;
+        }
+        if (s2.textArrowLeftSafeOffset !== undefined) {
+            this.textArrowLeftSafeOffset = s2.textArrowLeftSafeOffset;
+        }
+        if (s2.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = s2.isFollowingSystemFontScale;
+        }
+        if (s2.maxFontScale !== undefined) {
+            this.maxFontScale = s2.maxFontScale;
+        }
     }
     updateStateVars(r2) {
         this.__contentItem.reset(r2.contentItem);
@@ -1235,6 +1384,11 @@ export class ComposeListItem extends ViewPU {
         this.__touchDownColor.purgeDependencyOnElmtId(q2);
         this.__activedColor.purgeDependencyOnElmtId(q2);
         this.__focusOutlineColor.purgeDependencyOnElmtId(q2);
+        this.__fontSizeScale.purgeDependencyOnElmtId(q2);
+        this.__containerDirection.purgeDependencyOnElmtId(q2);
+        this.__contentItemDirection.purgeDependencyOnElmtId(q2);
+        this.__containerPadding.purgeDependencyOnElmtId(q2);
+        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(q2);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1251,6 +1405,11 @@ export class ComposeListItem extends ViewPU {
         this.__touchDownColor.aboutToBeDeleted();
         this.__activedColor.aboutToBeDeleted();
         this.__focusOutlineColor.aboutToBeDeleted();
+        this.__fontSizeScale.aboutToBeDeleted();
+        this.__containerDirection.aboutToBeDeleted();
+        this.__contentItemDirection.aboutToBeDeleted();
+        this.__containerPadding.aboutToBeDeleted();
+        this.__textArrowLeftSafeOffset.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1338,6 +1497,36 @@ export class ComposeListItem extends ViewPU {
     set focusOutlineColor(c2) {
         this.__focusOutlineColor.set(c2);
     }
+    get fontSizeScale() {
+        return this.__fontSizeScale.get();
+    }
+    set fontSizeScale(f5) {
+        this.__fontSizeScale.set(f5);
+    }
+    get containerDirection() {
+        return this.__containerDirection.get();
+    }
+    set containerDirection(e5) {
+        this.__containerDirection.set(e5);
+    }
+    get contentItemDirection() {
+        return this.__contentItemDirection.get();
+    }
+    set contentItemDirection(w4) {
+        this.__contentItemDirection.set(w4);
+    }
+    get containerPadding() {
+        return this.__containerPadding.get();
+    }
+    set containerPadding(v4) {
+        this.__containerPadding.set(v4);
+    }
+    get textArrowLeftSafeOffset() {
+        return this.__textArrowLeftSafeOffset.get();
+    }
+    set textArrowLeftSafeOffset(o4) {
+        this.__textArrowLeftSafeOffset.set(o4);
+    }
     onWillApplyTheme(b2) {
         this.hoveringColor = b2.colors.interactiveHover;
         this.touchDownColor = b2.colors.interactivePressed;
@@ -1403,6 +1592,115 @@ export class ComposeListItem extends ViewPU {
             return RIGHT_PART_WIDTH;
         }
     }
+    decideContentItemDirection() {
+        if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 &&
+            this.contentItem?.iconStyle && this.contentItem?.iconStyle > IconType.HEAD_SCULPTURE) {
+            return FlexDirection.Column;
+        }
+        return FlexDirection.Row;
+    }
+    decideContainerDirection() {
+        if (this.fontSizeScale < FontSizeScaleLevel.LEVEL1 || !this.contentItem) {
+            return FlexDirection.Row;
+        }
+        if (this.operateItem?.button) {
+            return FlexDirection.Column;
+        }
+        else if (this.operateItem?.image) {
+            return FlexDirection.Row;
+        }
+        else if (this.operateItem?.icon && this.operateItem?.text) {
+            return FlexDirection.Column;
+        }
+        else if (this.operateItem?.arrow) {
+            if (!this.operateItem?.text) {
+                return FlexDirection.Row;
+            }
+            this.textArrowLeftSafeOffset = TEXT_SAFE_MARGIN;
+            return FlexDirection.Column;
+        }
+        else if (this.operateItem?.text) {
+            return FlexDirection.Column;
+        }
+        else {
+            return FlexDirection.Row;
+        }
+    }
+    onFontSizeScaleChange() {
+        this.containerDirection = this.decideContainerDirection();
+        this.contentItemDirection = this.decideContentItemDirection();
+        if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
+            this.containerPadding = {
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level12'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            };
+        }
+        else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL2) {
+            this.containerPadding = {
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level10'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            };
+        }
+        else if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL1) {
+            this.containerPadding = {
+                top: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                bottom: { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            };
+        }
+        else {
+            this.containerPadding = undefined;
+        }
+    }
+    isSingleLine() {
+        return !this.contentItem?.secondaryText && !this.contentItem?.description;
+    }
+    getOperateOffset() {
+        if (this.containerDirection === FlexDirection.Row) {
+            return LengthMetrics.vp(0);
+        }
+        let j4 = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
+        if (this.contentItem?.icon && j4 && j4 <= HEADSCULPTURE_SIZE) {
+            return LengthMetrics.vp(j4 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        }
+        return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+    }
+    getMainSpace() {
+        if (this.containerDirection === FlexDirection.Column) {
+            return LengthMetrics.resource(this.isSingleLine() ? { "id": -1, "type": 10002, params: ['sys.float.padding_level1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.padding_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+        }
+        return LengthMetrics.vp(0);
+    }
+    getFlexOptions() {
+        if (this.containerDirection === FlexDirection.Column) {
+            return {
+                space: { main: this.getMainSpace() },
+                justifyContent: FlexAlign.Center,
+                alignItems: ItemAlign.Start,
+                direction: this.containerDirection,
+            };
+        }
+        return {
+            justifyContent: FlexAlign.SpaceBetween,
+            alignItems: ItemAlign.Center,
+            direction: this.containerDirection,
+        };
+    }
+    decideFontSizeScale() {
+        if (!this.isFollowingSystemFontScale) {
+            return 1;
+        }
+        return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
+    }
+    onMeasureSize(u1, v1, z2) {
+        this.fontSizeScale = this.decideFontSizeScale();
+        let w3 = { height: 0, width: 0 };
+        v1.forEach((y3) => {
+            let i4 = y3.measure(z2);
+            w3.width = i4.width;
+            w3.height = i4.height;
+        });
+        return w3;
+    }
     initialRender() {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
@@ -1412,8 +1710,10 @@ export class ComposeListItem extends ViewPU {
             });
         }, Stack);
         this.observeComponentCreation2((r1, s1) => {
-            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
-            Flex.height(this.itemHeight);
+            Flex.create(this.getFlexOptions());
+            Flex.constraintSize({
+                minHeight: this.itemHeight
+            });
             Flex.focusable(true);
             Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
@@ -1452,6 +1752,7 @@ export class ComposeListItem extends ViewPU {
                 color: Color.Transparent
             });
             ViewStackProcessor.visualState();
+            Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
         this.observeComponentCreation2((g1, h1) => {
             If.create();
@@ -1460,12 +1761,13 @@ export class ComposeListItem extends ViewPU {
                     {
                         this.observeComponentCreation2((l1, m1) => {
                             if (m1) {
-                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 725 });
+                                let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { },
+                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 939, col: 11 });
                                 ViewPU.create(n1);
-                                let c = () => {
+                                let z = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = c;
+                                n1.paramsGenerator_ = z;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l1, {});
@@ -1485,37 +1787,46 @@ export class ComposeListItem extends ViewPU {
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((a1, b1) => {
-                            if (b1) {
-                                let c1 = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((z, f1) => {
+                            if (f1) {
+                                let t1 = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
                                     description: this.contentItem?.description,
-                                    leftWidth: this.calculatedLeftWidth()
-                                }, undefined, a1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 728 });
-                                ViewPU.create(c1);
-                                let b = () => {
+                                    leftWidth: this.calculatedLeftWidth(),
+                                    fontSizeScale: this.fontSizeScale,
+                                    parentDirection: this.containerDirection,
+                                    itemDirection: this.contentItemDirection,
+                                }, undefined, z, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 942, col: 11 });
+                                ViewPU.create(t1);
+                                let a4 = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
                                         primaryText: this.contentItem?.primaryText,
                                         secondaryText: this.contentItem?.secondaryText,
                                         description: this.contentItem?.description,
-                                        leftWidth: this.calculatedLeftWidth()
+                                        leftWidth: this.calculatedLeftWidth(),
+                                        fontSizeScale: this.fontSizeScale,
+                                        parentDirection: this.containerDirection,
+                                        itemDirection: this.contentItemDirection
                                     };
                                 };
-                                c1.paramsGenerator_ = b;
+                                t1.paramsGenerator_ = a4;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(a1, {
+                                this.updateStateVarsOfChildByElmtId(z, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
                                     secondaryText: this.contentItem?.secondaryText,
                                     description: this.contentItem?.description,
-                                    leftWidth: this.calculatedLeftWidth()
+                                    leftWidth: this.calculatedLeftWidth(),
+                                    fontSizeScale: this.fontSizeScale,
+                                    parentDirection: this.containerDirection,
+                                    itemDirection: this.contentItemDirection
                                 });
                             }
                         }, { name: "ContentItemStruct" });
@@ -1534,12 +1845,14 @@ export class ComposeListItem extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((r, s) => {
                         __Common__.create();
+                        __Common__.flexShrink(0);
                         __Common__.onFocus(() => {
                             this.canFocus = false;
                         });
                         __Common__.onBlur(() => {
                             this.canFocus = true;
                         });
+                        __Common__.padding({ start: this.getOperateOffset() });
                     }, __Common__);
                     {
                         this.observeComponentCreation2((l, m) => {
@@ -1560,8 +1873,10 @@ export class ComposeListItem extends ViewPU {
                                     parentFrontColor: this.__frontColor,
                                     parentIsActive: this.__isActive,
                                     parentCanHover: this.__canHover,
-                                    rightWidth: this.calculatedRightWidth()
-                                }, undefined, l, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 738 });
+                                    rightWidth: this.calculatedRightWidth(),
+                                    parentDirection: this.__containerDirection,
+                                }, undefined, l, () => { },
+                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 956, col: 11 });
                                 ViewPU.create(n);
                                 let a = () => {
                                     return {
@@ -1580,7 +1895,8 @@ export class ComposeListItem extends ViewPU {
                                         parentFrontColor: this.frontColor,
                                         parentIsActive: this.isActive,
                                         parentCanHover: this.canHover,
-                                        rightWidth: this.calculatedRightWidth()
+                                        rightWidth: this.calculatedRightWidth(),
+                                        parentDirection: this.containerDirection
                                     };
                                 };
                                 n.paramsGenerator_ = a;

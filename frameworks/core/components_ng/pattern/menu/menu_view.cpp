@@ -20,11 +20,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -225,7 +226,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
 }
 
 void MountScrollToMenu(
-    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, MenuType type, RefPtr<FrameNode> menuNode)
+    const RefPtr<UINode>& customNode, RefPtr<FrameNode> scroll, RefPtr<FrameNode> menuNode)
 {
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
@@ -472,10 +473,28 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
         CHECK_NULL_VOID(previewPattern);
         previewPattern->SetIsHoverImageScalePlaying(false);
     });
+
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto callback = [weak = AceType::WeakClaim(AceType::RawPtr(menuWrapperPattern)), scaleFrom, scaleTo](float rate) {
+        auto menuWrapperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->SetHoverImageToPreviewRate(rate);
+        menuWrapperPattern->SetHoverImageToPreviewScale((scaleTo - scaleFrom) * rate + scaleFrom);
+    };
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
+    CHECK_NULL_VOID(animateProperty);
+    stackContext->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0);
     AnimationUtils::Animate(
-        scaleOption, [stackContext, scaleTo]() {
+        scaleOption,
+        [stackContext, scaleTo, animateProperty]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
+            CHECK_NULL_VOID(animateProperty);
+            animateProperty->Set(1.0);
         },
         scaleOption.GetOnFinishEvent());
 }
@@ -646,7 +665,6 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu();
 }
 
@@ -769,6 +787,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
@@ -1087,7 +1106,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
-    MountScrollToMenu(customNode, scroll, type, menuNode);
+    MountScrollToMenu(customNode, scroll, menuNode);
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateMenuBorderEffect(menuNode);

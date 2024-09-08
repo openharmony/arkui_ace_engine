@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"

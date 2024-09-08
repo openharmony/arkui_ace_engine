@@ -83,9 +83,8 @@ extern const char THEME_PATTERN_GAUGE[];
 extern const char THEME_PATTERN_SHEET[];
 extern const char THEME_BLUR_STYLE_COMMON[];
 extern const char THEME_PATTERN_SHADOW[];
-extern const char THEME_PATTERN_CONTAINER_MODAL[];
 extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
-extern const char THEME_PATTERN_LINEAR_INDICATOR[];
+extern const char THEME_PATTERN_CONTAINER_MODAL[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];

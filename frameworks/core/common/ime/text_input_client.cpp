@@ -58,8 +58,6 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
 #endif
     { KeyComb(KeyCode::KEY_DEL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
-    { KeyComb(KeyCode::KEY_DEL, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(true); } },
-    { KeyComb(KeyCode::KEY_FORWARD_DEL, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
@@ -102,22 +100,12 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Home); } },
     { KeyComb(KeyCode::KEY_MOVE_END, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
-    { KeyComb(KeyCode::KEY_B, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_B); } },
-    { KeyComb(KeyCode::KEY_I, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_I); } },
-    { KeyComb(KeyCode::KEY_U, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_U); } },
 };
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
-    }
-    uint32_t ctrlFlag =
-        (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL);
-    bool vFlag = keyEvent.HasKey(KeyCode::KEY_V);
-    if (!keyEvent.msg.empty() && ctrlFlag == KEY_CTRL && vFlag) {
-        InsertValue(keyEvent.msg);
-        return true;
     }
     uint32_t modKeyFlags =
         (keyEvent.HasKey(KeyCode::KEY_ALT_LEFT) || keyEvent.HasKey(KeyCode::KEY_ALT_RIGHT) ? KEY_ALT : KEY_NULL) |
@@ -133,10 +121,14 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a function key, key code: %{public}d, modKeyFlags: %{public}d",
+            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         return iterFunctionKeys->second(this);
     }
     auto iterKeyboardShortCuts = keyboardShortCuts_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterKeyboardShortCuts != keyboardShortCuts_.end()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a keyboard shortcut, key code: %{public}d, modKeyFlags: %{public}d",
+            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         iterKeyboardShortCuts->second(this);
         return true;
     }

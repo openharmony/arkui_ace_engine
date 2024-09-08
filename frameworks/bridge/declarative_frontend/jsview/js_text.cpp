@@ -318,7 +318,7 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if(overflowValue->IsUndefined()) {
+        if (overflowValue->IsUndefined()) {
             overflow = 0;
         } else if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
             break;
@@ -723,9 +723,8 @@ void JSText::Create(const JSCallbackInfo& info)
         return;
     }
 
-    JSRef<JSVal> args = info[0];
-    if (args->IsObject() && JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>()) {
-        auto *spanString = JSRef<JSObject>::Cast(args)->Unwrap<JSSpanString>();
+    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>()) {
+        auto *spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
         if (spanString == nullptr) {
             return;
         }
@@ -736,7 +735,7 @@ void JSText::Create(const JSCallbackInfo& info)
             TextModel::GetInstance()->Create(data);
         }
     } else {
-        ParseJsString(args, data);
+        ParseJsString(info[0], data);
         TextModel::GetInstance()->Create(data);
     }
 
@@ -785,7 +784,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
                            targetNode = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
@@ -820,7 +819,7 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -836,7 +835,7 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -852,7 +851,7 @@ void JSText::JsOnDragLeave(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
     CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -900,6 +899,7 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto tmpInfo = info[0];
@@ -914,6 +914,7 @@ void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     JSRef<JSVal> args = info[0];
@@ -1047,8 +1048,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxFontScale", &JSText::SetMaxFontScale, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
-    JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
+    JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("textSelectable", &JSText::SetTextSelectableMode, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
@@ -1090,8 +1091,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
-    JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
+    JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);

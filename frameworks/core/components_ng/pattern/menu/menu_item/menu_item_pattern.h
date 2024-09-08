@@ -269,13 +269,16 @@ private:
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+
     void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
     void UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbol, bool isStart);
-    bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -301,13 +304,14 @@ private:
     RefPtr<FrameNode> startIcon_ = nullptr;
     RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
-    RefPtr<FrameNode> expandIcon_ = nullptr;
     RefPtr<FrameNode> embeddedMenu_ = nullptr;
     RefPtr<FrameNode> clickableArea_ = nullptr;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> onTouchEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<ClickEvent> onClickEvent_;
+    RefPtr<FrameNode> expandIcon_ = nullptr;
+    std::vector<RefPtr<FrameNode>> expandableItems_;
     bool onTouchEventSet_ = false;
     bool onHoverEventSet_ = false;
     bool onKeyEventSet_ = false;

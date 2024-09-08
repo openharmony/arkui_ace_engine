@@ -50,8 +50,7 @@ public:
 
     void SetHasExtensionMenu(bool hasExtensionMenu)
     {
-        CHECK_NULL_VOID(hasExtensionMenu_);
-        hasExtensionMenu_->Set(hasExtensionMenu);
+        hasExtensionMenu_ = hasExtensionMenu;
     }
 
     bool GetHasExtensionMenu()
@@ -99,7 +98,6 @@ private:
 
     RefPtr<PropertyBool> firstHandleIsShow_;
     RefPtr<PropertyBool> secondHandleIsShow_;
-    RefPtr<PropertyBool> hasExtensionMenu_;
     RefPtr<PropertyOffsetF> menuOptionOffset_;
     RefPtr<AnimatablePropertyFloat> pointRadius_;
     RefPtr<AnimatablePropertyFloat> headPointRadius_;
@@ -109,6 +107,7 @@ private:
     std::vector<RefPtr<AnimatablePropertyOffsetF>> lineEndOffset_;
 
     Color iconColor_ = Color::BLACK;
+    bool hasExtensionMenu_ = false;
     bool isNewAvoid_ = false;
     bool isReverse_ = false;
 

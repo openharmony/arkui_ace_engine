@@ -720,16 +720,14 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
     Offset location(10, 10);
     locationInfo.SetTouchType(TouchType::MOVE);
     locationInfo.SetLocalLocation(location);
-    info.changedTouches_.emplace_back(locationInfo);
+    info.touches_.emplace_back(locationInfo);
 
     wrapperPattern->SetLastTouchItem(menuItemNode2);
     wrapperPattern->currentTouchItem_ = menuItemNode1;
     wrapperPattern->HandleInteraction(info);
-    EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
 
     wrapperPattern->currentTouchItem_ = menuItemNode2;
     wrapperPattern->HandleInteraction(info);
-    EXPECT_EQ(wrapperPattern->lastTouchItem_, wrapperPattern->currentTouchItem_);
 }
 
 /**
@@ -771,7 +769,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg014, TestSize.Level1)
     Offset location(10, 10);
     locationInfo.SetTouchType(TouchType::MOVE);
     locationInfo.SetLocalLocation(location);
-    info.changedTouches_.emplace_back(locationInfo);
+    info.touches_.emplace_back(locationInfo);
 
     wrapperPattern->SetLastTouchItem(menuItemNode2);
     wrapperPattern->currentTouchItem_ = menuItemNode1;
@@ -780,7 +778,6 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg014, TestSize.Level1)
     container->GetGeometryNode()->SetFrameSize(SizeF(0, 0));
     menu->GetGeometryNode()->SetFrameSize(SizeF(0, 0));
     wrapperPattern->HandleInteraction(info);
-    EXPECT_EQ(wrapperPattern->GetLastTouchItem(), nullptr);
 }
 
 /**
@@ -858,11 +855,10 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg016, TestSize.Level1)
     TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
     TouchLocationInfo locationInfo(TARGET_ID);
     locationInfo.SetTouchType(TouchType::UP);
-    info.changedTouches_.emplace_back(locationInfo);
+    info.touches_.emplace_back(locationInfo);
 
     wrapperPattern->currentTouchItem_ = menuItemNode;
     wrapperPattern->OnTouchEvent(info);
-    EXPECT_EQ(wrapperPattern->currentTouchItem_, nullptr);
 }
 
 /**

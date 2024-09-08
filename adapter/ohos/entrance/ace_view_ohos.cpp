@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include <memory>
-
 #include "input_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
@@ -88,7 +87,6 @@ void AceViewOhos::SurfaceChanged(const RefPtr<AceViewOhos>& view, int32_t width,
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HideOverlays();
-        pipelineContext->CheckVirtualKeyboardHeight();
     }
 }
 

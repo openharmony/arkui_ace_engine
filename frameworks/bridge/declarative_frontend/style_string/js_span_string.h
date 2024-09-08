@@ -89,7 +89,6 @@ public:
     void SetController(const RefPtr<SpanString>& spanString);
 
     static void FromHtml(const JSCallbackInfo& info);
-    static void FromHtmlBackTask(napi_value result, const JSCallbackInfo& info);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);

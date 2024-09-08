@@ -15,18 +15,18 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 
-#include "core/animation/scheduler.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
-    float baselineOffset, const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod)
-    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod), pManager_(pManager)
+    float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
+    const RefPtr<TextOverlayModifier>& overlayMod)
+    : TextPaintMethod(pattern, baselineOffset, contentMod, overlayMod),
+      pManager_(pManager)
 {}
 
 void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
@@ -53,7 +53,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     overlayMod->SetCaretVisible(caretVisible);
     overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
     overlayMod->SetSelectedBackgroundColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
-    constexpr float CARET_WIDTH = 1.5f;
+    constexpr float CARET_WIDTH = 2.0f;
     overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
     SetCaretOffsetAndHeight(paintWrapper);
     std::vector<RectF> selectedRects;

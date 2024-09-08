@@ -411,7 +411,6 @@ public:
     static void SetUseEffect(bool useEffect);
 
     static void SetFreeze(bool freeze);
-    static void SetAttractionEffect(const AttractionEffect& effect);
 
     static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
 
@@ -508,6 +507,8 @@ public:
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
     static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
+    static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
+    static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
@@ -535,6 +536,7 @@ public:
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetFocusType(FrameNode* frameNode, FocusType type);
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
@@ -634,6 +636,8 @@ public:
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
 
+    static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
+    static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
     static std::vector<DimensionRect> GetResponseRegion(FrameNode* frameNode);

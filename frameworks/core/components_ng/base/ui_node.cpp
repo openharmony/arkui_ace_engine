@@ -164,16 +164,10 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     DoAddChild(it, child, false);
 }
 
-void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode, bool addModalUiextension)
+void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
-    if (!addModalUiextension && modalUiextensionCount_ > 0) {
-        LOGW("AddChildBefore Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-            "Current modalUiextension count is : %{public}d",
-            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
-        return;
-    }
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
@@ -657,9 +651,8 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive, context);
+    OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
@@ -668,6 +661,14 @@ void UINode::DetachFromMainTree(bool recursive)
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
+}
+
+void UINode::FireCustomDisappear()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        child->FireCustomDisappear();
+    }
 }
 
 void UINode::ProcessOffscreenTask(bool recursive)
@@ -761,7 +762,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
+void UINode::OnDetachFromMainTree(bool) {}
 
 void UINode::OnAttachToMainTree(bool)
 {
@@ -778,8 +779,7 @@ void UINode::UpdateGeometryTransition()
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
-        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -1171,15 +1171,15 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
     }
 }
 
-void UINode::TryVisibleChangeOnDescendant(bool isVisible)
+void UINode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
-    UpdateChildrenVisible(isVisible);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
 }
 
-void UINode::UpdateChildrenVisible(bool isVisible) const
+void UINode::UpdateChildrenVisible(VisibleType preVisibility, VisibleType currentVisibility) const
 {
     for (const auto& child : GetChildren()) {
-        child->TryVisibleChangeOnDescendant(isVisible);
+        child->TryVisibleChangeOnDescendant(preVisibility, currentVisibility);
     }
 }
 

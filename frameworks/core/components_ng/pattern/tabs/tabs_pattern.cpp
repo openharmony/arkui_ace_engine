@@ -479,16 +479,17 @@ void TabsPattern::BeforeCreateLayoutWrapper()
 
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    if (swiperNode->GetChildrenUpdated() != -1) {
+    auto childrenUpdated = swiperNode->GetChildrenUpdated() != -1;
+    if (childrenUpdated) {
         HandleChildrenUpdated(swiperNode, tabBarNode);
     }
 
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    if (!tabBarPattern->IsMaskAnimationByCreate()) {
+    if (!childrenUpdated && !tabBarPattern->IsMaskAnimationByCreate()) {
         return;
     }
-    HandleMaskAnimationByCreate(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
+    UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, index);
 }
 
 /**
@@ -534,10 +535,10 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
 }
 
 /**
- * @brief Handles the mask animation when creating a tab.
+ * @brief Update selected state.
  *
  * This function is responsible for updating the indicator, text color, font weight, image color,
- * and index of the tab bar and swiper nodes when creating a tab.
+ * and index of the tab bar and swiper nodes when updating children or creating a tab.
  *
  * @param tabBarNode The node representing the tab bar.
  * @param swiperNode The node representing the swiper.
@@ -545,7 +546,7 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
  * @param tabsLayoutProperty The layout property for the tabs.
  * @param index The index of the tab being created.
  */
-void TabsPattern::HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
+void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
     const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index)
 {
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();

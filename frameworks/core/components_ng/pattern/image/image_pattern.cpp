@@ -168,9 +168,6 @@ void ImagePattern::OnCompleteInDataReady()
 
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
-    if (isComponentSnapshotNode_) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RectF frameRect;
@@ -716,35 +713,6 @@ void ImagePattern::OnModifyDone()
         default:
             break;
     }
-
-    InitOnKeyEvent();
-}
-
-void ImagePattern::InitOnKeyEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto focusHub = hub->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        pattern->OnKeyEvent();
-        return false;
-    };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-}
-
-void ImagePattern::OnKeyEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->PaintFocusState();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ImagePattern::OnAnimatedModifyDone()
@@ -784,10 +752,8 @@ void ImagePattern::OnAnimatedModifyDone()
 
 void ImagePattern::ControlAnimation(int32_t index)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (!animator_->HasScheduler()) {
-        auto context = host->GetContextRefPtr();
+        auto context = PipelineContext::GetCurrentContext();
         if (context) {
             animator_->AttachScheduler(context);
         } else {
@@ -814,6 +780,8 @@ void ImagePattern::ControlAnimation(int32_t index)
                 ResetFormAnimationFlag();
                 return;
             }
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
             if (host->IsVisible()) {
                 animator_->Forward();
             } else {
@@ -1632,6 +1600,21 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geomet
 {
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+}
+
+bool ImagePattern::AllowVisibleAreaCheck() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    RefPtr<FrameNode> parentUi = frameNode->GetAncestorNodeOfFrame(true);
+    while (parentUi) {
+        auto layoutProperty = parentUi->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->IsOverlayNode()) {
+            return true;
+        }
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
+    }
+    return false;
 }
 
 void ImagePattern::InitDefaultValue()

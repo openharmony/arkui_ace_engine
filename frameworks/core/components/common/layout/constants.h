@@ -263,16 +263,6 @@ inline std::string ToString(const TextOverflow& textOverflow)
 }
 } // namespace StringUtils
 
-// overflow-x: visible|hidden|scroll|auto|no-display|no-content;
-enum class TextFieldOverflowX {
-    VISIBLE,
-    HIDDEN,
-    SCROLL,
-    AUTO,
-    NO_DISPLAY,
-    NO_CONTENT,
-};
-
 enum class TextDirection {
     LTR,
     RTL,
@@ -672,7 +662,7 @@ enum class CopyOptions {
 };
 
 enum class VisibleType {
-    VISIBLE = 0,
+    VISIBLE,
     INVISIBLE,
     GONE,
 };
@@ -722,16 +712,7 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType {
-    UNKNOWN = -1,
-    SURFACE = 0,
-    COMPONENT,
-    TEXTURE,
-    NODE,
-#ifdef PLATFORM_VIEW_SUPPORTED
-    PLATFORM_VIEW = 999,
-#endif
-};
+enum class XComponentType { UNKNOWN = -1, SURFACE = 0, COMPONENT, TEXTURE, NODE };
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
 
@@ -767,7 +748,7 @@ enum class GestureTypeName {
     CLICK = 7,
     BOXSELECT = 8,
     WEBSCROLL = 9,
-    TEXTFIELD_BOXSELECT = 10
+    TEXTFIELD_BOXSELECT = 10,
 };
 
 enum class ModifierKey {

@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
@@ -52,6 +53,31 @@ private:
     void UpdateCircleButtonConstraint();
     void FillBlank();
     TextDirection GetTextDirection(LayoutWrapper* layoutWrapper);
+    void UpdatePadding(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper);
+    bool HasCustomPadding(RefPtr<SecurityComponentLayoutProperty>& property);
+    bool IsAging(LayoutWrapper* layoutWrapper);
+    RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, const std::string& tag);
+    bool IsTextAdaptOutOfRange(SizeF& leftPoint, SizeF& rightPoint, SizeF& circlePoint, float maxDistance);
+    void UpdateTextRectPoint();
+    bool IsTextOutOfRangeInCircle();
+    bool IsTextOutOfRangeInCapsule();
+    bool IsOutOfRangeInHoriCapsule(SizeF& leftCirclePoint, SizeF& rightCirclePoint, float maxDistance);
+    bool IsOutOfRangeInVertiCapsule(SizeF& topCirclePoint, SizeF& bottomCirclePoint, float maxDistance);
+    bool IsTextOutOfRangeInNormal();
+    bool GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper);
+    bool CompareDistance(SizeF& point, SizeF& circlePoint, float maxDistance);
+    bool TopLeftCompDistance(float obtainedRadius, float maxRadius, float threshold);
+    bool TopRightCompDistance(float obtainedRadius, float maxRadius, float threshold);
+    bool BottomLeftCompDistance(float obtainedRadius, float maxRadius, float threshold);
+    bool BottomRightCompDistance(float obtainedRadius, float maxRadius, float threshold);
+    bool IsTextOutOfOneColumn(RefPtr<FrameNode>& frameNode, float threshold);
+
+    void UpdateTextSize();
+
+    float pow(float value)
+    {
+        return value * value;
+    }
 
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
@@ -62,6 +88,11 @@ private:
     PaddingLayoutElement right_;
     PaddingLayoutElement bottom_;
     PaddingLayoutElement middle_;
+    SizeF textLeftTopPoint_;
+    SizeF textRightTopPoint_;
+    SizeF textLeftBottomPoint_;
+    SizeF textRightBottomPoint_;
+    Dimension currentFontSize_;
 
     double idealWidth_ = 0.0;
     double idealHeight_ = 0.0;
@@ -75,6 +106,7 @@ private:
     bool isVertical_ = false;
     bool isNobg_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutAlgorithm);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_LAYOUT_ALGORITHM_H

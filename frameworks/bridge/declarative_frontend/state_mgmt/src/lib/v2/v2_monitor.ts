@@ -142,7 +142,7 @@ class MonitorV2 {
       try {
         // exec @Monitor function
         this.monitorFunction.call(this.target_, this);
-      } catch(e) {
+      } catch (e) {
         stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
         throw e;
       } finally {
@@ -161,7 +161,7 @@ class MonitorV2 {
     ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
     let ret = false;
     this.values_.forEach((item) => {
-      const [ success, value ] = this.analysisProp(isInit, item)
+      const [ success, value ] = this.analysisProp(isInit, item);
       if (!success ) {
         stateMgmtConsole.debug(`@Monitor path no longer valid.`);
         return;
@@ -176,7 +176,7 @@ class MonitorV2 {
 
   // record / update object dependencies by reading each object along the path
   // return the value, i.e. the value of the last path item
-  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ]  {
+  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ] {
     let parentObj = this.target_; // main pointer
     let specialCur; // special pointer for Array
     let obj; // main property
@@ -211,7 +211,7 @@ class MonitorV2 {
         }
       } else {
         isInit && stateMgmtConsole.warn(`@Monitor prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-        return [ false, undefined ];
+        return [false, undefined];
       }
     }
     if (specialCur) {
@@ -221,9 +221,9 @@ class MonitorV2 {
     }
     if (!ObserveV2.IsMakeObserved(obj) && !ObserveV2.IsTrackedProperty(parentObj, lastProp)) {
       stateMgmtConsole.applicationError(`@Monitor "${monitoredValue.path}" cannot be monitored, make sure it is decorated !!`);
-      return [ false, undefined ];
+      return [false, undefined];
     }
-    return [ true, obj as unknown as T ];
+    return [true, obj as unknown as T];
   }
 
   public static clearWatchesFromTarget(target: Object): void {

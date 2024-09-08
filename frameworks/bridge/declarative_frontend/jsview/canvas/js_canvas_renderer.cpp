@@ -114,8 +114,7 @@ JSCanvasRenderer::JSCanvasRenderer()
             auto canvasRender = self.Upgrade();
             CHECK_NULL_VOID(canvasRender);
             canvasRender->density_ = density;
-            canvasRender->canvasDensity_= canvasRender->GetDensity();
-            canvasRender->TransferCanvasDensity();
+            canvasRender->SetDensity();
         });
     }
 }
@@ -256,9 +255,10 @@ void JSCanvasRenderer::SetAntiAlias()
     renderingContext2DModel_->SetAntiAlias(anti_);
 }
 
-void JSCanvasRenderer::TransferCanvasDensity()
+void JSCanvasRenderer::SetDensity()
 {
-    renderingContext2DModel_->SetDensity(canvasDensity_);
+    double density = GetDensity();
+    renderingContext2DModel_->SetDensity(density);
 }
 
 // font: string
@@ -674,6 +674,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     JSRef<JSUint8ClampedArray> colorArray = JSRef<JSUint8ClampedArray>::Cast(jsImgData);
     auto arrayBuffer = colorArray->GetArrayBuffer();
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    CHECK_NULL_VOID(buffer);
     int32_t bufferLength = arrayBuffer->ByteLength();
     imageData.data = std::vector<Color>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
@@ -757,6 +758,7 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    CHECK_NULL_VOID(buffer);
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
         return;
     }

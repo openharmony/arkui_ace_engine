@@ -249,7 +249,6 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
     EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f); // changed after refill
 
@@ -258,7 +257,6 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f); // doesn't affect current layout
     UpdateCurrentOffset(500.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 40), 10.0f); // changed after refill

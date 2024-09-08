@@ -8446,23 +8446,6 @@ class SearchHeightModifier extends ModifierWithKey {
 }
 SearchHeightModifier.identity = Symbol('searchHeight');
 
-class SearchIdModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().search.resetSearchInspectorId(node);
-    } else {
-      getUINativeModule().search.setSearchInspectorId(node, this.value);
-    }
-  }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SearchIdModifier.identity = Symbol('searchId');
 class SearchDecorationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11075,6 +11058,24 @@ class TextHalfLeadingModifier extends ModifierWithKey {
 }
 TextHalfLeadingModifier.identity = Symbol('textHalfLeading');
 
+class TextOnClickModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnClick(node);
+    }
+    else {
+      getUINativeModule().text.setOnClick(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextOnClickModifier.identity = Symbol('textOnClick');
+
 class TextResponseRegionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11298,6 +11299,10 @@ class ArkTextComponent extends ArkComponent {
   }
   halfLeading(value) {
     modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity, TextHalfLeadingModifier, value);
+    return this;
+  }
+  onClick(value) {
+    modifierWithKey(this._modifiersWithKeys, TextOnClickModifier.identity, TextOnClickModifier, value);
     return this;
   }
   responseRegion(value) {

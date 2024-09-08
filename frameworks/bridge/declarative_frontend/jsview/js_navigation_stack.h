@@ -132,12 +132,12 @@ private:
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
     void SetJSParentStack(JSRef<JSVal> parent);
-    std::string ConvertParamToString(const JSRef<JSVal>& param) const;
-    void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const;
-    static void UpdateOnStateChangedCallback(
-        JSRef<JSObject> obj, std::function<void()> callback, const RefPtr<JSNavigationStack>& stack);
-    static void UpdateCheckNavDestinationExistsFunc(
-        JSRef<JSObject> obj, std::function<int32_t(JSRef<JSObject>)> checkFunc, const RefPtr<JSNavigationStack>& stack);
+    std::string ConvertParamToString(const JSRef<JSVal>& param, bool needLimit = false) const;
+    void ParseJsObject(
+        std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const;
+    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
+    static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
+        std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);

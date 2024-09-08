@@ -84,7 +84,6 @@ struct TextFieldStyle : Style {
     bool cursorColorIsSet = false;
 
     TextAlign textAlign = TextAlign::START;
-    TextFieldOverflowX overflowX = TextFieldOverflowX::HIDDEN;
     TextStyle textStyle;
     TextStyle countTextStyle;
     TextStyle overCountStyle;
@@ -558,18 +557,6 @@ public:
     {
         auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
         style.height = height;
-    }
-
-    TextFieldOverflowX& GetOverflowX() const
-    {
-        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.overflowX;
-    }
-
-    void SetOverflowX(const TextFieldOverflowX& overflowX)
-    {
-        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        style.overflowX = overflowX;
     }
 
     bool GetAutoFocus() const

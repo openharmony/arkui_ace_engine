@@ -22,7 +22,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-    // SUB_WINDOW_MANAGER = 
 } // namespace
 
 class SubwindowManagerTest : public testing::Test {
@@ -45,7 +44,7 @@ HWTEST_F(SubwindowManagerTest, ShowPreviewNG001, TestSize.Level1)
     ASSERT_NE(manager, nullptr);
 
     /**
-     * @tc.steps: step2. 
+     * @tc.steps: step2.
      * @tc.expected: expect ShowPreviewNG return nullptr.
      */
     EXPECT_EQ(manager->ShowPreviewNG(false), nullptr);

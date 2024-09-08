@@ -116,7 +116,13 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
+    JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
+    JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
+    JSClass<JSSearch>::StaticMethod("minFontSize", &JSSearch::SetMinFontSize);
+    JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
+    JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
+    JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
     JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
     JSClass<JSSearch>::StaticMethod("editMenuOptions", &JSSearch::EditMenuOptions);
     JSBindMore();
@@ -125,14 +131,6 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
 void JSSearch::JSBindMore()
 {
-    JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
-    JSClass<JSSearch>::StaticMethod("minFontSize", &JSSearch::SetMinFontSize);
-    JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
-    JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
-    JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
-    JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
-    JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
-    JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::StaticMethod("selectedBackgroundColor", &JSSearch::SetSelectedBackgroundColor);
     JSClass<JSSearch>::StaticMethod("inputFilter", &JSSearch::SetInputFilter);
     JSClass<JSSearch>::StaticMethod("onEditChange", &JSSearch::SetOnEditChange);
@@ -257,23 +255,6 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     SearchModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
 }
 
-void JSSearch::SetId(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsId(info);
-    JSRef<JSVal> arg = info[0];
-    std::string id;
-    if (arg->IsString()) {
-        id = arg->ToString();
-    }
-    SearchModel::GetInstance()->UpdateInspectorId(id);
-}
-
-void JSSearch::SetKey(const std::string& key)
-{
-    JSViewAbstract::JsKey(key);
-    SearchModel::GetInstance()->UpdateInspectorId(key);
-}
-
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
@@ -298,7 +279,6 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             size = theme->GetFontSize();
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
-
         auto fontColorProp = param->GetProperty("fontColor");
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
             if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
@@ -353,6 +333,7 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
+
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -413,6 +394,7 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
+
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -1026,6 +1008,10 @@ void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
 
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
     int32_t maxLength = 0;
     if (info[0]->IsUndefined()) {
         SearchModel::GetInstance()->ResetMaxLength();

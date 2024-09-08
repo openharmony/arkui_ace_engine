@@ -142,13 +142,6 @@ public:
     {
         return GetParagraphLength() == 0;
     }
-    void SetParagraphId(uint32_t id) override
-    {
-        auto paragraph = GetParagraph();
-        if (paragraph) {
-            paragraph->SetParagraghId(id);
-        }
-    }
     LineMetrics GetLineMetricsByRectF(RectF& rect) override;
     TextLineMetrics GetLineMetrics(size_t lineNumber) override;
     void SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes);

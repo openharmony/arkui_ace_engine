@@ -341,10 +341,10 @@ public:
     static ArkUINativeModuleValue ResetFocusScopeId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusScopePriority(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFocusScopePriority(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue SetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetPixelRound(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GreatOrEqualAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue LessThanAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -352,5 +352,4 @@ public:
     static ArkUINativeModuleValue ResetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COMMON_BRIDGE_H

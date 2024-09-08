@@ -227,10 +227,10 @@ public:
 
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
-    void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
+    void PushWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
-    void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
+    void ReplaceWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void PostponePageTransition() override;
@@ -257,7 +257,7 @@ public:
     double MeasureText(MeasureContext context) override;
     Size MeasureTextSize(MeasureContext context) override;
 
-    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
+    void ShowToast(const NG::ToastInfo& toastInfo) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;

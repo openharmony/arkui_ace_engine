@@ -543,7 +543,7 @@ public:
 
     void OnTouchOutside() const
     {
-        TAG_LOGI(AceLogTag::ACE_MENU, "window is touching outside. instance id is %{public}d", instanceId_);
+        LOGI("window is touching outside. instance id is %{public}d", instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
@@ -797,31 +797,26 @@ napi_value UIContentImpl::GetUINapiContext()
 }
 
 UIContentErrorCode UIContentImpl::Restore(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, ContentInfoType type)
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
-    LOGI("Restore with contentInfo size: %{public}d, ContentInfotype: %{public}d",
-        static_cast<int32_t>(contentInfo.size()), static_cast<int32_t>(type));
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     errorCode = CommonInitialize(window, contentInfo, storage);
     CHECK_ERROR_CODE_RETURN(errorCode);
-    RouterRecoverRecord record;
-    std::tie(record, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo, type);
-    startUrl_ = record.url;
+    std::tie(startUrl_, errorCode) = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
     CHECK_ERROR_CODE_RETURN(errorCode);
     if (startUrl_.empty()) {
         LOGW("Restore start url is empty");
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl: %{public}s, isNamedRouter: %{public}s",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str(),
-        (record.isNamedRouter ? "yes" : "no"));
-    return Platform::AceContainer::RunPage(instanceId_, startUrl_, record.params, record.isNamedRouter);
+    LOGI("[%{public}s][%{public}s][%{public}d]: Restore startUrl:%{public}s", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
 
-std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
+std::string UIContentImpl::GetContentInfo() const
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: GetContentInfoType: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, type);
-    return Platform::AceContainer::GetContentInfo(instanceId_, type);
+    LOGI("[%{public}s][%{public}s][%{public}d]: GetContentInfoType", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_);
+    return Platform::AceContainer::GetContentInfo(instanceId_);
 }
 
 // ArkTSCard start
@@ -2202,6 +2197,16 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto updateDensityTask = [container, modifyConfig]() {
+        auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
+        CHECK_NULL_VOID(aceView);
+        Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
+    };
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        updateDensityTask(); // ensure density has been updated before load first page
+    } else {
+        taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+    }
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
@@ -2224,7 +2229,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         }
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
-        Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);

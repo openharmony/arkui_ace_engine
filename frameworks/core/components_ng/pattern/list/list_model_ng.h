@@ -73,7 +73,6 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
-    DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -123,6 +122,7 @@ public:
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
     static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
+    DisplayMode GetDisplayMode() const override;
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);

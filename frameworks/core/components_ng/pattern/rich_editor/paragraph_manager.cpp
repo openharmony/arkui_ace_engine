@@ -235,7 +235,7 @@ LineMetrics ParagraphManager::GetLineMetricsByRectF(RectF rect, int32_t paragrap
 
 TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
 {
-    if (GetLineCount() == 0 || lineNumber > GetLineCount() - 1) {
+    if (lineNumber > GetLineCount() - 1) {
         TAG_LOGE(AceLogTag::ACE_TEXT,
             "GetLineMetrics failed, lineNumber is greater than max lines:%{public}zu", lineNumber);
         return TextLineMetrics();
@@ -245,7 +245,7 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     size_t lineNumberParam = lineNumber;
     for (auto &&info : paragraphs_) {
         auto lineCount = info.paragraph->GetLineCount();
-        if (lineCount > 0 && lineNumber > lineCount - 1) {
+        if (lineNumber > lineCount - 1) {
             lineNumber -= lineCount;
             paragraphsHeight += info.paragraph->GetHeight();
             auto lastLineMetrics = info.paragraph->GetLineMetrics(lineCount - 1);

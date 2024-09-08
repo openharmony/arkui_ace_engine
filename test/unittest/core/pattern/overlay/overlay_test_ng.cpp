@@ -89,7 +89,6 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 const std::string MENU_CONTENT = "复制";
-constexpr int32_t OVERLAY_EXISTS = 0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayTestNg : public testing::Test {
@@ -340,6 +339,7 @@ HWTEST_F(OverlayTestNg, OnBindContentCover002, TestSize.Level1)
      * @tc.steps: step2. create target node.
      */
     CreateSheetBuilder();
+
     /**
      * @tc.steps: step3. create modal node and get modal node, get pattern.
      * @tc.expected: related function is called.
@@ -643,11 +643,11 @@ HWTEST_F(OverlayTestNg, MenuTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuAnimation(menuNode);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
@@ -758,8 +758,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     ASSERT_NE(previewContext, nullptr);
     auto menuContext = previewNode->GetRenderContext();
     ASSERT_NE(menuContext, nullptr);
-    previewContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
-    menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    previewContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    menuContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
 
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -782,11 +782,11 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     menuWrapperNode->MountToParent(rootNode);
     /**
      * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
-     * @tc.expected: the none of node will remove.
+     * @tc.expected: the preview node will remove.
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, false);
-    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
 }
 
 /**
@@ -1222,7 +1222,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
      */
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_EQ(overlayManager->RemoveOverlayInSubwindow(), OVERLAY_EXISTS);
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
 }
 
 /**
@@ -1241,9 +1241,9 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     auto toastInfo = NG::ToastInfo { .message = MESSAGE,
         .duration = DURATION,
         .bottom = BOTTOMSTRING,
-        .showMode = NG::ToastShowMode::TOP_MOST,
-        .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+        .isRightToLeft = true,
+        .showMode = NG::ToastShowMode::TOP_MOST };
+    overlayManager->ShowToast(toastInfo);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. Test Toast showMode and offset.
@@ -1292,7 +1292,7 @@ HWTEST_F(OverlayTestNg, ToastTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.
@@ -1331,7 +1331,7 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.
@@ -1445,72 +1445,6 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ToastTest007
- * @tc.desc: Test ToastPattern::CreateAccessibilityProperty function.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, ToastTest007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create toast and get toastNode.
-     */
-    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto toastNode =
-        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
-    ASSERT_NE(toastNode, nullptr);
-    toastNode->MarkModifyDone();
-
-    /**
-     * @tc.steps: step2. get ToastAccessibilityProperty.
-     * @tc.expected: step2. ToastAccessibilityProperty is not nullptr.
-     */
-    auto accessibilityProperty = toastNode->GetAccessibilityProperty<ToastAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-}
-
-/**
- * @tc.name: ToastTest008
- * @tc.desc: Test ToastAccessibilityProperty::SetSelectStatus function.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, ToastTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create toast and get toastNode.
-     */
-    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto toastNode =
-        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
-    ASSERT_NE(toastNode, nullptr);
-    toastNode->MarkModifyDone();
-
-    /**
-     * @tc.steps: step2. get pattern and update frameNode.
-     * @tc.expected: step2. ToastAccessibilityProperty is not nullptr.
-     */
-    auto accessibilityProperty = toastNode->GetAccessibilityProperty<ToastAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-
-    /**
-     * @tc.steps: step3. set showedSelectStatus OFF.
-     * @tc.expected: step3 get showedSelectStatus OFF.
-     */
-    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
-    ASSERT_NE(toastProperty, nullptr);
-    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
-    auto showedSelectStatus = toastProperty->GetSelectStatus();
-    EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::OFF);
-
-    /**
-     * @tc.steps: step4. set showedSelectStatus ON.
-     * @tc.expected: step4 get showedSelectStatus ON.
-     */
-    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
-    showedSelectStatus = toastProperty->GetSelectStatus();
-    EXPECT_EQ(showedSelectStatus, ToastLayoutProperty::SelectStatus::ON);
-}
-
-/**
  * @tc.name: DialogTest001
  * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
  * @tc.type: FUNC
@@ -1592,9 +1526,9 @@ HWTEST_F(OverlayTestNg, DialogTest002, TestSize.Level1)
      * @tc.steps: step3. call RemoveOverlayInSubwindow.
      * @tc.expected: remove successfully.
      */
-    EXPECT_EQ(overlayManager->RemoveOverlayInSubwindow(), OVERLAY_EXISTS);
-    EXPECT_FALSE(overlayManager->dialogMap_.empty());
-    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
 }
 
 /**
@@ -1611,7 +1545,27 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
     DialogProperties dialogProperties;
     dialogProperties.isShowInSubWindow = true;
 
-    auto datePickerSettingData = GenDatePickerSettingData();
+    DatePickerSettingData datePickerSettingData;
+    datePickerSettingData.isLunar = false;
+    datePickerSettingData.showTime = true;
+    datePickerSettingData.useMilitary = false;
+
+    PickerTextProperties properties;
+    properties.disappearTextStyle_.textColor = Color::RED;
+    properties.disappearTextStyle_.fontSize = Dimension(0);
+    properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    properties.normalTextStyle_.textColor = Color::BLACK;
+    properties.normalTextStyle_.fontSize = Dimension(10);
+    properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    properties.selectedTextStyle_.textColor = Color::RED;
+    properties.selectedTextStyle_.fontSize = Dimension(15);
+    properties.selectedTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    datePickerSettingData.properties = properties;
+    datePickerSettingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    datePickerSettingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    datePickerSettingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    datePickerSettingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
 
     std::map<std::string, NG::DialogEvent> dialogEvent;
     auto eventFunc = [](const std::string& info) { (void)info; };
@@ -1640,7 +1594,7 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.expected: timeDialogNode is created successfully
      */
     TimePickerSettingData timePickerSettingData;
-    timePickerSettingData.properties = datePickerSettingData.properties;
+    timePickerSettingData.properties = properties;
     timePickerSettingData.isUseMilitaryTime = false;
 
     std::map<std::string, PickerTime> timePickerProperty;
@@ -1654,8 +1608,8 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when dialogChildCount is 2
      * @tc.expected: remove lastChild successfully
      */
-    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
@@ -1663,12 +1617,12 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      */
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 
 /**
@@ -1888,38 +1842,6 @@ HWTEST_F(OverlayTestNg, DialogTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: DialogTest006
- * @tc.desc: Test DismissDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, DialogTest006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create root node and dialogProperties.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    DialogProperties dialogProperties;
-    /**
-     * @tc.steps: step2. Create overlayManager and call ShowDialog.
-     */
-    auto overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
-    ASSERT_NE(overlay, nullptr);
-    auto dialog = overlayManager->ShowDialog(dialogProperties, nullptr, false);
-    auto dialogMapSize = overlayManager->dialogMap_.size();
-    /**
-     * @tc.steps4: Call DismissDialog function.
-     * @tc.expected: DismissDialog function is called.
-     */
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), dialogMapSize);
-}
-
-/**
  * @tc.name: DialogTest007
  * @tc.desc: Test OverlayManager::OpenCustomDialog->CloseCustomDialog.
  * @tc.type: FUNC
@@ -2059,54 +1981,6 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: BuildAIEntityMenu
- * @tc.desc: Test OverlayManager::BuildAIEntityMenu.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, BuildAIEntityMenu, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create root node and overlayManager.
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    ASSERT_NE(overlayManager, nullptr);
-
-    /**
-     * @tc.steps: step2. create menuOptions and call BuildAIEntityMenu.
-     * @tc.expected: build AI entity menu successful.
-     */
-    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
-    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
-    EXPECT_NE(overlayManager->BuildAIEntityMenu(menuOptions), nullptr);
-}
-
-/**
- * @tc.name: CreateAIEntityMenu
- * @tc.desc: Test OverlayManager::CreateAIEntityMenu.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayTestNg, CreateAIEntityMenu, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create root node, target node and overlayManager.
-     */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    ASSERT_NE(overlayManager, nullptr);
-
-    /**
-     * @tc.steps: step2. create menuOptions and call CreateAIEntityMenu.
-     * @tc.expected: create AI entity menu successful.
-     */
-    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
-    menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
-    EXPECT_NE(overlayManager->CreateAIEntityMenu(menuOptions, targetNode), nullptr);
-}
-
-/**
  * @tc.name: ShowAIEntityMenu
  * @tc.desc: Test OverlayManager::ShowAIEntityMenu.
  * @tc.type: FUNC
@@ -2114,22 +1988,28 @@ HWTEST_F(OverlayTestNg, CreateAIEntityMenu, TestSize.Level1)
 HWTEST_F(OverlayTestNg, ShowAIEntityMenu, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create root node, target node and overlayManager.
+     * @tc.steps: step1. create target node and toast node.
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+    auto baseFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    ASSERT_NE(overlayManager, nullptr);
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
 
-    /**
-     * @tc.steps: step2. create menuOptions, handleRect and call CreateAIEntityMenu.
-     * @tc.expected: ShowAIEntityMenu return true.
-     */
     std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
     menuOptions.push_back(std::make_pair(MENU_CONTENT, []() {}));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowAIEntityMenu.
+     * @tc.expected: ShowAIEntityMenu return true.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager,nullptr);
+
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
-    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, targetNode));
+    EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, baseFrameNode));
 }
 
 /**

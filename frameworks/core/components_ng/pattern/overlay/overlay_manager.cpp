@@ -360,6 +360,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(menuPattern);
     auto previewPosition = menuPattern->GetPreviewOriginOffset();
 
+    menuWrapperPattern->StopHoverImageToPreviewAnimation();
     AnimationOption option = AnimationOption();
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
     AnimationUtils::Animate(
@@ -389,9 +390,13 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
 
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
+    if (previewPattern->IsHoverImageAnimationPlaying()) {
+        menuWrapperPattern->SetIsStopHoverImageAnimation(true);
+        previewPattern->SetIsHoverImageAnimationPlaying(false);
+    } else {
+        UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
+    }
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
-    CHECK_NULL_VOID(!previewPattern->IsHoverImageAnimationPlaying());
-    UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
 }
 
 void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset,
@@ -742,9 +747,9 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
-void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
+void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire dialog auto save enter");
     CHECK_NULL_VOID(ContainerNode);
     if (!ContainerNode->NeedRequestAutoSave()) {
         return;
@@ -752,20 +757,7 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-
-    const auto& nodeTag = ContainerNode->GetTag();
-    if (nodeTag == V2::SHEET_PAGE_TAG) {
-        // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
-        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto currentStyle = layoutProperty->GetSheetStyleValue();
-        if (currentStyle.instanceId.has_value()) {
-            auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
-            auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
-            CHECK_NULL_VOID(targetNode);
-            currentId = targetNode->GetInstanceId();
-        }
-    } else if (container->IsSubContainer()) {
+    if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
     container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
@@ -777,7 +769,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
 
     BlurOverlayNode(node);
-    FireAutoSave(node);
+    FireDialogAutoSave(node);
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
@@ -1054,8 +1046,8 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
-            overlayManager->SendToAccessibility(menuWK, true);
         });
+
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -1072,23 +1064,6 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     }
     wrapperPattern->SetAniamtinOption(option);
     SetPatternFirstShow(menu);
-}
-
-void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow)
-{
-    auto menuWrapper = node.Upgrade();
-    CHECK_NULL_VOID(menuWrapper);
-    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    auto menu = wrapperPattern->GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityIsShow(isShow);
-    menuWrapper->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
-        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
 }
 
 void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
@@ -1222,7 +1197,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->SendToAccessibility(menuWK, false);
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
@@ -1325,7 +1299,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
     return focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
 }
 
-void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback)
+void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     auto context = PipelineContext::GetCurrentContext();
@@ -1346,37 +1320,7 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
-    if (callback != nullptr) {
-        auto callbackToastId = ((toastId << 3) | // 3 : Use the last 3 bits of callbackToastId to store showMode
-                                (static_cast<int32_t>(toastInfo.showMode) & 0b111));
-        callback(callbackToastId);
-    }
     OpenToastAnimation(toastNode, toastInfo.duration);
-}
-
-void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback)
-{
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
-    if (!callback) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of CloseToast are incomplete because of no callback.");
-        callback(ERROR_CODE_INTERNAL_ERROR);
-        return;
-    }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    if (!rootNode) {
-        callback(ERROR_CODE_INTERNAL_ERROR);
-        return;
-    }
-    for (auto [id, toastNodeWeak] : toastMap_) {
-        if (id == toastId) {
-            rootNode->RemoveChild(toastNodeWeak.Upgrade());
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-            toastMap_.erase(id);
-            callback(ERROR_CODE_NO_ERROR);
-            return;
-        }
-    }
-    callback(ERROR_CODE_TOAST_NOT_FOUND);
 }
 
 void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration)
@@ -1417,13 +1361,8 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
             }
         },
         option.GetOnFinishEvent());
-    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
-    CHECK_NULL_VOID(toastProperty);
-    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
     toastNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    toastNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::PopToast(int32_t toastId)
@@ -1497,14 +1436,8 @@ void OverlayManager::PopToast(int32_t toastId)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
-    auto toastProperty = toastUnderPop->GetLayoutProperty<ToastLayoutProperty>();
-    CHECK_NULL_VOID(toastProperty);
-    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
     AccessibilityEvent event;
     event.type = AccessibilityEventType::CHANGE;
-    event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
-    pipeline->SendEventToAccessibility(event);
-    event.type = AccessibilityEventType::PAGE_CHANGE;
     event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
     pipeline->SendEventToAccessibility(event);
 }
@@ -1669,11 +1602,6 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
         ShowPopupAnimationNG(popupNode);
     }
     SetPopupHotAreas(popupNode);
-    auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetShowedState(1);
-    popupNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
@@ -1782,11 +1710,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         }
     };
     HidePopupAnimation(popupNode, onFinish);
-    auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetShowedState(0);
     popupNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
     RemoveGatherNodeWithAnimation();
@@ -1941,11 +1866,6 @@ void OverlayManager::ErasePopup(int32_t targetId)
         auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
         auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-        auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-        CHECK_NULL_VOID(accessibilityProperty);
-        accessibilityProperty->SetShowedState(0);
-        popupNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         if (isShowInSubWindow) {
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
@@ -2137,7 +2057,7 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
 
 void OverlayManager::HideAllMenus()
 {
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide all menus enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menus enter");
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
@@ -2147,7 +2067,6 @@ void OverlayManager::HideAllMenus()
             for (const auto& child : windowScene.Upgrade()->GetChildren()) {
                 auto node = DynamicCast<FrameNode>(child);
                 if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-                    TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
                     PopMenuAnimation(node);
                 }
             }
@@ -2163,7 +2082,6 @@ void OverlayManager::HideAllMenus()
             auto wrapperPattern = node->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             wrapperPattern->UpdateMenuAnimation(node);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
             PopMenuAnimation(node);
         }
     }
@@ -2801,6 +2719,19 @@ bool OverlayManager::DialogInMapHoldingFocus()
     return false;
 }
 
+bool OverlayManager::HasModalPage()
+{
+    if (modalList_.empty()) {
+        return false;
+    }
+    for (auto modal : modalList_) {
+        if (modal.Upgrade() && modal.Upgrade()->GetTag() == V2::MODAL_PAGE_TAG) {
+            return true;
+        }
+    }
+    return false;
+}
+
 RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "get dialog enter");
@@ -3411,7 +3342,6 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
             FireNavigationStateChange(false, topModalNode);
         }
         auto rootNode = FindWindowScene(topModalNode);
-        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         // Fire shown event of navdestination under the disappeared modal
@@ -3430,7 +3360,6 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
-                overlayManager->FireAutoSave(modal);
                 overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
@@ -3457,7 +3386,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     topModalNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (topModalNode->GetPattern<ModalPresentationPattern>()->HasTransitionEffect()) {
         PlayTransitionEffectOut(topModalNode);
     } else if (modalTransition == ModalTransition::DEFAULT) {
@@ -3468,7 +3397,6 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
-        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3753,7 +3681,12 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
-    MountToParentWithService(rootNode, modalNode);
+    if (targetId < 0) {
+        // modaluiextention node mounting
+        modalNode->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
+    } else {
+        MountToParentWithService(rootNode, modalNode);
+    }
     modalNode->AddChild(builder);
     if (!isAllowedBeCovered_ && modalNode->GetParent()) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
@@ -3778,7 +3711,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         FireNavigationStateChange(false);
     }
     modalNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (modalTransition == ModalTransition::DEFAULT) {
         PlayDefaultModalTransition(modalNode, true);
     } else if (modalTransition == ModalTransition::ALPHA) {
@@ -3814,7 +3747,7 @@ void OverlayManager::HandleModalPop(
         onWillDisappear();
     }
     topModalNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (modalPresentationPattern->HasTransitionEffect()) {
         PlayTransitionEffectOut(topModalNode);
     } else if (modalTransition == ModalTransition::DEFAULT) {
@@ -3827,7 +3760,6 @@ void OverlayManager::HandleModalPop(
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(false, topModalNode);
         }
-        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3922,7 +3854,6 @@ void OverlayManager::PlayDefaultModalOut(
                 // Fire hidden event of navdestination on the disappeared modal
                 overlayManager->FireNavigationStateChange(false, modal);
             }
-            overlayManager->FireAutoSave(modal);
             overlayManager->RemoveChildWithService(root, modal);
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
@@ -3984,7 +3915,6 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
-                overlayManager->FireAutoSave(modal);
                 overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
@@ -4295,8 +4225,7 @@ void OverlayManager::PlaySheetTransition(
 {
     CHECK_NULL_VOID(sheetNode);
     sheetNode->OnAccessibilityEvent(
-        isTransitionIn ? AccessibilityEventType::PAGE_OPEN : AccessibilityEventType::PAGE_CLOSE,
-        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 
     // current sheet animation
     AnimationOption option;
@@ -4374,7 +4303,6 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(root);
                 auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                 CHECK_NULL_VOID(sheetParent);
-                overlayManager->FireAutoSave(sheet);
                 overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
@@ -5650,20 +5578,7 @@ void OverlayManager::ResetRootNode(int32_t sessionId)
     curSessionIds_.erase(sessionId);
     auto rootNode = FindWindowScene(nullptr);
     CHECK_NULL_VOID(rootNode);
-    auto pipeline = rootNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetInstallationFree()) {
-        // it is in atomicservice
-        for (auto child : rootNode->GetChildren()) {
-            CHECK_NULL_VOID(child);
-            if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-                child->UpdateModalUiextensionCount(false);
-                break;
-            }
-        }
-    } else {
-        rootNode->UpdateModalUiextensionCount(false);
-    }
+    rootNode->UpdateModalUiextensionCount(false);
 }
 
 void OverlayManager::SetIsAllowedBeCovered(bool isAllowedBeCovered)
@@ -6648,11 +6563,7 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
         // it is in atomicservice
         SetNodeBeforeAppbar(rootNode, node);
     } else {
-        if (node->GetTag() == V2::MODAL_PAGE_TAG) {
-            node->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
-        } else {
-            node->MountToParent(rootNode);
-        }
+        node->MountToParent(rootNode);
     }
 }
  
@@ -6680,7 +6591,7 @@ void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
             CHECK_NULL_VOID(childNode);
             if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
                 TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
-                child->AddChildBefore(node, childNode, node->GetTag() == V2::MODAL_PAGE_TAG);
+                child->AddChildBefore(node, childNode);
                 return;
             }
         }

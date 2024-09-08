@@ -89,7 +89,7 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 
 void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items)
 {
-    const JSRef<JSArray>& jsArray = JSRef<JSArray>::Cast(info[0]);
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[0]);
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
         auto item = jsArray->GetValueAt(i);

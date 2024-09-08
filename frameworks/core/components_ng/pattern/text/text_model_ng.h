@@ -123,6 +123,8 @@ public:
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
+    static void ClearOnClick(FrameNode* frameNode);
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
@@ -159,10 +161,10 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
-    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
+    static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -171,7 +173,6 @@ public:
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
-    static bool GetHalfLeading(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

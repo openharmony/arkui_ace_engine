@@ -184,8 +184,8 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis end, state: %{public}d",
-        event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Id:%{public}d, pinch axis end, state: %{public}d", event.touchEventId, refereeState_);
     // if axisEvent received rotateEvent, no need to active Pinch recognizer.
     if (isPinchEnd_ || event.isRotationEvent) {
         return;
@@ -418,11 +418,12 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
+            info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

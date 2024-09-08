@@ -89,7 +89,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        return { FocusType::NODE, false };
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -295,6 +295,8 @@ public:
         return true;
     }
 
+    bool AllowVisibleAreaCheck() const override;
+
     void OnInActive() override
     {
         if (status_ == Animator::Status::RUNNING) {
@@ -305,10 +307,8 @@ public:
     void OnActive() override
     {
         if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             if (!animator_->HasScheduler()) {
-                auto context = host->GetContextRefPtr();
+                auto context = PipelineContext::GetCurrentContext();
                 if (context) {
                     animator_->AttachScheduler(context);
                 } else {
@@ -373,12 +373,6 @@ public:
     {
         InitDefaultValue();
         return interpolationDefault_;
-    }
-    void InitOnKeyEvent();
-
-    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
-    {
-        isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
 protected:
     void RegisterWindowStateChangedCallback();
@@ -500,7 +494,6 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
-    void OnKeyEvent();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
@@ -560,7 +553,6 @@ private:
     bool hasSizeChanged = false;
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
-    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

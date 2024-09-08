@@ -24,77 +24,6 @@ public:
 };
 
 /**
- * @tc.name: UpdateCaretByTouchMove001
- * @tc.desc: Test UpdateCaretByTouchMove
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize textInput and focusHub
-     */
-    CreateTextField();
-    GetFocus();
-
-    /**
-     * @tc.steps: step2. create location info, touch type DOWN
-     */
-    TouchLocationInfo touchLocationInfo1(0);
-    touchLocationInfo1.touchType_ = TouchType::DOWN;
-    touchLocationInfo1.localLocation_ = Offset(0.0f, 0.0f);
-
-    /**
-     * @tc.steps: step3. create touch info, touch type DOWN
-     */
-    TouchEventInfo touchInfo1("");
-    touchInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
-
-    /**
-     * @tc.steps: step4. test touch down
-     */
-    pattern_->HandleTouchEvent(touchInfo1);
-    EXPECT_TRUE(pattern_->isTouchCaret_);
-
-    /**
-     * @tc.steps: step5. create location info, touch type MOVE
-     */
-    TouchLocationInfo touchLocationInfo2(0);
-    touchLocationInfo2.touchType_ = TouchType::MOVE;
-    touchLocationInfo2.localLocation_ = Offset(0.0f, 0.0f);
-
-    /**
-     * @tc.steps: step6. create touch info, touch type MOVE
-     */
-    TouchEventInfo touchInfo2("");
-    touchInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
-
-    /**
-     * @tc.steps: step7. test touch move
-     */
-    pattern_->HandleTouchEvent(touchInfo2);
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
-
-    /**
-     * @tc.steps: step8. create location, touch type info UP
-     */
-    TouchLocationInfo touchLocationInfo3(0);
-    touchLocationInfo3.touchType_ = TouchType::UP;
-    touchLocationInfo3.localLocation_ = Offset(0.0f, 0.0f);
-
-    /**
-     * @tc.steps: step9. create touch info, touch type UP
-     */
-    TouchEventInfo touchInfo3("");
-    touchInfo3.AddTouchLocationInfo(std::move(touchLocationInfo3));
-
-    /**
-     * @tc.steps: step10. test touch up
-     */
-    pattern_->HandleTouchEvent(touchInfo3);
-    EXPECT_FALSE(pattern_->isTouchCaret_);
-}
-
-/**
  * @tc.name: CleanNode001
  * @tc.desc: Test UpdateClearNode
  * @tc.type: FUNC
@@ -195,7 +124,8 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
     /**
      * @tc.steps: step3. test repeat click caret
      */
-    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex, lastCaretRect));
+    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex));
+    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastCaretRect));
 }
 
 /**
@@ -1676,28 +1606,6 @@ HWTEST_F(TextFieldUXTest, ConvertTouchOffsetToCaretPosition001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnUndoAction001
- * @tc.desc: test testInput caretStyle
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text field node
-     */
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    /**
-     * @tc.step: step2. Set caretPosition and call ConvertTouchOffsetToCaretPosition
-     */
-    pattern_->SetCaretPosition(5);
-    pattern_->UpdateEditingValueToRecord();
-    pattern_->HandleOnUndoAction();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
-}
-
-/**
  * @tc.name: TextInputToJsonValue001
  * @tc.desc: test attrs on ToJsonValue
  * @tc.type: FUNC
@@ -1903,42 +1811,6 @@ HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
-}
-
-/**
- * @tc.name: HandleClickEventTest001
- * @tc.desc: test scrolling when clicking on the scroll bar
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create CreateTextField , GestureEvent and ScrollBars.
-     * @tc.expected: create CreateTextField , GestureEvent and ScrollBars created successfully.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
-    GestureEvent info;
-    info.localLocation_ = Offset(1.0f, 110.0f);
-    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
-    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
-    pattern_->scrollBar_->isScrollable_ = true;
-    // /**
-    //  * @tc.steps: step2. Test HandleClickEvent.
-    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
-    //  */
-    pattern_->hasMousePressed_ = true;
-    pattern_->HandleClickEvent(info);
-    Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
-    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
-    info.localLocation_ = Offset(1.0f, 1.0f);
-    pattern_->HandleClickEvent(info);
-    Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
-    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
-    info.localLocation_ = Offset(1.0f, 300.0f);
-    pattern_->HandleClickEvent(info);
-    Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
-    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
 }
 
 /**

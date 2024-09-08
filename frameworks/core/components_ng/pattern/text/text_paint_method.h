@@ -51,8 +51,8 @@ protected:
 
 private:
     void UpdateParagraphAndImageSpanNodeList();
-    void UpdateObscuredRects();
 
+private:
     WeakPtr<Pattern> pattern_;
     float baselineOffset_;
 

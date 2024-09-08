@@ -127,7 +127,7 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     if (dvsyncSwitch) {
-        ACE_SCOPED_TRACE("enale dvsync");
+        ACE_SCOPED_TRACE("enable dvsync");
     } else {
         ACE_SCOPED_TRACE("disable dvsync");
     }
@@ -155,7 +155,7 @@ void RosenWindow::RequestFrame()
             taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::JS,
                 VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
-#endif
+    #endif
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(

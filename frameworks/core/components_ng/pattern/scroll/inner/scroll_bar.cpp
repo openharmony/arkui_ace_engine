@@ -534,11 +534,16 @@ void ScrollBar::InitPanRecognizer()
     });
 }
 
-void ScrollBar::HandleDragStart(const GestureEvent& info)
+void ScrollBar::StopFlingAnimation()
 {
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
     }
+}
+
+void ScrollBar::HandleDragStart(const GestureEvent& info)
+{
+    StopFlingAnimation();
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {

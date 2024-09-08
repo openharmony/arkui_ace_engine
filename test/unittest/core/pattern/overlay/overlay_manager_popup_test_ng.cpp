@@ -155,7 +155,6 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest002, TestSize.Level1)
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
     rootNode->isLayoutComplete_ = true;
-    
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetInstallationFree(0);
@@ -1836,7 +1835,7 @@ HWTEST_F(OverlayManagerPopupTestNg, PopupTest035, TestSize.Level1)
 }
 /**
  * @tc.name: ToastTest001
- * @tc.desc: Test OverlayManager::ClearToast.
+ * @tc.desc: Test OverlayManager::ShowToast.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
@@ -1852,11 +1851,11 @@ HWTEST_F(OverlayManagerPopupTestNg, ToastTest001, TestSize.Level1)
     ASSERT_NE(overlayManager, nullptr);
     /**
      * @tc.steps: step2. call ShowToast.
-     * @tc.expected: toastMap_ is empty
+     * @tc.expected: toastMap_ is not empty
      */
     auto toastInfo =
         NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
-    overlayManager->ShowToast(toastInfo, nullptr);
+    overlayManager->ShowToast(toastInfo);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 }
 } // namespace OHOS::Ace::NG

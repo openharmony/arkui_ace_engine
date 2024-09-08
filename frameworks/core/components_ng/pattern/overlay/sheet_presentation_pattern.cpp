@@ -889,7 +889,6 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             CHECK_NULL_VOID(overlayManager);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            overlayManager->FireAutoSave(host);
             overlayManager->DestroySheet(host, pattern->GetSheetKey());
             pattern->FireCallback("false");
         }
@@ -1140,7 +1139,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
                 layoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
                 titleLayoutProps->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
+                    CalcSize(std::nullopt,
+                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
         UpdateSheetTitle();
@@ -1606,7 +1606,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
     } else {
         host->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(

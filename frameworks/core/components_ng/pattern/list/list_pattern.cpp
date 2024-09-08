@@ -626,6 +626,14 @@ bool ListPattern::IsScrollSnapAlignCenter() const
     return false;
 }
 
+void ListPattern::UpdateScrollSnap()
+{
+    if (!AnimateStoped()) {
+        return;
+    }
+    predictSnapOffset_ = 0.0f;
+}
+
 bool ListPattern::NeedScrollSnapAlignEffect() const
 {
     auto host = GetHost();
@@ -1020,6 +1028,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
     auto curListItemGroupPara = GetListItemGroupParameter(curFrame);
     if (curIndex < 0 || curIndex > maxListItemIndex_) {
+        LOGE("can't find focused child.");
         return nullptr;
     }
 
@@ -1214,8 +1223,8 @@ WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
     auto isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
-    auto groupIndexInGroup =
-        ScrollListItemGroupForFocus(nextIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
+    auto groupIndexInGroup = ScrollListItemGroupForFocus(nextIndex, nextIndexInGroup,
+        curIndexInGroup, moveStep, step, isScrollIndex);
 
     return groupIndexInGroup ? GetChildFocusNodeByIndex(nextIndex, nextIndexInGroup) : nullptr;
 }
@@ -1301,6 +1310,7 @@ void ListPattern::OnAnimateStop()
 
 void ListPattern::ScrollTo(float position)
 {
+    LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
     jumpIndex_.reset();
     targetIndex_.reset();
@@ -1312,6 +1322,7 @@ void ListPattern::ScrollTo(float position)
 
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
+    LOGI("ScrollToIndex:%{public}d, align:%{public}d.", index, align);
     SetScrollSource(SCROLL_FROM_JUMP);
     if (!smooth) {
         StopAnimate();
@@ -1363,6 +1374,7 @@ bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
 
 void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
+    LOGI("ScrollToIndex:%{public}d, %{public}d, align:%{public}d.", index, indexInGroup, align);
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
@@ -1704,7 +1716,16 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
-        posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        if (pos.groupInfo) {
+            bool groupAtStart = pos.groupInfo.value().atStart;
+            if (groupAtStart) {
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+            } else {
+                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height });
+            }
+        } else {
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+        }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
     bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);
@@ -2234,7 +2255,6 @@ void ListPattern::DumpAdvanceInfo()
     } else {
         DumpLog::GetInstance().AddDesc("predictSnapEndPos:null");
     }
-    // DumpLog::GetInstance().AddDesc("scrollAlign:%{public}d", scrollAlign_);
     paintStateFlag_ ? DumpLog::GetInstance().AddDesc("paintStateFlag:true")
                     : DumpLog::GetInstance().AddDesc("paintStateFlag:false");
     isFramePaintStateValid_ ? DumpLog::GetInstance().AddDesc("isFramePaintStateValid:true")

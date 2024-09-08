@@ -485,12 +485,12 @@ public:
 
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void TryVisibleChangeOnDescendant(bool isVisible) override;
-    void NotifyVisibleChange(bool isVisible);
+    void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
+    void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
@@ -504,6 +504,17 @@ public:
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
+    }
+
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
+    {
+        ndkColorModeUpdateCallback_ = callback;
+        colorMode_ = SystemProperties::GetColorMode();
+    }
+
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+    {
+        ndkFontUpdateCallback_ = callback;
     }
 
     bool MarkRemoving() override;
@@ -1016,7 +1027,6 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
-    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {
@@ -1136,8 +1146,6 @@ private:
     void TriggerShouldParallelInnerWith(
         const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
 
-    void TriggerRsProfilerNodeMountCallbackIfExist();
-
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
@@ -1147,6 +1155,10 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
+    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
+
+    bool AllowVisibleAreaCheck() const;
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -1154,6 +1166,8 @@ private:
     std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
 
+    std::function<void(int32_t)> ndkColorModeUpdateCallback_;
+    std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -1211,6 +1225,8 @@ private:
     bool isInternal_ = false;
 
     std::string nodeName_;
+
+    ColorMode colorMode_;
 
     bool draggable_ = false;
     bool userSet_ = false;
