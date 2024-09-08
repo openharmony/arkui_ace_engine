@@ -105,7 +105,6 @@ export struct ButtonBootcamp {
           ]
         })
 
-
         RadioBlock({
           title: '按钮样式',
           isEnabled: $enableButtonStyle,
@@ -127,7 +126,6 @@ export struct ButtonBootcamp {
           ]
         })
 
-
         RadioBlock({
           title: '按压态效果',
           isEnabled: $enableStateEffect,
@@ -148,7 +146,6 @@ export struct ButtonBootcamp {
             { label: '截断', value: TextOverflow.Clip }
           ]
         })
-
 
         RadioBlock({
           title: '最大行数',
@@ -200,7 +197,6 @@ export struct ButtonBootcamp {
           min: 9,
           max: 36
         })
-
       }.width('100%')
     }.height('50%')
   }
