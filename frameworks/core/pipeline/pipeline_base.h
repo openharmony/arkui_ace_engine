@@ -1379,6 +1379,34 @@ public:
     {
         return dragNodeGrayscale_;
     }
+
+    bool IsWaitFlushFinish() const
+    {
+        return isWaitFlushFinish_;
+    }
+
+    void EnWaitFlushFinish()
+    {
+        isWaitFlushFinish_ = true;
+    }
+
+    void UnWaitFlushFinish()
+    {
+        isWaitFlushFinish_ = false;
+    }
+
+    void SetUIExtensionFlushFinishCallback(std::function<void(void)>&& callback)
+    {
+        uiExtensionFlushFinishCallback_ = callback;
+    }
+
+    void FireUIExtensionFlushFinishCallback()
+    {
+        if (uiExtensionFlushFinishCallback_) {
+            uiExtensionFlushFinishCallback_();
+        }
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1562,6 +1590,8 @@ private:
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
+    bool isWaitFlushFinish_ = false;
+    std::function<void(void)> uiExtensionFlushFinishCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

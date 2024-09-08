@@ -257,4 +257,9 @@ uint32_t SessionWrapperImpl::GetReasonDump() const
 void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
 }
+
+WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+{
+    return static_cast<WindowSizeChangeReason>(0);
+}
 } // namespace OHOS::Ace::NG

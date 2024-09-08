@@ -2408,6 +2408,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
+            auto uiExtensionFlushFinishCallback = [rsWindow]() {
+                CHECK_NULL_VOID(rsWindow);
+                rsWindow->NotifyExtensionEventAsync(0);
+            };
+            if (container->IsUIExtensionWindow()) {
+                pipelineContext->EnWaitFlushFinish();
+                pipelineContext->SetUIExtensionFlushFinishCallback(uiExtensionFlushFinishCallback);
+            }
             UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));

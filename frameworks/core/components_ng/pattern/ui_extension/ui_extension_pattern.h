@@ -30,6 +30,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -92,9 +93,9 @@ public:
     FocusPattern GetFocusPattern() const override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
-    void SetPlaceholderNode(const RefPtr<FrameNode>& placeholderNode)
+    void SetPlaceholderMap(const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
     {
-        placeholderNode_ = placeholderNode;
+        placeholderMap_ = placeholderMap;
     }
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
@@ -156,8 +157,13 @@ public:
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
     bool IsShowPlaceholder()
     {
-        return isShowPlaceholder_;
+        return (curPlaceholderType_ != PlaceholderType::NONE);
     }
+    void SetCurPlaceholderType(PlaceholderType type)
+    {
+        curPlaceholderType_ = type;
+    }
+    void OnAreaUpdated();
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
     void SetModalFlag(bool isModal)
@@ -237,8 +243,17 @@ private:
     void LogoutModalUIExtension();
 
     void RegisterVisibleAreaChange();
-    void MountPlaceholderNode();
+    void MountPlaceholderNode(PlaceholderType type);
     void RemovePlaceholderNode();
+    void SetFoldStatusChanged(bool isChanged)
+    {
+        isFoldStatusChanged_ = isChanged;
+    }
+    bool IsFoldStatusChanged()
+    {
+        return isFoldStatusChanged_;
+    }
+    PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
 
@@ -259,7 +274,7 @@ private:
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
-    RefPtr<FrameNode> placeholderNode_ = nullptr;
+    std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap_;
 
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
@@ -271,7 +286,8 @@ private:
     bool isVisible_ = true;
     bool isModal_ = false;
     bool isAsyncModalBinding_ = false;
-    bool isShowPlaceholder_ = false;
+    PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
+    bool isFoldStatusChanged_ = false;
     bool densityDpi_ = false;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
@@ -280,7 +296,8 @@ private:
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
     bool needReSendFocusToUIExtension_ = false;
-    int32_t callbackId_ = 0;
+    int32_t surfacePositionCallBackId_ = -1;
+    int32_t foldDisplayCallBackId_ = -1;
     RectF displayArea_;
     bool isKeyAsync_ = false;
     // StartUIExtension should after mountToParent
