@@ -116,7 +116,11 @@ public:
 
     void UpdatePrevHasTextFieldPattern()
     {
-        prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
+        if (onFocusTextField_.Upgrade()) {
+            prevHasTextFieldPattern_ = true;
+        } else {
+            prevHasTextFieldPattern_ = false;
+        }
     }
 
     void AvoidKeyBoardInNavigation();

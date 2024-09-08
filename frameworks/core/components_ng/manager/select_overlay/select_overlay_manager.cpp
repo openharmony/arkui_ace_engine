@@ -466,21 +466,4 @@ const RefPtr<SelectContentOverlayManager>& SelectOverlayManager::GetSelectConten
     }
     return selectContentManager_;
 }
-
-void SelectOverlayManager::OnFontChanged()
-{
-    auto contentOverlayManager = GetSelectContentOverlayManager();
-    CHECK_NULL_VOID(contentOverlayManager);
-    contentOverlayManager->NotifyUpdateToolBar(true);
-}
-
-SelectOverlayManager::~SelectOverlayManager()
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    if (pipeline) {
-        auto fontManager = pipeline->GetFontManager();
-        if (fontManager) {
-        }
-    }
-}
 } // namespace OHOS::Ace::NG

@@ -20,11 +20,11 @@
 
 namespace OHOS::Ace {
 #ifdef APP_USE_ARM
-constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib/module/core/atomicservicecomponent/libhint2type.z.so";
+constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib/module/hms/core/atomicservicecomponent/libhint2type.z.so";
 #elif defined(APP_USE_X86_64)
-constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/core/atomicservicecomponent/libhint2type.z.so";
+constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/hms/core/atomicservicecomponent/libhint2type.z.so";
 #else
-constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/core/atomicservicecomponent/libhint2type.z.so";
+constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib64/module/hms/core/atomicservicecomponent/libhint2type.z.so";
 #endif
 constexpr char HINT_2_TYPE[] = "Hint2Type";
 using Hint2Type = int (*) (std::vector<std::string>, std::vector<int>&, std::vector<std::string>&);
