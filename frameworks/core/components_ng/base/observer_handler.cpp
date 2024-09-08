@@ -118,7 +118,7 @@ void UIObserverHandler::NotifyWillClick(
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
-
+ 
 void UIObserverHandler::NotifyDidClick(
     const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
 {
@@ -296,7 +296,7 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 {
     willClickHandleFunc_ = func;
 }
-
+ 
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
