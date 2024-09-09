@@ -381,7 +381,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSiz
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t currentIndex = 1;
     float endPos = 0.1f;
     float startPos = 0.2f;
@@ -397,8 +396,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSiz
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutBackwardItem(
-                &layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
+            swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
             if (i == 1) {
                 swiperLayoutAlgorithm->isLoop_ = true;
                 continue;
@@ -412,8 +410,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSiz
     indicatorNode_->tag_ = V2::SWIPER_LEFT_ARROW_ETS_TAG;
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutBackwardItem(
-                &layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
+            swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
             if (i == 1) {
                 indicatorNode_->tag_ = V2::SWIPER_RIGHT_ARROW_ETS_TAG;
                 continue;
@@ -443,7 +440,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Lev
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -453,7 +449,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Lev
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
         swiperLayoutAlgorithm->targetIndex_ = 0;
     }
 }
@@ -477,7 +473,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Le
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t endIndex = 1;
     float endPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -487,7 +482,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+        swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, endIndex, endPos);
         swiperLayoutAlgorithm->targetIndex_ = 0;
     }
 }
@@ -560,7 +555,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Lev
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -573,7 +567,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Lev
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
             if (i == 1) {
                 break;
             }
@@ -591,7 +585,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Lev
 
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
             if (i == 1) {
                 swiperLayoutAlgorithm->overScrollFeature_ = false;
             }
@@ -621,7 +615,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Le
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t endIndex = -1;
     float endPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -636,7 +629,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Le
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, endIndex, endPos);
             if (i == 1) {
                 endIndex = 1;
                 auto indicatorNode_test =
@@ -789,7 +782,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.L
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     bool isMainAxis = true;
     swiperLayoutAlgorithm->totalItemCount_ = 3;
 
@@ -798,7 +790,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.L
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, axis, isMainAxis);
+        swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, isMainAxis);
         swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
         swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
         swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
@@ -826,7 +818,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     swiperLayoutAlgorithm->totalItemCount_ = 2;
 
     /**
@@ -835,7 +826,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
             if (i == 1) {
                 int32_t targetIndex_test = 1;
                 swiperLayoutAlgorithm->SetTargetIndex(targetIndex_test);
@@ -851,7 +842,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
-                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
                 if (j == 1) {
                     swiperLayoutAlgorithm->startMainPos_ = -1.0f;
                     continue;
@@ -875,7 +866,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
-                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
                 if (j == 1) {
                     swiperLayoutAlgorithm->startMainPos_ = -1.0f;
                     swiperLayoutAlgorithm->spaceWidth_ = 0.0f;
@@ -903,7 +894,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
-                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
                 if (i == 1 && j == 0) {
                     swiperLayoutAlgorithm->endMainPos_ = -2.0f;
                     continue;
@@ -932,7 +923,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
-                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+                swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
                 if (j == 1) {
                     swiperLayoutAlgorithm->itemPosition_.clear();
                     swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 1 }));
@@ -950,7 +941,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
 
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
             if (i == 1) {
                 swiperLayoutAlgorithm->endMainPos_ = 1.0f;
                 continue;
@@ -963,7 +954,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
     swiperLayoutAlgorithm->currentOffset_ = 0;
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+            swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
             if (i == 1) {
                 swiperLayoutAlgorithm->startMainPos_ = 0;
                 continue;
@@ -995,7 +986,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Lev
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     swiperLayoutAlgorithm->totalItemCount_ = 2;
     swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
     swiperLayoutAlgorithm->isLoop_ = false;
@@ -1005,7 +995,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Lev
      * @tc.steps: step2. call MeasureSwiper
      * @tc.expected: Related function runs ok.
      */
-    swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+    swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
 }
 
 /**
@@ -1066,7 +1056,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Lev
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 0.0f }));
     swiperLayoutAlgorithm->prevMargin_ = -1.0f;
 
@@ -1074,7 +1063,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Lev
      * @tc.steps: step2. call MeasureSwiper
      * @tc.expected: Related function runs ok.
      */
-    swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+    swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint);
 }
 
 /**
@@ -1095,7 +1084,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t currentIndex = 0;
     float endPos = 0.1f;
     float startPos = 0.2f;
@@ -1115,7 +1103,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize
      * @tc.steps: step2. call LayoutForwardItem.
      * @tc.expected: Related function runs ok.
      */
-    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
+    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
 }
 
 /**
@@ -1138,7 +1126,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Le
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t endIndex = -1;
     float endPos = 2.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -1152,7 +1139,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Le
     swiperLayoutAlgorithm->overScrollFeature_ = false;
     int32_t currentIndex = 0;
     EXPECT_FALSE(
-        swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, axis, currentIndex, 0.0f, endPos));
+        swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, currentIndex, 0.0f, endPos));
     EXPECT_FLOAT_EQ(endPos, 2.0f);
     swiperLayoutAlgorithm->contentMainSize_ = 1.0f;
 
@@ -1162,7 +1149,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Le
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, endIndex, endPos);
             swiperLayoutAlgorithm->startMainPos_ = 0.0f;
             if (i == 1) {
                 swiperLayoutAlgorithm->canOverScroll_ = false;
@@ -1176,7 +1163,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Le
     EXPECT_TRUE(GreatNotEqual(endPos, swiperLayoutAlgorithm->startMainPos_));
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
+            swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, endIndex, endPos);
             swiperLayoutAlgorithm->startMainPos_ = 0.0f;
             if (i == 1) {
                 swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 2.0f, 2.0f }));
@@ -1216,7 +1203,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward003, TestSize.Lev
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -1232,7 +1218,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward003, TestSize.Lev
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
         layoutProperty_->UpdateMinSize(Dimension(0));
         layoutProperty_->UpdateDisplayCount(0);
         layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
@@ -1264,7 +1250,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Lev
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -1284,7 +1269,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Lev
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
             if (i == 1) {
                 swiperLayoutAlgorithm->mainSizeIsDefined_ = false;
                 continue;
@@ -1321,7 +1306,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Lev
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -1335,7 +1319,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Lev
     float currentStartPos = 0.0f;
     auto currentIndex = startIndex - 1;
     auto result = swiperLayoutAlgorithm->LayoutForwardItem(
-        &layoutWrapper, layoutConstraint, axis, currentIndex, currentStartPos, currentEndPos);
+        &layoutWrapper, layoutConstraint, currentIndex, currentStartPos, currentEndPos);
     EXPECT_TRUE(result);
 
     /**
@@ -1343,7 +1327,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Lev
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
         startIndex = 2;
     }
 }
@@ -1373,7 +1357,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Lev
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -1393,7 +1376,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Lev
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
             swiperLayoutAlgorithm->endMainPos_ = 1.0f;
             if (i == 1) {
                 swiperLayoutAlgorithm->canOverScroll_ = false;
@@ -1430,7 +1413,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Lev
     layoutWrapper.layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
     float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
@@ -1449,7 +1431,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Lev
      * @tc.steps: step2. call LayoutForward.
      * @tc.expected: Related function runs ok.
      */
-    swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+    swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, startIndex, startPos);
     EXPECT_FALSE(swiperLayoutAlgorithm->itemPosition_.empty());
 }
 
@@ -1530,7 +1512,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize
     layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     int32_t currentIndex = 0;
     float endPos = 0.1f;
     float startPos = 0.2f;
@@ -1554,25 +1535,25 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize
     auto swiperNode2 = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_RIGHT_ARROW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto layoutWrapper2 = LayoutWrapperNode(swiperNode2, geometryNode, swiperNode2->GetLayoutProperty());
-    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper2, layoutConstraint, axis, currentIndex, endPos, startPos);
-    auto result2 = swiperLayoutAlgorithm->LayoutForwardItem(
-        &layoutWrapper2, layoutConstraint, axis, currentIndex, endPos, startPos);
+    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper2, layoutConstraint, currentIndex, endPos, startPos);
+    auto result2 =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper2, layoutConstraint, currentIndex, endPos, startPos);
     EXPECT_FALSE(result2);
     currentIndex = 0;
     auto swiperNode3 = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_LEFT_ARROW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto layoutWrapper3 = LayoutWrapperNode(swiperNode3, geometryNode, swiperNode3->GetLayoutProperty());
-    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper3, layoutConstraint, axis, currentIndex, endPos, startPos);
-    auto result3 = swiperLayoutAlgorithm->LayoutForwardItem(
-        &layoutWrapper3, layoutConstraint, axis, currentIndex, endPos, startPos);
+    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper3, layoutConstraint, currentIndex, endPos, startPos);
+    auto result3 =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper3, layoutConstraint, currentIndex, endPos, startPos);
     EXPECT_FALSE(result3);
     currentIndex = 0;
     auto swiperNode4 = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_INDICATOR_ETS_TAG, 4, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto layoutWrapper4 = LayoutWrapperNode(swiperNode4, geometryNode, swiperNode2->GetLayoutProperty());
-    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper4, layoutConstraint, axis, currentIndex, endPos, startPos);
-    auto result4 = swiperLayoutAlgorithm->LayoutForwardItem(
-        &layoutWrapper2, layoutConstraint, axis, currentIndex, endPos, startPos);
+    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper4, layoutConstraint, currentIndex, endPos, startPos);
+    auto result4 =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper2, layoutConstraint, currentIndex, endPos, startPos);
     EXPECT_FALSE(result4);
 
     /**
@@ -1583,9 +1564,9 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize
     auto wrapper = layoutWrapper.GetOrCreateChildByIndex(1);
     auto layoutProperty = wrapper->GetLayoutProperty();
     layoutProperty->UpdateVisibility(VisibleType::GONE);
-    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
-    auto result = swiperLayoutAlgorithm->LayoutForwardItem(
-        &layoutWrapper2, layoutConstraint, axis, currentIndex, endPos, startPos);
+    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    auto result =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper2, layoutConstraint, currentIndex, endPos, startPos);
     EXPECT_NE(result, true);
 }
 
@@ -1620,7 +1601,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.L
     ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
 
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    Axis axis = Axis::HORIZONTAL;
     bool isMainAxis = true;
     swiperLayoutAlgorithm->totalItemCount_ = 3;
 
@@ -1629,7 +1609,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.L
      * @tc.expected: GetChildMaxSize->itemPosition_ not empty
      */
     swiperLayoutAlgorithm->itemPosition_.clear();
-    swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, axis, isMainAxis);
+    swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, isMainAxis);
     EXPECT_TRUE(swiperLayoutAlgorithm->itemPosition_.empty());
 }
 
