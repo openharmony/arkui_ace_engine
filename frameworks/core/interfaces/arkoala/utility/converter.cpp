@@ -152,9 +152,10 @@ ImageResource Convert(const Ark_Resource& value)
     resource.type = value.type.i32;
     resource.bundleName = std::string(value.bundleName.chars);
     resource.moduleName = std::string(value.moduleName.chars);
-    if (value.params.tag != ARK_TAG_UNDEFINED) {
+    if (value.params.tag != ARK_TAG_UNDEFINED && value.params.value.length > 0) {
+        resource.params.reserve(value.params.value.length);
         for (int i = 0; i < value.params.value.length; i++) {
-            resource.params[i] = std::string(value.params.value.array[i].chars);
+            resource.params.push_back(value.params.value.array[i].chars);
         }
     }
     return resource;
