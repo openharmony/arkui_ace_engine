@@ -287,9 +287,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if ((currentFingers_ <= fingers_) &&
         (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
         return;
     }
 
@@ -309,11 +306,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
     }
 
-    if (refereeState_ == RefereeState::FAIL) {
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
-    }
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();

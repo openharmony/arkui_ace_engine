@@ -317,6 +317,7 @@ private:
     std::vector<DimensionRect> responseRegion_;
     bool isSelectedItemNode_ = false;
     bool isOnBeforeLiftingAnimation = false;
+    bool isDragPrepareFinish_ = false;
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
