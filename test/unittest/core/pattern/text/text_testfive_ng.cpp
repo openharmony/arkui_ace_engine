@@ -2856,4 +2856,24 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
     value = Ace::LineBreakStrategy::GREEDY;
     EXPECT_EQ(GetLineBreakStrategyInJson(value), "GREEDY");
 }
+
+/**
+ * @tc.name: TxtParagraphUpdateColor001
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->UpdateFontColor(Color::BLACK);
+
+    RefPtr<Paragraph> paragraph = Paragraph::Create(nullptr);
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+    pattern->UpdateFontColor(Color::BLACK);
+}
 } // namespace OHOS::Ace::NG
