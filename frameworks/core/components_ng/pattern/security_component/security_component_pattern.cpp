@@ -385,6 +385,8 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
     auto buttonLayoutProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     const auto& buttonRender = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonRender);
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
 
     if (scLayoutProp->GetBackgroundBorderWidth().has_value()) {
         BorderWidthProperty widthProp;
@@ -408,6 +410,14 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         BorderColorProperty borderColor;
         borderColor.SetColor(scPaintProp->GetBackgroundBorderColor().value());
         buttonRender->UpdateBorderColor(borderColor);
+    }
+    if (scLayoutProp->GetStateEffect().has_value()) {
+        buttonEventHub->SetStateEffect(scLayoutProp->GetStateEffect().value());
+    }
+    if (scLayoutProp->GetHoverEffect().has_value()) {
+        auto inputHub = buttonEventHub->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(inputHub);
+        inputHub->SetHoverEffect(scLayoutProp->GetHoverEffect().value());
     }
 }
 
