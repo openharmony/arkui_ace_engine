@@ -31,6 +31,7 @@
 #include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -1843,6 +1844,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
+        OnNativeEmbedVisibilityChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedVisibilityChangeEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedVisibilityChangeId(), oldContext);
         OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
@@ -4938,6 +4942,20 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 }
 
+void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    if (sceneId == "") {
+        TAG_LOGE(AceLogTag::ACE_WEB, "sceneId is null, do not report.");
+        return;
+    }
+    ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
+    if (isStart) {
+        PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
+    } else {
+        PerfMonitor::GetPerfMonitor()->End(sceneId, false);
+    }
+}
+
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
@@ -6391,6 +6409,28 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
         },
         TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedLifecycleChange");
 }
+
+void WebDelegate::OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility)
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), embedId, visibility]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedVisibilityChangeV2_ = delegate->OnNativeEmbedVisibilityChangeV2_;
+            if (OnNativeEmbedVisibilityChangeV2_) {
+                OnNativeEmbedVisibilityChangeV2_(
+                    std::make_shared<NativeEmbedVisibilityInfo>(visibility, embedId));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedVisibilityChange");
+}
+
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {

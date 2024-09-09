@@ -546,9 +546,10 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
             pressedCodes.push_back(static_cast<int32_t>(pCode));
         }
         auto localLocation = event.GetLocalLocation();
-        delegate_->HandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
-                                               event.GetVelocity().GetVelocityX(),
-                                               event.GetVelocity().GetVelocityY());
+        delegate_->HandleTouchpadFlingEvent(
+            localLocation.GetX(), localLocation.GetY(),
+            event.GetVelocity().GetVelocityX(),
+            event.GetVelocity().GetVelocityY());
     }
 }
 

@@ -801,6 +801,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
+    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -886,6 +887,7 @@ public:
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     void OnNativeEmbedAllDestory();
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
+    void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     bool RequestFocus(OHOS::NWeb::NWebFocusSource source = OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_DEFAULT);
@@ -1155,6 +1157,7 @@ private:
     EventCallbackV2 onNavigationEntryCommittedV2_;
     EventCallbackV2 OnNativeEmbedAllDestoryV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
+    EventCallbackV2 OnNativeEmbedVisibilityChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
     EventCallbackV2 onRenderProcessNotRespondingV2_;

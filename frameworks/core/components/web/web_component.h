@@ -1059,6 +1059,17 @@ public:
         return declaration_->GetNativeEmbedLifecycleChangeId();
     }
 
+    void SetNativeEmbedVisibilityChangeId(const EventMarker& embedVisibilityChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedVisibilityChangeId(embedVisibilityChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedVisibilityChangeId() const
+    {
+        return declaration_->GetNativeEmbedVisibilityChangeId();
+    }
+
     void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
     {
         CHECK_NULL_VOID(declaration_);
