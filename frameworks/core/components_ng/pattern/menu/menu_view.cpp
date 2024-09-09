@@ -303,21 +303,22 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
     AnimationOption option;
     option.SetDuration(menuTheme->GetPreviewAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
+    auto previewBorderRadius = BorderRadiusProperty(menuTheme->GetPreviewBorderRadius());
+    if (auto presetRad = imageContext->GetBorderRadius(); presetRad) {
+        previewBorderRadius = presetRad.value();
+        imageContext->ResetBorderRadius();
+    }
     AnimationUtils::Animate(
         option,
         [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
-            if (imageContext) {
-                auto color = shadow->GetColor();
-                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-                shadow->SetColor(newColor);
-                imageContext->UpdateBackShadow(shadow.value());
+            CHECK_NULL_VOID(imageContext);
+            auto color = shadow->GetColor();
+            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+            shadow->SetColor(newColor);
+            imageContext->UpdateBackShadow(shadow.value());
 
-                CHECK_NULL_VOID(!isShowHoverImage);
-                BorderRadiusProperty borderRadius;
-                borderRadius.SetRadius(previewBorderRadius);
-                imageContext->UpdateBorderRadius(borderRadius);
-            }
+            CHECK_NULL_VOID(!isShowHoverImage);
+            imageContext->UpdateBorderRadius(previewBorderRadius);
         },
         option.GetOnFinishEvent());
 }
@@ -804,13 +805,11 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
-    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    auto imagePattern = imageNode->GetPattern<ImagePattern>();
-    imagePattern->SetSyncLoad(true);
+    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
     SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
@@ -832,6 +831,9 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
+        if (menuParam.previewBorderRadius) {
+            imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
+        }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
         ShowGatherAnimation(target, wrapperNode);

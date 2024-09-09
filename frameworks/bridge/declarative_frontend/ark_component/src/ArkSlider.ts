@@ -22,6 +22,17 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, undefined);
+    }
+    return this;
+  }
   blockColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
     return this;
@@ -128,6 +139,32 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
       this.sliderNode.update(sliderConfiguration);
     }
     return this.sliderNode.getFrameNode();
+  }
+}
+
+class SliderOptionsModifier extends ModifierWithKey<SliderOptions> {
+  constructor(value: SliderOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sliderOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().slider.setSliderOptions(node, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined);
+    } else {
+      getUINativeModule().slider.setSliderOptions(node, this.value.value, this.value.min, this.value.max,
+        this.value.step, this.value.style, this.value.direction, this.value.reverse);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.value, this.value?.value) ||
+      !isBaseOrResourceEqual(this.stageValue?.min, this.value?.min) ||
+      !isBaseOrResourceEqual(this.stageValue?.max, this.value?.max) ||
+      !isBaseOrResourceEqual(this.stageValue?.step, this.value?.step) ||
+      !isBaseOrResourceEqual(this.stageValue?.style, this.value?.style) ||
+      !isBaseOrResourceEqual(this.stageValue?.direction, this.value?.direction) ||
+      !isBaseOrResourceEqual(this.stageValue?.reverse, this.value?.reverse);
   }
 }
 

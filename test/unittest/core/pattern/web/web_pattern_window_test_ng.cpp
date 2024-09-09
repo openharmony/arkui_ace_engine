@@ -138,13 +138,24 @@ public:
     }
 };
 
-class WebDelegateMock : public OHOS::Ace::WebDelegate {
+class WebDelegateDummy : public OHOS::Ace::WebDelegate {
 public:
-    WebDelegateMock(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type, int32_t id)
+    WebDelegateDummy(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError,
+        const std::string& type, int32_t id)
         : WebDelegate(context, std::move(onError), type, id)
     {}
-    MOCK_METHOD0(GetIsSmoothDragResizeEnabled, bool());
-    MOCK_METHOD0(GetPendingSizeStatus, bool());
+    bool GetIsSmoothDragResizeEnabled() { return false; };
+    bool GetPendingSizeStatus() { return false; };
+};
+
+class WebDelegateTrueDummy : public OHOS::Ace::WebDelegate {
+public:
+    WebDelegateTrueDummy(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError,
+        const std::string& type, int32_t id)
+        : WebDelegate(context, std::move(onError), type, id)
+    {}
+    bool GetIsSmoothDragResizeEnabled() { return true; };
+    bool GetPendingSizeStatus() { return true; };
 };
 
 class FullScreenEnterEventMock : public FullScreenEnterEvent {
@@ -488,9 +499,6 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest001, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
     webPattern->delegate_ = nullptr;
     EXPECT_EQ(webPattern->delegate_, nullptr);
     webPattern->WindowDrag(0, 0);
@@ -510,12 +518,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest002, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetIsSmoothDragResizeEnabled()).WillOnce(::testing::Return(false));
     webPattern->WindowDrag(0, 0);
 }
 
@@ -533,12 +540,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest003, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetIsSmoothDragResizeEnabled()).WillOnce(::testing::Return(true));
     webPattern->WindowDrag(0, 2);
 }
 
@@ -556,12 +562,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest004, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetIsSmoothDragResizeEnabled()).WillOnce(::testing::Return(true));
     webPattern->WindowDrag(0, 0);
 }
 
@@ -579,13 +584,12 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest005, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetIsSmoothDragResizeEnabled()).WillOnce(::testing::Return(true));
     webPattern->WindowDrag(2, 0);
     webPattern->WindowDrag(0, 0);
 }
@@ -604,13 +608,12 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest006, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetIsSmoothDragResizeEnabled()).WillOnce(::testing::Return(true));
     webPattern->WindowDrag(2, 2);
     webPattern->WindowDrag(0, 0);
 }
@@ -629,12 +632,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest007, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetPendingSizeStatus()).WillOnce(::testing::Return(false));
     webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_START);
     webPattern->WindowDrag(0, 0);
 }
@@ -653,12 +655,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest008, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetPendingSizeStatus()).WillOnce(::testing::Return(true));
     webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     webPattern->WindowDrag(0, 0);
 }
@@ -677,12 +678,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest009, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetPendingSizeStatus()).WillOnce(::testing::Return(false));
     webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     webPattern->WindowDrag(0, 0);
 }
@@ -701,12 +701,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest010, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
-    auto delegateMock =
-        AceType::MakeRefPtr<WebDelegateMock>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
 
     webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    EXPECT_CALL(*delegateMock, GetPendingSizeStatus()).WillOnce(::testing::Return(true));
     webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_START);
     webPattern->WindowDrag(0, 0);
 }

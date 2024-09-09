@@ -64,6 +64,7 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t INVALID_WINDOW_ID = -1;
+constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 } // namespace
 
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -311,6 +312,23 @@ void SessionWrapperImpl::InitAllCallback()
         CHECK_NULL_RETURN(container, avoidArea);
         avoidArea = container->GetAvoidAreaByType(type);
         return avoidArea;
+    };
+    sessionCallbacks->notifyExtensionEventFunc_ =
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t event) {
+        taskExecutor->PostDelayedTask(
+            [weak, callSessionId]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifyBindModalFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
+                pattern->OnAreaUpdated();
+            },
+            TaskExecutor::TaskType::UI, REMOVE_PLACEHOLDER_DELAY_TIME, "ArkUIUIExtensionEventCallback");
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -719,6 +737,13 @@ void SessionWrapperImpl::TransferAccessibilityDumpChildInfo(
 std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
 {
     return session_ ? session_->GetSurfaceNode() : nullptr;
+}
+
+WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+{
+    auto parentSession = session_->GetParentSession();
+    auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    return static_cast<WindowSizeChangeReason>(reason);
 }
 
 void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)

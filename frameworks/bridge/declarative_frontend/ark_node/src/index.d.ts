@@ -214,6 +214,10 @@ declare class ArkRadioComponent extends ArkComponent {}
 
 declare class ArkRatingComponent extends ArkComponent {}
 
+declare class ArkSliderComponent extends ArkComponent {}
+
+declare class ArkSelectComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

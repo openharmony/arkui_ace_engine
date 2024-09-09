@@ -7826,6 +7826,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
+    auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
@@ -7887,6 +7888,17 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(sheetScrollSizeMode);
         }
     }
+
+    if (keyboardAvoidMode->IsNull() || keyboardAvoidMode->IsUndefined()) {
+        sheetStyle.sheetKeyboardAvoidMode.reset();
+    } else if (keyboardAvoidMode->IsNumber()) {
+        auto sheetKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (sheetKeyboardAvoidMode >= static_cast<int>(NG::SheetKeyboardAvoidMode::NONE) &&
+            sheetKeyboardAvoidMode <= static_cast<int>(NG::SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL)) {
+            sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
+        }
+    }
+    
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;

@@ -107,6 +107,12 @@ void NavDestinationPattern::OnLanguageConfigurationUpdate()
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto backButtonUINode = titleBarNode->GetBackButton();
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
+    CHECK_NULL_VOID(backButtonNode);
+    auto imageNode = backButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(imageNode);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)

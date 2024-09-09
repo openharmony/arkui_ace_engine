@@ -17,8 +17,10 @@
 
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 class TabBarTestNg : public TabsTestNg {
@@ -1613,5 +1615,311 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitDragEvent001, TestSize.Level1)
         tabBarPattern_->InitDragEvent(gestureHub);
         tabBarPattern_->dragEvent_ = AceType::MakeRefPtr<DragEvent>(nullptr, [](GestureEvent&) {}, nullptr, nullptr);
     }
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateSymbolStats001
+ * @tc.desc: Test UpdateSymbolStats method
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternUpdateSymbolStats001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    TabBarSymbol tabBarSymbol;
+    bool onApplyCalled = false;
+    std::string modeValue = "";
+    tabBarSymbol.selectedFlag = true;
+    tabBarSymbol.onApply = [&onApplyCalled, &modeValue](WeakPtr<NG::FrameNode> node, std::string mode) {
+        onApplyCalled = true;
+        modeValue = mode;
+    };
+    TabBarSymbol tabBarSymbol1;
+    bool onApplyCalled1 = false;
+    std::string modeValue1 = "";
+    tabBarSymbol1.onApply = [&onApplyCalled1, &modeValue1](WeakPtr<NG::FrameNode> node, std::string mode) {
+        onApplyCalled1 = true;
+        modeValue1 = mode;
+    };
+    tabBarPattern_->symbolArray_ = { tabBarSymbol, tabBarSymbol1 };
+    CreateTabContents(2);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode2, nullptr);
+    auto tabContentPattern1 = tabContentFrameNode1->GetPattern<TabContentPattern>();
+    auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
+    tabContentPattern1->SetTabBar("", "", tabBarSymbol, nullptr);
+    tabContentPattern2->SetTabBar("", "", tabBarSymbol1, nullptr);
+    CreateTabsDone(model);
+
+    int32_t index = 0;
+    int32_t preIndex = 1;
+    tabBarPattern_->UpdateSymbolStats(index, preIndex);
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    auto symbolNode1 = GetChildFrameNode(columnNode1, 0);
+    auto symbolProperty1 = symbolNode1->GetLayoutProperty<TextLayoutProperty>();
+    auto columnNode2 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode2->GetTabBarItemId());
+    auto symbolNode2 = GetChildFrameNode(columnNode2, 0);
+    auto symbolProperty2 = symbolNode2->GetLayoutProperty<TextLayoutProperty>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
+    auto defaultColorOff = tabTheme->GetBottomTabSymbolOff();
+    EXPECT_EQ(symbolProperty1->GetSymbolColorListValue({})[0], defaultColorOn);
+    EXPECT_EQ(symbolProperty2->GetSymbolColorListValue({})[0], defaultColorOff);
+    EXPECT_TRUE(onApplyCalled);
+    EXPECT_TRUE(onApplyCalled1);
+    EXPECT_EQ(modeValue, "selected");
+    EXPECT_EQ(modeValue1, "normal");
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateSymbolEffect001
+ * @tc.desc: Test UpdateSymbolEffect method
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternUpdateSymbolEffect001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    TabBarSymbol tabBarSymbol;
+    tabBarPattern_->symbolArray_ = { tabBarSymbol };
+    CreateTabContents(1);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto tabContentPattern1 = tabContentFrameNode1->GetPattern<TabContentPattern>();
+    tabContentPattern1->SetTabBar("", "", tabBarSymbol, nullptr);
+    CreateTabsDone(model);
+
+    tabBarPattern_->UpdateSymbolEffect(0);
+    auto columnNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    auto updatedOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    EXPECT_FALSE(updatedOptions.GetIsTxtActive());
+}
+
+/**
+ * @tc.name: TabBarPatternGetSelectedMode002
+ * @tc.desc: test GetSelectedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternGetSelectedMode002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    tabBarPattern_->selectedModes_ = { SelectedMode::BOARD, SelectedMode::INDICATOR };
+    tabBarPattern_->indicator_ = 3;
+    EXPECT_EQ(tabBarPattern_->GetSelectedMode(), SelectedMode::INDICATOR);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayIndicatorTranslateAnimation002
+ * @tc.desc: Test translateWidth prop callback is called in NearZero(indicatorEndPos_ - indicatorStartPos_) condition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternPlayIndicatorTranslateAnimation002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->indicatorAnimationIsRunning_ = false;
+    AnimationOption option = AnimationOption();
+    option.SetDuration(300);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f));
+    option.SetFillMode(FillMode::FORWARDS);
+    RectF originalPaintRect(10.0f, 10.0f, 100.0f, 20.0f);
+    RectF targetPaintRect(10.0f, 10.0f, 100.0f, 20.0f);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, 0.0f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->indicatorAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FLOAT_EQ(tabBarPattern_->indicatorStartPos_, originalPaintRect.Width());
+    EXPECT_FLOAT_EQ(tabBarPattern_->indicatorEndPos_, targetPaintRect.Width());
+    tabBarPattern_->isAnimating_ = true;
+    auto widthProperty =
+        AceType::DynamicCast<NodeAnimatablePropertyFloat>(tabBarNode_->GetAnimatablePropertyFloat("translateWidth"));
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+    EXPECT_NEAR(widthProperty->Get(), tabBarPattern_->indicatorEndPos_, 0.001f);
+
+    auto animatableProperty = AceType::DynamicCast<AnimatablePropertyFloat>(widthProperty->GetProperty());
+    auto updateCallback = animatableProperty->GetUpdateCallback();
+    tabBarPattern_->currentIndicatorOffset_ = 10.0f;
+    ASSERT_NE(updateCallback, nullptr);
+    updateCallback(0.0f);
+    EXPECT_NEAR(tabBarPattern_->currentIndicatorOffset_, 10.0f, 0.001f);
+
+    tabBarPattern_->isAnimating_ = false;
+    tabBarPattern_->indicatorEndPos_ = 110.0f;
+    tabBarPattern_->indicatorStartPos_ = 120.0f;
+    updateCallback(0.0f);
+    EXPECT_NEAR(tabBarPattern_->currentIndicatorOffset_, 10.0f, 0.001f);
+
+    tabBarPattern_->isAnimating_ = true;
+    updateCallback(0.0f);
+    EXPECT_NEAR(tabBarPattern_->turnPageRate_, 12.0f, 0.001f);
+}
+
+/**
+ * @tc.name: TabBarPatternPlayIndicatorTranslateAnimation003
+ * @tc.desc: Test indicatorOffset prop callback is called without NearZero(indicatorEndPos_ - indicatorStartPos_).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternPlayIndicatorTranslateAnimation003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->indicatorAnimationIsRunning_ = false;
+    AnimationOption option = AnimationOption();
+    option.SetDuration(300);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f));
+    option.SetFillMode(FillMode::FORWARDS);
+    RectF originalPaintRect(10.0f, 10.0f, 100.0f, 20.0f);
+    RectF targetPaintRect(100.0f, 10.0f, 100.0f, 20.0f);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    tabBarPattern_->PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, 0.0f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->indicatorAnimationIsRunning_);
+    auto widthProperty =
+        AceType::DynamicCast<NodeAnimatablePropertyFloat>(tabBarNode_->GetAnimatablePropertyFloat("indicatorOffset"));
+    EXPECT_NEAR(widthProperty->Get(), 150.0f, 0.001f);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+
+    auto animatableProperty = AceType::DynamicCast<AnimatablePropertyFloat>(widthProperty->GetProperty());
+    auto updateCallback = animatableProperty->GetUpdateCallback();
+    ASSERT_NE(updateCallback, nullptr);
+    tabBarPattern_->currentIndicatorOffset_ = 10.0f;
+    tabBarPattern_->isAnimating_ = true;
+    tabBarPattern_->indicatorStartPos_ = 110.0f;
+    tabBarPattern_->indicatorEndPos_ = 110.0f;
+    updateCallback(0.0f);
+    EXPECT_NEAR(tabBarPattern_->currentIndicatorOffset_, 10.0f, 0.001f);
+
+    tabBarPattern_->isAnimating_ = false;
+    tabBarPattern_->indicatorStartPos_ = 110.0f;
+    tabBarPattern_->indicatorEndPos_ = 120.0f;
+    tabBarPattern_->currentIndicatorOffset_ = 10.0f;
+    updateCallback(0.0f);
+    EXPECT_NEAR(tabBarPattern_->currentIndicatorOffset_, 10.0f, 0.001f);
+
+    tabBarPattern_->isAnimating_ = true;
+    updateCallback(0.0f);
+    EXPECT_NEAR(tabBarPattern_->turnPageRate_, -11.0f, 0.001f);
+}
+
+/**
+ * @tc.name: TabBarPatternSetEdgeEffect004
+ * @tc.desc: test SetEdgeEffect callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect004, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    tabBarPattern_->scrollEffect_ = nullptr;
+    tabBarPattern_->SetEdgeEffect(gestureHub);
+    auto scrollEffect = AceType::DynamicCast<ScrollSpringEffect>(tabBarPattern_->scrollEffect_);
+    ASSERT_NE(scrollEffect, nullptr);
+    auto outBoundaryCallback = scrollEffect->outBoundaryCallback_;
+    EXPECT_TRUE(outBoundaryCallback());
+    auto currentPositionCallback = scrollEffect->currentPositionCallback_;
+    auto leadingCallback = scrollEffect->leadingCallback_;
+    auto trailingCallback = scrollEffect->trailingCallback_;
+    tabBarPattern_->scrollMargin_ = 10.0f;
+    tabBarPattern_->currentDelta_ = 20.0f;
+    tabBarPattern_->visibleItemPosition_[0] = { 0, 50 };
+    tabBarPattern_->visibleItemPosition_[1] = { 50, 100 };
+    tabBarPattern_->visibleItemPosition_[2] = { 100, 150 };
+    tabBarPattern_->visibleItemPosition_[3] = { 150, 200 };
+    EXPECT_EQ(currentPositionCallback(), 20.0);
+    EXPECT_EQ(leadingCallback(), 510.0);
+    EXPECT_EQ(trailingCallback(), 10.0);
+
+    tabBarPattern_->isRTL_ = true;
+    tabBarPattern_->axis_ = Axis::HORIZONTAL;
+    EXPECT_EQ(currentPositionCallback(), 540.0);
+
+    tabBarPattern_->visibleItemPosition_.clear();
+    EXPECT_EQ(currentPositionCallback(), 30.0);
+    EXPECT_EQ(leadingCallback(), 710.0);
+}
+
+/**
+ * @tc.name: TabBarPatternToJsonValue001
+ * @tc.desc: Test the ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarPatternToJsonValue001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    IndicatorStyle style1;
+    style1.height = Dimension(10);
+    IndicatorStyle style2;
+    style2.height = Dimension(15);
+    tabBarPattern_->selectedModes_ = { SelectedMode::INDICATOR, SelectedMode::BOARD };
+    tabBarPattern_->indicatorStyles_ = { style1, style2 };
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::NOSTYLE, TabBarStyle::SUBTABBATSTYLE };
+
+    tabBarPattern_->ToJsonValue(json, filter);
+    EXPECT_FALSE(filter.IsFastFilter());
+
+    filter.AddFilterAttr("id");
+    tabBarPattern_->ToJsonValue(json, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
+}
+
+/**
+ * @tc.name: TabsPatternHandleBottomTabBarAnimation001
+ * @tc.desc: test HandleBottomTabBarAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabsPatternHandleBottomTabBarAnimation001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    bool changeCallBacked = false;
+    auto callback = [&changeCallBacked](int32_t preIndex, int32_t currentIndex) { changeCallBacked = true; };
+    bool callIndexChanged = false;
+    auto callback1 = [&callIndexChanged](int32_t index) { callIndexChanged = true; };
+    pattern_->onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>(callback);
+    pattern_->onIndexChangeEvent_ = std::make_shared<ChangeEvent>(callback1);
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+    EXPECT_TRUE(changeCallBacked);
+    EXPECT_TRUE(callIndexChanged);
+
+    callIndexChanged = false;
+    changeCallBacked = false;
+    tabBarPattern_->HandleBottomTabBarAnimation(0);
+    EXPECT_FALSE(changeCallBacked);
+    EXPECT_FALSE(callIndexChanged);
+
+    callIndexChanged = false;
+    changeCallBacked = false;
+    pattern_->onChangeEvent_ = nullptr;
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+    EXPECT_FALSE(changeCallBacked);
+    EXPECT_TRUE(callIndexChanged);
+
+    callIndexChanged = false;
+    changeCallBacked = false;
+    pattern_->onIndexChangeEvent_ = nullptr;
+    tabBarPattern_->HandleBottomTabBarAnimation(1);
+    EXPECT_FALSE(changeCallBacked);
+    EXPECT_FALSE(callIndexChanged);
 }
 } // namespace OHOS::Ace::NG

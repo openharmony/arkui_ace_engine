@@ -19,7 +19,7 @@ class ArkResourcesHelper {
 
     static $r(name: string, id?: number) {
         let splitted = name.split('.', 2);
-        let strType = splitted[1]
+        let strType = splitted[1];
         let type = undefined;
         switch (strType) {
             case 'float':

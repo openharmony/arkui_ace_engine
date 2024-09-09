@@ -1384,6 +1384,10 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     } else if (node->IsVisible()) {
         auto rect = node->GetTransformRectRelativeToWindow();
+        if ((scaleX_ != 0) && (scaleY_ != 0)) {
+            rect.SetRect(rect.GetX() * scaleX_, rect.GetY() * scaleY_,
+                rect.Width() * scaleX_, rect.Height() * scaleY_);
+        }
         auto left = rect.Left() + commonProperty.windowLeft;
         auto top = rect.Top() + commonProperty.windowTop;
         auto right = rect.Right() + commonProperty.windowLeft;
@@ -4838,6 +4842,12 @@ void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<
     getParentRectHandler_ = std::move(callback);
 }
 
+void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(
+    std::function<void(AccessibilityParentRectInfo &)> &&callback)
+{
+    getParentRectHandlerNew_ = std::move(callback);
+}
+
 void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
 {
     if (!IsRegister()) {
@@ -5525,6 +5535,17 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     }
     if (getParentRectHandler_) {
         getParentRectHandler_(output.windowTop, output.windowLeft);
+    } else if (getParentRectHandlerNew_) {
+        AccessibilityParentRectInfo rectInfo;
+        getParentRectHandlerNew_(rectInfo);
+        output.windowTop = rectInfo.top;
+        output.windowLeft = rectInfo.left;
+        if ((rectInfo.scaleX != 1.0f) || (rectInfo.scaleY != 1.0f)) {
+            scaleX_ = rectInfo.scaleX;
+            scaleY_ = rectInfo.scaleY;
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+                "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
+        }
     } else {
         output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
@@ -5614,11 +5635,12 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
     }
 }
 
-void JsAccessibilityManager::CreateNodeInfoJson(
-    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json)
+void JsAccessibilityManager::CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+    std::unique_ptr<JsonValue>& json, int32_t childSize)
 {
     CHECK_NULL_VOID(node);
     auto child = JsonUtil::Create(true);
+    child->Put("childSize", childSize);
     child->Put("ID", node->GetAccessibilityId());
     child->Put("compid", node->GetInspectorId().value_or("").c_str());
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -5656,7 +5678,7 @@ void JsAccessibilityManager::DumpTreeNodeInfoInJson(
     const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
 {
     auto json = JsonUtil::Create(true);
-    CreateNodeInfoJson(node, commonProperty, json);
+    CreateNodeInfoJson(node, commonProperty, json, childSize);
     std::string content = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
     std::string prefix = DumpLog::GetInstance().GetPrefix(depth);
     std::string fulljson = prefix.append(content);

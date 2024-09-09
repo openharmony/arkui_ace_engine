@@ -111,6 +111,10 @@ void ModelPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    uint32_t rotation = pipeline->GetTransformHint();
+    if (rotation_ != rotation) {
+        rotation_ = rotation;
+    }
     auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t rotation) {
         auto pattern = weak.Upgrade();
         if (pattern) {

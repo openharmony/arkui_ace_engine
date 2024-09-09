@@ -53,9 +53,6 @@ private:
     void UpdateCircleButtonConstraint();
     void FillBlank();
     TextDirection GetTextDirection(LayoutWrapper* layoutWrapper);
-    void UpdatePadding(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper);
-    bool HasCustomPadding(RefPtr<SecurityComponentLayoutProperty>& property);
-    bool IsAging(LayoutWrapper* layoutWrapper);
     RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, const std::string& tag);
     bool IsTextAdaptOutOfRange(SizeF& leftPoint, SizeF& rightPoint, SizeF& circlePoint, float maxDistance);
     void UpdateTextRectPoint();
