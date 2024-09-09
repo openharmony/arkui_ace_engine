@@ -2652,6 +2652,48 @@ HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BubblePatternTest023
+ * @tc.desc: Test bubble callback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubblePatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. Register bubble state callback function，and call this function.
+     * @tc.expected: Check callNum value
+     */
+    int32_t callNum = 0;
+    std::function<void(const std::string&)> callback = [&](const std::string& param) { callNum++; };
+    pattern->RegisterDoubleBindCallback(callback);
+    pattern->CallDoubleBindCallback("false");
+    EXPECT_EQ(callNum, 1);
+}
+
+/**
  * @tc.name: BubbleAlgorithmTest007
  * @tc.desc: Test bubble ClipBubbleWithPath.
  * @tc.type: FUNC
