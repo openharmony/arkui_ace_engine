@@ -624,7 +624,7 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             item->GetGeometryNode()->SetParentLayoutConstraint(constraint);
             item->Layout();
             item->SetActive(false);
-            return false;
+            return true;
         });
 }
 } // namespace OHOS::Ace::NG

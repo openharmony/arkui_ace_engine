@@ -280,16 +280,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
     auto cacheCount = props->GetCachedCountValue(1);
-    if (!gridLayoutInfo_.hasMultiLineItem_) {
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
-            props->GetShowCachedItemsValue(false));
-    }
     gridLayoutInfo_.totalHeightOfItemsInView_ = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 
     if (SystemProperties::GetGridCacheEnabled()) {
         if (!itemsCrossPosition_.empty() && cacheCount > 0) {
             LayoutCachedItem(layoutWrapper, cacheCount);
         }
+    }
+    if (!gridLayoutInfo_.hasMultiLineItem_) {
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
+            props->GetShowCachedItemsValue(false));
     }
 }
 
@@ -306,7 +306,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto prevLineHeight = gridLayoutInfo_.totalHeightOfItemsInView_;
+    float prevLineHeight = gridLayoutInfo_.totalHeightOfItemsInView_ + mainGap_;
     auto prevLineIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_);
     std::map<int32_t, int32_t> prevLine;
     if (prevLineIter != gridLayoutInfo_.gridMatrix_.end()) {
@@ -319,7 +319,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             break;
         }
 
-        auto prevLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, prevLineHeight) : OffsetF(prevLineHeight, 0.0);
+        OffsetF prevLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, prevLineHeight) : OffsetF(prevLineHeight, 0.0);
         if (line->second.empty()) {
             break;
         }
