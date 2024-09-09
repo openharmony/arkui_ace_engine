@@ -68,11 +68,15 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-struct KeyboardAnimationConfig {
+struct KeyboardAnimationCurve {
     std::string curveType_;
     std::vector<float> curveParams_;
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn_;
+    KeyboardAnimationCurve curveOut_;
 };
 
 struct FontInfo;

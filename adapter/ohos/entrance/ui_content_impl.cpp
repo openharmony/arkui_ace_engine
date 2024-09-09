@@ -1761,8 +1761,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
-        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
-            rsConfig.durationOut_ };
+        KeyboardAnimationCurve curveIn = {
+            rsConfig.curveIn.curveType_, rsConfig.curveIn.curveParams_, rsConfig.curveIn.duration_};
+        KeyboardAnimationCurve curveOut = {
+            rsConfig.curveOut.curveType_, rsConfig.curveOut.curveParams_, rsConfig.curveOut.duration_};
+        KeyboardAnimationConfig config = {curveIn, curveOut};
         pipeline->SetKeyboardAnimationConfig(config);
     }
     // Set sdk version in module json mode
