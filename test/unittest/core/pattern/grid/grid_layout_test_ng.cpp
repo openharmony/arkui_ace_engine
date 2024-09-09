@@ -18,6 +18,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -1963,9 +1964,9 @@ HWTEST_F(GridLayoutTestNg, Stretch008, TestSize.Level1)
     EXPECT_EQ(childRect2.Width(), 0);
 }
 
-/**
+/*
  * @tc.name: GridItemDisableEventTest002
- * @tc.desc: GridItem disable event test.
+ * @tc.desc: GirdItem disable event test.
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
@@ -1975,7 +1976,7 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
     CreateDone(frameNode_);
 
     /**
-     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
      * @tc.expected: Related function is called.
      */
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
