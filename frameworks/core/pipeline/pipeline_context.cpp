@@ -952,7 +952,7 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return RefPtr<Element>();
+    return rootElement_;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
