@@ -3081,8 +3081,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetTextAreaMargin)(ArkUINodeHandle node);
+    void (*getTextAreaMargin)(ArkUINodeHandle node,  ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextAreaCaret)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
-    void (*getTextAreaMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*setTextAreaOnWillInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);
     void (*resetTextAreaOnWillInsert)(ArkUINodeHandle node);
     void (*setTextAreaOnDidInsert)(ArkUINodeHandle node, ArkUI_Int64 callback);

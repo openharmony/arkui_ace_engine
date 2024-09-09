@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_THEME_MOCK_THEME_DEFAULT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_THEME_MOCK_THEME_DEFAULT_H
 
-#include "gmock/gmock.h"
-
 #include "core/components/picker/picker_theme.h"
 
 namespace OHOS::Ace {
