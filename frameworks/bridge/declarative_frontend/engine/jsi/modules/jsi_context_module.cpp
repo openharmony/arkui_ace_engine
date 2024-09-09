@@ -15,6 +15,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/core/common/container.h"
 
@@ -31,29 +32,47 @@ JsiContextModule* JsiContextModule::GetInstance()
     return &instance;
 }
 
+int32_t JsiContextModule::GetInstanceIdByThis(
+    const std::shared_ptr<JsRuntime>& runtime, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc <= 0) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    const auto& obj = argv[0];
+    if (!obj || !obj->IsObject(runtime) || !obj->HasProperty(runtime, "getInstanceId")) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    auto getIdFunc = obj->GetProperty(runtime, "getInstanceId");
+    auto retId = getIdFunc->Call(runtime, obj, {}, 0);
+    if (!retId->IsInt32(runtime)) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    return retId->ToInt32(runtime);
+}
+
 std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRuntime>& runtime,
     const std::shared_ptr<JsValue>& thisObj, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    int32_t currentInstance = Container::CurrentIdSafely();
-    if (argc > 0) {
-        const auto& obj = argv[0];
-        if (obj && obj->IsObject(runtime) && obj->HasProperty(runtime, "getInstanceId")) {
-            auto getIdFunc = obj->GetProperty(runtime, "getInstanceId");
-            auto retId = getIdFunc->Call(runtime, obj, {}, 0);
-            if (retId->IsInt32(runtime)) {
-                currentInstance = retId->ToInt32(runtime);
-            }
-        }
+    int32_t currentInstance = GetInstanceIdByThis(runtime, argv, argc);
+    if (currentInstance < 0) {
+        currentInstance = Container::CurrentIdSafely();
     }
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (currentInstance >= MIN_PLUGIN_SUBCONTAINER_ID) {
         currentInstance = PluginManager::GetInstance().GetPluginParentContainerId(currentInstance);
     }
 #endif
+
+    if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+    }
+
     auto it = contexts_.find(currentInstance);
     if (it != contexts_.end()) {
         return it->second;
     }
+    int32_t currentInstanceBak = currentInstance;
 
     // Try to get the active container.
     auto container = Container::GetActive();
@@ -62,6 +81,9 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
         it = contexts_.find(currentInstance);
         if (it != contexts_.end()) {
             return it->second;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "Context not found, id:%{public}d, active:%{public}d",
+                currentInstanceBak, currentInstance);
         }
     }
 
