@@ -639,9 +639,8 @@ bool JsThirdProviderInteractionOperation::HandleEventByFramework(
                     nativeAccessibilityEvent.GetElementInfo()->GetElementId(),
                     accessibilityEventInfo);
             }
-            break;
         default:
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Unsupported eventType");
+            break;
     }
     return needSendEvent;
 }
@@ -655,13 +654,19 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
     GetAccessibilityEventInfoFromNativeEvent(
         nativeAccessibilityEvent, accessibilityEventInfo);
 
-    // 2. SendEvent
-    auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_RETURN(jsAccessibilityManager, -1);
-    auto host = host_.Upgrade();
-    CHECK_NULL_RETURN(host, -1);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Inner SendAccessibilityAsyncEvent");
-    SendAccessibilitySyncEventToService(accessibilityEventInfo, callback);
+    // 2. handleEvent by frame work
+    bool needSendEvent =  HandleEventByFramework(
+        nativeAccessibilityEvent,
+        accessibilityEventInfo);
+    // 3. SendEvent
+    if (needSendEvent) {
+        auto jsAccessibilityManager = GetHandler().Upgrade();
+        CHECK_NULL_RETURN(jsAccessibilityManager, -1);
+        auto host = host_.Upgrade();
+        CHECK_NULL_RETURN(host, -1);
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Inner SendAccessibilityAsyncEvent");
+        SendAccessibilitySyncEventToService(accessibilityEventInfo, callback);
+    }
     callback(0);
     return 0;
 }

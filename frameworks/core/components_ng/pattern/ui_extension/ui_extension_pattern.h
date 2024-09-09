@@ -94,6 +94,7 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
+    void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void OnConnect();

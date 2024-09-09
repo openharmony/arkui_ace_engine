@@ -71,7 +71,7 @@ bool UIExtensionManager::OnBackPressed()
 
 bool UIExtensionManager::HandleUnfocusedModalUecBackPressed()
 {
-    RefPtr<SessionWrapper> session = nullptr
+    RefPtr<SessionWrapper> session = nullptr;
     {
         std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
         for (auto item = aliveUIExtensions_.rbegin(); item != aliveUIExtensions_.rend(); ++item) {
@@ -94,7 +94,7 @@ bool UIExtensionManager::HandleUnfocusedModalUecBackPressed()
             }
 
             session = uiExtension->GetSessionWrapper();
-            break
+            break;
         }
     }
 

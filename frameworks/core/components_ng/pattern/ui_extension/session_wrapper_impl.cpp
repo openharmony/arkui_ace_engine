@@ -60,6 +60,7 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 // Set the UIExtension type of the EmbeddedComponent.
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
+constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
 } // namespace
 
@@ -292,7 +293,6 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         .want = wantPtr,
         .isAsyncModalBinding_ = config.isAsyncModalBinding,
         .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
-        .realParentId_ = static_cast<int32_t>(realHostWindowId),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -443,9 +443,26 @@ bool SessionWrapperImpl::NotifyAxisEventAsync(const std::shared_ptr<OHOS::MMI::A
 /************************************************ Begin: The lifecycle interface **************************************/
 void SessionWrapperImpl::NotifyCreate() {}
 
+int32_t SessionWrapperImpl::GetWindowSceneId()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, INVALID_WINDOW_ID);
+    auto hostWindowNode = WindowSceneHelper::FindWindowScene(pattern->GetHost());
+    CHECK_NULL_RETURN(hostWindowNode, INVALID_WINDOW_ID);
+    auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+    CHECK_NULL_RETURN(hostNode, INVALID_WINDOW_ID);
+    auto hostPattern = hostNode->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(hostPattern, INVALID_WINDOW_ID);
+    auto hostSession = hostPattern->GetSession();
+    CHECK_NULL_RETURN(hostSession, INVALID_WINDOW_ID);
+    return hostSession->GetPersistentId();
+}
+
 void SessionWrapperImpl::NotifyForeground()
 {
     CHECK_NULL_VOID(session_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
@@ -454,7 +471,7 @@ void SessionWrapperImpl::NotifyForeground()
         " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d.",
         session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow());
     if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
-        hostWindowId = windowSceneId;
+        hostWindowId = static_cast<uint32_t>(windowSceneId);
     }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
@@ -611,15 +628,13 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    displayAreaWindow_ = pipeline->GetCurrentWindowRect();
-    displayArea_ = displayArea + OffsetF(displayAreaWindow_.Left(), displayAreaWindow_.Top());
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
-    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d], displayArea [%s]",
-        persistentId, reason, displayArea_.ToString().c_str());
-    UIEXT_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
+    int32_t duration = 0;
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();
@@ -628,15 +643,15 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             transaction = transactionController->GetRSTransaction();
         }
         if (transaction && parentSession) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            duration = pipeline->GetSyncAnimationOption().GetDuration();
+            transaction->SetDuration(duration);
         }
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d]",
-        displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration);
+        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration);
     UIEXT_LOGI("NotifyDisplayArea displayArea = %{public}s, curWindow = %{public}s, "
         "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
-        displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
-        reason, duration, persistentId);
+        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
         std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
 }

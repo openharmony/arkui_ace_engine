@@ -2097,7 +2097,6 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetTimeStamp(GetMicroTickCount());
     eventInfo.SetBeforeText(accessibilityEvent.beforeText);
     eventInfo.SetLatestContent(accessibilityEvent.latestContent);
-    eventInfo.SetTextAnnouncedForAccessibility(accessibilityEvent.textAnnouncedForAccessibility);
     eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
     eventInfo.SetWindowContentChangeTypes(
         static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
@@ -2546,43 +2545,6 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
             TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
     }
 }
-#ifdef WEB_SUPPORTED
-
-void JsAccessibilityManager::SendWebAccessibilityAsyncEvent(
-    const AccessibilityEvent& accessibilityEvent, const RefPtr<NG::WebPattern>& webPattern)
-{
-    ACE_ACCESS_SCOPED_TRACE("SendWebAccessibilityAsyncEvent");
-    auto context = GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
-    int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
-    if (windowId == 0) {
-        return;
-    }
-
-    AccessibilityEventInfo eventInfo;
-    RefPtr<NG::PipelineContext> ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
-    CHECK_NULL_VOID(ngPipeline);
-    FillWebEventInfo(eventInfo, ngPipeline, Claim(this),
-        FillEventInfoParam {
-                accessibilityEvent.nodeId, accessibilityEvent.stackNodeId, ngPipeline->GetRealHostWindowId() },
-        webPattern);
-    eventInfo.SetWindowId(ngPipeline->GetRealHostWindowId());
-
-    if (accessibilityEvent.type == AccessibilityEventType::PAGE_CHANGE && accessibilityEvent.windowId != 0) {
-        eventInfo.SetWindowId(accessibilityEvent.windowId);
-    }
-
-    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
-
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
-            auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
-            jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
-        },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
-}
-#endif
 
 void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node)
 {
@@ -4357,235 +4319,6 @@ void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
 }
 
 void JsAccessibilityManager::JsInteractionOperation::OutsideTouch() {}
-#ifdef WEB_SUPPORTED
-
-void GetChildrenFromWebNode(
-    int64_t nodeId, std::list<int64_t>& children,
-    const RefPtr<NG::PipelineContext>& ngPipeline, const RefPtr<NG::WebPattern>& webPattern)
-{
-    std::list<int64_t> webNodeChildren;
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        auto node = webPattern->GetAccessibilityNodeById(nodeId);
-        CHECK_NULL_VOID(node);
-    for (auto& childId : node->GetChildIds()) {
-            webNodeChildren.emplace_back(childId);
-        }
-    }
-    while (!webNodeChildren.empty()) {
-        children.emplace_back(webNodeChildren.front());
-        webNodeChildren.pop_front();
-    }
-}
-
-void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
-    AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    std::list<AccessibilityElementInfo> infos;
-
-    auto pipeline = GetPipelineByWindowId(windowId);
-    CHECK_NULL_VOID(pipeline);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(ngPipeline);
-
-    SearchWebElementInfoByAccessibilityIdNG(elementId, mode, infos, ngPipeline, webPattern);
-    SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
-}
-
-void JsAccessibilityManager::SearchWebElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-    std::list<AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "elementId: %{public}" PRId64 ", treeId: %{public}d, mode: %{public}d",
-        elementId, treeId_, mode);
-    auto mainContext = context_.Upgrade();
-    CHECK_NULL_VOID(mainContext);
-
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID(ngPipeline);
-
-    AccessibilityElementInfo nodeInfo;
-
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-
-    auto node = webPattern->GetAccessibilityNodeById(elementId);
-    CHECK_NULL_VOID(node);
-    UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
-    infos.push_back(nodeInfo);
-    SearchParameter param {elementId, "", mode, 0};
-    UpdateWebCacheInfo(infos, elementId, commonProperty, ngPipeline, param, webPattern);
-}
-
-void JsAccessibilityManager::FindWebFocusedElementInfo(const int64_t elementId, const int32_t focusType,
-    const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t windowId,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    AccessibilityElementInfo nodeInfo;
-    if (focusType != FOCUS_TYPE_INPUT && focusType != FOCUS_TYPE_ACCESSIBILITY) {
-        nodeInfo.SetValidElement(false);
-        SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
-        return;
-    }
-
-    auto context = GetPipelineByWindowId(windowId);
-    if (!context || AceType::InstanceOf<NG::PipelineContext>(context)) {
-        nodeInfo.SetValidElement(false);
-        SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
-        return;
-    }
-
-    FindWebFocusedElementInfoNG(elementId, focusType, nodeInfo, context, webPattern);
-    SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
-}
-
-void JsAccessibilityManager::FindWebFocusedElementInfoNG(int64_t elementId, int32_t focusType,
-    Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    auto mainContext = context_.Upgrade();
-    CHECK_NULL_VOID(mainContext);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID(ngPipeline);
-    auto node = webPattern->GetFocusedAccessibilityNode(elementId, focusType == FOCUS_TYPE_ACCESSIBILITY);
-    if (!node) {
-        info.SetValidElement(false);
-        return;
-    }
-    CHECK_NULL_VOID(node);
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
-}
-
-void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const int32_t direction,
-    const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    AccessibilityElementInfo nodeInfo;
-    auto context = GetPipelineByWindowId(windowId);
-    if (!context) {
-        nodeInfo.SetValidElement(false);
-        SetFocusMoveSearchResult(callback, nodeInfo, requestId);
-        return;
-    }
-
-    WebFocusMoveSearchNG(elementId, direction, nodeInfo, context, webPattern);
-    SetFocusMoveSearchResult(callback, nodeInfo, requestId);
-}
-
-void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t direction,
-    AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    auto mainContext = context_.Upgrade();
-    CHECK_NULL_VOID(mainContext);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID(ngPipeline);
-
-    auto node = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
-    if (!node) {
-        info.SetValidElement(false);
-        return;
-    }
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
-}
-
-bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType action,
-    const std::map<std::string, std::string>& actionArguments, const RefPtr<NG::WebPattern>& webPattern)
-{
-    CHECK_NULL_RETURN(webPattern, false);
-    return webPattern->ExecuteAction(elementId, ConvertAccessibilityAction(action), actionArguments);
-}
-
-void JsAccessibilityManager::ExecuteWebAction(const int64_t elementId, const ActionParam& param,
-    const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t windowId,
-    const RefPtr<NG::WebPattern>& webPattern)
-{
-    auto action = param.action;
-    auto actionArguments = param.actionArguments;
-
-    bool actionResult = false;
-    auto context = GetPipelineByWindowId(windowId);
-    if (!context || !AceType::InstanceOf<NG::PipelineContext>(context)) {
-        SetExecuteActionResult(callback, actionResult, requestId);
-        return;
-    }
-
-    actionResult = ExecuteWebActionNG(elementId, action, actionArguments, webPattern);
-    SetExecuteActionResult(callback, actionResult, requestId);
-}
-
-bool JsAccessibilityManager::RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
-    const WeakPtr<NG::WebPattern>& webPattern)
-{
-    std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(instance, false);
-    auto pipelineContext = GetPipelineContext().Upgrade();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
-    if (container != nullptr && container->IsUIExtensionWindow()) {
-        windowId_ = pipelineContext->GetRealHostWindowId();
-    }
-
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId_, accessibilityId);
-
-    uint32_t windowId = GetWindowId();
-    auto interactionOperation = std::make_shared<WebInteractionOperation>(windowId);
-    interactionOperation->SetHandler(WeakClaim(this));
-    interactionOperation->SetWebPattern(webPattern);
-    auto pattern = webPattern.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    Accessibility::Registration registration {
-        .windowId = windowId,
-        .parentWindowId = windowId,
-        .parentTreeId = treeId_,
-        .elementId = accessibilityId,
-    };
-    TAG_LOGI(AceLogTag::ACE_WEB, "windowId: %{public}u, parentWindowId: %{public}u, "
-        "parentTreeId: %{public}d, elementId %{public}" PRId64,
-        windowId, windowId, treeId_, accessibilityId);
-    Accessibility::RetError retReg = instance->RegisterElementOperator(registration, interactionOperation);
-    TAG_LOGI(AceLogTag::ACE_WEB, "RegisterWebInteractionOperationAsChildTree result: %{public}d", retReg);
-    return retReg == RET_OK;
-}
-
-bool JsAccessibilityManager::DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
-{
-    std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(instance, false);
-    uint32_t windowId = GetWindowId();
-    Accessibility::RetError retReg = instance->DeregisterElementOperator(windowId, treeId);
-    return retReg == RET_OK;
-}
-
-void JsAccessibilityManager::UpdateWebCacheInfo(std::list<AccessibilityElementInfo>& infos,
-    int64_t nodeId, const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
-    const SearchParameter& searchParam, const RefPtr<NG::WebPattern>& webPattern)
-{
-    uint32_t umode = searchParam.mode;
-    std::list<int64_t> children;
-    // get all children
-    if (!(umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN))) {
-        return;
-    }
-    GetChildrenFromWebNode(nodeId, children, ngPipeline, webPattern);
-    while (!children.empty()) {
-        int64_t parent = children.front();
-        children.pop_front();
-        AccessibilityElementInfo nodeInfo;
-
-        GetChildrenFromWebNode(parent, children, ngPipeline, webPattern);
-        auto node = webPattern->GetAccessibilityNodeById(parent);
-        if (node) {
-            UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
-            infos.push_back(nodeInfo);
-        }
-    }
-}
-#endif //WEB_SUPPORTED
 
 bool JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     const Registration& registration)
@@ -5657,16 +5390,17 @@ void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
 }
 
 void JsAccessibilityManager::TransferThirdProviderHoverEvent(
-    int64_t hostElementId, const NG::PointF &point, SourceType source,
+    const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
     NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(ngPipeline);
-    auto frameNode = GetFramenodeByAccessibilityId(
-        ngPipeline->GetRootElement(), hostElementId);
+    auto frameNode = hostNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     AccessibilityHoverForThirdConfig config;
-    config.hostElementId = hostElementId;
+    config.hostElementId = frameNode->GetAccessibilityId();
     config.point = point;
     config.sourceType = source;
     config.eventType = eventType;

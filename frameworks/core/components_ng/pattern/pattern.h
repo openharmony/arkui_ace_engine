@@ -94,7 +94,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool CheckCustomAvoidKeyboard() const
     {
         return false;
@@ -271,6 +271,8 @@ public:
     virtual void OnAfterModifyDone() {}
 
     virtual void OnMountToParentDone() {}
+
+    virtual void AfterMountToParent() {}
 
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
 
@@ -617,7 +619,7 @@ public:
     {
         return RectF();
     }
-    
+
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
     virtual bool TriggerAutoSaveWhenInvisible()
