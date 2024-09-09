@@ -595,6 +595,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (!pattern->GetIsFixedNestedScrollMode() || !pattern->GetNestedScrollParent()) {
             pattern->SetParentScrollable();
         }
+        pattern->UpdateTouchpadSlidingStatus(event);
         pattern->GetParentAxis();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
@@ -610,7 +611,6 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (parent) {
             parent->OnScrollDragEndRecursive();
         }
-
         pattern->HandleFlingMove(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -630,7 +630,6 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
                 // not web pan event type, continue
                 return GestureJudgeResult::CONTINUE;
             }
-
             auto inputEventType = gestureInfo->GetInputEventType();
             if (inputEventType == InputEventType::AXIS) {
                 // axis event type of web pan, dispatch to panEvent to process
@@ -5261,7 +5260,11 @@ ScrollResult WebPattern::HandleScroll(RefPtr<NestableScrollContainer> parent, fl
         expectedScrollAxis_,
         (parent != nullptr));
     if (parent) {
-        source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
+        if (isTouchpadSliding_) {
+            source = SCROLL_FROM_UPDATE;
+        } else {
+            source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
+        }
         return parent->HandleScroll(offset, source, state);
     }
     return { 0.0f, false };
@@ -6526,6 +6529,15 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
 {
     if (isEnabledHapticFeedback_) {
         NG::VibratorUtils::StartVibraFeedback(vibratorType);
+    }
+}
+
+void WebPattern::UpdateTouchpadSlidingStatus(const GestureEvent& event)
+{
+    isTouchpadSliding_ = false;
+    if ((event.GetInputEventType() == InputEventType::AXIS) &&
+        (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
+        isTouchpadSliding_ = true;
     }
 }
 } // namespace OHOS::Ace::NG
