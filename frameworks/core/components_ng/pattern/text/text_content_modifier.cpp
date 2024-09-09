@@ -404,7 +404,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         }
         if (!CheckMarqueeState(MarqueeState::RUNNING)) {
             auto paintOffsetY = paintOffset_.GetY();
-            textPattern->DumpRecord("Paint id:" + std::to_string(host->GetId()));
+            textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
             auto paragraphs = pManager->GetParagraphs();
             for (auto&& info : paragraphs) {
                 auto paragraph = info.paragraph;

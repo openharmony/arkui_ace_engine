@@ -788,7 +788,7 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
         dragDropManager->SetDampingOverflowCount();
     }
     // linear decrease for menu scale from 100% to 95% within drag damping range
-    auto previewMenuSacle = 1.0f - delta.GetDistance() / (dragPanDistance * dragStartDampingRatio) * MENU_DRAG_SCALE;
+    auto previewMenuScale = 1.0f - delta.GetDistance() / (dragPanDistance * dragStartDampingRatio) * MENU_DRAG_SCALE;
     auto updateOffset =
         OffsetF(dragStartDampingRatio * point.GetX() + (1 - dragStartDampingRatio) * startPoint.GetX(),
             dragStartDampingRatio * point.GetY() + (1 - dragStartDampingRatio) * startPoint.GetY());
@@ -796,10 +796,10 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     auto menuWrapperId = menuWrapperNode ? menuWrapperNode->GetId() : -1;
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true, menuWrapperId);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuScale, true, menuWrapperId);
         dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false, menuWrapperId);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuScale, false, menuWrapperId);
         dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
