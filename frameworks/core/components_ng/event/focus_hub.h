@@ -919,6 +919,10 @@ public:
     std::optional<std::string> GetInspectorKey() const;
 
     bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusStateToRenderContext();
+    Color GetPaintColor();
+    Dimension GetPaintWidth();
+    Dimension GetPaintPaddingVp();
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
