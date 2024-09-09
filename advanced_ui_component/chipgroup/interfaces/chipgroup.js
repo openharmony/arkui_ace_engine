@@ -592,9 +592,7 @@ export class ChipGroup extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: this.getChipGroupItemSpace() });
             Row.padding({ left: this.getChipGroupStartSpace(),
-                right: this.getChipGroupEndSpace(),
-                top: this.getPaddingTop(),
-                bottom: this.getPaddingBottom()
+                right: this.getChipGroupEndSpace()
             });
             Row.constraintSize({ minWidth: '100%' });
         }, Row);

@@ -15,9 +15,12 @@
 
 import curves from '@ohos.curves';
 import { Route, RouteGroup } from '../common/route';
-import { OperatesDestination, operatesRoute } from './operates';
+import { ContainersDestination, containersRoute } from './containers';
 import { DisplaysDestination, displaysRoute } from './displays';
+import { OperatesDestination, operatesRoute } from './operates';
 import { PickersDestination, pickersRoute } from './pickers';
+import { InputsDestination, inputsRoute } from './inputs';
+import { KeyboardAvoidMode } from '@kit.ArkUI';
 
 @Styles
 function CardPressedStyle() {
@@ -43,12 +46,16 @@ function CardDisabledStyle() {
 
 @Builder
 function Destination(name: string, route: Route) {
-  if (name.startsWith('displays/')) {
+  if (name.startsWith('containers/')) {
+    ContainersDestination(name, route)
+  } else if (name.startsWith('displays/')) {
     DisplaysDestination(name, route)
   } else if (name.startsWith('operates/')) {
     OperatesDestination(name, route)
   } else if (name.startsWith('pickers/')) {
     PickersDestination(name, route)
+  } else if (name.startsWith('inputs/')) {
+    InputsDestination(name, route)
   }
 }
 
@@ -57,9 +64,11 @@ function Destination(name: string, route: Route) {
 struct Index {
   @Provide('router') router: NavPathStack = new NavPathStack();
   @State routes: RouteGroup[] = [
-    operatesRoute,
+    containersRoute,
     displaysRoute,
+    operatesRoute,
     pickersRoute,
+    inputsRoute,
   ];
   @State selection: string | null = null;
 
@@ -112,6 +121,9 @@ struct Index {
     })
   }
 
+  aboutToAppear(): void{
+    this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE);
+  }
   build() {
     Navigation(this.router) {
       Text('ArkUI 是 OpenHarmony 的控件底座，这是一个 ArkUI 控件检视应用，你可以查阅目前版本的控件能力与默认样式。')

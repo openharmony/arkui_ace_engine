@@ -14,6 +14,7 @@
  */
 
 #include "scrollable_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -23,7 +24,12 @@
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
@@ -1104,7 +1110,7 @@ HWTEST_F(ScrollableCoverTestNg, ScrollPage001, TestSize.Level1)
      * @tc.steps: step2. Test ScrollPage
      * @tc.expected: Verify the scrollAbort_ status
      */
-    scrollPn->ScrollPage(false, false, AccessibilityScrollType::SCROLL_HALF);
+    scrollPn->ScrollPage(false, true, AccessibilityScrollType::SCROLL_HALF);
     EXPECT_TRUE(scrollPn->scrollAbort_);
 }
 
@@ -1818,5 +1824,163 @@ HWTEST_F(ScrollableCoverTestNg, GetFrictionPropertyTest001, TestSize.Level1)
     EXPECT_FALSE(scrollable->isSnapAnimation_);
     EXPECT_EQ(scrollable->lastPosition_, 100.0f);
     EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
+}
+
+/**
+ * @tc.name: UpdateFadingEdgeTest001
+ * @tc.desc: Test the UpdateFadingEdge method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, UpdateFadingEdgeTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_CALL(*scrollPn, GetMainContentSize()).WillRepeatedly(Return(100.0f));
+    EXPECT_CALL(*scrollPn, IsAtTop()).WillRepeatedly(Return(false));
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 99, AceType::MakeRefPtr<Pattern>());
+    scrollPn->axis_ = Axis::VERTICAL;
+    scroll_->overlayNode_ = overlayNode;
+    auto paintProperty = scroll_->GetPaintProperty<ScrollablePaintProperty>();
+    auto paint = AceType::MakeRefPtr<ScrollablePaintMethod>(false, false);
+    /**
+     * @tc.steps: step1. call UpdateFadingEdge with UpdateFadingEdge false.
+     */
+    scrollPn->UpdateFadingEdge(paint);
+    paintProperty->UpdateFadingEdge(false);
+    EXPECT_FALSE(paint->isFadingTop_);
+    /**
+     * @tc.steps: step2. call UpdateFadingEdge with UpdateFadingEdge true and unit with VP.
+     */
+    paintProperty->UpdateFadingEdge(true);
+    paintProperty->UpdateFadingEdgeLength(Dimension(1000.0f, DimensionUnit::VP));
+    scrollPn->UpdateFadingEdge(paint);
+    EXPECT_TRUE(paint->isFadingTop_);
+    /**
+     * @tc.steps: step3. call UpdateFadingEdge with UpdateFadingEdge true and unit with PERCENT.
+     */
+    paintProperty->UpdateFadingEdge(true);
+    paintProperty->UpdateFadingEdgeLength(Dimension(1000.0f, DimensionUnit::PERCENT));
+    scrollPn->UpdateFadingEdge(paint);
+    EXPECT_TRUE(paint->isFadingTop_);
+}
+
+/**
+ * @tc.name: CoordinateWithSheetTest001
+ * @tc.desc: Test the CoordinateWithSheet method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, CoordinateWithSheetTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return AceType::MakeRefPtr<SheetTheme>();
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto sheetContentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode->AddChild(childFrameNode);
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+    SheetStyle sheetStyle;
+    sheetStyle.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    double offset = 100.0;
+    scrollPattern->GetParentModalSheet();
+    ASSERT_NE(scrollPattern->sheetPattern_, nullptr);
+    auto mode = scrollPattern->CoordinateWithSheet(offset, 1, false);
+    EXPECT_EQ(mode, ModalSheetCoordinationMode::SCROLLABLE_SCROLL);
+    mode = scrollPattern->CoordinateWithSheet(offset, 10, false);
+    scrollPattern->isSheetInReactive_ = false;
+    EXPECT_EQ(mode, ModalSheetCoordinationMode::UNKNOWN);
+}
+
+/**
+ * @tc.name: InitTouchEvent001
+ * @tc.desc:  Test the behavior of the InitTouchEvent method Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitTouchEvent001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) { return true; };
+    auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
+    scrollable->isTouching_ = false;
+    scrollPn->scrollableEvent_->scrollable_ = scrollable;
+    auto gestureHub = scroll_->GetOrCreateGestureEventHub();
+    TouchEventInfo touchEventInfo("default");
+    TouchLocationInfo touch(0);
+    touch.SetTouchType(TouchType::DOWN);
+    touchEventInfo.AddTouchLocationInfo(std::move(touch));
+    /**
+     * @tc.steps: step1. call callback with TouchType::DOWN.
+     */
+    auto callback = gestureHub->touchEventActuator_->touchEvents_.front()->GetTouchEventCallback();
+    callback(touchEventInfo);
+    EXPECT_TRUE(scrollable->isTouching_);
+    /**
+     * @tc.steps: step2. call callback with TouchType::UP.
+     */
+    touchEventInfo.touches_.clear();
+    touch.SetTouchType(TouchType::UP);
+    touchEventInfo.AddTouchLocationInfo(std::move(touch));
+    callback(touchEventInfo);
+    EXPECT_FALSE(scrollable->isTouching_);
+    /**
+     * @tc.steps: step3. call callback with TouchType::CANCEL.
+     */
+    touchEventInfo.touches_.clear();
+    scrollable->isTouching_ = true;
+    touch.SetTouchType(TouchType::CANCEL);
+    touchEventInfo.AddTouchLocationInfo(std::move(touch));
+    callback(touchEventInfo);
+    EXPECT_FALSE(scrollable->isTouching_);
+}
+
+/**
+ * @tc.name: InitCurveOffsetPropertyTest001
+ * @tc.desc: Test the behavior of the InitCurveOffsetPropert callback method Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, InitCurveOffsetPropertyTest001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->finalPosition_ = 100.0f;
+    scrollPn->lastPosition_ = 90.0f;
+    scrollPn->isAnimationStop_ = false;
+    scrollPn->isAnimateOverScroll_ = true;
+    AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    auto curve = AceType::MakeRefPtr<LinearCurve>();
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    scrollPn->AnimateTo(100.0f, 300.0f, curve, false, true, false);
+    MockAnimationManager::GetInstance().Tick();
+    auto curveOffsetProperty = scrollPn->curveOffsetProperty_;
+    float actualValue = curveOffsetProperty->Get();
+    EXPECT_NEAR(actualValue, 100.0f, 1.0f);
+    EXPECT_TRUE(scrollPn->isAnimationStop_);
 }
 } // namespace OHOS::Ace::NG

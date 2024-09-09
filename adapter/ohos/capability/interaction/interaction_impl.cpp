@@ -14,9 +14,6 @@
  */
 
 #include "interaction_impl.h"
-#include "drag_data.h"
-#include "core/common/interaction/interaction_data.h"
-#include "core/gestures/gesture_info.h"
 
 #include "interaction_manager.h"
 #include "start_drag_listener_impl.h"

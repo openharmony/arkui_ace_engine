@@ -32,7 +32,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/property/measure_property.h"
 
 
@@ -61,6 +60,18 @@ public:
     void UpdatePos(int32_t index, PositionInfo posInfo)
     {
         posMap_[index] = { posInfo.mainPos, posInfo.mainSize };
+    }
+
+    void UpdatePosWithCheck(int32_t index, PositionInfo posInfo)
+    {
+        auto iter = posMap_.find(index);
+        if (iter == posMap_.end()) {
+            posMap_[index] = posInfo;
+            return;
+        }
+        if (LessNotEqual(iter->second.mainSize, posInfo.mainSize)) {
+            iter->second.mainSize = posInfo.mainSize;
+        }
     }
 
     void ClearPosMap()

@@ -14,16 +14,7 @@
  */
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
-#include "core/animation/animation_pub.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -157,6 +148,10 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto gatherNode = actuator->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto imageContext = gatherNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();

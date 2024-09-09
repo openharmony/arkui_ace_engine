@@ -14,15 +14,21 @@
  */
 
 import { Route, RouteGroup } from '../../common/route';
+import { BindContextMenuBootcamp } from './BindContextMenuBootcamp';
+import { BindMenuBootcamp } from './BindMenuBootcamp';
 import { ButtonBootcamp } from './ButtonBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
+import { SelectBootcamp } from './SelectBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
   label: '操作类',
   children: [
     { name: 'button', label: '按钮/Button' },
+    { name: 'Menu', label: '菜单/Menu' },
+    { name: 'BindContextMenu', label: '上下文菜单/BindContextMenu' },
     { name: 'chip', label: '操作块/Chip' },
+    { name: 'select', label: '下拉按钮/Select' },
   ]
 };
 
@@ -30,8 +36,14 @@ export const operatesRoute: RouteGroup = {
 export function OperatesDestination(name: string, route: Route) {
   if (name === 'operates/button') {
     ButtonBootcamp({ title: route.label })
+  } else if (name === 'operates/Menu') {
+    BindMenuBootcamp({ title: route.label })
+  } else if (name === 'operates/BindContextMenu') {
+    BindContextMenuBootcamp({ title: route.label })
   } else if (name === 'operates/chip') {
     ChipBootcamp({ title: route.label })
+  } else if (name === 'operates/select') {
+    SelectBootcamp({ title: route.label })
   }
 }
 

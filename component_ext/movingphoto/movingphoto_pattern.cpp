@@ -16,17 +16,10 @@
 #include <unistd.h>
 
 #include "movingphoto_pattern.h"
-#include "movingphoto_layout_property.h"
 #include "movingphoto_node.h"
 #include "movingphoto_utils.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -187,7 +180,7 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleLongPress start.");
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         FireMediaPlayerError();
         return;
@@ -236,6 +229,10 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
 
 void MovingPhotoPattern::UpdateImageNode()
 {
+    if (startAnimationFlag_) {
+        needUpdateImageNode_ = true;
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
@@ -332,11 +329,16 @@ void MovingPhotoPattern::PrepareMediaPlayer()
     }
     uri_ = layoutProperty->GetMovingPhotoUri().value();
     fd_ = layoutProperty->GetVideoSource().value();
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null.");
+        FireMediaPlayerError();
+        return;
+    }
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
-    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
+    if (!mediaPlayer_->IsMediaPlayerValid()) {
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is invalid.");
         FireMediaPlayerError();
         return;
     }
@@ -988,6 +990,10 @@ void MovingPhotoPattern::StopAnimationCallback()
 {
     Seek(0);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "StopAnimation OnFinishEvent:%{public}d.", autoAndRepeatLevel_);
+    if (needUpdateImageNode_) {
+        UpdateImageNode();
+        needUpdateImageNode_ = false;
+    }
     if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         StartRepeatPlay();
     } else if (autoAndRepeatLevel_ == PlaybackMode::AUTO) {
@@ -998,12 +1004,15 @@ void MovingPhotoPattern::StopAnimationCallback()
 void MovingPhotoPattern::AutoPlay(bool isAutoPlay)
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto AutoPlay: %{public}d.", isAutoPlay);
-    if (isAutoPlay && historyAutoAndRepeatLevel_ != PlaybackMode::AUTO) {
+    if (isAutoPlay) {
+        if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+            return;
+        }
         isChangePlayMode_ = true;
-    }
-    if (isAutoPlay && autoAndRepeatLevel_ != PlaybackMode::REPEAT) {
-        historyAutoAndRepeatLevel_ = PlaybackMode::AUTO;
-        autoAndRepeatLevel_ = PlaybackMode::AUTO;
+        if (autoAndRepeatLevel_ != PlaybackMode::REPEAT) {
+            historyAutoAndRepeatLevel_ = PlaybackMode::AUTO;
+            autoAndRepeatLevel_ = PlaybackMode::AUTO;
+        }
     }
 }
 

@@ -15,10 +15,7 @@
 
 #include "core/components_ng/event/pan_event.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -91,6 +88,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        // In the actionEnd callback, actuator->panEvents_ may be modified
         auto copyPanEvents_ = actuator->panEvents_;
         for (const auto& panEvent : copyPanEvents_) {
             auto actionEnd = panEvent->GetActionEndEventFunc();

@@ -52,6 +52,8 @@ constexpr char PULL_FAIL_NAME[] = "extension_pulling_up_fail";
 constexpr char PULL_FAIL_MESSAGE[] = "pulling another embedded component failed, not allowed to cascade.";
 constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
+constexpr char EXTENSION_TRANSPARENT_NAME[] = "extension_node_transparent";
+constexpr char EXTENSION_TRANSPARENT_MESSAGE[] = "the extension ability has transparent node.";
 constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
 constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
@@ -62,6 +64,7 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t INVALID_WINDOW_ID = -1;
+constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 } // namespace
 
 class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
@@ -309,6 +312,23 @@ void SessionWrapperImpl::InitAllCallback()
         CHECK_NULL_RETURN(container, avoidArea);
         avoidArea = container->GetAvoidAreaByType(type);
         return avoidArea;
+    };
+    sessionCallbacks->notifyExtensionEventFunc_ =
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t event) {
+        taskExecutor->PostDelayedTask(
+            [weak, callSessionId]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifyBindModalFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
+                pattern->OnAreaUpdated();
+            },
+            TaskExecutor::TaskType::UI, REMOVE_PLACEHOLDER_DELAY_TIME, "ArkUIUIExtensionEventCallback");
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -572,12 +592,18 @@ void SessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
-void SessionWrapperImpl::NotifyDestroy()
+void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyDestroy, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
-        session_, std::move(destructionCallback_));
+    UIEXT_LOGI("NotifyDestroy, isHandleError = %{public}d, persistentid = %{public}d.",
+        isHandleError, session_->GetPersistentId());
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, std::move(destructionCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, nullptr);
+    }
 }
 
 void SessionWrapperImpl::NotifyConfigurationUpdate() {}
@@ -639,11 +665,11 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
 }
 
-void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
+void SessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
 {
     int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, callSessionId]() {
+        [weak = hostPattern_, callSessionId, errorCode]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (callSessionId != pattern->GetSessionId()) {
@@ -651,8 +677,11 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
                         " is inconsistent with the curSession(%{public}d)",
                     callSessionId, pattern->GetSessionId());
             }
+            bool isTransparent = errorCode == ERROR_CODE_UIEXTENSION_TRANSPARENT;
             pattern->FireOnErrorCallback(
-                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT, LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
+                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
+                isTransparent ? EXTENSION_TRANSPARENT_NAME : LIFECYCLE_TIMEOUT_NAME,
+                isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
 }
@@ -710,6 +739,13 @@ std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
     return session_ ? session_->GetSurfaceNode() : nullptr;
 }
 
+WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+{
+    auto parentSession = session_->GetParentSession();
+    auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    return static_cast<WindowSizeChangeReason>(reason);
+}
+
 void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
 {
     CHECK_NULL_VOID(session_);
@@ -721,6 +757,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     int32_t duration = 0;
     if (reason == Rosen::SizeChangeReason::ROTATION) {
@@ -831,4 +868,17 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
     return static_cast<int32_t>(transferCode);
 }
 /************************************************ End: The interface to send the data for ArkTS ***********************/
+
+/************************************************ Begin: The interface for UEC dump **********************************/
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return reason_;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->NotifyDumpInfo(params, info);
+}
+/************************************************ End: The interface for UEC dump **********************************/
 } // namespace OHOS::Ace::NG

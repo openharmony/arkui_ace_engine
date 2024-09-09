@@ -15,9 +15,6 @@
 
 #include "core/components_ng/manager/focus/focus_view.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -127,7 +124,7 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
 
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_RETURN(focusManager, nullptr);

@@ -469,6 +469,10 @@ Rosen::Drawing::ImageInfo LayeredDrawableDescriptor::CreateRSImageInfo(
 void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
     std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
 {
+    if (!background) {
+        HILOGW("The background is null when adaptive composite icons are used.");
+        return;
+    }
     Rosen::Drawing::Brush brush;
     brush.SetAntiAlias(true);
     Rosen::Drawing::ImageInfo imageInfo =
@@ -485,13 +489,14 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
         bitmapCanvas.DetachBrush();
     }
 
-    Rosen::Drawing::Rect srcRect(0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
     Rosen::Drawing::Rect dstRect(
         0.0, 0.0, static_cast<float>(background->GetWidth()), static_cast<float>(background->GetHeight()));
     Rosen::Drawing::Image image;
     if (mask) {
+        Rosen::Drawing::Rect srcRect(
+            0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
         image.BuildFromBitmap(*mask);
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
             Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
@@ -552,7 +557,7 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::
         bitmapCanvas.DetachBrush();
     }
     if (mask) {
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();

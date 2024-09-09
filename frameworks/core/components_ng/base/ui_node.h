@@ -86,8 +86,7 @@ public:
     virtual void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode,
-        bool addModalUiextension = false);
+    void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
@@ -110,7 +109,8 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    virtual void DetachFromMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false);
+    virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
@@ -197,6 +197,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth, bool hasJson = false);
+    void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -398,12 +399,6 @@ public:
             return AceType::DynamicCast<T>(uiNode);
         }
         return nullptr;
-    }
-
-    void ChildrenUpdatedFrom(int32_t index);
-    int32_t GetChildrenUpdated() const
-    {
-        return childrenUpdatedFrom_;
     }
 
     // utility function for adding child to disappearingChildren_
@@ -682,6 +677,8 @@ public:
         return rootNodeType_;
     }
 
+    virtual void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false);
+
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
 
     virtual void RegisterUpdateJSInstanceCallback(std::function<void(int32_t)>&& callback)
@@ -751,7 +748,20 @@ public:
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
 
-    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
+    enum class NotificationType : int32_t {
+        START_CHANGE_POSITION = 0,
+        END_CHANGE_POSITION = 1,
+        START_AND_END_CHANGE_POSITION = 2
+    };
+    /**
+     * @brief For a DataChange happened in child [id], notify the corresponding change position to parent.
+     *
+     * @param changeIdx change index in child [id].
+     * @param count change of item count.
+     * @param id the accessibilityId of child who call this function.
+     * @param notificationType the type of notification.
+     */
+    virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -783,6 +793,7 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
@@ -819,6 +830,15 @@ protected:
     void TraversingCheck(RefPtr<UINode> node = nullptr, bool withAbort = false);
 
     PipelineContext* context_ = nullptr;
+
+    /**
+     * @brief Transform the [changeIdx] given by child [id] to corresponding position in [this] node.
+     *
+     * @param changeIdx change index in child [id].
+     * @param id the accessibilityId of child.
+     */
+    int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -851,7 +871,6 @@ private:
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };
 
-    int32_t childrenUpdatedFrom_ = -1;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;

@@ -15,7 +15,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 
 #include "base/log/log.h"
-#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/core/common/container.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED

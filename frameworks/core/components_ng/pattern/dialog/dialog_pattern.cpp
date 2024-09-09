@@ -17,18 +17,12 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
-#include <optional>
-#include <string>
 
-#include "base/geometry/dimension.h"
-#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
@@ -132,6 +126,33 @@ void DialogPattern::OnAttachToFrameNode()
     };
     auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
+    RegisterHoverModeChangeCallback();
+}
+
+void DialogPattern::RegisterHoverModeChangeCallback()
+{
+    auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetCurve(motion);
+        context->FlushUITasks();
+        context->Animate(optionPosition, motion, [host, context]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            context->FlushUITasks();
+        });
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto hoverModeCallId = context->RegisterHalfFoldHoverChangedCallback(std::move(hoverModeChangeCallback));
+    UpdateHoverModeChangedCallbackId(hoverModeCallId);
 }
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -141,6 +162,9 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
+    if (HasHoverModeChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
     }
 }
 
@@ -236,9 +260,15 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
         RecordEvent(buttonIdx);
     }
     if (dialogProperties_.isShowInSubWindow) {
-        SubwindowManager::GetInstance()->DeleteHotAreas(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId(), host->GetId());
-        SubwindowManager::GetInstance()->HideDialogSubWindow(SubwindowManager::GetInstance()->GetDialogSubWindowId());
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto currentId = Container::CurrentId();
+        if (!container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
+        }
+
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
     overlayManager->CloseDialog(host);
 }

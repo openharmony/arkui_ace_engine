@@ -15,16 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/event/axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -278,11 +269,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    if (currentFingers_ < fingers_) {
-        return;
-    }
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+    }
+    if (currentFingers_ < fingers_) {
+        return;
     }
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {

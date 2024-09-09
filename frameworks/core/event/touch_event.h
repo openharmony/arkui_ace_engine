@@ -52,6 +52,8 @@ enum class TouchType : size_t {
     HOVER_MOVE,
     HOVER_EXIT,
     HOVER_CANCEL,
+    PROXIMITY_IN,
+    PROXIMITY_OUT,
     UNKNOWN,
 };
 
@@ -450,6 +452,12 @@ struct TouchEvent final : public UIInputEvent {
             .SetOriginalId(originalId);
         event.pointers.emplace_back(std::move(point));
         return event;
+    }
+
+    bool IsPenHoverEvent() const
+    {
+        return sourceTool == SourceTool::PEN && (type == TouchType::PROXIMITY_IN ||
+        type == TouchType::PROXIMITY_OUT || (type == TouchType::MOVE && NearZero(force)));
     }
 };
 

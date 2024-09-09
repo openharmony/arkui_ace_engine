@@ -15,18 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 
-#include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
-#include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/plugin_model_impl.h"
-#include "core/components/common/properties/clip_path.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/plugin/plugin_model.h"
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
-#include "core/components_ng/pattern/plugin/plugin_pattern.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/box/box_component.h"
-#include "frameworks/core/components/plugin/plugin_component.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<PluginModel> PluginModel::instance_;
@@ -145,7 +136,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                              const std::string& param) {
+                                const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             PipelineContext::SetCallBackNode(node);
@@ -163,7 +154,7 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                           const std::string& param) {
+                            const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };

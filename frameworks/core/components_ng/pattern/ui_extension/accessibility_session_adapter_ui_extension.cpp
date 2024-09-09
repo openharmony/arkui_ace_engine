@@ -16,10 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 
 #include <cinttypes>
-#include "base/log/log.h"
-#include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 void AccessibilitySessionAdapterUIExtension::TransferHoverEvent(const PointF &point, SourceType source,

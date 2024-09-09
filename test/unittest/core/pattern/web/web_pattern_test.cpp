@@ -81,7 +81,13 @@ void WebPatternTest::SetUpTestCase()
     g_webPattern->SetWebController(controller);
 #endif
 }
-void WebPatternTest::TearDownTestCase() {}
+void WebPatternTest::TearDownTestCase()
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern = nullptr;
+#endif
+}
+
 void WebPatternTest::SetUp() {}
 void WebPatternTest::TearDown() {}
 
@@ -222,37 +228,10 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     EXPECT_FALSE(result);
     keyboard = 1;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
-    g_webPattern->UpdateWebLayoutSize(width, height, false);
-    TouchEventInfo info("test");
-    info.changedTouches_.clear();
-    g_webPattern->touchEvent_->callback_(info);
-    TouchLocationInfo touch(1);
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    info.SetSourceDevice(SourceType::NONE);
-    g_webPattern->touchEvent_->callback_(info);
-    info.SetSourceDevice(SourceType::TOUCH);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::DOWN);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::MOVE);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::UP);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::CANCEL);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
+    EXPECT_FALSE(result);
 #endif
 }
 
@@ -274,7 +253,7 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
     auto drawSize = Size(CONTRNT_WIDTH_SIZE, CONTRNT_HEIGHT_SIZE);
     g_webPattern->drawSizeCache_ = drawSize;
     bool result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     TouchLocationInfo info("webtest", fingerId);
     TouchEventInfo event("webtest");
     g_webPattern->HandleTouchUp(event, true);
@@ -313,13 +292,6 @@ HWTEST_F(WebPatternTest, IsTouchHandleValid003, TestSize.Level1)
     g_isEnable = true;
     result = g_webPattern->IsTouchHandleValid(handle);
     EXPECT_TRUE(result);
-
-    EXPECT_FALSE(result);
-    g_alpha = 1;
-    EXPECT_FALSE(result);
-    g_Y = 0;
-    g_height = 1;
-    EXPECT_FALSE(result);
 #endif
 }
 
@@ -498,11 +470,6 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     webPattern->isW3cDragEvent_ = false;
     result = webPattern->GenerateDragDropInfo(dragDropInfo);
     EXPECT_FALSE(result);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    g_webPattern->RegistVirtualKeyBoardListener(pipelineContext);
-    g_webPattern->needUpdateWeb_ = false;
-    g_webPattern->RegistVirtualKeyBoardListener(pipelineContext);
-    g_webPattern->OnQuickMenuDismissed();
 #endif
 }
 

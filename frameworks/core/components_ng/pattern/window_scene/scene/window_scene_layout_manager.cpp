@@ -15,11 +15,9 @@
 #include "window_scene_layout_manager.h"
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/input_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -111,7 +109,7 @@ void WindowSceneLayoutManager::UpdateGeometry(const RefPtr<FrameNode>& node, con
     auto rsNode = context->GetRSNode();
     CHECK_NULL_VOID(rsNode);
     auto globalGeometry = isParentTransformScene ? std::make_shared<Rosen::RSObjAbsGeometry>()
-                                           : GetGlobalGeometry(parentNode);
+        : GetGlobalGeometry(parentNode);
     if (!globalGeometry) {
         if (!WindowSceneHelper::IsScreenScene(node->GetWindowPatternType())) {
             TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE, "windowName:%{public}s, global geo is null and new",
@@ -122,8 +120,7 @@ void WindowSceneLayoutManager::UpdateGeometry(const RefPtr<FrameNode>& node, con
     rsNode->UpdateLocalGeometry();
     if (WindowSceneHelper::IsTransformScene(node->GetWindowPatternType())) {
         // once current transform scene, set pos/trans 0, to make global position relative to transform scene
-        auto localGeo = rsNode->GetLocalGeometry();
-        if (localGeo) {
+        if (auto localGeo = rsNode->GetLocalGeometry()) {
             localGeo->SetPosition(0.0f, 0.0f);
             localGeo->SetTranslateX(0.0f);
             localGeo->SetTranslateY(0.0f);
@@ -161,7 +158,7 @@ std::shared_ptr<Rosen::RSObjAbsGeometry> WindowSceneLayoutManager::GetLocalGeome
 }
 
 void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node,
-    TraverseResult& res, bool isAncestorRecent)
+    TraverseResult& res, bool isAncestorRecent, bool notSyncPosition)
 {
     auto rsNode = GetRSNode(node);
     if (!rsNode) {
@@ -171,9 +168,14 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
     auto globalGeometry = isAncestorRecent ? std::make_shared<Rosen::RSObjAbsGeometry>()
                                            : rsNode->GetGlobalGeometry();
     auto localGeometry = rsNode->GetLocalGeometry();
+    if (isAncestorRecent && !localGeometry) {
+        localGeometry = std::make_shared<Rosen::RSObjAbsGeometry>();
+    }
     if (!globalGeometry || !localGeometry) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
-            GetWindowName(node).c_str(), globalGeometry == nullptr, localGeometry == nullptr);
+        if (isCoreDebugEnable_) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s globalGeo is null:%{public}d localGeo:%{public}d",
+                GetWindowName(node).c_str(), globalGeometry == nullptr, localGeometry == nullptr);
+        }
         return;
     }
     Rosen::SessionUIParam uiParam;
@@ -192,7 +194,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         uiParam.scaleX_ = absRect.GetWidth() / width;
         uiParam.scaleY_ = absRect.GetHeight() / height;
     }
-
+    uiParam.needSync_ = notSyncPosition ? false : true;
     auto matrix = globalGeometry->GetAbsMatrix();
     uiParam.transX_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) - rsNode->GetGlobalPositionX());
     uiParam.transY_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) - rsNode->GetGlobalPositionY());
@@ -207,6 +209,27 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         uiParam.interactive_ = WindowSceneHelper::IsPanelScene(node->GetWindowPatternType());
     }
     res.uiParams_[windowId] = std::move(uiParam);
+}
+
+bool WindowSceneLayoutManager::NoNeedSyncScenePanelGlobalPosition(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    if (!WindowSceneHelper::IsPanelScene(node->GetWindowPatternType())) {
+        return false;
+    }
+    auto windowPattern = node->GetPattern<PanelScene>();
+    if (windowPattern == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "recent SystemWindowScene is null. node:%{public}s",
+            GetWindowName(node).c_str());
+        return false;
+    }
+    auto session = windowPattern->GetSession();
+    if (session == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "recent session is null. node:%{public}s",
+            GetWindowName(node).c_str());
+        return false;
+    }
+    return !session->IsNeedSyncScenePanelGlobalPosition();
 }
 
 void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& screenNode)
@@ -224,7 +247,7 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
     res.zOrderCnt_ = 0;
     res.screenId_ = screenId;
     UpdateGeometry(screenNode, nullptr, false);
-    TraverseTree(screenNode, res, false, IsNodeDirty(screenNode));
+    TraverseTree(screenNode, res, false, IsNodeDirty(screenNode), false);
     if (isCoreDebugEnable_) {
         DumpFlushInfo(screenId, res);
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "------------------- End FlushWindowPatternInfo ------------------");
@@ -255,7 +278,7 @@ bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& n
 }
 
 void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-    bool isAncestorRecent, bool isAncestorDirty)
+    bool isAncestorRecent, bool isAncestorDirty, bool notSyncPosition)
 {
     CHECK_NULL_VOID(rootNode);
     auto parentType = rootNode->GetWindowPatternType();
@@ -275,6 +298,7 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         if (hasWindowSession) {
             res.zOrderCnt_ = currentZorder++; // keep last zorder as current zorder
         }
+        notSyncPosition = (notSyncPosition || NoNeedSyncScenePanelGlobalPosition(node));
 
         // process recent and child node
         if (isAncestorRecent || IsRecentContainerState(node)) {
@@ -287,7 +311,7 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         }
         // only window pattern but not transform scene need sync info
         if (hasWindowSession) {
-            FillWindowSceneInfo(node, res, isAncestorRecent);
+            FillWindowSceneInfo(node, res, isAncestorRecent, notSyncPosition);
             DumpNodeInfo(node, rootNode, "AfterFillWindowSceneInfo");
         }
 
@@ -301,11 +325,12 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         if (isCoreDebugEnable_) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "finish TraverseTree winId:%{public}d name:%{public}s"
                 "nodeName:%{public}s tag:%{public}s zorder:%{public}u isAncestorRecent:%{public}d "
-                "isAncestorDirty:%{public}d", GetWindowId(node), GetWindowName(node).c_str(),
+                "isAncestorDirty:%{public}d hasWindowSession:%{public}d, notSyncPosition:%{public}d",
+                GetWindowId(node), GetWindowName(node).c_str(),
                 node->GetInspectorId()->c_str(), node->GetTag().c_str(), res.zOrderCnt_,
-                isAncestorRecent, isAncestorDirty);
+                isAncestorRecent, isAncestorDirty, hasWindowSession, notSyncPosition);
         }
-        TraverseTree(node, res, isAncestorRecent, isAncestorDirty);
+        TraverseTree(node, res, isAncestorRecent, isAncestorDirty, notSyncPosition);
     }
 }
 
@@ -437,16 +462,18 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
     auto nodeGeometry = rsNode->GetGlobalGeometry();
     if (!nodeGeometry) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE,
-            "globalGeometry name:%{public}s lrsId:%{public}" PRIu64 " %{public}d"
-            "parentRSId:%{public}" PRIu64 " frameNodeId:%{public}d global geoMetry is null",
-            GetWindowName(node).c_str(), GetRSNodeId(node), node->GetId(), GetRSNodeId(parentNode), parentId);
+            "reason:%{public}s globalGeometry name:%{public}s lrsId:%{public}" PRIu64 " %{public}d"
+            "parentRSId:%{public}" PRIu64 " frameNodeId:%{public}d global geFnoMetry is null",
+            reason.c_str(), GetWindowName(node).c_str(), GetRSNodeId(node), node->GetId(),
+            GetRSNodeId(parentNode), parentId);
         return;
     }
     auto nodeLocalGeometry = rsNode->GetLocalGeometry();
     if (!nodeLocalGeometry) {
         TAG_LOGW(AceLogTag::ACE_WINDOW_PIPELINE,
-            "localGeometry name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 " localGeo is null",
-            GetWindowName(node).c_str(), GetRSNodeId(node), GetRSNodeId(parentNode));
+            "reason:%{public}s localGeometry name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64
+            " localGeo is null", reason.c_str(), GetWindowName(node).c_str(),
+            GetRSNodeId(node), GetRSNodeId(parentNode));
         return;
     }
 
@@ -470,7 +497,7 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
     float globalPosY = rsNode->GetGlobalPositionY();
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE,
         "DumpNodeInfo reason:%{public}s name:%{public}s lrsId:%{public}" PRIu64 " parentRSId:%{public}" PRIu64 ""
-        "frameNodeId:%{public}d [Rect:%{public}s lTransX:%{public}f lTransY:%{public}f absLocalRect:%{public}s, "
+        " frameNodeId:%{public}d [Rect:%{public}s lTransX:%{public}f lTransY:%{public}f absLocalRect:%{public}s, "
         "gRect:%{public}s gTransX:%{public}f gTransY:%{public}f globalPosX:%{public}f, globalPosY:%{public}f, "
         "absGlobalRect:%{public}s lScaleX:%{public}f lScaleY:%{public}f gScaleX:%{public}f gScaleY:%{public}f]",
         GetWindowName(node).c_str(), reason.c_str(), GetRSNodeId(node), GetRSNodeId(parentNode), parentId,
@@ -514,8 +541,8 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         auto matrix = globalGeometry->GetAbsMatrix();
         oss << " globalScale: [ " << matrix.Get(Rosen::Drawing::Matrix::SCALE_X) << ", "
             << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y) << "],";
-        oss << " globalPos: [" << rsNode->GetGlobalPositionX() << ", "  << rsNode->GetGlobalPositionY() << "],";
-        oss << " pivot: [" << globalGeometry->GetPivotX() << ", "  << globalGeometry->GetPivotY() << "],";
+        oss << " globalPos: [" << rsNode->GetGlobalPositionX() << ", " << rsNode->GetGlobalPositionY() << "],";
+        oss << " pivot: [" << globalGeometry->GetPivotX() << ", " << globalGeometry->GetPivotY() << "],";
     } else {
         oss << " globalGeometry: [null],";
     }
@@ -554,7 +581,7 @@ void WindowSceneLayoutManager::GetTotalUITreeInfo(uint64_t screenId, std::string
         }
         std::ostringstream oss;
         GetUITreeInfo(screenNodeMap_[screenId], 0, 0, oss);
-        oss << "-------------------------------------RSTree-----------------------------------"<< std::endl;
+        oss << "-------------------------------------RSTree-----------------------------------" << std::endl;
         GetRSNodeTreeInfo(GetRSNode(screenNodeMap_[screenId]), 0, oss);
         info.append(oss.str());
     };
@@ -661,20 +688,19 @@ void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNo
     oss << ", Rotation: " << rsNode->GetStagingProperties().GetRotation();
     oss << ", Alpha: " << rsNode->GetStagingProperties().GetAlpha();
     oss << ", ClipToBounds: " << rsNode->GetStagingProperties().GetClipBounds();
-
     auto globalGeometry = rsNode->GetGlobalGeometry();
-    auto localGeometry = rsNode->GetLocalGeometry();
-    if (globalGeometry && localGeometry) {
+    if (globalGeometry) {
         auto absRect = globalGeometry->GetAbsRect();
         oss << ", globalAbsRect: " << absRect.ToString().c_str();
         auto matrix = globalGeometry->GetAbsMatrix();
         oss << ", globalScale: [ " << matrix.Get(Rosen::Drawing::Matrix::SCALE_X) << ", "
             << matrix.Get(Rosen::Drawing::Matrix::SCALE_Y) << "]";
-        oss << ", globalPos: [" << rsNode->GetGlobalPositionX() << ", "  << rsNode->GetGlobalPositionY() << "]";
-        oss << ", pivot: [" << globalGeometry->GetPivotX() << ", "  << globalGeometry->GetPivotY() << "]";
+        oss << ", globalPos: [" << rsNode->GetGlobalPositionX() << ", " << rsNode->GetGlobalPositionY() << "]";
+        oss << ", pivot: [" << globalGeometry->GetPivotX() << ", " << globalGeometry->GetPivotY() << "]";
     } else {
         oss << "globalGeometry: [null],";
     }
+    auto localGeometry = rsNode->GetLocalGeometry();
     if (localGeometry) {
         auto absRect = localGeometry->GetAbsRect();
         oss << ", localAbsRect: " << absRect.ToString().c_str();

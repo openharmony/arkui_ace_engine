@@ -58,6 +58,7 @@ struct OptionParam {
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
+    bool disableSystemClick = false;
 
     // Used for security controls.
     bool isPasteOption = false;
@@ -404,8 +405,6 @@ public:
     static void DisableOnDisappear(FrameNode* frameNode);
     static void DisableOnAttach(FrameNode* frameNode);
     static void DisableOnDetach(FrameNode* frameNode);
-    static void DisableOnLoad(FrameNode* frameNode);
-    static void DisableOnDestroy(FrameNode* frameNode);
     static void DisableOnFocus(FrameNode* frameNode);
     static void DisableOnBlur(FrameNode* frameNode);
     static void DisableOnAreaChange(FrameNode* frameNode);
@@ -540,6 +539,7 @@ public:
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
     static void SetGroupDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetFocusable(FrameNode* frameNode, bool focusable);
+    static void SetFocusType(FrameNode* frameNode, FocusType type);
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
@@ -613,8 +613,6 @@ public:
     static void SetOnDisappear(FrameNode* frameNode, std::function<void()> &&onDisappear);
     static void SetOnAttach(FrameNode* frameNode, std::function<void()> &&onAttach);
     static void SetOnDetach(FrameNode* frameNode, std::function<void()> &&onDetach);
-    static void SetOnLoad(FrameNode* frameNode, std::function<void(const std::string& xcomponentId)> &&onLoad);
-    static void SetOnDestroy(FrameNode* frameNode, std::function<void()> &&onDestroy);
     static void SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
         const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged);
     static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);

@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
-#include "core/animation/spring_curve.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 #if defined(PIXEL_MAP_SUPPORTED)

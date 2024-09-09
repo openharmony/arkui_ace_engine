@@ -133,10 +133,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 13);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 24);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
@@ -1159,7 +1159,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 10.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
-    richEditorPattern->textSelector_ = TextSelector(10, 50);
+    richEditorPattern->textSelector_ = TextSelector(0, 6);
     richEditorPattern->contentRect_ = { 0.0, 10.0, 500.0, 500.0 };
     richEditorPattern->isShowPlaceholder_ = true;
     auto res = richEditorPattern->GetSelectArea();

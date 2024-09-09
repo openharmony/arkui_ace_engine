@@ -15,13 +15,7 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void SelectOverlayClient::InitSelectOverlay()

@@ -260,12 +260,10 @@ namespace OHOS::Ace::NG {
         if (fromIter != cachedItems_.end() && toIter != cachedItems_.end()) {
             std::swap(fromIter->second, toIter->second);
         } else if (fromIter != cachedItems_.end()) {
-            expiringItem_.try_emplace(
-                fromIter->second.first, LazyForEachCacheChild(to, std::move(fromIter->second.second)));
+            expiringItem_[fromIter->second.first] = LazyForEachCacheChild(to, std::move(fromIter->second.second));
             cachedItems_.erase(fromIter);
         } else if (toIter != cachedItems_.end()) {
-            expiringItem_.try_emplace(
-                toIter->second.first, LazyForEachCacheChild(from, std::move(toIter->second.second)));
+            expiringItem_[toIter->second.first] = LazyForEachCacheChild(from, std::move(toIter->second.second));
             cachedItems_.erase(toIter);
         }
         return true;
@@ -282,6 +280,71 @@ namespace OHOS::Ace::NG {
         for (const auto& item : nodeList_) {
             items.emplace_back(RawPtr(item.second));
         }
+    }
+
+    void LazyForEachBuilder::Transit(std::list<std::pair<std::string, RefPtr<UINode>>>& childList)
+    {
+        if (needTransition) {
+            for (auto& [key, node] : expiringItem_) {
+                if (!node.second) {
+                    continue;
+                }
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode && frameNode->IsOnMainTree()) {
+                    childList.emplace_back(key, node.second);
+                }
+            }
+            needTransition = false;
+        }
+    }
+
+    std::map<int32_t, LazyForEachChild>& LazyForEachBuilder::GetItems(
+        std::list<std::pair<std::string, RefPtr<UINode>>>& childList)
+    {
+        startIndex_ = -1;
+        endIndex_ = -1;
+        int32_t lastIndex = -1;
+        bool isCertained = false;
+
+        decltype(cachedItems_) items(std::move(cachedItems_));
+
+        for (auto& [index, node] : items) {
+            if (!node.second) {
+                cachedItems_.try_emplace(index, std::move(node));
+                continue;
+            }
+
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode && !frameNode->IsActive()) {
+                ACE_SYNTAX_SCOPED_TRACE("LazyForEach not active index[%d]", index);
+                frameNode->SetJSViewActive(false, true);
+                expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+                continue;
+            }
+            cachedItems_.try_emplace(index, std::move(node));
+            if (startIndex_ == -1) {
+                startIndex_ = index;
+            }
+            if (isLoop_) {
+                if (isCertained) {
+                    continue;
+                }
+                if (lastIndex > -1 && index - lastIndex > 1) {
+                    startIndex_ = index;
+                    endIndex_ = lastIndex;
+                    isCertained = true;
+                } else {
+                    endIndex_ = std::max(endIndex_, index);
+                }
+            } else {
+                endIndex_ = std::max(endIndex_, index);
+            }
+            lastIndex = index;
+        }
+
+        Transit(childList);
+
+        return cachedItems_;
     }
 
     int32_t LazyForEachBuilder::GetTotalCountOfOriginalDataset()
@@ -367,8 +430,10 @@ namespace OHOS::Ace::NG {
                     expiringTempItem_.try_emplace(
                         index + preChangedIndex + i, LazyForEachChild(info.extraKey[i], nullptr));
                 }
-            } else {
+            } else if (info.moveIn || info.isExchange) {
                 RepairMoveOrExchange(expiringTempItem_, info, child, index, changedIndex);
+            } else {
+                expiringTempItem_.try_emplace(index + changedIndex, child);
             }
         }
     }

@@ -1525,6 +1525,9 @@ int32_t SetBorderRadius(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBorderRadius(
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+    } else if (node->type == ARKUI_NODE_IMAGE_SPAN) {
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBorderRadius(
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
@@ -1539,6 +1542,8 @@ void ResetBorderRadius(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getImageModifier()->resetImageBorderRadius(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT || node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaBorderRadius(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_IMAGE_SPAN) {
+        fullImpl->getNodeModifiers()->getImageSpanModifier()->resetImageSpanBorderRadius(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadius(node->uiNodeHandle);
     }
@@ -8577,15 +8582,17 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
             return ERROR_CODE_PARAM_INVALID;
         }
     }
-    int32_t intArray[NUM_3];
+    int32_t intArray[NUM_5];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     std::vector<float> greyVector(NUM_2);
     greyVector[NUM_0] = grayScaleStart;
     greyVector[NUM_1] = grayScaleEnd;
+    bool isValidColor = false;
+    Color inactiveColor = Color::TRANSPARENT;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2);
+        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue());
     return ERROR_CODE_NO_ERROR;
 }
 

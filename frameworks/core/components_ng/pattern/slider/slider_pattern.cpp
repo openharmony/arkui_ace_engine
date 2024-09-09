@@ -44,7 +44,8 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double STEP_OFFSET = 50.0;
-constexpr int32_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
+constexpr uint64_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
+const std::string STR_ACCESSIBILITY_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -235,7 +236,9 @@ void SliderPattern::UpdateStepAccessibilityVirtualNode()
     auto min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
     auto max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
     const std::vector<PointF>& stepPointVec = sliderContentModifier_->GetStepPointVec();
-
+    if (pointCount != stepPointVec.size()) {
+        return;
+    }
     for (uint32_t i = 0; i < pointCount; i++) {
         std::string txt = GetPointAccessibilityTxt(i, step, min, max);
         SetStepPointAccessibilityVirtualNode(pointAccessibilityNodeVec_[i], pointSize,
@@ -262,12 +265,16 @@ std::string SliderPattern::GetPointAccessibilityTxt(uint32_t pointIndex, float s
 void SliderPattern::SetStepPointAccessibilityVirtualNode(
     const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt)
 {
+    CHECK_NULL_VOID(pointNode);
     auto pointNodeProperty = pointNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(pointNodeProperty);
     pointNodeProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(size.Width()), CalcLength(size.Height())));
     pointNodeProperty->UpdateContent(txt);
     auto pointNodeContext = pointNode->GetRenderContext();
+    CHECK_NULL_VOID(pointNodeContext);
     pointNodeContext->UpdatePosition(OffsetT(Dimension(point.GetX()), Dimension(point.GetY())));
     auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(pointAccessibilityProperty);
     pointAccessibilityProperty->SetAccessibilityText(txt);
 
     pointAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
@@ -385,13 +392,17 @@ uint32_t SliderPattern::GetCurrentStepIndex()
 SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
 {
     auto host = GetHost();
-    auto& hostContent = host->GetGeometryNode()->GetContent();
+    CHECK_NULL_RETURN(host, SizeF());
     auto pointCount = pointAccessibilityNodeEventVec_.size();
     if (pointCount <= 1) {
-        return SizeF(0, 0);
+        return SizeF();
     }
     float pointNodeHeight = sliderLength_ / (pointCount - 1);
     float pointNodeWidth = pointNodeHeight;
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto& hostContent = geometryNode->GetContent();
+    CHECK_NULL_RETURN(hostContent, SizeF());
     if (direction_ == Axis::HORIZONTAL) {
         pointNodeHeight = hostContent->GetRect().Height();
     } else {
@@ -1365,8 +1376,7 @@ void SliderPattern::SendAccessibilityValueEvent(int32_t mode)
             CHECK_NULL_VOID(host);
             host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
         },
-        TaskExecutor::TaskType::UI, ACCESSIBILITY_SENDEVENT_TIMESTAMP, "ArkUISliderSendAccessibilityValueEvent"
-    );
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_SENDEVENT_TIMESTAMP, STR_ACCESSIBILITY_SENDEVENT);
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)

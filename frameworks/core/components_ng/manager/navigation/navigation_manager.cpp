@@ -15,13 +15,8 @@
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 
-#include <string>
-
 #include "base/log/dump_log.h"
-#include "base/thread/task_executor.h"
-#include "core/common/thread_checker.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
 
 
 namespace OHOS::Ace::NG {
@@ -94,5 +89,21 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
     return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
+}
+
+bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)
+{
+    if (!isInteractive_) {
+        return false;
+    }
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        FrameNode::GetFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, interactiveAnimationId_));
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto proxy = pattern->GetNavigationProxy();
+    CHECK_NULL_RETURN(proxy, false);
+    proxy->AddInteractiveAnimation(addCallback);
+    return true;
 }
 } // namespace OHOS::Ace::NG

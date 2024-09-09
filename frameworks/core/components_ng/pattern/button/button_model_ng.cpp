@@ -15,20 +15,14 @@
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void ButtonModelNG::SetFontSize(const Dimension& fontSize)
@@ -583,7 +577,7 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 
 void ButtonModelNG::ResetBorderRadius()
 {
-    ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
 }
 
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)

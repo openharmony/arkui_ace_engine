@@ -15,13 +15,6 @@
 
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

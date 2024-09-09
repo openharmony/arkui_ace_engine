@@ -158,6 +158,7 @@ public:
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
     void SetDensity(double density);
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
 
     void SaveLayer();
     void RestoreLayer();
@@ -168,6 +169,7 @@ public:
     void Reset();
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
 private:
     void OnAttachToFrameNode() override;

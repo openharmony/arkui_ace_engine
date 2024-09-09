@@ -15,18 +15,10 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-#include <memory>
-
 #include "input_manager.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/event/ace_events.h"
-#include "core/event/key_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -226,6 +218,8 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_MOVE, TouchType::HOVER_MOVE },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT, TouchType::HOVER_EXIT },
         { OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL, TouchType::HOVER_CANCEL },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_IN, TouchType::PROXIMITY_IN },
+        { OHOS::MMI::PointerEvent::POINTER_ACTION_PROXIMITY_OUT, TouchType::PROXIMITY_OUT },
     };
     auto typeIter = actionMap.find(orgAction);
     if (typeIter == actionMap.end()) {
@@ -377,6 +371,9 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
             event.action = AxisAction::END;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            event.action = AxisAction::CANCEL;
+            break;
         default:
             event.action = AxisAction::NONE;
             break;
@@ -436,6 +433,16 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     } else {
         event.action = KeyAction::UNKNOWN;
     }
+    auto keyItems = keyEvent->GetKeyItems();
+    for (auto item = keyItems.rbegin(); item != keyItems.rend(); item++) {
+        if (item->GetKeyCode() == keyEvent->GetKeyCode()) {
+            event.unicode = item->GetUnicode();
+            break;
+        } else {
+            event.unicode = 0;
+        }
+    }
+
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
@@ -492,6 +499,19 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     if (action == PointerAction::PULL_OUT_WINDOW) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
     }
+}
+
+bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t& toolType)
+{
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerID, item);
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "get pointer: %{public}d item failed.", pointerID);
+        return false;
+    }
+    toolType = item.GetToolType();
+    return true;
 }
 
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)

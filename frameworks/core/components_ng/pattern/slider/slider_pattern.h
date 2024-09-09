@@ -324,7 +324,7 @@ private:
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
-    int64_t lastAccessibilityValueTime_ = 0;
+    uint64_t lastAccessibilityValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);

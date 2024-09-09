@@ -16,10 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;

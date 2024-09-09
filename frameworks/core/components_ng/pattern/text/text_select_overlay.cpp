@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 
-#include <algorithm>
-#include <optional>
-
-#include "base/utils/utils.h"
 #include "core/common/vibrator/vibrator_utils.h"
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -132,6 +124,9 @@ bool TextSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleCont
     PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
     bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
     bool topInRegion = visibleContentRect.IsInRegion(topPoint);
+    if (IsClipHandleWithViewPort()) {
+        return bottomInRegion || topInRegion;
+    }
     if (!bottomInRegion && topInRegion) {
         paintRect.SetHeight(visibleContentRect.Bottom() - paintRect.Top());
     } else if (bottomInRegion && !topInRegion) {
@@ -332,6 +327,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
 
 void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
@@ -367,11 +363,11 @@ void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reas
     }
 }
 
-void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsMouseClickDown(sourceType, touchType)) {
+    if (IsMouseClickDown(sourceType, touchType) && touchInside) {
         textPattern->ResetSelection();
     }
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
@@ -414,5 +410,30 @@ void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
     if (!IsSingleHandle()) {
         ToggleMenu();
     }
+}
+
+void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().value_or(false)) {
+        return;
+    }
+    auto clipNode = host->GetAncestorNodeOfFrame(true);
+    while (clipNode) {
+        renderContext = clipNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (renderContext->GetClipEdge().value_or(false)) {
+            break;
+        }
+        clipNode = clipNode->GetAncestorNodeOfFrame(true);
+    }
+    CHECK_NULL_VOID(clipNode);
+    RectF visibleRect;
+    RectF frameRect;
+    clipNode->GetVisibleRect(visibleRect, frameRect);
+    rect.SetHeight(visibleRect.Bottom() - rect.Top());
 }
 } // namespace OHOS::Ace::NG

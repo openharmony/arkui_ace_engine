@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/progress/progress_modifier.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 
 namespace OHOS::Ace::Framework {
@@ -31,6 +32,9 @@ public:
     static void OnResult(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
+private:
+    static void ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
+        std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap);
 };
 
 enum class RegisterType {

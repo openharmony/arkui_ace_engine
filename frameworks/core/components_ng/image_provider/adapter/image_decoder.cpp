@@ -15,28 +15,18 @@
 
 #include "image_decoder.h"
 
-#include <mutex>
-#include <utility>
-
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #include "include/codec/SkCodec.h"
-#include "include/core/SkBitmap.h"
 #include "include/core/SkGraphics.h"
 
 #include "base/image/image_source.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#include "core/components_ng/image_provider/image_object.h"
-#include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
 
@@ -147,7 +137,9 @@ std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RS
 std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
 {
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto rsSkiaData = data_->GetImpl<Rosen::Drawing::SkiaData>();
+    CHECK_NULL_RETURN(rsSkiaData, nullptr);
+    auto skData = rsSkiaData->GetSkData();
     auto encodedImage = std::make_shared<RSImage>();
     if (!encodedImage->MakeFromEncoded(data_)) {
         return nullptr;

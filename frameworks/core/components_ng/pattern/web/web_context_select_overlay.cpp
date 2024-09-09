@@ -20,7 +20,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -147,7 +146,7 @@ void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     pattern->contextMenuResult_->Cancel();
 }
 
-void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);

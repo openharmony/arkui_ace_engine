@@ -137,10 +137,9 @@ public:
      */
     RefPtr<UINode> GetCachedNode4Index(uint32_t forIndex);
 
-    void AddKeyToL1(const std::string& key)
-    {
-        activeNodeKeysInL1_.emplace(key);
-    }
+    void AddKeyToL1(const std::string& key);
+
+    void RemoveKeyFromL1(const std::string& key);
 
     bool IsInL1Cache(const std::string& key) const
     {

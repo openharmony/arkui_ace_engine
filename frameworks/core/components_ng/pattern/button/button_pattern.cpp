@@ -15,17 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/mouse_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -100,7 +90,9 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-
+    (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE)
+        ? textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE)
+        : textLayoutProperty->ResetMaxFontScale();
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -195,21 +187,16 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
-        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
-    } else {
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        textLayoutProperty->UpdateMaxFontScale(buttonTheme->GetMaxFontSizeScale());
-    }
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
     auto buttonRenderContext = host->GetRenderContext();
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    } else {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    }
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }

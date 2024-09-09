@@ -15,18 +15,10 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
-#include <cstdint>
-#include <optional>
-#include <string>
-#include <utility>
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/matrix4.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -41,21 +33,8 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1000,20 +979,6 @@ void ViewAbstract::DisableOnDetach(FrameNode* frameNode)
     eventHub->ClearOnDetach();
 }
 
-void ViewAbstract::DisableOnLoad(FrameNode* frameNode)
-{
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->ClearOnLoad();
-}
-
-void ViewAbstract::DisableOnDestroy(FrameNode* frameNode)
-{
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->ClearOnDestroy();
-}
-
 void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
 {
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1742,11 +1707,16 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    // subwindow model needs to use subContainer to get popupInfo
-    if (showInSubWindow) {
+    if (popupInfo.popupNode) {
+        showInSubWindow = false;
+    } else {
+        // subwindow model needs to use subContainer to get popupInfo
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
+        }
+        if (popupInfo.popupNode) {
+            showInSubWindow = true;
         }
     }
 
@@ -1791,7 +1761,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
                 overlayManager->ErasePopup(id);
                 SubwindowManager::GetInstance()->HideSubWindowNG();
             };
-            targetNode->PushDestroyCallback(destructor);
+            targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
         } else {
             // erase popup in subwindow when target node destroy
             auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
@@ -1802,7 +1772,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
                 overlayManager->ErasePopup(id);
                 SubwindowManager::GetInstance()->HideSubWindowNG();
             };
-            targetNode->PushDestroyCallback(destructor);
+            targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
         }
     } else {
         // use param to update PopupParm
@@ -1821,7 +1791,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
-        popupPattern->RegisterPopupStateChangeCallback(param->GetOnStateChange());
+        popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
@@ -3218,6 +3188,14 @@ void ViewAbstract::SetFocusable(FrameNode* frameNode, bool focusable)
     focusHub->SetFocusable(focusable);
 }
 
+void ViewAbstract::SetFocusType(FrameNode* frameNode, FocusType focusType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(focusType);
+}
+
 void ViewAbstract::SetTouchable(FrameNode* frameNode, bool touchable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3268,7 +3246,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
         layoutProperty->UpdateVisibility(visible, true);
     }
 
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -3688,7 +3666,7 @@ void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
     } else {
         gestureHub->RemoveDragEvent();
     }
-    frameNode->SetDraggable(draggable);
+    frameNode->SetCustomerDraggable(draggable);
 }
 
 void ViewAbstract::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)
@@ -3763,22 +3741,6 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()>&& onD
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDetach(std::move(onDetach));
-}
-
-void ViewAbstract::SetOnLoad(FrameNode* frameNode, std::function<void(const std::string& xcomponentId)>&& onLoad)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnLoad(std::move(onLoad));
-}
-
-void ViewAbstract::SetOnDestroy(FrameNode* frameNode, std::function<void()>&& onDestroy)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDestroy(std::move(onDestroy));
 }
 
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,

@@ -15,16 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -89,7 +80,7 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
     }
-    if (distanceThreshold_ < 0) {
+    if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
 }
@@ -230,6 +221,11 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
+    UpdateInfoWithDownEvent(event);
+}
+
+void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
+{
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();

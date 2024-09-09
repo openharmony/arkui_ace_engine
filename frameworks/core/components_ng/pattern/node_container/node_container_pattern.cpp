@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +43,11 @@ void NodeContainerPattern::RemakeNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto newNode = FireMakeFunction();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto newNode = FireMakeFunction(instanceId);
     auto oldChild = host->GetChildAtIndex(0);
     if ((!oldChild && !newNode) || (oldChild && oldChild == newNode)) {
         return;

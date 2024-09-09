@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 
-#include "base/json/json_util.h"
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/dump_log.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom/custom_node_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
@@ -84,14 +76,15 @@ void CustomNode::Render()
     needMarkParent_ = needMarkParentBak;
 }
 
-void CustomNode::DetachFromMainTree(bool recursive)
+void CustomNode::FireCustomDisappear()
 {
-    auto context = GetContext();
-    if (context && context->IsDestroyed()) {
-        FireOnDisappear();
-        Reset();
+    if (!CheckFireOnAppear()) {
+        FireOnAppear();
+        FireDidBuild();
     }
-    UINode::DetachFromMainTree(recursive);
+    FireOnDisappear();
+    Reset();
+    UINode::FireCustomDisappear();
 }
 
 // used in HotReload to update root view @Component

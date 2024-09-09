@@ -16,7 +16,6 @@
 #include "core/components_v2/water_flow/water_flow_position_controller.h"
 
 #include "core/components_v2/water_flow/render_water_flow.h"
-#include "core/components_v2/water_flow/water_flow_scroll_controller.h"
 
 namespace OHOS::Ace::V2 {
 void WaterFlowPositionController::ScrollToIndex(

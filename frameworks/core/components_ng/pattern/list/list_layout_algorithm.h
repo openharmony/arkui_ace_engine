@@ -37,6 +37,8 @@ struct ListItemGroupLayoutInfo {
     bool atStart = false;
     bool atEnd = false;
     float averageHeight = -1;
+    float headerSize = 0.0f;
+    float footerSize = 0.0f;
 };
 
 struct ListItemInfo {
@@ -69,6 +71,12 @@ enum class ScrollAutoType {
     NOT_CHANGE = 0,
     START,
     END,
+};
+
+enum class LayoutDirection {
+    NONE = 0,
+    FORWARD,
+    BACKWARD,
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
@@ -125,6 +133,11 @@ public:
     void SetTargetIndex(int32_t index)
     {
         targetIndex_ = index;
+    }
+
+    void SetTargetIndexInGroup(int32_t targetIndexInGroup)
+    {
+        targetIndexInGroup_ = targetIndexInGroup;
     }
 
     std::optional<int32_t> GetTargetIndex() const
@@ -302,6 +315,7 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
     void LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
     void LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
@@ -350,7 +364,7 @@ public:
         return laneGutter_;
     }
 
-    void OffScreenLayoutDirection();
+    void OffScreenLayoutDirection(LayoutWrapper* layoutWrapper);
 
     ScrollAutoType GetScrollAutoType() const
     {
@@ -385,6 +399,8 @@ public:
         posMap_ = posMap;
     }
 
+    void ResetLayoutItem(LayoutWrapper* layoutWrapper);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -410,6 +426,8 @@ protected:
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd);
 
+    void SetListItemGroupJumpIndex(const RefPtr<ListItemGroupLayoutAlgorithm>& itemGroup,
+        bool forwardLayout, int32_t index);
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
         bool needAdjustRefPos = false);
@@ -439,6 +457,7 @@ protected:
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
+    LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
     void CheckJumpToIndex();
     void CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
@@ -468,10 +487,11 @@ private:
     virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         int32_t cacheCount, int32_t cached, int32_t& currIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
-        const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
-    void PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param);
-    void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline);
+    static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint, int64_t deadline,
+        int32_t cached, const ListMainSizeValues& listMainSizeValues);
+    static void PostIdleTaskV2(
+        RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param, ListMainSizeValues listMainSizeValues);
+    static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline, ListMainSizeValues listMainSizeValues);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
@@ -487,6 +507,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> targetIndexInGroup_;
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
@@ -496,6 +517,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
+    int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
     float totalOffset_ = 0.0f;

@@ -59,10 +59,13 @@ struct TextDetectConfig {
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_STRING(jsonValue, types);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, entityColor);
-        JSON_STRING_PUT_INT(jsonValue, entityDecorationType);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, entityDecorationColor);
+        jsonValue->Put("types", types.c_str());
+        jsonValue->Put("color", entityColor.ToString().c_str());
+        auto decorationJson = JsonUtil::Create(true);
+        decorationJson->Put("type", static_cast<int64_t>(entityDecorationType));
+        decorationJson->Put("color", entityDecorationColor.ToString().c_str());
+        decorationJson->Put("style", static_cast<int64_t>(entityDecorationStyle));
+        jsonValue->Put("decoration", decorationJson);
         return jsonValue->ToString();
     }
 };
@@ -131,7 +134,6 @@ public:
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
-    virtual void SetDraggable(bool draggable) = 0;
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;

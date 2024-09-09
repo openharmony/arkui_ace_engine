@@ -539,7 +539,7 @@ HWTEST_F(TouchEventTestNg, TouchEventTest003, TestSize.Level1)
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
     touchEvent.type = TouchType::DOWN;
     touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
-    SystemProperties::traceInputEventEnable_ = true;
+    SystemProperties::traceInputEventEnable_.store(true);
     touchEventActuator->TriggerTouchCallBack(touchEvent);
     touchEvent.type = TouchType::UP;
     touchEventActuator->TriggerTouchCallBack(touchEvent);
@@ -574,7 +574,7 @@ HWTEST_F(TouchEventTestNg, TouchEventTest005, TestSize.Level1)
     TouchEvent touchEvent;
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
     touchEvent.type = TouchType::DOWN;
-    SystemProperties::traceInputEventEnable_ = false;
+    SystemProperties::traceInputEventEnable_.store(false);
     touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
     touchEventActuator->TriggerTouchCallBack(touchEvent);
     touchEvent.type = TouchType::UP;

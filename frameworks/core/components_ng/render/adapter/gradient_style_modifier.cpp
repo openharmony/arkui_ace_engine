@@ -32,11 +32,11 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
     CHECK_NULL_VOID(colorStops_);
 #ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
-    SizeF contentSize(context.width, context.height);
+    SizeF contentSize(sizeF_->Get()[0], sizeF_->Get()[1]);
     PaintGradient(*skCanvas, contentSize);
 #else
     CHECK_NULL_VOID(context.canvas);
-    SizeF contentSize(context.width, context.height);
+    SizeF contentSize(sizeF_->Get()[0], sizeF_->Get()[1]);
     PaintGradient(*context.canvas, contentSize);
 #endif
 }
@@ -83,12 +83,10 @@ Gradient GradientStyleModifier::GetGradient() const
     }
     auto size = colors.size();
     gradient.ClearColors();
-    GradientColor color;
     if (size > stops.size()) {
-        TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "illegal param stops size:%{public}zu, color size:%{public}zu",
-            stops.size(), colors.size());
         return gradient;
     }
+    GradientColor color;
     for (size_t index = 0; index < size; index++) {
         color.SetColor(colors[index]);
         auto colorStop =
@@ -106,20 +104,53 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
             ColorAnimatableArithmetic(gradient));
         AttachProperty(colors_);
     } else {
-        colors_->Set(ColorAnimatableArithmetic(gradient));
+        auto colors = ColorAnimatableArithmetic(gradient);
+        PaddingColors(colors);
+        colors_->Set(colors);
     }
     if (!colorStops_) {
         colorStops_ = std::make_shared<Rosen::RSAnimatableProperty<ColorStopAnimatableArithmetic>>(
             ColorStopAnimatableArithmetic(gradient));
         AttachProperty(colorStops_);
     } else {
-        colorStops_->Set(ColorStopAnimatableArithmetic(gradient));
+        auto colorStops = ColorStopAnimatableArithmetic(gradient);
+        PaddingColorStops(colorStops);
+        colorStops_->Set(colorStops);
     }
     if (!gradient_) {
         gradient_ = std::make_shared<Rosen::RSProperty<Gradient>>(gradient);
         AttachProperty(gradient_);
     } else {
         gradient_->Set(gradient);
+    }
+}
+
+void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors)
+{
+    if (colors_->Get().GetColors().size() <= colors.GetColors().size()) {
+        return;
+    }
+    size_t paddingSize = colors_->Get().GetColors().size() - colors.GetColors().size();
+    colors.PaddingColors(paddingSize, Color::TRANSPARENT);
+}
+
+void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops)
+{
+    if (colorStops_->Get().GetColorStops().size() <= colorStops.GetColorStops().size()) {
+        return;
+    }
+    size_t paddingSize = colorStops_->Get().GetColorStops().size() - colorStops.GetColorStops().size();
+    colorStops.PaddingColorStops(paddingSize, Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT));
+}
+
+void GradientStyleModifier::SetSizeF(const SizeF& size)
+{
+    if (!sizeF_) {
+        sizeF_ = std::make_shared<Rosen::RSAnimatableProperty<Rosen::Vector2f>>(
+            Rosen::Vector2f(size.Width(), size.Height()));
+        AttachProperty(sizeF_);
+    } else {
+        sizeF_->Set(Rosen::Vector2f(size.Width(), size.Height()));
     }
 }
 

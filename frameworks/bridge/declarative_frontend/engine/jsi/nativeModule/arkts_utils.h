@@ -32,6 +32,21 @@ namespace OHOS::Rosen {
 
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
+
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000,
+    NONE = 40000
+};
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
@@ -40,6 +55,7 @@ public:
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsDimensionFromResource(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
@@ -101,7 +117,7 @@ public:
             return false;
         }
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-        if (handle->IsUndefined() || handle->IsNull()) {
+        if (handle.IsEmpty() || handle->IsUndefined() || handle->IsNull()) {
             return false;
         }
         int32_t length = static_cast<int32_t>(handle->Length(vm));
@@ -165,12 +181,6 @@ public:
     static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
         ArkUI_Float32 values[], int units[], int index);
     static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
-    static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
-    static bool CheckKeysPressed(
-        const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
-    static Local<JSValueRef> GetModifierKeyState(
-        ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
-    static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
@@ -192,6 +202,12 @@ public:
         const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
+    static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
+    static bool CheckKeysPressed(
+        const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
+    static Local<JSValueRef> GetModifierKeyState(
+        ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
+    static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

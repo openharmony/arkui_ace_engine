@@ -128,6 +128,7 @@ interface ChipNodeTheme {
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
   focusOutlineColor: ResourceColor;
+  focusOutlineMargin: number;
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
@@ -198,6 +199,7 @@ export const defaultTheme: ChipTheme = {
     backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
     activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
+    focusOutlineMargin: 2,
     normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
     smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
     borderWidth: 2,
@@ -985,6 +987,11 @@ export struct ChipComponent {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
+            .focusBox({
+              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            })
             .onSizeChange((oldValue, newValue) => {
               this.allowCloseSymbolWidth = newValue?.width
             })

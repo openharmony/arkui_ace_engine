@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 
@@ -60,6 +59,20 @@ float GetHoursWest(float hoursWest)
     }
 
     return int32_t(hoursWest);
+}
+
+void RemoveJSController(
+    FrameNode* frameNode, const RefPtr<TextClockController>& controller, Framework::JSTextClockController* jsController)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(controller);
+    CHECK_NULL_VOID(jsController);
+    auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
+    auto preController = static_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
+    if (preController) {
+        preController->removeController(controller);
+    }
+    TextClockModelNG::SetJSTextClockController(frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
 }
 } // namespace
 
@@ -437,18 +450,13 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
         if (jsController) {
             jsController->SetInstanceId(Container::CurrentId());
             if (controller) {
-                auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
-                auto preController = reinterpret_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
-                if (preController) {
-                    preController->removeController(controller);
-                }
-                TextClockModelNG::SetJSTextClockController(frameNode, Referenced::Claim((Referenced*)jsController));
+                RemoveJSController(frameNode, controller, jsController);
                 jsController->AddController(controller);
             }
         }
     } else if (controller) {
         auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
-        auto preController = reinterpret_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
+        auto preController = static_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
         if (preController) {
             preController->removeController(controller);
         }

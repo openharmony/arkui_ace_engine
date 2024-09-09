@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/panel/close_icon_layout_algorithm.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/property/measure_property.h"
-
 namespace OHOS::Ace::NG {
 void CloseIconLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {

@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
 
-#include <cstring>
-
 #include "securec.h"
-
-#include "core/components/common/properties/paint_state.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -543,6 +539,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetDensity(double density)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->SetDensity(density);
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::SetTransform(
+    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetTransform(pattern, transform);
 }
 
 // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.

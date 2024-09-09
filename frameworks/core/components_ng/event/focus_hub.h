@@ -473,7 +473,7 @@ public:
     void SetPaintRect(const RoundRect& rect)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintRect(rect);
@@ -481,7 +481,7 @@ public:
     void SetPaintColor(const Color& color)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintColor(color);
@@ -489,7 +489,7 @@ public:
     void SetPaintWidth(const Dimension& width)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintWidth(width);
@@ -497,7 +497,7 @@ public:
     void SetFocusPadding(const Dimension& padding)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetFocusPadding(padding);
@@ -563,6 +563,12 @@ public:
     void SetParentFocusable(bool parentFocusable);
 
     void SetFocusable(bool focusable, bool isExplicit = true);
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
     void SetShow(bool show);
     void SetEnabled(bool enabled);
 
@@ -1034,6 +1040,8 @@ public:
     bool FocusToHeadOrTailChild(bool isHead);
 
     WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
+
+    bool IsNeedPaintFocusStateSelf();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1103,6 +1111,9 @@ private:
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);
+
+    bool IsComponentDirectionRtl();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

@@ -36,10 +36,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 using namespace Commonlibrary::Concurrent::WorkerModule;
@@ -85,8 +82,13 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
-        worker->IsRunning(), worker->GetName().c_str());
+    if (worker == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ISOLATED_COMPONENT, "worker is nullptr");
+        return;
+    } else {
+        TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
+            worker->IsRunning(), worker->GetName().c_str());
+    }
     auto hapPath = hapPathValue->ToString();
     auto abcPath = abcPathValue->ToString();
     auto entryPoint = entryPointValue->ToString();

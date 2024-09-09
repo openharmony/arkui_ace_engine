@@ -14,16 +14,10 @@
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;

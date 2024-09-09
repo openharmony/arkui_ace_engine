@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/jsview/models/xcomponent_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components/xcomponent/xcomponent_component_client.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 

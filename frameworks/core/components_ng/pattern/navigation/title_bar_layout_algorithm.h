@@ -101,6 +101,7 @@ private:
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
 
     float WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width);
+    float WidthAfterAvoidSideBar(const RefPtr<TitleBarNode>& titleBarNode, float width);
 
     void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -123,10 +124,11 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
     float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
         const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
-    float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const SizeF& titleBarSize);
 
     // set variables from theme
     void InitializeTheme(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize);
+
+    void GetSideBarButtonInfo(const RefPtr<TitleBarNode>& titleBarNode);
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
@@ -160,6 +162,8 @@ private:
     float navBackIconWidth_ = 0.0f;
     float navButtonPadding_ = 0.0f;
     float navHorizontalMargin_ = 0.0f;
+    bool needToAvoidSideBar_ = false;
+    float sideBarAvoidY_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };

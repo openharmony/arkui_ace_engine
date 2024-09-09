@@ -47,6 +47,8 @@
 #endif
 
 #include "core/components_ng/event/input_event.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/event/key_event.h"
@@ -254,6 +256,8 @@ void XComponentPattern::Initialize()
             InitNativeNodeCallbacks();
         }
     }
+
+    InitializeAccessibility();
 }
 
 void XComponentPattern::OnAttachToMainTree()
@@ -261,7 +265,6 @@ void XComponentPattern::OnAttachToMainTree()
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->RegisterSurface();
-        renderSurface_->Connect();
         surfaceId_ = renderSurface_->GetUniqueId();
         CHECK_NULL_VOID(xcomponentController_);
         xcomponentController_->SetSurfaceId(surfaceId_);
@@ -274,7 +277,6 @@ void XComponentPattern::OnDetachFromMainTree()
     if (isTypedNode_) {
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->ReleaseSurfaceBuffers();
-        renderSurface_->Disconnect();
         renderSurface_->UnregisterSurface();
         CHECK_NULL_VOID(xcomponentController_);
         OnSurfaceDestroyed();
@@ -579,6 +581,7 @@ void XComponentPattern::OnRebuildFrame()
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    UninitializeAccessibility();
     if (isTypedNode_) {
         if (isNativeXComponent_) {
             OnNativeUnload(frameNode);
@@ -857,7 +860,171 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
     if (!isTypedNode_ && isNativeXComponent_ && !needFireNativeEvent) {
         return;
     }
-    OnSurfaceChanged(surfaceRect);
+    // When creating the surface for the first time, needFireNativeEvent = false, other time needFireNativeEvent = true
+    // the first time change size no need to resize nativeWindow
+    OnSurfaceChanged(surfaceRect, needFireNativeEvent);
+}
+
+RefPtr<AccessibilitySessionAdapter> XComponentPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
+}
+
+void XComponentPattern::InitializeAccessibility()
+{
+    if (accessibilityChildTreeCallback_) {
+        return;
+    }
+
+    InitializeAccessibilityCallback();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int64_t accessibilityId = host->GetAccessibilityId();
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT,
+        "InitializeAccessibility accessibilityId: %{public}" PRId64 "", accessibilityId);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityChildTreeCallback_ = std::make_shared<XComponentAccessibilityChildTreeCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(
+        accessibilityId, accessibilityChildTreeCallback_);
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(
+            pipeline->GetWindowId(), accessibilityManager->GetTreeId());
+    }
+}
+
+void XComponentPattern::UninitializeAccessibility()
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "UninitializeAccessibility");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int64_t accessibilityId = host->GetAccessibilityId();
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (accessibilityManager->IsRegister() && accessibilityChildTreeCallback_) {
+        accessibilityChildTreeCallback_->OnDeregister();
+    }
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(accessibilityId);
+    accessibilityChildTreeCallback_ = nullptr;
+}
+
+bool XComponentPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, false);
+    if (accessibilityProvider_ == nullptr) {
+        accessibilityProvider_ =
+            AceType::MakeRefPtr<XComponentAccessibilityProvider>(WeakClaim(this));
+    }
+
+    auto pair = GetNativeXComponent();
+    auto nativeXComponentImpl = pair.first;
+    CHECK_NULL_RETURN(nativeXComponentImpl, false);
+    auto nativeProvider = nativeXComponentImpl->GetAccessbilityProvider();
+    CHECK_NULL_RETURN(nativeProvider, false);
+    if (!nativeProvider->IsRegister()) {
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Not register native accessibility");
+        return false;
+    }
+
+    nativeProvider->SetInnerAccessibilityProvider(accessibilityProvider_);
+    if (accessibilitySessionAdapter_ == nullptr) {
+        accessibilitySessionAdapter_ =
+            AceType::MakeRefPtr<XcomponentAccessibilitySessionAdapter>(host);
+    }
+    Registration registration;
+    registration.windowId = windowId;
+    registration.parentWindowId = windowId;
+    registration.parentTreeId = treeId;
+    registration.elementId = host->GetAccessibilityId();
+    registration.operatorType = OperatorType::JS_THIRD_PROVIDER;
+    registration.hostNode = WeakClaim(RawPtr(host));
+    registration.accessibilityProvider = WeakClaim(RawPtr(accessibilityProvider_));
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeRegister, "
+        "windowId: %{public}d, treeId: %{public}d.", windowId, treeId);
+    return accessibilityManager->RegisterInteractionOperationAsChildTree(registration);
+}
+
+bool XComponentPattern::OnAccessibilityChildTreeDeregister()
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeDeregister, "
+        "windowId: %{public}u, treeId: %{public}d.", windowId_, treeId_);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(accessibilityManager, false);
+    auto pair = GetNativeXComponent();
+    auto nativeXComponentImpl = pair.first;
+    CHECK_NULL_RETURN(nativeXComponentImpl, false);
+    auto nativeProvider = nativeXComponentImpl->GetAccessbilityProvider();
+    CHECK_NULL_RETURN(nativeProvider, false);
+    nativeProvider->SetInnerAccessibilityProvider(nullptr);
+    accessibilitySessionAdapter_ = nullptr;
+    accessibilityProvider_ = nullptr;
+    return accessibilityManager->DeregisterInteractionOperationAsChildTree(windowId_, treeId_);
+}
+
+void XComponentPattern::OnSetAccessibilityChildTree(
+    int32_t childWindowId, int32_t childTreeId)
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeDeregister, "
+        "windowId: %{public}d, treeId: %{public}d.", childWindowId, childTreeId);
+    windowId_ = static_cast<uint32_t>(childWindowId);
+    treeId_ = childTreeId;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetChildWindowId(childWindowId);
+        accessibilityProperty->SetChildTreeId(childTreeId);
+    }
+}
+
+void XComponentPattern::InitializeAccessibilityCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "InitializeAccessibilityCallback");
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto nativeProvider = nativeXComponentImpl_->GetAccessbilityProvider();
+    CHECK_NULL_VOID(nativeProvider);
+    nativeProvider->SetRegisterCallback(
+        [weak = WeakClaim(this)] (bool isRegister) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleRegisterAccessibilityEvent(isRegister);
+        });
+}
+
+void XComponentPattern::HandleRegisterAccessibilityEvent(bool isRegister)
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "HandleRegisterAccessibilityEvent, "
+        "isRegister: %{public}d.", isRegister);
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (!isRegister) {
+        accessibilityChildTreeCallback_->OnDeregister();
+        return;
+    }
+
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(
+            pipeline->GetWindowId(), accessibilityManager->GetTreeId());
+    }
 }
 
 void XComponentPattern::InitNativeNodeCallbacks()
@@ -1386,7 +1553,7 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
     displaySync_->SetExpectedFrameRateRange(frameRateRange);
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
         "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 
@@ -1402,7 +1569,7 @@ void XComponentPattern::HandleOnFrameEvent()
         xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback()(xComponentPattern->nativeXComponent_.get(),
             displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
     });
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
         displaySync_->GetId());
     displaySync_->AddToPipelineOnContainer();
 }
@@ -1413,7 +1580,7 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
     displaySync_->UnregisterOnFrame();
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
         displaySync_->GetId());
     displaySync_->DelFromPipelineOnContainer();
 }
@@ -1665,22 +1832,24 @@ void XComponentPattern::OnSurfaceCreated()
     }
 }
 
-void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect)
+void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow)
 {
     CHECK_RUN_ON(UI);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isNativeXComponent_) {
-        CHECK_NULL_VOID(nativeXComponent_);
-        CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto width = surfaceRect.Width();
+    auto height = surfaceRect.Height();
+    if (needResizeNativeWindow) {
         CHECK_NULL_VOID(renderSurface_);
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto viewScale = context->GetViewScale();
-        auto width = surfaceRect.Width();
-        auto height = surfaceRect.Height();
-        renderSurface_->AdjustNativeWindowSize(static_cast<uint32_t>(width * viewScale),
-            static_cast<uint32_t>(height * viewScale));
+        renderSurface_->AdjustNativeWindowSize(
+            static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
+    }
+    if (isNativeXComponent_) {
+        CHECK_NULL_VOID(nativeXComponent_);
+        CHECK_NULL_VOID(nativeXComponentImpl_);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
@@ -1980,5 +2149,11 @@ void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     if (renderSurface_) {
         renderSurface_->DumpInfo(json);
     }
+}
+
+void XComponentPattern::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
 } // namespace OHOS::Ace::NG

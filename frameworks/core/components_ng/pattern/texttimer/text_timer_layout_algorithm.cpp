@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 
 namespace OHOS::Ace::NG {

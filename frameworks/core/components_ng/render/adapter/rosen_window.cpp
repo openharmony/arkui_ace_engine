@@ -276,4 +276,9 @@ uint32_t RosenWindow::GetStatusBarHeight() const
 #endif
 }
 
+void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->NotifyExtensionTimeout(errorCode);
+}
 } // namespace OHOS::Ace::NG

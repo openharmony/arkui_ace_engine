@@ -15,14 +15,8 @@
 
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -224,6 +218,14 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRadioChecked(value);
+}
+
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (indicator.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    }
 }
 
 bool RadioModelNG::GetChecked(FrameNode* frameNode)

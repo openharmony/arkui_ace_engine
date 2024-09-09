@@ -24,6 +24,8 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+const Dimension MAGNIFIERNODE_WIDTH = 127.0_vp;
+const Dimension MAGNIFIERNODE_HEIGHT = 95.0_vp;
 } // namespace
 
 class RichEditorBaseTestNg : public RichEditorCommonTestNg {
@@ -1277,12 +1279,11 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorController012, TestSize.Level1)
      * @tc.steps: step4. update symbol span style
      */
     struct UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE_2;
-    updateSpanStyle.updateFontWeight = FONT_WEIGHT_BOLD;
+    updateSpanStyle.updateSymbolFontSize = FONT_SIZE_VALUE_2;
+    updateSpanStyle.updateSymbolFontWeight = FONT_WEIGHT_BOLD;
     updateSpanStyle.updateSymbolColor = SYMBOL_COLOR_LIST_2;
     updateSpanStyle.updateSymbolRenderingStrategy = RENDER_STRATEGY_MULTI_COLOR;
     updateSpanStyle.updateSymbolEffectStrategy = EFFECT_STRATEGY_SCALE;
-    updateSpanStyle.isSymbolStyle = true;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
 
     ImageSpanAttribute imageStyle;
@@ -1461,5 +1462,116 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorController014, TestSize.Level1)
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 
     ClearSpan();
+}
+
+/**
+ * @tc.name: MagnifierTest001
+ * @tc.desc: Test magnifier position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, MagnifierTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto frameSize = SizeF(600.f, 400.f);
+    InitMagnifierParams(frameSize);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paintOffset = richEditorPattern->GetTextPaintOffset();
+
+    /**
+     * @tc.steps: step1. localOffset is on the far left.
+     */
+    RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    float offsetX = MAGNIFIER_OFFSETX.ConvertToPx();
+    OffsetF localOffset(offsetX, 0.f);
+    OffsetF magnifierOffset(0.f, 0.f);
+    controller->SetLocalOffset(localOffset);
+    ASSERT_NE(controller->magnifierFrameNode_, nullptr);
+    auto geometryNode = controller->magnifierFrameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    magnifierOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + 0.f);
+
+    /**
+     * @tc.steps: step2. localOffset is in the normal area.
+     */
+    localOffset.SetX(MAGNIFIERNODE_WIDTH.ConvertToPx());
+    controller->SetLocalOffset(localOffset);
+    magnifierOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2);
+
+    /**
+     * @tc.steps: step3. localOffset is on the far right.
+     */
+    localOffset.SetX(frameSize.Width());
+    controller->SetLocalOffset(localOffset);
+    magnifierOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + frameSize.Width() - MAGNIFIERNODE_WIDTH.ConvertToPx());
+}
+
+/**
+ * @tc.name: MagnifierTest002
+ * @tc.desc: Test magnifier position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto frameSize = SizeF(600.f, 400.f);
+    InitMagnifierParams(frameSize);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paintOffset = richEditorPattern->GetTextPaintOffset();
+
+    /**
+     * @tc.steps: step1. localOffset is on the top.
+     */
+    float offsetY = 1.f;
+    OffsetF localOffset(100.f, offsetY);
+    OffsetF magnifierOffset(0.f, 0.f);
+    RefPtr<MagnifierController> controller = richEditorPattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(localOffset);
+    ASSERT_NE(controller->magnifierFrameNode_, nullptr);
+    auto geometryNode = controller->magnifierFrameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    magnifierOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(magnifierOffset.GetY(), 0.f);
+
+    /**
+     * @tc.steps: step2. localOffset is in the normal area.
+     */
+    localOffset.SetY(MAGNIFIER_OFFSETY.ConvertToPx() + MAGNIFIERNODE_HEIGHT.ConvertToPx());
+    controller->SetLocalOffset(localOffset);
+    magnifierOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(magnifierOffset.GetY(), paintOffset.GetY() + localOffset.GetY() - MAGNIFIERNODE_HEIGHT.ConvertToPx() / 2 -
+                                          MAGNIFIER_OFFSETY.ConvertToPx());
+
+    /**
+     * @tc.steps: step3. Test cases of removeframeNode.
+     */
+    richEditorPattern->HandleTouchUp();
+    EXPECT_FALSE(controller->GetShowMagnifier());
+
+    controller->SetLocalOffset(localOffset);
+    richEditorPattern->HandleBlurEvent();
+    EXPECT_FALSE(controller->GetShowMagnifier());
+
+    controller->SetLocalOffset(localOffset);
+    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1);
+    EXPECT_FALSE(controller->GetShowMagnifier());
+
+    controller->SetLocalOffset(localOffset);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutWrapper->skipMeasureContent_ = false;
+    DirtySwapConfig config;
+    config.frameSizeChange = true;
+    richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(controller->GetShowMagnifier());
 }
 } // namespace OHOS::Ace::NG

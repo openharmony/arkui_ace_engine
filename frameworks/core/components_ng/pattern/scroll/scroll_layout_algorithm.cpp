@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 
-#include <algorithm>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -151,6 +139,26 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
+    UpdateOverlay(layoutWrapper);
+}
+
+void ScrollLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        return;
+    }
+    auto overlayNode = frameNode->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto scrollFrameSize = geometryNode->GetMarginFrameSize();
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(scrollFrameSize);
 }
 
 void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)

@@ -107,6 +107,7 @@ constexpr int32_t RIGHT_ANGLE = 90;
 constexpr int32_t STRAIGHT_ANGLE = 180;
 constexpr int32_t REFLEX_ANGLE = 270;
 constexpr int32_t FULL_ROTATION = 360;
+constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
@@ -510,13 +511,10 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             if (sandBoxCount_ > 0) {
                 return;
             }
-            sandBoxCount_ = 0;
-            CHECK_NULL_VOID(!host->IsRemoving());
-        } else {
-            sandBoxCount_ = 0;
         }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
+        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
@@ -708,6 +706,9 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 
 void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnForegroundColorUpdate(value);
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
@@ -2265,6 +2266,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         rsNode_->AddModifier(translateXY_);
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -2546,6 +2548,11 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(
     } else {
         ClearAccessibilityFocus();
     }
+
+    if (accessibilityIdForVirtualNode == ACCESSIBILITY_FOCUS_WITHOUT_EVENT) {
+        return;
+    }
+
     if (accessibilityIdForVirtualNode == INVALID_PARENT_ID) {
         uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                           : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
@@ -2602,6 +2609,11 @@ void RosenRenderContext::PaintAccessibilityFocus()
         RectF globalRect = frameRect.GetRect();
         globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
             localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+        globalRect = globalRect.Constrain(frameRect.GetRect());
+        if (globalRect.IsEmpty()) {
+            ClearAccessibilityFocus();
+            return;
+        }
         frameRect.SetRect(globalRect);
     }
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
@@ -3620,7 +3632,6 @@ void RosenRenderContext::PaintFocusState(
             accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = accessibilityFocusStateModifier_;
-        modifier->SetRoundRect(paintRect, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     } else {
         if (!focusStateModifier_) {
@@ -3628,11 +3639,11 @@ void RosenRenderContext::PaintFocusState(
             focusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = focusStateModifier_;
-        modifier->SetRoundRect(paintRect, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     }
-    modifier->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(modifier);
+    modifier->SetRoundRect(paintRect, borderWidthPx);
+    modifier->SetPaintTask(std::move(paintTask));
     RequestNextFrame();
 }
 
@@ -4404,6 +4415,7 @@ void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
         }
         propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
     }
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::CleanTransition()
@@ -4464,6 +4476,7 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
         rsNode_->AddModifier(gradientStyleModifier_);
     }
     gradientStyleModifier_->SetGradient(gradient);
+    gradientStyleModifier_->SetSizeF(frameSize);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
@@ -5176,6 +5189,15 @@ void RosenRenderContext::SetSurfaceRotation(bool isLock)
     }
 }
 
+void RosenRenderContext::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetFrameGravity(GetRosenGravity(renderFit));
+    }
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
@@ -5282,10 +5304,6 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
-        std::string backgroundFilter = rsNode_->GetBackgroundFilterDescription();
-        DumpLog::GetInstance().AddDesc(
-        std::string("backgroundFilter:").append(backgroundFilter));
-
         const auto& groupProperty = GetOrCreateBackground();
         if (groupProperty->propEffectOption.has_value()) {
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();

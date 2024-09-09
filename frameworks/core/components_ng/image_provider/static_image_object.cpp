@@ -16,7 +16,6 @@
 #include "core/components_ng/image_provider/static_image_object.h"
 
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"

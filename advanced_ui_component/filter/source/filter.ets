@@ -220,7 +220,7 @@ struct ListFilterRow {
                   this.backgroundColorRow[colIndex] = $r('sys.color.ohos_id_color_click_effect')
                   this.isBackgroundHoverRow[colIndex] = true
                 })
-              } else if (event.type === TouchType.Up) {
+              } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 animateTo({
                   curve: SHARP_CUBIC_BEZIER,
                   duration: ANIMATION_DURATION_100
@@ -392,7 +392,7 @@ struct MultiFilterRow {
           this.arrowBgColorRow = $r('sys.color.ohos_id_color_click_effect')
           this.isArrowBgHoverRow = true
         })
-      } else if (event.type === TouchType.Up) {
+      } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         animateTo({
           curve: SHARP_CUBIC_BEZIER,
           duration: ANIMATION_DURATION_100
@@ -480,7 +480,7 @@ struct MultiFilterRow {
                 this.backgroundColorRow[0] = $r('sys.color.ohos_id_color_click_effect')
                 this.isBackgroundHoverRow[0] = true
               })
-            } else if (event.type === TouchType.Up) {
+            } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
               animateTo({
                 curve: SHARP_CUBIC_BEZIER,
                 duration: ANIMATION_DURATION_100
@@ -555,7 +555,7 @@ struct MultiFilterRow {
                         this.backgroundColorRow[colIndex] = $r('sys.color.ohos_id_color_click_effect')
                         this.isBackgroundHoverRow[colIndex] = true
                       })
-                    } else if (event.type === TouchType.Up) {
+                    } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                       animateTo({
                         curve: SHARP_CUBIC_BEZIER,
                         duration: ANIMATION_DURATION_100
@@ -957,7 +957,7 @@ export struct Filter {
                       (this.additionBackgroundColorArr[index] = $r('sys.color.ohos_id_color_click_effect'))
                     this.isAdditionBackgroundHover && (this.isAdditionBackgroundHover[index] = true)
                   })
-                } else if (event.type === TouchType.Up) {
+                } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                   animateTo({
                     curve: SHARP_CUBIC_BEZIER,
                     duration: ANIMATION_DURATION_100
@@ -1136,7 +1136,7 @@ export struct Filter {
             this.floatArrowBgColor = $r('sys.color.ohos_id_color_click_effect')
             this.isFloatArrowBgHover = true
           })
-        } else if (event.type === TouchType.Up) {
+        } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           animateTo({
             curve: SHARP_CUBIC_BEZIER,
             duration: ANIMATION_DURATION_100

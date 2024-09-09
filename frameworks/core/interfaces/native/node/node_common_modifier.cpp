@@ -14,20 +14,8 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "interfaces/native/native_type.h"
 #include "interfaces/native/node/node_model.h"
-#include "securec.h"
 
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/shape.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -748,11 +736,7 @@ void SetBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const Ar
     borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
     borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
     borderRadius.multiValued = true;
-    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
-        ImageSpanView::SetBorderRadius(frameNode, borderRadius);
-    } else {
-        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
-    }
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
 }
 
 void ResetBorderRadius(ArkUINodeHandle node)
@@ -760,11 +744,7 @@ void ResetBorderRadius(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
-    if (frameNode->GetTag() == V2::IMAGE_SPAN_ETS_TAG) {
-        ImageSpanView::ResetBorderRadius(frameNode);
-    } else {
-        ViewAbstract::SetBorderRadius(frameNode, reset);
-    }
+    ViewAbstract::SetBorderRadius(frameNode, reset);
 }
 
 /**
@@ -1718,14 +1698,16 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ArkUI_Int32 blurStyle = (*intArray)[NUM_0];
     ArkUI_Int32 colorMode = (*intArray)[NUM_1];
     ArkUI_Int32 adaptiveColor = (*intArray)[NUM_2];
+    ArkUI_Int32 policy = (*intArray)[NUM_3];
+    ArkUI_Int32 blurType = (*intArray)[NUM_4];
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1748,6 +1730,11 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         bgBlurStyle.blurOption = blurOption;
     }
+    bgBlurStyle.policy = static_cast<BlurStyleActivePolicy>(policy);
+    bgBlurStyle.blurType = static_cast<BlurType>(blurType);
+    bgBlurStyle.isValidColor = isValidColor;
+    Color inactiveColor(inactiveColorArg);
+    bgBlurStyle.inactiveColor = inactiveColor;
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
@@ -2644,6 +2631,9 @@ void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == "Custom") {
+        ViewAbstract::SetFocusType(frameNode, focusable ? FocusType::SCOPE : FocusType::DISABLE);
+    }
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
@@ -3425,9 +3415,11 @@ void ResetForegroundEffect(ArkUINodeHandle node)
 
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
-    ArkUI_Int32 blurValuesSize)
+    ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
+    ArkUI_Uint32 inactiveColorArg)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
@@ -3438,10 +3430,18 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
-    EffectOption option = { radius, saturationArg, brightnessArg, color, static_cast<AdaptiveColor>(adaptiveColorArg),
-        blurOption };
-
-    CHECK_NULL_VOID(frameNode);
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturationArg;
+    option.brightness = brightnessArg;
+    option.color = color;
+    option.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorArg);
+    option.blurOption = blurOption;
+    option.blurType = static_cast<BlurType>(blurType);
+    option.policy = static_cast<BlurStyleActivePolicy>(policy);
+    Color inactiveColor(inactiveColorArg);
+    option.inactiveColor = inactiveColor;
+    option.isValidColor = isValidColor;
     ViewAbstract::SetBackgroundEffect(frameNode, option);
 }
 

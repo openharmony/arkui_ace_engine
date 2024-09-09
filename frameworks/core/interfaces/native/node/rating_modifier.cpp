@@ -14,10 +14,6 @@
  */
 #include "core/interfaces/native/node/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t STARS_DEFAULT = 5;
@@ -87,18 +83,25 @@ void ResetStarStyle(ArkUINodeHandle node)
     RatingModelNG::SetSecondarySrc(frameNode, "", true);
 }
 
+void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RatingModelNG::SetRatingOptions(frameNode, rating, static_cast<bool>(indicator));
+}
+
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
     static const ArkUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle};
+        ResetStars, ResetRatingStepSize, ResetStarStyle, SetRatingOptions};
     return &modifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
     static const CJUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle};
+        ResetStars, ResetRatingStepSize, ResetStarStyle };
     return &modifier;
 }
 }

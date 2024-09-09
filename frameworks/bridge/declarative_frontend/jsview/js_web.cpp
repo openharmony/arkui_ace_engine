@@ -24,6 +24,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb.h"
@@ -44,9 +45,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1922,6 +1921,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedLifecycleChange", &JSWeb::OnNativeEmbedLifecycleChange);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedVisibilityChange", &JSWeb::OnNativeEmbedVisibilityChange);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedGestureEvent", &JSWeb::OnNativeEmbedGestureEvent);
     JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
@@ -1942,6 +1942,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
+    JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2269,6 +2270,18 @@ void JSWeb::Create(const JSCallbackInfo& info)
     RenderMode renderMode = RenderMode::ASYNC_RENDER;
     if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
         renderMode = static_cast<RenderMode>(type->ToNumber<int32_t>());
+    }
+    std::string debugRenderMode = SystemProperties::GetWebDebugRenderMode();
+    if (debugRenderMode != "none") {
+        if (debugRenderMode == "async") {
+            renderMode = RenderMode::ASYNC_RENDER;
+        } else if (debugRenderMode == "sync") {
+            renderMode = RenderMode::SYNC_RENDER;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "JSWeb::Create unsupport debug render mode: %{public}s",
+                debugRenderMode.c_str());
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::Create use debug render mode: %{public}s", debugRenderMode.c_str());
     }
 
     bool incognitoMode = false;
@@ -4465,6 +4478,15 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> EmbedVisibilityChangeToJSValue(const NativeEmbedVisibilityInfo& visibilityInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("visibility", visibilityInfo.GetVisibility());
+    obj->SetProperty("embedId", visibilityInfo.GetEmbedId());
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -4482,6 +4504,25 @@ void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
     };
     WebModel::GetInstance()->SetNativeEmbedLifecycleChangeId(jsCallback);
 }
+
+void JSWeb::OnNativeEmbedVisibilityChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbedVisibilityInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), EmbedVisibilityChangeToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                            const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedVisibilityInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedVisibilityChangeId(jsCallback);
+}
+
 
 JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
 {
@@ -5105,6 +5146,15 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
     NG::OnMenuItemClickCallback onMenuItemClick;
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
     WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnabledHapticFeedback(isEnabled);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -15,16 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/tab_bar/tab_bar_component.h"
-#include "core/components/tab_bar/tab_content_component.h"
-#include "core/components/tab_bar/tab_theme.h"
-#include "core/components_v2/tabs/tabs_component.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

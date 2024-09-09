@@ -17,8 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -217,6 +215,7 @@ void TextClockModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std
 
 void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

@@ -44,6 +44,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 }
 
@@ -198,6 +200,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
     JSClass<JSTextPicker>::StaticMethod("selectedIndex", &JSTextPicker::SetSelectedIndex);
     JSClass<JSTextPicker>::StaticMethod("divider", &JSTextPicker::SetDivider);
+    JSClass<JSTextPicker>::StaticMethod("opacity", &JSTextPicker::JsOpacity);
 
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
@@ -227,6 +230,12 @@ void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
+}
+
+void JSTextPicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
@@ -1468,6 +1477,19 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     Shadow shadow;
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
         textPickerDialog.shadow = shadow;
+    }
+
+    auto enableHoverModeValue = paramObject->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        textPickerDialog.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            textPickerDialog.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
     }
 
     auto buttonInfos = ParseButtonStyles(paramObject);

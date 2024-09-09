@@ -14,18 +14,8 @@
  */
 
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
-#include <algorithm>
-#include <string>
 
-#include "base/log/ace_trace.h"
-#include "base/utils/time_util.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

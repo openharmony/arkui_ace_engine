@@ -604,6 +604,11 @@ public:
         return usePropertyAnimation_;
     }
 
+    bool IsTranslateAnimationRunning() const
+    {
+        return translateAnimationIsRunning_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;
@@ -751,6 +756,8 @@ private:
     void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
+    void SetLazyForEachFlag() const;
+    void SetRepeatLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
@@ -923,6 +930,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    std::optional<RefPtr<UINode>> FindRepeatVirtualNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
@@ -942,6 +950,8 @@ private:
     void UpdateIndicatorOnChildChange();
 
     void CheckSpecialItemCount() const;
+    int32_t CheckIndexRange(int32_t index) const;
+    void CheckAndFireCustomAnimation();
 
     friend class SwiperHelper;
 

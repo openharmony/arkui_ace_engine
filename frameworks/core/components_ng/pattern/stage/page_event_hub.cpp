@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-#include "core/components_ng/pattern/radio/radio_paint_property.h"
-#include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 const RefPtr<GroupManager>& PageEventHub::GetGroupManager() const

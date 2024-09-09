@@ -2373,7 +2373,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
     textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
     SetContentModifier(textContentModifier);
     auto pattern = textFrameNode->GetPattern<Pattern>();
@@ -2433,7 +2433,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
     textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
     SetContentModifier(textContentModifier);
     auto pattern = textFrameNode->GetPattern<Pattern>();
@@ -2848,27 +2848,6 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextSelectOverlayTestPreProcessOverlay001
- * @tc.desc: Verify PreProcessOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestPreProcessOverlay001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    OverlayRequest request;
-
-    textSelectOverlay->hostTextBase_ = nullptr;
-    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), false);
-    textSelectOverlay->hostTextBase_ = pattern;
-
-    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), true);
-}
-
-/**
  * @tc.name: TextSelectOverlayTestGetFirstHandleInfo001
  * @tc.desc: Verify GetFirstHandleInfo
  * @tc.type: FUNC
@@ -3220,76 +3199,6 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnUpdateMenuInfo001, TestSize.Level1)
 
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_FIRST_HANDLE);
     ASSERT_EQ(menuInfo.showCut, false);
-}
-
-/**
- * @tc.name: TextSelectOverlayTestOnMenuItemAction001
- * @tc.desc: Verify OnMenuItemAction
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestOnMenuItemAction001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    pattern->textForDisplay_ = TEXT_CONTENT;
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::NO_MENU);
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::NO_MENU);
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
-}
-
-/**
- * @tc.name: TextSelectOverlayTestOnCloseOverlay001
- * @tc.desc: Verify OnCloseOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestOnCloseOverlay001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    pattern->textForDisplay_ = TEXT_CONTENT;
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
-
-    textSelectOverlay->OnCloseOverlay(OptionMenuType::NO_MENU, CloseReason::CLOSE_REASON_TOOL_BAR);
-    textSelectOverlay->OnCloseOverlay(OptionMenuType::NO_MENU, CloseReason::CLOSE_REASON_HOLD_BY_OTHER);
-
-    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
-}
-
-/**
- * @tc.name: TextSelectOverlayTestOnHandleGlobalTouchEvent001
- * @tc.desc: Verify OnHandleGlobalTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleGlobalTouchEvent001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    pattern->textForDisplay_ = TEXT_CONTENT;
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
-
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::DOWN);
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP);
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN);
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::UP);
-
-    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
 }
 
 /**

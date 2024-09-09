@@ -15,10 +15,6 @@
 
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
-#include <unordered_map>
-
-#include "base/utils/string_utils.h"
-#include "core/common/container.h"
 #include "core/components_v2/inspector/actionsheetdialog_composed_element.h"
 #include "core/components_v2/inspector/alertdialog_composed_element.h"
 #include "core/components_v2/inspector/badge_composed_element.h"
@@ -46,7 +42,6 @@
 #include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
 #include "core/components_v2/inspector/indexer_composed_element.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
 #include "core/components_v2/inspector/list_item_group_composed_element.h"
@@ -97,7 +92,6 @@
 #include "core/components_v2/inspector/water_flow_composed_element.h"
 #include "core/components_v2/inspector/water_flow_item_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
 

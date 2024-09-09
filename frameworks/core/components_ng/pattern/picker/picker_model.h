@@ -35,12 +35,14 @@ struct PickerDialogInfo {
     bool isStartDate;
     bool isEndDate;
     bool isSelectedDate;
+    bool enableHoverMode = false;
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<Shadow> shadow;
+    std::optional<HoverModeAreaType> hoverModeArea;
 };
 struct PickerDialogEvent {
     std::function<void()> onDidAppear;
@@ -71,6 +73,7 @@ public:
     virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
+    virtual void HasUserDefinedOpacity() = 0;
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;

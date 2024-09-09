@@ -495,7 +495,7 @@ struct TabContentItem {
                 if (event.type === TouchType.Down) {
                   this.isOnClick = true
                 }
-                if (event.type === TouchType.Up) {
+                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                   this.isOnClick = false
                 }
               })
@@ -557,7 +557,7 @@ struct TabContentItem {
               if (event.type === TouchType.Down) {
                 this.isOnClick = true
               }
-              if (event.type === TouchType.Up) {
+              if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isOnClick = false
               }
             })
@@ -698,7 +698,7 @@ struct ImageMenuItem {
       if (event.type === TouchType.Down) {
         this.isOnClick = true
       }
-      if (event.type === TouchType.Up) {
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
       }
     })

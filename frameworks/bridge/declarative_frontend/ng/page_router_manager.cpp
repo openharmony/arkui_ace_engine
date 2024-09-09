@@ -15,22 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <iterator>
-#include <string>
-
 #include "base/i18n/localization.h"
-#include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
-#include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "bridge/common/utils/source_map.h"
-#include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/ng/entry_page_info.h"
-#include "bridge/js_frontend/frontend_delegate.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"

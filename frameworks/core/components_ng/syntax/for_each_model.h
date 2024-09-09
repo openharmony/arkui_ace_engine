@@ -48,6 +48,7 @@ public:
 
     virtual std::list<std::string> GetCurrentIdList(int32_t nodeId) = 0;
     virtual void SetNewIds(std::list<std::string>&& newIds) = 0;
+    virtual void SetRemovedElmtIds(std::list<int32_t>& removedElmtId) = 0;
 
     virtual void CreateNewChildStart(const std::string& id) = 0;
     virtual void CreateNewChildFinish(const std::string& id) = 0;

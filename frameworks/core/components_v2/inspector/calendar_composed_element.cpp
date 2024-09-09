@@ -15,9 +15,7 @@
 
 #include "core/components_v2/inspector/calendar_composed_element.h"
 
-#include "base/log/dump_log.h"
 #include "core/components/calendar/calendar_element.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {

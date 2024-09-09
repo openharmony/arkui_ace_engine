@@ -15,9 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/web_model_impl.h"
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/event/ace_event_handler.h"
-
 namespace OHOS::Ace::Framework {
 void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController,
     RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken)
@@ -604,6 +601,15 @@ void WebModelImpl::SetNativeEmbedLifecycleChangeId(std::function<void(const Base
     auto eventMarker = EventMarker(std::move(jsCallback));
 
     webComponent->SetNativeEmbedLifecycleChangeId(eventMarker);
+}
+
+void WebModelImpl::SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetNativeEmbedVisibilityChangeId(eventMarker);
 }
 
 void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)

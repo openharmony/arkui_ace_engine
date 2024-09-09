@@ -14,15 +14,6 @@
  */
 #include "core/components_ng/pattern/text/span/span_object.h"
 
-#include <optional>
-#include <utility>
-
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/render/paragraph.h"
-
 namespace OHOS::Ace {
 // SpanBase
 std::optional<std::pair<int32_t, int32_t>> SpanBase::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
@@ -885,8 +876,9 @@ RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
 void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     auto address = GetUrlSpanAddress();
+    spanItem->SetUrlAddress(address);
     spanItem->HandleUrlNormalStyle(spanItem);
-    auto urlOnRelease = [address]() {
+    auto urlOnRelease = [](const std::string& address) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HyperlinkStartAbility(address);
@@ -894,7 +886,7 @@ void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
     auto urlOnHover = [](const RefPtr<NG::SpanItem>& spanItem, bool isHover, int32_t urlId) {
         spanItem->HandeUrlHoverEvent(isHover, urlId, spanItem);
     };
-    auto urlOnClick = [address](OHOS::Ace::GestureEvent&) {
+    auto urlOnClick = [](const std::string& address) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HyperlinkStartAbility(address);

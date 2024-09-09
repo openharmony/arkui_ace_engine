@@ -14,20 +14,10 @@
  */
 #include "core/components_ng/pattern/gauge/gauge_modifier.h"
 
-#include <algorithm>
-#include <cmath>
-
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
-#include "core/components_ng/pattern/gauge/gauge_paint_property.h"
-#include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
-#include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 namespace {

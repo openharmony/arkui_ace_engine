@@ -63,7 +63,7 @@ public:
     void NotifyCreate() override;
     void NotifyForeground() override;
     void NotifyBackground() override;
-    void NotifyDestroy() override;
+    void NotifyDestroy(bool isHandleError = true) override;
     void NotifyConfigurationUpdate() override;
 
     // The interface for responsing provider
@@ -95,6 +95,11 @@ public:
     // The interface to update viewport config
     void UpdateSessionViewportConfig() override;
 
+    // The interface for UEC dump
+    uint32_t GetReasonDump() const override;
+    void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WindowSizeChangeReason GetSizeChangeReason() const override;
+
 private:
     void InitAllCallback();
     void UpdateSessionConfig();
@@ -109,6 +114,7 @@ private:
     sptr<Rosen::ExtensionSession> session_;
     bool isNotifyOccupiedAreaChange_ = true;
     RectF displayArea_;
+    uint32_t reason_ = (uint32_t)Rosen::SizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;

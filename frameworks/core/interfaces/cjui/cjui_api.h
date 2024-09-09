@@ -104,8 +104,9 @@ struct CJUICommonModifier {
     void (*setLinearGradientBlur)(ArkUINodeHandle node, ArkUI_Float32 blurRadius, const ArkUI_Float32* stops,
         ArkUI_Uint32 stopsLength, ArkUI_Int32 directionValue);
     void (*resetLinearGradientBlur)(ArkUINodeHandle node);
-    void (*setBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-        const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
+    void (*setBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
+        const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor,
+        ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
         const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
@@ -238,7 +239,8 @@ struct CJUICommonModifier {
     void (*resetForegroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 saturation,
         ArkUI_Float32 brightness, ArkUI_Uint32 color, ArkUI_Int32 adaptiveColor, const ArkUI_Float32* blurValues,
-        ArkUI_Int32 blurValuesSize);
+        ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
+        ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundBrightness)(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree);
     void (*resetBackgroundBrightness)(ArkUINodeHandle node);
@@ -1232,6 +1234,8 @@ struct CJUIScrollBarModifier {
     void (*setScrollBarState)(ArkUINodeHandle node, ArkUI_Int32 state);
     void (*resetScrollBarState)(ArkUINodeHandle node);
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
+    void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
 };
 
 struct CJUIScrollerModifier {
@@ -1869,6 +1873,8 @@ struct CJUICheckboxModifier {
     ArkUI_Float64 (*getCheckMarkSize)(ArkUINodeHandle node);
     ArkUI_Float64 (*getCheckMarkWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
+    void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
+    void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct CJUICheckboxGroupModifier {
@@ -1888,6 +1894,7 @@ struct CJUICheckboxGroupModifier {
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
+    void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
 };
 
 struct CJUIImageSpanModifier {
@@ -2269,6 +2276,13 @@ struct CJUICalendarPickerModifier {
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
+    void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetCalendarPickerBorderColor)(ArkUINodeHandle node);
+    void (*setCalendarPickerBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
+    void (*resetCalendarPickerBorderRadius)(ArkUINodeHandle node);
+    void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
 };
 
 struct CJUIRatingModifier {

@@ -22,12 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
-#include "frameworks/base/geometry/dimension.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -60,11 +55,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
         }
         colorArray.emplace_back(color.GetValue());
     }
-    if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
-        for (uint32_t i = 0; i < length; i++) {
-            colorArray.emplace_back(colorArray[i]);
-        }
-    }
+
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColor(nativeNode, colorArray.data(), colorArray.size());
     return panda::JSValueRef::Undefined(vm);
 }

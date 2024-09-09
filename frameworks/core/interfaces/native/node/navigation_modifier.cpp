@@ -14,13 +14,7 @@
  */
 #include "core/interfaces/native/node/navigation_modifier.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NAV_BAR_POSITION_RANGE_MODIFIER = 1;

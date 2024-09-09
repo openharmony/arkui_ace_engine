@@ -16,7 +16,6 @@
 #include "core/common/stylus/stylus_detector_loader.h"
 
 #include <dlfcn.h>
-#include <memory>
 
 #include "frameworks/base/log/log_wrapper.h"
 
@@ -59,7 +58,7 @@ bool StylusDetectorLoader::Init()
     destroyStylusDetectorInstance_ =
         (void (*)(StylusDetectorInterface*))dlsym(libraryHandle_, "DestroyStylusDetectorInstance");
     if (createStylusDetectorInstance_ == nullptr || destroyStylusDetectorInstance_ == nullptr) {
-        LOGI("Stylus detector loader instance loading failed.");
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "Stylus detector loader instance loading failed.");
         Close();
         return false;
     }

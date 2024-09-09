@@ -154,6 +154,7 @@ public:
     void UpdateCaretWidth(float width)
     {
         caretInfo_.rect.SetWidth(width);
+        caretInfo_.originalRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     }
 
     HandleInfoNG GetFirstHandleInfo() const
@@ -197,10 +198,10 @@ public:
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
-    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true);
-    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true);
-    void MoveCaretToContentRect(
-        int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
+    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
+    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
+    void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM,
+        bool isEditorValueChanged = true, bool moveContent = true);
     void MoveCaretAnywhere(const Offset& touchOffset);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;
     void AdjustHandleAtEdge(RectF& handleRect) const;
@@ -208,7 +209,7 @@ public:
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
-    RectF CalculateEmptyValueCaretRect();
+    RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
     bool IsTouchAtLineEnd(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
@@ -233,6 +234,8 @@ private:
     bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
     bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
     const TimeStamp& GetLastClickTime();
+    void UpdateCaretOriginalRect(const OffsetF& offset);
+    void SetCaretRectAtEmptyValue();
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);

@@ -15,15 +15,7 @@
 
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components/button/button_theme.h"
 #include "core/components/toggle/toggle_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -34,6 +26,17 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    if (buttonLayoutProperty->HasType() && buttonLayoutProperty->GetType() == ButtonType::CIRCLE &&
+        !pattern->GetHasCustomPadding()) {
+        NG::PaddingProperty paddings;
+        paddings.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        paddings.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        paddings.left = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        paddings.right = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+        buttonLayoutProperty->UpdatePadding(paddings);
+    }
     if (pattern->UseContentModifier()) {
         const auto& childList = layoutWrapper->GetAllChildrenWithBuild();
         std::list<RefPtr<LayoutWrapper>> builderChildList;
@@ -52,8 +55,6 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     HandleChildLayoutConstraint(layoutWrapper, layoutConstraint);
-    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(buttonLayoutProperty);
     if (buttonLayoutProperty->HasLabel()) {
         // If the button has label, according to whether the font size is set to do the corresponding expansion button,
         // font reduction, truncation and other operations.
@@ -367,6 +368,14 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
         } else {
             frameSize.SetHeight(frameSize.Height() + agingPadding);
         }
+        auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
+        CHECK_NULL_RETURN(layoutContraint, false);
+        auto maxHeight = layoutContraint->maxSize.Height();
+        auto minHeight = layoutContraint->minSize.Height();
+        auto actualHeight = frameSize.Height();
+        actualHeight = std::min(actualHeight, maxHeight);
+        actualHeight = std::max(actualHeight, minHeight);
+        frameSize.SetHeight(actualHeight);
         geometryNode->SetFrameSize(frameSize);
     }
     HandleBorderRadius(layoutWrapper);

@@ -15,14 +15,7 @@
 
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
-#include "frameworks/base/utils/utils.h"
-#include "frameworks/core/common/container.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "frameworks/core/components_ng/property/measure_property.h"
-#include "frameworks/core/components_ng/property/measure_utils.h"
-#include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -46,7 +39,7 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
             auto builderLayoutConstraint = layoutConstraint;
-            bool isCustomBuilderExist = layoutProperty->GetIsCustomBuilderExistValue(false);
+            bool isCustomBuilderExist = layoutProperty->GetIsCustomBuilderExistValue(true);
             if (isCustomBuilderExist) {
                 builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
                     CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));

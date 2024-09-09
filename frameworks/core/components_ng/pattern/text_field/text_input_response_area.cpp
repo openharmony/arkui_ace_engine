@@ -25,14 +25,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/mouse_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -200,6 +195,14 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         auto button = weak.Upgrade();
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        auto node = button->GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto message = !button->IsObscured() ? theme->GetHasShowedPassword() : theme->GetHasHiddenPassword();
+        node->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, message);
     };
     auto longPressCallback = [](GestureEvent& info) {
         LOGD("PasswordResponseArea long press");

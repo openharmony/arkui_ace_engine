@@ -40,7 +40,7 @@ public:
         attribute.gradient.SetGradientTransform(gradientTransform);
     }
 
-    void SetSpreadMethod(SpreadMethod spreadMethod)
+    void SetSpreadMethod(GradientSpreadMethodNG spreadMethod)
     {
         auto& attribute = MaybeResetAttribute<SvgGradientAttribute>(AttributeTag::SPECIALIZED_ATTR);
         attribute.gradient.SetSpreadMethod(spreadMethod);
@@ -107,7 +107,7 @@ public:
         return attribute.gradient.GetGradientTransform();
     }
 
-    SpreadMethod GetSpreadMethod() const
+    GradientSpreadMethodNG GetSpreadMethod() const
     {
         auto& attribute = static_cast<SvgGradientAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.gradient.GetSpreadMethod();

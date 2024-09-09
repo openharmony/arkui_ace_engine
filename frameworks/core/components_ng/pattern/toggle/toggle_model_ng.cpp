@@ -15,23 +15,11 @@
 
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components/toggle/toggle_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
-#include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -594,9 +582,13 @@ void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool is
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch update isOn %{public}d", isOn);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
+    auto paintProperty = frameNode->GetPaintPropertyPtr<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasIsOn() && paintProperty->GetIsOn().value() != isOn) {
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch update isOn %{public}d", isOn);
+    }
+    paintProperty->UpdateIsOn(isOn);
 }
 
 void ToggleModelNG::UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)

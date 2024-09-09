@@ -74,6 +74,15 @@ public:
         it->second.stagingValue_ += delta;
     }
 
+    void ForceUpdate(const WeakPtr<AnimatableProperty<T>>& ptr, T delta)
+    {
+        auto it = props_.find(ptr);
+        if (it == props_.end()) {
+            return;
+        }
+        it->second.stagingValue_ += delta;
+    }
+
 private:
     struct PropertyImpl {
         T stagingValue_;

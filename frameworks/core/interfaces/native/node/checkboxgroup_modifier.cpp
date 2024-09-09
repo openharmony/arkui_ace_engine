@@ -14,12 +14,7 @@
  */
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
-#include "frameworks/core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
@@ -160,6 +155,13 @@ void ResetCheckboxGroupStyle(ArkUINodeHandle node)
     CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
 }
 
+void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetCheckboxGroupName(frameNode, std::string(group));
+}
+
 namespace NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
@@ -167,7 +169,7 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
         SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
         SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
-        SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
+        SetCheckboxGroupStyle, ResetCheckboxGroupStyle, SetCheckboxGroupName };
     return &modifier;
 }
 
@@ -177,7 +179,7 @@ const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier()
         ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
         SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
         SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
-        SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
+        SetCheckboxGroupStyle, ResetCheckboxGroupStyle, SetCheckboxGroupName };
     return &modifier;
 }
 }

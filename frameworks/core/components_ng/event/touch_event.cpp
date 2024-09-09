@@ -15,8 +15,6 @@
 
 #include "core/components_ng/event/touch_event.h"
 
-#include "core/components_ng/event/response_ctrl.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

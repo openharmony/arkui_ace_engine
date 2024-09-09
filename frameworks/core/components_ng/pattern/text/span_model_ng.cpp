@@ -15,16 +15,6 @@
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-
 #define ACE_UPDATE_SPAN_PROPERTY(name, value, flag)                                                              \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
@@ -462,8 +452,9 @@ TextBackgroundStyle SpanModelNG::GetSpanTextBackgroundStyle(UINode* uiNode)
 std::vector<Shadow> SpanModelNG::GetTextShadow(UINode* uiNode)
 {
     std::vector<Shadow> defaultShadow;
-    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(uiNode, defaultShadow);
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, defaultShadow);
     return spanNode->GetTextShadow().value_or(defaultShadow);
 }
 

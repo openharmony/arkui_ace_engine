@@ -68,7 +68,7 @@ public:
 
     // override SelectOverlayHolder
     RefPtr<FrameNode> GetOwner() override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     bool CheckRestartHiddenHandleTask(int32_t requestCode) override;
@@ -191,6 +191,16 @@ public:
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
+    void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
+    {
+        onCreateMenuCallback_ = onCreateMenuCallback;
+    }
+
+    void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    {
+        onMenuItemClick_ = onMenuItemClick;
+    }
+
     float GetHandleDiameter();
     VectorF GetHostScale();
     void SwitchToOverlayMode();
@@ -276,6 +286,13 @@ protected:
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
     virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
+    bool GetClipHandleViewPort(RectF& rect);
+    virtual void UpdateClipHandleViewPort(RectF& rect) {};
+    bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
+    virtual bool IsClipHandleWithViewPort()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

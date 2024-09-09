@@ -22,12 +22,8 @@
 #include "core/components/font/rosen_font_collection.h"
 #endif
 
-#include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 
 namespace OHOS::Ace::NG {
@@ -41,9 +37,10 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     lastLayoutSize_.SetWidth(static_cast<float>(width));
     lastLayoutSize_.SetHeight(static_cast<float>(height));
     InitBitmap();
-    InitImageCallbacks();
-    // The initial value of the font size in canvas is 14px.
+    // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
+    // The default value of TextAlign is TextAlign::START.
+    SetDefaultTextAlign();
 }
 
 void OffscreenCanvasPaintMethod::InitBitmap()
@@ -95,24 +92,6 @@ void OffscreenCanvasPaintMethod::UpdateSize(int32_t width, int32_t height)
     lastLayoutSize_.SetWidth(static_cast<float>(width));
     lastLayoutSize_.SetHeight(static_cast<float>(height));
     Reset();
-}
-
-void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
-{
-#ifndef ACE_UNITTEST
-    CHECK_EQUAL_VOID(imageObj->IsSvg(), false);
-    skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj)->GetSkiaDom();
-    currentSource_ = loadingSource_;
-#endif
-}
-
-void OffscreenCanvasPaintMethod::ImageObjFailed()
-{
-#ifndef ACE_UNITTEST
-    loadingSource_.SetSrc("");
-    currentSource_.SetSrc("");
-    skiaDom_ = nullptr;
-#endif
 }
 
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)

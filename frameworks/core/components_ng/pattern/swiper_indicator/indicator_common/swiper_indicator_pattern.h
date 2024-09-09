@@ -90,6 +90,7 @@ public:
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(swiperPattern->DisplayIndicatorTotalCount());
+        paintMethod->SetTotalItemCount(swiperPattern->TotalCount());
         paintMethod->SetSwipeByGroup(swiperLayoutProperty->GetSwipeByGroup().value_or(false));
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         gestureState_ = swiperPattern->GetGestureState();

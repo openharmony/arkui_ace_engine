@@ -13,40 +13,19 @@
  * limitations under the License.
  */
 
-#include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/components_ng/pattern/image/image_overlay_modifier.h"
-#include "core/image/image_source_info.h"
+#include "core/components_ng/property/border_property.h"
 #define NAPI_VERSION 8
 
-#include <array>
-#include <cstdint>
-#include <memory>
-
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/matrix4.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/vector.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
-#include "core/common/frontend.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -470,6 +449,9 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
 
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
+    if (!dstSize.IsPositive()) {
+        return;
+    }
     // if layout size has not decided yet, resize target can not be calculated
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -766,8 +748,10 @@ void ImagePattern::OnModifyDone()
         default:
             break;
     }
-
-    InitOnKeyEvent();
+    
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        InitOnKeyEvent();
+    }
 }
 
 void ImagePattern::InitOnKeyEvent()
@@ -1392,6 +1376,10 @@ void ImagePattern::DumpLayoutInfo()
     if (sourceSize.has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("sourceSize: ").append(sourceSize.value().ToString()));
     }
+
+    bool autoResize = layoutProp->GetAutoResize().value_or(autoResizeDefault_);
+    autoResize ? DumpLog::GetInstance().AddDesc("autoResize:true")
+                       : DumpLog::GetInstance().AddDesc("autoResize:false");
 }
 
 void ImagePattern::DumpRenderInfo()
@@ -1437,6 +1425,9 @@ void ImagePattern::DumpRenderInfo()
     needBorderRadius ? DumpLog::GetInstance().AddDesc("needBorderRadius:true")
                      : DumpLog::GetInstance().AddDesc("needBorderRadius:false");
 
+    auto borderRadius = renderProp->GetBorderRadius().value_or(BorderRadiusProperty());
+    DumpLog::GetInstance().AddDesc(borderRadius.ToString());
+
     if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
         DumpLog::GetInstance().AddDesc(
             std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
@@ -1449,10 +1440,6 @@ void ImagePattern::DumpInfo()
     DumpRenderInfo();
 
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
-
-    autoResizeDefault_ ? DumpLog::GetInstance().AddDesc("autoResize:true")
-                       : DumpLog::GetInstance().AddDesc("autoResize:false");
-
 
     DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
     if (loadingCtx_) {

@@ -50,11 +50,11 @@ enum ItemType {
   LeftIcon,
 }
 
-const PUBLIC_CANCEL = $r('sys.media.ohos_ic_public_cancel');
+const PUBLIC_CANCEL = $r('sys.symbol.xmark');
 
-const PUBLIC_OK = $r('sys.media.ohos_ic_public_ok');
+const PUBLIC_OK = $r('sys.symbol.checkmark');
 
-const PUBLIC_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
+const PUBLIC_BACK = $r('sys.symbol.chevron_backward');
 
 const DEFAULT_TITLE_BAR_HEIGHT = 56;
 const DEFAULT_TITLE_PADDING = 2;
@@ -89,10 +89,10 @@ class EditableTitleBarTheme {
 }
 
 class ButtonGestureModifier implements GestureModifier {
-   public static readonly longPressTime: number = 500;
-   public static readonly minFontSize: number = 1.75;
-   public fontSize: number = 1;
-   public controller: CustomDialogController | null = null;
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
 
   constructor(controller: CustomDialogController | null) {
     this.controller = controller;
@@ -256,6 +256,7 @@ export struct EditableTitleBar {
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        useSymbol: true,
       })
     } else {
       ImageMenuItem({
@@ -266,6 +267,7 @@ export struct EditableTitleBar {
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        useSymbol: true,
       })
     }
   }
@@ -378,6 +380,7 @@ struct EditableTitleBarMenuSection {
             },
             fontSize: this.fontSize,
             attribute: ItemType.Icon,
+            useSymbol: true,
           })
         }
       }
@@ -398,6 +401,7 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
+  useSymbol: boolean = false;
   @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
@@ -562,15 +566,25 @@ struct ImageMenuItem {
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
-      Image(this.item.value)
-        .fillColor(this.editableTitleBarTheme.iconColor)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
-        .width($r('sys.float.titlebar_icon_width'))
-        .height($r('sys.float.titlebar_icon_height'))
-        .focusable(this.item.isEnabled)
-        .enabled(this.item.isEnabled)
-        .draggable(false)
-        .accessibilityText(this.getAccessibilityReadText())
+      if (this.useSymbol) {
+        SymbolGlyph(this.item.value as Resource)
+          .width($r('sys.float.titlebar_icon_width'))
+          .height($r('sys.float.titlebar_icon_height'))
+          .focusable(this.item.isEnabled)
+          .enabled(this.item.isEnabled)
+          .draggable(false)
+          .fontSize(25)
+      } else {
+        Image(this.item.value)
+          .fillColor(this.editableTitleBarTheme.iconColor)
+          .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
+          .width($r('sys.float.titlebar_icon_width'))
+          .height($r('sys.float.titlebar_icon_height'))
+          .focusable(this.item.isEnabled)
+          .enabled(this.item.isEnabled)
+          .draggable(false)
+          .accessibilityText(this.getAccessibilityReadText())
+      }
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))

@@ -15,13 +15,6 @@
 
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -135,10 +128,12 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        activeFingers_.remove(event.id);
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        activeFingers_.remove(event.id);
         return;
     }
 

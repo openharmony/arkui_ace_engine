@@ -16,13 +16,9 @@
 #include "bridge/declarative_frontend/jsview/models/stepper_item_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/box/box_component.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
-#include "core/components/navigator/navigator_component.h"
 #include "core/components/stepper/stepper_item_component_v2.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components/stepper/stepper_item_component.h"
 #include "frameworks/core/components/stepper/stepper_theme.h"
 
 namespace OHOS::Ace::Framework {

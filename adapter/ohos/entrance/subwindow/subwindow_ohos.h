@@ -57,6 +57,7 @@ public:
     bool InitContainer() override;
     void ResizeWindow() override;
     NG::RectF GetRect() override;
+    void SetRect(const NG::RectF& rect) override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
@@ -137,6 +138,10 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    bool IsFreeMultiWindow() const override;
+    void OnFreeMultiWindowSwitch(bool enable) override;
+    int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
+    void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -149,6 +154,8 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
+    void DestroyToastWindow() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -207,6 +214,10 @@ private:
     bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
+    int32_t callbackId_ = 0;
+    sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+    std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
+    NG::RectF windowRect_;
 };
 
 } // namespace OHOS::Ace

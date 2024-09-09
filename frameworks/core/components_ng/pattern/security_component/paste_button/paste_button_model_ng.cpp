@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 
-#include "base/log/ace_scoring_log.h"
-#include "base/resource/internal_resource.h"
-#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 std::unique_ptr<PasteButtonModelNG> PasteButtonModelNG::instance_ = nullptr;

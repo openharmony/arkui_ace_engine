@@ -19,15 +19,12 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr uint8_t ENABLED_ALPHA = 255;
-constexpr uint8_t DISABLED_ALPHA = 102;
 constexpr uint8_t DOUBLE = 2;
 const Dimension PICKER_DIALOG_DIVIDER_MARGIN = 24.0_vp;
 } // namespace
@@ -51,7 +48,7 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
 
     return
         [weak = WeakClaim(this), layoutProperty, frameRect,
-            fontScale, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
+            fontScale, pattern = pattern_](RSCanvas& canvas) {
             auto picker = weak.Upgrade();
             CHECK_NULL_VOID(picker);
             auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
@@ -76,9 +73,6 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
                     picker->PaintDefaultDividerLines(canvas, contentRect, dividerHeight);
                 }
             }
-            if (!enabled) {
-                picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
-            }
         };
 }
 
@@ -88,8 +82,6 @@ void TextPickerPaintMethod::PaintCustomDividerLines(RSCanvas& canvas, const Rect
     DividerInfo info;
     if (NeedPaintDividerLines(contentRect, divider, dividerHeight, info)) {
         PaintDividerLines(canvas, contentRect, info, false);
-    } else {
-        PaintDisable(canvas, frameRect.Width(), frameRect.Height());
     }
 }
 
@@ -220,21 +212,4 @@ void TextPickerPaintMethod::PaintLine(const OffsetF& offset, const DividerInfo &
     canvas.Restore();
 }
 
-void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
-{
-    double centerY = Y;
-    double centerX = X;
-    RSRect rRect(0, 0, centerX, centerY);
-    RSPath path;
-    path.AddRoundRect(rRect, 0, 0, RSPathDirection::CW_DIRECTION);
-    RSPen pen;
-    RSBrush brush;
-    brush.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    pen.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    canvas.AttachBrush(brush);
-    canvas.AttachPen(pen);
-    canvas.DrawPath(path);
-    canvas.DetachPen();
-    canvas.DetachBrush();
-}
 } // namespace OHOS::Ace::NG

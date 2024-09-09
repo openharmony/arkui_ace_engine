@@ -219,6 +219,16 @@ public:
         showTime_ = value;
     }
 
+    void SetShowLunarSwitch(bool value)
+    {
+        showLunarSwitch_ = value;
+    }
+
+    bool GetShowLunarSwitch()
+    {
+        return showLunarSwitch_;
+    }
+
     const EventMarker& GetDialogAcceptEvent() const
     {
         return OnDialogAccept_;
@@ -690,6 +700,11 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -724,6 +739,7 @@ private:
     bool lunar_ = false;
     bool showMonthDays_ = false;
     bool showTime_ = false;
+    bool showLunarSwitch_ = false;
     Color backgroundColor_ = Color::WHITE;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
@@ -768,6 +784,10 @@ private:
     bool isFiredDateChange_ = false;
     bool isForceUpdate_ = false;
     std::optional<std::string> firedDateStr_;
+    void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
+    bool CheckFocusID(int32_t childSize);
+    bool ParseDirectionKey(RefPtr<DatePickerColumnPattern>& pattern, KeyCode& code, uint32_t totalOptionCount,
+                          int32_t childSize);
 
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
@@ -779,6 +799,7 @@ private:
     Dimension dividerSpacing_;
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
+    double curOpacity_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

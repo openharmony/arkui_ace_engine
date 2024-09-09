@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
-#include "base/resource/internal_resource.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,7 +55,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
     if (needUpdate) {
-        LOGI("title is need update, isFocus_: %{public}d", isFocus_);
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "title is need update, isFocus_: %{public}d", isFocus_);
         ChangeCustomTitle(isFocus_);
         ChangeControlButtons(isFocus_);
         return;
@@ -76,7 +70,8 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
     hasDeco_ = hasDeco;
-    LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d",
+        isShow, windowMode_, hasDeco_);
     if (!hasDeco_) {
         isShow = false;
     }
@@ -100,7 +95,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus_));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -330,7 +325,7 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(isFocus));
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderColorProperty borderColor;
     borderColor.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
     renderContext->UpdateBorderColor(borderColor);
@@ -433,12 +428,12 @@ bool ContainerModalPattern::CanShowFloatingTitle()
 
     if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN && windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
         windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        LOGI("Window is not full screen or split screen, can not show floating title.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Window is not full screen or split screen, can not show floating title.");
         return false;
     }
 
     if (floatingLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
-        LOGI("Floating tittle is visible now, no need to show again.");
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "Floating tittle is visible now, no need to show again.");
         return false;
     }
     return true;
@@ -446,7 +441,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
 
 void ContainerModalPattern::SetAppTitle(const std::string& title)
 {
-    LOGI("SetAppTitle successfully, title is %{public}s", title.c_str());
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully, title is %{public}s", title.c_str());
     auto customTitleNode = GetCustomTitleNode();
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
@@ -459,7 +454,7 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
 void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 {
     CHECK_NULL_VOID(icon);
-    LOGI("SetAppIcon successfully");
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppIcon successfully");
     auto customTitleNode = GetCustomTitleNode();
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppIconCallback(icon);
@@ -470,7 +465,7 @@ void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 }
 
 void ContainerModalPattern::SetTitleButtonHide(
-    const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize)
+    const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     auto leftSplitButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, LEFT_SPLIT_BUTTON_INDEX));
@@ -489,17 +484,24 @@ void ContainerModalPattern::SetTitleButtonHide(
     CHECK_NULL_VOID(minimizeButton);
     minimizeButton->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
     minimizeButton->MarkDirtyNode();
+
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
+    closeButton->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
+    closeButton->MarkDirtyNode();
 }
 
-void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsRow);
-    SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize);
+    SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize, hideClose);
     hideSplitButton_ = hideSplit;
-    LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
-         "hideMinimize: %{public}d",
-        hideSplit, hideMaximize, hideMinimize);
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "Set containerModal button status successfully, "
+        "hideSplit: %{public}d, hideMaximize: %{public}d, "
+        "hideMinimize: %{public}d, hideClose: %{public}d",
+        hideSplit, hideMaximize, hideMinimize, hideClose);
 }
 
 void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
@@ -513,7 +515,30 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isEnabled);
-    LOGI("Set close button status %{public}s", isEnabled ? "enable" : "disable");
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "Set close button status %{public}s", isEnabled ? "enable" : "disable");
+}
+
+void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
+{
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto containerNode = GetHost();
+    CHECK_NULL_VOID(containerNode);
+    // update container modal background
+    auto renderContext = containerNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
+    activeColor_ = activeColor;
+    inactiveColor_ = inactiveColor;
+}
+
+Color ContainerModalPattern::GetContainerColor(bool isFocus)
+{
+
+    if (isFocus) {
+        return activeColor_;
+    } else {
+        return inactiveColor_;
+    }
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()
@@ -537,8 +562,9 @@ void ContainerModalPattern::UpdateGestureRowVisible()
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
-    LOGI("ContainerModal customTitleSettedShow=%{public}d, floatingTitleSettedShow=%{public}d", customTitleSettedShow,
-        floatingTitleSettedShow);
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "ContainerModal customTitleSettedShow=%{public}d, floatingTitleSettedShow=%{public}d",
+        customTitleSettedShow, floatingTitleSettedShow);
     customTitleSettedShow_ = customTitleSettedShow;
     auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
@@ -565,7 +591,7 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
-    LOGI("ContainerModal SetContainerModalTitleHeight height=%{public}d", height);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModal SetContainerModalTitleHeight height=%{public}d", height);
     if (height < 0) {
         height = 0;
     }
@@ -591,7 +617,7 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
     auto columnRect = column->GetGeometryNode()->GetFrameRect();
     containerModal = columnRect;
     if (columnRect.Width() == 0) {
-        LOGW("Get rect of buttons failed, the rect is measuring.");
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, the rect is measuring.");
         return false;
     }
 
@@ -613,7 +639,7 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
     }
     buttons = firstButtonRect.CombineRectT(lastButtonRect);
     if (buttons.Width() == 0) {
-        LOGW("Get rect of buttons failed, buttons are hidden");
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Get rect of buttons failed, buttons are hidden");
         return false;
     }
 
@@ -671,16 +697,26 @@ void ContainerModalPattern::InitTitle()
         RefPtr<PixelMap> icon = PixelMap::CreatePixelMap(&pixelMap);
         SetAppIcon(icon);
     } else {
-        LOGW("Cannot get pixelmap, try media path."); // use themeConstants GetMediaPath
+        TAG_LOGW(AceLogTag::ACE_APPBAR, "Cannot get pixelmap, try media path."); // use themeConstants GetMediaPath
     }
     SetAppTitle(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
 }
 
 void ContainerModalPattern::Init()
 {
+    InitContainerColor();
     InitContainerEvent();
     InitTitle();
     InitLayoutProperty();
+}
+
+void ContainerModalPattern::InitContainerColor()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    activeColor_ = theme->GetBackGroundColor(true);
+    inactiveColor_ = theme->GetBackGroundColor(false);
 }
 
 void ContainerModalPattern::OnColorConfigurationUpdate()
@@ -724,6 +760,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));

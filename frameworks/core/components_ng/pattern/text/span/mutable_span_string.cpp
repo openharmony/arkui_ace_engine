@@ -15,15 +15,6 @@
 
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 
-#include <algorithm>
-#include <iterator>
-#include <vector>
-
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
@@ -48,6 +39,9 @@ void MutableSpanString::RemoveSpans(int32_t start, int32_t length, bool removeSp
     if (!CheckRange(start, length)) {
         return;
     }
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    length = end - start;
     std::list<SpanType> typeList;
     auto iter = typeList.begin();
     for (auto& it : spansMap_) {
@@ -71,7 +65,9 @@ void MutableSpanString::RemoveSpecialSpans(int32_t start, int32_t length)
     if (!CheckRange(start, length)) {
         return;
     }
-    int32_t end = start + length;
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    length = end - start;
     std::list<RefPtr<SpanBase>> spanBaseList;
     auto iter = spanBaseList.begin();
     for (const auto& type : specailTypes) {
@@ -96,6 +92,9 @@ void MutableSpanString::ReplaceSpan(int32_t start, int32_t length, const RefPtr<
     if (!CheckRange(start, length)) {
         return;
     }
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    length = end - start;
     if (IsSpecialNode(span)) {
         RemoveSpans(start, length);
         AddSpan(span->GetSubSpan(start, start + length));
@@ -254,13 +253,15 @@ void MutableSpanString::ReplaceString(int32_t start, int32_t length, const std::
     if (!CheckRange(start, length)) {
         return;
     }
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    length = end - start;
     SpanStringOperation op = SpanStringOperation::REPLACE;
     auto wOther = StringUtils::ToWstring(other);
     auto otherLength = wOther.length();
     if (otherLength == 0) {
         op = SpanStringOperation::REMOVE;
     }
-    int32_t end = start + length;
     auto text = GetWideString();
     SetString(StringUtils::ToString(text.substr(0, start) + wOther + text.substr(end)));
     ApplyReplaceStringToSpans(start, length, other, op);
@@ -323,6 +324,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     if (other.length() == 0 || start > len) {
         return;
     }
+    ChangeStartToCorrectNum(start);
     auto isAround = IsInsertAroundSpecialNode(start);
     if (isAround != AroundSpecialNode::NONE) {
         InsertStringAroundSpecialNode(start, other, isAround);
@@ -371,13 +373,9 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
 
 void MutableSpanString::RemoveString(int32_t start, int32_t length)
 {
-    // process emoji
-    auto text = GetWideString();
-    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
-        start, length, text, true);
-    int startIndex = range.startIndex;
-    int endIndex = range.endIndex;
-    ReplaceString(startIndex, endIndex - startIndex, "");
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    ReplaceString(start, end - start, "");
     NotifySpanWatcher();
 }
 
@@ -418,6 +416,9 @@ void MutableSpanString::ReplaceSpanString(int32_t start, int32_t length, const R
     if (length < 0 || start + length > GetLength()) {
         return;
     }
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    length = end - start;
     if (length != 0) {
         RemoveString(start, length);
     }
@@ -509,6 +510,7 @@ void MutableSpanString::InsertSpanString(int32_t start, const RefPtr<SpanString>
     if (start > len || spanString->GetLength() == 0) {
         return;
     }
+    ChangeStartToCorrectNum(start);
     auto offset = spanString->GetLength();
     auto wContent = GetWideString();
     SetString(StringUtils::ToString(

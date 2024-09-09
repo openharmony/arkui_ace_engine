@@ -49,6 +49,7 @@ const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolde
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -108,6 +109,11 @@ JSCanvasRenderer::JSCanvasRenderer()
 {
     SetInstanceId(Container::CurrentIdSafely());
     density_ = PipelineBase::GetCurrentDensity();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
         densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
@@ -257,7 +263,7 @@ void JSCanvasRenderer::SetAntiAlias()
 
 void JSCanvasRenderer::SetDensity()
 {
-    double density = GetDensity();
+    double density = GetDensity(true);
     renderingContext2DModel_->SetDensity(density);
 }
 
@@ -890,6 +896,7 @@ void JSCanvasRenderer::JsSetDirection(const JSCallbackInfo& info)
         renderingContext2DModel_->SetTextDirection(direction);
     }
 }
+
 // getJsonData(path: string): string
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
 {
@@ -1304,6 +1311,9 @@ void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 // setTransform(transform?: Matrix2D): void
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
+    if (info.GetSize() == 0) {
+        renderingContext2DModel_->ResetTransform();
+    }
     double density = GetDensity();
     TransformParam param;
     // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
@@ -1410,12 +1420,7 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        pattern_[id]->SetScaleX(transform.scaleX);
-        pattern_[id]->SetScaleY(transform.scaleY);
-        pattern_[id]->SetSkewX(transform.skewX);
-        pattern_[id]->SetSkewY(transform.skewY);
-        pattern_[id]->SetTranslateX(transform.translateX);
-        pattern_[id]->SetTranslateY(transform.translateY);
+        renderingContext2DModel_->SetTransform(pattern_[id], transform);
     }
 }
 
@@ -1528,7 +1533,13 @@ void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 // reset(): void
 void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 {
-    paintState_ = PaintState();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    } else {
+        paintState_ = PaintState();
+    }
     anti_ = false;
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;
@@ -1542,7 +1553,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * GetDensity());
+        return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
 }

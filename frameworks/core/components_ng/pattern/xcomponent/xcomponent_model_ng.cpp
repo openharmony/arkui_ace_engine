@@ -14,13 +14,8 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include <optional>
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
@@ -259,6 +254,19 @@ void XComponentModelNG::SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestr
     eventHub->SetControllerDestroyedEvent(std::move(onDestroyed));
 }
 
+void XComponentModelNG::SetRenderFit(RenderFit renderFit)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type != XComponentType::SURFACE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetRenderFit(renderFit);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -274,7 +282,7 @@ XComponentType XComponentModelNG::GetType(FrameNode* frameNode)
 }
 
 RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
-    const std::string& libraryname)
+    const std::optional<std::string>& libraryname)
 {
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     auto frameNode = FrameNode::CreateFrameNode(

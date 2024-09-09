@@ -28,9 +28,6 @@
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -180,9 +177,6 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     auto childSize = childWrapper->GetGeometryNode()->GetContentSize();
     if (childSize.Width() > (width - 2 * margin.ConvertToPx())) {
         CalcSize defaultCalcSize((CalcLength(width - 2 * margin.ConvertToPx())), std::nullopt);
-        childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
-    } else {
-        CalcSize defaultCalcSize((CalcLength(childSize.Width())), std::nullopt);
         childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
     }
     float childHeight =

@@ -100,6 +100,7 @@ public:
     void TearDown() override;
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void SetSheetTheme(RefPtr<SheetTheme> sheetTheme);
     std::function<RefPtr<UINode>()> builderFunc_;
     std::function<RefPtr<UINode>()> titleBuilderFunc_;
 
@@ -160,6 +161,20 @@ void OverlayManagerTestUpdateNg::TearDownTestCase()
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void OverlayManagerTestUpdateNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 RefPtr<FrameNode> OverlayManagerTestUpdateNg::CreateTargetNode()
@@ -2002,44 +2017,50 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnBindSheet033
- * @tc.desc: Test OverlayManager::OnBindSheet Large test.
+ * @tc.name: UpdateSheetRender001
+ * @tc.desc: Test OverlayManager::UpdateSheetRender shadow update.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet033, TestSize.Level1)
+HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRender001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create sheet page, get sheet pattern.
+     * @tc.steps: step1. create target node.
      */
-    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto callback = [](const std::string&) {};
-    SheetStyle style;
-    style.isTitleBuilder = true;
-    style.sheetTitle = MESSAGE;
-    style.sheetSubtitle = MESSAGE;
-    style.sheetMode = SheetMode::LARGE;
-    style.sheetType = SheetType::SHEET_BOTTOM;
-    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.shadow.reset();
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(sheetNode, nullptr);
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(sheetPattern, nullptr);
-
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackShadow().has_value(), false);
     /**
-     * @tc.steps: step2. test when NoStatusBarAndLANDSCAPE.
-     * @tc.expected: sheetPattern->IsNoStatusBarAndLandscape() = true.
+     * @tc.steps: step3. Change the SheetTheme shadow.
+     * @tc.expected: the shadow is updated successfully
      */
-    auto deviceOrientation = static_cast<int32_t>(DeviceOrientation::LANDSCAPE);
-    SystemProperties::SetDeviceOrientation(deviceOrientation);
-    auto isNoStatusBarAndLandscape = sheetPattern->IsNoStatusBarAndLandscape();
-    EXPECT_TRUE(isNoStatusBarAndLandscape);
-
-    /**
-     * @tc.steps: step3. test when BottomLarge.
-     * @tc.expected: sheetPattern->IsBottomLarge() = true.
-     */
-
-    auto isBottomLarge = sheetPattern->IsBottomLarge();
-    EXPECT_TRUE(isBottomLarge);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetShadowConfig_ = static_cast<int>(ShadowStyle::OuterFloatingMD);
+    OverlayManagerTestUpdateNg::SetSheetTheme(sheetTheme);
+    Shadow shadow = ShadowConfig::FloatingShadowM;
+    overlayManager->UpdateSheetRender(sheetNode, sheetStyle, false);
+    EXPECT_EQ(renderContext->GetBackShadow().has_value(), true);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
+
 } // namespace OHOS::Ace::NG

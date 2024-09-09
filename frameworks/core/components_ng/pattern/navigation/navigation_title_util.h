@@ -87,13 +87,15 @@ public:
         node->UpdateInspectorId(id);
     }
 
+    static float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth);
+
     static void CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
         const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle);
     static void CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
         const NG::NavigationTitleInfo& titleInfo);
-    static void CreateOrUpdateNavMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+    static void CreateOrUpdateDestinationMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
         const NG::NavigationTitleInfo& titleInfo);
-    static void CreateOrUpdateNavSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+    static void CreateOrUpdateDestinationSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
         const NG::NavigationTitleInfo& titleInfo);
     
 private:

@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_composite.h"
 
-#include "include/effects/SkImageFilters.h"
-
-#include "base/utils/utils.h"
-#include "core/components/common/properties/blend_mode.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {

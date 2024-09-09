@@ -213,7 +213,7 @@ public:
     void GetFocus(const RefPtr<RichEditorPattern>& pattern);
     void OnDrawVerify(const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset,
         bool selected = false);
-
+    void InitMagnifierParams(const SizeF& frameSize);
     static void MockKeyboardBuilder() {}
     RefPtr<FrameNode> richEditorNode_;
 };

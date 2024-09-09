@@ -16,20 +16,13 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 #include "base/i18n/localization.h"
-#include "base/log/ace_scoring_log.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -421,6 +414,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
     titleBarNode->AddChild(customTitle);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
@@ -716,10 +710,10 @@ void NavDestinationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::Nav
 
     auto theme = NavigationGetTheme();
     // create or update main title
-    NavigationTitleUtil::CreateOrUpdateNavMainTitle(titleBarNode, titleInfo);
+    NavigationTitleUtil::CreateOrUpdateDestinationMainTitle(titleBarNode, titleInfo);
 
     // create or update subtitle
-    NavigationTitleUtil::CreateOrUpdateNavSubtitle(titleBarNode, titleInfo);
+    NavigationTitleUtil::CreateOrUpdateDestinationSubtitle(titleBarNode, titleInfo);
     return;
 }
 

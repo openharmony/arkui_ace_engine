@@ -25,6 +25,7 @@
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_style.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 
 namespace OHOS::Ace::NG {
 class SecurityComponentTheme : public virtual Theme {
@@ -41,7 +42,7 @@ public:
         {
             RefPtr<SecurityComponentTheme> theme = AceType::Claim(new SecurityComponentTheme());
             if (!themeConstants) {
-                LOGE("Build SecurityComponentTheme error, themeConstants is null!");
+                SC_LOG_ERROR("Build SecurityComponentTheme error, themeConstants is null!");
                 return theme;
             }
             ParsePattern(themeConstants, theme);

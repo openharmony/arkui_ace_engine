@@ -29,7 +29,11 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true };
+        auto node = GetHost();
+        CHECK_NULL_RETURN(node, FocusPattern());
+        auto focusHub = node->GetFocusHub();
+        CHECK_NULL_RETURN(focusHub, FocusPattern());
+        return { focusHub->GetFocusType(), focusHub->GetFocusable() };
     }
 };
 } // namespace OHOS::Ace::NG

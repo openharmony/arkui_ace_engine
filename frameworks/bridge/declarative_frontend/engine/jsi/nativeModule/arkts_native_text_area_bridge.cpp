@@ -20,8 +20,6 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"

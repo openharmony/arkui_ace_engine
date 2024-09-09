@@ -15,19 +15,10 @@
 
 #include "core/common/ai/image_analyzer_manager.h"
 
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "js_native_api_types.h"
-
-#include "base/geometry/offset.h"
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_mgr.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
 
@@ -234,10 +225,12 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
         isUIConfigUpdate = UpdateVideoConfig(info);
     } else {
         auto padding = layoutProps->CreatePaddingAndBorder();
-        float paddingWidth = holder_ == ImageAnalyzerHolder::IMAGE ? padding.left.value_or(0) +
-                                                                     padding.right.value_or(0) : 0.0f;
-        float paddingHeight = holder_ == ImageAnalyzerHolder::IMAGE ? padding.top.value_or(0) +
-                                                                      padding.bottom.value_or(0) : 0.0f;
+        float paddingWidth = 0.0f;
+        float paddingHeight = 0.0f;
+        if (holder_ == ImageAnalyzerHolder::IMAGE || holder_ == ImageAnalyzerHolder::XCOMPONENT) {
+            paddingWidth = padding.left.value_or(0) + padding.right.value_or(0);
+            paddingHeight = padding.top.value_or(0) + padding.bottom.value_or(0);
+        }
         NG::SizeF frameSize = geometryNode->GetFrameSize();
         bool shouldUpdateSize = analyzerUIConfig_.contentWidth != frameSize.Width() - paddingWidth ||
                                 analyzerUIConfig_.contentHeight != frameSize.Height() - paddingHeight;

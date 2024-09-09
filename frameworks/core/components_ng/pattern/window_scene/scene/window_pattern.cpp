@@ -19,7 +19,6 @@
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/image_provider/image_utils.h"
@@ -448,13 +447,15 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
         ImageSourceInfo sourceInfo;
-        if (session_->GetScenePersistence()->IsSavingSnapshot()) {
+        auto scenePersistence = session_->GetScenePersistence();
+        CHECK_NULL_VOID(scenePersistence);
+        if (scenePersistence->IsSavingSnapshot()) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
+            sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath());
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         ClearImageCache(sourceInfo);

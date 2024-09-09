@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 
-#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -323,7 +322,7 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displaycount);
     if (swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displaycount);
-        rightArrowIsHidden = (index_ == (swiperPattern->DisplayIndicatorTotalCount() - 1) * displaycount);
+        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displaycount);
     }
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);

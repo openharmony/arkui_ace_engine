@@ -31,6 +31,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t ARGC_COUNT_TWO = 2;
 constexpr int32_t MAX_PARSE_DEPTH = 3;
+constexpr uint32_t MAX_PARSE_LENGTH = 1024;
+constexpr uint32_t MAX_PARSE_PROPERTY_SIZE = 15;
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
 }
@@ -534,7 +536,7 @@ std::string JSNavigationStack::GetRouteParam() const
     auto size = GetSize();
     if (size > 0) {
         auto param = GetParamByIndex(size - 1);
-        return ConvertParamToString(param);
+        return ConvertParamToString(param, true);
     }
     return "";
 }
@@ -556,7 +558,7 @@ int32_t JSNavigationStack::GetSize() const
     return 0;
 }
 
-std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param) const
+std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param, bool needLimit) const
 {
     if (param->IsBoolean()) {
         bool ret = param->ToBoolean();
@@ -568,18 +570,21 @@ std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param) c
         return oss.str();
     } else if (param->IsString()) {
         std::string ret = param->ToString();
+        if (needLimit && ret.size() > MAX_PARSE_LENGTH) {
+            return ret.substr(0, MAX_PARSE_LENGTH);
+        }
         return ret;
     } else if (param->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(param);
         auto jsonObj = JsonUtil::Create(true);
-        ParseJsObject(jsonObj, obj, MAX_PARSE_DEPTH);
+        ParseJsObject(jsonObj, obj, MAX_PARSE_DEPTH, needLimit);
         return jsonObj->ToString();
     }
     return "";
 }
 
 void JSNavigationStack::ParseJsObject(
-    std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const
+    std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (depthLimit == 0) {
@@ -590,7 +595,11 @@ void JSNavigationStack::ParseJsObject(
     if (!propertyNames->IsArray()) {
         return;
     }
-    for (size_t i = 0; i < propertyNames->Length(); i++) {
+    size_t size = propertyNames->Length();
+    if (needLimit && size > MAX_PARSE_PROPERTY_SIZE) {
+        size = MAX_PARSE_PROPERTY_SIZE;
+    }
+    for (size_t i = 0; i < size; i++) {
         JSRef<JSVal> name = propertyNames->GetValueAt(i);
         if (!name->IsString()) {
             continue;
@@ -608,11 +617,15 @@ void JSNavigationStack::ParseJsObject(
             json->Put(key, oss.str().c_str());
         } else if (value->IsString()) {
             std::string ret = value->ToString();
-            json->Put(key, ret.c_str());
+            if (needLimit && ret.size() > MAX_PARSE_LENGTH) {
+                json->Put(key, ret.substr(0, MAX_PARSE_LENGTH).c_str());
+            } else {
+                json->Put(key, ret.c_str());
+            }
         } else if (value->IsObject()) {
             JSRef<JSObject> childObj = JSRef<JSObject>::Cast(value);
             auto childJson = JsonUtil::Create(true);
-            ParseJsObject(childJson, childObj, depthLimit);
+            ParseJsObject(childJson, childObj, depthLimit, needLimit);
             json->Put(key, childJson);
         }
     }
@@ -777,6 +790,8 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
         auto isEntryVal = navPathInfo->GetProperty("isEntry");
         bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+        pattern->SetName(name);
+        pattern->SetIndex(GetSize() - 1);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }

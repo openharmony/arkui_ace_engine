@@ -21,6 +21,17 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, undefined);
+    }
+    return this;
+  }
   optionWidth(value: Dimension | OptionWidthMode): this {
     modifierWithKey(
       this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
@@ -151,6 +162,39 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     modifierWithKey(
       this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
     return this;
+  }
+}
+
+class SelectOptionsModifier extends ModifierWithKey<SelectOption[]> {
+  constructor(value: SelectOption[]) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.setOptions(node, undefined, undefined, undefined, undefined);
+    } else {
+      let valueArray: string[] = [];
+      let iconArray: string[] = [];
+      let symbolIconArray: object[] = [];
+      let length: number = this.value?.length;
+      for (let i = 0; i < length; i++) {
+        valueArray.push(this.value[i]?.value);
+        iconArray.push(this.value[i]?.icon);
+        symbolIconArray.push(this.value[i]?.symbolIcon);
+      }
+      getUINativeModule().select.setOptions(node, valueArray, iconArray, symbolIconArray, length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(Array.isArray(this.stageValue) && Array.isArray(this.value) &&
+      this.stageValue.length === this.value.length &&
+        this.stageValue.every((eachValue, index) => {
+          return isBaseOrResourceEqual(eachValue.value, this.value[index].value) &&
+            isBaseOrResourceEqual(eachValue.icon, this.value[index].icon) &&
+            isBaseOrResourceEqual(eachValue.symbolIcon, this.value[index].symbolIcon);
+        }));
   }
 }
 

@@ -25,9 +25,11 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_event.h"
@@ -483,6 +485,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
 
     bool IsFocus() const
     {
@@ -557,6 +560,7 @@ public:
     void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
         std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, ViewDataCommon& viewDataCommon);
     AceAutoFillType GetFocusedType();
+    HintToTypeWrap GetHintTypeAndMetadata(const std::string& attribute, RefPtr<PageNodeInfoWrap> node);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool RequestAutoFill(AceAutoFillType autoFillType);
     bool RequestAutoSave();
@@ -617,6 +621,7 @@ public:
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
+    void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnPopupShow(bool show);
@@ -680,6 +685,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
         return treeId_;
@@ -770,6 +776,7 @@ private:
     void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnEnabledHapticFeedbackUpdate(bool enable);
     int GetWebId();
 
     void InitEvent();
@@ -844,6 +851,10 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    void OnSelectHandleStart(bool isFirst);
+    void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
+    void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
+
     bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
     void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
 
@@ -911,6 +922,7 @@ private:
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
+    void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
     void SetMouseHoverExit(bool isHoverExit)
     {
@@ -954,6 +966,7 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
+    int32_t GetBufferSizeByDeviceType();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1096,16 +1109,19 @@ private:
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
+    int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
+    bool isEnabledHapticFeedback_ = true;
     NestedScrollOptionsExt nestedScroll_ = {
         .scrollUp = NestedScrollMode::SELF_ONLY,
         .scrollDown = NestedScrollMode::SELF_ONLY,
         .scrollLeft = NestedScrollMode::SELF_ONLY,
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
+    VisibleType componentVisibility_ = VisibleType::VISIBLE;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

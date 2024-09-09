@@ -15,22 +15,8 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
-#include <algorithm>
-
 #include "base/log/ace_checker.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -384,7 +370,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
         // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
         if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
-                innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
+            innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
             rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
         }
     }
@@ -392,7 +378,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
         // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
         if (InRange(adjustingRect.Top(), innerSpaceTopLength,
-                innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
+            innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
             rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
         }
     }
@@ -402,8 +388,8 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         // right side safeArea padding range is
         // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
         if (InRange(adjustingRect.Right(),
-                parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
-                parentWidth - innerSpaceRightLength)) {
+            parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
+            parentWidth - innerSpaceRightLength)) {
             rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
         }
     }
@@ -414,8 +400,8 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         // parentHeight - (bottom border + padding)]
         auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
         if (InRange(adjustingRect.Bottom(),
-                parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
-                parentHeight - innerSpaceBottomLength)) {
+            parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
+            parentHeight - innerSpaceBottomLength)) {
             rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();
         }
     }

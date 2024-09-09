@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 
-#include <algorithm>
-
-#include "core/components_ng/property/measure_property.h"
-
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
@@ -565,6 +561,10 @@ bool WaterFlowLayoutInfo::OutOfBounds() const
 {
     bool outOfStart = itemStart_ && Positive(currentOffset_);
     bool outOfEnd = offsetEnd_ && LessNotEqual(currentOffset_ + maxHeight_, lastMainSize_);
+    // not outOfEnd when content size < mainSize but currentOffset_ == 0
+    if (LessNotEqual(maxHeight_, lastMainSize_)) {
+        outOfEnd &= Negative(currentOffset_);
+    }
     return outOfStart || outOfEnd;
 }
 
@@ -584,13 +584,13 @@ float WaterFlowLayoutInfo::EstimateContentHeight() const
 {
     auto childCount = 0;
     if (!itemInfos_.empty()) {
-        //in segmented layout
+        // in segmented layout
         childCount = static_cast<int32_t>(itemInfos_.size());
     } else if (maxHeight_) {
-        //in original layout, already reach end.
+        // in original layout, already reach end.
         return maxHeight_;
     } else {
-        //in original layout
+        // in original layout
         for (const auto& item : items_[0]) {
             childCount += static_cast<int32_t>(item.second.size());
         }
