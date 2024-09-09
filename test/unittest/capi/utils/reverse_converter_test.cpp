@@ -23,6 +23,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+using std::literals::string_literals::operator""s;
+
 class ReverseConvertorTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -138,8 +140,19 @@ HWTEST_F(ReverseConvertorTest, ArrayTypes, TestSize.Level1)
     EXPECT_EQ(stringArrayResult.array[1].chars, "3456"sv);
     EXPECT_EQ(stringArrayResult.array[1].length, 4);
 
+    // Check optional version
+    auto optResult = listHolder.OptValue<Opt_Array_String>();
+    EXPECT_EQ(optResult.tag, ARK_TAG_OBJECT);
+    EXPECT_EQ(optResult.value.length, 2);
+    EXPECT_EQ(optResult.value.array[0].chars, "def"sv);
+    EXPECT_EQ(optResult.value.array[0].length, 3);
+    EXPECT_EQ(optResult.value.array[1].chars, "5678"sv);
+    EXPECT_EQ(optResult.value.array[1].length, 4);
+
     // Should be impossible to use temporary version
     static_assert(std::is_void_v<decltype(Converter::ArkArrayHolder<Array_String>({"Error!"}).ArkValue())>);
+    static_assert(std::is_void_v<decltype(
+        Converter::ArkArrayHolder<Array_String>({"Error!"}).OptValue<Opt_Array_String>())>);
 }
 
 /**
@@ -152,7 +165,13 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
     auto optNumber = Converter::ArkValue<Opt_Number>(std::optional<int>{});
     EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
 
+    optNumber = Converter::ArkValue<Opt_Number>();
+    EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
+
     optNumber = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
+
+    optNumber = Converter::ArkValue<Opt_Number>(std::nullopt);
     EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
 
     optNumber = Converter::ArkValue<Opt_Number>(std::optional(123));
@@ -169,6 +188,12 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
     EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
     EXPECT_EQ(optNumber.value.tag, ARK_TAG_FLOAT32);
     EXPECT_EQ(optNumber.value.f32, 12.3f);
+
+    auto ark = Converter::ArkValue<Ark_Number>(123);
+    optNumber = Converter::ArkValue<Opt_Number>(ark);
+    EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.value.tag, ARK_TAG_INT32);
+    EXPECT_EQ(optNumber.value.i32, 123);
 }
 
 /**

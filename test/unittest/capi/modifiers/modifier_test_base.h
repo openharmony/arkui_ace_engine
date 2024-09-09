@@ -42,7 +42,7 @@ public:
         node = nullptr;
     }
 
-    static const GENERATED_ArkUINodeModifiers *GetNodeModifires()
+    static const GENERATED_ArkUINodeModifiers *GetNodeModifiers()
     {
         return nodeModifiers_;
     }

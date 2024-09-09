@@ -27,52 +27,56 @@
 #include "generated/converter_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-    void AssignArkValue(Ark_Boolean& dst, const bool& src)
+    // Forward declaration for use in custom AssignArkValue() functions
+    template<typename To, typename From = Ark_Empty>
+    To ArkValue(From&& src = Ark_Empty());
+
+    inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
     {
         dst = static_cast<Ark_Boolean>(src);
     }
 
-    void AssignArkValue(Ark_String& dst, const std::string& src)
+    inline void AssignArkValue(Ark_String& dst, const std::string& src)
     {
         dst.chars = src.data();
         dst.length = src.size();
     }
 
-    void AssignArkValue(Ark_String& dst, const std::string_view& src)
+    inline void AssignArkValue(Ark_String& dst, const std::string_view& src)
     {
         dst.chars = src.data();
         dst.length = src.size();
     }
 
-    void AssignArkValue(Ark_String& dst, const char *src)
+    inline void AssignArkValue(Ark_String& dst, const char *src)
     {
         AssignArkValue(dst, std::string_view(src));
     }
 
-    void AssignArkValue(Ark_Number& dst, const int32_t& src)
+    inline void AssignArkValue(Ark_Number& dst, const int32_t& src)
     {
         dst.tag = ARK_TAG_INT32;
         dst.i32 = src;
     }
 
-    void AssignArkValue(Ark_Number& dst, const uint32_t& src)
+    inline void AssignArkValue(Ark_Number& dst, const uint32_t& src)
     {
         dst.tag = ARK_TAG_INT32;
         dst.i32 = src;
     }
 
-    void AssignArkValue(Ark_Number& dst, const float& src)
+    inline void AssignArkValue(Ark_Number& dst, const float& src)
     {
         dst.tag = ARK_TAG_FLOAT32;
         dst.f32 = src;
     }
 
-    void AssignArkValue(Ark_NativePointer& dst, void *src)
+    inline void AssignArkValue(Ark_NativePointer& dst, void *src)
     {
         dst = src;
     }
 
-    void AssignArkValue(Ark_Function& dst, const int& src)
+    inline void AssignArkValue(Ark_Function& dst, const int& src)
     {
         dst.id = src;
     }
@@ -86,11 +90,19 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Int32>(src);
     }
 
+    // Passthrough version
+    template<typename T>
+    void AssignArkValue(T &dst, const T& src)
+    {
+        dst = src;
+    }
+
     // Handle optional types
     template<typename To, typename From, typename = std::void_t<decltype(To().tag), decltype(To().value)>>
     void AssignArkValue(To& dst, From&& src)
     {
-        if constexpr (std::is_same_v<From, Ark_Empty>) {
+        using ClearedFrom = std::remove_cv_t<std::remove_reference_t<From>>;
+        if constexpr (std::is_same_v<ClearedFrom, Ark_Empty> || std::is_same_v<ClearedFrom, std::nullopt_t>) {
             dst.tag = ARK_TAG_UNDEFINED;
         } else {
             std::optional arg(std::forward<From>(src));
@@ -101,13 +113,6 @@ namespace OHOS::Ace::NG::Converter {
                 dst.tag = ARK_TAG_UNDEFINED;
             }
         }
-    }
-
-    // Passthrough version
-    template<typename T>
-    void AssignArkValue(T &dst, const T& src)
-    {
-        dst = src;
     }
 
     /**
@@ -203,6 +208,26 @@ namespace OHOS::Ace::NG::Converter {
 
         void ArkValue() &&
         {
+        }
+
+        template<typename O>
+        O OptValue() &
+        {
+            static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
+            T value = {
+                .array = data_.data(),
+                .length = data_.size(),
+            };
+            return {
+                .tag = ARK_TAG_OBJECT,
+                .value = value,
+            };
+        }
+
+        template<typename O>
+        void OptValue() &&
+        {
+            static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
         }
     };
 

@@ -143,7 +143,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
     modifier_->setColor(node_, &resNameColor);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal9, "#FF000000"); // Should be Color::RED, but converter from Resource works incorrect now.
-                                       // So modifier pass Color::BALCK to divider component int this case
+                                       // So modifier pass Color::BLACK to divider component int this case
 
     strNumber = { .selector = 2, .value2 = ArkStr("incorrect_color") };
     modifier_->setColor(node_, &strNumber);

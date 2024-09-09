@@ -22,8 +22,7 @@
 #include "frameworks/core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
+inline std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
 {
     static const InspectorFilter inspector;
 
@@ -34,7 +33,6 @@ std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
         }
     }
     return {};
-}
 }
 } // namespace OHOS::Ace::NG
 #endif
