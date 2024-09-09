@@ -1074,6 +1074,8 @@ protected:
 private:
     friend class FocusView;
 
+    friend class FocusManager;
+
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
