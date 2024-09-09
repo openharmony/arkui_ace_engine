@@ -4990,17 +4990,26 @@ void WebPattern::SetRenderMode(RenderMode renderMode)
     isInit = true;
 }
 
-Axis WebPattern::GetParentAxis()
+void WebPattern::GetParentAxis()
 {
     auto parent = GetNestedScrollParent();
-    CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
-    axis_ = parent->GetAxis();
-    parentsMap_ = { { axis_, parent } };
-    auto oppositeParent = SearchParent(axis_ == Axis::HORIZONTAL ? Axis::VERTICAL : Axis::HORIZONTAL);
-    if (oppositeParent) {
-        parentsMap_.emplace(oppositeParent->GetAxis(), oppositeParent);
+    if (parent) {
+        axis_ = parent->GetAxis();
+        parentsMap_ = { { axis_, parent } };
+        auto oppositeParent = SearchParent(axis_ == Axis::HORIZONTAL ? Axis::VERTICAL : Axis::HORIZONTAL);
+        if (oppositeParent) {
+            parentsMap_.emplace(oppositeParent->GetAxis(), oppositeParent);
+        }
+    } else {
+        auto verticalParent = SearchParent(Axis::VERTICAL);
+        auto horizontalParent = SearchParent(Axis::HORIZONTAL);
+        if (verticalParent) {
+            parentsMap_.emplace(verticalParent->GetAxis(), verticalParent);
+        }
+        if (horizontalParent) {
+            parentsMap_.emplace(horizontalParent->GetAxis(), horizontalParent);
+        }
     }
-    return axis_;
 }
 
 RefPtr<NestableScrollContainer> WebPattern::SearchParent()
