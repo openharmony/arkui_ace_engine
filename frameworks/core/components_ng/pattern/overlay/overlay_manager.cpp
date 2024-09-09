@@ -6467,6 +6467,9 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
             CHECK_NULL_VOID(filterRenderContext);
             if (menuTheme->GetHasBackBlur()) {
                 filterRenderContext->UpdateBackBlurStyle(styleOption);
+                if (menuTheme->HasBackBlurColor()) {
+                    filterRenderContext->UpdateBackgroundColor(menuTheme->GetBackBlurColor());
+                }
             } else {
                 filterRenderContext->UpdateBackgroundColor(maskColor);
             }

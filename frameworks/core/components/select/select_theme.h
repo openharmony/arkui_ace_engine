@@ -116,6 +116,7 @@ public:
             ParsePartOne(theme, pattern);
             ParsePartTwo(theme, pattern);
             ParsePartThree(theme, pattern);
+            ParsePartFourth(theme, pattern);
         }
 
         void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SelectTheme>& theme) const
@@ -308,6 +309,20 @@ public:
                 pattern->GetAttr<Color>("select_focused_icon_color", theme->spinnerFocusedColor_);
             theme->optionApplyFocusedStyle_ = pattern->GetAttr<int>("option_is_apply_focus_style", 0);
             theme->isSlideMoreOffset_ = pattern->GetAttr<int>("select_slide_more_offset", 0);
+        }
+
+        void ParsePartFourth(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->menuItemTopBottomMargin_ = pattern->GetAttr<Dimension>("menu_item_top_bottom_margin", 0.0_vp);
+            theme->menuItemLeftRightMargin_ = pattern->GetAttr<Dimension>("menu_item_left_right_margin", 0.0_vp);
+            theme->menuTargetSecuritySpace_ = pattern->GetAttr<Dimension>("menu_target_security_space", 8.0_vp);
+            theme->menuItemFocusedBgColor_ = pattern->GetAttr<Color>("menu_item_focused_bg_color", Color::TRANSPARENT);
+            theme->menuItemFocusedTextColor_ =
+                pattern->GetAttr<Color>("menu_item_focused_text_color", Color(0xff182431));
+            theme->menuItemFocusedShadowStyle_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
+            theme->menuItemContentAlign_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_content_align", CONTENT_ALIGN_LEFT));
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -510,6 +525,13 @@ public:
         theme->spinnerFocusedColor_ = spinnerFocusedColor_;
         theme->optionApplyFocusedStyle_ = optionApplyFocusedStyle_;
         theme->isSlideMoreOffset_ = isSlideMoreOffset_;
+        theme->menuItemTopBottomMargin_ = menuItemTopBottomMargin_;
+        theme->menuItemLeftRightMargin_ = menuItemLeftRightMargin_;
+        theme->menuTargetSecuritySpace_ = menuTargetSecuritySpace_;
+        theme->menuItemFocusedBgColor_ = menuItemFocusedBgColor_;
+        theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
+        theme->menuItemFocusedShadowStyle_ = menuItemFocusedShadowStyle_;
+        theme->menuItemContentAlign_ = menuItemContentAlign_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1343,6 +1365,37 @@ public:
     {
         return isSlideMoreOffset_;
     }
+
+    const Dimension& GetMenuItemTopBottomMargin() const
+    {
+        return menuItemTopBottomMargin_;
+    }
+
+    const Dimension& GetMenuItemLeftRightMargin() const
+    {
+        return menuItemLeftRightMargin_;
+    }
+
+    const Dimension& GetMenuTargetSecuritySpace() const
+    {
+        return menuTargetSecuritySpace_;
+    }
+
+    const Color& GetMenuItemFocusedBgColor() const
+    {
+        return menuItemFocusedBgColor_;
+    }
+
+    const Color& GetMenuItemFocusedTextColor() const
+    {
+        return menuItemFocusedTextColor_;
+    }
+
+    const uint32_t& GetMenuItemFocusedShadowStyle() const
+    {
+        return menuItemFocusedShadowStyle_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1493,6 +1546,12 @@ private:
     Color spinnerFocusedColor_ = Color(0xE5182431);
     bool optionApplyFocusedStyle_ = false;
     bool isSlideMoreOffset_ = false;
+    uint32_t menuItemFocusedShadowStyle_;
+    Dimension menuItemTopBottomMargin_;
+    Dimension menuItemLeftRightMargin_;
+    Dimension menuTargetSecuritySpace_;
+    Color menuItemFocusedBgColor_;
+    Color menuItemFocusedTextColor_;
 };
 
 } // namespace OHOS::Ace
