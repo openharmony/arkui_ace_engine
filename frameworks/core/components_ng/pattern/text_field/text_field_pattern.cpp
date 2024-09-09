@@ -105,7 +105,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
+ 
 const BorderRadiusProperty ZERO_BORDER_RADIUS_PROPERTY(0.0_vp);
 // need to be moved to TextFieldTheme
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
@@ -576,7 +576,7 @@ void TextFieldPattern::SetAccessibilityClearAction()
         }
     }
 }
-
+ 
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
 {
     if (textRect_ == textRect) {
@@ -666,7 +666,6 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         "selectController_ Start %{public}d, end %{public}d",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, selectController_->GetStartIndex(),
         selectController_->GetEndIndex());
-
 #else
     if (HasConnection()) {
         TextEditingValue value;
@@ -1662,7 +1661,6 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     if (HasStateStyle(UI_STATE_PRESSED)) {
         return;
     }
-
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
         auto lastCaretRect = selectController_->GetCaretRect();
         moveCaretState_.isTouchCaret = !IsSelected() && RepeatClickCaret(offset, lastCaretRect);
@@ -3017,7 +3015,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    
+
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
         selectController_->UpdateSelectWithBlank(localOffset);
@@ -5674,7 +5672,7 @@ void TextFieldPattern::PlayScrollBarAppearAnimation()
         scrollBar->PlayScrollBarAppearAnimation();
     }
 }
-
+ 
 void TextFieldPattern::ScheduleDisappearDelayTask()
 {
     auto scrollBar = GetScrollBar();
