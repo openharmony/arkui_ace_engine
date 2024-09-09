@@ -155,6 +155,7 @@ export struct TextPickerDialogBootcamp {
             { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
+
         RadioBlock({
           title: '取消按钮类型',
           isEnabled: this.enabledCancelButtonType,
@@ -177,6 +178,7 @@ export struct TextPickerDialogBootcamp {
             { label: '文本型', value: ButtonStyleMode.TEXTUAL }
           ]
         })
+
         RadioBlock({
           title: '取消按钮样式',
           isEnabled: this.enableCancelButtonStyle,
@@ -193,6 +195,7 @@ export struct TextPickerDialogBootcamp {
           isEnabled: this.enableAcceptButtonFontColor,
           color: this.acceptButtonFontColor
         })
+
         ColorBlock({
           title: '取消按钮字体颜色',
           isEnabled: this.enableCancelButtonFontColor,
@@ -208,6 +211,7 @@ export struct TextPickerDialogBootcamp {
             { label: 'ERROR', value: ButtonRole.ERROR },
           ]
         })
+
         RadioBlock({
           title: '取消按钮角色',
           isEnabled: this.enableCancelButtonRole,
@@ -227,6 +231,7 @@ export struct TextPickerDialogBootcamp {
             { label: '小型', value: '12fp' },
           ]
         })
+
         RadioBlock({
           title: '取消按钮尺寸',
           isEnabled: this.enableCancelButtonFontSize,
@@ -246,6 +251,7 @@ export struct TextPickerDialogBootcamp {
             { label: '加粗', value: 800 },
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体粗细',
           isEnabled: this.enableCancelButtonFontWeight,
@@ -265,6 +271,7 @@ export struct TextPickerDialogBootcamp {
             { label: 'Italic', value: FontStyle.Italic },
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体样式',
           isEnabled: this.enableCancelButtonFontStyle,
@@ -280,6 +287,7 @@ export struct TextPickerDialogBootcamp {
           isEnabled: this.enableAcceptButtonBackGroundColor,
           color: this.acceptButtonBackGroundColor
         })
+
         ColorBlock({
           title: '取消按钮背景颜色',
           isEnabled: this.enableCancelButtonBackGroundColor,
@@ -295,6 +303,7 @@ export struct TextPickerDialogBootcamp {
             { label: '较大', value: 100 },
           ]
         })
+
         RadioBlock({
           title: '取消按钮边框圆角半径',
           isEnabled: this.enableCancelButtonBorderRadius,

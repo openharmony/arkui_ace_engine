@@ -23,12 +23,6 @@ export struct TextInputBootcamp {
   @State showParameters: boolean = false
   @State isShow: boolean = false
   @State text: string = ''
-  private textWidth: string = '90%';
-  private textHeight: number = 40;
-  private textFontSize: number = 16;
-  private textInputHeight: number = 60;
-  private textInputFontSize: number = 24;
-  private textInputMargin: number = 10;
   @State enablebackgroundColor: boolean = false;
   @State ebackgroundColor: ResourceColor = 'rgb(255, 0, 0, 0.9)';
   @State enablecaretColor: boolean = false;
