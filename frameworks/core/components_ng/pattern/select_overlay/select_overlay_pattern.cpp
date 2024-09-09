@@ -299,13 +299,13 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
         firstHandleDrag_ = true;
         secondHandleDrag_ = false;
         if (info_->onHandleMoveStart) {
-            info_->onHandleMoveStart(firstHandleDrag_);
+            info_->onHandleMoveStart(info, firstHandleDrag_);
         }
     } else {
         firstHandleDrag_ = false;
         secondHandleDrag_ = true;
         if (info_->onHandleMoveStart) {
-            info_->onHandleMoveStart(firstHandleDrag_);
+            info_->onHandleMoveStart(info, firstHandleDrag_);
         }
     }
 
@@ -485,7 +485,7 @@ void SelectOverlayPattern::SetSelectRegionVisible(bool isSelectRegionVisible)
 
 void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
 {
-    if (info_->firstHandle == info || firstHandleDrag_) {
+    if (info_->firstHandle == info) {
         return;
     }
     info_->firstHandle = info;
@@ -502,7 +502,7 @@ void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& i
 
 void SelectOverlayPattern::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info)
 {
-    if (info_->secondHandle == info || secondHandleDrag_) {
+    if (info_->secondHandle == info) {
         return;
     }
     info_->secondHandle = info;
