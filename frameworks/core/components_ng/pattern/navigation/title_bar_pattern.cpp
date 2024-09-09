@@ -17,6 +17,7 @@
 
 #include <sstream>
 
+#include "base/i18n/localization.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -1710,5 +1711,15 @@ float TitleBarPattern::GetNavLeftPadding(float parentWidth)
         }
     }
     return navLeftPadding;
+}
+
+voids TitleBarPattern::OnLanguageConfigurationUpdate()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 }
 } // namespace OHOS::Ace::NG
