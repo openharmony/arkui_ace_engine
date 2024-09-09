@@ -58,6 +58,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     bool ShouldDelayChildPressedState() const override
     {
         return true;
