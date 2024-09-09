@@ -7434,20 +7434,19 @@ void OH_ArkUI_UnregisterSystemFontStyleChangeEvent(ArkUI_NodeHandle node);
  * @brief Retrieve the font size value for system font change events.
  *
  * @param event Indicates a pointer to the current system font change event.
- * @return Updated system font size. -1 indicates a retrieval error.
+ * @return Updated system font size scaling factor. Default value: 1.0.
  * @since 12
  */
-int32_t OH_ArkUI_SystemFontStyleEvent_GetFontSize(const ArkUI_SystemFontStyleEvent* event);
+float OH_ArkUI_SystemFontStyleEvent_GetFontSizeScale(const ArkUI_SystemFontStyleEvent* event);
 
 /**
  * @brief Retrieve the font thickness values for system font change events.
  *
  * @param event Indicates a pointer to the current system font change event.
- * @return Updated system font thickness, return value type {@link ArkUI_fontWeight},
- * default value:ARKUI_FONT_WEIGHT_W100。
+ * @return The updated system font thickness scaling factor. Default value: 1.0.
  * @since 12
  */
-int32_t OH_ArkUI_SystemFontStyleEvent_GetFontWeight(const ArkUI_SystemFontStyleEvent* event);
+float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontStyleEvent* event);
 
 #ifdef __cplusplus
 };
