@@ -240,7 +240,7 @@ public:
     bool DeregisterInteractionOperationAsChildTree(uint32_t windowId, int32_t treeId) override;
 
     void TransferThirdProviderHoverEvent(
-        int64_t elementId, const NG::PointF &point, SourceType source,
+        const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
         NG::AccessibilityHoverEventType eventType, TimeStamp time) override;
 
     void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo);
