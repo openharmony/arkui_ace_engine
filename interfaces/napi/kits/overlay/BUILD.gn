@@ -22,7 +22,15 @@ template("napi_overlay_static") {
 
     defines += [ "USE_ARK_ENGINE" ]
     cflags_cc += invoker.cflags_cc
-    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
+    if (is_mac) {
+      cflags_cc += [ "-O0" ]
+    }
+
+    include_dirs = [
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$root_out_dir/arkui/framework",
+    ]
 
     sources = [ "js_overlay.cpp" ]
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
 #include <cmath>
+
 #include <optional>
 
 #include "base/geometry/ng/offset_t.h"
@@ -201,6 +202,7 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
         }
         return;
     }
+
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
@@ -271,7 +273,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     // with the end of the original menu.
     auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
-
     auto backButton = layoutWrapper->GetOrCreateChildByIndex(1);
     bool isBackButtonVisible = false;
     if (backButton) {

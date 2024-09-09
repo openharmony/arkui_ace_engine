@@ -606,14 +606,14 @@ RefPtr<UINode> SelectContentOverlayManager::FindWindowScene(RefPtr<FrameNode> ta
     return parent;
 }
 
-bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, CloseReason reason)
+void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, CloseReason reason)
 {
-    CHECK_NULL_RETURN(selectOverlayHolder_, false);
-    CHECK_NULL_RETURN(selectOverlayHolder_->GetOwnerId() == id, false);
-    CHECK_NULL_RETURN(shareOverlayInfo_, false);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Close selectoverlay, id:%{public}d, reason %{public}d",
         id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(shareOverlayInfo_);
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     RefPtr<OverlayInfo> info = nullptr;
@@ -640,7 +640,6 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     if (callback) {
         callback->OnCloseOverlay(menuType, reason, info);
     }
-    return true;
 }
 
 void SelectContentOverlayManager::DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node)
@@ -707,7 +706,8 @@ bool SelectContentOverlayManager::CloseCurrent(bool animation, CloseReason reaso
 {
     CHECK_NULL_RETURN(selectOverlayHolder_, false);
     CHECK_NULL_RETURN(selectOverlayNode_.Upgrade() || menuNode_.Upgrade() || handleNode_.Upgrade(), false);
-    return CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
+    CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
+    return true;
 }
 
 void SelectContentOverlayManager::CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation)
@@ -1013,6 +1013,16 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
+}
+
+void SelectContentOverlayManager::UpdateViewPort()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    CHECK_NULL_VOID(shareOverlayInfo_);
+    shareOverlayInfo_->ancestorViewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void SelectContentOverlayManager::SetHandleCircleIsShow(bool isFirst, bool isShow)

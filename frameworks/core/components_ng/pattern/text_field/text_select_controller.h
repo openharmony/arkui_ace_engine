@@ -212,6 +212,7 @@ public:
     std::string ToString() const;
     bool IsTouchAtLineEnd(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
+    void UpdateSelectWithBlank(const Offset& localOffset);
 
 private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
@@ -223,7 +224,7 @@ private:
         int32_t extent, CaretMetricsF& caretMetrics, const OffsetF& touchOffset);
     // The cursor needs to fit the line where the touch is located.
     void UpdateCaretRectByPositionNearTouchOffset(int32_t position, const Offset& touchOffset);
-    
+
     // ai text analysis or detect
     bool NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
         std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout);

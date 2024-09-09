@@ -116,12 +116,11 @@ public:
 
     void UpdatePrevHasTextFieldPattern()
     {
-        prevHasTextFieldPattern_ = onFocusTextField_.Upgrade();
-    }
-
-    bool HasKeyboard() const override
-    {
-        return imeShow_ || uiExtensionImeShow_;
+        if (onFocusTextField_.Upgrade()) {
+            prevHasTextFieldPattern_ = true;
+        } else {
+            prevHasTextFieldPattern_ = false;
+        }
     }
 
     void AvoidKeyBoardInNavigation();

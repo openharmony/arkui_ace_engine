@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,6 @@ public:
     static void SetOnDidChange(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
     static JSRef<JSVal> CreateJSSelectionRange(const SelectionRangeInfo& selectRange);
@@ -67,9 +66,10 @@ public:
     static JSRef<JSObject> CreateJSLayoutStyle(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
+    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetOnEditingChange(const JSCallbackInfo& args);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
@@ -78,7 +78,6 @@ public:
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
     static void EditMenuOptions(const JSCallbackInfo& info);
-    static std::optional<uint32_t> ParseColorResourceId(JSRef<JSVal> colorVal);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const TextStyleResult& textStyleResult);
     static JSRef<JSArray> CreateJsTextShadowObjectArray(const std::vector<Shadow>& textShadows);

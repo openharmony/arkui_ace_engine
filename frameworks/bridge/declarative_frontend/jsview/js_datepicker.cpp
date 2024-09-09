@@ -1025,6 +1025,7 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     }
 
     auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1699,6 +1700,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&

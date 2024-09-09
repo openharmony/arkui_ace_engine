@@ -78,7 +78,7 @@ public:
         }
         json->PutExtAttr("defaultPickerItemHeight",
             GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str(), filter);
-        json->PutExtAttr("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str(), filter);
+        json->Put("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str());
         json->PutExtAttr("selected", std::to_string(GetSelectedValue(0)).c_str(), filter);
         json->PutExtAttr("value", GetValueValue("").c_str(), filter);
         if (propDivider_.has_value()) {

@@ -30,16 +30,6 @@ class PointerEvent;
 }
 
 namespace OHOS::Ace::NG {
-enum class WindowPatternType : uint32_t {
-    DEFAULT = 0,
-    SCREEN_SCENE,
-    TRANSFORM_SCENE, // no window session before transform scene
-    WINDOW_SCENE, // app window, sub window
-    SYSTEM_WINDOW_SCENE, // SCB system scene
-    PANEL_SCENE,
-    INPUT_SCENE,
-};
-
 class WindowSceneHelper : public AceType {
     DECLARE_ACE_TYPE(WindowSceneHelper, AceType);
 
@@ -61,6 +51,8 @@ public:
 
     static void IsCloseKeyboard(const RefPtr<FrameNode>& frameNode);
 
+    static bool GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode);
+
     static void InjectPointerEvent(const std::string& targetNodeName,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
@@ -68,18 +60,6 @@ public:
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
     static bool InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme = false);
-
-    static bool IsWindowPattern(const RefPtr<FrameNode>& node);
-
-    static bool HasWindowSession(const RefPtr<FrameNode>& node);
-
-    static bool IsTransformScene(uint32_t type);
-
-    static bool IsSystemWindowScene(uint32_t type);
-
-    static bool IsPanelScene(uint32_t type);
-
-    static bool IsScreenScene(uint32_t type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

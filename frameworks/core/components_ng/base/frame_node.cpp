@@ -20,8 +20,8 @@
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/dimension.h"
@@ -488,8 +488,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false, GetContext());
-        LOGW("%{public}s %{public}d should do detach before destroy function", GetTag().c_str(), GetId());
+        OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -1046,21 +1045,8 @@ void FrameNode::UpdateGeometryTransition()
     }
 }
 
-void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    CHECK_NULL_VOID(renderContext_);
-    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
-    if (callback) {
-        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
-        callback(info);
-    }
-#endif
-}
-
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
@@ -1112,6 +1098,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (ndkColorModeUpdateCallback_ && colorMode_ != SystemProperties::GetColorMode()) {
+            auto colorModeChange = ndkColorModeUpdateCallback_;
+            colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+            colorMode_ = SystemProperties::GetColorMode();
+        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1142,6 +1133,14 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    if (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) {
+        if (ndkFontUpdateCallback_) {
+            auto fontChangeCallback = ndkFontUpdateCallback_;
+            auto pipeline = GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
+        }
+    }
 }
 
 void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
@@ -1164,7 +1163,7 @@ void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleT
     NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
-void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -1179,12 +1178,6 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
-    if (context) {
-        const auto& safeAreaManager = context->GetSafeAreaManager();
-        if (safeAreaManager) {
-            safeAreaManager->RemoveRestoreNode(WeakClaim(this));
-        }
-    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -3474,12 +3467,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first) {
+    if (res.first || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second) {
+    if (res.second || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -5118,12 +5111,6 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     }
 #endif
     UINode::NotifyWebPattern(isRegister);
-}
-
-uint32_t FrameNode::GetWindowPatternType() const
-{
-    CHECK_NULL_RETURN(pattern_, 0);
-    return pattern_->GetWindowPatternType();
 }
 
 void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const

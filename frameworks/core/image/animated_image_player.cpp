@@ -168,6 +168,9 @@ std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& in
     auto iterator = cachedFrame_.find(index);
     if (iterator != cachedFrame_.end() && iterator->second != nullptr) {
         auto image = std::shared_ptr<RSImage>();
+        if (!image) {
+            return nullptr;
+        }
         image->BuildFromBitmap(*iterator->second);
         return image;
     }
@@ -207,6 +210,9 @@ std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& in
         iterator->second = std::make_unique<RSBitmap>(bitmap);
     }
     auto image = std::make_shared<RSImage>();
+    if (!image) {
+        return nullptr;
+    }
     image->BuildFromBitmap(bitmap);
     return image;
 }

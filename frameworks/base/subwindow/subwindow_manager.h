@@ -115,9 +115,7 @@ public:
     void DeleteHotAreas(int32_t subwindowId, int32_t nodeId);
 
     void ClearToastInSubwindow();
-    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
-    void CloseToast(
-        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
+    void ShowToast(const NG::ToastInfo& toastInfo);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);

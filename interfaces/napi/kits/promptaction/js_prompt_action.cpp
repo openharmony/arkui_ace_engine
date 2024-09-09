@@ -36,8 +36,6 @@ static napi_value PromptActionExport(napi_env env, napi_value exports)
 
     napi_property_descriptor promptDesc[] = {
         DECLARE_NAPI_FUNCTION("showToast", JSPromptShowToast),
-        DECLARE_NAPI_FUNCTION("openToast", JSPromptOpenToast),
-        DECLARE_NAPI_FUNCTION("closeToast", JSPromptCloseToast),
         DECLARE_NAPI_FUNCTION("showDialog", JSPromptShowDialog),
         DECLARE_NAPI_FUNCTION("showActionMenu", JSPromptShowActionMenu),
         DECLARE_NAPI_FUNCTION("openCustomDialog", JSPromptOpenCustomDialog),

@@ -237,7 +237,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
-    auto container = Container::Current();
+    auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -416,7 +416,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     return true;
 }
 
-bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
+bool ShowToast(napi_env env, NG::ToastInfo& toastInfo)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
@@ -427,10 +427,10 @@ bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_
             return false;
         }
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
-        delegate->ShowToast(toastInfo, std::move(toastCallback));
+        delegate->ShowToast(toastInfo);
     } else if (SubwindowManager::GetInstance() != nullptr) {
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
-        SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
+        SubwindowManager::GetInstance()->ShowToast(toastInfo);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -440,10 +440,10 @@ bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_
     }
     if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
-        delegate->ShowToast(toastInfo, std::move(toastCallback));
+        delegate->ShowToast(toastInfo);
     } else if (SubwindowManager::GetInstance() != nullptr) {
         TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
-        SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
+        SubwindowManager::GetInstance()->ShowToast(toastInfo);
     }
 #endif
     return true;
@@ -466,91 +466,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     if (!GetToastParams(env, argv, toastInfo)) {
         return nullptr;
     }
-    std::function<void(int32_t)> toastCallback = nullptr;
-    ShowToast(env, toastInfo, toastCallback);
-    return nullptr;
-}
-
-napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
-{
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "open toast enter");
-    size_t requireArgc = 1;
-    size_t argc = 1;
-    napi_value argv = nullptr;
-    napi_value thisVar = nullptr;
-    void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-    if (argc != requireArgc) {
-        NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
-    auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = -1 };
-    if (!GetToastParams(env, argv, toastInfo)) {
-        return nullptr;
-    }
-    napi_deferred deferred;
-    napi_value result;
-    napi_create_promise(env, &deferred, &result);
-    std::function<void(int32_t)> toastCallback = nullptr;
-    toastCallback = [env, deferred](int32_t toastId) mutable {
-        napi_value napiToastId = nullptr;
-        napi_create_int32(env, toastId, &napiToastId);
-        napi_resolve_deferred(env, deferred, napiToastId);
-    };
-    if (ShowToast(env, toastInfo, toastCallback)) {
-        return result;
-    }
-    return nullptr;
-}
-
-napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
-{
-    size_t argc = 1;
-    napi_value args[1];
-    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (argc != 1) {
-        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        return nullptr;
-    }
-    int32_t id = -1;
-    napi_get_value_int32(env, args[0], &id);
-    int32_t showModeVal = id & 0b111;
-    int32_t toastId = id >> 3; // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
-    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
-        NapiThrow(env, "", ERROR_CODE_TOAST_NOT_FOUND);
-        return nullptr;
-    }
-    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
-    std::function<void(int32_t)> toastCloseCallback = nullptr;
-    toastCloseCallback = [env](int32_t errorCode) mutable {
-        if (errorCode != ERROR_CODE_NO_ERROR) {
-            NapiThrow(env, "", errorCode);
-        }
-    };
-#ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
-        showMode == NG::ToastShowMode::DEFAULT) {
-        auto delegate = EngineHelper::GetCurrentDelegateSafely();
-        if (delegate) {
-            delegate->CloseToast(toastId, std::move(toastCloseCallback));
-        } else {
-            NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
-        }
-    } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseToast(
-            toastId, static_cast<NG::ToastShowMode>(showMode), std::move(toastCloseCallback));
-    }
-#else
-    auto delegate = EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
-    }
-    if (showMode == NG::ToastShowMode::DEFAULT) {
-        delegate->CloseToast(toastId, std::move(toastCloseCallback));
-    } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
-    }
-#endif
+    ShowToast(env, toastInfo);
     return nullptr;
 }
 

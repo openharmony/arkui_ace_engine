@@ -98,13 +98,6 @@ public:
                 theme->radius_ = Radius(toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp),
                     toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp));
             }
-            theme->toastDoubleBorderEnable_ = toastPattern->GetAttr<int>("toast_double_border_enable", 0);
-            theme->toastOuterBorderColor_ =
-                toastPattern->GetAttr<Color>("toast_outer_border_color", Color::TRANSPARENT);
-            theme->toastOuterBorderWidth_ = toastPattern->GetAttr<double>("toast_outer_border_width", 0.0f);
-            theme->toastInnerBorderColor_ =
-                toastPattern->GetAttr<Color>("toast_inner_border_color", Color::TRANSPARENT);
-            theme->toastInnerBorderWidth_ = toastPattern->GetAttr<double>("toast_inner_border_width", 0.0f);
         }
     };
 
@@ -170,31 +163,6 @@ public:
         return blurStyleTextColor_;
     }
 
-    int32_t GetToastDoubleBorderEnable() const
-    {
-        return toastDoubleBorderEnable_;
-    }
-
-    double GetToastOuterBorderWidth() const
-    {
-        return toastOuterBorderWidth_;
-    }
-
-    Color GetToastOuterBorderColor() const
-    {
-        return toastOuterBorderColor_;
-    }
-
-    double GetToastInnerBorderWidth() const
-    {
-        return toastInnerBorderWidth_;
-    }
-
-    Color GetToastInnerBorderColor() const
-    {
-        return toastInnerBorderColor_;
-    }
-
 protected:
     ToastTheme() = default;
 
@@ -211,11 +179,6 @@ private:
     uint32_t textMaxLines_ = 1;
     Edge marging_;
     Color blurStyleTextColor_;
-    int32_t toastDoubleBorderEnable_ = 0;
-    double toastOuterBorderWidth_ = 0.0f;
-    Color toastOuterBorderColor_ = Color::TRANSPARENT;
-    double toastInnerBorderWidth_ = 0.0f;
-    Color toastInnerBorderColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace

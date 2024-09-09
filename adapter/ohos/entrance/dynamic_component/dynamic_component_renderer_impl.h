@@ -66,6 +66,7 @@ public:
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
+    static RefPtr<Platform::AceContainer> GetAceConainer(int32_t instanceId);
 
     void AttachRenderContext();
     void RegisterSizeChangedCallback();

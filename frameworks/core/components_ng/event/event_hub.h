@@ -131,8 +131,8 @@ public:
     }
 
     void AttachHost(const WeakPtr<FrameNode>& host);
-    void OnAttachContext(PipelineContext* context);
-    void OnDetachContext(PipelineContext* context);
+    void OnAttachContext(PipelineContext *context);
+    void OnDetachContext(PipelineContext *context);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -520,21 +520,6 @@ public:
 
     bool HasImmediatelyVisibleCallback();
 
-    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
-    {
-        defaultOnDragStart_ = std::move(defaultOnDragStart);
-    }
-
-    const OnDragStartFunc& GetDefaultOnDragStart() const
-    {
-        return defaultOnDragStart_;
-    }
-
-    bool HasDefaultOnDragStart() const
-    {
-        return static_cast<bool>(defaultOnDragStart_);
-    }
-
     std::vector<double>& GetThrottledVisibleAreaRatios()
     {
         return throttledVisibleAreaRatios_;
@@ -590,6 +575,21 @@ public:
             visibleAreaUserRatios_.clear();
             visibleAreaUserCallback_.callback = nullptr;
         }
+    }
+
+    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
+    {
+        defaultOnDragStart_ = std::move(defaultOnDragStart);
+    }
+
+    const OnDragStartFunc& GetDefaultOnDragStart() const
+    {
+        return defaultOnDragStart_;
+    }
+
+    bool HasDefaultOnDragStart() const
+    {
+        return static_cast<bool>(defaultOnDragStart_);
     }
 
     bool HasVisibleAreaCallback(bool isUser)

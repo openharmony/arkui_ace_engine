@@ -1210,9 +1210,9 @@ void ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef> blurOptionsArg, B
 
 void ParseDynamicBrightnessOption(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
     ArkUI_Float32& rate, ArkUI_Float32& lightUpDegree, ArkUI_Float32& cubicCoeff, ArkUI_Float32& quadCoeff,
-    ArkUI_Float32& saturation, std::vector<float>& posRGB, std::vector<float>& negRGB, ArkUI_Float32& fraction) 
-{   
-    Local<JSValueRef> rateArg = runtimeCallInfo->GetCallArgRef(1);         
+    ArkUI_Float32& saturation, std::vector<float>& posRGB, std::vector<float>& negRGB, ArkUI_Float32& fraction)
+{
+    Local<JSValueRef> rateArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> lightUpDegreeArg = runtimeCallInfo->GetCallArgRef(2);
     Local<JSValueRef> cubicCoeffArg = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> quadCoeffArg = runtimeCallInfo->GetCallArgRef(4);
@@ -3488,8 +3488,10 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
             return panda::JSValueRef::Undefined(vm);
         }
     }
-    Color foregroundColor = Color::TRANSPARENT;
-    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor);
+    Color foregroundColor;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, true, foregroundColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -4866,7 +4868,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBrightnessInternal(ArkUIRuntim
     std::vector<float> posRGB(3, 0.0);
     std::vector<float> negRGB(3, 0.0);
     ArkUI_Float32 fraction = 1.0f;
-    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree, 
+    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree,
         cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction);
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBrightnessInternal(
         nativeNode, rate, lightUpDegree, cubicCoeff, quadCoeff, saturation,
@@ -4898,7 +4900,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBrightness(ArkUIRuntimeCallInf
     std::vector<float> posRGB(3, 0.0);
     std::vector<float> negRGB(3, 0.0);
     ArkUI_Float32 fraction = 1.0f;
-    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree, 
+    ParseDynamicBrightnessOption(runtimeCallInfo, vm, rate, lightUpDegree,
         cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction);
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundBrightness(
         nativeNode, rate, lightUpDegree, cubicCoeff, quadCoeff, saturation,
@@ -6195,8 +6197,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityX() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityY() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityValue() / density),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, info.GetDeviceId()) };
+        panda::NumberRef::New(vm, info.GetDeviceId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
@@ -6544,7 +6546,7 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
         ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
-            "stopPropagation", "getModifierKeyState", "intentionCode" };
+            "stopPropagation", "intentionCode" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
             panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
@@ -6552,7 +6554,6 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
             panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
             panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
             panda::FunctionRef::New(vm, Framework::JsStopPropagation),
-            panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         obj->SetNativePointerFieldCount(vm, 1);
@@ -7433,6 +7434,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopePriority(ArkUIRuntimeCallInfo*
     GetArkUINodeModifiers()->getCommonModifier()->setFocusScopePriority(nativeNode, scopeId.c_str(), priority);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue CommonBridge::SetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -17,49 +17,15 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/window_scene/scene/input_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/transform_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-std::function<RefPtr<Pattern>(void)> PatternCreator(const sptr<Rosen::SceneSession>& sceneSession)
-{
-    std::function<RefPtr<Pattern>(void)> patternCreator;
-    switch (sceneSession->GetSessionInfo().sceneType_) {
-        case Rosen::SceneType::SYSTEM_WINDOW_SCENE:
-            patternCreator = [sceneSession]() { return AceType::MakeRefPtr<SystemWindowScene>(sceneSession); };
-            break;
-        case Rosen::SceneType::PANEL_SCENE:
-            patternCreator = [sceneSession]() { return AceType::MakeRefPtr<PanelScene>(sceneSession); };
-            break;
-        case Rosen::SceneType::INPUT_SCENE:
-            patternCreator = [sceneSession]() { return AceType::MakeRefPtr<InputScene>(sceneSession); };
-            break;
-        default:
-            break;
-    }
-    return patternCreator;
-}
-
 void WindowSceneModel::Create(int32_t persistentId)
 {
-    if (persistentId == -1) { // -1: transform window scene type
-        auto stack = ViewStackProcessor::GetInstance();
-        auto nodeId = stack->ClaimNodeId();
-        ACE_SCOPED_TRACE("Create[%s][self:%d][TransformScene]", V2::WINDOW_SCENE_ETS_TAG, nodeId);
-        auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
-            []() { return AceType::MakeRefPtr<TransformScene>(); });
-        stack->Push(node);
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
-        return;
-    }
-
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
@@ -67,12 +33,13 @@ void WindowSceneModel::Create(int32_t persistentId)
         return;
     }
 
-    if (sceneSession->GetSessionInfo().sceneType_ != Rosen::SceneType::WINDOW_SCENE) {
+    if (sceneSession->GetSessionInfo().isSystem_) {
         auto stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
         ACE_SCOPED_TRACE("Create[%s][self:%d][%s]",
             V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
-        auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, PatternCreator(sceneSession));
+        auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
+            [sceneSession]() { return AceType::MakeRefPtr<SystemWindowScene>(sceneSession); });
         stack->Push(node);
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
         return;
@@ -90,10 +57,5 @@ void WindowSceneModel::Create(int32_t persistentId)
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
-}
-
-void WindowSceneModel::SetAttractionEffect(const AttractionEffect& effect)
-{
-    ViewAbstract::SetAttractionEffect(effect);
 }
 } // namespace OHOS::Ace::NG

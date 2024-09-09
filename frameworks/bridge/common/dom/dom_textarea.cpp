@@ -124,7 +124,7 @@ bool DOMTextarea::SetSpecializedAttr(const std::pair<std::string, std::string>& 
                 textarea.textAreaChild_->SetObscure(StringToBool(val));
             } },
         { DOM_TEXTAREA_EXTEND, [](const std::string& val,
-                                DOMTextarea& textarea) { textarea.textAreaChild_->SetExtend(StringToBool(val)); } },
+                               DOMTextarea& textarea) { textarea.textAreaChild_->SetExtend(StringToBool(val)); } },
         { DOM_TEXTAREA_SHOW_COUNTER,
             [](const std::string& val, DOMTextarea& textarea) {
                 textarea.textAreaChild_->SetShowCounter(StringToBool(val));

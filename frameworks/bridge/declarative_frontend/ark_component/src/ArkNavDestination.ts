@@ -26,7 +26,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     throw new Error('Method not implemented.');
   }
   hideTitleBar(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
+    modifier(this._modifiers, HideTitleBarModifier, value);
     return this;
   }
   backButtonIcon(value: any): this {
@@ -91,10 +91,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   }
 }
 
-class HideTitleBarModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class HideTitleBarModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {

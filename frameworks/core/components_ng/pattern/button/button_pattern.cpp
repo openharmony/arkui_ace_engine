@@ -464,11 +464,11 @@ void ButtonPattern::FireBuilder()
     CHECK_NULL_VOID(gestureEventHub);
     if (!makeFunc_.has_value()) {
         gestureEventHub->SetRedirectClick(false);
-        if (nodeId_ == -1) {
-            return;
-        }
         auto children = host->GetChildren();
         for (const auto& child : children) {
+            if (nodeId_ == -1) {
+                return;
+            }
             if (child->GetId() == nodeId_) {
                 host->RemoveChildAndReturnIndex(child);
                 host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);

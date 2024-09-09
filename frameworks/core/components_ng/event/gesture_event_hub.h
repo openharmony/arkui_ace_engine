@@ -606,6 +606,7 @@ public:
 
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
@@ -664,9 +665,9 @@ public:
 
     void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
 
-    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
-
     bool IsTextCategoryComponent(const std::string& frameTag);
+
+    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
 
     DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);

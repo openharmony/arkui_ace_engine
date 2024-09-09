@@ -1267,41 +1267,6 @@ HWTEST_F(GridCommonTestNg, PerformActionTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PerformActionTest002
- * @tc.desc: Grid AccessibilityPerformAction test ScrollForward and ScrollBackward.
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. When grid is not Scrollable
-     * @tc.expected: can not scrollpage
-     */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(10);
-    CreateDone(frameNode_);
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
-
-    /**
-     * @tc.steps: step2. When grid is Scrollable
-     * @tc.expected: can scrollpage
-     */
-    ClearOldNodes();
-    model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(20);
-    CreateDone(frameNode_);
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
-}
-
-/**
  * @tc.name: GridDistributed001
  * @tc.desc: Test the distributed capability of Grid.
  * @tc.type: FUNC

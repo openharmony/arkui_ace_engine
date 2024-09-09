@@ -354,7 +354,6 @@ public:
      * @param callback callback func.
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
-
     // Actually paint size of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
@@ -408,17 +407,18 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
+
+    virtual void SetStatusBarItemColor(uint32_t color) {};
+
+    virtual void PreLayout() {};
+
+    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
     
     virtual sptr<IRemoteObject> GetRemoteObj()
     {
         return {};
     }
 
-    virtual void PreLayout() {};
-    
-    virtual void SetStatusBarItemColor(uint32_t color) {};
-
-    virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
 };
 
 } // namespace OHOS::Ace

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -204,6 +205,27 @@ ArkUI_Int32 GetIdByNodePtr(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, -1);
     auto nodeId = currentNode->GetId();
     return nodeId;
+}
+
+void PropertyUpdate(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    if (uiNode) {
+        uiNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    }
+}
+
+ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    size_t size = isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
+                             : static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
+    CHECK_NULL_RETURN(size > 0, nullptr);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 void GetPositionToParent(ArkUINodeHandle node, ArkUI_Float32 (*parentOffset)[2], ArkUI_Bool useVp)
@@ -403,27 +425,6 @@ ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
-void PropertyUpdate(ArkUINodeHandle node)
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    if (uiNode) {
-        uiNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
-    }
-}
-
-ArkUINodeHandle GetLast(ArkUINodeHandle node, ArkUI_Bool isExpanded)
-{
-    auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
-    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    size_t size = isExpanded ? frameNode->GetAllChildrenWithBuild(false).size()
-                             : static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
-    CHECK_NULL_RETURN(size > 0, nullptr);
-    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, isExpanded);
-    return reinterpret_cast<ArkUINodeHandle>(child);
-}
-
 ArkUINodeHandle GetFirstUINode(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -454,6 +455,49 @@ ArkUI_Float32* GetLayoutPositionWithoutMargin(ArkUINodeHandle node)
     return ret;
 }
 
+ArkUI_Int32 SetSystemColorModeChangeEvent(ArkUINodeHandle node, void* userData, void* onColorModeChange)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto onColorChange = [userData, onColorModeChange](int32_t colorMode) {
+        using FuncType = float (*)(int32_t, void*);
+        FuncType func = reinterpret_cast<FuncType>(onColorModeChange);
+        func(colorMode, userData);
+    };
+    ViewAbstract::SetSystemColorModeChangeEvent(frameNode, onColorChange);
+    return 0;
+}
+
+void ResetSystemColorModeChangeEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemColorModeChangeEvent(frameNode, nullptr);
+}
+
+ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto onFontChange = [userData, onFontStyleChange](float fontSize, float fontWeight) {
+        ArkUISystemFontStyleEvent fontStyle = new ArkUI_SystemFontStyleEvent();
+        fontStyle->fontSize = fontSize;
+        fontStyle->fontWeight = fontWeight;
+        using FuncType = float (*)(ArkUISystemFontStyleEvent, void*);
+        FuncType func = reinterpret_cast<FuncType>(onFontStyleChange);
+        func(fontStyle, userData);
+    };
+    ViewAbstract::SetSystemFontChangeEvent(frameNode, onFontChange);
+    return 0;
+}
+
+void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetSystemFontChangeEvent(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -464,7 +508,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
         GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
         GetFrameNodeByKey, GetAttachedFrameNodeById, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize,
-        GetLayoutPositionWithoutMargin };
+        GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
+        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent};
     return &modifier;
 }
 

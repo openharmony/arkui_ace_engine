@@ -294,16 +294,6 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
-void EventHub::ClearCustomerOnDragFunc()
-{
-    onDragStart_ = nullptr;
-    customerOnDragEnter_ = nullptr;
-    customerOnDragLeave_ = nullptr;
-    customerOnDragMove_ = nullptr;
-    customerOnDrop_ = nullptr;
-    customerOnDragEnd_ = nullptr;
-}
-
 void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
 {
     onSizeChanged_ = std::move(onSizeChanged);
@@ -352,6 +342,16 @@ bool EventHub::HasImmediatelyVisibleCallback()
 void EventHub::ClearOnAreaChangedInnerCallbacks()
 {
     onAreaChangedInnerCallbacks_.clear();
+}
+
+void EventHub::ClearCustomerOnDragFunc()
+{
+    onDragStart_ = nullptr;
+    customerOnDragEnter_ = nullptr;
+    customerOnDragLeave_ = nullptr;
+    customerOnDragMove_ = nullptr;
+    customerOnDrop_ = nullptr;
+    customerOnDragEnd_ = nullptr;
 }
 
 void EventHub::SetJSFrameNodeOnAppear(std::function<void()>&& onAppear)

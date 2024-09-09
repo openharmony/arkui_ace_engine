@@ -123,13 +123,9 @@ public:
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
         checkboxModifier_->UpdateAnimatableProperty();
-
-        SetHoverEffectType(paintProperty);
-        SetModifierBoundsRect(size, offset);
-    }
-
-    void SetModifierBoundsRect(const SizeF& size, const OffsetF& offset)
-    {
+        checkboxModifier_->SetCheckboxStyle(checkBoxStyle_);
+        checkboxModifier_->SetUseContentModifier(useContentModifier_);
+        checkboxModifier_->SetHasBuilder(hasBuilder_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
@@ -141,6 +137,7 @@ public:
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         checkboxModifier_->SetBoundsRect(boundsRect);
+        SetHoverEffectType(paintProperty);
     }
 
     void SetHoverEffectType(const RefPtr<CheckBoxPaintProperty>& checkBoxPaintProperty)
