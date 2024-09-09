@@ -206,6 +206,8 @@ public:
 
     void UpdateSubTabBoard(int32_t index);
 
+    void GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId);
+
     SelectedMode GetSelectedMode() const;
 
     void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
@@ -465,12 +467,29 @@ public:
         }
     }
 
+    void SetFocusSet(bool hasFocus)
+    {
+        isTabBarFocus_ = hasFocus;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void InitTabbarProperties(const RefPtr<TabTheme>& tabTheme);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    const Color& GetSubTabBarHoverColor(int32_t index) const;
+    void UpdateFocusTabarPageState();
+    void UpdateSubTabarItemStyles(const RefPtr<FrameNode>& columnNode, int32_t focusedColumnId,
+        int32_t selectedColumnId, OHOS::Ace::Axis axis, int32_t index);
+    void UpdateSubTabFocusedTextColor(const RefPtr<TabTheme>& tabTheme, int32_t isFocusedItem,
+        RefPtr<TextLayoutProperty> textLayoutProperty, int32_t index);
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -632,6 +651,11 @@ private:
     float lastFontScale_ = 0.0f;
     std::optional<float> thirdLargeFontHeight_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
+    bool isTabBarFocus_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    Color tabBarItemDefalutBgColor_ = Color::TRANSPARENT;
+    Color tabBarItemFocusBgColor_ = Color::TRANSPARENT;
+    Color tabBarItemHoverColor_ = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace::NG
 
