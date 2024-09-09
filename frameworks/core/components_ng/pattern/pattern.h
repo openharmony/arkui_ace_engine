@@ -143,7 +143,8 @@ public:
         OnAttachToFrameNode();
     }
 
-    virtual bool CustomizeExpandSafeArea(){
+    virtual bool CustomizeExpandSafeArea()
+    {
         return false;
     }
     
