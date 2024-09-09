@@ -117,6 +117,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         !textFieldPattern->IsNormalInlineState());
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
+    DoTextRaceIfNeed(paintWrapper);
     PropertyChangeFlag flag = 0;
     if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);
@@ -197,6 +198,28 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetPreviewTextDecorationColor(previewDecorationColor);
     textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
+}
+
+void TextFieldPaintMethod::DoTextRaceIfNeed(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(textFieldContentModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldTheme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    textFieldContentModifier_->SetErrorTipsSpacing(textFieldTheme->GetTextInputAndErrTipsSpacing());
+    if ((textFieldTheme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity())) {
+        auto paragraph = textFieldPattern->GetParagraph();
+        CHECK_NULL_VOID(paragraph);
+        auto paintContentWidth = paintWrapper->GetContentSize().Width();
+        auto textFadeoutEnabled =
+            GreatNotEqual(paintContentWidth, 0.0) &&
+            GreatNotEqual(paragraph->GetTextWidth() + textFieldPattern->GetTextParagraphIndent(), paintContentWidth);
+        textFieldContentModifier_->SetTextFadeoutEnabled(textFadeoutEnabled);
+    }
 }
 
 void TextFieldPaintMethod::UpdateScrollBar()

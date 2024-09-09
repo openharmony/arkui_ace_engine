@@ -75,6 +75,34 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     return pattern->GetSearchController();
 }
 
+void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
+    if (!layoutProperty->GetBorderWidthProperty()) {
+        if (!renderContext->HasBorderWidth()) {
+            BorderWidthProperty borderWidth;
+            borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
+            layoutProperty->UpdateBorderWidth(borderWidth);
+            renderContext->UpdateBorderWidth(borderWidth);
+        }
+        if (!renderContext->HasBorderColor()) {
+            BorderColorProperty borderColor;
+            borderColor.SetColor(searchTheme->GetBorderColor());
+            renderContext->UpdateBorderColor(borderColor);
+        }
+    }
+}
+
 RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
     const std::optional<std::string>& placeholder, const std::optional<std::string>& icon)
 {
@@ -107,7 +135,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
-    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    UpdateSearchNodeBorderProps(frameNode);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     pattern->SetSearchController(textFieldPattern->GetTextFieldController());
@@ -741,8 +769,9 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        if (!textFieldPaintProperty || !textFieldPaintProperty->HasTextColorFlagByUser()) {
+        if (!hasTextFieldNode) {
             textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
+            textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
         }
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
@@ -750,6 +779,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    pattern->SetTextFadeoutCapacity(true);
+
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
@@ -783,6 +814,7 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     BorderRadiusProperty borderRadius;
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(borderRadius);
     pattern->SetEnableTouchAndHoverEffect(true);
+    textFieldPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 }
 

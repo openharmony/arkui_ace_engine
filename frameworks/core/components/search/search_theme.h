@@ -92,6 +92,13 @@ public:
             theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->borderColor_ = pattern->GetAttr<Color>("search_border_color", Color());
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("search_border_width", 0.0_vp);
+            theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
+            theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("search_need_focus_box", 0.0));
+            theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
+                static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
         }
     };
 
@@ -257,6 +264,31 @@ public:
         return symbolIconColor_;
     }
 
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    const Color& GetFocusBgColor() const
+    {
+        return focusBgColor_;
+    }
+
+    const Color& GetFocusIconColor() const
+    {
+        return focusIconColor_;
+    }
+
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -293,6 +325,11 @@ private:
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
     Color symbolIconColor_;
+    Color borderColor_;
+    Dimension borderWidth_;
+    Color focusBgColor_;
+    Color focusIconColor_;
+    bool needFocusBox_ = false;
 };
 
 } // namespace OHOS::Ace
