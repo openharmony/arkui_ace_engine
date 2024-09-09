@@ -14,6 +14,8 @@
  */
 
 #include "core/components/progress/progress_theme.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "test/mock/core/common/mock_container.h"
@@ -25,37 +27,20 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace Converter;
 
 const Color THEME_LOADING_COLOR(0xFFAABBCC);
 
 namespace {
-inline Ark_Number ArkNum(float src)
-{
-    return {.tag= ARK_TAG_FLOAT32, .f32 = static_cast<Ark_Float32>(src)
-    };
-}
-
-inline Ark_Number ArkNum(int src)
-{
-    return {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(src)
-    };
-}
-
-inline Ark_String ArkStr(const char *s)
-{
-    return {.chars = s, .length = strlen(s)
-    };
-}
-
 inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
     const char *module = "", const char *bundle = "")
 {
     return {
-        .id = ArkNum(id),
-        .type = ArkNum(static_cast<int>(type)),
-        .moduleName = ArkStr(module),
-        .bundleName = ArkStr(bundle),
+        .id = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
+        .type = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type)},
+        .moduleName = {.chars = module},
+        .bundleName = {.chars = bundle},
         .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
     };
 }
@@ -108,38 +93,39 @@ HWTEST_F(LoadingProgressModifierTest, LoadingProgressModifierTest001, TestSize.L
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, THEME_LOADING_COLOR.ToString());
-    ResourceColor color = { .selector = 0, .value0 = 0xFF123400 };
+
+    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color, int>(0xFF123400);
     modifier_->setColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "#FF123400");
 
-    Ark_ResourceColor numberInt = { .selector = 1, .value1 = ArkNum(0x123401) };
+    Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
     modifier_->setColor(node_, &numberInt);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "#FF123401");
 
-    Ark_ResourceColor numberFlt = { .selector = 1, .value1 = ArkNum(0.5f) };
+    Ark_ResourceColor numberFlt = ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f);
     modifier_->setColor(node_, &numberFlt);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "#00000000");
 
-    Ark_ResourceColor strColor = { .selector = 2, .value2 = ArkStr("#11223344") };
+    Ark_ResourceColor strColor = ArkUnion<Ark_ResourceColor, Ark_String>("#11223344");
     modifier_->setColor(node_, &strColor);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "#11223344");
 
-    Ark_ResourceColor strNumber = { .selector = 2, .value2 = ArkStr("65535") };
+    Ark_ResourceColor strNumber = ArkUnion<Ark_ResourceColor, Ark_String>("65535");
     modifier_->setColor(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
 
-    auto resName = ArkStr("aa.bb.cc");
-    Ark_ResourceColor resNameColor = { .selector = 3, .value3 = ArkRes(&resName) };
+    auto resName = ArkValue<Ark_String>("aa.bb.cc");
+    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
     modifier_->setColor(node_, &resNameColor);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
 
-    Ark_ResourceColor resIdColor = { .selector = 3, .value3 = ArkRes(nullptr, 1234) };
+    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
     modifier_->setColor(node_, &resIdColor);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
