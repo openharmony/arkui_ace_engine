@@ -34,6 +34,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
