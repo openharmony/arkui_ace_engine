@@ -42,7 +42,9 @@ public:
 
     void operator()() const
     {
-        task_();
+        if (task_) {
+            task_();
+        }
     }
 
 private:
