@@ -4715,7 +4715,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (!ProcessFocusIndexAction()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction  %{public}d", static_cast<int32_t>(action));
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction %{public}d", static_cast<int32_t>(action));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
@@ -4731,7 +4731,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         if (event.IsKeepEditable()) {
             return;
         }
-        FocusHub::LostFocusToViewRoot();
+        TextFieldLostFocusToViewRoot();
         return;
     }
     if (IsTextArea() && action == TextInputAction::NEW_LINE) {
@@ -4741,7 +4741,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
             }
         } else {
             CloseKeyboard(forceCloseKeyboard, false);
-            FocusHub::LostFocusToViewRoot();
+            TextFieldLostFocusToViewRoot();
         }
         return;
     }
@@ -4754,11 +4754,17 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     // which will call StopTwinkling on HandleBlurEvent method.
     if (textInputBlurOnSubmit_) {
         CloseKeyboard(forceCloseKeyboard, false);
-        FocusHub::LostFocusToViewRoot();
+        TextFieldLostFocusToViewRoot();
     }
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Textfield.onSubmit");
 #endif
+}
+
+void TextFieldPattern::TextFieldLostFocusToViewRoot()
+{
+    CHECK_NULL_VOID(HasFocus());
+    FocusHub::LostFocusToViewRoot();
 }
 
 void TextFieldPattern::RecordSubmitEvent() const
