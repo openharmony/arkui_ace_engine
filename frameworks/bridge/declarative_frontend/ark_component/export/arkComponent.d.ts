@@ -1457,15 +1457,6 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         handler: SslErrorHandler;
         error: SslError;
     }) => void): this;
-    onSslErrorEvent(callback: (event: {
-        handler: SslErrorHandler;
-        error: SslError;
-        url: string;
-        originalUrl: string;
-        referrer: string;
-        isFatalError: boolean;
-        isMainFrame:boolean;
-    }) => void): this;
     onClientAuthenticationRequest(callback: (event: {
         handler: ClientAuthenticationHandler;
         host: string;
