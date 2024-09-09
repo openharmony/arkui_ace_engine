@@ -20269,6 +20269,10 @@ class ArkNavDestinationComponent extends ArkComponent {
     }
     return this;
   }
+  recoverable(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
+    return this;
+  }
 }
 class HideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
@@ -20320,6 +20324,21 @@ class NavDestinationTitleModifier extends ModifierWithKey {
   }
 }
 NavDestinationTitleModifier.identity = Symbol('title');
+
+class NavDestinationRecoverableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetRecoverable(node);
+    } else {
+      getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
+  }
+}
+NavDestinationRecoverableModifier.identity = Symbol('recoverable');
 
 class NavDestinationMenusModifier extends ModifierWithKey {
   constructor(value) {
@@ -21117,6 +21136,10 @@ class ArkNavigationComponent extends ArkComponent {
     }
     return this;
   }
+  recoverable(value) {
+    modifierWithKey(this._modifiersWithKeys, NavigationRecoverableModifier.identity, NavigationRecoverableModifier, value);
+    return this;
+  }
 }
 class BackButtonIconModifier extends ModifierWithKey {
   constructor(value) {
@@ -21344,6 +21367,21 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey {
   }
 }
 IgnoreNavLayoutSafeAreaModifier.identity = Symbol('ignoreLayoutSafeArea');
+
+class NavigationRecoverableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetRecoverable(node);
+    } else {
+      getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
+  }
+}
+NavigationRecoverableModifier.identity = Symbol('recoverable');
 
 class MenusModifier extends ModifierWithKey {
   constructor(value) {
