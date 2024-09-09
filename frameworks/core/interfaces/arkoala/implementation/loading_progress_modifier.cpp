@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressInterfaceModifier {
 void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
+    LOGE("ARKOALA LoadingProgressInterfaceModifier::SetLoadingProgressOptionsImpl -> Method is not implemented");
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {

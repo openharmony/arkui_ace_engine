@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
-#define private public
-
 #include "core/components/progress/progress_theme.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -69,16 +67,23 @@ public:
     static void SetUpTestCase()
     {
         MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+
+        // set test values to Theme Pattern as data for the Theme building
+        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        themeStyle->SetAttr("fg_progress_color", { .value = THEME_LOADING_COLOR });
+        MockThemeStyle::GetInstance()->SetAttr("progress_pattern", { .value = themeStyle });
+        themeConstants->LoadTheme(0);
+
+        auto builder = ProgressTheme::Builder();
+        auto theme = builder.Build(themeConstants);
+
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
         EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto builder = ProgressTheme::Builder();
-            auto theme = builder.Build(nullptr);
-            theme->loadingColor_ = THEME_LOADING_COLOR;
-            return theme;
-        });
+        EXPECT_CALL(*themeManager, GetTheme(testing::_)).WillRepeatedly(Return(theme));
+
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
     }
