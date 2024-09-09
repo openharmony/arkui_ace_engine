@@ -2119,6 +2119,8 @@ class NavPathInfo {
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
     this.isEntry = isEntry;
+    this.fromRecovery = false;
+    this.mode = undefined;
   }
 }
 

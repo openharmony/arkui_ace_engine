@@ -230,6 +230,21 @@ class IgnoreLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandOpts
   }
 }
 
+class RecoverableModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('recoverable');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetRecoverable(node);
+    } else {
+      getUINativeModule().navDestination.setRecoverable(node, this.value);
+    }
+  }
+}
+
 //@ts-ignore
 globalThis.NavDestination.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

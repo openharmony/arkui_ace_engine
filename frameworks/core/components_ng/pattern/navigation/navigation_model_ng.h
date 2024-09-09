@@ -69,6 +69,8 @@ public:
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
+    void SetRecoverable(bool recoverable) override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
@@ -85,7 +87,8 @@ public:
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
-    
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;

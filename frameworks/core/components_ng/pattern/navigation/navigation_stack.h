@@ -187,6 +187,12 @@ public:
     virtual int32_t GetJsIndexFromNativeIndex(int32_t index) { return -1; }
     virtual void MoveIndexToTop(int32_t index) {}
 
+    virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
+    virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
+    virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
+    virtual bool IsFromRecovery(int32_t index) { return false; }
+    virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
+
     const WeakPtr<UINode>& GetNavigationNode()
     {
         return navigationNode_;
