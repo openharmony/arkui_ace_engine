@@ -3489,7 +3489,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
         }
     }
     Color foregroundColor;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, true, foregroundColor.GetValue());
@@ -6198,7 +6198,7 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityY() / density),
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityValue() / density),
         panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState)};
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));

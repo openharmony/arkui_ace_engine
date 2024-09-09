@@ -367,6 +367,7 @@ public:
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
     void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
+    void SetRenderFrameOffset(const OffsetF& offset) override;
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     void SetRotation(float rotationX, float rotationY, float rotationZ) override;
@@ -375,7 +376,6 @@ public:
     void SetShadowAlpha(float alpha) override;
     void SetShadowElevation(float elevation) override;
     void SetShadowRadius(float radius) override;
-    void SetRenderFrameOffset(const OffsetF& offset) override;
     void SetScale(float scaleX, float scaleY) override;
     void SetBackgroundColor(uint32_t colorValue) override;
     void SetRenderPivot(float pivotX, float pivotY) override;
@@ -383,21 +383,21 @@ public:
     void SetOpacity(float opacity) override;
     void SetTranslate(float translateX, float translateY, float translateZ) override;
     void SetHostNode(const WeakPtr<FrameNode>& host) override;
+    void ResetSurface(int width, int height) override;
+    void PaintDebugBoundary(bool flag) override;
 
     void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) override;
     void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) override;
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
-    void ResetSurface(int width, int height) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
-    void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
     void SyncPartialRsProperties() override;
     void UpdatePaintRect(const RectF& paintRect) override;
-    Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
+    Matrix4 GetRevertMatrix() override;
     void SetOpacityMultiplier(float opacity) override;
 
 protected:
@@ -590,6 +590,8 @@ protected:
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
     void SetContentRectToFrame(RectF rect) override;
+    Matrix4 GetMatrix();
+    Matrix4 GetMatrixWithTransformRotate();
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
@@ -599,8 +601,6 @@ protected:
     void RoundToPixelGrid(bool isRound, uint8_t flag);
     void OnePixelRounding();
     void OnePixelRounding(bool isRound, uint8_t flag);
-    Matrix4 GetMatrix();
-    Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
