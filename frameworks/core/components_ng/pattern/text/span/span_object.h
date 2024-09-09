@@ -23,9 +23,10 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -249,6 +250,7 @@ private:
 };
 class BackgroundColorSpan : public SpanBase {
     DECLARE_ACE_TYPE(BackgroundColorSpan, SpanBase);
+
 public:
     BackgroundColorSpan() = default;
     explicit BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_);
@@ -260,6 +262,7 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
 private:
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
@@ -304,6 +307,8 @@ public:
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> GetOnDraw();
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    virtual void AddStyledString(const WeakPtr<SpanStringBase>& spanString) {}
+    virtual void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) {}
 
 private:
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure_;
@@ -378,10 +383,11 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
 private:
     void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);
-    std::string urlAddress_;
+    std::string urlAddress_ = "";
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H

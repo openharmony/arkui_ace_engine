@@ -181,6 +181,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::JsPixelStretchEffect);
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
     JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
+    JSClass<JSXComponent>::StaticMethod("renderFit", &JSXComponent::JsRenderFit);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -670,4 +671,26 @@ void JSXComponent::JsEnableAnalyzer(bool enable)
     XComponentModel::GetInstance()->EnableAnalyzer(enable);
 }
 
+void JSXComponent::JsRenderFit(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE || args.Length() != 1) {
+        return;
+    }
+    if (type == XComponentType::TEXTURE) {
+        JSViewAbstract::JSRenderFit(args);
+        return;
+    }
+
+    // set RenderFit on SurfaceNode when type is SURFACE
+    RenderFit renderFit = RenderFit::RESIZE_FILL;
+    if (args[0]->IsNumber()) {
+        int32_t fitNumber = args[0]->ToNumber<int32_t>();
+        if (fitNumber >= static_cast<int32_t>(RenderFit::CENTER) &&
+            fitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+            renderFit = static_cast<RenderFit>(fitNumber);
+        }
+    }
+    XComponentModel::GetInstance()->SetRenderFit(renderFit);
+}
 } // namespace OHOS::Ace::Framework

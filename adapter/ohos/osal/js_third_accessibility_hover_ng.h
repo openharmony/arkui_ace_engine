@@ -38,6 +38,7 @@ namespace Framework {
 class FrameNode;
 class JsAccessibilityManager;
 struct ActionParam;
+class JsThirdProviderInteractionOperation;
 
 using namespace OHOS::Accessibility;
 
@@ -48,6 +49,16 @@ struct AccessibilityHoverForThirdState {
     bool idle = true;
 };
 
+struct AccessibilityHoverForThirdConfig {
+    int64_t hostElementId = -1;
+    NG::PointF point;
+    SourceType sourceType = SourceType::NONE;
+    NG::AccessibilityHoverEventType eventType = NG::AccessibilityHoverEventType::ENTER;
+    TimeStamp time = std::chrono::high_resolution_clock::now();
+    RefPtr<NG::FrameNode> hostNode;
+    RefPtr<NG::PipelineContext> context;
+};
+
 using AccessibilityHoverTestPathForThird = std::vector<int64_t>;
 
 class AccessibilityHoverManagerForThirdNG : public AceType {
@@ -55,44 +66,11 @@ class AccessibilityHoverManagerForThirdNG : public AceType {
 
 public:
     void HandleAccessibilityHoverForThird(
-        int64_t hostElementId,
-        const NG::PointF& point,
-        SourceType sourceType,
-        NG::AccessibilityHoverEventType eventType,
-        TimeStamp time,
-        RefPtr<NG::FrameNode> &hostNode,
-        RefPtr<NG::PipelineContext> &context);
-
-    void SendAccessibilityEventForThird(
+        const AccessibilityHoverForThirdConfig& config);
+    bool GetElementInfoForThird(
         int64_t elementId,
-        AccessibilityEventType eventType,
-        WindowsContentChangeTypes windowsContentChangeType,
-        RefPtr<NG::FrameNode> &hostNode,
-        RefPtr<NG::PipelineContext> &context);
-    void GetElementInfoForThird(int64_t elementId, AccessibilityElementInfo &info);
-    void SendThirdAccessibilityAsyncEvent(
-        const AccessibilityEvent &accessibilityEvent, 
-        const RefPtr<NG::FrameNode>& hostNode);
-
-    void SetHandlerForThird(const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager)
-    {
-        jsAccessibilityManager_ = jsAccessibilityManager;
-    }
-
-    const WeakPtr<JsAccessibilityManager>& GetHandlerForThird() const
-    {
-        return jsAccessibilityManager_;
-    }
-
-    void SetTreeIdForTest(int32_t treeId)
-    {
-        xcomponentTreeId_ = treeId;
-    }
-
-    int32_t GetTreeIdForTest()
-    {
-        return xcomponentTreeId_;
-    }
+        AccessibilityElementInfo& info,
+        int64_t hostElementId);
 
     bool ActThirdAccessibilityFocus(
         int64_t elementId,
@@ -100,30 +78,52 @@ public:
         const RefPtr<NG::FrameNode>& hostNode,
         const RefPtr<NG::PipelineContext>& context,
         bool isNeedClear);
+    void RegisterJsThirdProviderInteractionOperation(
+        int64_t hostElementId,
+        const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator);
+    void DeregisterJsThirdProviderInteractionOperation(int64_t hostElementId);
+    std::weak_ptr<JsThirdProviderInteractionOperation> &GetJsThirdProviderInteractionOperation(
+        int64_t hostElementId)
+    {
+        return jsThirdProviderOperator_[hostElementId];
+    }
+
+    bool OnDumpChildInfoForThirdRecursive(
+        int64_t hostElementId,
+        const std::vector<std::string>& params,
+        std::vector<std::string>& info,
+        const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager);
+    bool ClearThirdAccessibilityFocus(const RefPtr<NG::FrameNode>& hostNode);
 
 private:
     void ResetHoverForThirdState();
     AccessibilityHoverTestPathForThird HoverPathForThird(
         const int64_t hostElementId,
         const NG::PointF& point,
-        AccessibilityElementInfo& rootInfo);
+        AccessibilityElementInfo& rootInfo,
+        NG::OffsetF hostOffset);
     bool HoverPathForThirdRecursive(
         const int64_t hostElementId,
         const NG::PointF& hoverPoint,
         const AccessibilityElementInfo& nodeInfo,
-        AccessibilityHoverTestPathForThird& path);
+        AccessibilityHoverTestPathForThird& path,
+        NG::OffsetF hostOffset);
     std::pair<bool, bool> GetSearchStrategyForThird(
         const AccessibilityElementInfo& nodeInfo);
     bool IsAccessibilityFocusable(const AccessibilityElementInfo& nodeInfo);
     bool HasAccessibilityTextOrDescription(const AccessibilityElementInfo& nodeInfo);
     void UpdateSearchStrategyByHitTestModeStr(
-        std::string &hitTestMode,
+        std::string& hitTestMode,
         bool& shouldSearchSelf,
         bool& shouldSearchChildren);
+    void DumpPropertyForThird(
+        int64_t elementId,
+        const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager,
+        const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator);
 
     AccessibilityHoverForThirdState hoverForThirdState_;
-    WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;
-    int32_t xcomponentTreeId_ = 0;
+    std::unordered_map<int64_t, std::weak_ptr<JsThirdProviderInteractionOperation>>
+        jsThirdProviderOperator_;
 };
 } // namespace NG
 } // namespace OHOS::Ace

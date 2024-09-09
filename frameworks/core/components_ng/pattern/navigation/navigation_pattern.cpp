@@ -768,7 +768,6 @@ void NavigationPattern::CheckTopNavPathChange(
             if (!newTopNavDestination) {
                 break;
             }
-            auto focusHub = newTopNavDestination->GetFocusHub();
             if (!GetIsFocusable(newTopNavDestination)) {
                 break;
             }
@@ -799,7 +798,6 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageShow(pageInfo->GetPageUrl());
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto focusHub = navBarNode->GetFocusHub();
         if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarFocusView);
@@ -915,7 +913,6 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
         }
         return;
     }
-    navigationPattern->SyncWithJsStackIfNeeded();
     for (int32_t index = end - 1; index >= 0 && index >= start; index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -2409,6 +2406,15 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
     }
+}
+
+void NavigationPattern::OnWindowHide()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navigationPattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SyncWithJsStackIfNeeded();
 }
 
 void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)

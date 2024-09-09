@@ -91,8 +91,16 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
         SetDefaultAnimatablePropertyValue(textStyle.value());
     }
 
+    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+    }
+
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
+    ResetTextRacePercent();
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip_ = MakeRefPtr<PropertyBool>(true);
     } else {
@@ -372,12 +380,12 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(textPattern);
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
-    if (pManager->GetParagraphs().empty()) {
-        textPattern->DumpRecord(",onDraw GetParagraphs empty:");
-        return;
-    }
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
+    if (pManager->GetParagraphs().empty()) {
+        textPattern->DumpRecord("onDraw GetParagraphs empty:" + std::to_string(host->GetId()));
+        return;
+    }
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
     if (!ifPaintObscuration_) {
@@ -396,7 +404,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         }
         if (!CheckMarqueeState(MarqueeState::RUNNING)) {
             auto paintOffsetY = paintOffset_.GetY();
-            textPattern->DumpRecord(",Paint id:" + std::to_string(host->GetId()));
+            textPattern->DumpRecord("Paint id:" + std::to_string(host->GetId()));
             auto paragraphs = pManager->GetParagraphs();
             for (auto&& info : paragraphs) {
                 auto paragraph = info.paragraph;
@@ -422,7 +430,8 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
-    float textRacePercent = GetTextRacePercent();
+    float textRacePercent = GetTextRaceDirection() == TextDirection::LTR ?
+        GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
     float paragraph1Offset =
         (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
     if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
@@ -858,7 +867,11 @@ void TextContentModifier::StartTextRace()
     option.SetCurve(curve);
     option.SetIteration(-1);
     option.SetTempo(RACE_TEMPO);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
+    raceAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        float startPercent = modifier->GetTextRacePercent();
+        modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent);
+    });
     SetMarqueeState(MarqueeState::RUNNING);
 }
 
@@ -875,7 +888,7 @@ void TextContentModifier::StopTextRace()
     }
 
     SetMarqueeState(MarqueeState::STOPPED);
-    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+    ResetTextRacePercent();
 }
 
 void TextContentModifier::ResumeAnimation()
@@ -905,6 +918,71 @@ float TextContentModifier::GetTextRacePercent()
         percent = racePercentFloat_->Get();
     }
     return percent;
+}
+
+TextDirection TextContentModifier::GetTextRaceDirection() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, TextDirection::LTR);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    auto direction = layoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::AUTO) {
+        direction = GetTextRaceDirectionByContent();
+    }
+    return direction;
+}
+
+TextDirection TextContentModifier::GetTextRaceDirectionByContent() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, TextDirection::LTR);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, TextDirection::LTR);
+    if (pManager->GetParagraphs().size() == 0) {
+        return TextDirection::LTR;
+    }
+    auto paragraph = pManager->GetParagraphs().front().paragraph;
+    CHECK_NULL_RETURN(paragraph, TextDirection::LTR);
+    auto paragraphText = StringUtils::Str16ToStr8(paragraph->GetParagraphText());
+    auto content = StringUtils::ToWstring(paragraphText);
+    for (const auto& charFromContent : content) {
+        if (TextLayoutadapter::IsLeftToRight(charFromContent)) {
+            return TextDirection::LTR;
+        } else if (TextLayoutadapter::IsRightToLeft(charFromContent)) {
+            return TextDirection::RTL;
+        } else if (TextLayoutadapter::IsRightTOLeftArabic(charFromContent)) {
+            return TextDirection::RTL;
+        }
+    }
+    return AceApplicationInfo::GetInstance().IsRightToLeft() ?
+        TextDirection::RTL : TextDirection::LTR;
+}
+
+void TextContentModifier::ResetTextRacePercent() const
+{
+    if (GetTextRaceDirection() == TextDirection::LTR) {
+        // LTR start 0%
+        racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+        return;
+    }
+    // RTL
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
+    if (pManager->GetParagraphs().size() == 0) {
+        return;
+    }
+    auto paragraph = pManager->GetParagraphs().front().paragraph;
+    CHECK_NULL_VOID(paragraph);
+    auto textRectWidth = textPattern->GetTextRect().Width();
+    float textWidth = paragraph->GetTextWidth();
+    racePercentFloat_->Set(
+        (textRaceSpaceWidth_ + textRectWidth) / (textWidth + textRaceSpaceWidth_) *
+        RACE_MOVE_PERCENT_MAX - RACE_MOVE_PERCENT_MAX);
 }
 
 void TextContentModifier::ContentChange()

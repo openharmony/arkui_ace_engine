@@ -35,121 +35,150 @@ constexpr Dimension ARROW_VERTICAL_P4_OFFSET_X = 1.5_vp;
 constexpr Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
 constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
-constexpr Dimension OUTER_MARGIN = Dimension(1.0f);
 constexpr float BLUR_MASK_FILTER = 0.55f;
 } // namespace
 
 void SheetWrapperPaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
-    auto sheetNode = GetSheetNode();
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_EQUAL_VOID(IsDrawBorder(paintWrapper), false);
+    auto sheetNode = GetSheetNode(paintWrapper);
     CHECK_NULL_VOID(sheetNode);
-    auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
-    CHECK_NULL_VOID(sheetPattern);
-    auto sheetType = sheetPattern->GetSheetType();
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (!sheetTheme->IsOuterBorderEnable() || sheetType != SheetType::SHEET_POPUP ||
-        sheetStyle.borderWidth.has_value()) {
-        return;
-    }
     RSPath path;
-    CHECK_EQUAL_VOID(GetOuterDrawPath(path, sheetNode), false);
+    auto outerBorderWidth = sheetTheme->GetSheetOuterBorderWidth().ConvertToPx();
+    GetBorderDrawPath(path, sheetNode, sheetTheme, outerBorderWidth);
     RSPen pen;
-    SetOuterPenStyle(pen, sheetTheme);
+    SetBorderPenStyle(pen, sheetTheme->GetSheetOuterBorderWidth(), sheetTheme->GetSheetOuterBorderColor());
+    canvas.Save();
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
-    canvas.Save();
-    canvas.Restore();
     canvas.DetachPen();
+    canvas.Restore();
     path.Close();
 }
 
-RefPtr<FrameNode> SheetWrapperPaintMethod::GetSheetNode()
+RefPtr<FrameNode> SheetWrapperPaintMethod::GetSheetNode(PaintWrapper* paintWrapper)
 {
-    auto pattern = DynamicCast<SheetWrapperPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(paintWrapper, nullptr);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto host = renderContext->GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto sheetNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_RETURN(sheetNode, nullptr);
     return sheetNode;
 }
 
-Dimension SheetWrapperPaintMethod::GetSheetOuterRadius(const SizeF& sheetSize, const Dimension& sheetRadius)
+Dimension SheetWrapperPaintMethod::GetSheetRadius(const SizeF& sheetSize, const Dimension& radius)
 {
     float half = 0.5f;
-    Dimension sheetOuterRadius;
-    if (sheetSize.Width() * half < sheetRadius.ConvertToPx()) {
-        sheetOuterRadius = Dimension(sheetSize.Width() * half);
+    auto sheetRadius = radius;
+    if (GreatNotEqual(radius.ConvertToPx(), sheetSize.Width() * half)) {
+        sheetRadius = Dimension(sheetSize.Width() * half);
     }
-    sheetOuterRadius = Dimension(sheetRadius.ConvertToPx() + 1.0f);
-    return sheetOuterRadius;
+    return sheetRadius;
 }
 
-bool SheetWrapperPaintMethod::SetOuterPenStyle(RSPen& pen, const RefPtr<SheetTheme>& sheetTheme)
+void SheetWrapperPaintMethod::GetBorderDrawPath(
+    RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme, float borderWidth)
+{
+    auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
+    CHECK_NULL_VOID(sheetPattern);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetSize = geometryNode->GetFrameSize();
+    auto targetOffset = sheetNode->GetPositionToParentWithTransform();
+    auto sheetRadius = GetSheetRadius(sheetSize, sheetTheme->GetSheetRadius()).ConvertToPx();
+    auto borderRadius = sheetRadius + borderWidth * 0.2f;
+    auto borderOffset = borderWidth * 0.2f;
+    auto arrowOffset = sheetPattern->GetSheetArrowOffset().GetX();
+    path.Reset();
+    path.MoveTo(
+        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION, sheetRadius + targetOffset.GetX(),
+        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
+    path.LineTo(arrowOffset - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
+        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset); // P1
+    path.LineTo(arrowOffset - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx() + targetOffset.GetX() - borderOffset,
+        SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P2_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P2
+    path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.0f,
+        RSPathDirection::CW_DIRECTION,
+        arrowOffset + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx() + targetOffset.GetX() + borderOffset,
+        SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P4
+    path.LineTo(arrowOffset + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
+        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset); // P5
+    path.LineTo(sheetSize.Width() - sheetRadius + targetOffset.GetX(),
+        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
+    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+        sheetSize.Width() + targetOffset.GetX() + borderOffset,
+        SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+    path.LineTo(
+        sheetSize.Width() + targetOffset.GetX() + borderOffset, sheetSize.Height() - sheetRadius + targetOffset.GetY());
+    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+        sheetSize.Width() - sheetRadius + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
+    path.LineTo(sheetRadius + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
+    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION, targetOffset.GetX() - borderOffset,
+        sheetSize.Height() - sheetRadius + targetOffset.GetY());
+    path.LineTo(
+        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+}
+
+void SheetWrapperPaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_EQUAL_VOID(IsDrawBorder(paintWrapper), false);
+    auto sheetNode = GetSheetNode(paintWrapper);
+    CHECK_NULL_VOID(sheetNode);
+    auto pipeline = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    RSPath path;
+    auto innerBorderWidth = -(sheetTheme->GetSheetInnerBorderWidth().ConvertToPx());
+    GetBorderDrawPath(path, sheetNode, sheetTheme, innerBorderWidth);
+    RSPen pen;
+    SetBorderPenStyle(pen, sheetTheme->GetSheetInnerBorderWidth(), sheetTheme->GetSheetInnerBorderColor());
+    canvas.Save();
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
+    canvas.DetachPen();
+    canvas.Restore();
+    path.Close();
+}
+
+void SheetWrapperPaintMethod::SetBorderPenStyle(RSPen& pen, const Dimension& borderWidth, const Color& borderColor)
 {
     RSFilter filter;
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
     pen.SetFilter(filter);
     pen.SetAntiAlias(true);
-    pen.SetWidth(sheetTheme->GetSheetOuterBorderWidth().ConvertToPx());
-    pen.SetColor(sheetTheme->GetSheetOuterBorderColor().GetValue());
-    return true;
+    pen.SetWidth(borderWidth.ConvertToPx());
+    pen.SetColor(borderColor.GetValue());
 }
 
-bool SheetWrapperPaintMethod::GetOuterDrawPath(RSPath& path, const RefPtr<FrameNode> sheetNode)
+bool SheetWrapperPaintMethod::IsDrawBorder(PaintWrapper* paintWrapper)
 {
+    auto sheetNode = GetSheetNode(paintWrapper);
+    CHECK_NULL_RETURN(sheetNode, false);
     auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
     CHECK_NULL_RETURN(sheetPattern, false);
-    auto geometryNode = sheetNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto sheetSize = geometryNode->GetFrameSize();
-    auto targetOffset = sheetNode->GetPositionToParentWithTransform();
+    auto sheetType = sheetPattern->GetSheetType();
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, false);
-    auto outerRadius = GetSheetOuterRadius(sheetSize, sheetTheme->GetSheetRadius());
-    auto arrowOffset = sheetPattern->GetSheetArrowOffset().GetX();
-    path.Reset();
-    path.MoveTo(targetOffset.GetX() - OUTER_MARGIN.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + outerRadius.ConvertToPx() + targetOffset.GetY());
-    path.ArcTo(outerRadius.ConvertToPx(), outerRadius.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        outerRadius.ConvertToPx() + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - OUTER_MARGIN.ConvertToPx());
-    path.LineTo(arrowOffset - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - OUTER_MARGIN.ConvertToPx()); // P1
-    path.LineTo(
-        arrowOffset - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx() + targetOffset.GetX() - OUTER_MARGIN.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P2_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P2
-    path.ArcTo(ARROW_RADIUS.ConvertToPx() + OUTER_MARGIN.ConvertToPx(),
-        ARROW_RADIUS.ConvertToPx() + OUTER_MARGIN.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        arrowOffset + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx() + targetOffset.GetX() + OUTER_MARGIN.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P4
-    path.LineTo(arrowOffset + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - OUTER_MARGIN.ConvertToPx()); // P5
-    path.LineTo(sheetSize.Width() - outerRadius.ConvertToPx() + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - OUTER_MARGIN.ConvertToPx());
-    path.ArcTo(outerRadius.ConvertToPx(), outerRadius.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        sheetSize.Width() + targetOffset.GetX() + OUTER_MARGIN.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + outerRadius.ConvertToPx() + targetOffset.GetY());
-    path.LineTo(sheetSize.Width() + targetOffset.GetX() + OUTER_MARGIN.ConvertToPx(),
-        sheetSize.Height() - outerRadius.ConvertToPx() + targetOffset.GetY());
-    path.ArcTo(outerRadius.ConvertToPx(), outerRadius.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        sheetSize.Width() - outerRadius.ConvertToPx() + targetOffset.GetX(),
-        sheetSize.Height() + targetOffset.GetY() + OUTER_MARGIN.ConvertToPx());
-    path.LineTo(outerRadius.ConvertToPx() + targetOffset.GetX(),
-        sheetSize.Height() + targetOffset.GetY() + OUTER_MARGIN.ConvertToPx());
-    path.ArcTo(outerRadius.ConvertToPx(), outerRadius.ConvertToPx(), 0.0f, RSPathDirection::CW_DIRECTION,
-        targetOffset.GetX() - OUTER_MARGIN.ConvertToPx(),
-        sheetSize.Height() - outerRadius.ConvertToPx() + targetOffset.GetY());
-    path.LineTo(targetOffset.GetX() - OUTER_MARGIN.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + outerRadius.ConvertToPx() + targetOffset.GetY());
-    return true;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetTheme->IsOuterBorderEnable() && sheetType == SheetType::SHEET_POPUP &&
+        !sheetStyle.borderWidth.has_value()) {
+        return true;
+    }
+    return false;
 }
+
 } // namespace OHOS::Ace::NG

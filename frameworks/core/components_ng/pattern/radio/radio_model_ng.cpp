@@ -63,15 +63,6 @@ void RadioModelNG::SetRadioIndicator(int32_t indicator)
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);
 }
 
-void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, std::optional<int32_t> indicator)
-{
-    if (indicator) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, frameNode);
-    }
-}
-
 void RadioModelNG::SetChecked(bool isChecked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -227,6 +218,16 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRadioChecked(value);
+}
+
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (indicator.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, frameNode);
+    }
 }
 
 bool RadioModelNG::GetChecked(FrameNode* frameNode)

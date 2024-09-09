@@ -19,6 +19,7 @@
 #include <mutex>
 #include <set>
 #include <unordered_map>
+#include <array>
 
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow.h"
@@ -31,6 +32,9 @@
 namespace OHOS::Ace {
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
+using ToastWindowArray = std::array<RefPtr<Subwindow>,
+    static_cast<int32_t>(ToastWindowType::TOAST_WINDOW_COUNT)>;
+using ToastWindowMap = std::unordered_map<int32_t, ToastWindowArray>;
 
 class ACE_FORCE_EXPORT SubwindowManager final : public NonCopyable {
 public:
@@ -94,14 +98,6 @@ public:
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
-    int32_t GetDialogSubWindowId()
-    {
-        return dialogSubWindowId_;
-    }
-    void SetDialogSubWindowId(int32_t dialogSubWindowId)
-    {
-        dialogSubWindowId_ = dialogSubWindowId;
-    }
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
@@ -112,6 +108,11 @@ public:
 
     void ClearToastInSubwindow();
     void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId, const ToastWindowType& windowType);
+    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow, const ToastWindowType& windowType);
+    void HideToastSubWindowNG();
+    ToastWindowType GetToastWindowType();
     void CloseToast(
         const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
@@ -145,10 +146,13 @@ public:
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
+    void SetRect(const NG::RectF& rect, int32_t instanceId);
+
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
+    RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -161,11 +165,12 @@ private:
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
     SubwindowMap subwindowMap_;
-    int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
 
     RefPtr<Subwindow> currentSubwindow_;
 
+    std::mutex toastMutex_;
+    ToastWindowMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;

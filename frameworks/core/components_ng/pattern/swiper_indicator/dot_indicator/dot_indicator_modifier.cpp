@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 
-#include "base/utils/utils.h"
-#include "core/animation/spring_curve.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
@@ -177,6 +172,10 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     RSCanvas& canvas = context.canvas;
     OffsetF selectedCenter = {};
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+    if (totalCount == 0 && NearZero(contentProperty.longPointLeftCenterX) &&
+        NearZero(contentProperty.longPointRightCenterX)) {
+        return;
+    }
 
     for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);

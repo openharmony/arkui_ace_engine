@@ -133,7 +133,7 @@ bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const st
             return std::regex_match(filterParam, contrastRegexExpression);
         }
         case FilterType::BLUR: {
-            std::regex blurRegexExpression(R"((-?0)|(\d+(\.\d+)?(px|vp|rem)?)|(^$))");
+            std::regex blurRegexExpression(R"((-?0)|(\d+(\.\d+)?(px|vp|rem))|(^$))");
             return std::regex_match(filterParam, blurRegexExpression);
         }
         case FilterType::HUE_ROTATE: {
@@ -1134,19 +1134,14 @@ void CustomPaintPaintMethod::Save()
 
 void CustomPaintPaintMethod::Restore()
 {
-    if (rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) {
-        if (!saveStates_.empty()) {
-            state_ = saveStates_.back();
-            saveStates_.pop_back();
-        }
-        if (!saveColorFilter_.empty()) {
-            colorFilter_ = saveColorFilter_.back();
-            saveColorFilter_.pop_back();
-        }
-        if (!saveBlurFilter_.empty()) {
-            blurFilter_ = saveBlurFilter_.back();
-            saveBlurFilter_.pop_back();
-        }
+    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
+        (!saveBlurFilter_.empty())) {
+        state_ = saveStates_.back();
+        saveStates_.pop_back();
+        colorFilter_ = saveColorFilter_.back();
+        saveColorFilter_.pop_back();
+        blurFilter_ = saveBlurFilter_.back();
+        saveBlurFilter_.pop_back();
         rsCanvas_->Restore();
     }
 }
@@ -2154,5 +2149,15 @@ void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
     shadowBuilder->AppendText(StringUtils::Str8ToStr16(text));
     shadowParagraph_ = shadowBuilder->CreateTypography();
 #endif
+}
+
+void CustomPaintPaintMethod::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    pattern->SetScaleX(transform.scaleX);
+    pattern->SetScaleY(transform.scaleY);
+    pattern->SetSkewX(transform.skewX);
+    pattern->SetSkewY(transform.skewY);
+    pattern->SetTranslateX(transform.translateX);
+    pattern->SetTranslateY(transform.translateY);
 }
 } // namespace OHOS::Ace::NG

@@ -58,11 +58,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect(float width)
     rect.SetLeft(contentRect_.Left());
     rect.SetTop(contentRect_.Top());
     rect.SetHeight(textFiled->PreferredLineHeight());
-    if (LessOrEqual(width, 0.0f)) {
-        rect.SetWidth(caretInfo_.rect.Width());
-    } else {
-        rect.SetWidth(width);
-    }
+    rect.SetWidth(GreatNotEqual(width, 0.0f) ? width : caretInfo_.rect.Width());
     auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
     textFiled->CheckTextAlignByDirection(textAlign, direction);
@@ -165,16 +161,13 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
     UpdateCaretIndex(index);
-    auto secondHandleWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
-        secondHandleInfo_.rect = caretInfo_.rect;
-        secondHandleInfo_.rect.SetWidth(secondHandleWidth);
+        auto offset = caretInfo_.rect.GetOffset();
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
-        AdjustHandleAtEdge(secondHandleInfo_.rect);
+        UpdateCaretOriginalRect(offset);
     } else {
-        caretInfo_.rect = CalculateEmptyValueCaretRect();
-        secondHandleInfo_.rect = CalculateEmptyValueCaretRect(secondHandleWidth);
+        SetCaretRectAtEmptyValue();
     }
 }
 
@@ -215,14 +208,15 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     auto textRect = textField->GetTextRect();
+    auto contentRect = textField->GetTextContentRect();
     auto touchLocalOffset = localOffset;
     if (textField->IsTextArea()) {
         if (GreatNotEqual(touchLocalOffset.GetY(), textRect.Bottom())) {
             // click at end of a paragraph.
-            touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Right() : textRect.Left());
+            touchLocalOffset.SetX(textField->IsLTRLayout() ? contentRect.Right() : textRect.Left());
         } else if (LessNotEqual(touchLocalOffset.GetY(), textRect.Top())) {
             // click at the beginning of a paragraph.
-            touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Left() : textRect.Right());
+            touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Left() : contentRect.Right());
         }
     }
 
@@ -376,7 +370,7 @@ void TextSelectController::CalculateHandleOffset()
 {
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
     if (contentController_->IsEmpty()) {
-        caretInfo_.rect = CalculateEmptyValueCaretRect();
+        SetCaretRectAtEmptyValue();
         return;
     }
     CaretMetricsF secondHandleMetrics;
@@ -556,7 +550,7 @@ void TextSelectController::MoveCaretToContentRect(
     firstHandleInfo_.index = index;
     secondHandleInfo_.index = index;
     if (contentController_->IsEmpty()) {
-        caretInfo_.rect = CalculateEmptyValueCaretRect();
+        SetCaretRectAtEmptyValue();
         return;
     }
     CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, textAffinity_);
@@ -588,8 +582,8 @@ void TextSelectController::MoveCaretToContentRect(
     } else {
         AdjustHandleAtEdge(caretRect);
     }
+    UpdateCaretOriginalRect(CaretMetrics.offset);
     caretInfo_.rect = caretRect;
-    caretRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
 }
 
 void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
@@ -597,7 +591,7 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
     CaretMetricsF CaretMetrics;
 
     if (contentController_->IsEmpty()) {
-        caretInfo_.rect = CalculateEmptyValueCaretRect();
+        SetCaretRectAtEmptyValue();
         return;
     }
     FitCaretMetricsToTouchPoint(CaretMetrics, touchOffset);
@@ -614,6 +608,7 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
     // Adjusts one character width.
     float boundaryAdjustment = 0.0f;
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
+    UpdateCaretOriginalRect(CaretMetrics.offset);
     caretInfo_.rect = caretRect;
     auto index = ConvertTouchOffsetToPosition(touchOffset);
     AdjustCursorPosition(index, touchOffset);
@@ -644,7 +639,7 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
 {
     textAffinity_ = textAffinity;
     if (contentController_->IsEmpty()) {
-        caretInfo_.rect = CalculateEmptyValueCaretRect();
+        SetCaretRectAtEmptyValue();
         return;
     }
     CaretMetricsF caretMetrics;
@@ -662,12 +657,14 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity, bool mov
     if (moveHandle) {
         MoveHandleToContentRect(caretInfo_.rect, 0.0f);
     }
+    UpdateCaretOriginalRect(caretMetrics.offset);
 }
 
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 {
-    caretInfo_.rect.SetOffset(offset);
-    secondHandleInfo_.UpdateOffset(offset);
+    caretInfo_.rect.SetOffset(caretInfo_.rect.GetOffset() + offset);
+    caretInfo_.originalRect.SetOffset(caretInfo_.originalRect.GetOffset() + offset);
+    secondHandleInfo_.UpdateOffset(caretInfo_.rect.GetOffset() + offset);
 }
 
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
@@ -864,15 +861,29 @@ void TextSelectController::UpdateSelectWithBlank(const Offset& localOffset)
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     auto textRect = textField->GetTextRect();
+    auto contentRect = textField->GetTextContentRect();
     auto touchLocalOffset = localOffset;
     if (textField->IsTextArea() && GreatNotEqual(touchLocalOffset.GetY(), textRect.Bottom())) {
         // click at end of a paragraph.
-        touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Right() : textRect.Left());
+        touchLocalOffset.SetX(textField->IsLTRLayout() ? contentRect.Right() : textRect.Left());
     }
     if (IsTouchAtLineEnd(touchLocalOffset)) {
         UpdateCaretInfoByOffset(touchLocalOffset);
     } else {
         UpdateSelectByOffset(localOffset);
     }
+}
+
+void TextSelectController::SetCaretRectAtEmptyValue()
+{
+    caretInfo_.rect = CalculateEmptyValueCaretRect();
+    caretInfo_.originalRect = CalculateEmptyValueCaretRect(caretInfo_.originalRect.Width());
+}
+
+void TextSelectController::UpdateCaretOriginalRect(const OffsetF& offset)
+{
+    caretInfo_.originalRect.SetOffset(offset);
+    caretInfo_.originalRect.SetHeight(caretInfo_.originalRect.Height());
+    AdjustHandleAtEdge(caretInfo_.originalRect);
 }
 } // namespace OHOS::Ace::NG

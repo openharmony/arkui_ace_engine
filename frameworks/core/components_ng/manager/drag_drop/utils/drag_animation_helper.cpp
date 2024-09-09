@@ -148,6 +148,10 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto gatherNode = actuator->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto imageContext = gatherNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();

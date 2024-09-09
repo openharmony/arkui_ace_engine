@@ -107,6 +107,12 @@ void NavDestinationPattern::OnLanguageConfigurationUpdate()
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto backButtonUINode = titleBarNode->GetBackButton();
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
+    CHECK_NULL_VOID(backButtonNode);
+    auto imageNode = backButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(imageNode);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
@@ -331,10 +337,6 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
         pattern->HandleLongPressActionEnd();
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
-
-    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 void NavDestinationPattern::HandleLongPress()

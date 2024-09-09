@@ -83,8 +83,6 @@ public:
     void CreateAnalyzerOverlay(const RefPtr<FrameNode> node);
 
     void UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint);
-    
-    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
@@ -892,6 +890,11 @@ private:
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
+
+    float startPercent_ = 0.0f;
+    float endPercent_ = 1.0f;
+    void UpdateFadeInfo(
+        bool isFadingTop, bool isFadingBottom, float fadeFrameSize, const RefPtr<ScrollablePaintMethod>& paint);
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };

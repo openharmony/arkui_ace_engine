@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"

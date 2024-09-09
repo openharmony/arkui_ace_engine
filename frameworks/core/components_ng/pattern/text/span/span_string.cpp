@@ -39,7 +39,6 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
     return content.substr(start);
 }
 
-
 SpanString::SpanString(const std::string& text) : text_(text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
@@ -69,6 +68,47 @@ SpanString::SpanString(RefPtr<CustomSpan>& span) : text_(" ")
     spanItem->onDraw = span->GetOnDraw();
     spans_.emplace_back(spanItem);
     spansMap_[SpanType::CustomSpan].emplace_back(span);
+}
+
+void SpanString::AddCustomSpan()
+{
+    auto spanBases = GetSpans(0, GetLength(), SpanType::CustomSpan);
+    for (const auto& spanBase : spanBases) {
+        if (spanBase->GetSpanType() != SpanType::CustomSpan) {
+            continue;
+        }
+        auto customSpan = DynamicCast<CustomSpan>(spanBase);
+        if (!customSpan) {
+            continue;
+        }
+        customSpan->AddStyledString(Referenced::WeakClaim(this));
+    }
+}
+
+void SpanString::RemoveCustomSpan()
+{
+    auto spanBases = GetSpans(0, GetLength(), SpanType::CustomSpan);
+    for (const auto& spanBase : spanBases) {
+        if (spanBase->GetSpanType() != SpanType::CustomSpan) {
+            continue;
+        }
+        auto customSpan = DynamicCast<CustomSpan>(spanBase);
+        if (!customSpan) {
+            continue;
+        }
+        customSpan->RemoveStyledString(Referenced::WeakClaim(this));
+    }
+}
+void SpanString::SetFramNode(const WeakPtr<NG::FrameNode>& frameNode)
+{
+    framNode_ = frameNode;
+}
+
+void SpanString::MarkDirtyFrameNode()
+{
+    auto frameNode = framNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
 }
 
 SpanString::~SpanString()
@@ -249,13 +289,13 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
     return step;
 }
 
-void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
+void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int32_t start)
 {
     auto wStr = GetWideString();
     text_ = StringUtils::ToString(
-        wStr.substr(0, span->GetStartIndex()) + StringUtils::ToWstring(" ") + wStr.substr(span->GetStartIndex()));
+        wStr.substr(0, start) + StringUtils::ToWstring(" ") + wStr.substr(start));
     auto iter = spans_.begin();
-    auto step = GetStepsByPosition(span->GetStartIndex());
+    auto step = GetStepsByPosition(start);
     std::advance(iter, step);
     RefPtr<NG::SpanItem> spanItem;
     if (type == SpanType::Image) {
@@ -273,14 +313,14 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         ++(*iter)->interval.second;
     }
 
-    UpdateSpanMapWithOffset(span->GetStartIndex() - 1, 1);
+    UpdateSpanMapWithOffset(start - 1, 1);
     if (spansMap_.find(type) == spansMap_.end()) {
         spansMap_[type].emplace_back(span);
     } else {
         auto specialList = spansMap_[type];
         int32_t step = 0;
         for (const auto& specialSpan : specialList) {
-            if (specialSpan->GetStartIndex() >= span->GetStartIndex()) {
+            if (specialSpan->GetStartIndex() >= start) {
                 break;
             }
             ++step;
@@ -313,23 +353,106 @@ RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpa
     return spanItem;
 }
 
+void SpanString::ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end)
+{
+    auto text = GetWideString();
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+        start, end-start, text, true);
+    int startIndex = range.startIndex;
+    int endIndex = range.endIndex;
+
+    if (start == startIndex) {
+        ChangeStartToCorrectNum(start);
+    } else {
+        LOGI("SpanString: Get Emoji, Change Start %{public}d to %{public}d",
+            start, startIndex);
+        start = startIndex;
+    }
+
+    if (end == endIndex) {
+        ChangeEndToCorrectNum(end);
+    } else {
+        LOGI("SpanString: Get Emoji, Change End %{public}d to %{public}d",
+            end, endIndex);
+        end = endIndex;
+    }
+
+    if (end < start) {
+        std::swap(start, end);
+    }
+}
+
+void SpanString::ChangeStartToCorrectNum(int32_t& start)
+{
+    if (start == 0) {
+        return;
+    }
+    auto text = GetWideString();
+    auto textLen = text.length();
+    if (textLen == 0) {
+        return;
+    }
+    auto tmpStart = start;
+    auto substr = StringUtils::ToString(GetWideStringSubstr(text, 0, tmpStart));
+    while (substr.length() == 0) {
+        if (tmpStart == textLen) {
+            break;
+        }
+        tmpStart --;
+        if (tmpStart <= 0) {
+            break;
+        }
+        substr = StringUtils::ToString(GetWideStringSubstr(text, 0, tmpStart));
+    }
+    if (tmpStart != start) {
+        LOGI("SpanString: Get Complex Char, Change Start %{public}d to %{public}d", start, tmpStart);
+        start = tmpStart;
+    }
+}
+
+void SpanString::ChangeEndToCorrectNum(int32_t& end)
+{
+    auto text = GetWideString();
+    auto textLen = text.length();
+    if (textLen == 0) {
+        return;
+    }
+    auto tmpEnd = end;
+    auto substr = StringUtils::ToString(GetWideStringSubstr(text, end));
+    while (substr.length() == 0) {
+        if (tmpEnd == textLen) {
+            break;
+        }
+        tmpEnd ++;
+        if (tmpEnd >= textLen) {
+            break;
+        }
+        substr = StringUtils::ToString(GetWideStringSubstr(text, tmpEnd));
+    }
+    if (tmpEnd != end) {
+        LOGI("SpanString: Get Complex Char, Change End %{public}d to %{public}d", end, tmpEnd);
+        end = tmpEnd;
+    }
+}
+
 void SpanString::AddSpan(const RefPtr<SpanBase>& span)
 {
     if (!span || !CheckRange(span)) {
         return;
     }
-    if (span->GetSpanType() == SpanType::Image || span->GetSpanType() == SpanType::CustomSpan) {
-        AddSpecialSpan(span, span->GetSpanType());
-        return;
-    }
     auto start = span->GetStartIndex();
     auto end = span->GetEndIndex();
+    ChangeStartAndEndToCorrectNum(start, end);
+    if (span->GetSpanType() == SpanType::Image || span->GetSpanType() == SpanType::CustomSpan) {
+        AddSpecialSpan(span, span->GetSpanType(), start);
+        return;
+    }
     if (spansMap_.find(span->GetSpanType()) == spansMap_.end()) {
         spansMap_[span->GetSpanType()].emplace_back(span);
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
     }
-    RemoveSpan(start, span->GetLength(), span->GetSpanType());
+    RemoveSpan(start, end - start, span->GetSpanType());
     auto spans = spansMap_[span->GetSpanType()];
     ApplyToSpans(span, { start, end }, SpanOperation::ADD);
     SplitInterval(spans, { start, end });
@@ -344,19 +467,14 @@ void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
     if (!CheckRange(start, length)) {
         return;
     }
-    auto text = GetWideString();
-    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
-        start, length, text, true);
-    int startIndex = range.startIndex;
-    int endIndex = range.endIndex;
-    start = startIndex;
-    length = endIndex - startIndex;
+    auto end = start + length;
+    ChangeStartAndEndToCorrectNum(start, end);
+    length = end - start;
     auto it = spansMap_.find(key);
     if (it == spansMap_.end()) {
         return;
     }
     auto spans = spansMap_[key];
-    auto end = start + length;
     if (key == SpanType::Image) {
         RemoveSpecialSpan(start, end, key);
         return;

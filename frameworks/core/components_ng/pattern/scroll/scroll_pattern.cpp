@@ -15,21 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -243,6 +229,9 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
+    if (LessNotEqual(scrollableDistance_, 0.0f)) {
+        return LessOrEqual(currentOffset_, 0.0f);
+    }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 
@@ -576,8 +565,10 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
         static_cast<int32_t>(host->GetAccessibilityId()));
-    ScrollBy(distance, distance, smooth);
-    scrollEdgeType_ = scrollEdgeType;
+    if (!NearZero(distance)) {
+        ScrollBy(distance, distance, smooth);
+        scrollEdgeType_ = scrollEdgeType;
+    }
 }
 
 void ScrollPattern::CheckScrollToEdge()

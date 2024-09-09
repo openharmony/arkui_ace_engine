@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 
-#include <queue>
-
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void MenuItemGroupPattern::OnMountToParentDone()

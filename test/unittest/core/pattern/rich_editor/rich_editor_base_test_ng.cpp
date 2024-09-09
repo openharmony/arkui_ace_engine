@@ -1279,8 +1279,8 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorController012, TestSize.Level1)
      * @tc.steps: step4. update symbol span style
      */
     struct UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateFontSize = FONT_SIZE_VALUE_2;
-    updateSpanStyle.updateFontWeight = FONT_WEIGHT_BOLD;
+    updateSpanStyle.updateSymbolFontSize = FONT_SIZE_VALUE_2;
+    updateSpanStyle.updateSymbolFontWeight = FONT_WEIGHT_BOLD;
     updateSpanStyle.updateSymbolColor = SYMBOL_COLOR_LIST_2;
     updateSpanStyle.updateSymbolRenderingStrategy = RENDER_STRATEGY_MULTI_COLOR;
     updateSpanStyle.updateSymbolEffectStrategy = EFFECT_STRATEGY_SCALE;

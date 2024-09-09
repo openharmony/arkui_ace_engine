@@ -35,7 +35,6 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -97,8 +96,6 @@ const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
-
-const float SMOOTH_EDGE_SIZE = 0.35;
 } // namespace
 bool ContainerModalViewEnhance::sIsForbidMenuEvent_ = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
@@ -487,12 +484,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     iconLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
-    FrameNode* frameNode = RawPtr(icon);
-    ImageModelNG::SetSmoothEdge(frameNode, SMOOTH_EDGE_SIZE);
-    auto render = icon->GetRenderContext();
-    if (render) {
-        render->UpdateRenderGroup(true);
-    }
     icon->MarkModifyDone();
     return icon;
 }

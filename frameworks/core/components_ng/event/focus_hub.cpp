@@ -886,6 +886,13 @@ void FocusHub::RequestFocus() const
     if (IsCurrentFocus()) {
         return;
     }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (!frameNode->IsOnMainTree()) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS,
+            "Can't find Node %{public}s/%{public}d on tree, please check the timing of the function call.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
+    }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());

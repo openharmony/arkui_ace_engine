@@ -201,7 +201,7 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;
-    richEditorPattern->InitSelection(Offset(0, 1));
+    richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
@@ -1400,7 +1400,7 @@ HWTEST_F(RichEditorOverlayTestNg, HandleLevel001, TestSize.Level1)
      */
     richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
     richEditorNode_->ProcessFrameNodeChangeFlag();
-    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
+    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
 }
 
 /**

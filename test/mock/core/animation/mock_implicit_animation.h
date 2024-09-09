@@ -44,6 +44,12 @@ public:
      */
     void Next();
 
+    /**
+     * @brief force update the property by @c delta to simulate velocity update
+     * @note currently only supports float type
+     */
+    void ForceUpdate(float delta);
+
     bool Finished() const
     {
         return remainingTicks_ <= 0;

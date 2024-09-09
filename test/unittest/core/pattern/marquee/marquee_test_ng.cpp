@@ -1655,4 +1655,37 @@ HWTEST_F(MarqueeTestNg, MarqueeTest024, TestSize.Level1)
     EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(marqueeLayoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
 }
+
+/**
+ * @tc.name: MarqueeTest025
+ * @tc.desc: Test marquee SetFrameRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and marquee.
+     */
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    FrameNode frameNode = FrameNode(V2::MARQUEE_ETS_TAG, 1, pattern);
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    /**
+     * @tc.steps: step2. set frame rate range.
+     * @tc.expected: step2. check if the expected rate is set correctly.
+     */
+    int32_t expectedRate = 60;
+    auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, expectedRate);
+    marqueeModel.SetMarqueeFrameRateRange(&frameNode, frameRateRange, MarqueeDynamicSyncSceneType::ANIMATE);
+    auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
+    int32_t nodeId = frameNode.GetId();
+    frameRateManager->isRateChanged_ = false;
+    frameRateManager->AddNodeRate(nodeId, expectedRate);
+    auto iter = frameRateManager->nodeRateMap_.find(nodeId);
+    EXPECT_NE(iter, frameRateManager->nodeRateMap_.end());
+    if (iter != frameRateManager->nodeRateMap_.end()) {
+        EXPECT_EQ(iter->second, expectedRate);
+        EXPECT_TRUE(frameRateManager->isRateChanged_);
+    }
+}
 } // namespace OHOS::Ace::NG

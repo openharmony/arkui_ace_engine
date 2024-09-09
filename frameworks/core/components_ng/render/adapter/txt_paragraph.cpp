@@ -656,6 +656,16 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
     GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects, RectHeightPolicy::COVER_LINE);
 }
 
+std::pair<size_t, size_t> TxtParagraph::GetEllipsisTextRange()
+{
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, std::make_pair(std::numeric_limits<size_t>::max(), 0));
+    const auto& range = paragrah->GetEllipsisTextRange();
+    auto start = std::min(range.leftIndex, range.rightIndex);
+    auto end = std::max(range.leftIndex, range.rightIndex);
+    return std::make_pair(start, end);
+}
+
 void TxtParagraph::GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
 {
     auto adjustStart = AdjustIndexForEmoji(start);
@@ -878,10 +888,28 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     }
 
     result.offset.Reset();
-    result.height = paragrah->GetHeight();
-    auto lineHeight = paraStyle_.lineHeight;
-    if (lineHeight.IsValid()) {
-        result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto boxes = paragrah->GetRectsForRange(0, 1, txt::Paragraph::RectHeightStyle::kMax,
+        txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragrah->GetTextRectsByBoundary(0, 1, Rosen::TextRectHeightStyle::TIGHT,
+        Rosen::TextRectWidthStyle::TIGHT);
+#endif
+    if (boxes.empty()) {
+        result.height = paragrah->GetHeight();
+        auto lineHeight = paraStyle_.lineHeight;
+        if (lineHeight.IsValid()) {
+            result.offset.SetY(std::max(lineHeight.ConvertToPx() - result.height, 0.0));
+        }
+    } else {
+        const auto& textBox = boxes.back();
+#ifndef USE_GRAPHIC_TEXT_GINE
+        result.height = textBox.rect.fBottom - textBox.rect.fTop;
+        result.offset.SetY(textBox.rect.fTop);
+#else
+        result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+        result.offset.SetY(textBox.rect.GetTop());
+#endif
     }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);

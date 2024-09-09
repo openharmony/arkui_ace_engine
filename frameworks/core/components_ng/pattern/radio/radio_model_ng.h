@@ -31,6 +31,12 @@ public:
 };
 using RadioMakeCallback = std::function<RefPtr<FrameNode>(RadioConfiguration& radioConfiguration)>;
 
+enum class RadioIndicatorType {
+    TICK = 0,
+    DOT,
+    CUSTOM,
+};
+
 class ACE_EXPORT RadioModelNG : public OHOS::Ace::RadioModel {
 public:
     void Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
@@ -50,7 +56,6 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetBuilder(std::function<void()>&& buildFunc) override;
     static void SetRadioIndicator(int32_t indicator);
-    static void SetRadioIndicatorType(FrameNode* frameNode, std::optional<int32_t> indicator);
     static void SetChecked(FrameNode* frameNode, bool isChecked);
     static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);
@@ -63,6 +68,7 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator);
     static bool GetChecked(FrameNode* frameNode);
     static Color GetCheckedBackgroundColor(FrameNode* frameNode);
     static Color GetUncheckedBorderColor(FrameNode* frameNode);

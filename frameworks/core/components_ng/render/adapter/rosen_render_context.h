@@ -272,6 +272,7 @@ public:
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
+    void SetRenderFit(RenderFit renderFit) override;
     PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
@@ -414,6 +415,10 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
+    bool IsDisappearing() const override
+    {
+        return isDisappearing_;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

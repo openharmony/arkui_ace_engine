@@ -55,6 +55,7 @@
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/background_task_executor.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
@@ -99,6 +100,12 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
+const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
+const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
+const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
+const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
@@ -315,6 +322,7 @@ void AceContainer::Destroy()
 {
     LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
+    RemoveWatchSystemParameter();
 
     ReleaseResourceAdapter();
     if (pipelineContext_ && taskExecutor_) {
@@ -352,6 +360,8 @@ void AceContainer::Destroy()
         } else {
             taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
         }
+
+        DestroyToastSubwindow(instanceId_);
     }
     resRegister_.Reset();
     assetManager_.Reset();
@@ -1690,6 +1700,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
+    paramUie_.assign(params.begin(), params.end());
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
@@ -1819,7 +1830,7 @@ void AceContainer::SetLocalStorage(
     NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     ContainerScope scope(instanceId_);
-    taskExecutor_->PostTask(
+    taskExecutor_->PostSyncTask(
         [frontend = WeakPtr<Frontend>(frontend_), storage,
             contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
             sharedRuntime = sharedRuntime_] {
@@ -2398,69 +2409,6 @@ void AceContainer::CheckAndSetFontFamily()
     } else {
         fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     }
-}
-
-bool AceContainer::IsFontFileExistInPath(std::string path)
-{
-    DIR* dir;
-    struct dirent* ent;
-    bool isFlagFileExist = false;
-    bool isFontDirExist = false;
-    if ((dir = opendir(path.c_str())) == nullptr) {
-        if (errno == ENOENT) {
-            LOGE("ERROR ENOENT");
-        } else if (errno == EACCES) {
-            LOGE("ERROR EACCES");
-        } else {
-            LOGE("ERROR Other");
-        }
-        return false;
-    }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (strcmp(ent->d_name, "flag") == 0) {
-            isFlagFileExist = true;
-        } else if (strcmp(ent->d_name, "fonts") == 0) {
-            isFontDirExist = true;
-        }
-    }
-    closedir(dir);
-    if (isFlagFileExist && isFontDirExist) {
-        LOGI("font path exist");
-        return true;
-    }
-    return false;
-}
-
-std::string AceContainer::GetFontFamilyName(std::string path)
-{
-    std::string fontFamilyName = "";
-    DIR* dir;
-    struct dirent* ent;
-    if ((dir = opendir(path.c_str())) == nullptr) {
-        return fontFamilyName;
-    }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (endsWith(ent->d_name, ".ttf")) {
-            fontFamilyName = ent->d_name;
-            break;
-        }
-    }
-    closedir(dir);
-    return fontFamilyName;
-}
-
-bool AceContainer::endsWith(std::string str, std::string suffix)
-{
-    if (str.length() < suffix.length()) {
-        return false;
-    }
-    return str.substr(str.length() - suffix.length()) == suffix;
 }
 
 void AceContainer::SetFontScaleAndWeightScale(
@@ -3204,5 +3152,53 @@ void AceContainer::NotifyDirectionUpdate()
         ConfigurationChange configurationChange { .directionUpdate = true };
         pipelineContext_->FlushReload(configurationChange, fullUpdate);
     }
+}
+
+void AceContainer::RenderLayoutBoundary(bool isDebugBoundary)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(renderBoundaryManager_);
+    renderBoundaryManager_->PostTaskRenderBoundary(isDebugBoundary, container);
+}
+
+void AceContainer::AddWatchSystemParameter()
+{
+    auto task = [weak = WeakClaim(this)] {
+        auto weakPtr = weak.Upgrade();
+        CHECK_NULL_VOID(weakPtr);
+        auto container = static_cast<void*>(weakPtr.GetRawPtr());
+        CHECK_NULL_VOID(container);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_TRACE_LAYOUT_KEY, container, SystemProperties::EnableSystemParameterTraceLayoutCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_TRACE_INPUTEVENT_KEY, container, SystemProperties::EnableSystemParameterTraceInputEventCallback);
+        SystemProperties::AddWatchSystemParameter(ENABLE_SECURITY_DEVELOPERMODE_KEY, container,
+            SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_DEBUG_STATEMGR_KEY, container, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_DEBUG_BOUNDARY_KEY, container, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+        SystemProperties::AddWatchSystemParameter(
+            ENABLE_PERFORMANCE_MONITOR_KEY, container,
+            SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
+}
+
+void AceContainer::RemoveWatchSystemParameter()
+{
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_LAYOUT_KEY, this, SystemProperties::EnableSystemParameterTraceLayoutCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, SystemProperties::EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_SECURITY_DEVELOPERMODE_KEY, this, SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_DEBUG_STATEMGR_KEY, this, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
 }
 } // namespace OHOS::Ace::Platform

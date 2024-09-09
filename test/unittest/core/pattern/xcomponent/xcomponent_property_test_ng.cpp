@@ -1624,7 +1624,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest042, Te
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
-        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, std::nullopt);
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
 
     /**
@@ -1634,6 +1634,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest042, Te
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
     pattern->surfaceId_ = SURFACE_ID;
+    EXPECT_FALSE(pattern->isNativeXComponent_);
     XComponentModelNG::SetControllerOnCreated(Referenced::RawPtr(frameNode), std::move(onSurfaceCreated));
     XComponentModelNG::SetControllerOnChanged(Referenced::RawPtr(frameNode), std::move(onSurfaceChanged));
     XComponentModelNG::SetControllerOnDestroyed(Referenced::RawPtr(frameNode), std::move(onSurfaceDestroyed));

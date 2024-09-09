@@ -210,6 +210,11 @@ public:
         return selected_;
     }
 
+    void SetBlockClick(bool blockClick)
+    {
+        blockClick_ = blockClick;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -249,6 +254,7 @@ private:
     // this option node's index in the menu
     int index_ = -1;
 
+    bool blockClick_ = false;
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
     bool isWidthModifiedBySelect_ = false;

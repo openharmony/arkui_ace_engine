@@ -16,13 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
-#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -309,21 +303,22 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
     AnimationOption option;
     option.SetDuration(menuTheme->GetPreviewAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
+    auto previewBorderRadius = BorderRadiusProperty(menuTheme->GetPreviewBorderRadius());
+    if (auto presetRad = imageContext->GetBorderRadius(); presetRad) {
+        previewBorderRadius = presetRad.value();
+        imageContext->ResetBorderRadius();
+    }
     AnimationUtils::Animate(
         option,
         [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
-            if (imageContext) {
-                auto color = shadow->GetColor();
-                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-                shadow->SetColor(newColor);
-                imageContext->UpdateBackShadow(shadow.value());
+            CHECK_NULL_VOID(imageContext);
+            auto color = shadow->GetColor();
+            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+            shadow->SetColor(newColor);
+            imageContext->UpdateBackShadow(shadow.value());
 
-                CHECK_NULL_VOID(!isShowHoverImage);
-                BorderRadiusProperty borderRadius;
-                borderRadius.SetRadius(previewBorderRadius);
-                imageContext->UpdateBorderRadius(borderRadius);
-            }
+            CHECK_NULL_VOID(!isShowHoverImage);
+            imageContext->UpdateBorderRadius(previewBorderRadius);
         },
         option.GetOnFinishEvent());
 }
@@ -810,13 +805,11 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
-    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    auto imagePattern = imageNode->GetPattern<ImagePattern>();
-    imagePattern->SetSyncLoad(true);
+    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
     SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
@@ -835,12 +828,15 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
         props->UpdateUserDefinedIdealSize(targetSize);
         props->UpdateImageFit(ImageFit::FILL);
 
-        ShowGatherAnimation(target, wrapperNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
+        if (menuParam.previewBorderRadius) {
+            imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
+        }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
+        ShowGatherAnimation(target, wrapperNode);
     }
     
     auto geometryNode = imageNode->GetGeometryNode();
@@ -923,7 +919,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
-    if (isAllowedDrag) {
+    if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
         auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetLastChild());
         CHECK_NULL_VOID(pixelMapNode);
         auto renderContext = pixelMapNode->GetRenderContext();
@@ -1021,6 +1017,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         } else {
             optionNode = OptionView::CreateMenuOption(
                 optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+            if (optionNode) {
+                auto optionPattern = optionNode->GetPattern<OptionPattern>();
+                optionPattern->SetBlockClick(params[i].disableSystemClick);
+            }
         }
         if (!optionNode) {
             continue;

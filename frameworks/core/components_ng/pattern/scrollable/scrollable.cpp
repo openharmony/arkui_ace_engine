@@ -15,17 +15,8 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
-#include <chrono>
-
-#include "base/log/ace_trace.h"
-#include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/common/layout_inspector.h"
-#include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -974,10 +965,10 @@ void Scrollable::ProcessSpringMotion(double position)
         ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
                             "nextDistance:%f, nodeId:%d, tag:%s",
             distance, nextDistance, nodeId_, nodeTag_.c_str());
-        if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
-            // pass the velocity to the child component to avoid dealing with additional offsets
-            delta = finalPosition_ - currentPos_;
-        } else {
+        // only handle offsets that are out of bounds
+        delta = finalPosition_ - currentPos_;
+        // remainVelocityCallback_ will pass the velocity to the child component
+        if (!remainVelocityCallback_ || !remainVelocityCallback_(currentVelocity)) {
             StartScrollAnimation(position, currentVelocity);
         }
     }

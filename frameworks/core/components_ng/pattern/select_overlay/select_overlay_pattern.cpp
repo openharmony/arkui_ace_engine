@@ -21,7 +21,6 @@
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"

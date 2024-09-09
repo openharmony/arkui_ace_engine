@@ -52,6 +52,8 @@ public:
         const OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
+    void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam) override;
+    void SetBarState(DisplayMode mode) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -82,6 +84,8 @@ public:
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetImagePreviewMenuParam(FrameNode* frameNode,
+        std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
 
 private:
     void SetDraggable(bool draggable);

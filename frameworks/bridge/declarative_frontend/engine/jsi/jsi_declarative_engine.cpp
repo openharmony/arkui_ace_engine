@@ -106,9 +106,9 @@ const std::string OHMURL_START_TAG = "@bundle:";
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -2520,6 +2520,7 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
     }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
         return;
     }
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;

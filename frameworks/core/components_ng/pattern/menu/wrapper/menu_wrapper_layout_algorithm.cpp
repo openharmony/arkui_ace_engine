@@ -15,14 +15,7 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 
-#include "base/geometry/axis.h"
-#include "base/utils/utils.h"
-#include "core/components/declaration/common/declaration_constants.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 // set wrapper to full screen size

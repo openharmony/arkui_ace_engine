@@ -38,23 +38,32 @@ void LinearIndicatorBridge::SetIndicatorStyleSize(
     auto jsSpace = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "space"));
     auto jsStrokeWidth = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeWidth"));
     auto jsStrokeRadius = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeRadius"));
-    ArkUI_Float32 space = .0f;
-    if (jsSpace->IsNumber()) {
-        space = jsSpace->ToNumber(vm)->Value();
+
+    CalcDimension space;
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsSpace, space)) {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleSpace(
+            nativeNode, space.Value(), static_cast<int>(space.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->resetLinearIndicatorIndicatorStyleSpace(nativeNode);
     }
-    ArkUI_Float32 strokeWidth = .0f;
-    if (jsStrokeWidth->IsNumber()) {
-        strokeWidth = jsStrokeWidth->ToNumber(vm)->Value();
+
+    CalcDimension strokeWidth;
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsStrokeWidth, strokeWidth)) {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleStrokeWidth(
+            nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->resetLinearIndicatorIndicatorStyleStrokeWidth(
+            nativeNode);
     }
-    ArkUI_Float32 strokeRadius = .0f;
-    if (jsStrokeRadius->IsNumber()) {
-        strokeRadius = jsStrokeRadius->ToNumber(vm)->Value();
+
+    CalcDimension strokeRadius;
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsStrokeRadius, strokeRadius)) {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleStrokeRadius(
+            nativeNode, strokeRadius.Value(), static_cast<int>(strokeRadius.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->resetLinearIndicatorIndicatorStyleStrokeRadius(
+            nativeNode);
     }
-    GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleSpace(nativeNode, space);
-    GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleStrokeWidth(
-        nativeNode, strokeWidth);
-    GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleStrokeRadius(
-        nativeNode, strokeRadius);
 }
 
 void LinearIndicatorBridge::SetIndicatorStyleColor(
@@ -62,18 +71,23 @@ void LinearIndicatorBridge::SetIndicatorStyleColor(
 {
     auto jsTrackBackgroundColor = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "trackBackgroundColor"));
     auto jsTrackColor = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "trackColor"));
-    ArkUI_Uint32 trackBackgroundColor = 0;
-    if (jsTrackBackgroundColor->IsNumber()) {
-        trackBackgroundColor = jsTrackBackgroundColor->ToNumber(vm)->Value();
+
+    Color trackBackgroundColor;
+    if (ParseColorMetricsToColor(vm, jsTrackBackgroundColor, trackBackgroundColor)) {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleTrackBackgroundColor(
+            nativeNode, trackBackgroundColor.GetValue());
+    } else {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->resetLinearIndicatorIndicatorStyleTrackBackgroundColor(
+            nativeNode);
     }
-    ArkUI_Uint32 trackColor = 0;
-    if (jsTrackColor->IsNumber()) {
-        trackColor = jsTrackColor->ToNumber(vm)->Value();
+
+    Color trackColor;
+    if (ParseColorMetricsToColor(vm, jsTrackColor, trackColor)) {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleTrackColor(
+            nativeNode, trackColor.GetValue());
+    } else {
+        GetArkUINodeModifiers()->getLinearIndicatorModifier()->resetLinearIndicatorIndicatorStyleTrackColor(nativeNode);
     }
-    GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleTrackBackgroundColor(
-        nativeNode, trackBackgroundColor);
-    GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleTrackColor(
-        nativeNode, trackColor);
 }
 
 ArkUINativeModuleValue LinearIndicatorBridge::SetIndicatorStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -179,6 +193,22 @@ ArkUINativeModuleValue LinearIndicatorBridge::ResetOnChange(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getLinearIndicatorModifier()->resetLinearIndicatorOnChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+bool LinearIndicatorBridge::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
+{
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto toNumericProp = obj->Get(vm, "toNumeric");
+    if (toNumericProp->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = toNumericProp;
+        auto colorVal = func->Call(vm, obj, nullptr, 0);
+        result.SetValue(colorVal->Uint32Value(vm));
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

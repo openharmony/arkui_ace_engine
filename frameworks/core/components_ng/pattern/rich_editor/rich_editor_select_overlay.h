@@ -44,6 +44,7 @@ public:
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnOverlayTouchDown(const TouchEventInfo& event) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void GetLocalPointWithTransform(OffsetF& localPoint);
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;

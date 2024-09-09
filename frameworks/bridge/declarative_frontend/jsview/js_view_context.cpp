@@ -484,7 +484,7 @@ const AnimationOption JSViewContext::CreateAnimation(const JSRef<JSObject>& anim
         fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
         fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
         fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[animation/animateTo] SetExpectedFrameRateRange"
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[animation/animateTo] SetExpectedFrameRateRange"
             "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
     }
     RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);

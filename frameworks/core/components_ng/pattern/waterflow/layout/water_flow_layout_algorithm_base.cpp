@@ -92,4 +92,13 @@ void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         algo->EndCacheLayout();
     });
 }
+
+int32_t WaterFlowLayoutBase::GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx)
+{
+    int32_t updateIdx = host->GetHostNode()->GetChildrenUpdated();
+    if (updateIdx > 0 && footerIdx == 0) {
+        --updateIdx;
+    }
+    return updateIdx;
+}
 } // namespace OHOS::Ace::NG

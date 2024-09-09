@@ -60,7 +60,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<SheetWrapperPaintMethod>(WeakClaim(this));
+        return MakeRefPtr<SheetWrapperPaintMethod>();
     }
 
 protected:

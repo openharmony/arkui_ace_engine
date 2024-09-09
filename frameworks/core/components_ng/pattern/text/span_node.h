@@ -242,8 +242,8 @@ public:
     void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
     void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
     void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
-    GestureEventFunc urlOnClick;
-    std::function<void()> urlOnRelease;
+    std::function<void(const std::string& address)> urlOnClick;
+    std::function<void(const std::string& address)> urlOnRelease;
     std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
     std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
     void SetUrlAddress(const std::string& address)
@@ -254,7 +254,7 @@ public:
     {
         return address_;
     }
-    void SetUrlOnReleaseEvent(std::function<void()>&& urlOnRelease_)
+    void SetUrlOnReleaseEvent(std::function<void(const std::string& address)>&& urlOnRelease_)
     {
         urlOnRelease = std::move(urlOnRelease_);
     }
@@ -263,7 +263,7 @@ public:
     {
         urlOnHover = std::move(urlOnHover_);
     }
-    void SetUrlOnClickEvent(GestureEventFunc&& urlOnClick_)
+    void SetUrlOnClickEvent(std::function<void(const std::string& address)>&& urlOnClick_)
     {
         urlOnClick = std::move(urlOnClick_);
     }
@@ -335,6 +335,11 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    void SetDefaultMouseStyle(MouseFormat mouseStyle)
+    {
+        defaultMouseStyle_ = mouseStyle;
+    }
+
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -352,6 +357,7 @@ private:
     WeakPtr<Pattern> pattern_;
     Dimension radius_ = 2.0_vp;
     std::string address_;
+    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     uint32_t symbolId_ = 0;
 };
 
@@ -427,8 +433,14 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
-    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId)
+    {
+        SetPropertyInfoContainer();
+    }
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId)
+    {
+        SetPropertyInfoContainer();
+    }
     ~SpanNode() override = default;
 
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
@@ -550,21 +562,22 @@ public:
 
     void AddPropertyInfo(PropertyInfo value)
     {
-        propertyInfo_.insert(value);
+        propertyInfoContainer_.erase(value);
     }
 
     void CleanPropertyInfo()
     {
-        propertyInfo_.clear();
+        propertyInfoContainer_.clear();
     }
+
+    void SetPropertyInfoContainer();
 
     void MarkTextDirty() override
     {
         RequestTextFlushDirty();
     }
 
-    std::set<PropertyInfo> CalculateInheritPropertyInfo();
-
+    std::set<PropertyInfo> GetInheritPropertyInfo();
 
     void UpdateSpanTextColor(Color color)
     {
@@ -583,10 +596,11 @@ public:
 protected:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
-    std::set<PropertyInfo> propertyInfo_;
+    std::set<PropertyInfo> propertyInfoContainer_;
     bool hasUserFontWeight_ = false;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 

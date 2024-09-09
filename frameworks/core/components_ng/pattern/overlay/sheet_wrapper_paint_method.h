@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SheetWrapperPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SheetWrapperPaintMethod, NodePaintMethod)
 public:
-    SheetWrapperPaintMethod(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern) {}
+    SheetWrapperPaintMethod() {}
     ~SheetWrapperPaintMethod() override = default;
 
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override
@@ -33,19 +33,22 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto sheet = weak.Upgrade();
             if (sheet) {
+                sheet->PaintInnerBorder(canvas, paintWrapper);
                 sheet->PaintOuterBorder(canvas, paintWrapper);
             }
         };
     }
 
     void PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
 
 private:
-    RefPtr<FrameNode> GetSheetNode();
-    Dimension GetSheetOuterRadius(const SizeF& sheetSize, const Dimension& sheetRadius);
-    bool SetOuterPenStyle(RSPen& pen, const RefPtr<SheetTheme>& sheetTheme);
-    bool GetOuterDrawPath(RSPath& path, const RefPtr<FrameNode> sheetNode);
-    WeakPtr<Pattern> pattern_;
+    RefPtr<FrameNode> GetSheetNode(PaintWrapper* paintWrapper);
+    Dimension GetSheetRadius(const SizeF& sheetSize, const Dimension& sheetRadius);
+    void SetBorderPenStyle(RSPen& pen, const Dimension& borderWidth, const Color& borderColor);
+    void GetBorderDrawPath(
+        RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme, float borderWidth);
+    bool IsDrawBorder(PaintWrapper* paintWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetWrapperPaintMethod);
 };

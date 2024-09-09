@@ -67,7 +67,7 @@ void* FfiPromptMallocButtons(int64_t size)
         return nullptr;
     }
 
-    CButtonInfo* pButton = (CButtonInfo*)malloc(sizeof(CButtonInfo) * size);
+    CButtonInfo* pButton = static_cast<CButtonInfo*>(malloc(sizeof(CButtonInfo) * size));
     if (pButton == nullptr) {
         printf("Fail to malloc pButton.");
         return nullptr;

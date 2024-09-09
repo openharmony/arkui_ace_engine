@@ -178,9 +178,6 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     if (childSize.Width() > (width - 2 * margin.ConvertToPx())) {
         CalcSize defaultCalcSize((CalcLength(width - 2 * margin.ConvertToPx())), std::nullopt);
         childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
-    } else {
-        CalcSize defaultCalcSize((CalcLength(childSize.Width())), std::nullopt);
-        childLayoutProperty->UpdateUserDefinedIdealSize(defaultCalcSize);
     }
     float childHeight =
         paintProperty->GetTextSize().value_or(progressTheme->GetTextSize()).ConvertToPx() + 2 * margin.ConvertToPx();

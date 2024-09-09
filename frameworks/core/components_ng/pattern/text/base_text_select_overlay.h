@@ -191,6 +191,16 @@ public:
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
+    void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
+    {
+        onCreateMenuCallback_ = onCreateMenuCallback;
+    }
+
+    void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    {
+        onMenuItemClick_ = onMenuItemClick;
+    }
+
     float GetHandleDiameter();
     VectorF GetHostScale();
     void SwitchToOverlayMode();

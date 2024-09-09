@@ -15,17 +15,7 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

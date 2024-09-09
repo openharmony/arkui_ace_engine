@@ -15,13 +15,9 @@
 
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 
-#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -413,7 +409,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
                                GetLanesFloor(startIndex) + headerMainSize_;
             }
         }
-        if (GreatNotEqual(referencePos_, endPos_)) {
+        if (!isNeedMeasureFormLastItem_) {
             endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
             endPos = itemPosition_.rbegin()->second.endPos;
         }
@@ -1185,6 +1181,8 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
 ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
 {
     ListItemGroupLayoutInfo info;
+    info.headerSize = headerMainSize_;
+    info.footerSize = footerMainSize_;
     if (totalItemCount_ == 0 || childrenSize_) {
         info.atStart = true;
         info.atEnd = true;

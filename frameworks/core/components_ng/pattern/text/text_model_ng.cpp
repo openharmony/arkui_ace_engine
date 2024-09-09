@@ -76,14 +76,15 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
 RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
-
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto isFirstBuild = frameNode->IsFirstBuilding();
     if (layout) {
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][isFirstBuild:%d]", V2::TEXT_ETS_TAG, nodeId, isFirstBuild);
         layout->UpdateContent(content);
     }
     // set draggable for framenode
-    if (frameNode->IsFirstBuilding()) {
+    if (isFirstBuild) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
@@ -403,13 +404,6 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
-void TextModelNG::SetDraggable(bool draggable)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetDraggable(draggable);
-}
-
 void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
@@ -497,12 +491,6 @@ void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value, frameNode);
-}
-
-void TextModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->SetDraggable(draggable);
 }
 
 void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)

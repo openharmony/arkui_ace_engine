@@ -1,0 +1,28 @@
+{
+  "integer": [
+    {
+      "name": "number",
+      "value": 20
+    },
+    {
+      "name": "min",
+      "value": 2
+    },
+    {
+      "name": "stroke_width",
+      "value": 20
+    },
+    {
+      "name": "offset_radius1",
+      "value": 10
+    },
+    {
+      "name": "offset_radius2",
+      "value": 30
+    },
+    {
+      "name": "offset_radius3",
+      "value": 60
+    }
+  ]
+}

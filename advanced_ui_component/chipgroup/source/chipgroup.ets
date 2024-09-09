@@ -533,9 +533,7 @@ export struct ChipGroup {
             });
           }
           .padding({ left: this.getChipGroupStartSpace(),
-            right: this.getChipGroupEndSpace(),
-            top: this.getPaddingTop(),
-            bottom: this.getPaddingBottom()
+            right: this.getChipGroupEndSpace()
           })
           .constraintSize({ minWidth: '100%' })
         }

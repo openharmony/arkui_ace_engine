@@ -81,6 +81,9 @@ void GridTestNg::TearDown()
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     ClearOldNodes(); // Each testcase will create new list at begin
+    MockAnimationManager::GetInstance().Reset();
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(0);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(0);
 }
 
 void GridTestNg::GetGrid()

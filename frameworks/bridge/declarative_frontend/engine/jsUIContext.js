@@ -259,6 +259,32 @@ class UIContext {
         return this.UIInspector_;
     }
 
+    getFilteredInspectorTree(filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTree();
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTree(filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    getFilteredInspectorTreeById(id, depth, filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth, filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
     getComponentSnapshot() {
         this.ComponentSnapshot_ = new ComponentSnapshot(this.instanceId_);
         return this.ComponentSnapshot_;
@@ -601,14 +627,14 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const windowName = getUINativeModule().common.getWindowName();
         __JSScopeUtil__.restoreInstanceId();
-        return windowName
+        return windowName;
     }
 
     getWindowWidthBreakpoint() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const breakpoint = getUINativeModule().common.getWindowWidthBreakpoint();
         __JSScopeUtil__.restoreInstanceId();
-        return breakpoint
+        return breakpoint;
     }
 
     getWindowHeightBreakpoint() {

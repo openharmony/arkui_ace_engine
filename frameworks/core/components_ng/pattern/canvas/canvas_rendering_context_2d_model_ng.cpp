@@ -532,6 +532,13 @@ void CanvasRenderingContext2DModelNG::Reset()
     pattern_->Reset();
 }
 
+void CanvasRenderingContext2DModelNG::SetTransform(
+    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetTransform(pattern, transform);
+}
+
 // All interfaces that only the 'CanvasRenderingContext2D' has.
 void CanvasRenderingContext2DModelNG::GetWidth(RefPtr<AceType>& canvasPattern, double& width)
 {

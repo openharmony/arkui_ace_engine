@@ -15,19 +15,11 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
-#include <cstdint>
-
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
