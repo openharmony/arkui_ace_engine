@@ -1976,7 +1976,7 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
     auto heightBeforeUpdate = rect.Height();
     if (isResizeContentAvoid_ && frameNode->SelfExpansive()) {
         rect.SetHeight(heightAfterAvoid_);
-        frameNode->GetRenderContext()->UpdatePaintRect(rect);
+        renderContext->UpdatePaintRect(rect);
         rect.SetHeight(heightBeforeUpdate);
     }
     
