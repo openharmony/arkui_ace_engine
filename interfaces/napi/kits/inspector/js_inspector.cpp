@@ -300,10 +300,6 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     ComponentObserver* observer = new ComponentObserver(componentIdStr);
     napi_value result = nullptr;
     observer->NapiSerializer(env, result);
-    if (!result) {
-        delete observer;
-        return nullptr;
-    }
     auto layoutCallback = [observer, env]() { observer->callUserFunction(env, observer->cbLayoutList_); };
     observer->layoutEvent_ = AceType::MakeRefPtr<InspectorEvent>(std::move(layoutCallback));
 
@@ -316,6 +312,10 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     layoutCallback();
     drawCallback();
 #endif
+    if (!result) {
+        delete observer;
+        return nullptr;
+    }
     return result;
 }
 
