@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 
-#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -215,14 +214,10 @@ void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, 
     CHECK_NULL_VOID(textPattern);
     auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirstHandle) {
-        if (textPattern->GetTextSelector().baseOffset != currentHandleIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
-        }
+        textPattern->StartVibratorByIndexChange(currentHandleIndex, textPattern->GetTextSelector().baseOffset);
         textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
     } else {
-        if (textPattern->GetTextSelector().destinationOffset != currentHandleIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
-        }
+        textPattern->StartVibratorByIndexChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
         textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
     }
 }

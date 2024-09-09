@@ -90,6 +90,7 @@ public:
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
+    void SetEnableHapticFeedback(bool state) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);

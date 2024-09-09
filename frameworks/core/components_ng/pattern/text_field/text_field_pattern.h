@@ -1517,6 +1517,12 @@ public:
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
     }
 
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
+
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
@@ -1602,6 +1608,7 @@ private:
     void HandleLeftMousePressEvent(MouseInfo& info);
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
+    void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
@@ -1962,6 +1969,7 @@ private:
     bool isTouchPreviewText_ = false;
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
+    bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
