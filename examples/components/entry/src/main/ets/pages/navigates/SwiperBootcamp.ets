@@ -96,43 +96,23 @@ export struct SwiperBootcamp {
   @Builder
   Content() {
     Scroll(this.scrollerForScroll) {
-      if (this.isDot) {
-        Column() {
-          Swiper(this.swiperController) {
-            LazyForEach(this.data, (item: string, index: number) => {
-              Text(item.toString())
-                .width(useEnabled(this.enableTextWidth, this.textWidth, 200))
-                .height(useEnabled(this.enableTextHeight, this.textHeight, 100))
-                .textAlign(useEnabled(this.enableTextAlign, this.textAlign, TextAlign.Center))
-                .fontSize(useEnabled(this.enableFontSize, this.fontSize, 30))
-            }, (item: string) => item)
-          }
-          .displayCount(this.displayCount, this.swipeByGroup)
-          .vertical(useEnabled(this.enableVertical, this.vertical))
-          .autoPlay(useEnabled(this.enableAutoPlay, this.autoPlay))
-          .indicator(new DotIndicator())
-          .displayArrow(useEnabled(this.enableDisplayArrow, this.displayArrow))
-          .loop(useEnabled(this.enableLoop, this.loop))
-        }.width('100%').height('50%')
-      } else {
-        Column() {
-          Swiper(this.swiperController) {
-            LazyForEach(this.data, (item: string, index: number) => {
-              Text(item.toString())
-                .width(useEnabled(this.enableTextWidth, this.textWidth, 200))
-                .height(useEnabled(this.enableTextHeight, this.textHeight, 100))
-                .textAlign(useEnabled(this.enableTextAlign, this.textAlign, TextAlign.Center))
-                .fontSize(useEnabled(this.enableFontSize, this.fontSize, 30))
-            }, (item: string) => item)
-          }
-          .displayCount(this.displayCount, this.swipeByGroup)
-          .vertical(useEnabled(this.enableVertical, this.vertical))
-          .autoPlay(useEnabled(this.enableAutoPlay, this.autoPlay))
-          .indicator(Indicator.digit())
-          .displayArrow(useEnabled(this.enableDisplayArrow, this.displayArrow))
-          .loop(useEnabled(this.enableLoop, this.loop))
-        }.width('100%').height('50%')
-      }
+      Column() {
+        Swiper(this.swiperController) {
+          LazyForEach(this.data, (item: string, index: number) => {
+            Text(item.toString())
+              .width(useEnabled(this.enableTextWidth, this.textWidth))
+              .height(useEnabled(this.enableTextHeight, this.textHeight))
+              .textAlign(useEnabled(this.enableTextAlign, this.textAlign, TextAlign.Center))
+              .fontSize(useEnabled(this.enableFontSize, this.fontSize))
+          }, (item: string) => item)
+        }
+        .displayCount(this.displayCount, this.swipeByGroup)
+        .vertical(useEnabled(this.enableVertical, this.vertical))
+        .autoPlay(useEnabled(this.enableAutoPlay, this.autoPlay))
+        .indicator(this.isDot ? new DotIndicator() : Indicator.digit())
+        .displayArrow(useEnabled(this.enableDisplayArrow, this.displayArrow))
+        .loop(useEnabled(this.enableLoop, this.loop))
+      }.width('100%').height('50%')
     }
   }
 
