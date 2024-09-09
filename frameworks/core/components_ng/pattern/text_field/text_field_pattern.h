@@ -1788,7 +1788,6 @@ private:
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
-    RefPtr<Paragraph> dragParagraph_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 
