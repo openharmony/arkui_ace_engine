@@ -1713,7 +1713,7 @@ float TitleBarPattern::GetNavLeftPadding(float parentWidth)
     return navLeftPadding;
 }
 
-voids TitleBarPattern::OnLanguageConfigurationUpdate()
+void TitleBarPattern::OnLanguageConfigurationUpdate()
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
