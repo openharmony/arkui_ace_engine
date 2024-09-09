@@ -1457,6 +1457,13 @@ struct ArkUIBarItem {
     ArkUIOptionalBool isEnable;
 };
 
+struct ArkUINavigationTitleInfo {
+    ArkUI_Bool hasSubTitle;
+    ArkUI_Bool hasMainTitle;
+    ArkUI_CharPtr subTitle;
+    ArkUI_CharPtr mainTitle;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -3011,8 +3018,7 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
-    void (*setTitle)(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
-        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options);
+    void (*setTitle)(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options);
     void (*resetTitle)(ArkUINodeHandle node);
     void (*setMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
     void (*resetMenus)(ArkUINodeHandle node);
@@ -3650,8 +3656,8 @@ struct ArkUINavigationModifier {
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
-    void (*setNavTitle)(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
-        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options);
+    void (*setNavTitle)(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo,
+        ArkUINavigationTitlebarOptions options);
     void (*resetNavTitle)(ArkUINodeHandle node);
     void (*setNavMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
     void (*resetNavMenus)(ArkUINodeHandle node);

@@ -463,8 +463,8 @@ ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeC
     if (optionsArg->IsObject(vm)) {
         NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
     }
-    GetArkUINodeModifiers()->getNavigationModifier()->
-        setNavTitle(nativeNode, hasSub, hasMain, subtitle.c_str(), title.c_str(), options);
+    ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavTitle(nativeNode, titleInfo, options);
     return panda::JSValueRef::Undefined(vm);
 }
 

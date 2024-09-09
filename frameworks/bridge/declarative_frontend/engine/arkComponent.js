@@ -20339,25 +20339,23 @@ class NavDestinationMenusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 NavDestinationMenusModifier.identity = Symbol('menus');
@@ -21363,25 +21361,23 @@ class MenusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 MenusModifier.identity = Symbol('menus');

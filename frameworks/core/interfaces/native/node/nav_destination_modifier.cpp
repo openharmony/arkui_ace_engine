@@ -93,14 +93,15 @@ void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
-void SetTitle(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
-    ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options)
+void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string mainTitleString = std::string(mainTitle);
-    std::string subTitleString = std::string(subTitle);
-    NavDestinationModelNG::ParseCommonTitle(frameNode, hasSubTitle, hasMainTitle, subTitleString, mainTitleString);
+    std::string mainTitleString = std::string(titleInfo.mainTitle);
+    std::string subTitleString = std::string(titleInfo.subTitle);
+    NG::NavigationTitleInfo ngTitleInfo = { titleInfo.hasSubTitle, titleInfo.hasMainTitle,
+        subTitleString, mainTitleString };
+    NavDestinationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     NG::NavigationTitlebarOptions finalOptions;
     if (options.colorValue.isSet) {
         finalOptions.bgOptions.color = Color(options.colorValue.value);
@@ -126,7 +127,8 @@ void ResetTitle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::ParseCommonTitle(frameNode, false, false, "", "");
+    NG::NavigationTitleInfo ngTitleInfo = { false, false, "", "" };
+    NavDestinationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     NavigationTitlebarOptions options;
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(options));
 }
