@@ -96,6 +96,8 @@ public:
 private:
     void InitAllCallback();
     void UpdateSessionConfig();
+    int32_t GetWindowSceneId();
+
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_;
@@ -104,6 +106,7 @@ private:
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
     bool isNotifyOccupiedAreaChange_ = true;
+    Rect displayAreaWindow_;
     RectF displayArea_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
