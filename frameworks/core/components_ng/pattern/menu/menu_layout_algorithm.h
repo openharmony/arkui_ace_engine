@@ -118,6 +118,7 @@ private:
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI11(LayoutWrapper* layoutWrapper);
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
+    void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
@@ -215,6 +216,7 @@ private:
     void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
     void TranslateOptions(LayoutWrapper* layoutWrapper);
+    void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -262,6 +264,7 @@ private:
     float previewScale_ = 1.0f;
     PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
+    MarginPropertyF layoutRegionMargin_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

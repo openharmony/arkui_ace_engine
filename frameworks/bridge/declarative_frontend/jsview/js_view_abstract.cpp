@@ -3385,6 +3385,39 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
+void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
+{
+    CalcDimension dimension;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(jsValue, dimension, true)) {
+        return;
+    }
+
+    if (dimension.IsNonNegative() && dimension.CalcValue().find("calc") == std::string::npos) {
+        calcDimension = dimension;
+    }
+}
+
+void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto marginVal = menuOptions->GetProperty("layoutRegionMargin");
+    if (!marginVal->IsObject()) {
+        return;
+    }
+
+    CommonCalcDimension commonCalcDimension;
+    auto object = JSRef<JSObject>::Cast(marginVal);
+    ParseLayoutRegionMargin(object->GetProperty(TOP_PROPERTY), commonCalcDimension.top);
+    ParseLayoutRegionMargin(object->GetProperty(BOTTOM_PROPERTY), commonCalcDimension.bottom);
+    ParseLayoutRegionMargin(object->GetProperty(LEFT_PROPERTY), commonCalcDimension.left);
+    ParseLayoutRegionMargin(object->GetProperty(RIGHT_PROPERTY), commonCalcDimension.right);
+
+    if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+        commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+        menuParam.layoutRegionMargin = JSViewAbstract::GetLocalizedPadding(
+            commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+    }
+}
+
 void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -3506,6 +3539,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
+    ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
@@ -3745,6 +3779,42 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     } else {
         ViewAbstractModel::GetInstance()->SetPadding(length);
     }
+}
+
+NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& start,
+    const std::optional<CalcDimension>& end)
+{
+    NG::PaddingProperty paddings;
+    if (start.has_value()) {
+        if (start.value().Unit() == DimensionUnit::CALC) {
+            paddings.start = NG::CalcLength(start.value().CalcValue());
+        } else {
+            paddings.start = NG::CalcLength(start.value());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(bottom.value().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value());
+        }
+    }
+    if (end.has_value()) {
+        if (end.value().Unit() == DimensionUnit::CALC) {
+            paddings.end = NG::CalcLength(end.value().CalcValue());
+        } else {
+            paddings.end = NG::CalcLength(end.value());
+        }
+    }
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top = NG::CalcLength(top.value().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value());
+        }
+    }
+    return paddings;
 }
 
 void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
