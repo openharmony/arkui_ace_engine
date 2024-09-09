@@ -189,8 +189,8 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(Layout
 
 void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(gridLayoutProperty);
+    auto props = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -218,8 +218,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         int32_t itemIdex = -1;
         float lineHeight = gridLayoutInfo_.lineHeightMap_[line->first];
         Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
-        if (gridLayoutProperty->GetPositionProperty()) {
-            align = gridLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+        if (props->GetPositionProperty()) {
+            align = props->GetPositionProperty()->GetAlignment().value_or(align);
         }
         for (auto iter = line->second.begin(); iter != line->second.end(); iter++) {
             // If item index is the same, must be the same GridItem, need't layout again.
@@ -279,9 +279,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
+    auto cacheCount = props->GetCachedCountValue(1);
     if (!gridLayoutInfo_.hasMultiLineItem_) {
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_);
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
+            props->GetShowCachedItemsValue(false));
     }
     gridLayoutInfo_.totalHeightOfItemsInView_ = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 

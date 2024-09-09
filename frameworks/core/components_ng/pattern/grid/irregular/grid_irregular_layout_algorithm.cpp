@@ -64,7 +64,8 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutChildren(info.currentOffset_, props->GetCachedCountValue(1));
 
     const int32_t cacheCnt = props->GetCachedCountValue(1) * info.crossCount_;
-    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt);
+    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt,
+        props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cacheCnt);
     PreloadItems(cacheCnt);
 }
