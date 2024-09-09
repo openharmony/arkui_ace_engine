@@ -497,6 +497,14 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class PretendChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit PretendChangedListener(int32_t instanceId) {}
+    ~PretendChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override {}
+};
+
 class AvailableAreaChangedListener : public OHOS::Rosen::DisplayManager::IAvailableAreaListener {
 public:
     explicit AvailableAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -1957,7 +1965,8 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
     auto pipeline = container->GetPipelineContext();
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
         (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
-        avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
+        avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
+        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         if (pipeline->GetUseCutout()) {
             pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
