@@ -123,6 +123,9 @@ public:
     void PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize);
     float GetSwitchWidth(const SizeF& contentSize) const;
     float CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap);
+    void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset);
+    void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset,
+        const SizeF& contentSize, const double& actualGap);
 
     void SetUserActiveColor(const Color& color)
     {
@@ -132,6 +135,7 @@ public:
 
     void SetPointColor(const Color& color)
     {
+        hasPointColor_ = true;
         animatePointColor_->Set(LinearColor(color));
     }
 
@@ -154,6 +158,25 @@ public:
         if (isSelect_) {
             isSelect_->Set(isSelect);
         }
+    }
+
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
+    }
+
+    void SetIsOn(bool isOn)
+    {
+        if (isOn_) {
+            isOn_->Set(isOn);
+        }
+    }
+
+    void SetFocusPointColor(Color color)
+    {
+        pointColor_ = color;
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -265,7 +288,12 @@ private:
     Color activeColor_;
     Color inactiveColor_;
     Color userActiveColor_;
+    Color pointColorUnchecked_;
+    Color pointColor_;
+    Color focusBoardColor_;
     Dimension hoverRadius_ = 8.0_vp;
+    Dimension focusRadius_ = 8.0_vp;
+    bool isUseDiffPointColor_ = false;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
@@ -289,6 +317,9 @@ private:
     RefPtr<PropertyFloat> dragOffsetX_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> isOn_;
+    bool hasPointColor_ = false;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;

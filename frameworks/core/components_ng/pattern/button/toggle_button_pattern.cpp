@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/toggle/toggle_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -97,6 +98,7 @@ void ToggleButtonPattern::OnModifyDone()
             auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
             renderContext->UpdateBackgroundColor(bgColor);
         }
+        HandleOnOffStyle(!isOn_.value(), isFocus_);
     }
 
     if (changed) {
@@ -108,10 +110,220 @@ void ToggleButtonPattern::OnModifyDone()
     InitButtonAndText();
     HandleEnabled();
     InitClickEvent();
+    HandleOverlayStyle();
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
     SetAccessibilityAction();
+}
+
+void ToggleButtonPattern::HandleOverlayStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline_ = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline_);
+    toggleTheme_ = pipeline_->GetTheme<ToggleTheme>();
+    renderContext_ = host->GetRenderContext();
+    paintProperty_ = host->GetPaintProperty<ToggleButtonPaintProperty>();
+
+    HandleBorderAndShadow();
+    HandleFocusStyle();
+}
+
+void ToggleButtonPattern::HandleBorderAndShadow()
+{
+    CHECK_NULL_VOID(toggleTheme_);
+    CHECK_NULL_VOID(renderContext_);
+    CHECK_NULL_VOID(paintProperty_);
+
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetBorderWidthProperty()) {
+        if (!renderContext_->HasBorderWidth()) {
+            BorderWidthProperty borderWidth;
+            borderWidth.SetBorderWidth(toggleTheme_->GetBorderWidth());
+            layoutProperty->UpdateBorderWidth(borderWidth);
+            renderContext_->UpdateBorderWidth(borderWidth);
+        }
+        if (!renderContext_->HasBorderColor()) {
+            BorderColorProperty borderColor;
+            Color color = paintProperty_->GetIsOnValue(false) ?
+                toggleTheme_->GetBorderColorChecked() : toggleTheme_->GetBorderColorUnchecked();
+            borderColor.SetColor(color);
+            renderContext_->UpdateBorderColor(borderColor);
+        }
+    }
+
+    auto&& graphics = renderContext_->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    CHECK_NULL_VOID(paintProperty_->GetIsOn());
+    if (!graphics->HasBackShadow()) {
+        ShadowStyle shadowStyle = ShadowStyle::None;
+        if (paintProperty_->GetIsOnValue(false)) {
+            shadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal());
+        }
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        renderContext_->UpdateBackShadow(shadow);
+    }
+}
+
+void ToggleButtonPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsFocus(isFocusAcitve);
+            pattern->UpdateButtonStyle();
+        };
+    }
+
+    CHECK_NULL_VOID(pipeline_);
+    pipeline_->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void ToggleButtonPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    CHECK_NULL_VOID(pipeline_);
+    pipeline_->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+
+void ToggleButtonPattern::UpdateButtonStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (isFocus_) {
+        SetFocusButtonStyle(textNode, textLayoutProperty);
+    } else {
+        SetBlurButtonStyle(textNode, textLayoutProperty);
+    }
+}
+
+void ToggleButtonPattern::SetBlurButtonStyle(
+    RefPtr<FrameNode>& textNode, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(toggleTheme_);
+    CHECK_NULL_VOID(renderContext_);
+    CHECK_NULL_VOID(paintProperty_);
+    if (isCheckedShadow_ && isOn_.value()) {
+        isCheckedShadow_ = false;
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal());
+        renderContext_->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
+    }
+
+    if (isShadow_ && !isOn_.value()) {
+        isShadow_ = false;
+        renderContext_->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::None));
+    }
+    if (isScale_) {
+        isScale_ = false;
+        renderContext_->SetScale(1.0, 1.0);
+    }
+    if (isbgColorFocus_) {
+        Color color =
+            paintProperty_->GetIsOnValue(false) ? toggleTheme_->GetCheckedColor() : toggleTheme_->GetBackgroundColor();
+        renderContext_->UpdateBackgroundColor(color);
+    }
+    if (isTextColor_) {
+        isTextColor_ = false;
+        textLayoutProperty->UpdateTextColor(toggleTheme_->GetTextColor());
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode();
+    }
+}
+
+void ToggleButtonPattern::SetFocusButtonStyle(
+    RefPtr<FrameNode>& textNode, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(toggleTheme_);
+    CHECK_NULL_VOID(renderContext_);
+    CHECK_NULL_VOID(paintProperty_);
+    auto&& graphics = renderContext_->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    auto&& transform = renderContext_->GetOrCreateTransform();
+    CHECK_NULL_VOID(transform);
+
+    isTextColor_ = textLayoutProperty->GetTextColor() == toggleTheme_->GetTextColor();
+    if (isTextColor_) {
+        textLayoutProperty->UpdateTextColor(toggleTheme_->GetTextColorFocus());
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode();
+    }
+    float sacleFocus = toggleTheme_->GetScaleFocus();
+    VectorF scale(sacleFocus, sacleFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
+        isScale_ = true;
+        renderContext_->SetScale(sacleFocus, sacleFocus);
+    }
+
+    ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowFocus());
+    Shadow normalshadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal()));
+    if (paintProperty_->GetIsOnValue(false)) {
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == normalshadow) {
+            isCheckedShadow_ = true;
+            renderContext_->UpdateBackShadow(Shadow::CreateShadow(focusShadowStyle));
+        }
+        isbgColorFocus_ = renderContext_->GetBackgroundColor() == toggleTheme_->GetCheckedColor();
+        if (isbgColorFocus_) {
+            renderContext_->UpdateBackgroundColor(toggleTheme_->GetBackgroundColorFocusChecked());
+        }
+        return;
+    }
+    if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == Shadow::CreateShadow(ShadowStyle::None)) {
+        isShadow_ = true;
+        renderContext_->UpdateBackShadow(Shadow::CreateShadow(focusShadowStyle));
+    }
+    isbgColorFocus_ = renderContext_->GetBackgroundColor() == toggleTheme_->GetBackgroundColor();
+    if (isbgColorFocus_) {
+        renderContext_->UpdateBackgroundColor(toggleTheme_->GetBackgroundColorFocusUnchecked());
+    }
+}
+
+void ToggleButtonPattern::HandleFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "status button handle focus event");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "status button handle blur event");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+
+void ToggleButtonPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(pipeline_);
+
+    SetIsFocus(true);
+    AddIsFocusActiveUpdateEvent();
+    if (pipeline_->GetIsFocusActive()) {
+        UpdateButtonStyle();
+    }
+}
+
+void ToggleButtonPattern::HandleBlurEvent()
+{
+    SetIsFocus(false);
+    RemoveIsFocusActiveUpdateEvent();
+    UpdateButtonStyle();
 }
 
 void ToggleButtonPattern::SetAccessibilityAction()
@@ -342,6 +554,46 @@ void ToggleButtonPattern::OnClick()
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    HandleOnOffStyle(!isOn_.value(), isFocus_);
+}
+
+void ToggleButtonPattern::HandleOnOffStyle(bool isOnToOff, bool isFocus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(toggleTheme_);
+    auto&& graphics = renderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    if (isFocus) {
+        ShadowStyle focusShadowStyle = static_cast<ShadowStyle>(toggleTheme_->GetShadowFocus());
+        Shadow shadow = Shadow::CreateShadow(focusShadowStyle);
+        auto isShadow = !graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow;
+        isOnToOff ? isShadow_ = isShadow : isCheckedShadow_ = isShadow;
+        if (isShadow) {
+            renderContext->UpdateBackShadow(shadow);
+        }
+        if (isbgColorFocus_) {
+            renderContext->UpdateBackgroundColor(isOnToOff ? toggleTheme_->GetBackgroundColorFocusUnchecked() :
+                toggleTheme_->GetBackgroundColorFocusChecked());
+        }
+    } else {
+        Shadow shadowNone = Shadow::CreateShadow(ShadowStyle::None);
+        Shadow normalShadow = Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal()));
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == (isOnToOff ? normalShadow : shadowNone)) {
+            renderContext->UpdateBackShadow(isOnToOff ? shadowNone : normalShadow);
+        }
+    }
+    BorderColorProperty borderColor;
+    borderColor.SetColor(isOnToOff ? toggleTheme_->GetBorderColorChecked() : toggleTheme_->GetBorderColorUnchecked());
+    if (!renderContext->HasBorderColor() || renderContext->GetBorderColor() == borderColor) {
+        BorderColorProperty color;
+        color.SetColor(isOnToOff ? toggleTheme_->GetBorderColorUnchecked() : toggleTheme_->GetBorderColorChecked());
+        renderContext->UpdateBorderColor(color);
+    }
 }
 
 void ToggleButtonPattern::InitButtonAndText()
