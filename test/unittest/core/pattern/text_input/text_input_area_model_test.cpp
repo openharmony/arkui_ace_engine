@@ -1029,5 +1029,4 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg009, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     textFieldModelNG.SetTextAlign(TextAlign::RIGHT);
 }
-
 } // namespace OHOS::Ace::NG

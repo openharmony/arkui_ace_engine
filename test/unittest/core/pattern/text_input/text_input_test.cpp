@@ -1828,4 +1828,41 @@ HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
     pattern_->SetCustomKeyboardOption(supportAvoidance);
     EXPECT_FALSE(pattern_->keyboardAvoidance_);
 }
+
+/**
+ * @tc.name: TextInputLineBreakStrategy001
+ * @tc.desc: test testInput text lineBreakStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputLineBreakStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set lineBreakStrategy GREEDY
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::GREEDY);
+
+    /**
+     * @tc.step: step3. Set lineBreakStrategy HIGH_QUALITY
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::HIGH_QUALITY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::HIGH_QUALITY);
+
+    /**
+     * @tc.step: step4. Set lineBreakStrategy BALANCED
+     */
+    layoutProperty_->UpdateLineBreakStrategy(LineBreakStrategy::BALANCED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
+}
 } // namespace OHOS::Ace::NG
