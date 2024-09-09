@@ -246,6 +246,10 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     } while (false);
 #endif
     hasIdleTasks_ = true;
+    if (dirty->GetTag() == V2::ROOT_ETS_TAG && isFirstRootLayout_) {
+        isFirstRootLayout_ = false;
+        LOGI("Root node request first frame.");
+    }
     RequestFrame();
 }
 
@@ -848,6 +852,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_();
         dragWindowVisibleCallback_ = nullptr;
     }
+    if (isFirstFlushMessages_) {
+        isFirstFlushMessages_ = false;
+        LOGI("ArkUi flush first frame messages.");
+    }
     FlushMessages();
     FlushWindowPatternInfo();
     InspectDrew();
@@ -980,6 +988,7 @@ void PipelineContext::FlushMessages()
     ACE_FUNCTION_TRACE();
     if (IsFreezeFlushMessage()) {
         SetIsFreezeFlushMessage(false);
+        LOGI("Flush message is freezed.");
         return;
     }
     window_->FlushTasks();
