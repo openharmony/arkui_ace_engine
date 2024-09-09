@@ -2293,6 +2293,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     } while (false);
     if (needCloseOverlay || GetIsPreviewText()) {
         CloseSelectOverlay(true);
+        StartTwinkling();
     }
     DoProcessAutoFill();
     // emulate clicking bottom of the textField
