@@ -299,7 +299,7 @@ void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageSt
             CHECK_NULL_VOID(previewPattern);
             auto clipStartWidth = previewPattern->GetCustomPreviewAfterScaleWidth();
             auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
-            
+
             auto clipStartHeight = previewPattern->GetCustomPreviewAfterScaleHeight();
             auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
             auto dist = 1.0f;
@@ -353,7 +353,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(flexNode);
     auto flexContext = flexNode->GetRenderContext();
     CHECK_NULL_VOID(flexContext);
-    
+
     auto menuChild = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuChild);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
@@ -446,7 +446,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
     CHECK_NULL_VOID(previewPattern->GetIsShowHoverImage());
-    
+
     CHECK_NULL_VOID(dragPreviewContext);
     auto width = dragPreviewContext->GetPaintRectWithTransform().Width();
     auto height = dragPreviewContext->GetPaintRectWithTransform().Height();
@@ -454,7 +454,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     CHECK_NULL_VOID(previewRenderContext);
     auto previewWidth = previewPattern->GetCustomPreviewWidth();
     auto previewHeight = previewPattern->GetCustomPreviewHeight();
-    
+
     // reverse scale
     float scaleTo = 1.0f;
     if (previewWidth - width < previewHeight - height) {
@@ -646,7 +646,7 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     if (menuMap_.empty()) {
         return;
     }
-    
+
     overlayManager->UpdateDragMoveVector(offset);
 
     if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
@@ -796,7 +796,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
     node->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     DeleteDialogHotAreas(node);
     root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -865,7 +865,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
                            : theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
     node->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
@@ -951,7 +951,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node)
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
     node->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
@@ -6566,7 +6566,7 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
         node->MountToParent(rootNode);
     }
 }
- 
+
 void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(rootNode);
@@ -6577,7 +6577,7 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(node);
 }
- 
+
 void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(rootNode);

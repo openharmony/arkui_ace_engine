@@ -3136,21 +3136,6 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
-void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType)
-{
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        AccessibilityEvent event;
-        event.type = eventType;
-        event.windowContentChangeTypes = windowsContentChangeType;
-        event.nodeId = GetAccessibilityId();
-        event.stackNodeId = stackNodeId;
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->SendEventToAccessibility(event);
-    }
-}
-
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
