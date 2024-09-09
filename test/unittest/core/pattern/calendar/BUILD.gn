@@ -17,6 +17,7 @@ ace_unittest("calendar_test_ng") {
   type = "new"
   sources = [
     "calendar_month_pattern_test.cpp",
+    "calendar_paint_method_test.cpp",
     "calendar_test_ng.cpp",
   ]
 }
