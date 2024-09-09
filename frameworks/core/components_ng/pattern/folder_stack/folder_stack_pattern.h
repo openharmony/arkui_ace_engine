@@ -87,16 +87,6 @@ public:
 
     void DumpInfo() override;
 
-    bool GetNeedCallBack()
-    {
-        return needCallBack_;
-    }
-
-    void SetNeedCallBack(bool needCallBack)
-    {
-        needCallBack_ = needCallBack;
-    }
-
     bool IsInHoverMode() const
     {
         return hasInHoverMode_;
@@ -138,7 +128,6 @@ private:
     bool isAppearCallback_ = false;
     RefPtr<DisplayInfo> displayInfo_;
     bool hasInHoverMode_ = false;
-    bool needCallBack_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     FoldStatus lastFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
