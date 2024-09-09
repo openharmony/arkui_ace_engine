@@ -142,6 +142,7 @@ public:
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
+    void NotifyEnterTextEditorArea(bool enable);
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
     void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEven,
         const std::string& extraInfo);
@@ -556,7 +557,7 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     PointerEvent dragDropPointerEvent_;
-    bool isDragFwkShow_ { false };
+    bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
     OffsetF prePointerOffset_;
     OffsetF curPointerOffset_;
