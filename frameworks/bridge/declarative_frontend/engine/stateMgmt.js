@@ -4217,12 +4217,26 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        if (deep) {
-            for (const child of this.childrenWeakrefMap_.values()) {
-                const childView = child.deref();
-                if (childView) {
-                    childView.forceCompleteRerender(true);
+        if (!deep) {
+            
+            
+            return;
+        }
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (!childView) {
+                continue;
+            }
+            if (child instanceof ViewPU) {
+                if (!child.isRecycled()) {
+                    child.forceCompleteRerender(true);
                 }
+                else {
+                    child.delayCompleteRerender (deep);
+                }
+            }
+            else {
+                childView.forceCompleteRerender(true);
             }
         }
         
