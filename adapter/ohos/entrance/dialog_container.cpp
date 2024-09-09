@@ -276,9 +276,8 @@ void DialogContainer::Destroy()
                 },
                 TaskExecutor::TaskType::JS, "ArkUIDialogFrontendDestroy");
         }
-
-        DestroyToastSubwindow(instanceId_);
     }
+    DestroyToastSubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
