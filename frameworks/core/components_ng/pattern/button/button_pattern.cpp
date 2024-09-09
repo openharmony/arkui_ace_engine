@@ -642,6 +642,7 @@ void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
         textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
         textNode->MarkDirtyNode();
     }
 }
