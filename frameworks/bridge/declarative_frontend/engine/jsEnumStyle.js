@@ -350,7 +350,7 @@ var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
   BlendMode[BlendMode["DESTINATION_IN"] = 7] = "DESTINATION_IN";
-  BlendMode[BlendMode["SOURCE_IN"] = 6] = "SOURCE_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 5000] = "SOURCE_IN";
   BlendMode[BlendMode["NONE"] = 0] = "NONE";
   BlendMode[BlendMode["CLEAR"] = 1] = "CLEAR";
   BlendMode[BlendMode["SRC"] = 2] = "SRC";

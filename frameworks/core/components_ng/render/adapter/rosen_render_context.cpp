@@ -4113,8 +4113,13 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
-    rsNode_->SetColorBlendMode(rsBlendMode);
+    if (blendMode == BlendMode::BACK_COMPAT_SOURCE_IN) {
+        rsNode_->SetBackgroundShader(nullptr);
+        rsNode->SetColorBlendMode(Rosen::RSColorBlendMode::NONE);
+    } else {
+        auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+        rsNode_->SetColorBlendMode(rsBlendMode);
+    }
     RequestNextFrame();
 }
 
@@ -4454,6 +4459,13 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
 void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
 {
     CHECK_NULL_VOID(rsNode_);
+    // temporary code for back compat
+    auto& graphicProps = GetOrCreateGraphics();
+    if (graphicProps->GetBackBlendMode() == BlendMode::BACK_COMPAT_SOURCE_IN)
+    {
+        rsNode_->SetBackgroundShader(nullptr);
+        return;
+    }
     rsNode_->SetBackgroundShader(shader);
 }
 
