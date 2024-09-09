@@ -3302,6 +3302,22 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
+void ParseMenuSafeAreaPaddingParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto paddingVal = menuOptions->GetProperty("safeAreaPadding");
+    if (!paddingVal->IsObject()) {
+        return;
+    }
+
+    CommonCalcDimension commonCalcDimension;
+    JSViewAbstract::ParseCommonMarginOrPaddingCorner(JSRef<JSObject>::Cast(paddingVal), commonCalcDimension);
+    if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+        commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+        menuParam.safeAreaPadding = JSViewAbstract::GetLocalizedPadding(
+            commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+    }
+}
+
 void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -3423,6 +3439,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
+    ParseMenuSafeAreaPaddingParam(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)

@@ -118,6 +118,7 @@ private:
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
+    void InitializeSafaAreaPadding(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -221,6 +222,7 @@ private:
     bool CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern);
     void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
         LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
+    void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -268,6 +270,7 @@ private:
     float previewScale_ = 1.0f;
     PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
+    PaddingPropertyF safeAreaPadding_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

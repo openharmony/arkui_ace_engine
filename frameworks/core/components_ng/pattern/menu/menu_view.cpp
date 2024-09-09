@@ -1160,6 +1160,10 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
     CHECK_NULL_RETURN(previewNode, nullptr);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetMenuParam(menuParam);
+
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
 
     UpdateMenuBackgroundStyle(menuNode, menuParam);
