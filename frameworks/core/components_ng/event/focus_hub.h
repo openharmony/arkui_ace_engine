@@ -1114,6 +1114,8 @@ private:
 
     bool IsComponentDirectionRtl();
 
+    bool SkipFocusMoveBeforeRemove();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

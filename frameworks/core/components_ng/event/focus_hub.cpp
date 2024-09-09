@@ -145,6 +145,12 @@ void FocusHub::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
     frameNode->GetChildrenFocusHub(focusNodes);
 }
 
+bool FocusHub::SkipFocusMoveBeforeRemove()
+{
+    return ((GetFrameName() == V2::MENU_WRAPPER_ETS_TAG) ||
+        (GetFrameName() == V2::SHEET_WRAPPER_TAG));
+}
+
 std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     GetChildrenFocusHub(focusNodes);
@@ -407,11 +413,15 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     if (focusNode->IsCurrentFocus()) {
         FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         // Try to goto next focus, otherwise goto previous focus.
-        if (!GoToNextFocusLinear(FocusStep::TAB) && !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
+        if (!SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
+            !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
             lastWeakFocusNode_ = nullptr;
             auto focusView = FocusView::GetCurrentFocusView();
             auto mainViewRootScope = focusView ? focusView->GetViewRootScope() : nullptr;
             if (mainViewRootScope && mainViewRootScope == AceType::Claim(this)) {
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "Focus will stop at root scope %{public}s/%{public}d of focus view %{public}s/%{public}d",
+                    GetFrameName().c_str(), GetFrameId(), focusView->GetFrameName().c_str(), focusView->GetFrameId());
                 focusView->SetIsViewRootScopeFocused(true);
             } else {
                 RemoveSelf(reason);
