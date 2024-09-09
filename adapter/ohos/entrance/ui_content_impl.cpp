@@ -2207,10 +2207,23 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
     }
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_]() {
+    RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        safeAreaManager = context->GetSafeAreaManager();
+    }
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
+            if (safeAreaManager) {
+                uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
+                safeAreaManager->UpdateCutoutSafeArea(
+                    container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
+                    NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+            }
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
@@ -2233,11 +2246,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        if (pipelineContext) {
-            // KeyboardInset and cutoutInset depend on rootHeight, need calculate again
-            pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-        }
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
