@@ -65,6 +65,12 @@ public:
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
     void SetIsRightToLeft(bool value);
+    void SetIsHovered(bool value);
+    void SetIsPressed(bool value);
+    void SetIsFocused(bool value);
+    bool IsFocused() const;
+
+    Color CalculateHoverPressColor(const Color& color);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -148,6 +154,11 @@ private:
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> isRightToLeft_;
 
+    Color hoverBlendColor_;
+    Color pressBlendColor_;
+    bool isHover_ = false;
+    bool isPress_ = false;
+    bool isFocus_ = false;
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;
     bool isLoading_ = false;

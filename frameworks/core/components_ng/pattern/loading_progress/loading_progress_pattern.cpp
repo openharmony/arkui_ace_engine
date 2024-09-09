@@ -14,6 +14,7 @@
  */
 
 #include "base/log/dump_log.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
@@ -61,6 +62,7 @@ void LoadingProgressPattern::OnModifyDone()
     CHECK_NULL_VOID(paintProperty);
     enableLoading_ = paintProperty->GetEnableLoadingValue(true);
     enableLoading_ ? StartAnimation() : StopAnimation();
+    InitFocusEvent();
 }
 
 void LoadingProgressPattern::OnVisibleChange(bool isVisible)
@@ -177,5 +179,112 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
     auto enableLoading = paintProperty->GetEnableLoadingValue(true);
     LoadingProgressConfiguration loadingProgressConfiguration(enableLoading, enabled);
     return (makeFunc_.value())(loadingProgressConfiguration);
+}
+
+void LoadingProgressPattern::InitThemeValues()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
+
+    defaultColor_ = progressTheme->GetLoadingColor();
+    focusedColor_ = progressTheme->GetLoadingFocusedColor();
+}
+
+void LoadingProgressPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void LoadingProgressPattern::HandleFocusEvent()
+{
+    SetFocusStyle();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
+    AddIsFocusActiveUpdateEvent();
+}
+
+void LoadingProgressPattern::HandleBlurEvent()
+{
+    ClearFocusStyle();
+    RemoveIsFocusActiveUpdateEvent();
+}
+
+void LoadingProgressPattern::SetFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (paintProperty->GetColorValue(defaultColor_) == defaultColor_) {
+        paintProperty->UpdateColor(focusedColor_);
+        isFocusColorSet_ = true;
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void LoadingProgressPattern::ClearFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (isFocusColorSet_) {
+        paintProperty->UpdateColor(defaultColor_);
+        isFocusColorSet_ = false;
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void LoadingProgressPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            isFocusAcitve ? pattern->SetFocusStyle() : pattern->ClearFocusStyle();
+        };
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void LoadingProgressPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
 } // namespace OHOS::Ace::NG
