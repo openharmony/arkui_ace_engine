@@ -156,9 +156,6 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();
     pipeline->FlushSyncGeometryNodeTasks();
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetIsTouchGatherAnimationPlaying(true);
     manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(actuator, manager);
@@ -239,15 +236,6 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(GATHER_SPRING_RESPONSE,
         GATHER_SPRING_DAMPING_FRACTION, 0.0f);
     option.SetCurve(curve);
-
-    option.SetOnFinishEvent([]() {
-        auto pipelineContext = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto dragDropManager = pipelineContext->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetIsTouchGatherAnimationPlaying(false);
-    });
-
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameNodeSize = geometryNode->GetFrameSize();
