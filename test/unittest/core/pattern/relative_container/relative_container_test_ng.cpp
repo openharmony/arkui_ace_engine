@@ -382,6 +382,9 @@ HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutTest003, TestSize.Level
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(CONTAINER_SIZE);
     EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
+
     layoutWrapper.GetGeometryNode()->SetFrameSize(CONTAINER_SIZE);
     auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
     EXPECT_FALSE(relativeContainerPattern == nullptr);
