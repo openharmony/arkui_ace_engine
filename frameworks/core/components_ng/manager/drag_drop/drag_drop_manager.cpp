@@ -580,7 +580,6 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     isDragFwkShow_ = true;
-    menuWrapperNode_ = nullptr;
     auto overlayManager = GetDragAnimationOverlayManager(windowContainerId);
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveDragPixelMap();
@@ -732,6 +731,10 @@ void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
     auto container = Container::GetContainer(instanceId);
     if (container && (container->IsScenceBoardWindow() || container->IsUIExtensionWindow())) {
         return;
+    }
+    // pull-in subwindow, need to notify showMenu and update menu offset.
+    if (instanceId > MIN_SUBCONTAINER_ID) {
+        isDragFwkShow_ = true;
     }
     preTargetFrameNode_ = nullptr;
 }
