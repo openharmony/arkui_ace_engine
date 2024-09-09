@@ -1779,6 +1779,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontSize));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontFeature));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontFeature));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDecoration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetDecoration));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDecoration"),
@@ -1795,10 +1799,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetLineHeight));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetLineHeight));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontFeature));
-    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetFontFeature));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetWordBreak));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
@@ -2194,6 +2194,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontFamily));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontFamily));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontFeature));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontFeature));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUnderlineColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetUnderlineColor));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUnderlineColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetUnderlineColor));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDecoration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetDecoration));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDecoration"),
@@ -2206,14 +2214,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetLineHeight));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetLineHeight));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUnderlineColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetUnderlineColor));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUnderlineColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetUnderlineColor));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetFontFeature));
-    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetFontFeature));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetWordBreak));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
@@ -2461,13 +2461,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "component3D"), component3D);
 #endif
 
-    auto containerSpan = panda::ObjectRef::New(vm);
-    containerSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextBackgroundStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::SetTextBackgroundStyle));
-    containerSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextBackgroundStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::ResetTextBackgroundStyle));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "containerSpan"), containerSpan);
-
     auto relativeContainer = panda::ObjectRef::New(vm);
     relativeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGuideLine"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RelativeContainerBridge::SetGuideLine));
@@ -2478,6 +2471,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     relativeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarrier"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RelativeContainerBridge::ResetBarrier));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "relativeContainer"), relativeContainer);
+
+    auto containerSpan = panda::ObjectRef::New(vm);
+    containerSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextBackgroundStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::SetTextBackgroundStyle));
+    containerSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextBackgroundStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ContainerSpanBridge::ResetTextBackgroundStyle));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "containerSpan"), containerSpan);
 
     RegisterButtonAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
@@ -2543,8 +2543,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #if defined(FORM_SUPPORTED) || defined(PREVIEW)
     RegisterFormAttributes(object, vm);
 #endif
-    RegisterResourceAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
+    RegisterResourceAttributes(object, vm);
     return object;
 }
 
@@ -5032,6 +5032,16 @@ void ArkUINativeModule::RegisterXComponentNodeAttributes(Local<panda::ObjectRef>
 }
 #endif
 
+void ArkUINativeModule::RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto flex = panda::ObjectRef::New(vm);
+    flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::SetFlexInitialize));
+    flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::ResetFlexInitialize));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "flex"), flex);
+}
+
 void ArkUINativeModule::RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto resource = panda::ObjectRef::New(vm);
@@ -5044,15 +5054,5 @@ void ArkUINativeModule::RegisterResourceAttributes(Local<panda::ObjectRef> objec
     resource->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearCache"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ResourceBridge::ClearCache));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "resource"), resource);
-}
-
-void ArkUINativeModule::RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto flex = panda::ObjectRef::New(vm);
-    flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFlexInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::SetFlexInitialize));
-    flex->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlexInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FlexBridge::ResetFlexInitialize));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "flex"), flex);
 }
 } // namespace OHOS::Ace::NG
