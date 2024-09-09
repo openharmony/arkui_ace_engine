@@ -2831,12 +2831,11 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
 
 void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList)
 {
-    ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListByTraversal");
+    CHECK_NULL_VOID(renderContext_);
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto rootRegionList = GetResponseRegionListForTouch(origRect);
     if (!rootRegionList.empty()) {
         responseRegionList.insert(responseRegionList.end(), rootRegionList.begin(), rootRegionList.end());
-        ACE_LAYOUT_TRACE_END()
         return;
     }
     for (auto childWeak = frameChildren_.rbegin(); childWeak != frameChildren_.rend(); ++childWeak) {
@@ -2846,7 +2845,6 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
         }
         child->GetResponseRegionListByTraversal(responseRegionList);
     }
-    ACE_LAYOUT_TRACE_END()
 }
 
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
