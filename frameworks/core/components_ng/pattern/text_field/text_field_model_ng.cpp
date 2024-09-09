@@ -586,9 +586,7 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
         unitFunction();
         unitNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    if (unitNode) {
-        pattern->SetUnitNode(unitNode);
-    }
+    pattern->SetUnitNode(unitNode);
 }
 
 void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)

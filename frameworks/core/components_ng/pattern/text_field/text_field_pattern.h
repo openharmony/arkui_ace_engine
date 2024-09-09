@@ -1010,6 +1010,13 @@ public:
     }
     void SetUnitNode(const RefPtr<NG::UINode>& unitNode)
     {
+        if (unitNode_ && responseArea_) {
+            // clear old node
+            auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
+            CHECK_NULL_VOID(unitResponseArea);
+            unitResponseArea->ClearArea();
+            responseArea_ = nullptr;
+        }
         unitNode_ = unitNode;
     }
     void AddCounterNode();
