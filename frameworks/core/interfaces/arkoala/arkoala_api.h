@@ -3018,6 +3018,8 @@ struct ArkUINavDestinationModifier {
     void (*resetMenus)(ArkUINodeHandle node);
     void (*setMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
     void (*setMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
+    void (*setRecoverable)(ArkUINodeHandle node, ArkUI_Bool recoverable);
+    void (*resetRecoverable)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
@@ -3655,6 +3657,8 @@ struct ArkUINavigationModifier {
     void (*resetNavMenus)(ArkUINodeHandle node);
     void (*setNavMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
     void (*setNavMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
+    void (*setRecoverable)(ArkUINodeHandle node, ArkUI_Bool recoverable);
+    void (*resetRecoverable)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {

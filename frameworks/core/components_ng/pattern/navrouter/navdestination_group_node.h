@@ -192,6 +192,30 @@ public:
     bool SystemTransitionPopCallback(bool transitionIn);
     void InitDialogTransition(bool isZeroY);
 
+    void SetRecoverable(bool recoverable)
+    {
+        recoverable_ = recoverable;
+    }
+
+    void SetFromNavrouterAndNoRouteInfo(bool fromNavrouterAndNoRouteInfo)
+    {
+        fromNavrouterAndNoRouteInfo_ = fromNavrouterAndNoRouteInfo;
+    }
+
+    bool CanRecovery() const
+    {
+        return recoverable_ && !fromNavrouterAndNoRouteInfo_;
+    }
+
+    void SetNeedAppearFromRecovery(bool needAppear)
+    {
+        needAppearFromRecovery_ = needAppear;
+    }
+
+    bool NeedAppearFromRecovery() const
+    {
+        return needAppearFromRecovery_;
+    }
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -204,6 +228,9 @@ private:
     bool isCacheNode_ = false;
     bool isAnimated_ = true;
     bool canReused_ = true;
+    bool recoverable_ = true;
+    bool fromNavrouterAndNoRouteInfo_ = false;
+    bool needAppearFromRecovery_ = false;
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
