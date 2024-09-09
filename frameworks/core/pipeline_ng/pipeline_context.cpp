@@ -2341,19 +2341,19 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
-        if (SystemProperties::GetAceCommercialLogEnabled() || scalePoint.isPrivacyMode) {
+#ifdef IS_RELEASE_VERSION
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                 "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d, "
                 "isPrivacyMode=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected,
                 scalePoint.isPrivacyMode);
-        } else {
+#else
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                 "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}.3f, y=%{public}.3f type=%{public}d, "
                 "inject=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
                 scalePoint.isInjected);
-        }
+#endif
     }
 
     if (scalePoint.type == TouchType::MOVE) {

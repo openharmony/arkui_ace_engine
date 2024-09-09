@@ -312,6 +312,9 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "PinchRecognizer activeFingers size not equal fingers_, not send cancel callback.");
     }
 }
 
