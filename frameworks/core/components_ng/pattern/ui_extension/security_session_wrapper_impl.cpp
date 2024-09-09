@@ -631,7 +631,7 @@ void SecuritySessionWrapperImpl::NotifyOriginAvoidArea(
 }
 
 bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
-    sptr<Rosen::OccupiedAreaChangeInfo> info) const
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);
