@@ -8351,10 +8351,10 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     // serialize the selected text
     info.selectStart = selectController_->GetStartIndex();
     info.selectEnd = selectController_->GetEndIndex();
-    info.selectLength = info.selectEnd - info.selectStart;
     auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
+    info.selectLength = aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString());
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{public}s",
         info.selectStart, info.selectEnd, spanString->GetString().c_str());
 
@@ -8379,7 +8379,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     info.end = info.selectEnd - sentenceStart;
     auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
     spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
-    spanString->EncodeTlv(info.selectBuffer);
+    spanString->EncodeTlv(info.sentenceBuffer);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
 
