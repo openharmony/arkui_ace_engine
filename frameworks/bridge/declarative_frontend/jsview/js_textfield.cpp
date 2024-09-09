@@ -1198,6 +1198,7 @@ void JSTextField::SetShowUnit(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     if (!jsValue->IsFunction()) {
+        TextFieldModel::GetInstance()->SetShowUnit(nullptr);
         return;
     }
 
