@@ -377,7 +377,6 @@ using CalePredictSnapOffsetCallback =
                 std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
-using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 } // namespace OHOS::Ace
 
 #endif

@@ -1140,7 +1140,7 @@ HWTEST_F(ListScrollerTestNg, PositionController001, TestSize.Level1)
     controller->ScrollPage(false, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * VIEW_ITEM_NUMBER);
-    controller->ScrollPage(true, false);
+    controller->ScrollPage(true, true);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 

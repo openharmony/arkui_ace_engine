@@ -29,8 +29,6 @@ class ScrollableTestNg : public TestNG {
 public:
     void SetUp() override;
     void TearDown() override;
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
     
 protected:
     virtual void InitNestedScrolls();
