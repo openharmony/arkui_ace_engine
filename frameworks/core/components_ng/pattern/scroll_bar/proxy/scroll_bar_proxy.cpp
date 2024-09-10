@@ -46,9 +46,9 @@ float GetScrollableNodeOffset(RefPtr<Pattern> pattern)
 
 double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
 {
-    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
-    return scrollablePattern->GetScrollBarOutBoundaryExtent();
+    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetScrollBarOutBoundaryExtent();
 }
 } // namespace
 
