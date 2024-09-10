@@ -525,6 +525,7 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
     }
 }
 
+
 void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position)
 {
     auto menu = layoutWrapper->GetHostNode();
