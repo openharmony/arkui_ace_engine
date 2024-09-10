@@ -297,9 +297,10 @@ struct ScrollableFrameInfo {
     {
         json->Put("scroll from", GetSourceStr(scrollState_).c_str());
         json->Put("canOverScroll", std::to_string(canOverScroll_).c_str());
-        json->Put("isScrollableSpringEffect", (canOverScrollInfo_ >> 4) & 1 ? "true" : "false");
-        json->Put("isScrollable", (canOverScrollInfo_ >> 3) & 1 ? "true" : "false");
-        json->Put("scrollableIdle", (canOverScrollInfo_ >> 2) & 1 ? "true" : "false");
+        json->Put("isScrollableSpringEffect",
+            (canOverScrollInfo_ >> 4) & 1 ? "true" : "false");                         // 4: isScrollableSpringEffect
+        json->Put("isScrollable", (canOverScrollInfo_ >> 3) & 1 ? "true" : "false");   // 3: isScrollable
+        json->Put("scrollableIdle", (canOverScrollInfo_ >> 2) & 1 ? "true" : "false"); // 2: scrollableIdle
         json->Put("animateOverScroll", (canOverScrollInfo_ >> 1) & 1 ? "true" : "false");
         json->Put("animateCanOverScroll", canOverScrollInfo_ & 1 ? "true" : "false");
         json->Put("scroll from", std::to_string(scrollStateTime_).c_str());

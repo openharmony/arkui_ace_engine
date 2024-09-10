@@ -58,6 +58,7 @@ struct OptionParam {
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
+    bool disableSystemClick = false;
 
     // Used for security controls.
     bool isPasteOption = false;

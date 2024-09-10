@@ -965,6 +965,11 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
+    auto overlayManager = GetDragAnimationOverlayManager(container->GetInstanceId());
+    if (overlayManager && !isDragFwkShow_) {
+        overlayManager->RemovePixelMap();
+        pipeline->FlushMessages();
+    }
     pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior,
                                      pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() {
         TAG_LOGI(AceLogTag::ACE_DRAG,

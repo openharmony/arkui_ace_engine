@@ -120,6 +120,16 @@ public:
         return param;
     }
 
+    virtual void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+    {
+        pattern->SetScaleX(transform.scaleX);
+        pattern->SetScaleY(transform.scaleY);
+        pattern->SetSkewX(transform.skewX);
+        pattern->SetSkewY(transform.skewY);
+        pattern->SetTranslateX(transform.translateX);
+        pattern->SetTranslateY(transform.translateY);
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(RenderingContext2DModel);
 };
 

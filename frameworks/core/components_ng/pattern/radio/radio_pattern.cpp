@@ -36,6 +36,7 @@ constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 728.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 46.0f;
+
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()

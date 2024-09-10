@@ -440,6 +440,8 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
+    VectorF GetTransformScaleRelativeToWindow() const;
+
     RectF GetTransformRectRelativeToWindow() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
@@ -979,6 +981,8 @@ public:
 
     void ProcessAccessibilityVirtualNode();
 
+    void UpdateAccessibilityNodeRect();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -1032,6 +1036,8 @@ public:
         return changeInfoFlag_;
     }
 
+    void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
+
     void ClearChangeInfoFlag()
     {
         changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
@@ -1051,6 +1057,11 @@ public:
         layoutAlgorithm_.Reset();
     }
 
+    bool HasLayoutAlgorithm()
+    {
+        return layoutAlgorithm_ != nullptr;
+    }
+
     bool GetDragHitTestBlock() const
     {
         return dragHitTestBlock_;
@@ -1061,13 +1072,22 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
-    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
+
+    void OnForegroundColorUpdate(const Color& value);
 
 protected:
     void DumpInfo() override;
     std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
@@ -1112,6 +1132,13 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
+    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
     void DumpOverlayInfo(std::unique_ptr<JsonValue>& json);
     void DumpDragInfo(std::unique_ptr<JsonValue>& json);
     void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);
@@ -1194,6 +1221,8 @@ private:
 
     bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
+    void ResetPredictNodes();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1310,6 +1339,8 @@ private:
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
     FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
     std::optional<RectF> syncedFramePaintRect_;
+
+    int32_t childrenUpdatedFrom_ = -1;
 
     friend class RosenRenderContext;
     friend class RenderContext;

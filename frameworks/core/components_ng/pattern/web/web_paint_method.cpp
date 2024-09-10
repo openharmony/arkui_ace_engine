@@ -30,6 +30,8 @@ CanvasDrawFunction WebPaintMethod::GetForegroundDrawFunction(PaintWrapper* paint
         CHECK_NULL_VOID(painter);
         auto surface = DynamicCast<NG::RosenRenderSurface>(painter->renderSuface_);
         if (surface) {
+            ACE_SCOPED_TRACE("WebPaintMethod::GetForegroundDrawFunction Web DrawBuffer (width %d, height %d)",
+                width, height);
             surface->DrawBuffer(width, height);
         }
     };

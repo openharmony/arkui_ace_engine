@@ -110,6 +110,7 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
+    CHECK_NULL_VOID(Container::Current());
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
@@ -292,7 +293,7 @@ void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
     layoutDoneHandleFunc_ = func;
 }
 
-void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
+void UIObserverHandler::SetHandleNavDestinationSwitchFunc(const NavDestinationSwitchHandleFunc& func)
 {
     navDestinationSwitchHandleFunc_ = func;
 }

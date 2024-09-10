@@ -38,6 +38,7 @@ public:
     static ArkUINativeModuleValue SetRadioResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetRadioResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRadioOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

@@ -27,6 +27,7 @@ constexpr char END_CHAR = '\0';
 ArkUI_CharPtr ParseStringToCharPtr(std::string str)
 {
     char* id = static_cast<char*>(malloc((str.length() + 1) * sizeof(char)));
+    CHECK_NULL_RETURN(id, nullptr);
     str.copy(id, str.length());
     id[str.length()] = END_CHAR;
     return id;

@@ -213,6 +213,7 @@ void OptionView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& par
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
+    pattern->SetBlockClick(params[index].disableSystemClick);
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);

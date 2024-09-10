@@ -127,6 +127,19 @@ struct DragDropBaseInfo {
     std::string extraInfo;
 };
 
+struct BindMenuStatus {
+    bool isBindCustomMenu = false;
+    bool isBindLongPressMenu = false;
+    bool isShow = false;
+    MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
+    MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
+    bool IsNotNeedShowPreview() const
+    {
+        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
+            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
+    }
+};
+
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
@@ -713,6 +726,8 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
     static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
 
@@ -724,6 +739,12 @@ public:
     float GetMenuPreviewScale() const
     {
         return menuPreviewScale_;
+    }
+    
+    void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
+    const BindMenuStatus& GetBindMenuStatus()
+    {
+        return bindMenuStatus_;
     }
 
 private:
@@ -818,6 +839,7 @@ private:
     // the value from show parameter of context menu, which is controlled by caller manually
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
+    BindMenuStatus bindMenuStatus_;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;

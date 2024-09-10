@@ -18,9 +18,9 @@ class ArkResourcesHelper {
     static FLOAT: number = 10002;
 
     static $r(name: string, id?: number) {
-        var splitted = name.split(".", 2);
-        var strType = splitted[1]
-        var type = undefined;
+        let splitted = name.split('.', 2);
+        let strType = splitted[1]
+        let type = undefined;
         switch (strType) {
             case 'float':
                 type = ArkResourcesHelper.FLOAT;
@@ -30,6 +30,6 @@ class ArkResourcesHelper {
                 type = ArkResourcesHelper.COLOR;
                 break;
         }
-        return { "id": id ?? -1, "type": type, 'params': [name], 'bundleName': '', 'moduleName': '' };
+        return { 'id': id ?? -1, 'type': type, 'params': [name], 'bundleName': '', 'moduleName': '' };
     }
 }

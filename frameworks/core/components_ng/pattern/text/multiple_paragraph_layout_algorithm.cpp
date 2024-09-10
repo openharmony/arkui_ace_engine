@@ -227,7 +227,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextPattern>();
             CHECK_NULL_VOID(pattern);
@@ -243,11 +242,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
 {
     auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->HasForegroundColor()) {
-        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
-            textStyle.SetTextColor(Color::FOREGROUND);
-        }
-    } else if (renderContext->HasForegroundColorStrategy()) {
+    if (renderContext && renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     }
 }

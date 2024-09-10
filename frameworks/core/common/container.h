@@ -29,6 +29,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -596,6 +597,15 @@ public:
     {
         uIContentType_ = uIContentType;
     }
+
+    void DestroyToastSubwindow(int32_t instanceId);
+
+    virtual void CheckAndSetFontFamily() {};
+
+protected:
+    bool IsFontFileExistInPath(std::string path);
+    std::string GetFontFamilyName(std::string path);
+    bool endsWith(std::string str, std::string suffix);
 
 private:
     static bool IsIdAvailable(int32_t id);

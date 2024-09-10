@@ -104,7 +104,6 @@ void BubblePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = host->GetContextRefPtr();
@@ -136,6 +135,23 @@ void BubblePattern::OnAttachToFrameNode()
         pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+
+    halfFoldHoverCallbackId_ =
+        pipelineContext->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this)](bool isHalfFoldHover) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            AnimationOption option;
+            auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+            option.SetCurve(curve);
+            auto context = host->GetContext();
+            CHECK_NULL_VOID(context);
+            AnimationUtils::Animate(option, [host, context]() {
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                context->FlushUITasks();
+            });
+        });
 }
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -149,6 +165,7 @@ void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (!hasOnAreaChange_) {
         pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
     }
+    pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_);
 }
 
 void BubblePattern::InitTouchEvent()

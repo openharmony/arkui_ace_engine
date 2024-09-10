@@ -167,9 +167,13 @@ public:
         return unit_;
     }
 
-    inline double GetDensity()
+    inline double GetDensity(bool useSystemDensity = false)
     {
-        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
+        if (useSystemDensity) {
+            return !NearZero(density_) ? density_ : 1.0;
+        } else {
+            return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
+        }
     }
 
     void SetInstanceId(int32_t id)

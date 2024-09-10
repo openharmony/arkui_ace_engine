@@ -14,12 +14,10 @@
  */
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 
-#include "base/log/ace_scoring_log.h"
-#include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -130,33 +128,42 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     height_ = textSizeF.Height();
 }
 
-void TextLayoutElement::DoMeasure(bool isVertical, float comWidth, float maxWidth, float idealWidth, float iconWidth)
+void TextLayoutElement::MeasureForWidth(float width)
 {
-    if (!isExist_) {
-        return;
-    }
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
     auto textConstraint = textProp->GetContentLayoutConstraint();
     CHECK_NULL_VOID(textConstraint);
-    auto minWidth = std::min(maxWidth, comWidth);
-    if (!NearEqual(idealWidth, 0.0)) {
-        minWidth = std::min(minWidth, idealWidth);
+    textConstraint->selfIdealSize.SetWidth(width);
+    textWrap_->Measure(textConstraint);
+    auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
+    width_ = textSizeF.Width();
+    height_ = textSizeF.Height();
+}
+
+void TextLayoutElement::DoMeasure(bool isVertical, float minWidth, float leftSpace)
+{
+    if (!isExist_) {
+        return;
     }
 
-    auto textMaxWidth = 0.0;
+    float textMaxWidth;
     if (isVertical) {
-        textMaxWidth = minWidth > iconWidth ? minWidth : iconWidth;
+        textMaxWidth = minWidth > leftSpace ? minWidth : leftSpace;
     } else {
-        textMaxWidth = minWidth > iconWidth ? minWidth - iconWidth : 0.0;
+        textMaxWidth = minWidth > leftSpace ? minWidth - leftSpace : 0.0;
     }
+    auto textNode = textWrap_->GetHostNode();
+    CHECK_NULL_VOID(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
 
-    if (width_ > textMaxWidth) {
-        textConstraint->selfIdealSize.SetWidth(textMaxWidth);
-        textWrap_->Measure(textConstraint);
-        auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
-        width_ = textSizeF.Width();
-        height_ = textSizeF.Height();
+    if (GreatNotEqual(width_, textMaxWidth)) {
+        MeasureForWidth(textMaxWidth);
+        auto realWidth = textPattern->GetLineMetrics(0).width;
+        if (LessNotEqual(width_, realWidth)) {
+            MeasureForWidth(realWidth);
+        }
     }
 }
 
@@ -172,7 +179,7 @@ void TextLayoutElement::ChooseExactFontSize(RefPtr<TextLayoutProperty>& property
     while (fontSize > minFontSize_) {
         auto tempSize = GetMeasureTextSize(property->GetContent().value_or(""),
             fontSize,
-            property->GetFontWeight().value_or(FontWeight::NORMAL));
+            property->GetFontWeight().value_or(FontWeight::NORMAL), 0.0);
         if (!tempSize.has_value()) {
             fontSize = minFontSize_;
             break;
@@ -210,44 +217,72 @@ void TextLayoutElement::UpdateSize(bool isWidth)
     height_ = textSizeF.Height();
 }
 
-bool TextLayoutElement::GetTextLimitExceededFlag(double maxHeight)
+bool TextLayoutElement::GetCurrentTextSize(std::optional<SizeF>& currentTextSize, Dimension& currentFontSize)
 {
-    CHECK_NULL_RETURN(textWrap_, false);
-    std::optional<SizeF> currentTextSize;
-
-    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
-    CHECK_NULL_RETURN(textProp, false);
-    currentTextSize = GetMeasureTextSize(textProp->GetContent().value_or(""),
-        textProp->GetFontSize().value_or(minFontSize_),
-        textProp->GetFontWeight().value_or(FontWeight::NORMAL));
-    if (!currentTextSize.has_value()) {
+    if (!isExist_) {
         return false;
     }
 
-    auto textConstraint = textProp->GetContentLayoutConstraint();
-    CHECK_NULL_RETURN(textConstraint, false);
-    if (!GreatNotEqual(textConstraint->maxSize.Width(), 0.0)) {
-        return true;
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_RETURN(textProp, false);
+    if (!textProp->GetFontSize().has_value()) {
+        return false;
     }
-    if (LessOrEqual(currentTextSize.value().Width(), textConstraint->maxSize.Width())) {
-        if (GreatNotEqual(currentTextSize.value().Height(), maxHeight)) {
-            return true;
+    if (!textProp->GetContent().has_value()) {
+        return false;
+    }
+    currentTextSize = GetMeasureTextSize(textProp->GetContent().value(), textProp->GetFontSize().value(),
+        textProp->GetFontWeight().value_or(FontWeight::NORMAL), width_);
+    if (!currentTextSize.has_value()) {
+        return false;
+    }
+    currentFontSize = textProp->GetFontSize().value();
+    return true;
+}
+
+bool TextLayoutElement::TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
+    float threshold)
+{
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_RETURN(textProp, false);
+
+    auto stepPx = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    auto tempHeight = height_;
+    auto tempWidth = width_;
+    auto currentRectWidth = point.Width();
+    while (NearEqual(tempHeight, height_)) {
+        if (LessOrEqual(tempWidth, threshold)) {
+            return false;
         }
-    } else {
-        auto times = std::ceil(currentTextSize.value().Width() / textConstraint->maxSize.Width());
-        auto expectedHeight = times * currentTextSize.value().Height();
-        if (expectedHeight > maxHeight) {
-            return true;
+        tempWidth -= stepPx;
+        currentRectWidth -= stepPx;
+        auto tempSize = GetMeasureTextSize(textProp->GetContent().value(), textProp->GetFontSize().value(),
+            textProp->GetFontWeight().value_or(FontWeight::NORMAL), tempWidth);
+        if (!tempSize.has_value()) {
+            return false;
+        }
+        tempHeight = tempSize.value().Height();
+        if (!NearEqual(tempHeight, height_)) {
+            return false;
+        }
+        auto distance = pow(currentRectWidth - circlePoint.Width()) + pow(point.Height() - circlePoint.Height());
+        if (!GreatNotEqual(distance, maxDistance)) {
+            break;
         }
     }
-    return false;
+
+    MeasureForWidth(tempWidth);
+    return true;
 }
 
 std::optional<SizeF> TextLayoutElement::GetMeasureTextSize(const std::string& data,
-    const Dimension& fontSize, FontWeight fontWeight)
+    const Dimension& fontSize, FontWeight fontWeight, float constraintWidth)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     MeasureContext content;
+    if (!NearEqual(constraintWidth, 0.0)) {
+        content.constraintWidth = Dimension(constraintWidth);
+    }
     content.textContent = data;
     content.fontSize = fontSize;
     auto fontweight = StringUtils::FontWeightToString(fontWeight);
@@ -265,7 +300,7 @@ void TextLayoutElement::MeasureMinTextSize()
     CHECK_NULL_VOID(textProp);
     minTextSize_ = GetMeasureTextSize(textProp->GetContent().value_or(""),
         minFontSize_,
-        textProp->GetFontWeight().value_or(FontWeight::NORMAL));
+        textProp->GetFontWeight().value_or(FontWeight::NORMAL), 0.0);
 }
 
 double TextLayoutElement::ShrinkWidth(double reduceSize)

@@ -339,6 +339,17 @@ OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle no
         nodeModifiers->getXComponentModifier()->getNativeXComponent(node->uiNodeHandle));
 }
 
+int32_t OH_NativeXComponent_GetNativeAccessibilityProvider(
+    OH_NativeXComponent* component, ArkUI_AccessibilityProvider** handle)
+{
+    if ((component == nullptr) || (handle == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+
+    return component->GetAccessibilityProvider(handle);
+}
+
+
 #ifdef __cplusplus
 };
 #endif

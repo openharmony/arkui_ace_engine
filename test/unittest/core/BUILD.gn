@@ -29,6 +29,7 @@ group("core_unittest") {
     "property:core_property_unittest",
     "render:core_render_unittest",
     "rosen:arkui_rosen_render_context_test",
+    "rosen:gradient_style_modifier_test",
     "svg:core_svg_unittest",
     "syntax:core_syntax_unittest",
   ]

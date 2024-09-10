@@ -53,6 +53,8 @@ const int32_t INDEX_YEAR = 0;
 const int32_t INDEX_MONTH = 1;
 const int32_t INDEX_DAY = 2;
 constexpr float DISABLE_ALPHA = 0.6f;
+const Dimension FOCUS_OFFSET = 2.0_vp;
+const int32_t RATE = 2;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -83,21 +85,33 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
     auto children = host->GetChildren();
-    auto heigth = pickerTheme->GetDividerSpacing();
+    auto height = pickerTheme->GetDividerSpacing();
     for (const auto& child : children) {
         auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
+        auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
+        CHECK_NULL_RETURN(datePickerColumnNode, false);
+        auto columnNodeHeight = datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
+        auto maxButtonHeight = static_cast<float>(columnNodeHeight);
+        auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(heigth - PRESS_INTERVAL)));
+            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
+        if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
+            GreatNotEqual(maxButtonHeight, 0.0f)) {
+            auto parentNode = DynamicCast<FrameNode>(host->GetParent());
+            CHECK_NULL_RETURN(parentNode, false);
+            parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
     }
     return true;
 }
@@ -374,21 +388,25 @@ void DatePickerPattern::PaintFocusState()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void DatePickerPattern::CalcLeftTotalColumnWith(
-    const RefPtr<FrameNode>& host, float& leftTotalColumnWith, float childSize)
+void DatePickerPattern::CalcLeftTotalColumnWidth(
+    const RefPtr<FrameNode>& host, float& leftTotalColumnWidth, float childSize)
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (isRtl) {
         for (int32_t index = childSize - 1; index > focusKeyID_; --index) {
             auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
             CHECK_NULL_VOID(stackChild);
-            leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+            auto geometryNode = stackChild->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            leftTotalColumnWidth += geometryNode->GetFrameSize().Width();
         }
     } else {
         for (int32_t index = 0; index < focusKeyID_; ++index) {
             auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
             CHECK_NULL_VOID(stackChild);
-            leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
+            auto geometryNode = stackChild->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            leftTotalColumnWidth += geometryNode->GetFrameSize().Width();
         }
     }
 }
@@ -401,8 +419,8 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (!ShowMonthDays()) {
         childSize = static_cast<float>(host->GetChildren().size());
     }
-    auto leftTotalColumnWith = 0.0f;
-    CalcLeftTotalColumnWith(host, leftTotalColumnWith, childSize);
+    auto leftTotalColumnWidth = 0.0f;
+    CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto blendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -415,16 +433,16 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
-    auto pickerThemeWidth = dividerSpacing * 2;
+    auto pickerThemeWidth = dividerSpacing * RATE;
 
-    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth)/ RATE + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx();
     auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
-    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
+        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
     if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth;
-        centerX = leftTotalColumnWith;
+        piantRectWidth = columnWidth - FOCUS_OFFSET.ConvertToPx() * RATE;
+        centerX = leftTotalColumnWidth + FOCUS_OFFSET.ConvertToPx();
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -485,11 +503,7 @@ bool DatePickerPattern::ParseDirectionKey(
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {
-        if (isRtl) {
-            focusKeyID_ += 1;
-        } else {
-            focusKeyID_ -= 1;
-        }
+        focusKeyID_ = isRtl ? (focusKeyID_ + 1) : (focusKeyID_ - 1);
         if (!CheckFocusID(childSize)) {
             return false;
         }
@@ -497,11 +511,7 @@ bool DatePickerPattern::ParseDirectionKey(
         return true;
     }
     if (code == KeyCode::KEY_DPAD_RIGHT) {
-        if (isRtl) {
-            focusKeyID_ -= 1;
-        } else {
-            focusKeyID_ += 1;
-        }
+        focusKeyID_ = isRtl ? (focusKeyID_ - 1) : (focusKeyID_ + 1);
         if (ShowMonthDays()) {
             childSize = 1;
         }

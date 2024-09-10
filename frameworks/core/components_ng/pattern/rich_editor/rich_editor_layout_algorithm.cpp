@@ -15,15 +15,10 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
-#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/render/paragraph.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
@@ -57,7 +52,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         spans_.push_back(std::move(spans));
     }
     AppendNewLineSpan();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{private}s", SpansToString().c_str());
 }
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
@@ -79,12 +74,6 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
 {
     if (source->fontStyle->HasFontSize()) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
-    }
-
-    if (source->textLineStyle->HasLeadingMargin()) {
-        auto leadingMargin = source->textLineStyle->GetLeadingMarginValue();
-        leadingMargin.pixmap.Reset();
-        target->textLineStyle->UpdateLeadingMargin(leadingMargin);
     }
 
     if (source->textLineStyle->HasTextAlign()) {

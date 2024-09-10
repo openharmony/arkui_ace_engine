@@ -50,6 +50,8 @@ constexpr char PULL_FAIL_NAME[] = "extension_pulling_up_fail";
 constexpr char PULL_FAIL_MESSAGE[] = "pulling another embedded component failed, not allowed to cascade.";
 constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
+constexpr char EXTENSION_TRANSPARENT_NAME[] = "extension_node_transparent";
+constexpr char EXTENSION_TRANSPARENT_MESSAGE[] = "the extension ability has transparent node.";
 constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
 constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
@@ -522,11 +524,11 @@ void SecuritySessionWrapperImpl::OnDisconnect(bool isAbnormal)
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
 }
 
-void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
+void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
 {
     int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, callSessionId]() {
+        [weak = hostPattern_, callSessionId, errorCode]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (callSessionId != pattern->GetSessionId()) {
@@ -535,8 +537,11 @@ void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
                     callSessionId, pattern->GetSessionId());
                 return;
             }
-            pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
-                LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
+            bool isTransparent = errorCode == ERROR_CODE_UIEXTENSION_TRANSPARENT;
+            pattern->FireOnErrorCallback(
+                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
+                isTransparent ? EXTENSION_TRANSPARENT_NAME : LIFECYCLE_TIMEOUT_NAME,
+                isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
 }
@@ -584,6 +589,7 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
@@ -675,5 +681,16 @@ int32_t SecuritySessionWrapperImpl::SendDataSync(
         transferCode = session_->TransferComponentDataSync(wantParams, reWantParams);
     }
     return static_cast<int32_t>(transferCode);
+}
+
+uint32_t SecuritySessionWrapperImpl::GetReasonDump() const
+{
+    return reason_;
+}
+
+void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->NotifyDumpInfo(params, info);
 }
 } // namespace OHOS::Ace::NG

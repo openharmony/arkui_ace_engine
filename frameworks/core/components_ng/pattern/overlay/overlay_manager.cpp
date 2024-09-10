@@ -1480,7 +1480,7 @@ void OverlayManager::PopToast(int32_t toastId)
             if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
                 SubwindowManager::GetInstance()->HideSystemTopMostWindow();
             } else {
-                SubwindowManager::GetInstance()->HideSubWindowNG();
+                SubwindowManager::GetInstance()->HideToastSubWindowNG();
             }
         }
     });
@@ -1800,7 +1800,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             subwindow->HideSubWindowNG();
         }
     };
-    popupPattern->CallPopupStateChangeCallback("false");
+    popupPattern->CallDoubleBindCallback("false");
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
@@ -2900,10 +2900,15 @@ void OverlayManager::DeleteDialogHotAreas(const RefPtr<FrameNode>& dialogNode)
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogLayoutProp);
     if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
-        SubwindowManager::GetInstance()->DeleteHotAreas(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialogNode->GetId());
-        SubwindowManager::GetInstance()->HideDialogSubWindow(
-            SubwindowManager::GetInstance()->GetDialogSubWindowId());
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto currentId = Container::CurrentId();
+        if (!container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
+        }
+
+        SubwindowManager::GetInstance()->DeleteHotAreas(currentId, dialogNode->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
 }
 
@@ -3203,11 +3208,12 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
 {
 #ifdef WEB_SUPPORTED
     RefPtr<NG::FrameNode> webNode;
-    FindWebNode(overlay, webNode);
+    bool isNavDestination = false;
+    FindWebNode(overlay, webNode, isNavDestination);
     if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
         auto webPattern = DynamicCast<WebPattern>(webNode->GetPattern());
         CHECK_NULL_RETURN(webPattern, OVERLAY_EXISTS);
-        if (webPattern->Backward()) {
+        if (webPattern->Backward() && !isNavDestination) {
             return OVERLAY_REMOVE;
         }
     }
@@ -3215,10 +3221,11 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
     return OVERLAY_NOTHING;
 }
 
-void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode)
+void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::FrameNode>& webNode,
+    bool& isNavDestination)
 {
     CHECK_NULL_VOID(node);
-
+    
     if (webNode) {
         return;
     }
@@ -3229,9 +3236,14 @@ void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::Fram
         return;
     }
 
+    if (frameNode && frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG && !isNavDestination) {
+        isNavDestination = true;
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "find NavDestination node.");
+    }
+
     if (!node->GetChildren().empty()) {
         for (const auto& child : node->GetChildren()) {
-            FindWebNode(child, webNode);
+            FindWebNode(child, webNode, isNavDestination);
         }
     }
 }

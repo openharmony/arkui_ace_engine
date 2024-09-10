@@ -697,6 +697,40 @@ HWTEST_F(ListGroupAlgTestNg, Sticky006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Sticky007
+ * @tc.desc: List set sticky footer when top out of boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Sticky007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. V2::StickyStyle::FOOTER
+     * @tc.expected: footer is Sticky
+     */
+    ListModelNG model = CreateList();
+    model.SetSticky(V2::StickyStyle::FOOTER);
+    CreateGroupWithFooter(1, V2::ListItemGroupStyle::NONE, 4);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(firstGroupNode, 0), 350.f);
+
+    /**
+     * @tc.steps: step2. List scroll out of Top
+     * @tc.expected: footer is Sticky
+     */
+    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
+    EXPECT_NE(scrollable, nullptr);
+    scrollable->isTouching_ = true;
+    UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
+    float footerPos = GetChildY(frameNode_, 0) + GetChildY(firstGroupNode, 0);
+    EXPECT_EQ(footerPos, 350.f);
+
+    UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
+    footerPos = GetChildY(frameNode_, 0) + GetChildY(firstGroupNode, 0);
+    EXPECT_EQ(footerPos, 350.f);
+}
+
+/**
  * @tc.name: LanesLayout001
  * @tc.desc: test lanes
  * @tc.type: FUNC

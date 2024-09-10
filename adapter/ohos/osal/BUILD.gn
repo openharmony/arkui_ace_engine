@@ -126,7 +126,11 @@ template("ace_osal_ohos_source_set") {
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
-        sources += [ "js_accessibility_manager.cpp" ]
+        sources += [
+          "js_accessibility_manager.cpp",
+          "js_third_accessibility_hover_ng.cpp",
+          "js_third_provider_interaction_operation.cpp",
+        ]
         deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
           "accessibility:accessibility_common",

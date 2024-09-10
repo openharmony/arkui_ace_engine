@@ -103,8 +103,8 @@ class ModifierUtils {
     componentOverrideMap: Map<string, new (value: T0) => M0>): void {
       newMap.forEach((value, key) => {
         if (!key) {
-          ArkLogConsole.info("key of modifier map is undefined, ModifierWithKey is " +
-            (value ? value.constructor.name.toString() : "undefined"));
+          ArkLogConsole.info('key of modifier map is undefined, ModifierWithKey is ' +
+            (value ? value.constructor.name.toString() : 'undefined'));
         } else {
           if (componentOverrideMap.has(key.toString())) {
             //@ts-ignore
@@ -152,7 +152,9 @@ class ModifierUtils {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined || attributeModifierWithKey.value === null));
     } else {
-      ArkLogConsole.warn("pointer is invalid when putDirtyModifier");
+      ArkLogConsole.info('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
+        arkModifier.constructor.name.toString() : 'undefined') + ' of ' + (attributeModifierWithKey ?
+        attributeModifierWithKey.constructor.name.toString() : 'undefined'));
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
@@ -288,7 +290,7 @@ class AttributeUpdater {
 
   updateConstructorParams(...args: Object[]): void {
     if (!this.attribute) {
-      ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");
+      ArkLogConsole.info('AttributeUpdater has not been initialized before updateConstructorParams.');
       return;
     }
     this.attribute.initialize(args);

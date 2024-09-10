@@ -747,9 +747,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001
 HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternIsParentMenu001, TestSize.Level1)
 {
     RefPtr<SecurityComponentPattern> pattern = AceType::MakeRefPtr<SecurityComponentPattern>();
-    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, false);
-    auto locationButton = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern, false);
-    auto text = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1, pattern, false);
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern);
+    auto locationButton = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern);
+    auto text = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1, pattern);
 
     locationButton->SetParent(text);
     ASSERT_FALSE(pattern->IsParentMenu(locationButton));
@@ -846,12 +846,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent0
     locationInfo.SetTouchType(TouchType::DOWN);
     Offset offset(1.0, 1.0);
     locationInfo.SetLocalLocation(offset);
-    TouchEventInfo touch("");
-    touch.AddTouchLocationInfo(std::move(locationInfo));
+    TouchEventInfo info("");
+    info.AddTouchLocationInfo(std::move(locationInfo));
+
     ASSERT_TRUE(gestureHub->touchEventActuator_ != nullptr);
     ASSERT_TRUE(gestureHub->touchEventActuator_->touchEvents_.size() > 0);
     auto impl = gestureHub->touchEventActuator_->touchEvents_.front()->callback_;
-    impl(touch);
+    impl(info);
     ASSERT_NE(pattern.onTouchListener_, nullptr);
 }
 

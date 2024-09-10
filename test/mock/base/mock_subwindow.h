@@ -96,6 +96,8 @@ public:
     MOCK_METHOD1(OnFreeMultiWindowSwitch, void(bool enable));
     MOCK_METHOD1(RegisterFreeMultiWindowSwitchCallback, int32_t(std::function<void(bool)>&& callback));
     MOCK_METHOD1(UnRegisterFreeMultiWindowSwitchCallback, void(int32_t callbackId));
+    MOCK_METHOD1(SetRect, void(const NG::RectF& rect));
+    MOCK_METHOD0(DestroyToastWindow, void());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

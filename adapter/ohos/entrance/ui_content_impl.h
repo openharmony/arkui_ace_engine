@@ -35,7 +35,6 @@
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
@@ -93,13 +92,15 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
     void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr);
+        AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
-    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
@@ -110,6 +111,7 @@ public:
     // Window color
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;
+    void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) override;
 
     bool NeedSoftKeyboard() override;
 
@@ -171,6 +173,8 @@ public:
     void RegisterAccessibilityChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override;
+    void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo&)>&& callback) override;
     void DeregisterAccessibilityChildTree() override;
     void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
@@ -327,12 +331,12 @@ public:
     void SetContentNodeGrayScale(float grayscale) override;
 
     void PreLayout() override;
-    
+
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;
     }
-    
+
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
@@ -372,12 +376,6 @@ private:
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
-    void RenderLayoutBoundary(bool isDebugBoundary);
-    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
@@ -419,7 +417,6 @@ private:
 
     sptr<IRemoteObject> parentToken_ = nullptr;
     sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();
-    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;

@@ -25,8 +25,9 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-namespace OHOS::Ace::Framework {
+#include "core/components_ng/pattern/text/text_model.h"
 
+namespace OHOS::Ace::Framework {
 class JSFontSpan : public virtual AceType {
     DECLARE_ACE_TYPE(JSFontSpan, AceType)
 
@@ -285,6 +286,23 @@ private:
     RefPtr<ImageSpan> imageSpan_;
 };
 
+class JSNativeCustomSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSNativeCustomSpan, AceType)
+
+public:
+    JSNativeCustomSpan() = default;
+    ~JSNativeCustomSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSNativeCustomSpan* imageSpan);
+    static void JSBind(BindingTarget globalObj);
+    void Invalidate(const JSCallbackInfo& info);
+    void AddStyledString(const WeakPtr<SpanStringBase>& spanString);
+    void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString);
+
+private:
+    std::set<WeakPtr<SpanStringBase>> spanStringBaseSet_;
+};
+
 class JSCustomSpan : public CustomSpan {
     DECLARE_ACE_TYPE(JSCustomSpan, CustomSpan)
 
@@ -299,14 +317,16 @@ public:
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
     static std::function<void(NG::DrawingContext&, CustomSpanOptions)> ParseOnDrawFunc(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
-
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     void SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj);
     JSRef<JSObject>& GetJsCustomSpanObject();
+    void AddStyledString(const WeakPtr<SpanStringBase>& spanString) override;
+    void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
+    RefPtr<JSNativeCustomSpan> customSpan_;
     JSRef<JSObject> customSpanObj_;
 };
 

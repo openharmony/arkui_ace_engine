@@ -90,7 +90,9 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-
+    (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE)
+        ? textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE)
+        : textLayoutProperty->ResetMaxFontScale();
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -185,21 +187,16 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
-        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
-    } else {
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        textLayoutProperty->UpdateMaxFontScale(buttonTheme->GetMaxFontSizeScale());
-    }
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
     auto buttonRenderContext = host->GetRenderContext();
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    } else {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    }
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }

@@ -91,6 +91,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         pickerPattern->SetDateOrder(dateOrder);
     }
     pickerPattern->SetIsShowInDialog(true);
+    pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
     auto buttonTitleNode = CreateAndMountButtonTitleNode(dateNode, contentColumn);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
@@ -951,7 +952,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     datePickerPattern->SetShowCount(showCount);
-
+    datePickerPattern->SetIsShowInDialog(true);
     if (showTime) {
         CreateSingleDateNode(dateNode, showCount);
     } else {
@@ -1089,6 +1090,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
+    timePickerRowPattern->SetIsShowInDialog(true);
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -1547,6 +1549,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
     monthDaysPickerPattern->SetShowTimeFlag(true);
+    monthDaysPickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetShowTimeFlag(true);
     auto monthDaysLayoutProperty = monthDaysNode->GetLayoutProperty();
     CHECK_NULL_RETURN(monthDaysLayoutProperty, nullptr);
@@ -1572,6 +1575,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetTextProperties(settingData.properties);
+    timePickerRowPattern->SetShowLunarSwitch(settingData.lunarswitch);
     auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;

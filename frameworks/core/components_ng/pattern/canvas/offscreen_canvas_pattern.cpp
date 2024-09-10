@@ -406,6 +406,11 @@ TransformParam OffscreenCanvasPattern::GetTransform() const
     return offscreenPaintMethod_->GetTransform();
 }
 
+void OffscreenCanvasPattern::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    offscreenPaintMethod_->SetTransform(pattern, transform);
+}
+
 void OffscreenCanvasPattern::SaveLayer()
 {
     offscreenPaintMethod_->SaveLayer();

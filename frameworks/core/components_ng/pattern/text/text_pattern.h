@@ -165,8 +165,10 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+    void DumpParagraphsInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -665,7 +667,7 @@ public:
 
     void DumpRecord(const std::string& record)
     {
-        frameRecord_.append(record);
+        frameRecord_ = record;
     }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
@@ -774,6 +776,7 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void OnForegroundColorUpdate(const Color& value) override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -824,14 +827,20 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    void SetDefaultMouseStyle(MouseFormat mouseStyle)
+    {
+        defaultMouseStyle_ = mouseStyle;
+    }
+    virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
+    void InitUrlHoverEvent();
 
 private:
+    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitTouchEvent();
-    void InitUrlHoverEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);

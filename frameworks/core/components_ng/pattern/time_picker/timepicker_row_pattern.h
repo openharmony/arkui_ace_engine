@@ -87,6 +87,17 @@ public:
     {
         return isShowInDialog_;
     }
+
+    void SetShowLunarSwitch(bool value)
+    {
+        showLunarSwitch_ = value;
+    }
+
+    bool GetShowLunarSwitch() const
+    {
+        return showLunarSwitch_;
+    }
+    
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
@@ -580,7 +591,7 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
-    void CalcLeftTotalColumnWith(const RefPtr<FrameNode>& host, float &leftTotalColumnWith, float childSize);
+    void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
                           int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);
@@ -637,6 +648,7 @@ private:
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
     bool isShowInDialog_ = false;
+    bool showLunarSwitch_ = false;
     bool isUserSetDividerSpacingFont_ = false;
     bool isUserSetGradientFont_ = false;
     Dimension gradientHeight_;

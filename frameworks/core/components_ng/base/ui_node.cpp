@@ -430,6 +430,14 @@ void UINode::DoAddChild(
     }
     children_.insert(it, child);
 
+    if (IsAccessibilityVirtualNode()) {
+        auto parentVirtualNode = GetVirtualNodeParent().Upgrade();
+        if (parentVirtualNode) {
+            child->SetAccessibilityNodeVirtual();
+            child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
+
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
@@ -651,6 +659,14 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
+void UINode::FireCustomDisappear()
+{
+    std::list<RefPtr<UINode>> children = GetChildren();
+    for (const auto& child : children) {
+        child->FireCustomDisappear();
+    }
+}
+
 void UINode::ProcessOffscreenTask(bool recursive)
 {
     if (useOffscreenProcess_) {
@@ -846,6 +862,40 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
+    }
+}
+
+void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
+{
+    current->Put("ID", nodeId_);
+    current->Put("Type", tag_.c_str());
+    auto nodeChildren = GetChildren();
+    DumpSimplifyInfo(current);
+    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
+    if (hasChildren) {
+        current->Put("ChildrenSize", static_cast<int32_t>(nodeChildren.size()));
+        auto array = JsonUtil::CreateArray();
+        if (!nodeChildren.empty()) {
+            for (const auto& item : nodeChildren) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        if (!disappearingChildren_.size()) {
+            for (const auto& [item, index, branch] : disappearingChildren_) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        current->PutRef("Children", std::move(array));
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        auto overlay = JsonUtil::Create();
+        frameNode->GetOverlayNode()->DumpSimplifyTree(depth + 1, overlay);
+        current->PutRef("Overlay", std::move(overlay));
     }
 }
 
@@ -1231,12 +1281,6 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
     return { false, count };
 }
 
-// for Grid refresh GridItems
-void UINode::ChildrenUpdatedFrom(int32_t index)
-{
-    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
-}
-
 bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
@@ -1589,6 +1633,13 @@ void UINode::GetInspectorValue()
     }
 }
 
+void UINode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
+{
+    for (const auto& child : GetChildren()) {
+        child->ClearSubtreeLayoutAlgorithm(includeSelf, clearEntireTree);
+    }
+}
+
 void UINode::NotifyWebPattern(bool isRegister)
 {
     for (const auto& item : GetChildren()) {
@@ -1612,21 +1663,27 @@ void UINode::GetContainerComponentText(std::string& text)
     }
 }
 
-void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
 {
     int32_t updateFrom = 0;
     for (const auto& child : GetChildren()) {
         if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
+            updateFrom += changeIdx;
             break;
         }
         int32_t count = child->FrameCount();
         updateFrom += count;
     }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
     auto accessibilityId = GetAccessibilityId();
     auto parent = GetParent();
     if (parent) {
-        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

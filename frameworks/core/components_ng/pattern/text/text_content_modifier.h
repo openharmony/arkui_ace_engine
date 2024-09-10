@@ -112,6 +112,9 @@ private:
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
     float GetTextRacePercent();
+    TextDirection GetTextRaceDirection() const;
+    TextDirection GetTextRaceDirectionByContent() const;
+    void ResetTextRacePercent() const;
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);

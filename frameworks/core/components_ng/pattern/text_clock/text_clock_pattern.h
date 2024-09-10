@@ -128,6 +128,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();

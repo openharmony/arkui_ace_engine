@@ -99,7 +99,9 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->HideMenu();
+    if (!blockClick_) {
+        menuPattern->HideMenu();
+    }
 }
 
 void OptionPattern::PlayBgColorAnimation(bool isHoverChange)
@@ -252,7 +254,9 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
 
         props->UpdatePress(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        UpdateNextNodeDivider(true);
+        if (!IsSelected()) {
+            UpdateNextNodeDivider(true);
+        }
     }
 }
 
@@ -281,7 +285,9 @@ void OptionPattern::OnHover(bool isHover)
 
         props->UpdateHover(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        UpdateNextNodeDivider(true);
+        if (!IsSelected()) {
+            UpdateNextNodeDivider(true);
+        }
     }
     PlayBgColorAnimation();
 }
@@ -295,6 +301,11 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
     CHECK_NULL_VOID(parent);
     auto nextNode = parent->GetChildAtIndex(index_ + 1);
     if (nextNode) {
+        auto pattern = DynamicCast<FrameNode>(nextNode)->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->IsSelected()) {
+            return;
+        }
         if (!InstanceOf<FrameNode>(nextNode)) {
             LOGW("next optionNode is not a frameNode! type = %{public}s", nextNode->GetTag().c_str());
             return;

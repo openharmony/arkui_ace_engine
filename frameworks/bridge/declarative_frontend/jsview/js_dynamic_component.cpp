@@ -82,8 +82,13 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
-        worker->IsRunning(), worker->GetName().c_str());
+    if (worker == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ISOLATED_COMPONENT, "worker is nullptr");
+        return;
+    } else {
+        TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
+            worker->IsRunning(), worker->GetName().c_str());
+    }
     auto hapPath = hapPathValue->ToString();
     auto abcPath = abcPathValue->ToString();
     auto entryPoint = entryPointValue->ToString();

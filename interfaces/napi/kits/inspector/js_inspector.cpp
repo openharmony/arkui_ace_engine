@@ -24,6 +24,9 @@ static ComponentObserver* GetObserver(napi_env env, napi_value thisVar)
 {
     ComponentObserver* observer = nullptr;
     napi_unwrap(env, thisVar, (void**)&observer);
+    if (!observer) {
+        return nullptr;
+    }
     observer->Initialize(env, thisVar);
 
     return observer;
@@ -264,6 +267,10 @@ void ComponentObserver::Initialize(napi_env env, napi_value thisVar)
 
 static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info info)
 {
+    auto jsEngine = EngineHelper::GetCurrentEngineSafely();
+    if (!jsEngine) {
+        return nullptr;
+    }
     /* Get arguments */
     size_t argc = 1;
     napi_value argv = nullptr;
@@ -286,17 +293,15 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     ComponentObserver* observer = new ComponentObserver(componentIdStr);
     napi_value result = nullptr;
     observer->NapiSerializer(env, result);
+    if (!result) {
+        delete observer;
+        return nullptr;
+    }
     auto layoutCallback = [observer, env]() { observer->callUserFunction(env, observer->cbLayoutList_); };
     observer->layoutEvent_ = AceType::MakeRefPtr<InspectorEvent>(std::move(layoutCallback));
 
     auto drawCallback = [observer, env]() { observer->callUserFunction(env, observer->cbDrawList_); };
     observer->drawEvent_ = AceType::MakeRefPtr<InspectorEvent>(std::move(drawCallback));
-
-    auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-    if (!jsEngine) {
-        return nullptr;
-    }
-
     jsEngine->RegisterLayoutInspectorCallback(observer->layoutEvent_, observer->componentId_);
     jsEngine->RegisterDrawInspectorCallback(observer->drawEvent_, observer->componentId_);
     observer->SetEngine(jsEngine);

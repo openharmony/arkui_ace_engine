@@ -902,8 +902,8 @@ var DialogAlignment;
 
 let HoverModeAreaType;
 (function (HoverModeAreaType) {
-  HoverModeAreaType[HoverModeAreaType["TOP_SCREEN"] = 0] = "TOP_SCREEN";
-  HoverModeAreaType[HoverModeAreaType["BOTTOM_SCREEN"] = 1] = "BOTTOM_SCREEN";
+  HoverModeAreaType.TOP_SCREEN = 0;
+  HoverModeAreaType.BOTTOM_SCREEN = 1;
 })(HoverModeAreaType || (HoverModeAreaType = {}));
 
 var DialogButtonStyle;
@@ -1064,6 +1064,12 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+let MenuType;
+(function (MenuType) {
+  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
+  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
+})(MenuType || (MenuType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
@@ -1130,8 +1136,6 @@ var SourceTool;
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
-  SourceTool[SourceTool["Finger"] = 1] = "Finger";
-  SourceTool[SourceTool["Pen"] = 2] = "Pen";
   SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
   SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
   SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
@@ -1624,6 +1628,14 @@ var ScrollSizeMode ;
   ScrollSizeMode[ScrollSizeMode["FOLLOW_DETENT"] = 0] = "FOLLOW_DETENT";
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
 })(ScrollSizeMode || (ScrollSizeMode = {}));
+
+var SheetKeyboardAvoidMode;
+(function (SheetKeyboardAvoidMode) {
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -3281,27 +3293,27 @@ let DataOperationType;
 
 var StyledStringKey;
 (function (StyledStringKey) {
-  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
-  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
-  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
-  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
-  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
-  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
-  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
-  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
-  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
-  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
+  StyledStringKey[StyledStringKey['FONT'] = 0] = 'FONT';
+  StyledStringKey[StyledStringKey['DECORATION'] = 1] = 'DECORATION';
+  StyledStringKey[StyledStringKey['BASELINE_OFFSET'] = 2] = 'BASELINE_OFFSET';
+  StyledStringKey[StyledStringKey['LETTER_SPACING'] = 3] = 'LETTER_SPACING';
+  StyledStringKey[StyledStringKey['TEXT_SHADOW'] = 4] = 'TEXT_SHADOW';
+  StyledStringKey[StyledStringKey['LINE_HEIGHT'] = 5] = 'LINE_HEIGHT';
+  StyledStringKey[StyledStringKey['PARAGRAPH_STYLE'] = 200] = 'PARAGRAPH_STYLE';
+  StyledStringKey[StyledStringKey['BACKGROUND_COLOR'] = 6] = 'BACKGROUND_COLOR';
+  StyledStringKey[StyledStringKey['URL'] = 7] = 'URL';
+  StyledStringKey[StyledStringKey['GESTURE'] = 100] = 'GESTURE';
+  StyledStringKey[StyledStringKey['IMAGE'] = 300] = 'IMAGE';
+  StyledStringKey[StyledStringKey['CUSTOM_SPAN'] = 400] = 'CUSTOM_SPAN';
+  StyledStringKey[StyledStringKey['USER_DATA'] = 500] = 'USER_DATA';
 })(StyledStringKey || (StyledStringKey = {}));
 
-class CustomSpan {
-  type_ = "CustomSpan"
+class CustomSpan extends NativeCustomSpan {
+  type_ = "CustomSpan";
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan"
+  type_ = "ExtSpan";
 }
 
 let FocusPriority;

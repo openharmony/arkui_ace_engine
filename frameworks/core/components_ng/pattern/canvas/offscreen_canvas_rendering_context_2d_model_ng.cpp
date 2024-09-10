@@ -541,6 +541,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetDensity(double density)
     pattern_->SetDensity(density);
 }
 
+void OffscreenCanvasRenderingContext2DModelNG::SetTransform(
+    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetTransform(pattern, transform);
+}
+
 // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.
 RefPtr<AceType> OffscreenCanvasRenderingContext2DModelNG::CreateOffscreenPattern(int width, int height)
 {

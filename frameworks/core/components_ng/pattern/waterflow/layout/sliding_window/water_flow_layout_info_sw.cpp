@@ -105,7 +105,7 @@ bool WaterFlowLayoutInfoSW::OutOfBounds() const
     if (itemStart_ && Positive(lanes_[0][0].startPos - TopMargin())) {
         return true;
     }
-    if (offsetEnd_) {
+    if (!itemStart_ && offsetEnd_) {
         return std::all_of(lanes_.back().begin(), lanes_.back().end(), [this](const Lane& lane) {
             return LessNotEqual(lane.endPos + footerHeight_ + BotMargin(), lastMainSize_);
         });
@@ -134,7 +134,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
     if (!itemEnd_) {
         return res;
     }
-    float disToBot = EndPosWithMargin() + footerHeight_ - lastMainSize_;
+    float disToBot = EndPosWithMargin() + footerHeight_ - std::min(lastMainSize_, maxHeight_);
     if (!offsetEnd_) {
         res.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {

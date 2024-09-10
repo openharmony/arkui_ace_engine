@@ -71,7 +71,12 @@ public:
     int32_t SendAccessibilityAsyncEvent(
         const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
         void (*callback)(int32_t errorCode)) override;
-
+    int32_t SendAccessibilityAsyncEventForThird(
+        int64_t thirdElementId,
+        Accessibility::EventType eventType);
+    bool FindAccessibilityNodeInfosByIdFromProvider(
+        const int64_t splitElementId, const int32_t mode, const int32_t requestId,
+        std::list<Accessibility::AccessibilityElementInfo>& infos);
     const WeakPtr<JsAccessibilityManager>& GetHandler() const
     {
         return jsAccessibilityManager_;
@@ -103,9 +108,6 @@ private:
     void SetExecuteActionResult(
         AccessibilityElementOperatorCallback& callback,
         const bool succeeded, const int32_t requestId);
-    bool FindAccessibilityNodeInfosByIdFromProvider(
-        const int64_t splitElementId, const int32_t mode, const int32_t requestId,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
     bool FindAccessibilityNodeInfosByTextFromProvider(
         const int64_t splitElementId, const std::string& text, const int32_t requestId,
         std::list<Accessibility::AccessibilityElementInfo>& infos);
@@ -114,9 +116,22 @@ private:
     void GetAccessibilityEventInfoFromNativeEvent(
         const ArkUI_AccessibilityEventInfo& nativeEventInfo,
         OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+    void GetAccessibilityEventInfoFromNativeEvent(
+        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
     bool SendAccessibilitySyncEventToService(
         const OHOS::Accessibility::AccessibilityEventInfo& eventInfo,
         void (*callback)(int32_t errorCode));
+    bool FindFocusedElementInfoFromProvider(
+        int64_t elementId, const int32_t focusType, const int32_t requestId,
+        Accessibility::AccessibilityElementInfo& info);
+    bool ExecuteActionFromProvider(
+        int64_t elementId, const int32_t action,
+        const std::map<std::string, std::string>& actionArguments, const int32_t requestId);
+    bool FocusMoveSearchProvider(
+        int64_t elementId, const int32_t direction, const int32_t requestId,
+        Accessibility::AccessibilityElementInfo& info);
+    bool ClearFocusFromProvider();
+    bool ClearDrawBound();
 
     WeakPtr<AccessibilityProvider> accessibilityProvider_;
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;

@@ -516,6 +516,8 @@ public:
 
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
 
+    void RemoveInnerOnAreaChangedCallback(int32_t id);
+
     void ClearOnAreaChangedInnerCallbacks();
 
     bool HasImmediatelyVisibleCallback();

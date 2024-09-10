@@ -218,6 +218,7 @@ private:
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
+    void DumpInfoAddSections();
 
     /**
      * @param step FocusStep

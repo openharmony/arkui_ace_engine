@@ -102,7 +102,12 @@ std::string ContentController::GetSelectedValue(int32_t startIndex, int32_t endI
 {
     FormatIndex(startIndex, endIndex);
     auto wideText = GetWideText();
-    return StringUtils::ToString(wideText.substr(startIndex, endIndex - startIndex));
+    auto selectedValue = StringUtils::ToString(wideText.substr(startIndex, endIndex - startIndex));
+    if (selectedValue.empty()) {
+        selectedValue = StringUtils::ToString(
+            TextEmojiProcessor::SubWstring(startIndex, endIndex - startIndex, wideText));
+    }
+    return selectedValue;
 }
 
 void ContentController::FormatIndex(int32_t& startIndex, int32_t& endIndex)

@@ -24,6 +24,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb.h"
@@ -1941,6 +1942,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
+    JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2268,6 +2270,18 @@ void JSWeb::Create(const JSCallbackInfo& info)
     RenderMode renderMode = RenderMode::ASYNC_RENDER;
     if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
         renderMode = static_cast<RenderMode>(type->ToNumber<int32_t>());
+    }
+    std::string debugRenderMode = SystemProperties::GetWebDebugRenderMode();
+    if (debugRenderMode != "none") {
+        if (debugRenderMode == "async") {
+            renderMode = RenderMode::ASYNC_RENDER;
+        } else if (debugRenderMode == "sync") {
+            renderMode = RenderMode::SYNC_RENDER;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WEB, "JSWeb::Create unsupport debug render mode: %{public}s",
+                debugRenderMode.c_str());
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::Create use debug render mode: %{public}s", debugRenderMode.c_str());
     }
 
     bool incognitoMode = false;
@@ -5132,6 +5146,15 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
     NG::OnMenuItemClickCallback onMenuItemClick;
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
     WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnabledHapticFeedback(isEnabled);
 }
 
 } // namespace OHOS::Ace::Framework

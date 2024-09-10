@@ -17,6 +17,7 @@
 
 namespace OHOS::Ace {
 float Animator::scale_ = 1.0f;
+float MAX_TIME = 1000000000.0f;
 
 void Animator::SetDurationScale(float scale)
 {
@@ -174,6 +175,7 @@ void Animator::PlayMotion(const RefPtr<Motion>& motion)
     isReverse_ = false;
     motion_ = motion;
     status_ = Status::RUNNING; // StartInner
+    motion_->OnTimestampChanged(MAX_TIME, 0.0f, false);
 }
 
 void Animator::Play()

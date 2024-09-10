@@ -197,6 +197,8 @@ public:
         int32_t appRotation, int32_t windowMode);
     static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                   const std::string& pageName);
+    static void ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
+        const std::string& abilityName, const std::string& moduleName, int32_t dimension);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

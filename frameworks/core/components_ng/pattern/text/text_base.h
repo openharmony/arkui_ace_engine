@@ -213,7 +213,9 @@ public:
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
 
-    virtual bool IsTextEditableForStylus()
+    static void RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point);
+    static bool HasRenderTransform(const RefPtr<FrameNode>& targetNode);
+    virtual bool IsTextEditableForStylus() const
     {
         return false;
     }

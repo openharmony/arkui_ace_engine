@@ -70,9 +70,11 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose);
 
     void SetCloseButtonStatus(bool isEnabled);
+
+    virtual void SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor);
 
     bool GetIsFocus() const
     {
@@ -207,6 +209,7 @@ protected:
     bool CanShowFloatingTitle();
     bool CanShowCustomTitle();
     void TrimFloatingWindowLayout();
+    Color GetContainerColor(bool isFocus);
 
     WindowMode windowMode_;
     bool customTitleSettedShow_ = true;
@@ -214,15 +217,19 @@ protected:
     std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
     RectF buttonsRect_;
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
+    Color activeColor_;
+    Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
 private:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
-        const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+        const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize,
+            bool hideClose);
     CalcLength GetControlButtonRowWidth();
     void InitTitle();
     void InitContainerEvent();
     void InitLayoutProperty();
+    void InitContainerColor();
 
     void InitButtonsLayoutProperty();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ public:
 
     static RefPtr<SvgNode> Create();
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
-    const GradientColor& GetGradientColor() const;
+    const Ace::GradientColor& GetGradientColor() const;
 
 private:
     SvgStopAttribute stopAttr_;

@@ -35,6 +35,11 @@
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/gradient_property.h"
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/common/ace_view.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 using HiddenChangeEvent = std::function<void(bool)>;
@@ -52,6 +57,7 @@ constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
+constexpr int32_t MEDIA_TYPE_AUD = 0;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -322,7 +328,7 @@ void VideoPattern::PrepareMediaPlayer()
 
 bool VideoPattern::SetSourceForMediaPlayer()
 {
-    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{public}s", src_.c_str());
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{private}s", src_.c_str());
     CHECK_NULL_RETURN(mediaPlayer_, false);
     return mediaPlayer_->SetSource(src_);
 }
@@ -413,7 +419,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 return;
             }
             video->OnTextureRefresh(nativeWindow);
-        }, "ArkUIVideoTextureRefresh");
+            }, "ArkUIVideoTextureRefresh");
     };
     mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
 #endif
@@ -615,6 +621,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     currentPos_ = currentPos;
     isInitialState_ = currentPos != 0 ? false : isInitialState_;
     isPlaying_ = mediaPlayer_->IsPlaying();
+    SetIsSeeking(false);
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
@@ -745,7 +752,12 @@ void VideoPattern::UpdateMuted()
         platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            mediaPlayer->SetVolume(videoVolume, videoVolume);
+            if (NearZero(videoVolume)) {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+            } else {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
+                mediaPlayer->SetVolume(videoVolume, videoVolume);
+            }
         }, "ArkUIVideoUpdateMuted");
     }
 }
