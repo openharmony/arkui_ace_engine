@@ -530,6 +530,8 @@ public:
 
     virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
 
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
+
     void HandleSelectionChange(int32_t start, int32_t end);
 
     CopyOptions GetCopyOptions() const
@@ -691,6 +693,10 @@ public:
                 .count());
     }
 
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -700,6 +706,7 @@ protected:
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
+    void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
@@ -908,6 +915,7 @@ private:
     bool isLongPress_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
+    bool isEnableHapticFeedback_ = true;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;

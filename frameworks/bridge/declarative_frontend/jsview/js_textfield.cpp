@@ -1740,4 +1740,14 @@ void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
+
+void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
 } // namespace OHOS::Ace::Framework

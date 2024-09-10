@@ -679,6 +679,17 @@ void SearchModelNG::SetEnablePreviewText(bool enablePreviewText)
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
+void SearchModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();

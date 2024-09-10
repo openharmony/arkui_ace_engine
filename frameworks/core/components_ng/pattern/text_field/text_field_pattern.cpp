@@ -1751,6 +1751,12 @@ void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
     }
 }
 
+void TextFieldPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
+}
+
 void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
 {
     scrollable_ = false;
@@ -1778,17 +1784,15 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
-        if (moveCaretState_.isMoveCaret && selectController_->GetCaretIndex() != preCaretIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
+        if (moveCaretState_.isMoveCaret) {
+            StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
         }
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
         if (magnifierController_ && IsOperation()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
-        if (selectController_->GetCaretIndex() != preCaretIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
-        }
+        StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
     }
 
     UpdateCaretInfoToController();
@@ -3095,6 +3099,12 @@ void TextFieldPattern::InitLongPressEvent()
     gesture->SetLongPressEvent(longPressEvent_);
 }
 
+void TextFieldPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
+}
+
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
@@ -3118,7 +3128,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    VibratorUtils::StartVibraFeedback("longPress.light");
+    StartVibratorByLongPress();
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
         return;

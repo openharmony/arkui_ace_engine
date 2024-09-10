@@ -98,6 +98,7 @@ public:
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
+    void SetEnableHapticFeedback(bool state) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

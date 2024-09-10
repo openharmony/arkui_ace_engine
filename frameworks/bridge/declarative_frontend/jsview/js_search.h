@@ -88,6 +88,7 @@ public:
     static void SetCancelDefaultIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
     static void SetCancelImageIcon(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {
