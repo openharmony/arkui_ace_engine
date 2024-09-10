@@ -4048,7 +4048,7 @@ export class PopoverDialog extends ViewPU {
         this.__visible = new SynchedPropertySimpleTwoWayPU(o.visible, this, 'visible');
         this.__popover = new SynchedPropertyObjectOneWayPU(o.popover, this, 'popover');
         this.targetBuilder = undefined;
-        this.__dialogWidth = new ObservedPropertyObjectPU(this.popover.width, this, 'dialogWidth');
+        this.__dialogWidth = new ObservedPropertyObjectPU(this.popover?.width, this, 'dialogWidth');
         this.setInitiallyProvidedValue(o);
         this.finalizeConstruction();
     }
@@ -4102,6 +4102,15 @@ export class PopoverDialog extends ViewPU {
 
     set dialogWidth(h) {
         this.__dialogWidth.set(h);
+    }
+
+    emptyBuilder(n = null) {
+    }
+
+    aboutToAppear() {
+        if (this.targetBuilder === undefined || this.targetBuilder === null) {
+            this.targetBuilder = this.emptyBuilder;
+        }
     }
 
     initialRender() {
