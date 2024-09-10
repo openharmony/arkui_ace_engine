@@ -139,7 +139,7 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
         return false;
     }
     isFullScreen_ = value;
-    LOGI("SafeAreaManager::SetIsFullScreen %{public}d", isFullScreen_);
+    TAG_LOGI(ACE_LAYOUT, "SetIsFullScreen %{public}d", isFullScreen_);
     return true;
 }
 
@@ -149,7 +149,7 @@ bool SafeAreaManager::SetIsNeedAvoidWindow(bool value)
         return false;
     }
     isNeedAvoidWindow_ = value;
-    LOGI("SafeAreaManager::SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
+    TAG_LOGI(ACE_LAYOUT, "SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
     return true;
 }
 
@@ -159,7 +159,7 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
         return false;
     }
     ignoreSafeArea_ = value;
-    LOGI("SafeAreaManager::SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
+    TAG_LOGI(ACE_LAYOUT, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
     return true;
 }
 
@@ -169,7 +169,7 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
         return false;
     }
     keyboardSafeAreaEnabled_ = value;
-    LOGI("SafeAreaManager::SetKeyBoardAvoidMode %{public}d", int(keyboardSafeAreaEnabled_));
+    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
     return true;
 }
 
@@ -179,7 +179,7 @@ bool SafeAreaManager::SetIsAtomicService(bool value)
         return false;
     }
     isAtomicService_ = value;
-    LOGI("SafeAreaManager::SetIsAtomicService %{public}d", int(isAtomicService_));
+    TAG_LOGI(ACE_LAYOUT, "SetIsAtomicService %{public}d", isAtomicService_);
     return true;
 }
 
