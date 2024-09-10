@@ -415,7 +415,7 @@ void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::MODAL_PAGE_TAG);
 
     overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
         std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
@@ -511,7 +511,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),

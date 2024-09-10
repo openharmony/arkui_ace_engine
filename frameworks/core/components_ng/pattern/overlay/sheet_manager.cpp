@@ -91,7 +91,7 @@ int32_t GetOverlayAndTargetNode(int32_t targetId, const SheetStyle& sheetStyle, 
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteModal(id);
         };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace
