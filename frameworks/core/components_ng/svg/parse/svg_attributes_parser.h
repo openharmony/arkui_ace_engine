@@ -28,6 +28,8 @@ namespace OHOS::Ace::NG {
 class SvgAttributesParser {
 public:
     static Color GetColor(const std::string& str);
+    static bool ParseColor(const std::string& value, Color& color);
+    static std::optional<Color> GetSpecialColor(const std::string& value);
     static LineCapStyle GetLineCapStyle(const std::string& val);
     static LineJoinStyle GetLineJoinStyle(const std::string& val);
     static Dimension ParseDimension(const std::string& value, bool useVp = false);
