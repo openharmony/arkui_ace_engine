@@ -716,10 +716,10 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
-var FormShape;
+let FormShape;
 (function (FormShape) {
-  FormShape["RECT"] = 1;
-  FormShape["CIRCLE"] = 2;
+  FormShape.RECT = 1;
+  FormShape.CIRCLE = 2;
 })(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
