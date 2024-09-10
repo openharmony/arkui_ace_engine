@@ -419,7 +419,7 @@ public:
     void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-    Axis GetParentAxis();
+    void GetParentAxis();
     RefPtr<NestableScrollContainer> SearchParent() override;
     RefPtr<NestableScrollContainer> SearchParent(Axis scrollAxis);
     /**
