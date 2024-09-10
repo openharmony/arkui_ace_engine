@@ -51,7 +51,7 @@ public:
 
     void RemoveGesture(RefPtr<Gesture> gesture);
 
-    const std::vector<RefPtr<Gesture>> &GetGestures()
+    const std::vector<RefPtr<Gesture>> &GetGestures() const
     {
         return gestures_;
     }
