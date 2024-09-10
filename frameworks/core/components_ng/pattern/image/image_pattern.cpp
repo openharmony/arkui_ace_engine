@@ -1293,6 +1293,10 @@ void ImagePattern::DumpLayoutInfo()
     if (sourceSize.has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("sourceSize: ").append(sourceSize.value().ToString()));
     }
+
+    bool autoResize = layoutProp->GetAutoResize().value_or(autoResizeDefault_);
+    autoResize ? DumpLog::GetInstance().AddDesc("autoResize:true")
+                       : DumpLog::GetInstance().AddDesc("autoResize:false");
 }
 
 void ImagePattern::DumpRenderInfo()
@@ -1350,10 +1354,6 @@ void ImagePattern::DumpInfo()
     DumpRenderInfo();
 
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
-
-    autoResizeDefault_ ? DumpLog::GetInstance().AddDesc("autoResize:true")
-                       : DumpLog::GetInstance().AddDesc("autoResize:false");
-
 
     DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
     if (loadingCtx_) {
