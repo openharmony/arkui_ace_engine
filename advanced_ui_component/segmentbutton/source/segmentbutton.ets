@@ -581,7 +581,7 @@ struct SegmentButtonItem {
           .minFontSize(this.property.minFontSize)
           .maxFontSize(this.property.fontSize)
           .textOverflow({ overflow: this.marquee ? TextOverflow.MARQUEE : TextOverflow.Ellipsis })
-          .marqueeOptions({ start: this.isMarquee, fadeout: this.isFadeout })
+          .marqueeOptions({ start: this.isMarquee, fadeout: this.isFadeout, marqueeStartPolicy: MarqueeStartPolicy.DEFAULT })
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .padding(this.getTextPadding())
@@ -1180,13 +1180,6 @@ export struct SegmentButton {
                 ForEach(this.options.buttons, (item: SegmentButtonItemOptions, index) => {
                   if (index < MAX_ITEM_COUNT) {
                     Stack() {
-                      PressAndHoverEffect({
-                        pressIndex: index,
-                        colorProperty: this.hoverColorArray[index],
-                        press: this.pressArray[index],
-                        hover: this.hoverArray[index],
-                        options: this.options,
-                      })
                     }
                     .direction(this.options.direction)
                     .scale({

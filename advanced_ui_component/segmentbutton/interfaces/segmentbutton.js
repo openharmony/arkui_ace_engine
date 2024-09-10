@@ -319,7 +319,7 @@ class MultiSelectBackground extends ViewPU {
         }, Row);
         this.observeComponentCreation2((u17, v17) => {
             ForEach.create();
-            const s = (y17, z17) => {
+            const r = (y17, z17) => {
                 const a18 = y17;
                 this.observeComponentCreation2((c18, d18) => {
                     If.create();
@@ -344,7 +344,7 @@ class MultiSelectBackground extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(u17, this.optionsArray, s, undefined, true, false);
+            this.forEachUpdateFunction(u17, this.optionsArray, r, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -578,7 +578,7 @@ class MultiSelectItemArray extends ViewPU {
         }, Row);
         this.observeComponentCreation2((k15, l15) => {
             ForEach.create();
-            const r = (o15, p15) => {
+            const q = (o15, p15) => {
                 const q15 = o15;
                 this.observeComponentCreation2((s15, t15) => {
                     If.create();
@@ -602,7 +602,7 @@ class MultiSelectItemArray extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(k15, this.optionsArray, r, undefined, true, false);
+            this.forEachUpdateFunction(k15, this.optionsArray, q, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -836,7 +836,7 @@ class SegmentButtonItem extends ViewPU {
                         Text.minFontSize(this.property.minFontSize);
                         Text.maxFontSize(this.property.fontSize);
                         Text.textOverflow({ overflow: this.marquee ? TextOverflow.MARQUEE : TextOverflow.Ellipsis });
-                        Text.marqueeOptions({ start: this.isMarquee, fadeout: this.isFadeout });
+                        Text.marqueeOptions({ start: this.isMarquee, fadeout: this.isFadeout, marqueeStartPolicy: MarqueeStartPolicy.DEFAULT });
                         Text.maxLines(1);
                         Text.textAlign(TextAlign.Center);
                         Text.padding(this.getTextPadding());
@@ -1367,7 +1367,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         options: this.options,
                     }, undefined, g10, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 835, col: 7 });
                     ViewPU.create(i10);
-                    let q = () => {
+                    let p = () => {
                         return {
                             pressIndex: m9,
                             colorProperty: this.hoverColorArray[m9],
@@ -1376,7 +1376,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                             options: this.options
                         };
                     };
-                    i10.paramsGenerator_ = q;
+                    i10.paramsGenerator_ = p;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(g10, {
@@ -1415,7 +1415,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         marquee: this.marquee
                     }, undefined, s9, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 842, col: 7 });
                     ViewPU.create(u9);
-                    let p = () => {
+                    let o = () => {
                         return {
                             isMarqueeAndFadeout: this.isMarqueeAndFadeout,
                             selectedIndexes: this.selectedIndexes,
@@ -1428,7 +1428,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                             marquee: this.marquee
                         };
                     };
-                    u9.paramsGenerator_ = p;
+                    u9.paramsGenerator_ = o;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(s9, {
@@ -1474,7 +1474,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((o7, p7) => {
                         ForEach.create();
-                        const o = (s7, t7) => {
+                        const n = (s7, t7) => {
                             const u7 = s7;
                             this.observeComponentCreation2((w7, x7) => {
                                 If.create();
@@ -1609,7 +1609,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                             }, If);
                             If.pop();
                         };
-                        this.forEachUpdateFunction(o7, this.optionsArray, o, undefined, true, false);
+                        this.forEachUpdateFunction(o7, this.optionsArray, n, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                     Row.pop();
@@ -2189,13 +2189,13 @@ export class SegmentButton extends ViewPU {
                                                 options: this.options,
                                             }, undefined, g3, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1172, col: 11 });
                                             ViewPU.create(i3);
-                                            let n = () => {
+                                            let k = () => {
                                                 return {
                                                     optionsArray: this.options.buttons,
                                                     options: this.options
                                                 };
                                             };
-                                            i3.paramsGenerator_ = n;
+                                            i3.paramsGenerator_ = k;
                                         }
                                         else {
                                             this.updateStateVarsOfChildByElmtId(g3, {
@@ -2241,38 +2241,6 @@ export class SegmentButton extends ViewPU {
                                                                         y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[j2]
                                                                     });
                                                                 }, Stack);
-                                                                {
-                                                                    this.observeComponentCreation2((s2, t2) => {
-                                                                        if (t2) {
-                                                                            let u2 = new PressAndHoverEffect(this, {
-                                                                                pressIndex: j2,
-                                                                                colorProperty: this.hoverColorArray[j2],
-                                                                                press: this.pressArray[j2],
-                                                                                hover: this.hoverArray[j2],
-                                                                                options: this.options,
-                                                                            }, undefined, s2, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1183, col: 23 });
-                                                                            ViewPU.create(u2);
-                                                                            let k = () => {
-                                                                                return {
-                                                                                    pressIndex: j2,
-                                                                                    colorProperty: this.hoverColorArray[j2],
-                                                                                    press: this.pressArray[j2],
-                                                                                    hover: this.hoverArray[j2],
-                                                                                    options: this.options
-                                                                                };
-                                                                            };
-                                                                            u2.paramsGenerator_ = k;
-                                                                        }
-                                                                        else {
-                                                                            this.updateStateVarsOfChildByElmtId(s2, {
-                                                                                colorProperty: this.hoverColorArray[j2],
-                                                                                press: this.pressArray[j2],
-                                                                                hover: this.hoverArray[j2],
-                                                                                options: this.options
-                                                                            });
-                                                                        }
-                                                                    }, { name: "PressAndHoverEffect" });
-                                                                }
                                                                 Stack.pop();
                                                             });
                                                         }
@@ -2322,7 +2290,7 @@ export class SegmentButton extends ViewPU {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1209, col: 13 });
+                                            }, undefined, l1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1202, col: 13 });
                                             ViewPU.create(n1);
                                             let g = () => {
                                                 return {
@@ -2352,7 +2320,7 @@ export class SegmentButton extends ViewPU {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, d1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1215, col: 13 });
+                                            }, undefined, d1, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1208, col: 13 });
                                             ViewPU.create(f1);
                                             let d = () => {
                                                 return {
@@ -2386,7 +2354,7 @@ export class SegmentButton extends ViewPU {
                                     optionsArray: this.options.buttons,
                                     options: this.options,
                                     selectedIndexes: this.__selectedIndexes,
-                                }, undefined, t, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1230, col: 9 });
+                                }, undefined, t, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton0822NewF.ets", line: 1223, col: 9 });
                                 ViewPU.create(v);
                                 let c = () => {
                                     return {
