@@ -25,7 +25,6 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
 /**
  * ToastTheme defines color and styles of Toast. ToastTheme should be built
  * using ToastTheme::Builder.
@@ -49,6 +48,7 @@ public:
             Parse(themeConstants, theme);
             return theme;
         }
+
     private:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToastTheme>& theme) const
         {
@@ -70,6 +70,9 @@ public:
             theme->shadowNormal_ = static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_shadow_default", 0.0));
             theme->toastAlign_ = static_cast<int32_t>(toastPattern->GetAttr<double>("toast_align", 0.0));
             theme->multiLineTextAlign_ = static_cast<TextAlign>(toastPattern->GetAttr<double>("toast_text_align", 0.0));
+            constexpr double toastLimitHeightRatio = 0.65;
+            theme->toastLimitHeightRatio_ =
+                toastPattern->GetAttr<double>("toast_limit_height_ratio", toastLimitHeightRatio);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
                     toastPattern->GetAttr<Dimension>("toast_padding_level4", 0.0_vp).Value(),
@@ -193,7 +196,7 @@ public:
     {
         return borderWidth_;
     }
-    
+
     uint32_t GetShadowNormal() const
     {
         return shadowNormal_;
@@ -214,6 +217,11 @@ public:
         return multiLineTextAlign_;
     }
 
+    double GetTToastLimitHeightRatio() const
+    {
+        return toastLimitHeightRatio_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -230,13 +238,14 @@ private:
     Dimension minFontSize_;
     Dimension borderWidth_;
     uint32_t textMaxLines_ = 1;
-    uint32_t shadowNormal_ = 6;  // no shadow
+    uint32_t shadowNormal_ = 6; // no shadow
     uint32_t bgThemeColorMode_ = 0;
     Edge marging_;
     Color blurStyleTextColor_;
     Color defaultBGColor_;
     TextAlign multiLineTextAlign_;
     int32_t toastAlign_ = 0;
+    double toastLimitHeightRatio_ = 0.0;
 };
 
 } // namespace OHOS::Ace
