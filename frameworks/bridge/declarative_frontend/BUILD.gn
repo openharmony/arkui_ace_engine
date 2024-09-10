@@ -181,13 +181,18 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
       ":mock",
       ":prefetcher",
       ":statemanagement",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
+
+    if (!is_arkui_x) {
+      deps += [ ":uicontext" ]
+    } else {
+      deps += [ ":gen_obj_src_js_uicontext" ]
+    }
 
     configs = [ "$ace_root:ace_config" ]
     if (ace_engine_feature_enable_point_light) {
@@ -707,13 +712,18 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
       ":mock",
       ":prefetcher",
       ":statemanagement",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
+
+    if (!is_arkui_x) {
+      deps += [ ":uicontext" ]
+    } else {
+      deps += [ ":gen_obj_src_js_uicontext" ]
+    }
 
     configs = [ "$ace_root:ace_config" ]
 
@@ -1158,6 +1168,28 @@ ohos_abc("x_node") {
 ohos_abc("prefetcher") {
   sources = [ "engine/jsPrefetcher.js" ]
   output_name = "prefetcher"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+action("gen_uicontext_ohos") {
+  script = "$ace_root/build/tools/gen_uicontext_ohos.py"
+  inputs = [
+    "$ace_root/frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+  ]
+  outputs = [ "$base_output_path/jsUIContext_ohos.js" ]
+  args = [
+    rebase_path(inputs[0]),
+    rebase_path(outputs[0]),
+  ]
+}
+
+ohos_abc("uicontext") {
+  sources = [ "$base_output_path/jsUIContext_ohos.js" ]
+  output_name = "uicontext"
+  deps = [ ":gen_uicontext_ohos" ]
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
