@@ -633,7 +633,9 @@ RefPtr<PixelMap> GestureEventHub::GetPreScaledPixelMapIfExist(float targetScale,
         TAG_LOGW(AceLogTag::ACE_DRAG, "duplicate PixelMap failed!");
         preScaledPixelMap = defaultPixelMap;
     }
-    preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    if (!NearEqual(targetScale, 1.0f)) {
+        preScaledPixelMap->Scale(targetScale, targetScale, AceAntiAliasingOption::HIGH);
+    }
 #endif
     return preScaledPixelMap;
 }
@@ -929,10 +931,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (badgeNumber.has_value()) {
         recordsSize = badgeNumber.value();
     }
-    float defaultPixelMapScale =
-        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    auto windowScale = dragDropManager->GetWindowScale();
-    float scale = windowScale * defaultPixelMapScale;
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto overlayManager = mainPipeline->GetOverlayManager();
@@ -954,6 +952,14 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
+    float defaultPixelMapScale =
+        info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
+    // use menuPreviewScale only for 1.0f menu scale.
+    if (isMenuShow && !IsPixelMapNeedScale() && NearEqual(menuPreviewScale_, 1.0f)) {
+        defaultPixelMapScale = menuPreviewScale_;
+    }
+    auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * defaultPixelMapScale;
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -961,6 +967,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        if (isMenuShow && !IsPixelMapNeedScale()) {
+            auto imageGestureHub = imageNode->GetOrCreateGestureEventHub();
+            if (imageGestureHub) {
+                imageGestureHub->SetMenuPreviewScale(scale);
+            }
+        }
         auto originPoint = imageNode->GetPositionToScreen();
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
