@@ -20,8 +20,8 @@ export default async function textFontFamilyTest() {
    * 找到画面id为textFontFamily的Text组件
    * 找到画面文本为TextFontFamily的Button组件
    * 获取text的FontFamily属性与期待值'Arial'比对
-   * 点击button，变更text的FontFamily属性值为'ITCBLKADRawFile'
-   * 获取text的FontFamily属性与期待值'ITCBLKADRawFile'比对
+   * 点击button，变更text的FontFamily属性值为'TESTFONTRawFile'
+   * 获取text的FontFamily属性与期待值'TESTFONTRawFile'比对
    */
   defineTest('textFontFamilyTestDemo', {
     level: TestCaseLevel.LEVEL0
