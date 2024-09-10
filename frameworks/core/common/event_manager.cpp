@@ -1147,9 +1147,7 @@ void EventManager::AccessibilityHoverTest(
 void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        ACE_FUNCTION_TRACE();
-    }
+    ACE_FUNCTION_TRACE();
     TAG_LOGD(AceLogTag::ACE_MOUSE,
         "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,
         event.button, event.action);
