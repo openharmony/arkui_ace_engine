@@ -372,6 +372,20 @@ class RichEditorEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions>
   }
 }
 
+class RichEditorBarStateModifier extends ModifierWithKey<BarState> {
+  constructor(value: BarState) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorBarState');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().richEditor.resetBarState(node);
+    } else {
+      getUINativeModule().richEditor.setBarState(node, this.value);
+    }
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);

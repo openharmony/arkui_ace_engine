@@ -7605,12 +7605,19 @@ void RichEditorPattern::ScrollToSafeArea() const
 
 void RichEditorPattern::InitScrollablePattern()
 {
-    if (GetScrollableEvent()) {
-        return;
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+    CHECK_NULL_VOID(!barDisplayMode_ || barDisplayMode_.value() != barState);
+    barDisplayMode_ = barState;
+    if (!GetScrollableEvent()) {
+        AddScrollEvent();
     }
     SetAxis(Axis::VERTICAL);
-    AddScrollEvent();
-    SetScrollBar(barDisplayMode_);
+    if (barState != DisplayMode::AUTO) {
+        barState = DisplayMode::ON;
+    }
+    SetScrollBar(barState);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -7622,8 +7629,6 @@ void RichEditorPattern::InitScrollablePattern()
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
-    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto& paddingProperty = layoutProperty->GetPaddingProperty();
     if (paddingProperty) {
         auto offsetY = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;

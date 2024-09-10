@@ -8162,6 +8162,24 @@ class RichEditorEnterKeyTypeModifier extends ModifierWithKey {
 }
 RichEditorEnterKeyTypeModifier.identity = Symbol('richEditorEnterKeyType');
 
+class RichEditorBarStateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetBarState(node);
+    }
+    else {
+      getUINativeModule().richEditor.setBarState(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RichEditorBarStateModifier.identity = Symbol('richEditorBarState');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);

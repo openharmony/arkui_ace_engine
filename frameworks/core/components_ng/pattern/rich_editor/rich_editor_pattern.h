@@ -946,9 +946,9 @@ public:
         isOnlyRequestFocus_ = true;
     }
 
-    void SetBarState(DisplayMode mode)
+    DisplayMode GetBarDisplayMode()
     {
-        barDisplayMode_ = mode;
+        return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
 
 protected:
@@ -1367,7 +1367,7 @@ private:
     std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
-    DisplayMode barDisplayMode_ = DisplayMode::AUTO;
+    std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1809,6 +1809,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEditMenuOptions));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditMenuOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEditMenuOptions));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetBarState));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetBarState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
