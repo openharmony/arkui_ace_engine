@@ -2127,7 +2127,7 @@ class NavPathStack {
   initNavPathIndex(pathName) {
     this.popArray = [];
     for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
-      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+      if (pathName[i] === this.pathArray[i].name) {
         this.pathArray[i].index = i;
       }
     }
