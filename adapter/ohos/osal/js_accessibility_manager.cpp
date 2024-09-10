@@ -4839,7 +4839,6 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     for (auto subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_VOID(context);
-        LogBacktrace();
         interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
         interactionOperation->SetHandler(WeakClaim(this));
         instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
