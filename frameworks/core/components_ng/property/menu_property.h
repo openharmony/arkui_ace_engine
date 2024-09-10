@@ -78,6 +78,7 @@ struct MenuParam {
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     bool isSetPreviewNone = false; // user set MenuPreviewMode::NONE
+    std::optional<NG::PaddingProperty> safeAreaPadding;
 };
 
 } // namespace OHOS::Ace::NG
