@@ -540,7 +540,6 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
-    bool IsSelfFocusableWholePath();
     bool IsOnRootTree() const;
 
     bool IsFocusable();
@@ -913,11 +912,12 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState();
+    bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState();
+    void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
+    void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
@@ -1033,6 +1033,7 @@ public:
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
     bool FocusToHeadOrTailChild(bool isHead);
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);

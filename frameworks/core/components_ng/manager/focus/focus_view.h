@@ -105,8 +105,6 @@ public:
         return isViewHasShow_;
     }
 
-    bool GetFocusViewFocusable();
-
 private:
     bool isDefaultHasBeFocused_ = false;
     bool isViewRootScopeFocused_ = true;
