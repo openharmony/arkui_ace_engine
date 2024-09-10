@@ -83,7 +83,7 @@ void LineHeightImpl(Ark_NativePointer node,
 {
 }
 void TextOverflowImpl(Ark_NativePointer node,
-                      const Type_TextAttribute_textOverflow_Arg0* value)
+                      const Ark_TextOverflowOptions* options)
 {
 }
 void FontFamilyImpl(Ark_NativePointer node,

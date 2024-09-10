@@ -39,7 +39,7 @@ void FlingImpl(ScrollerPeer* peer,
 {
 }
 void ScrollPage0Impl(ScrollerPeer* peer,
-                     const Ark_ScrollPageOptions* value)
+                     const Literal_Boolean_next* value)
 {
 }
 void ScrollPage1Impl(ScrollerPeer* peer,

@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MarqueeInterfaceModifier {
 void SetMarqueeOptionsImpl(Ark_NativePointer node,
-                           const Type_MarqueeInterface_setMarqueeOptions_Arg0* value)
+                           const Ark_MarqueeOptions* options)
 {
 }
 } // MarqueeInterfaceModifier

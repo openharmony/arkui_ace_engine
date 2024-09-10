@@ -89,6 +89,10 @@ void SystemBarStyleImpl(Ark_NativePointer node,
                         const Opt_CustomObject* style)
 {
 }
+void SystemTransitionImpl(Ark_NativePointer node,
+                          Ark_Int32 type)
+{
+}
 } // NavDestinationAttributeModifier
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -110,6 +114,7 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::OnWillHideImpl,
         NavDestinationAttributeModifier::IgnoreLayoutSafeAreaImpl,
         NavDestinationAttributeModifier::SystemBarStyleImpl,
+        NavDestinationAttributeModifier::SystemTransitionImpl,
     };
     return &ArkUINavDestinationModifierImpl;
 }

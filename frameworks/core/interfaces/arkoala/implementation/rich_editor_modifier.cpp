@@ -144,6 +144,10 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean isEnabled)
 {
 }
+void BarStateImpl(Ark_NativePointer node,
+                  Ark_Int32 state)
+{
+}
 } // RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -178,6 +182,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::EditMenuOptionsImpl,
         RichEditorAttributeModifier::EnableKeyboardOnFocusImpl,
         RichEditorAttributeModifier::EnableHapticFeedbackImpl,
+        RichEditorAttributeModifier::BarStateImpl,
     };
     return &ArkUIRichEditorModifierImpl;
 }

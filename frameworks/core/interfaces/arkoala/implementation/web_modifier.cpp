@@ -500,6 +500,10 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_Materialized* editMenu)
 {
 }
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean enabled)
+{
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -624,6 +628,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::OnAdsBlockedImpl,
         WebAttributeModifier::KeyboardAvoidModeImpl,
         WebAttributeModifier::EditMenuOptionsImpl,
+        WebAttributeModifier::EnableHapticFeedbackImpl,
     };
     return &ArkUIWebModifierImpl;
 }

@@ -1817,13 +1817,14 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
-                   const Union_String_Ark_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle& src)
+                   const Union_String_Ark_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
         case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         case SELECTOR_ID_3: AssignTo(dst, src.value3); break;
+        case SELECTOR_ID_4: AssignTo(dst, src.value4); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -2639,6 +2640,13 @@ void AssignLiteralTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
+                     const Literal_Boolean_next& src)
+{
+    AssignTo(dst, src.next);
+}
+
+template<typename T>
+void AssignLiteralTo(std::optional<T>& dst,
                      const Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction& src)
 {
     AssignTo(dst, src.fingers);
@@ -2670,13 +2678,6 @@ void AssignLiteralTo(std::optional<T>& dst,
                      const Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller& src)
 {
     AssignTo(dst, src.timeZoneOffset);
-}
-
-template<typename T>
-void AssignLiteralTo(std::optional<T>& dst,
-                     const Literal_TextOverflow_overflow& src)
-{
-    AssignTo(dst, src.overflow);
 }
 
 template<typename T>
@@ -2733,13 +2734,6 @@ void AssignLiteralTo(std::optional<T>& dst,
                      const Literal_String_target_Opt_NavigationType_type& src)
 {
     AssignTo(dst, src.target);
-}
-
-template<typename T>
-void AssignLiteralTo(std::optional<T>& dst,
-                     const Literal_Boolean_start_Opt_Number_step_loop_Opt_Boolean_fromStart_String_src& src)
-{
-    AssignTo(dst, src.start);
 }
 
 template<typename T>
@@ -3152,6 +3146,7 @@ ASSIGN_OPT(Opt_SaveDescription)
 ASSIGN_OPT(Opt_SaveIconStyle)
 ASSIGN_OPT(Opt_Union_String_Number)
 ASSIGN_OPT(Opt_Array_TextDataDetectorType)
+ASSIGN_OPT(Opt_MenuType)
 ASSIGN_OPT(Opt_RichEditorResponseType)
 ASSIGN_OPT(Opt_ResponseType)
 ASSIGN_OPT(Opt_RichEditorStyledStringController)
@@ -3448,7 +3443,7 @@ ASSIGN_OPT(Opt_NavPathInfo)
 ASSIGN_OPT(Opt_ScrollToIndexOptions)
 ASSIGN_OPT(Opt_ScrollAlign)
 ASSIGN_OPT(Opt_Literal_Boolean_next_Opt_Axis_direction)
-ASSIGN_OPT(Opt_ScrollPageOptions)
+ASSIGN_OPT(Opt_Literal_Boolean_next)
 ASSIGN_OPT(Opt_ScrollEdgeOptions)
 ASSIGN_OPT(Opt_Edge)
 ASSIGN_OPT(Opt_ScrollOptions)
@@ -3512,7 +3507,7 @@ ASSIGN_OPT(Opt_TextSelectableMode)
 ASSIGN_OPT(Opt_TextResponseType)
 ASSIGN_OPT(Opt_TextSpanType)
 ASSIGN_OPT(Opt_EllipsisMode)
-ASSIGN_OPT(Opt_Literal_TextOverflow_overflow)
+ASSIGN_OPT(Opt_TextOverflowOptions)
 ASSIGN_OPT(Opt_FontSettingOptions)
 ASSIGN_OPT(Opt_TextOptions)
 ASSIGN_OPT(Opt_Union_SubTabBarStyle_BottomTabBarStyle)
@@ -3606,12 +3601,13 @@ ASSIGN_OPT(Opt_NavBarPosition)
 ASSIGN_OPT(Opt_NavPathStack)
 ASSIGN_OPT(Opt_NavRouteMode)
 ASSIGN_OPT(Opt_RouteInfo)
+ASSIGN_OPT(Opt_NavigationSystemTransitionType)
 ASSIGN_OPT(Opt_LayoutSafeAreaEdge)
 ASSIGN_OPT(Opt_LayoutSafeAreaType)
 ASSIGN_OPT(Opt_NavigationMenuItem)
 ASSIGN_OPT(Opt_Union_ResourceStr_CustomObject_CustomObject)
 ASSIGN_OPT(Opt_NavigationTitleOptions)
-ASSIGN_OPT(Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle)
+ASSIGN_OPT(Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource)
 ASSIGN_OPT(Opt_MenuItemGroupOptions)
 ASSIGN_OPT(Opt_Union_Boolean_ResourceStr_CustomObject)
 ASSIGN_OPT(Opt_Union_MenuItemOptions_CustomBuilder)
@@ -3619,7 +3615,7 @@ ASSIGN_OPT(Opt_SubMenuExpandingMode)
 ASSIGN_OPT(Opt_Union_DividerStyleOptions_Undefined)
 ASSIGN_OPT(Opt_Union_CustomObject_ResourceStr_CustomObject_ASTCResource)
 ASSIGN_OPT(Opt_MarqueeUpdateStrategy)
-ASSIGN_OPT(Opt_Literal_Boolean_start_Opt_Number_step_loop_Opt_Boolean_fromStart_String_src)
+ASSIGN_OPT(Opt_MarqueeOptions)
 ASSIGN_OPT(Opt_LocationButtonOptions)
 ASSIGN_OPT(Opt_Union_Position_Edges_LocalizedEdges)
 ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
