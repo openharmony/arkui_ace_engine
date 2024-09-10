@@ -5702,16 +5702,17 @@ void JsAccessibilityManager::DumpTreeNodeInfoInJson(
 
 
 void JsAccessibilityManager::TransferThirdProviderHoverEvent(
-    int64_t hostElementId, const NG::PointF &point, SourceType source,
+    const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
     NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(ngPipeline);
-    auto frameNode = GetFramenodeByAccessibilityId(
-        ngPipeline->GetRootElement(), hostElementId);
+    auto frameNode = hostNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     AccessibilityHoverForThirdConfig config;
-    config.hostElementId = hostElementId;
+    config.hostElementId = frameNode->GetAccessibilityId();
     config.point = point;
     config.sourceType = source;
     config.eventType = eventType;
