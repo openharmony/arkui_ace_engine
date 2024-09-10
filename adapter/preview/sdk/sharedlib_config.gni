@@ -226,17 +226,34 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ]
 }
 
+_arkui_shared_libs = [
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/napi/kits/drawabledescriptor:drawabledescriptor"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "drawabledescriptor" ]
+  },
+]
+
+if (defined(current_platform.config)) {
+  platform_config = current_platform.config
+  if (defined(platform_config.enable_component_test) &&
+      platform_config.enable_component_test && use_mingw_win) {
+    _arkui_shared_libs += [
+      {
+        label = "//foundation/arkui/ace_engine/interfaces/napi/kits/component_test:componenttest"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "componenttest" ]
+      },
+    ]
+  }
+}
+
 napi_modules = [
   {
     prefix = "arkui"
-    shard_libs = [
-      {
-        label = "//foundation/arkui/ace_engine/interfaces/napi/kits/drawabledescriptor:drawabledescriptor"
-        subsystem_name = "arkui"
-        part_name = "ace_engine"
-        lib_names = [ "drawabledescriptor" ]
-      },
-    ]
+    shard_libs = _arkui_shared_libs
   },
   {
     prefix = "multimedia"
