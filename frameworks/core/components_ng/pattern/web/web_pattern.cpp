@@ -5486,8 +5486,8 @@ RefPtr<NestableScrollContainer> WebPattern::SearchParent(Axis scrollAxis)
 void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt &nestedScroll)
 {
     NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
     };
     if (nestedScroll.scrollUp == nestedScroll.scrollLeft) {
         nestedOpt.backward = nestedScroll.scrollUp;

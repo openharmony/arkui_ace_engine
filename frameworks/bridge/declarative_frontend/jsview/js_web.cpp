@@ -4664,10 +4664,10 @@ void JSWeb::SetLayoutMode(int32_t layoutMode)
 void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 {
     NestedScrollOptionsExt nestedOpt = {
-        .scrollUp = NestedScrollMode::SELF_ONLY,
-        .scrollDown = NestedScrollMode::SELF_ONLY,
-        .scrollLeft = NestedScrollMode::SELF_ONLY,
-        .scrollRight = NestedScrollMode::SELF_ONLY,
+        .scrollUp = NestedScrollMode::SELF_FIRST,
+        .scrollDown = NestedScrollMode::SELF_FIRST,
+        .scrollLeft = NestedScrollMode::SELF_FIRST,
+        .scrollRight = NestedScrollMode::SELF_FIRST,
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
         WebModel::GetInstance()->SetNestedScrollExt(nestedOpt);
