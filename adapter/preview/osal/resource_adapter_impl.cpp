@@ -445,7 +445,7 @@ bool ResourceAdapterImpl::GetIdByName(const std::string& resName, const std::str
     }
     int32_t globalResId = 0;
     if (!resourceManger_.GetIdByName("", resName, globalResType, globalResId)) {
-        LOGI("get resource id failed.(name=%{public}s, type=%{public}s)", resName.c_str(), resType.c_str());
+        LOGW("get resource id failed.(name=%{public}s, type=%{public}s)", resName.c_str(), resType.c_str());
         return false;
     }
     resId = static_cast<uint32_t>(globalResId);
