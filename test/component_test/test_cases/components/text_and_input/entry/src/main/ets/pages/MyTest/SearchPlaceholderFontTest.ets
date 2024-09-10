@@ -25,11 +25,11 @@ export default async function searchPlaceholderFontTest() {
 * 获取search1的PlaceholderFont属性PlaceholderFont.style与期待值FontStyle.Normal比对
 * 点击button1，变更search1的PlaceholderFont属性PlaceholderFont.size值为40
 * 变更search1的PlaceholderFont属性PlaceholderFont.weight值为FontWeight.Normal
-* 变更search1的PlaceholderFont属性PlaceholderFont.family值为'ITCBLKADRawFile'
+* 变更search1的PlaceholderFont属性PlaceholderFont.family值为'TESTFONTRawFile'
 * 变更search1的PlaceholderFont属性PlaceholderFont.style值为FontStyle.Italic
 * 获取search1的PlaceholderFont属性PlaceholderFont.size与期待值40比对
 * 获取search1的PlaceholderFont属性PlaceholderFont.weight与期待值FontWeight.Normal比对
-* 获取search1的PlaceholderFont属性PlaceholderFont.family与期待值'ITCBLKADRawFile'比对
+* 获取search1的PlaceholderFont属性PlaceholderFont.family与期待值'TESTFONTRawFile'比对
 * 获取search1的PlaceholderFont属性PlaceholderFont.style与期待值FontStyle.Italic比对
 * 获取search2的PlaceholderFont属性PlaceholderFont.size与期待值$r('app.string.length')比对
 * 获取search2的PlaceholderFont属性PlaceholderFont.weight与期待值"900"比对
@@ -67,7 +67,7 @@ export default async function searchPlaceholderFontTest() {
     await button1.tap()
     let placeholderFont4: string = await search1.getInspectorInfo()
     assertEqual(JSON.parse(placeholderFont4).$attrs.placeholderFont,
-      '{"style":"FontStyle.Italic","size":"40.00fp","fontWeight":"FontWeight.Normal","fontFamily":"ITCBLKADRawFile"}')
+      '{"style":"FontStyle.Italic","size":"40.00fp","fontWeight":"FontWeight.Normal","fontFamily":"TESTFONTRawFile"}')
     await button2.tap()
     let placeholderFont5: string = await search3.getInspectorInfo()
     assertEqual(JSON.parse(placeholderFont5).$attrs.placeholderFont,
