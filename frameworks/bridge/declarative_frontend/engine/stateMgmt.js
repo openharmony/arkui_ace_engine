@@ -6090,7 +6090,6 @@ function uiNodeCleanUpIdleTask() {
     
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 class UINodeRegisterProxy {
     constructor() {
