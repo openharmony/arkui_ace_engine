@@ -172,6 +172,10 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     RSCanvas& canvas = context.canvas;
     OffsetF selectedCenter = {};
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+    if (totalCount == 0 && NearZero(contentProperty.longPointLeftCenterX) &&
+        NearZero(contentProperty.longPointRightCenterX)) {
+        return;
+    }
 
     for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);

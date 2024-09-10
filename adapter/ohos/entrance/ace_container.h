@@ -315,7 +315,7 @@ public:
 
     bool ParseThemeConfig(const std::string& themeConfig);
 
-    void CheckAndSetFontFamily();
+    void CheckAndSetFontFamily() override;
 
     void OnFinish()
     {
@@ -670,15 +670,17 @@ public:
     void AddWatchSystemParameter();
     void RemoveWatchSystemParameter();
 
+    const std::vector<std::string>& GetUieParams() const
+    {
+        return paramUie_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
     void InitWindowCallback();
-    bool IsFontFileExistInPath(std::string path);
-    std::string GetFontFamilyName(std::string path);
-    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);
@@ -764,6 +766,9 @@ private:
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
+
+    // for Ui Extension dump param get
+    std::vector<std::string> paramUie_;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -577,7 +577,7 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 
 void ButtonModelNG::ResetBorderRadius()
 {
-    ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
 }
 
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)

@@ -263,7 +263,7 @@ void JSCanvasRenderer::SetAntiAlias()
 
 void JSCanvasRenderer::SetDensity()
 {
-    double density = GetDensity();
+    double density = GetDensity(true);
     renderingContext2DModel_->SetDensity(density);
 }
 
@@ -634,6 +634,7 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
     // return the black image
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    CHECK_NULL_VOID(buffer);
     for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
         buffer[idx] = 0xffffffff;
     }
@@ -1420,12 +1421,7 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        pattern_[id]->SetScaleX(transform.scaleX);
-        pattern_[id]->SetScaleY(transform.scaleY);
-        pattern_[id]->SetSkewX(transform.skewX);
-        pattern_[id]->SetSkewY(transform.skewY);
-        pattern_[id]->SetTranslateX(transform.translateX);
-        pattern_[id]->SetTranslateY(transform.translateY);
+        renderingContext2DModel_->SetTransform(pattern_[id], transform);
     }
 }
 
@@ -1558,7 +1554,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * GetDensity());
+        return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
 }

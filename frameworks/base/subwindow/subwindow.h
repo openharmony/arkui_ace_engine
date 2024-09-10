@@ -29,6 +29,13 @@
 
 namespace OHOS::Ace {
 
+enum class ToastWindowType {
+    TOAST_IN_TYPE_APP_SUB_WINDOW = 0,
+    TOAST_IN_TYPE_SYSTEM_SUB_WINDOW,
+    TOAST_IN_TYPE_TOAST,
+    TOAST_WINDOW_COUNT
+};
+
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
 
@@ -121,6 +128,17 @@ public:
         return isAboveApps_;
     }
 
+    void SetToastWindowType(const ToastWindowType& type)
+    {
+        toastWindowType_ = type;
+        SetAboveApps(true);
+    }
+
+    ToastWindowType GetToastWindowType()
+    {
+        return toastWindowType_;
+    }
+
     void SetIsSystemTopMost(bool isSystemTopMost)
     {
         isSystemTopMost_ = isSystemTopMost;
@@ -151,11 +169,14 @@ public:
     virtual void ResizeWindowForFoldStatus() = 0;
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
     virtual bool Close() = 0;
+    virtual bool IsToastSubWindow() = 0;
+    virtual void DestroyWindow() = 0;
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
 };
 
 } // namespace OHOS::Ace

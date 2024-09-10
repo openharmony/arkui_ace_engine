@@ -29,6 +29,7 @@
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_event.h"
@@ -418,7 +419,7 @@ public:
     void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-    Axis GetParentAxis();
+    void GetParentAxis();
     RefPtr<NestableScrollContainer> SearchParent() override;
     RefPtr<NestableScrollContainer> SearchParent(Axis scrollAxis);
     /**
@@ -484,6 +485,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
 
     bool IsFocus() const
     {
@@ -683,6 +685,7 @@ public:
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();
+    void StartVibraFeedback(const std::string& vibratorType);
     int32_t GetTreeId()
     {
         return treeId_;
@@ -773,6 +776,7 @@ private:
     void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnEnabledHapticFeedbackUpdate(bool enable);
     int GetWebId();
 
     void InitEvent();
@@ -963,6 +967,7 @@ private:
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
     int32_t GetBufferSizeByDeviceType();
+    void UpdateTouchpadSlidingStatus(const GestureEvent& event);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1085,6 +1090,8 @@ private:
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
     double startPageScale_ = 1.0;
+    bool isResizeContentAvoid_ = false;
+    float heightAfterAvoid_ = 0.0;
     bool zoomOutSwitch_ = false;
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
@@ -1110,12 +1117,15 @@ private:
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
+    bool isEnabledHapticFeedback_ = true;
+    bool isTouchpadSliding_ = false;
     NestedScrollOptionsExt nestedScroll_ = {
         .scrollUp = NestedScrollMode::SELF_ONLY,
         .scrollDown = NestedScrollMode::SELF_ONLY,
         .scrollLeft = NestedScrollMode::SELF_ONLY,
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
+    VisibleType componentVisibility_ = VisibleType::VISIBLE;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

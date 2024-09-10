@@ -409,7 +409,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
                                GetLanesFloor(startIndex) + headerMainSize_;
             }
         }
-        if (GreatNotEqual(referencePos_, endPos_)) {
+        if (!isNeedMeasureFormLastItem_) {
             endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
             endPos = itemPosition_.rbegin()->second.endPos;
         }

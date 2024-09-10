@@ -694,6 +694,29 @@ HWTEST_F(TextFieldControllerTest, TextFieldControllerTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextFieldControllerTest003
+ * @tc.desc: Test TextFieldModelNG controller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldControllerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize textarea node.
+     */
+    auto frameNode = TextFieldModelNG::CreateFrameNode(-1, "", "", true);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+
+    /**
+     * @tc.expected: Check jsController value.
+     */
+    auto jsController = AceType::MakeRefPtr<Referenced>();
+    TextFieldModelNG::SetJSTextEditableController(node, jsController);
+    auto getController = TextFieldModelNG::GetJSTextEditableController(node);
+    EXPECT_NE(getController, nullptr);
+}
+
+/**
  * @tc.name: TextFieldFontFeatureTest
  * @tc.desc: Test the caret move right
  * @tc.type: FUNC

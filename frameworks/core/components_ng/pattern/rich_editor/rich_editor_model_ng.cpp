@@ -529,7 +529,7 @@ void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCr
 }
 
 
-void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const MenuParam& menuParam)
+void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
@@ -537,11 +537,18 @@ void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFun
 }
 
 void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
-    std::function<void()>& buildFunc, const MenuParam& menuParam)
+    std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
+
+void RichEditorModelNG::SetBarState(DisplayMode mode)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetBarState(mode);
 }
 } // namespace OHOS::Ace::NG

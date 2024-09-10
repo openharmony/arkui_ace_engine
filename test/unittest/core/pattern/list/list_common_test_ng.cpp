@@ -125,7 +125,9 @@ void ListCommonTestNg::CreateForEachList(
     for (int32_t index = 0; index < itemNumber; index++) {
         newIds.emplace_back(std::to_string(index));
     }
+    std::list<int32_t> removedElmtId;
     forEachModelNG.SetNewIds(std::move(newIds));
+    forEachModelNG.SetRemovedElmtIds(removedElmtId);
     forEachModelNG.OnMove(std::move(onMove));
     for (int32_t index = 0; index < itemNumber; index++) {
         // key is 0,1,2,3...

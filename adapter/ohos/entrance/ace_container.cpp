@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 #include <cerrno>
-#include <dirent.h>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -361,6 +360,7 @@ void AceContainer::Destroy()
             taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
         }
     }
+    DestroyToastSubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -1331,6 +1331,9 @@ public:
             if (offset.deltaX > edgeDist) {
                 offset.deltaX = edgeDist;
             }
+            if (edgeDist + size.width > windowRect_.width_) {
+                offset.deltaX = 0;
+            }
         }
 
         if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
@@ -1698,6 +1701,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
+    paramUie_.assign(params.begin(), params.end());
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
@@ -1827,7 +1831,7 @@ void AceContainer::SetLocalStorage(
     NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     ContainerScope scope(instanceId_);
-    taskExecutor_->PostTask(
+    taskExecutor_->PostSyncTask(
         [frontend = WeakPtr<Frontend>(frontend_), storage,
             contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
             sharedRuntime = sharedRuntime_] {
@@ -2406,69 +2410,6 @@ void AceContainer::CheckAndSetFontFamily()
     } else {
         fontManager->SetFontFamily(familyName.c_str(), path.c_str());
     }
-}
-
-bool AceContainer::IsFontFileExistInPath(std::string path)
-{
-    DIR* dir;
-    struct dirent* ent;
-    bool isFlagFileExist = false;
-    bool isFontDirExist = false;
-    if ((dir = opendir(path.c_str())) == nullptr) {
-        if (errno == ENOENT) {
-            LOGE("ERROR ENOENT");
-        } else if (errno == EACCES) {
-            LOGE("ERROR EACCES");
-        } else {
-            LOGE("ERROR Other");
-        }
-        return false;
-    }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (strcmp(ent->d_name, "flag") == 0) {
-            isFlagFileExist = true;
-        } else if (strcmp(ent->d_name, "fonts") == 0) {
-            isFontDirExist = true;
-        }
-    }
-    closedir(dir);
-    if (isFlagFileExist && isFontDirExist) {
-        LOGI("font path exist");
-        return true;
-    }
-    return false;
-}
-
-std::string AceContainer::GetFontFamilyName(std::string path)
-{
-    std::string fontFamilyName = "";
-    DIR* dir;
-    struct dirent* ent;
-    if ((dir = opendir(path.c_str())) == nullptr) {
-        return fontFamilyName;
-    }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (endsWith(ent->d_name, ".ttf")) {
-            fontFamilyName = ent->d_name;
-            break;
-        }
-    }
-    closedir(dir);
-    return fontFamilyName;
-}
-
-bool AceContainer::endsWith(std::string str, std::string suffix)
-{
-    if (str.length() < suffix.length()) {
-        return false;
-    }
-    return str.substr(str.length() - suffix.length()) == suffix;
 }
 
 void AceContainer::SetFontScaleAndWeightScale(

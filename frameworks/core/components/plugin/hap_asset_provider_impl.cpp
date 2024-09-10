@@ -23,6 +23,7 @@ bool HapAssetProviderImpl::Initialize(const std::string& hapPath, const std::vec
 {
     ACE_SCOPED_TRACE("Initialize");
     if (hapPath.empty() || assetBasePaths.empty()) {
+        LOGE("the packagePath or assetBasePath is empty");
         return false;
     }
 
@@ -79,6 +80,7 @@ void HapAssetProviderImpl::GetAssetList(const std::string& path, std::vector<std
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!runtimeExtractor_) {
+        LOGW("RuntimeExtractor null:%{public}s", hapPath_.c_str());
         return;
     }
     for (const auto& basePath : assetBasePaths_) {

@@ -133,8 +133,6 @@ void HyperlinkPattern::LinkToAddress()
     auto color = theme->GetTextColor();
     hyperlinkLayoutProperty->UpdateTextColor(
         hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
-    hyperlinkLayoutProperty->UpdateForegroundColor(
-        hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateForegroundColor(
@@ -215,8 +213,6 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
                 theme->GetTextTouchedColor()));
             hyperlinkLayoutProperty->UpdateTextDecorationColor(
                 hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
-            hyperlinkLayoutProperty->UpdateForegroundColor(
-                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
             renderContext->UpdateForegroundColor(
                 hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
         }
@@ -225,7 +221,6 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
         if (!isLinked_) {
             hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(color));
-            hyperlinkLayoutProperty->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
             renderContext->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

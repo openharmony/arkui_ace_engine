@@ -492,6 +492,13 @@ void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
     }
 }
 
+void RichEditorSelectOverlay::OnOverlayTouchDown(const TouchEventInfo& event)
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RequestFocusWhenSelected();
+}
+
 void RichEditorSelectOverlay::UpdateHandleOffset()
 {
     auto manager = GetManager<SelectContentOverlayManager>();

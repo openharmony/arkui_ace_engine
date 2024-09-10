@@ -845,6 +845,132 @@ void FrameNode::DumpOverlayInfo()
         std::string("OverlayOffset: ").append(offsetX.ToString()).append(std::string(", ")).append(offsetY.ToString()));
 }
 
+void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (geometryNode_->GetFrameRect() != RectF(0.0, 0.0, 0.0, 0.0)) {
+        json->Put("FrameRect", geometryNode_->GetFrameRect().ToString().c_str());
+    }
+    if (renderContext_->GetPaintRectWithoutTransform() != RectF(0.0, 0.0, 0.0, 0.0)) {
+        json->Put("PaintRectWithoutTransform", renderContext_->GetPaintRectWithoutTransform().ToString().c_str());
+    }
+    if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
+        json->Put("BackgroundColor", renderContext_->GetBackgroundColor()->ColorToString().c_str());
+    }
+    if (GetOffsetRelativeToWindow() != OffsetF(0.0, 0.0)) {
+        json->Put("Offset", GetOffsetRelativeToWindow().ToString().c_str());
+    }
+    VisibleType visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible != VisibleType::VISIBLE) {
+        json->Put("Visible", static_cast<int32_t>(visible));
+    }
+    DumpPadding(layoutProperty_->GetPaddingProperty(), std::string("Padding"), json);
+    DumpPadding(layoutProperty_->GetSafeAreaPaddingProperty(), std::string("SafeAreaPadding"), json);
+    DumpBorder(layoutProperty_->GetBorderWidthProperty(), std::string("Border"), json);
+    DumpPadding(layoutProperty_->GetMarginProperty(), std::string("Margin"), json);
+    if (layoutProperty_->GetLayoutRect()) {
+        json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
+    }
+    if (layoutProperty_->GetCalcLayoutConstraint()) {
+        json->Put("UserDefinedConstraint", layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str());
+    }
+    if (layoutProperty_->GetPaddingProperty() || layoutProperty_->GetBorderWidthProperty() ||
+        layoutProperty_->GetMarginProperty() || layoutProperty_->GetCalcLayoutConstraint()) {
+        if (layoutProperty_->GetContentLayoutConstraint().has_value()) {
+            json->Put("ContentConstraint", layoutProperty_->GetContentLayoutConstraint().value().ToString().c_str());
+        }
+    }
+    if (geometryNode_->GetParentLayoutConstraint().has_value()) {
+        json->Put("ParentLayoutConstraint", geometryNode_->GetParentLayoutConstraint().value().ToString().c_str());
+    }
+}
+
+void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label,
+    std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(padding);
+    NG::CalcLength defaultValue = NG::CalcLength(
+        Dimension(0, padding->left.value_or(CalcLength()).GetDimension().Unit()));
+    if (padding->left.value_or(defaultValue) != defaultValue && padding->right.value_or(defaultValue) != defaultValue &&
+        padding->top.value_or(defaultValue) != defaultValue && padding->bottom.value_or(defaultValue) != defaultValue) {
+        json->Put(label.c_str(), padding->ToString().c_str());
+    }
+}
+
+void FrameNode::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
+    std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(border);
+    Dimension defaultValue(0, border->leftDimen.value_or(Dimension()).Unit());
+    if (border->leftDimen.value_or(defaultValue) != defaultValue &&
+        border->rightDimen.value_or(defaultValue) != defaultValue &&
+        border->topDimen.value_or(defaultValue) != defaultValue &&
+        border->bottomDimen.value_or(defaultValue) != defaultValue) {
+        json->Put(label.c_str(), border->ToString().c_str());
+    }
+}
+
+void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
+    if (opts && opts->type != NG::SAFE_AREA_TYPE_NONE && opts->edges != NG::SAFE_AREA_EDGE_NONE) {
+        json->Put("SafeAreaExpandOpts", opts->ToString().c_str());
+    }
+    if (layoutProperty_->GetSafeAreaInsets()) {
+        json->Put("SafeAreaInsets", layoutProperty_->GetSafeAreaInsets()->ToString().c_str());
+    }
+    if (SelfOrParentExpansive()) {
+        RectF defaultValue(0.0, 0.0, 0.0, 0.0);
+        auto rect = geometryNode_->GetSelfAdjust();
+        auto parentRect = geometryNode_->GetParentAdjust();
+        if (rect != defaultValue) {
+            json->Put("SelfAdjust", rect.ToString().c_str());
+        }
+        if (parentRect != defaultValue) {
+            json->Put("ParentSelfAdjust", parentRect.ToString().c_str());
+        }
+        CHECK_EQUAL_VOID(GetTag(), V2::PAGE_ETS_TAG);
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(manager);
+        if (!manager->IsIgnoreAsfeArea()) {
+            json->Put("IgnoreSafeArea", manager->IsIgnoreAsfeArea());
+        }
+        if (!manager->IsNeedAvoidWindow()) {
+            json->Put("IsNeedAvoidWindow", manager->IsNeedAvoidWindow());
+        }
+        if (!manager->IsFullScreen()) {
+            json->Put("IsFullScreen", manager->IsFullScreen());
+        }
+        if (!manager->KeyboardSafeAreaEnabled()) {
+            json->Put("IsKeyboardAvoidMode", manager->KeyboardSafeAreaEnabled());
+        }
+        if (!pipeline->GetUseCutout()) {
+            json->Put("IsUseCutout", pipeline->GetUseCutout());
+        }
+    }
+}
+
+void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
+{
+    if (!layoutProperty_->IsOverlayNode()) {
+        return;
+    }
+    json->Put("IsOverlayNode", true);
+    Dimension offsetX;
+    Dimension offsetY;
+    layoutProperty_->GetOverlayOffset(offsetX, offsetY);
+    json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
+}
+
+void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(json);
+    DumpSimplifyCommonInfo(json);
+    DumpSimplifySafeAreaInfo(json);
+    DumpSimplifyOverlayInfo(json);
+}
+
 void FrameNode::DumpInfo()
 {
     DumpCommonInfo();
@@ -1319,8 +1445,6 @@ void FrameNode::AdjustGridOffset()
         return;
     }
     if (layoutProperty_->UpdateGridOffset(Claim(this))) {
-        renderContext_->UpdateOffset(OffsetT<Dimension>());
-        renderContext_->UpdateAnchor(OffsetT<Dimension>());
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
     }
 }
@@ -1767,6 +1891,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ContainerScope scope(self->GetInstanceId());
         ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
@@ -2372,8 +2497,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
-    if (!isActive_ || !eventHub_->IsEnabled()) {
+    if (!isActive_) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        return HitTestResult::OUT_OF_REGION;
+    }
+    if (!eventHub_->IsEnabled()) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
@@ -2955,6 +3084,29 @@ OffsetF FrameNode::GetPositionToWindowWithTransform() const
     offset.SetX(pointNode.GetX());
     offset.SetY(pointNode.GetY());
     return offset;
+}
+
+VectorF FrameNode::GetTransformScaleRelativeToWindow() const
+{
+    VectorF finalScale {1.0f, 1.0f};
+    auto context = GetRenderContext();
+    if (context) {
+        auto scale = GetTransformScale();
+        finalScale.x = scale.x;
+        finalScale.y = scale.y;
+    }
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            auto scale = parent->GetTransformScale();
+            finalScale.x *= scale.x;
+            finalScale.y *= scale.y;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return finalScale;
 }
 
 RectF FrameNode::GetTransformRectRelativeToWindow() const
@@ -3879,6 +4031,16 @@ void FrameNode::ProcessAccessibilityVirtualNode()
     }
 }
 
+void FrameNode::UpdateAccessibilityNodeRect()
+{
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (isFocus && !IsAccessibilityVirtualNode()) {
+        renderContext_->UpdateAccessibilityRoundRect();
+    }
+}
+
 bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 {
     auto context = GetContext();
@@ -3949,7 +4111,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    renderContext_->UpdateAccessibilityRoundRect();
+    
+    UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -5150,6 +5313,22 @@ void FrameNode::GetInspectorValue()
     UINode::GetInspectorValue();
 }
 
+void FrameNode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
+{
+    // return when reaches a child that has no layoutAlgorithm and no need to clear the entire tree
+    if (!layoutAlgorithm_ && !clearEntireTree) {
+        return;
+    }
+    // include Self might be false for the first ClearSubtreeLayoutAlgorithm enter,
+    // but children should always include themselves
+    if (includeSelf) {
+        layoutAlgorithm_.Reset();
+    }
+    for (const auto& child : GetChildren()) {
+        child->ClearSubtreeLayoutAlgorithm(true, clearEntireTree);
+    }
+}
+
 void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
 {
     if (syncedFramePaintRect_.has_value() && syncedFramePaintRect_.value() != paintRect) {
@@ -5271,6 +5450,13 @@ void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, Notificat
 void FrameNode::ChildrenUpdatedFrom(int32_t index)
 {
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
+}
+
+void FrameNode::OnForegroundColorUpdate(const Color& value)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnForegroundColorUpdate(value);
 }
 
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)

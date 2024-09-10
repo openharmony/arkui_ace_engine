@@ -767,6 +767,7 @@ bool RelativeContainerLayoutAlgorithm::CalcOffsetInChain(const std::string& chai
 
 void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    std::lock_guard<std::mutex> lock(relativeContainerMutex_);
     CHECK_NULL_VOID(layoutWrapper);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);

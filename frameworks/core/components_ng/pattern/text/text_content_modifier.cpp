@@ -380,12 +380,12 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(textPattern);
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
-    if (pManager->GetParagraphs().empty()) {
-        textPattern->DumpRecord(",onDraw GetParagraphs empty:");
-        return;
-    }
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
+    if (pManager->GetParagraphs().empty()) {
+        textPattern->DumpRecord("onDraw GetParagraphs empty:" + std::to_string(host->GetId()));
+        return;
+    }
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
     if (!ifPaintObscuration_) {
@@ -404,7 +404,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         }
         if (!CheckMarqueeState(MarqueeState::RUNNING)) {
             auto paintOffsetY = paintOffset_.GetY();
-            textPattern->DumpRecord(",Paint id:" + std::to_string(host->GetId()));
+            textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
             auto paragraphs = pManager->GetParagraphs();
             for (auto&& info : paragraphs) {
                 auto paragraph = info.paragraph;

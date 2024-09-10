@@ -89,6 +89,7 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        isInitDecoration = false;
 
         updateSymbolColor.reset();
         updateSymbolFontSize.reset();
@@ -119,6 +120,7 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
+    bool isInitDecoration = false;
     
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<CalcDimension> updateSymbolFontSize = std::nullopt;
@@ -362,7 +364,8 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
-    virtual void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const NG::MenuParam& menuParam) {}
+    virtual void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const NG::SelectMenuParam& menuParam) {}
+    virtual void SetBarState(DisplayMode mode) {}
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

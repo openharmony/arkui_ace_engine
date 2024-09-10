@@ -713,12 +713,12 @@ void IndexerPattern::ApplyIndexChanged(
     }
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
 #ifndef ACE_UNITTEST
-    auto fontManager = pipeline->GetFontManager();
+    auto fontManager = pipelineContext->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
 #else
@@ -776,13 +776,13 @@ void IndexerPattern::ApplyIndexChanged(
                 auto borderColor = indexerTheme->GetFocusBgOutlineColor();
                 childRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
                 childRenderContext->UpdateBackgroundColor(
-                    paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
+                    paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
             } else {
                 Dimension borderWidth;
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
                 if (!fromTouchUp || animateSelected_ == lastSelected_) {
                     childRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
-                        indexerTheme->GetSeclectedBackgroundColor()));
+                        indexerTheme->GetSelectedBackgroundColor()));
                 }
                 childRenderContext->ResetBlendBorderColor();
             }
@@ -989,9 +989,9 @@ void IndexerPattern::UpdateBubbleBackgroundView()
         CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
         BlurStyleOption styleOption;
         if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
             styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
@@ -1063,9 +1063,9 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std::s
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1114,11 +1114,11 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    auto fontManager = pipeline->GetFontManager();
+    auto fontManager = pipelineContext->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1183,9 +1183,9 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     }
     auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto listPattern = DynamicCast<ListPattern>(listNode->GetPattern());
     listPattern->SetNeedLinked(false);
@@ -1510,9 +1510,9 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     popupClickedIndex_ = clickIndex;
     auto host = GetHost();
     CHECK_NULL_VOID(popupNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1685,43 +1685,38 @@ void IndexerPattern::OnKeyEventDisapear()
 void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
 {
     CHECK_NULL_VOID(itemNode);
-    auto rendercontext = itemNode->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    Color selectedBackgroundColor =
+        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor());
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId(), weak = WeakClaim(this)]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), selectedBackgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        rendercontext->UpdateBackgroundColor(
-            paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
+        renderContext->UpdateBackgroundColor(selectedBackgroundColor);
     });
 }
 
 void IndexerPattern::ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode)
 {
     CHECK_NULL_VOID(itemNode);
-    auto rendercontext = itemNode->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        rendercontext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     });
 }
 
@@ -1731,17 +1726,17 @@ void IndexerPattern::IndexerHoverInAnimation()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color slipHoverBackgroundColor = indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
     option.SetDuration(INDEXER_HOVER_IN_DURATION);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), slipHoverBackgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(
-            indexerTheme->GetSlipHoverBackgroundColor());
+        renderContext->UpdateBackgroundColor(slipHoverBackgroundColor);
     });
 }
 
@@ -1756,10 +1751,6 @@ void IndexerPattern::IndexerHoverOutAnimation()
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     });
 }
@@ -1770,18 +1761,19 @@ void IndexerPattern::IndexerPressInAnimation()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color backgroundColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                ? indexerTheme->GetSlipPressedBackgroundColor()
+                                : indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
     option.SetDuration(INDEXER_PRESS_IN_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), backgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                                                 ? indexerTheme->GetSlipPressedBackgroundColor()
-                                                 : indexerTheme->GetSlipHoverBackgroundColor());
+        renderContext->UpdateBackgroundColor(backgroundColor);
     });
 }
 
@@ -1791,18 +1783,19 @@ void IndexerPattern::IndexerPressOutAnimation()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color backgroundColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                ? indexerTheme->GetSlipPressedBackgroundColor()
+                                : indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
     option.SetDuration(INDEXER_PRESS_OUT_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), backgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                                                 ? indexerTheme->GetSlipPressedBackgroundColor()
-                                                 : indexerTheme->GetSlipHoverBackgroundColor());
+        renderContext->UpdateBackgroundColor(backgroundColor);
     });
 }
 
@@ -1875,9 +1868,9 @@ void IndexerPattern::StartBubbleDisappearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             CHECK_NULL_VOID(pattern->popupNode_);
-            auto rendercontext = pattern->popupNode_->GetRenderContext();
-            CHECK_NULL_VOID(rendercontext);
-            if (NearZero(rendercontext->GetOpacityValue(0.0f))) {
+            auto renderContext = pattern->popupNode_->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (NearZero(renderContext->GetOpacityValue(0.0f))) {
                 pattern->UpdatePopupVisibility(VisibleType::GONE);
             }
         });
@@ -1886,9 +1879,9 @@ void IndexerPattern::StartBubbleDisappearAnimation()
 void IndexerPattern::UpdatePopupOpacity(float ratio)
 {
     CHECK_NULL_VOID(popupNode_);
-    auto rendercontext = popupNode_->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
-    rendercontext->UpdateOpacity(ratio);
+    auto renderContext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(ratio);
 }
 
 void IndexerPattern::UpdatePopupVisibility(VisibleType visible)

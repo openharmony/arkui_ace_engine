@@ -165,6 +165,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
+        } else if (!snapTrigOnScrollStart_) {
+            OnAnimateStop();
         }
         scrollSnapVelocity_ = 0.0f;
         predictSnapOffset_.reset();
@@ -683,6 +685,10 @@ bool ListPattern::IsAtBottom() const
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
+    auto res = GetOutBoundaryOffset(false);
+    if (Positive(res.start)) {
+        return false;
+    }
     return (endIndex == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }

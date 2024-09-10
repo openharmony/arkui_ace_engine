@@ -36,6 +36,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
+const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 0.0_vp };
 } // namespace
 
 class SheetPresentationTestNg : public testing::Test {
@@ -592,22 +593,17 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup001, TestSize.Level1)
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    Rect originWindowRect = pipelineContext->GetCurrentWindowRect();
-    Rect windowRect = { 0.0f, 0.0f, 0.0f, 0.0f };
-    MockPipelineContext::SetCurrentWindowRect(windowRect);
-    auto currentWindowRect = pipelineContext->GetCurrentWindowRect();
-    EXPECT_FALSE(GreatOrEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
-    EXPECT_FALSE(GreatOrEqual(currentWindowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    MockPipelineContext::GetCurrent()->rootWidth_ = 100.0f;
+    EXPECT_FALSE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_FALSE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
     SheetType sheetType;
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_BOTTOM_FREE_WINDOW);
 
-    windowRect.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    MockPipelineContext::GetCurrent()->rootWidth_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     AceApplicationInfo::GetInstance().packageName_ = "";
-    currentWindowRect = pipelineContext->GetCurrentWindowRect();
-    EXPECT_TRUE(GreatOrEqual(currentWindowRect.Width(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
-    EXPECT_TRUE(LessNotEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(LessNotEqual(PipelineContext::GetCurrentRootWidth(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
     EXPECT_FALSE(sheetStyle.sheetType.has_value());
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
@@ -621,7 +617,6 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup001, TestSize.Level1)
     EXPECT_TRUE(sheetPattern->sheetKey_.hasValidTargetNode);
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_POPUP);
-    MockPipelineContext::SetCurrentWindowRect(originWindowRect);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -642,12 +637,9 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup002, TestSize.Level1)
     SheetStyle sheetStyle;
     layoutProperty->propSheetStyle_ = sheetStyle;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    Rect originWindowRect = pipelineContext->GetCurrentWindowRect();
-    Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
-    MockPipelineContext::SetCurrentWindowRect(windowRect);
+    MockPipelineContext::GetCurrent()->rootWidth_ = SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
     AceApplicationInfo::GetInstance().packageName_ = "";
-    auto currentWindowRect = pipelineContext->GetCurrentWindowRect();
-    EXPECT_TRUE(GreatOrEqual(currentWindowRect.Width(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
+    EXPECT_TRUE(GreatOrEqual(PipelineContext::GetCurrentRootWidth(), SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()));
     EXPECT_FALSE(sheetStyle.sheetType.has_value());
     SheetType sheetType;
     sheetPattern->GetSheetTypeWithPopup(sheetType);
@@ -663,7 +655,6 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithPopup002, TestSize.Level1)
     EXPECT_FALSE(sheetPattern->sheetKey_.hasValidTargetNode);
     sheetPattern->GetSheetTypeWithPopup(sheetType);
     EXPECT_EQ(sheetType, SheetType::SHEET_CENTER);
-    MockPipelineContext::SetCurrentWindowRect(originWindowRect);
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -1254,6 +1245,192 @@ HWTEST_F(SheetPresentationTestNg, GetTopAreaInWindow001, TestSize.Level1)
     SystemProperties::SetDeviceOrientation(deviceOrientation);
     safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeAreaInsets.top_.Length(), sheetPattern->GetBottomSafeArea());
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetOuterBorderWidth001
+ * @tc.desc: Test SetSheetOuterBorderWidth outerBorder updated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+
+    auto renderContext = sheetNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. Change the SheetTheme border.
+     * @tc.expected: the border is updated successfully
+     */
+    SheetStyle sheetStyle;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+
+    sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
+    BorderWidthProperty BorderWidth;
+    BorderWidth.SetBorderWidth(Dimension(20.0));
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().value(), BorderWidth);
+    BorderWidth.SetBorderWidth(Dimension(10.0));
+    EXPECT_EQ(renderContext->GetBorderWidth().value(), BorderWidth);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetOuterBorderWidth002
+ * @tc.desc: Test SetSheetOuterBorderWidth outerBorder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+
+    auto renderContext = sheetNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. Change the SheetTheme border.
+     * @tc.expected: the border is not updated
+     */
+    SheetStyle sheetStyle;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = false;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+
+    sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), false);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetOuterBorderWidth003
+ * @tc.desc: Test SetSheetOuterBorderWidth outerBorder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+
+    auto renderContext = sheetNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. Change the SheetTheme border.
+     * @tc.expected: the border is not updated
+     */
+    SheetStyle sheetStyle;
+
+    sheetStyle.borderWidth = BORDER_WIDTH_TEST;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+
+    sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), false);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetOuterBorderWidth004
+ * @tc.desc: Test SetSheetOuterBorderWidth outerBorder updated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+
+    auto renderContext = sheetNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. Change the SheetTheme border.
+     * @tc.expected: the border is updated successfully
+     */
+    SheetStyle sheetStyle;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOM);
+
+    sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetSheetOuterBorderWidth005
+ * @tc.desc: Test SetSheetOuterBorderWidth outerBorder updated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+
+    auto renderContext = sheetNode->GetRenderContext();
+
+    /**
+     * @tc.steps: step2. Change the SheetTheme border.
+     * @tc.expected: the border is not updated successfully
+     */
+    SheetStyle sheetStyle;
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->isOuterBorderEnable_ = true;
+    sheetTheme->sheetOuterBorderWidth_ = Dimension(20.0);
+    sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
+
+    sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
+    EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
     SheetPresentationTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

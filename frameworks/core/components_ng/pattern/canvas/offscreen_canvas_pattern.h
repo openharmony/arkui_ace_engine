@@ -117,6 +117,7 @@ public:
     void Reset();
     RefPtr<PixelMap> TransferToImageBitmap();
     void SetDensity(double density);
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
 
     size_t GetBitmapSize();
 private:

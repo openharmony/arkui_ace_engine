@@ -19,6 +19,7 @@
 #include <mutex>
 #include <set>
 #include <unordered_map>
+#include <array>
 
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow.h"
@@ -31,6 +32,9 @@
 namespace OHOS::Ace {
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
+using ToastWindowArray = std::array<RefPtr<Subwindow>,
+    static_cast<int32_t>(ToastWindowType::TOAST_WINDOW_COUNT)>;
+using ToastWindowMap = std::unordered_map<int32_t, ToastWindowArray>;
 
 class ACE_FORCE_EXPORT SubwindowManager final : public NonCopyable {
 public:
@@ -104,6 +108,11 @@ public:
 
     void ClearToastInSubwindow();
     void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId, const ToastWindowType& windowType);
+    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow, const ToastWindowType& windowType);
+    void HideToastSubWindowNG();
+    ToastWindowType GetToastWindowType();
     void CloseToast(
         const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
@@ -143,6 +152,7 @@ private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
+    RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -159,6 +169,8 @@ private:
 
     RefPtr<Subwindow> currentSubwindow_;
 
+    std::mutex toastMutex_;
+    ToastWindowMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;

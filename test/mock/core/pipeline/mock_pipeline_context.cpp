@@ -347,8 +347,6 @@ void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
-void PipelineContext::CheckVirtualKeyboardHeight() {}
-
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}

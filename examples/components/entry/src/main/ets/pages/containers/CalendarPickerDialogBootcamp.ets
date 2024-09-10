@@ -21,7 +21,7 @@ export struct CalendarPickerDialogBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableAcceptType: boolean = false;
-  @State compAcceptType: ButtonType = ButtonType.Capsule;
+  @State compAcceptType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
   @State enableAcceptStyle: boolean = false;
   @State compAcceptStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED;
   @State enableAcceptRole: boolean = false;
@@ -41,7 +41,7 @@ export struct CalendarPickerDialogBootcamp {
   @State enableAcceptBorderRadius: boolean = false;
   @State compAcceptBorderRadius: number = 10;
   @State enableCancelType: boolean = false;
-  @State compCancelType: ButtonType = ButtonType.Capsule;
+  @State compCancelType: ButtonType = ButtonType.ROUNDED_RECTANGLE;
   @State enableCancelStyle: boolean = false;
   @State compCancelStyle: ButtonStyleMode = ButtonStyleMode.EMPHASIZED;
   @State enableCancelRole: boolean = false;
@@ -75,6 +75,7 @@ export struct CalendarPickerDialogBootcamp {
         }
       })
     }
+    .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
   }
 
@@ -147,9 +148,11 @@ export struct CalendarPickerDialogBootcamp {
           dataSource: [
             { label: '胶囊按钮', value: ButtonType.Capsule },
             { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle }
+            { label: '圆形按钮', value: ButtonType.Circle },
+            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
+
         RadioBlock({
           title: '取消按钮类型',
           isEnabled: this.enableCancelType,
@@ -157,9 +160,11 @@ export struct CalendarPickerDialogBootcamp {
           dataSource: [
             { label: '胶囊按钮', value: ButtonType.Capsule },
             { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle }
+            { label: '圆形按钮', value: ButtonType.Circle },
+            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
+
         RadioBlock({
           title: '确认按钮样式',
           isEnabled: this.enableAcceptStyle,
@@ -170,6 +175,7 @@ export struct CalendarPickerDialogBootcamp {
             { label: '文本型', value: ButtonStyleMode.TEXTUAL }
           ]
         })
+
         RadioBlock({
           title: '取消按钮样式',
           isEnabled: this.enableCancelStyle,
@@ -180,17 +186,19 @@ export struct CalendarPickerDialogBootcamp {
             { label: '文本型', value: ButtonStyleMode.TEXTUAL }
           ]
         })
+
         ColorBlock({
           title: '确认按钮字体颜色',
           isEnabled: this.enableAcceptFontColor,
           color: this.compAcceptFontColor
-
         })
+
         ColorBlock({
           title: '取消按钮字体颜色',
           isEnabled: this.enableCancelFontColor,
           color: this.compCancelFontColor
         })
+
         RadioBlock({
           title: '确认按钮角色',
           isEnabled: this.enableAcceptRole,
@@ -200,6 +208,7 @@ export struct CalendarPickerDialogBootcamp {
             { label: 'ERROR', value: ButtonRole.ERROR },
           ]
         })
+
         RadioBlock({
           title: '取消按钮角色',
           isEnabled: this.enableCancelRole,
@@ -209,6 +218,7 @@ export struct CalendarPickerDialogBootcamp {
             { label: 'ERROR', value: ButtonRole.ERROR },
           ]
         })
+
         SliderBlock({
           title: '确认按钮尺寸',
           isEnabled: this.enableAcceptFontSize,
@@ -216,6 +226,7 @@ export struct CalendarPickerDialogBootcamp {
           min: 12,
           max: 16
         })
+
         SliderBlock({
           title: '取消按钮尺寸',
           isEnabled: this.enableCancelFontSize,
@@ -223,6 +234,7 @@ export struct CalendarPickerDialogBootcamp {
           min: 12,
           max: 16
         })
+
         SliderBlock({
           title: '确认按钮字体粗细',
           isEnabled: this.enableAcceptFontWeight,
@@ -237,6 +249,7 @@ export struct CalendarPickerDialogBootcamp {
           min: 400,
           max: 800
         })
+
         RadioBlock({
           title: '确认按钮字体样式',
           isEnabled: this.enableAcceptFontStyle,
@@ -246,6 +259,7 @@ export struct CalendarPickerDialogBootcamp {
             { label: 'Italic', value: FontStyle.Italic },
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体样式',
           isEnabled: this.enableCancelFontStyle,
@@ -255,16 +269,19 @@ export struct CalendarPickerDialogBootcamp {
             { label: 'Italic', value: FontStyle.Italic },
           ]
         })
+
         ColorBlock({
           title: '确认按钮背景颜色',
           isEnabled: this.enableAcceptBackGroundColor,
           color: this.compAcceptBackGroundColor
         })
+
         ColorBlock({
           title: '取消按钮背景颜色',
           isEnabled: this.enableCancelBackGroundColor,
           color: this.compCancelBackGroundColor
         })
+
         SliderBlock({
           title: '确认按钮边框圆角半径',
           isEnabled: this.enableAcceptBorderRadius,
@@ -272,6 +289,7 @@ export struct CalendarPickerDialogBootcamp {
           min: 10,
           max: 100
         })
+
         SliderBlock({
           title: '取消按钮边框圆角半径',
           isEnabled: this.enableCancelBorderRadius,
@@ -286,10 +304,10 @@ export struct CalendarPickerDialogBootcamp {
 
 @Preview
 @Component
-struct ToastBootcampPreviewer {
+struct CalendarPickerDialogBootcampPreviewer {
   build() {
     CalendarPickerDialogBootcamp({
-      title: '日历选择器弹窗/Calendarpickerdialog'
+      title: '日历选择器弹窗/CalendarpickerDialog'
     })
   }
 }

@@ -77,6 +77,8 @@ template("ace_core_source_set") {
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
+      "accessibility/native_interface_accessibility_impl.cpp",
+      "accessibility/native_interface_accessibility_provider.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -661,6 +663,8 @@ template("ace_core_ng_source_set") {
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
+      "accessibility/native_interface_accessibility_impl.cpp",
+      "accessibility/native_interface_accessibility_provider.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -835,6 +839,7 @@ template("ace_core_ng_source_set") {
       "components/theme/app_theme.cpp",
       "components/theme/blur_style_theme.cpp",
       "components/theme/icon_theme.cpp",
+      "components/theme/shadow_theme.cpp",
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager_impl.cpp",

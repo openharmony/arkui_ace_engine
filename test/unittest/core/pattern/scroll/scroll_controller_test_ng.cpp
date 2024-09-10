@@ -169,6 +169,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo004, TestSize.Level1)
     EXPECT_TRUE(VerifyTickPosition(-200.f));
     EXPECT_TRUE(VerifyTickPosition(-400.f));
     EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(VerifyTickPosition(-800.f)); // Tick doesn't advance new animations created within the same tick
     EXPECT_TRUE(VerifyTickPosition(-760.f));
     EXPECT_TRUE(VerifyTickPosition(-720.f));
     EXPECT_TRUE(VerifyTickPosition(-680.f));

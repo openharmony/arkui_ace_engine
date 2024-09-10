@@ -362,6 +362,11 @@ void ListItemGroupPattern::ResetChildrenSize()
     }
 }
 
+void ListItemGroupPattern::ClearItemPosition()
+{
+    itemPosition_.clear();
+}
+
 void ListItemGroupPattern::CalculateItemStartIndex()
 {
     int32_t headerIndex = -1;

@@ -430,6 +430,14 @@ void UINode::DoAddChild(
     }
     children_.insert(it, child);
 
+    if (IsAccessibilityVirtualNode()) {
+        auto parentVirtualNode = GetVirtualNodeParent().Upgrade();
+        if (parentVirtualNode) {
+            child->SetAccessibilityNodeVirtual();
+            child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
+
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
@@ -818,6 +826,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     if (hasJson) {
         std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        children->Put("childSize", static_cast<int32_t>(GetChildren().size()));
         children->Put("ID", nodeId_);
         children->Put("Depth", GetDepth());
         children->Put("InstanceId", instanceId_);
@@ -826,7 +835,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
             children->Put("IsDisappearing", IsDisappearing());
         }
         DumpInfo(children);
-        std::string key = isRoot_ ? tag_ : tag_ + std::to_string(nodeId_);
+        std::string key = isRoot_ ? tag_ : tag_ + "_" + std::to_string(nodeId_);
         json->Put(key.c_str(), children);
         std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
         auto prefix = DumpLog::GetInstance().GetPrefix(depth);
@@ -857,12 +866,47 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     }
 }
 
+void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
+{
+    current->Put("ID", nodeId_);
+    current->Put("Type", tag_.c_str());
+    auto nodeChildren = GetChildren();
+    DumpSimplifyInfo(current);
+    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
+    if (hasChildren) {
+        current->Put("ChildrenSize", static_cast<int32_t>(nodeChildren.size()));
+        auto array = JsonUtil::CreateArray();
+        if (!nodeChildren.empty()) {
+            for (const auto& item : nodeChildren) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        if (!disappearingChildren_.size()) {
+            for (const auto& [item, index, branch] : disappearingChildren_) {
+                auto child = JsonUtil::Create();
+                item->DumpSimplifyTree(depth + 1, child);
+                array->PutRef(std::move(child));
+            }
+        }
+        current->PutRef("Children", std::move(array));
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        auto overlay = JsonUtil::Create();
+        frameNode->GetOverlayNode()->DumpSimplifyTree(depth + 1, overlay);
+        current->PutRef("Overlay", std::move(overlay));
+    }
+}
+
 bool UINode::DumpTreeById(int32_t depth, const std::string& id, bool hasJson)
 {
     if (hasJson) {
         if ((id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
             std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
             std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+            children->Put("childSize", static_cast<int32_t>(GetChildren().size()));
             children->Put("ID", nodeId_);
             children->Put("Depth", GetDepth());
             children->Put("IsDisappearing", IsDisappearing());
@@ -1588,6 +1632,13 @@ void UINode::GetInspectorValue()
 {
     for (const auto& item : GetChildren()) {
         item->GetInspectorValue();
+    }
+}
+
+void UINode::ClearSubtreeLayoutAlgorithm(bool includeSelf, bool clearEntireTree)
+{
+    for (const auto& child : GetChildren()) {
+        child->ClearSubtreeLayoutAlgorithm(includeSelf, clearEntireTree);
     }
 }
 

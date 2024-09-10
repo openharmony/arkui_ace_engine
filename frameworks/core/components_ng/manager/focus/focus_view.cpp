@@ -124,7 +124,7 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
 
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_RETURN(focusManager, nullptr);

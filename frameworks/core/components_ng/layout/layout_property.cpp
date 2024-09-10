@@ -255,6 +255,7 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
 
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
+    CHECK_NULL_VOID(layoutProperty);
     layoutConstraint_ = layoutProperty->layoutConstraint_;
     if (layoutProperty->gridProperty_) {
         gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);
@@ -1682,7 +1683,7 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         borderColors.topColor = colorProperty.topColor;
     }
     if (colorProperty.bottomColor.has_value()) {
-        borderColors.topColor = colorProperty.bottomColor;
+        borderColors.bottomColor = colorProperty.bottomColor;
     }
     borderColors.multiValued = true;
     target->UpdateBorderColor(borderColors);

@@ -131,15 +131,13 @@ void DialogPattern::OnAttachToFrameNode()
 
 void DialogPattern::RegisterHoverModeChangeCallback()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto hoverModeChangeCallback = [weak = WeakClaim(this), context](bool isHalfFoldHover) {
+    auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
         AnimationOption optionPosition;
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
         optionPosition.SetCurve(motion);
@@ -149,6 +147,10 @@ void DialogPattern::RegisterHoverModeChangeCallback()
             context->FlushUITasks();
         });
     };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     auto hoverModeCallId = context->RegisterHalfFoldHoverChangedCallback(std::move(hoverModeChangeCallback));
     UpdateHoverModeChangedCallbackId(hoverModeCallId);
 }

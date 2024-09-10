@@ -285,6 +285,17 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
     return resultTextBoxes;
 }
 
+std::pair<size_t, size_t> ParagraphManager::GetEllipsisTextRange()
+{
+    std::pair<size_t, size_t> range = {std::numeric_limits<size_t>::max(), 0};
+    for (auto&& info : paragraphs_) {
+        const auto& ellipsisTextRange = info.paragraph->GetEllipsisTextRange();
+        range.first = std::min(range.first, ellipsisTextRange.first);
+        range.second = std::max(range.second, ellipsisTextRange.second);
+    }
+    return range;
+}
+
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     std::vector<RectF> res;

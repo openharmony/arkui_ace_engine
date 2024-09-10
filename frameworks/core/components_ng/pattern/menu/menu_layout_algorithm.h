@@ -276,7 +276,7 @@ private:
     Rect preRect_;
     bool flag_ = false;
     bool isHalfFoldHover_ = false;
-    // previewSacle_ must be greater than 0
+    // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
     PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;

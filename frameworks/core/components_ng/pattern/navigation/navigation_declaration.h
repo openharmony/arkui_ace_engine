@@ -152,6 +152,13 @@ struct BarItem {
     }
 };
 
+struct NavigationTitleInfo {
+    bool hasSubTitle;
+    bool hasMainTitle;
+    std::string subtitle;
+    std::string title;
+};
+
 enum class ToolbarIconStatus {
     INITIAL = 0,
     ACTIVE,

@@ -164,7 +164,7 @@ napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
     }
 
     uiDisplaySync->SetExpectedFrameRateRange(frameRateRange);
-    TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
         "{%{public}d, %{public}d, %{public}d}", uiDisplaySync->GetId(), frameRateRange.min_, frameRateRange.max_,
         frameRateRange.preferred_);
     return NapiGetUndefined(env);
@@ -184,7 +184,7 @@ napi_value JSStart(napi_env env, napi_callback_info info)
     }
 
     uiDisplaySync->AddToPipelineOnContainer();
-    TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "Id: %{public}" PRIu64 " Start", uiDisplaySync->GetId());
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Id: %{public}" PRIu64 " Start", uiDisplaySync->GetId());
     return NapiGetUndefined(env);
 }
 
@@ -202,7 +202,7 @@ napi_value JSStop(napi_env env, napi_callback_info info)
     }
 
     uiDisplaySync->DelFromPipelineOnContainer();
-    TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "Id: %{public}" PRIu64 " Stop", uiDisplaySync->GetId());
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Id: %{public}" PRIu64 " Stop", uiDisplaySync->GetId());
     return NapiGetUndefined(env);
 }
 
@@ -333,6 +333,10 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 
     napi_value jsDisplaySync = nullptr;
     displaySync->NapiSerializer(env, jsDisplaySync);
+    if (!jsDisplaySync) {
+        delete displaySync;
+        return nullptr;
+    }
 
     napi_property_descriptor resultFuncs[] = {
         DECLARE_NAPI_FUNCTION("setExpectedFrameRateRange", JSSetExpectedFrameRateRange),
@@ -342,7 +346,7 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
         DECLARE_NAPI_FUNCTION("stop", JSStop),
     };
 
-    TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync Id: %{public}" PRIu64 "",
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Create UIDisplaySync Id: %{public}" PRIu64 "",
         uiDisplaySync->GetId());
     NAPI_CALL(env, napi_define_properties(
         env, jsDisplaySync, sizeof(resultFuncs) / sizeof(resultFuncs[0]), resultFuncs));

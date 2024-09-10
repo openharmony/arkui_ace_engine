@@ -45,6 +45,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     void SetTopologicalResult(std::string result)
     {
         topologicalResult_ = result;
@@ -64,6 +69,8 @@ public:
     {
         DumpLog::GetInstance().AddDesc(std::string("topologicalResult:").append(topologicalResult_));
     }
+
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
 private:
     std::string topologicalResult_;

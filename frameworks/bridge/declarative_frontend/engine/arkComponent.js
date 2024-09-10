@@ -1278,8 +1278,10 @@ class BackgroundBlurStyleModifier extends ModifierWithKey {
       getUINativeModule().common.resetBackgroundBlurStyle(node);
     }
     else {
-      getUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
-        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale);
+      getUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode,
+        this.value.adaptiveColor, this.value.scale,
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
+        this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 }
@@ -2356,8 +2358,10 @@ class BackgroundEffectModifier extends ModifierWithKey {
       getUINativeModule().common.resetBackgroundEffect(node);
     }
     else {
-      getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation, this.value.brightness, this.value.color,
-        this.value.adaptiveColor, (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale);
+      getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation,
+        this.value.brightness, this.value.color, this.value.adaptiveColor,
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
+        this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
   checkObjectDiff() {
@@ -2367,6 +2371,9 @@ class BackgroundEffectModifier extends ModifierWithKey {
       this.value.brightness === this.stageValue.brightness &&
       isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
       this.value.adaptiveColor === this.stageValue.adaptiveColor &&
+      this.value.policy === this.stageValue.policy &&
+      this.value.inactiveColor === this.stageValue.inactiveColor &&
+      this.value.type === this.stageValue.type &&
       ((_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale) === ((_b = this.stageValue.blurOptions) === null ||
       _b === void 0 ? void 0 : _b.grayscale));
   }
@@ -3385,6 +3392,9 @@ class ArkComponent {
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
       arkBackgroundBlurStyle.blurOptions = options.blurOptions;
+      arkBackgroundBlurStyle.policy = options.policy;
+      arkBackgroundBlurStyle.inactiveColor = options.inactiveColor;
+      arkBackgroundBlurStyle.type = options.type;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
@@ -5607,7 +5617,7 @@ class ArkGridComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   allowChildTypes() {
-    return ["GridItem"];
+    return ['GridItem'];
   }
   initialize(value) {
     if (value.length === 1 && isObject(value[0])) {
@@ -5785,20 +5795,20 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    var _a, _b, _c, _d;
+    let _a, _b, _c, _d;
     if (reset) {
       getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().grid.setGridLayoutOptions(node, isArray(this.value.regularSize) ? this.value.regularSize : undefined,
-      isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
-      isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
-      isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
-      isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+        isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
+        isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
+        isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
+        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
     }
   }
   checkObjectDiff() {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    let _a, _b, _c, _d, _e, _f, _g, _h;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.regularSize,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.regularSize) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.irregularIndexes,
@@ -8350,19 +8360,11 @@ class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
       getUINativeModule().linearIndicator.resetIndicatorStyle(node);
     }
     else {
-      getUINativeModule().linearIndicator.setIndicatorStyle(node,
-        this.value.space, this.value.strokeWidth, this.value.strokeRadius
-        , this.value.trackBackgroundColor, this.value.trackColor);
+      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
     }
   }
   checkObjectDiff() {
-    return
-    this.stageValue.space !== this.value.space
-      || this.stageValue.strokeWidth !== this.value.strokeWidth
-      || this.stageValue.strokeRadius !== this.value.strokeRadius
-      || this.stageValue.trackBackgroundColor !== this.value.trackBackgroundColor
-      || this.stageValue.trackColor !== this.value.trackColor
-      ;
+    return this.stageValue !== this.value;
   }
 }
 LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
@@ -11609,6 +11611,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
@@ -11622,6 +11627,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   font(value, options) {
+    if (value === undefined || value === null) {
+      return this;
+    }
     let arkTextFont = new ArkTextFont();
     arkTextFont.value = value;
     arkTextFont.enableVariableFontWeight = options?.enableVariableFontWeight;
@@ -15318,13 +15326,19 @@ class ArkBackgroundBlurStyle {
     this.adaptiveColor = undefined;
     this.scale = undefined;
     this.blurOptions = undefined;
+    this.policy = undefined;
+    this.inactiveColor = undefined;
+    this.type = undefined;
   }
   isEqual(another) {
     return (this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
       this.scale === another.scale &&
-      this.blurOptions === another.blurOptions);
+      this.blurOptions === another.blurOptions &&
+      this.policy === another.policy &&
+      this.inactiveColor === another.inactiveColor &&
+      this.type === another.type);
   }
 }
 class ArkBorderDashGap {
@@ -17734,6 +17748,17 @@ class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, undefined);
+    }
+    return this;
+  }
   optionWidth(value) {
     modifierWithKey(this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
     return this;
@@ -17846,6 +17871,40 @@ class ArkSelectComponent extends ArkComponent {
     return this;
   }
 }
+
+class SelectOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.setOptions(node, undefined, undefined, undefined, undefined);
+    } else {
+      const valueArray = [];
+      const iconArray = [];
+      const symbolIconArray = [];
+      const length = this.value?.length;
+      for (let i = 0; i < length; i++) {
+        valueArray.push(this.value[i]?.value);
+        iconArray.push(this.value[i]?.icon);
+        symbolIconArray.push(this.value[i]?.symbolIcon);
+      }
+      getUINativeModule().select.setOptions(node, valueArray, iconArray, symbolIconArray, length);
+    }
+  }
+
+  checkObjectDiff() {
+    return !(Array.isArray(this.stageValue) && Array.isArray(this.value) &&
+    this.stageValue.length === this.value.length &&
+    this.stageValue.every((eachValue, index) => {
+      return isBaseOrResourceEqual(eachValue.value, this.value[index].value) &&
+        isBaseOrResourceEqual(eachValue.icon, this.value[index].icon) &&
+        isBaseOrResourceEqual(eachValue.symbolIcon, this.value[index].symbolIcon);
+    }));
+  }
+}
+SelectOptionsModifier.identity = Symbol('SelectOptions');
+
 class MenuBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -18277,6 +18336,17 @@ class ArkRadioComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, undefined);
+    }
+    return this;
+  }
   checked(value) {
     modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
@@ -18342,6 +18412,25 @@ class ArkRadioComponent extends ArkComponent {
     return this.radioNode.getFrameNode();
   }
 }
+class RadioOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.setRadioOptions(node, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().radio.setRadioOptions(node, this.value.value, this.value.group, this.value.indicatorType);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.group, this.value.group) ||
+      !isBaseOrResourceEqual(this.stageValue.indicatorType, this.value.indicatorType);
+  }
+}
+RadioOptionsModifier.identity = Symbol('radioOptions');
 class RadioCheckedModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19072,6 +19161,17 @@ class ArkSliderComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, undefined);
+    }
+    return this;
+  }
   blockColor(value) {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
     return this;
@@ -19180,6 +19280,31 @@ class ArkSliderComponent extends ArkComponent {
     return this.sliderNode.getFrameNode();
   }
 }
+class SliderOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.setSliderOptions(node, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined);
+    } else {
+      getUINativeModule().slider.setSliderOptions(node, this.value.value, this.value.min, this.value.max,
+        this.value.step, this.value.style, this.value.direction, this.value.reverse);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.min, this.value.min) ||
+      !isBaseOrResourceEqual(this.stageValue.max, this.value.max) ||
+      !isBaseOrResourceEqual(this.stageValue.step, this.value.step) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style) ||
+      !isBaseOrResourceEqual(this.stageValue.direction, this.value.direction) ||
+      !isBaseOrResourceEqual(this.stageValue.reverse, this.value.reverse);
+  }
+}
+SliderOptionsModifier.identity = Symbol('sliderOptions');
 class BlockStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19574,6 +19699,17 @@ class ArkRatingComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
+    }
+    return this;
+  }
   stars(value) {
     modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
     return this;
@@ -19628,6 +19764,24 @@ class ArkRatingComponent extends ArkComponent {
     return this.ratingNode.getFrameNode();
   }
 }
+class RatingOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().rating.setRatingOptions(node, undefined, undefined);
+    } else {
+      getUINativeModule().rating.setRatingOptions(node, this.value?.rating, this.value?.indicator);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue?.rating, this.value?.rating) ||
+      !isBaseOrResourceEqual(this.stageValue?.indicator, this.value?.indicator);
+  }
+}
+RatingOptionsModifier.identity = Symbol('ratingOptions');
 // @ts-ignore
 if (globalThis.Rating !== undefined) {
   globalThis.Rating.attributeModifier = function (modifier) {
@@ -20185,25 +20339,23 @@ class NavDestinationMenusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 NavDestinationMenusModifier.identity = Symbol('menus');
@@ -21209,25 +21361,23 @@ class MenusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 MenusModifier.identity = Symbol('menus');
@@ -24011,7 +24161,7 @@ class ArkTextClockComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    var _a, _b;
+    let _a, _b;
     if (value.length === 1 && isObject(value[0])) {
       if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.timeZoneOffset) !== undefined) {
         modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, value[0].timeZoneOffset);
@@ -24410,25 +24560,25 @@ class TextTimerOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    var _a, _b, _c;
+    let _a, _b, _c;
     if (reset) {
-        getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
     }
     else {
-        getUINativeModule().textTimer.setTextTimerOptions(node,
-          (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
-          (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
-          (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+      getUINativeModule().textTimer.setTextTimerOptions(node,
+        (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
+        (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
     }
   }
   checkObjectDiff() {
-    var _a, _b, _c, _d, _e, _f;
+    let _a, _b, _c, _d, _e, _f;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.isCountDown,
-              (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
-        !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
-          (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
-        !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
-          (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+      (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
+      !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
+      !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
   }
 }
 TextTimerOptionsModifier.identity = Symbol('textTimerOptions');
@@ -25759,7 +25909,7 @@ class ArkBadgeComponent extends ArkComponent {
     return 1;
   }
   initialize(value) {
-    var _a, _b;
+    let _a, _b;
     if (value.length === 1 && isObject(value[0])) {
       if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.count) !== undefined) {
         modifierWithKey(
@@ -25785,7 +25935,7 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1;
     if (reset) {
       getUINativeModule().badge.setBadgeParamWithNumber(node, undefined, undefined, undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, undefined, undefined, 0, undefined);
@@ -25826,15 +25976,15 @@ class BadgeParamWithNumberModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
-    var positionResult = false;
-    var badgeSizeResult = false;
-    var borderWidthResult = false;
-    var badgeColorResult = false;
-    var borderColorResult = false;
-    var colorResult = false;
-    var fontSizeResult = false;
-    var fontWeightResult = false;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7;
+    let positionResult = false;
+    let badgeSizeResult = false;
+    let borderWidthResult = false;
+    let badgeColorResult = false;
+    let borderColorResult = false;
+    let colorResult = false;
+    let fontSizeResult = false;
+    let fontWeightResult = false;
     if (isNumber((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.position) &&
       isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position)) {
       positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
@@ -25890,7 +26040,7 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
     if (reset) {
       getUINativeModule().badge.setBadgeParamWithString(node, undefined, undefined, undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, undefined, undefined, undefined);
@@ -25929,15 +26079,15 @@ class BadgeParamWithStringModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5;
-    var positionResult = false;
-    var badgeSizeResult = false;
-    var borderWidthResult = false;
-    var badgeColorResult = false;
-    var borderColorResult = false;
-    var colorResult = false;
-    var fontSizeResult = false;
-    var fontWeightResult = false;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5;
+    let positionResult = false;
+    let badgeSizeResult = false;
+    let borderWidthResult = false;
+    let badgeColorResult = false;
+    let borderColorResult = false;
+    let colorResult = false;
+    let fontSizeResult = false;
+    let fontWeightResult = false;
     if (isNumber((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.position) &&
       isNumber((_b = this.value) === null || _b === void 0 ? void 0 : _b.position)) {
       positionResult = !isBaseOrResourceEqual(this.stageValue.position, this.value.position);
@@ -26106,7 +26256,7 @@ class GridItemColumnEndModifier extends ModifierWithKey {
 GridItemColumnEndModifier.identity = Symbol('gridItemColumnEnd');
 class GridItemOptionsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
-    var _a;
+    let _a;
     if (reset) {
       getUINativeModule().gridItem.setGridItemOptions(node, undefined);
     }
@@ -26120,7 +26270,7 @@ class GridItemOptionsModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    var _a, _b;
+    let _a, _b;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.style,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.style);
   }

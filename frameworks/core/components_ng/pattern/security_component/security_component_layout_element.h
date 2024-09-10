@@ -148,13 +148,16 @@ public:
 
     double ShrinkHeight(double reduceSize) override;
 
-    bool GetTextLimitExceededFlag(double maxHeight);
+    bool GetCurrentTextSize(std::optional<SizeF>& currentTextSize, Dimension& currentFontSize);
 
-    void DoMeasure(bool isVertical, float comWidth, float maxWidth, float idealWidth, float iconWidth);
+    void DoMeasure(bool isVertical, float minWidth, float leftSpace);
 
-    bool IsExist()
+    bool TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
+        float threshold);
+
+    float pow(float value)
     {
-        return isExist_;
+        return value * value;
     }
 
 private:
@@ -162,7 +165,8 @@ private:
     void MeasureMinTextSize();
     void ChooseExactFontSize(RefPtr<TextLayoutProperty>& property, bool isWidth);
     std::optional<SizeF> GetMeasureTextSize(const std::string& data,
-        const Dimension& fontSize, FontWeight fontWeight);
+        const Dimension& fontSize, FontWeight fontWeight, float constraintWidth);
+    void MeasureForWidth(float width);
 
     bool isExist_ = false;
     Dimension minFontSize_;

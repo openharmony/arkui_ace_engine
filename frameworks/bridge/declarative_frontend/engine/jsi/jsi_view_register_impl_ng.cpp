@@ -408,6 +408,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
+    JSNativeCustomSpan::JSBind(globalObj);
     JSSpanString::JSBind(globalObj);
     JSMutableSpanString::JSBind(globalObj);
     JSFontSpan::JSBind(globalObj);

@@ -20,6 +20,8 @@
 #include "core/common/plugin_manager.h"
 #endif
 
+#include <dirent.h>
+
 namespace OHOS::Ace {
 
 int32_t Container::CurrentId()
@@ -218,6 +220,82 @@ bool Container::IsFoldable()
 FoldStatus Container::GetCurrentFoldStatus()
 {
     return DisplayInfoUtils::GetInstance().GetCurrentFoldStatus();
+}
+
+void Container::DestroyToastSubwindow(int32_t instanceId)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetToastSubwindow(
+        instanceId, SubwindowManager::GetInstance()->GetToastWindowType());
+    if (subwindow && subwindow->IsToastSubWindow()) {
+        subwindow->DestroyWindow();
+    }
+    auto systemToastWindow = SubwindowManager::GetInstance()->GetSystemToastWindow();
+    if (systemToastWindow && systemToastWindow->IsToastSubWindow()) {
+        systemToastWindow->DestroyWindow();
+    }
+}
+
+bool Container::IsFontFileExistInPath(const std::string& path)
+{
+    DIR* dir;
+    struct dirent* ent;
+    bool isFlagFileExist = false;
+    bool isFontDirExist = false;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        if (errno == ENOENT) {
+            LOGE("ERROR ENOENT");
+        } else if (errno == EACCES) {
+            LOGE("ERROR EACCES");
+        } else {
+            LOGE("ERROR Other");
+        }
+        return false;
+    }
+    while ((ent = readdir(dir)) != nullptr) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        if (strcmp(ent->d_name, "flag") == 0) {
+            isFlagFileExist = true;
+        } else if (strcmp(ent->d_name, "fonts") == 0) {
+            isFontDirExist = true;
+        }
+    }
+    closedir(dir);
+    if (isFlagFileExist && isFontDirExist) {
+        LOGI("font path exist");
+        return true;
+    }
+    return false;
+}
+
+std::string Container::GetFontFamilyName(std::string path)
+{
+    std::string fontFamilyName = "";
+    DIR* dir;
+    struct dirent* ent;
+    if ((dir = opendir(path.c_str())) == nullptr) {
+        return fontFamilyName;
+    }
+    while ((ent = readdir(dir)) != nullptr) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+        if (endsWith(ent->d_name, ".ttf")) {
+            fontFamilyName = ent->d_name;
+            break;
+        }
+    }
+    closedir(dir);
+    return fontFamilyName;
+}
+
+bool Container::endsWith(std::string str, std::string suffix)
+{
+    if (str.length() < suffix.length()) {
+        return false;
+    }
+    return str.substr(str.length() - suffix.length()) == suffix;
 }
 
 template<>

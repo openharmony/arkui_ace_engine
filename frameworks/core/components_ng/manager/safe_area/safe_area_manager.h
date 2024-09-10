@@ -32,12 +32,28 @@ public:
     ~SafeAreaManager() override = default;
 
     /**
+     * @brief Check if the incoming safe area is identical to the system safe area
+     *
+     * @param safeArea The new system safe area.
+     * @return True if the incoming safe area is identical to the current one, false otherwise.
+     */
+    bool CheckSystemSafeArea(const SafeAreaInsets& safeArea);
+
+    /**
      * @brief Updates the system safe area.
      *
      * @param safeArea The new system safe area.
      * @return True if the system safe area was modified, false otherwise.
      */
     bool UpdateSystemSafeArea(const SafeAreaInsets& safeArea);
+
+    /**
+     * @brief Check if the incoming safe area is identical to the navigation indictor safe area.
+     *
+     * @param safeArea The new navigation indictor safe area.
+     * @return True if the incoming safe area is identical to the current one, false otherwise.
+     */
+    bool CheckNavArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Updates the navigation indictor safe area.
@@ -56,6 +72,15 @@ public:
      * @return The system safe area insets.
      */
     SafeAreaInsets GetSystemSafeArea() const;
+
+    /**
+     * @brief Cut the incoming area with root size, then check if the result is identical to the cutout safe area.
+     *
+     * @param safeArea The SafeAreaInsets representing the new cutout safe area, which would be modified.
+     * @return True if the incoming safe area is identical to the current one, false otherwise.
+     */
+    bool CheckCutoutSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     /**
      * @brief Updates the cutout safe area.
@@ -207,8 +232,24 @@ public:
     }
     void SetkeyboardHeightConsideringUIExtension(uint32_t height)
     {
-        keyboardHeightConsideringUIExtension_ = height;
+        if (keyboardHeightConsideringUIExtension_ != height) {
+            for (const auto& [nodeId, callback] : keyboardChangeCbsConsideringUIExt_) {
+                if (callback) {
+                    callback();
+                }
+            }
+            keyboardHeightConsideringUIExtension_ = height;
+        }
     }
+    void AddKeyboardChangeCallbackConsideringUIExt(int32_t nodeId, const std::function<void()>& callback)
+    {
+        keyboardChangeCbsConsideringUIExt_[nodeId] = callback;
+    }
+    void RemoveKeyboardChangeCallbackConsideringUIExt(int32_t nodeId)
+    {
+        keyboardChangeCbsConsideringUIExt_.erase(nodeId);
+    }
+
 private:
     bool isAtomicService_ = false;
 
@@ -276,6 +317,7 @@ private:
         SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
 
     uint32_t keyboardHeightConsideringUIExtension_ = 0;
+    std::unordered_map<int32_t, std::function<void()>> keyboardChangeCbsConsideringUIExt_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

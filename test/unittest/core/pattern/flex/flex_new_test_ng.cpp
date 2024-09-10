@@ -14,8 +14,9 @@
  */
 #include "flex_base_test_ng.h"
 
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/blank/blank_pattern.h"
 #include "core/components_ng/pattern/text/text_controller.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -23,6 +24,11 @@ using namespace testing::ext;
 
 namespace {
 const int32_t SECOND_CHILD = 1;
+const float RK356_WIDTH = 720.0f;
+const float RK356_HEIGHT = 1136.0f;
+const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
+const float ZERO = 0.0f;
+const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 } // namespace
 class FlexNewTestNG : public FlexBaseTestNG {
 public:
@@ -31,8 +37,8 @@ public:
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
-        auto frameNode = FrameNode::GetOrCreateFrameNode(
-            tag, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
         stack->Push(frameNode);
 
         auto castTextLayoutProperty = frameNode->GetLayoutPropertyPtr<TextLayoutProperty>();
@@ -450,5 +456,346 @@ HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes002, TestSize.Level1)
     flexLayoutAlgorithm->MeasureAndCleanMagicNodes(AceType::RawPtr(frameNode), flexItemProperties);
 
     EXPECT_EQ(flexLayoutAlgorithm->crossAxisSize_, 50);
+}
+
+/**
+ * @tc.name: ReverseFlexDirection001
+ * @tc.desc: test ReverseFlexDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, ReverseFlexDirection001, TestSize.Level1)
+{
+    auto frameNode = CreateFlexRow([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        auto text = CreateText("text", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto flexLayoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(flexLayoutAlgorithm, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(frameNode->GetLayoutProperty());
+    layoutProperty->GetFlexLayoutAttribute()->UpdateIsReverse(true);
+
+    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    flexLayoutAlgorithm->Layout(AceType::RawPtr(frameNode));
+    EXPECT_EQ(flexLayoutAlgorithm->direction_, FlexDirection::ROW_REVERSE);
+
+    layoutProperty->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
+    flexLayoutAlgorithm->Layout(AceType::RawPtr(frameNode));
+    EXPECT_EQ(flexLayoutAlgorithm->direction_, FlexDirection::ROW);
+
+    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+    flexLayoutAlgorithm->Layout(AceType::RawPtr(frameNode));
+    EXPECT_EQ(flexLayoutAlgorithm->direction_, FlexDirection::COLUMN_REVERSE);
+
+    layoutProperty->UpdateFlexDirection(FlexDirection::COLUMN_REVERSE);
+    flexLayoutAlgorithm->Layout(AceType::RawPtr(frameNode));
+    EXPECT_EQ(flexLayoutAlgorithm->direction_, FlexDirection::COLUMN);
+
+    layoutProperty->UpdateFlexDirection(static_cast<FlexDirection>(10));
+    flexLayoutAlgorithm->Layout(AceType::RawPtr(frameNode));
+    EXPECT_EQ(flexLayoutAlgorithm->direction_, FlexDirection::ROW);
+}
+
+/**
+ * @tc.name: CheckIsGrowOrShrink001
+ * @tc.desc: test CheckIsGrowOrShrink
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, CheckIsGrowOrShrink001, TestSize.Level1)
+{
+    RefPtr<FrameNode> textFrameNode = nullptr;
+    auto frameNode = CreateFlexRow([this, &textFrameNode](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        textFrameNode = CreateText("text", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto flexLayoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(flexLayoutAlgorithm, nullptr);
+    std::function<float(const RefPtr<LayoutWrapper>&)> getFlex;
+    float spacePerFlex;
+    FlexItemProperties flexItemProperties;
+    RefPtr<LayoutWrapper> lastChild;
+    flexItemProperties.totalShrink = 1;
+    flexItemProperties.lastShrinkChild = textFrameNode;
+    flexLayoutAlgorithm->CheckIsGrowOrShrink(getFlex, -10, spacePerFlex, flexItemProperties, lastChild);
+    auto layoutProperty = textFrameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step1. call getFlex.
+     * @tc.expected: Property's FlexShrink less or equal 0, getFlex return 0.
+     */
+    layoutProperty->UpdateFlexShrink(0.0f);
+    EXPECT_EQ(getFlex(textFrameNode), 0.0f);
+    /**
+     * @tc.steps: step2. call getFlex.
+     * @tc.expected: getFlex return value equal Property's FlexShrink
+     */
+    layoutProperty->UpdateFlexShrink(1.0f);
+    EXPECT_EQ(getFlex(textFrameNode), 1.0f);
+}
+
+/**
+ * @tc.name: CheckBlankAndKeepMin001
+ * @tc.desc: test CheckBlankAndKeepMin
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, CheckBlankAndKeepMin001, TestSize.Level1)
+{
+    RefPtr<FrameNode> blankFrameNode = nullptr;
+    auto frameNode = CreateFlexRow([this, &blankFrameNode](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
+        stack->Push(frameNode);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->Pop();
+        blankFrameNode = AceType::DynamicCast<FrameNode>(element);
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto flexLayoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(flexLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step1. call CheckBlankAndKeepMin.
+     * @tc.expected: hostNode_ is nullptr, so flexSize no change
+     */
+    float flexSize = 300;
+    auto hostNode = blankFrameNode->hostNode_;
+    blankFrameNode->hostNode_ = nullptr;
+    flexLayoutAlgorithm->CheckBlankAndKeepMin(blankFrameNode, flexSize);
+    EXPECT_EQ(flexSize, 300);
+    /**
+     * @tc.steps: step2. call CheckBlankAndKeepMin.
+     * @tc.expected: ndoe's property MinSize less than flexSize, so flexSize no change
+     */
+    blankFrameNode->hostNode_ = hostNode;
+    flexLayoutAlgorithm->CheckBlankAndKeepMin(blankFrameNode, flexSize);
+    EXPECT_EQ(flexSize, 300);
+    /**
+     * @tc.steps: step3. call CheckBlankAndKeepMin.
+     * @tc.expected: ndoe's property MinSize bigger than flexSize, so flexSize equal MinSize
+     */
+    auto blankProperty = blankFrameNode->GetLayoutProperty<BlankLayoutProperty>();
+    ASSERT_NE(blankProperty, nullptr);
+    blankProperty->UpdateMinSize(Dimension(500));
+    flexLayoutAlgorithm->CheckBlankAndKeepMin(blankFrameNode, flexSize);
+    EXPECT_EQ(flexSize, 500);
+}
+
+/**
+ * @tc.name: UpdateLayoutConstraintOnCrossAxis001
+ * @tc.desc: test UpdateLayoutConstraintOnCrossAxis
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, UpdateLayoutConstraintOnCrossAxis001, TestSize.Level1)
+{
+    RefPtr<FrameNode> textFrameNode = nullptr;
+    auto frameNode = CreateFlexRow([this, &textFrameNode](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        textFrameNode = CreateText("text", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+    });
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto flexLayoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(flexLayoutAlgorithm, nullptr);
+
+    LayoutConstraintF layoutConstraint { .selfIdealSize = OptionalSize<float>(SizeF(100, 200)) };
+    /**
+     * @tc.steps: step1. call UpdateLayoutConstraintOnCrossAxis.
+     * @tc.expected: direction_ equal ROW, so selfIdealSize.Height() equal size
+     */
+    flexLayoutAlgorithm->direction_ = FlexDirection::ROW;
+    float size = 300.0f;
+    flexLayoutAlgorithm->UpdateLayoutConstraintOnCrossAxis(layoutConstraint, 300);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Height(), 300.0f);
+    /**
+     * @tc.steps: step2. call UpdateLayoutConstraintOnCrossAxis.
+     * @tc.expected: direction_ equal ROW_REVERSE, so selfIdealSize.Height() equal size
+     */
+    flexLayoutAlgorithm->direction_ = FlexDirection::ROW_REVERSE;
+    size = 500.0f;
+    flexLayoutAlgorithm->UpdateLayoutConstraintOnCrossAxis(layoutConstraint, size);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Height(), 500.0f);
+    /**
+     * @tc.steps: step3. call UpdateLayoutConstraintOnCrossAxis.
+     * @tc.expected: direction_ equal COLUMN, so selfIdealSize.Width() equal size
+     */
+    flexLayoutAlgorithm->direction_ = FlexDirection::COLUMN;
+    size = 400.0f;
+    flexLayoutAlgorithm->UpdateLayoutConstraintOnCrossAxis(layoutConstraint, size);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Width(), 400.0f);
+}
+
+/**
+ * @tc.name: MeasureAndCleanMagicNodes003
+ * @tc.desc: test MeasureAndCleanMagicNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, MeasureAndCleanMagicNodes003, TestSize.Level1)
+{
+    auto frameNode = CreateFlexRow([this](FlexModelNG model) {
+        model.SetDirection(FlexDirection::ROW);
+
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+
+        auto text1 = CreateText("text1", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+        auto text2 = CreateText("text2", [this](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(50.0f));
+        });
+        text1->GetLayoutProperty()->GetMagicItemProperty().UpdateLayoutWeight(1.0);
+        text2->GetLayoutProperty()->GetMagicItemProperty().UpdateLayoutWeight(1.0);
+    });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    layoutProperty->contentConstraint_ = LayoutConstraintF();
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    auto flexLayoutAlgorithm = AceType::DynamicCast<FlexLayoutAlgorithm>(layoutAlgorithm);
+    flexLayoutAlgorithm->Measure(AceType::RawPtr(frameNode));
+    auto iterChilds = flexLayoutAlgorithm->magicNodes_.begin()->second.begin();
+    auto& child1 = *iterChilds++;
+    auto& child2 = *iterChilds++;
+    child1.layoutConstraint.minSize = SizeT<float>(500, 500);
+    child2.layoutConstraint.minSize = SizeT<float>(500, 500);
+    flexLayoutAlgorithm->totalFlexWeight_ = 1;
+    FlexItemProperties flexItemProperties;
+    flexLayoutAlgorithm->MeasureAndCleanMagicNodes(AceType::RawPtr(frameNode), flexItemProperties);
+    std::list<MagicLayoutNode> nodes = { child1, child2 };
+    flexLayoutAlgorithm->magicNodes_[2] = nodes;
+    flexLayoutAlgorithm->MeasureAndCleanMagicNodes(AceType::RawPtr(frameNode), flexItemProperties);
+    EXPECT_EQ(flexLayoutAlgorithm->crossAxisSize_, 50);
+}
+
+/**
+ * @tc.name: PerformLayoutInitialize001
+ * @tc.desc: test PerformLayoutInitialize
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, PerformLayoutInitialize001, TestSize.Level1)
+{
+    auto frameNode = CreateFlexRow([this](FlexModelNG model) {});
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<FlexLayoutPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetIsWrap(true);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto wrapLayoutAlgorithm = AceType::DynamicCast<WrapLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(wrapLayoutAlgorithm, nullptr);
+    auto layoutProp = AceType::DynamicCast<FlexLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProp, nullptr);
+    /**
+     * @tc.steps: step1. call PerformLayoutInitialize.
+     * @tc.expected: selfIdealSize has value and isHorizontal_ is true, so mainLengthLimit_ equal
+     * selfIdealSize.Width()
+     */
+    layoutProp->layoutConstraint_->selfIdealSize.SetWidth(10);
+    wrapLayoutAlgorithm->isHorizontal_ = true;
+    wrapLayoutAlgorithm->PerformLayoutInitialize(layoutProp);
+    EXPECT_EQ(wrapLayoutAlgorithm->mainLengthLimit_, 10);
+    /**
+     * @tc.steps: step2. call PerformLayoutInitialize.
+     * @tc.expected: selfIdealSize has value and isHorizontal_ is false, so crossLengthLimit_ equal
+     * selfIdealSize.Width()
+     */
+    wrapLayoutAlgorithm->isHorizontal_ = false;
+    wrapLayoutAlgorithm->PerformLayoutInitialize(layoutProp);
+    EXPECT_EQ(wrapLayoutAlgorithm->crossLengthLimit_, 10);
+    /**
+     * @tc.steps: step3. call PerformLayoutInitialize.
+     * @tc.expected: selfIdealSize has value and isHorizontal_ is true, so crossLengthLimit_ equal
+     * selfIdealSize.Height()
+     */
+    layoutProp->layoutConstraint_->selfIdealSize.Reset();
+    layoutProp->layoutConstraint_->selfIdealSize.SetHeight(10);
+    wrapLayoutAlgorithm->isHorizontal_ = true;
+    wrapLayoutAlgorithm->PerformLayoutInitialize(layoutProp);
+    EXPECT_EQ(wrapLayoutAlgorithm->crossLengthLimit_, 10);
+    /**
+     * @tc.steps: step4. call PerformLayoutInitialize.
+     * @tc.expected: selfIdealSize has value and isHorizontal_ is false, so mainLengthLimit_ equal
+     * selfIdealSize.Height()
+     */
+    wrapLayoutAlgorithm->isHorizontal_ = false;
+    wrapLayoutAlgorithm->PerformLayoutInitialize(layoutProp);
+    EXPECT_EQ(wrapLayoutAlgorithm->mainLengthLimit_, 10);
+}
+
+/**
+ * @tc.name: CalcItemCrossAxisOffset002
+ * @tc.desc: test CalcItemCrossAxisOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, CalcItemCrossAxisOffset002, TestSize.Level1)
+{
+    auto wrapFrameNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 0, AceType::MakeRefPtr<FlexLayoutPattern>(true));
+    ASSERT_NE(wrapFrameNode, nullptr);
+    auto wrapLayoutPattern = wrapFrameNode->GetPattern<FlexLayoutPattern>();
+    ASSERT_NE(wrapLayoutPattern, nullptr);
+    auto wrapLayoutAlgorithm = AccessibilityManager::MakeRefPtr<WrapLayoutAlgorithm>(false);
+    ASSERT_NE(wrapLayoutAlgorithm, nullptr);
+    wrapLayoutAlgorithm->isHorizontal_ = false;
+    /**
+     * @tc.steps: step1. call CalcItemCrossAxisOffset.
+     * @tc.expected: function return value equal offset.GetX()
+     */
+    OffsetF offset(10.0f, 0.0f);
+    std::list<RefPtr<LayoutWrapper>> list;
+    ContentInfo content(362.2, 362.2, 362, list);
+    wrapLayoutAlgorithm->crossAlignment_ = WrapAlignment::SPACE_AROUND;
+    auto ret = wrapLayoutAlgorithm->CalcItemCrossAxisOffset(content, offset, nullptr);
+    EXPECT_EQ(ret, 10.0f);
+    /**
+     * @tc.steps: step2. call CalcItemCrossAxisOffset.
+     * @tc.expected: function return value equal offset.GetX()
+     */
+    wrapLayoutAlgorithm->crossAlignment_ = WrapAlignment::BASELINE;
+    ret = wrapLayoutAlgorithm->CalcItemCrossAxisOffset(content, offset, nullptr);
+    EXPECT_EQ(ret, 10.0f);
 }
 } // namespace OHOS::Ace::NG

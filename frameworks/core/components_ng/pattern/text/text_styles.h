@@ -224,6 +224,7 @@ struct HandleInfoNG {
 
     int32_t index = 0;
     RectF rect;
+    RectF originalRect;
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_accessibility_property.h"
 
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "location_button/location_button_common.h"
 #include "paste_button/paste_button_common.h"
@@ -43,12 +44,12 @@ std::string SecurityComponentAccessibilityProperty::GetText() const
         std::string nodeType = frameNode->GetTag();
         auto pipeline = frameNode->GetContextRefPtr();
         if (pipeline == nullptr) {
-            LOGE("Pipeline is null.");
+            SC_LOG_ERROR("Pipeline is null.");
             return std::string();
         }
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         if (theme == nullptr) {
-            LOGE("Theme is null.");
+            SC_LOG_ERROR("Theme is null.");
             return std::string();
         }
         if (nodeType == V2::LOCATION_BUTTON_ETS_TAG) {

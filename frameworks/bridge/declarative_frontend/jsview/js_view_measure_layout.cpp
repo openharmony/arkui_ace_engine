@@ -441,6 +441,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -523,6 +524,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -561,6 +563,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -596,6 +599,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetMargin(panda::JsiRuntime
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
@@ -611,6 +615,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntim
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
@@ -628,6 +633,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetBorderWidth(panda::JsiRu
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenBorderWidthGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();

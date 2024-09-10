@@ -76,14 +76,15 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
 RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
-
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto isFirstBuild = frameNode->IsFirstBuilding();
     if (layout) {
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][isFirstBuild:%d]", V2::TEXT_ETS_TAG, nodeId, isFirstBuild);
         layout->UpdateContent(content);
     }
     // set draggable for framenode
-    if (frameNode->IsFirstBuilding()) {
+    if (isFirstBuild) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
@@ -1094,5 +1095,12 @@ bool TextModelNG::GetHalfLeading(FrameNode* frameNode)
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, HalfLeading, value, frameNode, value);
     return value;
+}
+
+void TextModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::NG

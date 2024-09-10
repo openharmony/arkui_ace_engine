@@ -77,6 +77,7 @@ struct MenuParam {
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<NG::BorderRadiusProperty> borderRadius;
+    std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     bool isSetPreviewNone = false; // user set MenuPreviewMode::NONE
 };
 

@@ -329,6 +329,8 @@ public:
 
     void InitSideBarButtonUpdateCallbackIfNeeded();
 
+    void OnLanguageConfigurationUpdate() override;
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -387,6 +389,7 @@ private:
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
     RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
     void UpdateTitlePositionInfo();

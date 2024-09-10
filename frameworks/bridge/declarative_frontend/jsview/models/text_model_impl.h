@@ -77,6 +77,7 @@ public:
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetHalfLeading(bool halfLeading) override;
+    void SetEnableHapticFeedback(bool state) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

@@ -269,11 +269,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    if (currentFingers_ < fingers_) {
-        return;
-    }
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+    }
+    if (currentFingers_ < fingers_) {
+        return;
     }
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
@@ -507,6 +507,9 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         // AxisEvent is single one.
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "PanRecognizer touchPoints size not equal fingers_, not send cancel callback.");
     }
 }
 

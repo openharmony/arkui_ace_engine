@@ -550,6 +550,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
@@ -559,12 +560,17 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "445.45px");
 
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
 }
 
 /**

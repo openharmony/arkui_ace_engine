@@ -105,6 +105,7 @@ public:
     void Reset() override;
     TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text) override;
     void SetDensity(double density) override;
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform) override;
 
     // All interfaces that only the 'CanvasRenderingContext2D' has.
     void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;

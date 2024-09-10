@@ -39,6 +39,14 @@ enum class DragDropMgrState : int32_t {
     DRAGGING
 };
 
+struct GatherAnimationInfo {
+    float scale = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    OffsetF gatherNodeCenter;
+    std::optional<BorderRadiusProperty> borderRadius;
+};
+
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
 
@@ -143,6 +151,7 @@ public:
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
+    void NotifyEnterTextEditorArea(bool enable);
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
     void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEven,
         const std::string& extraInfo);
@@ -340,8 +349,7 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
-    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-        const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
+    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -451,7 +459,7 @@ public:
 
     uint32_t GetDampingOverflowCount() const
     {
-        return dampingOverflowCount_ ;
+        return dampingOverflowCount_;
     }
 
     void SetDampingOverflowCount()
@@ -554,7 +562,7 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     PointerEvent dragDropPointerEvent_;
-    bool isDragFwkShow_ { false };
+    bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
     OffsetF prePointerOffset_;
     OffsetF curPointerOffset_;

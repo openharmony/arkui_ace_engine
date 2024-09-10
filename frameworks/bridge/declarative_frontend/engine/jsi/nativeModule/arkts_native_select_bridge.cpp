@@ -920,4 +920,63 @@ ArkUINativeModuleValue SelectBridge::ResetDivider(ArkUIRuntimeCallInfo* runtimeC
     }
     return panda::JSValueRef::Undefined(vm);
 }
+
+static std::string ParseValues(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    std::string result;
+    ArkTSUtils::ParseJsString(vm, jsValue, result);
+    return result;
+}
+
+ArkUINativeModuleValue SelectBridge::SetOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valuesArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> iconsArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> symbolIconArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(4);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto length = lengthArg->Uint32Value(vm);
+    auto valueArray = std::make_unique<std::string[]>(length);
+    auto iconArray = std::make_unique<std::string[]>(length);
+    auto selectParamArray = std::make_unique<SelectParam[]>(length);
+
+    bool valueParseResult = ArkTSUtils::ParseArray<std::string>(vm, valuesArg, valueArray.get(), length, ParseValues);
+    bool iconParseResult = ArkTSUtils::ParseArray<std::string>(
+        vm, iconsArg, iconArray.get(), length, [](const EcmaVM* vm, const Local<JSValueRef>& jsValue) {
+            std::string result;
+            ArkTSUtils::ParseJsMedia(vm, jsValue, result);
+            return result;
+        });
+    bool symbolIconParseResult = ArkTSUtils::ParseArray<SelectParam>(
+        vm, symbolIconArg, selectParamArray.get(), length, [runtimeCallInfo](const EcmaVM* vm,
+            const Local<JSValueRef>& jsValue) {
+            auto selectSymbol = AceType::MakeRefPtr<Framework::JSSymbolGlyphModifier>();
+            auto jsRefValue = Framework::JSRef<Framework::JsiValue>(Framework::JsiValue(jsValue));
+            selectSymbol->symbol_ = jsRefValue;
+            std::function<void(WeakPtr<NG::FrameNode>)> symbolIcoResult;
+            RefPtr<SymbolModifier> symbolModifier;
+            if (jsValue->IsObject(vm)) {
+                std::function<void(WeakPtr<NG::FrameNode>)> symbolApply = nullptr;
+                Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, jsRefValue);
+                symbolIcoResult = symbolApply;
+            }
+            return SelectParam{.symbolIcon=symbolIcoResult, .symbolModifier= selectSymbol};
+        });
+    std::vector<SelectParam> params(length);
+    if (valueParseResult && iconParseResult && symbolIconParseResult) {
+        for (uint32_t i = 0; i < length; i++) {
+            params[i].text = valueArray[i];
+            params[i].symbolModifier = selectParamArray[i].symbolModifier;
+            params[i].symbolIcon = selectParamArray[i].symbolIcon;
+            if (!(selectParamArray[i].symbolIcon)) {
+                params[i].icon = iconArray[i];
+            }
+        }
+    }
+    SelectModelNG::InitSelect(reinterpret_cast<FrameNode*>(nativeNode), params);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

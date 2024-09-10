@@ -849,6 +849,26 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkCheckboxGroupComponent(node, type);
       })
     }],
+    ['Radio', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Radio', (node: NodePtr, type: ModifierType): ArkRadioComponent => {
+        return new ArkRadioComponent(node, type);
+      })
+    }],
+    ['Rating', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
+        return new ArkRatingComponent(node, type);
+      })
+    }],
+    ['Slider', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Slider', (node: NodePtr, type: ModifierType): ArkSliderComponent => {
+        return new ArkSliderComponent(node, type);
+      })
+    }],
+    ['Select', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
+        return new ArkSelectComponent(node, type);
+      })
+    }],
   ]
 )
 

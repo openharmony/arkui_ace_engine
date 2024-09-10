@@ -144,6 +144,7 @@ public:
     void HandlePenHoverOut(const TouchEvent& point) override;
 
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+    void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
@@ -166,6 +167,17 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
+    void OnFlushMouseEvent(TouchRestrict& touchRestrict);
+    void DispatchMouseEvent(
+        std::unordered_map<int, MouseEvent>& idToMousePoints,
+        std::unordered_map<int32_t, MouseEvent> &newIdMousePoints,
+        std::list<MouseEvent> &mouseEvents,
+        TouchRestrict& touchRestrict);
+    void FlushDragEvents();
+    void OnFlushDragEvents(const RefPtr<DragDropManager>& manager,
+        std::unordered_map<int32_t, PointerEvent> newIdPoints,
+        std::string& extraInfo,
+        std::unordered_map<int, PointerEvent> &idToPoints);
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -715,8 +727,6 @@ public:
     bool PrintVsyncInfoIfNeed() const override;
     void SetUIExtensionImeShow(bool imeShow);
 
-    void CheckVirtualKeyboardHeight() override;
-
     void StartWindowAnimation() override
     {
         isWindowAnimation_ = true;
@@ -887,6 +897,8 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -962,7 +974,6 @@ private:
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void AnimateOnSafeAreaUpdate();
-    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1003,7 +1014,27 @@ private:
         const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    
+    PointerEvent GetResamplePointerEvent(const std::vector<PointerEvent>& history,
+        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
 
+    std::tuple<float, float, float, float> GetResamplePointerCoord(const std::vector<PointerEvent>& history,
+        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
+
+    PointerEvent GetPointerLatestPoint(const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
+
+    std::tuple<float, float, uint64_t> GetPointerAvgPoint(const std::vector<PointerEvent>& events, const bool isScreen);
+
+    MouseEvent GetResampleMouseEvent(
+        const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
+
+    std::tuple<float, float, float, float> GetMouseResampleCoord(const std::vector<MouseEvent>& history,
+        const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
+
+    MouseEvent GetMouseLatestPoint(const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
+ 
+    std::tuple<float, float, uint64_t> GetMouseAvgPoint(const std::vector<MouseEvent>& events, const bool isScreen);
+    
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
@@ -1025,6 +1056,8 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
+    std::list<MouseEvent> mouseEvents_;
+    std::list<PointerEvent> dragEvents_;
 
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
@@ -1046,7 +1079,8 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
-
+    std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
+    std::unordered_map<int32_t, std::vector<PointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
@@ -1113,6 +1147,8 @@ private:
     RefPtr<PostEventManager> postEventManager_;
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
+    std::unordered_map<int32_t, MouseEvent> idToMousePoints_;
+    std::unordered_map<int32_t, PointerEvent> idToDragPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
@@ -1143,6 +1179,8 @@ private:
     std::list<WeakPtr<FrameNode>> changedNodes_;
     bool isHalfFoldHoverStatus_ = false;
     CancelableCallback<void()> foldStatusDelayTask_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
 };
 } // namespace OHOS::Ace::NG
 

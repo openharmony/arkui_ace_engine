@@ -26,8 +26,6 @@ void TransformAccessbilityElementInfo(
     const ArkUI_AccessibilityElementInfo& nativeInfo,
     OHOS::Accessibility::AccessibilityElementInfo& accessibilityElementInfo)
 {
-    accessibilityElementInfo.SetPageId(nativeInfo.GetPageId());
-    accessibilityElementInfo.SetComponentId(nativeInfo.GetComponentId());
     accessibilityElementInfo.SetParent(nativeInfo.GetParentId());
     accessibilityElementInfo.SetComponentType(nativeInfo.GetComponentType());
     accessibilityElementInfo.SetContent(nativeInfo.GetContents());
@@ -105,7 +103,6 @@ void TransformAccessbilityEventInfo(
 {
     accessibilityEventInfo.SetEventType(
         static_cast<OHOS::Accessibility::EventType>(nativeEventInfo.GetEventType()));
-    accessibilityEventInfo.SetPageId(nativeEventInfo.GetPageId());
     OHOS::Accessibility::AccessibilityElementInfo elementInfo;
     auto info = nativeEventInfo.GetElementInfo();
     if (info != nullptr) {

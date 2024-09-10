@@ -315,6 +315,7 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
     void LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
     void LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
@@ -425,6 +426,8 @@ protected:
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd);
 
+    void SetListItemGroupJumpIndex(const RefPtr<ListItemGroupLayoutAlgorithm>& itemGroup,
+        bool forwardLayout, int32_t index);
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
         bool needAdjustRefPos = false);
@@ -514,6 +517,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
+    int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
     float totalOffset_ = 0.0f;

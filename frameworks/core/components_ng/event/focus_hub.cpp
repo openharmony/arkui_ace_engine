@@ -886,6 +886,13 @@ void FocusHub::RequestFocus() const
     if (IsCurrentFocus()) {
         return;
     }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (!frameNode->IsOnMainTree()) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS,
+            "Can't find Node %{public}s/%{public}d on tree, please check the timing of the function call.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
+    }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());
@@ -2581,9 +2588,12 @@ void FocusHub::DumpFocusScopeTreeInJson(int32_t depth)
 {
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
     std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+    std::list<RefPtr<FocusHub>> focusNodes;
+    GetChildrenFocusHub(focusNodes);
     std::string information = GetFrameName();
     information += IsCurrentFocus() ? "(Scope*)" : "(Scope)";
     auto frameId = GetFrameId();
+    children->Put("childSize", static_cast<int32_t>(focusNodes.size()));
     children->Put("id", frameId);
     if (GetInspectorKey().has_value()) {
         children->Put("idstr", GetInspectorKey().value().c_str());
@@ -2620,8 +2630,6 @@ void FocusHub::DumpFocusScopeTreeInJson(int32_t depth)
     std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
     auto prefix = DumpLog::GetInstance().GetPrefix(depth);
     DumpLog::GetInstance().PrintJson(prefix + jsonstr);
-    std::list<RefPtr<FocusHub>> focusNodes;
-    GetChildrenFocusHub(focusNodes);
     for (const auto& child : focusNodes) {
         child->DumpFocusTree(depth + 1, true);
     }
@@ -2638,6 +2646,7 @@ void FocusHub::DumpFocusNodeTreeInJson(int32_t depth)
         information += "(Node)";
     }
     auto frameId = GetFrameId();
+    children->Put("childSize", 0);
     children->Put("id", frameId);
     if (GetInspectorKey().has_value()) {
         children->Put("idstr", GetInspectorKey().value().c_str());

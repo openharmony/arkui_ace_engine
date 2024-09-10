@@ -136,6 +136,7 @@ ohos_source_set("ace_components_base") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
@@ -416,6 +417,8 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
+    "$ace_root/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
+    "$ace_root/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
     "$ace_root/frameworks/core/common/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/event_dump.cpp",
@@ -840,7 +843,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_presentation_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.cpp",
@@ -1132,6 +1134,9 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/water_flow_sections.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_provider.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_controller_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.cpp",

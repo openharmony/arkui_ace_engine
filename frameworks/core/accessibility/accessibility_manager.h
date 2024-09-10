@@ -16,14 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_MANAGER_H
 
+#include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_node.h"
+#include "core/accessibility/accessibility_constants.h"
+#include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
+class AccessibilityElementOperator;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
@@ -48,9 +52,36 @@ struct AccessibilityEvent {
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
 };
 
+enum class OperatorType {
+    UNDEFINE = 1,
+    JS_UIEXTENSION,
+    JS_WEB,
+    JS_THIRD_PROVIDER,
+};
+
+struct Registration {
+    uint32_t windowId = 0;
+    uint32_t parentWindowId = 0;
+    int32_t parentTreeId = 0;
+    int64_t elementId = 0;
+    OperatorType operatorType = OperatorType::UNDEFINE;
+    WeakPtr<NG::FrameNode> hostNode;
+    WeakPtr<AccessibilityProvider> accessibilityProvider;
+};
+
 enum class AccessibilityVersion {
     JS_VERSION = 1,
     JS_DECLARATIVE_VERSION,
+};
+
+struct AccessibilityParentRectInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    float scaleX = 1.0f;       // scale of parent interface
+    float scaleY = 1.0f;       // scale of parent interface
+    int32_t centerX = 0;       // center X of parent interface relative to real window
+    int32_t centerY = 0;       // center Y scale of parent interface relative to real window
+    int32_t rotateDegree = 0;  // final rotate degree of parent interface
 };
 
 class AccessibilitySAObserverCallback {
@@ -187,6 +218,8 @@ public:
     virtual void RegisterInteractionOperationAsChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) {};
+    virtual void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) {};
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
@@ -195,6 +228,21 @@ public:
         int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
 
     virtual void DeregisterAccessibilitySAObserverCallback(int64_t elementId) {};
+
+    virtual bool RegisterInteractionOperationAsChildTree(
+        const Registration& registration) { return false; };
+    virtual bool DeregisterInteractionOperationAsChildTree(
+        uint32_t windowId, int32_t treeId) { return false; };
+
+    virtual void TransferThirdProviderHoverEvent(
+        int64_t elementId, const NG::PointF &point, SourceType source,
+        NG::AccessibilityHoverEventType eventType, TimeStamp time) {};
+
+    virtual bool OnDumpChildInfoForThird(
+        int64_t hostElementId, const std::vector<std::string> &params, std::vector<std::string> &info)
+    {
+        return false;
+    }
 
     bool IsRegister()
     {

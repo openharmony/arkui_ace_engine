@@ -410,7 +410,7 @@ void FocusManager::WindowFocus(bool isFocus)
         return;
     }
     WindowFocusMoveStart();
-    FocusSwitchingStart(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
+    FocusManager::FocusGuard guard(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
     auto curFocusView = GetLastFocusView().Upgrade();
     auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     if (!curFocusViewHub) {
@@ -434,7 +434,10 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
+        auto focusDepend = rootFocusHub->GetFocusDependence();
+        rootFocusHub->SetFocusDependence(FocusDependence::SELF);
         rootFocusHub->RequestFocusImmediately();
+        rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
 }

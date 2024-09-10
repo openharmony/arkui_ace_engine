@@ -25,26 +25,25 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr int64_t RESPONSE_TIMEOUT = 60000000;
-constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
+constexpr int64_t RESPONSE_TIMEOUT = 600000000;
+constexpr int64_t STARTAPP_FRAME_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
 // Obtain the last three digits of the full path
-constexpr int32_t PATH_DEPTH = 3;
+constexpr uint32_t PATH_DEPTH = 3;
 
 std::string ParsePageUrl(const std::string& pagePath)
 {
     std::string res;
     std::vector<std::string> paths;
     StringUtils::StringSplitter(pagePath, '/', paths);
-    if (paths.empty() || paths.size() < PATH_DEPTH) {
+    uint32_t pathSize = paths.size();
+    if (pathSize < PATH_DEPTH) {
         return pagePath;
     }
-    vector<string>::iterator it = paths.end();
-    for (int i = 0; i < PATH_DEPTH; i++) {
-        it--;
-        res = '/' + *it + res;
+    for (uint32_t i = pathSize - PATH_DEPTH; i < pathSize; i++) {
+        res = res + "/" + paths[i];
     }
     return res;
 }
@@ -137,7 +136,7 @@ void ReportPerfEventToRS(DataBase& data)
             }
         case EVENT_COMPLETE:
             {
-                if (data.isDisplayAnimator) {
+                if (data.needReportRs) {
                     ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS sceneId = %s, uniqueId = %lld",
                         dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);

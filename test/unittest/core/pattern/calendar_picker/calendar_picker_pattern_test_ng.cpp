@@ -19,9 +19,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-
-#define private public
-#define protected public
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -67,9 +65,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -372,12 +367,24 @@ HWTEST_F(CalendarPickerPatternTestNg, HandleYearKeyWaitingEvent001, TestSize.Lev
     std::function<void()> zeroStartTask = []() {};
     pickerPattern->yearPrefixZeroCount_ = 2;
     pickerPattern->yearEnterCount_ = 3;
-    pickerPattern->HandleYearKeyWaitingEvent(0, task, zeroStartTask);
-
+    bool res = pickerPattern->HandleYearKeyWaitingEvent(0, task, zeroStartTask);
+    EXPECT_TRUE(res);
+    pickerPattern->yearPrefixZeroCount_ = 2;
+    pickerPattern->yearEnterCount_ = 3;
+    res = pickerPattern->HandleYearKeyWaitingEvent(-1, task, zeroStartTask);
+    EXPECT_TRUE(res);
     pickerPattern->yearPrefixZeroCount_ = 3;
     pickerPattern->yearEnterCount_ = 4;
-    bool res = pickerPattern->HandleYearKeyWaitingEvent(0, task, zeroStartTask);
+    res = pickerPattern->HandleYearKeyWaitingEvent(0, task, zeroStartTask);
     EXPECT_FALSE(res);
+    pickerPattern->yearPrefixZeroCount_ = 3;
+    pickerPattern->yearEnterCount_ = 4;
+    res = pickerPattern->HandleYearKeyWaitingEvent(-1, task, zeroStartTask);
+    EXPECT_TRUE(res);
+    pickerPattern->yearPrefixZeroCount_ = 3;
+    pickerPattern->yearEnterCount_ = 5;
+    res = pickerPattern->HandleYearKeyWaitingEvent(-1, task, zeroStartTask);
+    EXPECT_TRUE(res);
 }
 
 /**

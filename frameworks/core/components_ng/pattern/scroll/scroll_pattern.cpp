@@ -229,6 +229,9 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
+    if (LessNotEqual(scrollableDistance_, 0.0f)) {
+        return LessOrEqual(currentOffset_, 0.0f);
+    }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 
@@ -562,8 +565,10 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
         static_cast<int32_t>(host->GetAccessibilityId()));
-    ScrollBy(distance, distance, smooth);
-    scrollEdgeType_ = scrollEdgeType;
+    if (!NearZero(distance)) {
+        ScrollBy(distance, distance, smooth);
+        scrollEdgeType_ = scrollEdgeType;
+    }
 }
 
 void ScrollPattern::CheckScrollToEdge()
