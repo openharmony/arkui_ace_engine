@@ -21,6 +21,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/event/key_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -101,6 +102,15 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_MOVE_END, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
 };
+
+void TextInputClient::NotifyKeyboardHeight(uint32_t height)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetkeyboardHeightConsideringUIExtension(height);
+}
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {

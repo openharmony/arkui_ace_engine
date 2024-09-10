@@ -152,11 +152,7 @@ void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(manager);
-        manager->SetkeyboardHeightConsideringUIExtension(height);
+        client->NotifyKeyboardHeight(height);
     };
     PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
 }
@@ -327,6 +323,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
                 client->NotifyKeyboardClosedByUser();
             }
             client->NotifyKeyboardClosed();
+            client->NotifyKeyboardHeight(0);
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }

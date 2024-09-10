@@ -459,7 +459,7 @@ uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaMa
     }
 
     // Determine whether the menu is an AI menu
-    if (props->GetIsRectInTargetValue(false)) {
+    if (props->GetIsRectInTargetValue(false) && !safeAreaManager->IsNeedAvoidWindow()) {
         if (LessOrEqual(keyboardHeight, 0)) {
             keyboardHeight = safeAreaManager->GetkeyboardHeightConsideringUIExtension();
         }
