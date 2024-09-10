@@ -335,6 +335,18 @@ void SessionWrapperImpl::InitAllCallback()
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
+Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionViewportConfig& config)
+{
+    Rosen::SessionViewportConfig config_ = {
+        .isDensityFollowHost_ = config.isDensityFollowHost_,
+        .density_ = config.density_,
+        .displayId_ = config.displayId_,
+        .orientation_ = config.orientation_,
+        .transform_ = config.transform_,
+    };
+    return config_;
+}
+
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
@@ -394,7 +406,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     extensionSessionInfo.realParentId_ = static_cast<int32_t>(realHostWindowId);
     extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
-    extensionSessionInfo.config_ = *reinterpret_cast<Rosen::SessionViewportConfig*>(&sessionViewportConfig);
+    extensionSessionInfo.config_ = ConvertToRosenSessionViewportConfig(sessionViewportConfig);
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     UpdateSessionConfig();
@@ -872,7 +884,7 @@ void SessionWrapperImpl::UpdateSessionViewportConfig()
     UIEXT_LOGI("SessionViewportConfig: isDensityFollowHost_ = %{public}d, density_ = %{public}f, "
                "displayId_ = %{public}" PRIu64", orientation_ = %{public}d, transform_ = %{public}d",
         config.isDensityFollowHost_, config.density_, config.displayId_, config.orientation_, config.transform_);
-    session_->UpdateSessionViewportConfig(*reinterpret_cast<Rosen::SessionViewportConfig*>(&config));
+    session_->UpdateSessionViewportConfig(ConvertToRosenSessionViewportConfig(config));
 }
 
 /***************************** End: The interface to control the display area and the avoid area **********************/

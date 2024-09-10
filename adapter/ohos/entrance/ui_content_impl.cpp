@@ -423,12 +423,15 @@ public:
                 ContainerScope scope(instanceId_);
                 auto uiExtMgr = pipeline->GetUIExtensionManager();
                 if (uiExtMgr) {
-                    SetUIExtensionImeShow(keyboardRect, pipeline);
+                    SetUIExtensionImeShow(keyboardRect);
                 }
                 if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
                     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "uiExtension consumed");
                     taskExecutor->PostTask(
-                        [context] {
+                        [id = instanceId_] {
+                            auto container = Platform::AceContainer::GetContainer(id);
+                            CHECK_NULL_VOID(container);
+                            auto context = container->GetPipelineContext();
                             CHECK_NULL_VOID(context);
                             context->OnVirtualKeyboardAreaChange(Rect());
                         },
@@ -449,20 +452,24 @@ public:
     }
 
 private:
-    void SetUIExtensionImeShow(const Rect& keyboardRect, const RefPtr<NG::PipelineContext>& pipeline)
+    void SetUIExtensionImeShow(const Rect& keyboardRect)
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         if (GreatNotEqual(keyboardRect.Height(), 0.0f)) {
             taskExecutor->PostTask(
-                [pipeline] {
+                [id = instanceId_] {
+                    ContainerScope scope(id);
+                    auto pipeline = NG::PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(pipeline);
                     pipeline->SetUIExtensionImeShow(true);
                 }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeShow");
         } else {
             taskExecutor->PostTask(
-                [pipeline] {
+                [id = instanceId_] {
+                    ContainerScope scope(id);
+                    auto pipeline = NG::PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(pipeline);
                     pipeline->SetUIExtensionImeShow(false);
                 }, TaskExecutor::TaskType::UI, "ArkUISetUIExtensionImeHide");
@@ -2496,7 +2503,9 @@ void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config
     CHECK_NULL_VOID(taskExecutor);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto updateSessionViewportConfigTask = [context, config]() {
+    auto updateSessionViewportConfigTask = [id = instanceId_, config]() {
+        ContainerScope scope(id);
+        auto context = NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto uiExtMgr = context->GetUIExtensionManager();
         if (uiExtMgr) {
