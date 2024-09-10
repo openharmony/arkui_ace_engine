@@ -29,24 +29,22 @@ bool IsTapClick(const RefPtr<NG::Gesture>& gesture)
     return tap && (tap->GetTapCount() == 1) && (tap->GetFingers() == 1);
 }
 
-GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture)
+bool HasTapClick(const RefPtr<NG::Gesture>& gesture)
 {
     if (IsTapClick(gesture)) {
-        auto tapGesture = AceType::DynamicCast<NG::TapGesture>(gesture);
-        return tapGesture->GetOnActionId();
+        return true;
     }
     auto group = AceType::DynamicCast<NG::GestureGroup>(gesture);
     if (!group) {
-        return nullptr;
+        return false;
     }
     auto list = group->GetGestures();
     for (auto tap : list) {
         if (IsTapClick(tap)) {
-            auto tapGesture = AceType::DynamicCast<NG::TapGesture>(tap);
-            return tapGesture->GetOnActionId();
+            return true;
         }
     }
-    return nullptr;
+    return false;
 }
 } // namespace
 
@@ -86,12 +84,10 @@ void GestureModelNG::Finish()
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->AddGesture(gesture);
 
-    GestureEventFunc clickEvent = GetTapGestureEventFunc(gesture);
-    if (clickEvent) {
+    if (HasTapClick(gesture)) {
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);
-        focusHub->SetOnClickCallback(std::move(clickEvent));
     }
 }
 
