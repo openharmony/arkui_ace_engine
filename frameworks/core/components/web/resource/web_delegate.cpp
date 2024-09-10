@@ -7253,4 +7253,11 @@ void WebDelegate::StartVibraFeedback(const std::string& vibratorType)
     CHECK_NULL_VOID(webPattern);
     webPattern->StartVibraFeedback(vibratorType);
 }
+
+bool WebDelegate::CloseImageOverlaySelection()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->CloseImageOverlaySelection();
+}
 } // namespace OHOS::Ace
