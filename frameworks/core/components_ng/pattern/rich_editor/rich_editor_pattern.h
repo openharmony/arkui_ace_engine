@@ -218,6 +218,9 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
