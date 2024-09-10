@@ -1045,4 +1045,14 @@ void ScrollBarPattern::GetAxisDumpInfo(std::unique_ptr<JsonValue>& json)
         }
     }
 }
+
+void ScrollBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("enableNestedScroll", enableNestedSorll_ ? "true" : "false", filter);
+}
 } // namespace OHOS::Ace::NG
