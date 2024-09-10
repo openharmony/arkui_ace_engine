@@ -53,7 +53,7 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<RatingLayoutAlgorithm>(
-            foregroundImageLoadingCtx_, secondaryImageLoadingCtx_, backgroundImageLoadingCtx_);
+            foregroundImageLoadingCtx_, secondaryImageLoadingCtx_, backgroundImageLoadingCtx_, backgroundImageFocusLoadingCtx_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -115,6 +115,8 @@ private:
     void LoadSecondary(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
+    void LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
     void UpdatePaintConfig();
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
@@ -178,14 +180,17 @@ private:
     RefPtr<ImageLoadingContext> foregroundImageLoadingCtx_;
     RefPtr<ImageLoadingContext> secondaryImageLoadingCtx_;
     RefPtr<ImageLoadingContext> backgroundImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> backgroundImageFocusLoadingCtx_;
 
     RefPtr<RatingModifier> ratingModifier_;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
+    RefPtr<CanvasImage> backgroundImageFocusCanvas_;
     ImagePaintConfig foregroundConfig_;
     ImagePaintConfig secondaryConfig_;
     ImagePaintConfig backgroundConfig_;
+    ImagePaintConfig backgroundFocusConfig_;
     uint32_t imageReadyStateCode_ = 0;
     uint32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;

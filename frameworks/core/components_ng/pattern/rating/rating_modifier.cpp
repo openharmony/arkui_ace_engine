@@ -100,6 +100,7 @@ void RatingModifier::PaintStar(DrawingContext& context)
     const ImagePainter foregroundImagePainter(foregroundImageCanvas_);
     const ImagePainter secondaryImagePainter(secondaryImageCanvas_);
     const ImagePainter backgroundPainter(backgroundImageCanvas_);
+    const ImagePainter backgroundFocusPainter(backgroundImageFocusCanvas_);
 
     auto& canvas = context.canvas;
     auto offset = contentOffset_->Get();
@@ -148,12 +149,19 @@ void RatingModifier::PaintStar(DrawingContext& context)
     }
 
     // step4: draw background image.
-    for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
+    if (foregroundImageRepeatNum == 0 && isFocus_) {
+        isScore_ = true;
+        backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize);
+        offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
+    }
+    int32_t i = isScore_ ? 1 : 0;
+    for (; i < backgroundImageRepeatNum; i++) {
         backgroundPainter.DrawImage(canvas, offsetTemp, contentSize);
         if (i < backgroundImageRepeatNum - 1) {
             offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
         }
     }
+    isScore_ = false;
 }
 
 void RatingModifier::PaintReverseStar(DrawingContext& context)

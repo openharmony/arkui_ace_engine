@@ -50,16 +50,19 @@ public:
 
     void UpdateCanvasImage(const RefPtr<CanvasImage>& foregroundImageCanvas,
         const RefPtr<CanvasImage>& secondaryImageCanvas, const RefPtr<CanvasImage>& backgroundImageCanvas,
+        const RefPtr<CanvasImage>& backgroundImageFocusCanvas,
         const ImagePaintConfig& foregroundConfig, const ImagePaintConfig& secondaryConfig,
-        const ImagePaintConfig& backgroundConfig)
+        const ImagePaintConfig& backgroundConfig, const ImagePaintConfig& backgroundFocusConfig)
     {
         SetNeedDraw(true);
         foregroundImageCanvas_ = foregroundImageCanvas;
         secondaryImageCanvas_ = secondaryImageCanvas;
         backgroundImageCanvas_ = backgroundImageCanvas;
+        backgroundImageFocusCanvas_ = backgroundImageFocusCanvas;
         foregroundImageCanvas_->SetPaintConfig(foregroundConfig);
         secondaryImageCanvas_->SetPaintConfig(secondaryConfig);
         backgroundImageCanvas_->SetPaintConfig(backgroundConfig);
+        backgroundImageFocusCanvas_->SetPaintConfig(backgroundFocusConfig);
     }
 
     void UpdateImageSourceInfo(
@@ -223,9 +226,11 @@ private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
     bool isFocus_ = false;
+    bool isScore_ = false;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
+    RefPtr<CanvasImage> backgroundImageFocusCanvas_;
     ImageSourceInfo foreground_;
     ImageSourceInfo secondary_;
     ImageSourceInfo background_;
