@@ -1844,10 +1844,10 @@ struct ArkUICommonModifier {
     void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
     void (*resetDragPreview)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
     void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
         ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
@@ -3337,10 +3337,11 @@ struct ArkUICheckboxModifier {
     void (*setCheckboxHeight)(ArkUINodeHandle node, ArkUI_Float32 heightVal, ArkUI_Int32 heightUnit);
     void (*setMark)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit,
         ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit);
-    void (*setCheckboxPadding)(
-        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
-    void (*setCheckboxResponseRegion)(
-        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
+
+    void (*setCheckboxPadding)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Uint32 length);
+    void (*setCheckboxResponseRegion)(ArkUINodeHandle node, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Uint32 length);
 
     void (*resetSelect)(ArkUINodeHandle node);
     void (*resetSelectedColor)(ArkUINodeHandle node);
@@ -4788,8 +4789,8 @@ struct ArkUINodeModifiers {
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
     const ArkUIRelativeContainerModifier* (*getRelativeContainerModifier)();
-    const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
+    const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
     const ArkUISymbolSpanModifier* (*getSymbolSpanModifier)();
     const ArkUIComponent3DModifier* (*getComponent3DModifier)();

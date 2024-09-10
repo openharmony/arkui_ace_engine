@@ -6202,7 +6202,7 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+        ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop };
 
     return &modifier;
 }
