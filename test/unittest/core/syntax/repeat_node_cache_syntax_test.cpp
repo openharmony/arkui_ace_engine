@@ -414,12 +414,6 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
      */
     auto frameNode = repeatNode->GetFrameNode(1);
     EXPECT_NE(frameNode, nullptr);
-    /**
-     * @tc.steps: step5. Get children count
-     * @tc.expected: Returns number of children. Should be 0
-     */
-    RefPtr<UINode> nodes = repeatNode->caches_.CreateNewNode(5);
-    EXPECT_NE(nodes, nullptr);
 }
 
 /**

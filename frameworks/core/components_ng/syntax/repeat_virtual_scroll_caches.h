@@ -304,7 +304,7 @@ private:
     std::unordered_map<std::string, CacheItem> node4key_;
 
     // for tracking reused/recycled nodes
-    std::unordered_set<int32_t> reusedNodeIds;
+    std::unordered_set<int32_t> reusedNodeIds_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

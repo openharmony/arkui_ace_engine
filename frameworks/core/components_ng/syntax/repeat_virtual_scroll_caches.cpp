@@ -183,7 +183,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     CHECK_NULL_VOID(child);
 
     // if node is already reused, do nothing
-    if (reusedNodeIds.emplace(child->GetId()).second == false) {
+    if (reusedNodeIds_.emplace(child->GetId()).second == false) {
         return;
     }
 
@@ -209,7 +209,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
     CHECK_NULL_VOID(child);
 
     // if node is not reused currently, do nothing
-    if (reusedNodeIds.erase(child->GetId()) == 0) {
+    if (reusedNodeIds_.erase(child->GetId()) == 0) {
         return;
     }
 
