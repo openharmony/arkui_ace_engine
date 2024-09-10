@@ -277,8 +277,6 @@ public:
     void UpdateContextRect(
         const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
 
-    void OnNavBarStateChange(bool modeChange);
-
     bool GetNavigationModeChange() const
     {
         return navigationModeChange_;
@@ -311,11 +309,13 @@ public:
 
     void OnNavigationModeChange(bool modeChange);
 
-    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
+    void OnNavBarStateChange(bool modeChange);
 
     static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
 
     static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
+
+    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
 
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
@@ -323,6 +323,7 @@ public:
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
+    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -359,8 +360,6 @@ public:
     void AddToDumpManager();
     void RemoveFromDumpManager();
 
-    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
-        NavDestinationLifecycle lifecycle, bool isNavigationChanged);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
     void SetParentCustomNode(const RefPtr<UINode>& parentNode)
@@ -372,6 +371,8 @@ public:
     {
         return parentNode_;
     }
+    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
+        NavDestinationLifecycle lifecycle, bool isNavigationChanged);
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
 
@@ -391,14 +392,14 @@ public:
         return isFinishInteractiveAnimation_;
     }
 
-    bool IsCurTopNewInstance() const
-    {
-        return isCurTopNewInstance_;
-    }
-
     const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
     {
         return currentProxy_;
+    }
+
+    bool IsCurTopNewInstance() const
+    {
+        return isCurTopNewInstance_;
     }
 
     const std::vector<std::pair<std::string, WeakPtr<UINode>>>& GetAllNavDestinationNodesPrev()
@@ -489,12 +490,13 @@ private:
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
     void ProcessAutoSave(const RefPtr<FrameNode>& node);
-    void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
+
+    void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
     void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, bool isNeedInVisible = false);

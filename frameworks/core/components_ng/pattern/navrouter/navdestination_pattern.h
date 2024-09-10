@@ -301,7 +301,6 @@ private:
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H
