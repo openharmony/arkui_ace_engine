@@ -4799,7 +4799,6 @@ struct ArkUIBasicAPI {
     ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
     ArkUINodeHandle (*createNodeWithParams)(
         ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags, const ArkUI_Params& params);
-    ArkUINodeHandle (*getNodeByViewStack)();
     void (*disposeNode)(ArkUINodeHandle node);
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getName)(ArkUINodeHandle node);
