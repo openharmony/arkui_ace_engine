@@ -133,11 +133,6 @@ if (is_ohos_standard_system) {
       }
     }
 
-    # The dynamic library here is used for local testing of the previewer.
-    if (enable_glfw_window) {
-      deps += [ "$ace_root/adapter/preview/entrance/samples:previewer_demo" ]
-    }
-
     sources = [
       "//third_party/icu/ohos_icu4j/data/icudt72l.dat",
       "//third_party/skia/src/ports/skia_ohos/config/fontconfig.json",
