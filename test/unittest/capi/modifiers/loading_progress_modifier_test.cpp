@@ -29,9 +29,9 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
+namespace {
 const Color THEME_LOADING_COLOR(0xFFAABBCC);
 
-namespace {
 inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
     const char *module = "", const char *bundle = "")
@@ -82,11 +82,11 @@ public:
 };
 
 /**
- * @tc.name: LoadingProgressModifierTest001
- * @tc.desc: Test color attribute
+ * @tc.name: setColorTest
+ * @tc.desc: Test setColor function
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressModifierTest, LoadingProgressModifierTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressModifierTest, setColorTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("color");
     ASSERT_NE(modifier_->setColor, nullptr);
@@ -132,11 +132,11 @@ HWTEST_F(LoadingProgressModifierTest, LoadingProgressModifierTest001, TestSize.L
 }
 
 /**
- * @tc.name: LoadingProgressModifierTest001
- * @tc.desc: Test enableLoading attribute
+ * @tc.name: setEnableLoadingTest
+ * @tc.desc: Test setEnableLoading function
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressModifierTest, LoadingProgressModifierTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressModifierTest, setEnableLoadingTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("enableLoading");
     ASSERT_NE(modifier_->setEnableLoading, nullptr);
