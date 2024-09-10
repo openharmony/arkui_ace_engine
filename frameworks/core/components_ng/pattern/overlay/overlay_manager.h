@@ -571,6 +571,14 @@ public:
     {
         return gatherNodeChildrenInfo_;
     }
+    bool IsGatherWithMenu() const
+    {
+        return isGatherWithMenu_;
+    }
+    void SetIsGatherWithMenu(bool isGatherWithMenu)
+    {
+        isGatherWithMenu_ = isGatherWithMenu;
+    }
     void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
     void RemovePreviewBadgeNode();
     void CreateOverlayNode();
@@ -857,6 +865,7 @@ private:
     int32_t dismissPopupId_ = 0;
 
     bool hasGatherNode_ { false };
+    bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;

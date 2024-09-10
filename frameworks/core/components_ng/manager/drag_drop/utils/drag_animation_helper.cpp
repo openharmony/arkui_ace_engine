@@ -159,6 +159,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetIsTouchGatherAnimationPlaying(true);
+    manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(actuator, manager);
 }
@@ -250,11 +251,14 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameNodeSize = geometryNode->GetFrameSize();
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    GatherAnimationInfo gatherAnimationInfo = { PIXELMAP_DRAG_SCALE_MULTIPLE, frameNodeSize.Width(),
+        frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
     AnimationUtils::Animate(
         option,
-        [overlayManager, gatherNodeCenter, frameNodeSize]() {
-            DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, PIXELMAP_DRAG_SCALE_MULTIPLE,
-                frameNodeSize.Width(), frameNodeSize.Height());
+        [overlayManager, gatherAnimationInfo]() {
+            DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
         },
         option.GetOnFinishEvent());
 }
@@ -360,5 +364,40 @@ void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(BADGE_DEFAULT_SIZE);
     textRenderContext->UpdateBorderRadius(borderRadius);
+}
+
+void DragAnimationHelper::UpdateGatherNodeToTop()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
+}
+
+void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetIsGatherWithMenu(true);
+
+    mainPipeline->AddAfterRenderTask([weakWrapperNode = AceType::WeakClaim(AceType::RawPtr(menuWrapperNode)),
+        weakManager = AceType::WeakClaim(AceType::RawPtr(manager))]() {
+        auto menuWrapperNode = weakWrapperNode.Upgrade();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto manager = weakManager.Upgrade();
+        auto textNode = menuWrapperPattern->GetBadgeNode();
+        auto imageNode = menuWrapperPattern->GetPreview();
+        auto menuNode = menuWrapperPattern->GetMenu();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
+    });
 }
 }

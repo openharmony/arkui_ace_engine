@@ -2097,10 +2097,10 @@ void DragEventActuator::HandleTouchUpEvent()
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetHasGatherNode(false);
     DragAnimationHelper::PlayNodeResetAnimation(Claim(this));
-    auto preDragStatus = dragDropManager->GetPreDragStatus();
     ResetResponseRegion();
-    if (preDragStatus >= PreDragStatus::ACTION_DETECTING_STATUS &&
-        preDragStatus < PreDragStatus::PREVIEW_LIFT_FINISHED && IsNeedGather()) {
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    if (IsNeedGather() && !manager->IsGatherWithMenu()) {
         SetGatherNode(nullptr);
         ClearGatherNodeChildrenInfo();
         auto manager = pipelineContext->GetOverlayManager();
