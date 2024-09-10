@@ -693,6 +693,11 @@ public:
                 .count());
     }
 
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
+
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;

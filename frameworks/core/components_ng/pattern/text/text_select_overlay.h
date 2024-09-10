@@ -58,7 +58,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
 
     void UpdateHandleGlobalOffset()
     {

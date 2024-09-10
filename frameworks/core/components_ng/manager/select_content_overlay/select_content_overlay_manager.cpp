@@ -184,11 +184,12 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
     if (!callback->IsRegisterHandleCallback()) {
         return;
     }
-    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isFirst) {
-        auto overlayCallback = weakCallback.Upgrade();
-        CHECK_NULL_VOID(overlayCallback);
-        overlayCallback->OnHandleMoveStart(isFirst);
-    };
+    info.onHandleMoveStart =
+        [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isFirst) {
+            auto overlayCallback = weakCallback.Upgrade();
+            CHECK_NULL_VOID(overlayCallback);
+            overlayCallback->OnHandleMoveStart(event, isFirst);
+        };
     info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);

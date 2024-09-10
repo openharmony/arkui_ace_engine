@@ -3521,7 +3521,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         CHECK_NULL_VOID(webPattern);
         webPattern->OnSelectHandleMove(handleRect, isFirst);
     };
-    selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
+    selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](const GestureEvent& event, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->OnSelectHandleStart(isFirst);
