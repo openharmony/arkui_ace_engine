@@ -815,16 +815,12 @@ void TextContentModifier::SetTextDecorationColor(const Color& color, bool isRese
     }
 }
 
-void TextContentModifier::SetBaselineOffset(const Dimension& value, bool isReset)
+void TextContentModifier::SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
-    float baselineOffsetValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        baselineOffsetValue = pipelineContext->NormalizeToPx(value);
-    } else {
-        baselineOffsetValue = value.Value();
-    }
+    float baselineOffsetValue = 0.0f;
     if (!isReset) {
+        baselineOffsetValue = value.ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         baselineOffset_ = Dimension(baselineOffsetValue);
     } else {
         baselineOffset_ = std::nullopt;

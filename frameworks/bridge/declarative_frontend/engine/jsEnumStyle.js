@@ -3311,11 +3311,11 @@ var StyledStringKey;
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let FocusPriority;
