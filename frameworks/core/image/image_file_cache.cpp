@@ -26,6 +26,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
