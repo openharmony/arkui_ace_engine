@@ -476,7 +476,7 @@ public:
     {
         ACE_SCOPED_TRACE("OnAvoidAreaChanged: incoming avoidArea: %s, instanceId %d, type %d",
             avoidArea.ToString().c_str(), instanceId_, type);
-        LOGI("Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
+        TAG_LOGI(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
             avoidArea.ToString().c_str(), instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
@@ -2495,8 +2495,8 @@ void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
+    TAG_LOGI(ACE_LAYOUT, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);

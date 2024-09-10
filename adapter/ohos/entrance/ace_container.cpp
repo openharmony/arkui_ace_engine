@@ -2308,8 +2308,8 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        LOGI("SafeArea get success, area type is:%{public}d insets area is:%{public}s", static_cast<int32_t>(type),
-            safeAreaInsets.ToString().c_str());
+        TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
+            static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
     return {};
