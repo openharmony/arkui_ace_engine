@@ -56,6 +56,9 @@
 #endif
 #include "core/image/image_file_cache.h"
 #include "core/pipeline/pipeline_context.h"
+#ifdef COMPONENT_TEST_ENABLED
+#include "component_test/pipeline_status.h"
+#endif // COMPONENT_TEST_ENABLED
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
@@ -887,6 +890,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
+#ifdef COMPONENT_TEST_ENABLED
+    ComponentTest::UpdatePipelineStatus();
+#endif // COMPONENT_TEST_ENABLED
 }
 
 void PipelineContext::FlushWindowPatternInfo()
