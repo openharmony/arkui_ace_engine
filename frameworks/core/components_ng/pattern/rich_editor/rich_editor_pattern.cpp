@@ -3845,7 +3845,7 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
         RefPtr<SpanItem> newSpanItem = MakeRefPtr<SpanItem>();
         auto spanStart = oldStart <= start ? 0 : oldStart - start;
         auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
-        spanStart += placeholderGains;
+        spanStart += static_cast<int32_t>(placeholderGains);
         if (spanItem->spanItemType == SpanItemType::NORMAL) {
             newSpanItem = spanItem->GetSameStyleSpanItem();
             newSpanItem->content = StringUtils::ToString(
@@ -3855,12 +3855,12 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
             newSpanItem->content = "![id" + std::to_string(index++) + "]";
             placeholderSpansMap_[newSpanItem->content] = spanItem;
             placeholderGains += PLACEHOLDER_LENGTH - SYMBOL_CONTENT_LENGTH;
-            spanEnd += placeholderGains;
+            spanEnd += static_cast<int32_t>(placeholderGains);
         } else {
             newSpanItem->content = "![id" + std::to_string(index++) + "]";
             placeholderSpansMap_[newSpanItem->content] = spanItem;
             placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH;
-            spanEnd += placeholderGains;
+            spanEnd += static_cast<int32_t>(placeholderGains);
         }
         newSpanItem->interval = {spanStart, spanEnd};
         newSpanItem->position = spanStart;
@@ -10326,7 +10326,7 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     info.secondHandle = textSelector_.secondHandle.ToString();
     info.selectStart = textSelector_.GetTextStart();
     info.selectEnd = textSelector_.GetTextEnd();
-    info.selectLength = info.selectEnd - info.selectStart;
+
     // serialize the sentenced-level text
     auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     RefPtr<SpanString> spanString = ToStyledString(0, textSize);
@@ -10357,6 +10357,7 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Selected range=[%{public}d--%{public}d], content = %{private}s",
         info.selectStart, info.selectEnd, spanString->GetString().c_str());
     spanString->EncodeTlv(info.selectBuffer);
+    info.selectLength = aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString());
 }
 
 void RichEditorPattern::HandleOnAIWrite()

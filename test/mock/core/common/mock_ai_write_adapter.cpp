@@ -17,6 +17,16 @@
 
 namespace OHOS::Ace {
 bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value) { return false; }
+uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::wstring& content)
+{
+    uint32_t length = 0;
+    for (uint32_t i = 0; i < content.length(); i++) {
+        if (content[i] != L' ' && content[i] != L'\n') {
+            length++;
+        }
+    }
+    return length;
+}
 void AIWriteAdapter::CloseModalUIExtension() {}
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     std::function<void(std::vector<uint8_t>&)> resultCallback) {}
