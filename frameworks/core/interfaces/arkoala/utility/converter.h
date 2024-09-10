@@ -128,7 +128,10 @@ namespace OHOS::Ace::NG::Converter {
     template<>
     inline FontWeight Convert(const Ark_Number& src)
     {
-        return src.tag == ARK_TAG_FLOAT32 ? static_cast<FontWeight>(src.f32) : static_cast<FontWeight>(src.i32);
+        auto str = std::to_string(
+            src.tag == ARK_TAG_FLOAT32 ? static_cast<int32_t>(src.f32) : src.i32
+        );
+        return Framework::ConvertStrToFontWeight(str);
     }
 
     template<>
@@ -144,16 +147,37 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
+    inline void AssignTo(std::optional<FontWeight>& dst, const Ark_Number& src)
+    {
+        auto str = std::to_string(src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32));
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(str); parseOk) {
+            dst = val;
+        } else {
+            dst.reset();
+        }
+    }
+
+    template<>
+    inline void AssignTo(std::optional<FontWeight>& dst, const Ark_String& src)
+    {
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+            dst = val;
+        } else {
+            dst.reset();
+        }
+    }
+
+    template<>
     inline Dimension Convert(const Ark_Resource& src)
     {
-        return CalcDimension();
+        return Dimension();
     }
 
     template<>
     inline Dimension Convert(const Ark_Length& src)
     {
         return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
-               CalcDimension() : CalcDimension(src.value, (DimensionUnit)src.unit);
+               Dimension() : Dimension(src.value, static_cast<DimensionUnit>(src.unit));
     }
 
     template<>
@@ -279,7 +303,7 @@ namespace OHOS::Ace::NG::Converter {
     {
         return Color::FromString(src.chars);
     }
-    
+
     bool ParseColorFromArkResource(const Ark_Resource &res, Color &result);
 
     template<>
@@ -372,7 +396,7 @@ namespace OHOS::Ace::NG::Converter {
         PaddingProperty padding;
         return padding;
     }
-    
+
     struct ImageResource {
         uint32_t type;
         std::string bundleName;
@@ -413,6 +437,22 @@ namespace OHOS::Ace::NG::Converter {
             case static_cast<Ark_LineCapStyle>(LineCap::BUTT): dst = LineCap::BUTT; break;
             default: LOGE("Unexpected enum value in Ark_LineCapStyle: %{public}d", src);
         }
+    }
+
+    template<>
+    inline Dimension Convert(const Ark_CustomObject& src)
+    {
+        LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
+        return Dimension();
+    }
+
+    template<>
+    inline FontMetaData Convert(const Ark_Font& src)
+    {
+        return {
+            OptConvert<Dimension>(src.size),
+            OptConvert<FontWeight>(src.weight),
+        };
     }
 } // namespace OHOS::Ace::NG::Converter
 

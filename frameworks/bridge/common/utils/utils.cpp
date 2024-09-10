@@ -373,6 +373,28 @@ RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault)
     return useDefault? Curves::EASE_IN_OUT : nullptr;
 }
 
+RefPtr<Curve> CreateCurve(int curveType, bool useDefault)
+{
+    static const LinearEnumMapNode<int, RefPtr<Curve>> curveMap[] = {
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR), Curves::LINEAR },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_EASE), Curves::EASE },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN), Curves::EASE_IN },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_EASE_OUT), Curves::EASE_OUT },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN_OUT), Curves::EASE_IN_OUT },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_SLOW_IN), Curves::FAST_OUT_SLOW_IN },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR_OUT_SLOW_IN), Curves::LINEAR_OUT_SLOW_IN },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_LINEAR_IN), Curves::FAST_OUT_LINEAR_IN },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_EXTREME_DECELERATION), Curves::EXTREME_DECELERATION },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_RHYTHM), Curves::RHYTHM },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_SHARP), Curves::SHARP },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_SMOOTH), Curves::SMOOTH },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_FRICTION), Curves::FRICTION },
+    };
+    auto index = BinarySearchFindIndex(curveMap, ArraySize(curveMap), curveType);
+    RefPtr<Curve> defaultCurve = useDefault? Curves::EASE_IN_OUT : nullptr;
+    return index < 0 ? defaultCurve : curveMap[index].value;
+}
+
 // create curve whose duration works. i.e not support spring
 RefPtr<Curve> CreateCurveExceptSpring(
     const std::string& aniTimFunc, const std::function<float(float)>& jsFunc)

@@ -5878,6 +5878,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
+    json->PutExtAttr("indicatorInteractive", isIndicatorInteractive_ ? "true" : "false", filter);
 
     if (indicatorIsBoolean_) {
         return;
@@ -5885,8 +5886,10 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
     auto indicatorType = GetIndicatorType();
     if (indicatorType == SwiperIndicatorType::DOT) {
+        json->Delete("indicator");
         json->PutExtAttr("indicator", SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
     } else {
+        json->Delete("indicator");
         json->PutExtAttr(
             "indicator", SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
     }

@@ -237,6 +237,9 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   }
 
   sources = [
+    "../../../bridge/common/dom/dom_type.cpp",
+    "../../../bridge/common/utils/utils.cpp",
+    "../../../bridge/js_frontend/engine/common/js_constants.cpp",
     "../../common/card_scope.cpp",
     "node/extension_companion_node.cpp",
     "node/node_adapter_impl.cpp",

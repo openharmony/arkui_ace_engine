@@ -34,5 +34,63 @@ inline std::string GetStringAttribute(ArkUINodeHandle node, const std::string &n
     }
     return {};
 }
+
+inline std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
+{
+    static const InspectorFilter inspector;
+
+    if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
+        if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
+            fnode->ToJsonValue(jsonVal, inspector);
+            return jsonVal;
+        }
+    }
+    return nullptr;
+}
+
+template <typename T>
+T GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey) = delete;
+
+template<>
+inline int GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    return jsonVal ? jsonVal->GetInt(attrKey) : int();
+}
+
+template<>
+inline std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    return jsonVal ? jsonVal->GetString(attrKey) : std::string();
+}
+
+template<>
+inline std::unique_ptr<JsonValue> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    return jsonVal ? jsonVal->GetObject(attrKey) : nullptr;
+}
+
+template<>
+inline bool GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    return jsonVal ? jsonVal->GetBool(attrKey) : bool();
+}
+
+template<>
+inline double GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    return jsonVal ? jsonVal->GetDouble(attrKey) : double();
+}
+
+template <typename T>
+inline T GetAttrValue(ArkUINodeHandle node, const std::string &attrKey)
+{
+    return GetAttrValue<T>(GetJsonValue(node), attrKey);
+}
+
+template <typename T>
+inline T GetAttrValue(const std::string &jsonObjAsStr, const std::string &attrKey)
+{
+    return GetAttrValue<T>(JsonUtil::ParseJsonData(jsonObjAsStr.c_str()), attrKey);
+}
 } // namespace OHOS::Ace::NG
 #endif
