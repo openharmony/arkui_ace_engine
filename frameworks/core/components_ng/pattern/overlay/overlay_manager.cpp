@@ -1519,10 +1519,8 @@ void OverlayManager::PopToast(int32_t toastId)
     auto toastProperty = toastUnderPop->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_VOID(toastProperty);
     toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CLOSE;
-    event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
-    pipeline->SendEventToAccessibility(event);
+    toastUnderPop->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::ClearToastInSubwindow()
