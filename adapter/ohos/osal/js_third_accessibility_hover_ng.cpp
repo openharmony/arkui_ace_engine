@@ -393,7 +393,7 @@ void AccessibilityHoverManagerForThirdNG::DumpPropertyForThird(
     }
 
     Accessibility::AccessibilityElementInfo info = infos.front();
-    jsAccessibilityManagerTemp->DumpCommonPropertyNG(info, splitTreeId); 
+    jsAccessibilityManagerTemp->DumpCommonPropertyNG(info, splitTreeId);
     jsAccessibilityManagerTemp->DumpAccessibilityPropertyNG(info);
     DumpLog::GetInstance().Print(0, info.GetComponentType(), info.GetChildCount());
 }
