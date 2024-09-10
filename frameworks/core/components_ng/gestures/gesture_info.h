@@ -113,6 +113,10 @@ public:
     {
         onActionId_ = std::make_unique<GestureEventFunc>(onActionId);
     }
+    GestureEventFunc GetOnActionId()
+    {
+        return *onActionId_;
+    }
     void SetOnActionStartId(const GestureEventFunc& onActionStartId)
     {
         onActionStartId_ = std::make_unique<GestureEventFunc>(onActionStartId);
