@@ -63,14 +63,11 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
                 event->BarCollectTouchTarget(
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
-            } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
-                event->BarCollectLongPressTarget(
-                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
-                event->CollectScrollableTouchTarget(
-                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
-            } else {
-                event->CollectScrollableTouchTarget(
-                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+            } else if (event->GetScrollable()) {
+                const auto& scrollable = event->GetScrollable();
+                scrollable->SetGetEventTargetImpl(getEventTargetImpl);
+                scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+                scrollable->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
             }
         }
         bool clickJudge = event->ClickJudge(localPoint);
@@ -115,15 +112,4 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
         item->ResetSwipeStatus();
     });
 }
-
-void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffset,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
-    {
-        if (scrollable_) {
-            scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
-            scrollable_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            scrollable_->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
-        }
-    }
 } // namespace OHOS::Ace::NG

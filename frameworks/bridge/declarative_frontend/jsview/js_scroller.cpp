@@ -27,6 +27,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
+constexpr Axis DIRECTION_TABLE[] = { Axis::VERTICAL, Axis::HORIZONTAL };
+
 constexpr AlignDeclaration::Edge EDGE_TABLE[] = {
     AlignDeclaration::Edge::TOP,
     AlignDeclaration::Edge::CENTER,
@@ -265,17 +267,14 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     if (!ConvertFromJSValue(obj->GetProperty("next"), next)) {
         return;
     }
-    bool smooth = false;
-    auto smoothValue = obj->GetProperty("animation");
-    if (smoothValue->IsBoolean()) {
-        smooth = smoothValue->ToBoolean();
-    }
+    Axis direction = Axis::NONE;
+    ConvertFromJSValue(obj->GetProperty("direction"), DIRECTION_TABLE, direction);
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         return;
     }
     ContainerScope scope(instanceId_);
-    scrollController->ScrollPage(!next, smooth);
+    scrollController->ScrollPage(!next, true);
 }
 
 void JSScroller::CurrentOffset(const JSCallbackInfo& args)
