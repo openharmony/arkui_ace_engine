@@ -47,7 +47,7 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     CHECK_NULL_VOID(executor);
     auto currentId = Container::CurrentIdSafely();
     auto container = Container::GetContainer(currentId);
-    if (!(container && container->IsUIExtensionWindow())) {
+    if (!(container && container->IsUIExtensionWindow()) || !pipelineContext->GetOnFoucs()) {
         return;
     }
     detectCount--;
