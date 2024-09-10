@@ -438,7 +438,7 @@ private:
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
 
-    bool IsTextFadeOut();
+    void InitTextFadeOut();
     void UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
     bool isFocusColumn_ = false;

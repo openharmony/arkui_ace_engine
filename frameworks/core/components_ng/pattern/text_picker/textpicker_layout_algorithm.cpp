@@ -34,6 +34,8 @@ const int32_t BUFFER_NODE_NUMBER = 2;
 const float DOUBLE_VALUE = 2.0f;
 constexpr double PERCENT_100 = 100.0;
 constexpr double PERCENT_120 = 1.2f;
+constexpr size_t MAX_CHILD_COUNT = 2;
+const Dimension ICON_TEXT_SPACE = 8.0_vp;
 
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
@@ -225,29 +227,28 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
 
 void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     SizeF frameSize = size;
-    CHECK_NULL_VOID(layoutWrapper->GetLayoutProperty());
-    auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
-    for (const auto& child : children) {
-        if (child == children.back()) {
-            auto frameNode  = child->GetHostNode();
-            CHECK_NULL_VOID(frameNode);
-            auto overlayNode = frameNode ->GetOverlayNode();
-            CHECK_NULL_VOID(overlayNode);
-            auto geometryNode = frameNode->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto overlayGeometryNode = overlayNode->GetGeometryNode();
-            CHECK_NULL_VOID(overlayGeometryNode);
-            auto textRect = geometryNode->GetFrameRect();
-            contentWrapper.selfIdealSize = { frameSize.Width() - textRect.Left(), textRect.Height() };
-            child->Measure(contentWrapper);
-            auto textFrameSize_ = geometryNode->GetMarginFrameSize();
-            overlayGeometryNode->SetFrameSize(textFrameSize_);
-            overlayNode->Layout();
-        }
+    if (children.size() != MAX_CHILD_COUNT) {
+        return;
     }
+    auto iconChild = children.front();
+    CHECK_NULL_VOID(iconChild);
+    auto frameNode  = iconChild->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto iconRect = geometryNode->GetFrameRect();
+    auto contentWrapper = layoutProperty->CreateChildConstraint();
+    contentWrapper.selfIdealSize = { frameSize.Width() - iconRect.Width() -
+        ICON_TEXT_SPACE.ConvertToPx(), frameSize.Height() };
+    auto textChild = children.back();
+    CHECK_NULL_VOID(textChild);
+    textChild->Measure(contentWrapper);
 }
 
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

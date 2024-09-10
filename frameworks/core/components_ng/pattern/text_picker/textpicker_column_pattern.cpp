@@ -105,6 +105,7 @@ void TextPickerColumnPattern::OnModifyDone()
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
+    InitTextFadeOut();
     InitSelectorButtonProperties(theme);
     auto showCount = GetShowOptionCount();
     InitMouseAndPressEvent();
@@ -254,15 +255,15 @@ void TextPickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& p
     }
 }
 
-bool TextPickerColumnPattern::IsTextFadeOut()
+void TextPickerColumnPattern::InitTextFadeOut()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, false);
+    CHECK_NULL_VOID(context);
     auto textTheme = context->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, false);
-    return textTheme->GetIsTextFadeout();
+    CHECK_NULL_VOID(textTheme);
+    isTextFadeOut_ = textTheme->GetIsTextFadeout();
 }
 
 void TextPickerColumnPattern::UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty)
