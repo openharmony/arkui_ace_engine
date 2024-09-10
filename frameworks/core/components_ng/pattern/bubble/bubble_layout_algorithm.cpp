@@ -1059,12 +1059,12 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     if (!targetNode->IsOnMainTree() && !targetNode->IsVisible()) {
         return;
     }
-    auto rect = targetNode->GetPaintRectToWindowWithTransform();
-    targetSize_ = rect.GetSize();
-    targetOffset_ = rect.GetOffset();
+    auto geometryNode = targetNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    targetSize_ = geometryNode->GetFrameSize();
     auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    
+    targetOffset_ = targetNode->GetPaintRectOffset();
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str());
     // Show in SubWindow
