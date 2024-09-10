@@ -4105,7 +4105,7 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-     if (blendMode == BlendMode::BACK_COMPAT_SOURCE_IN) {
+    if (blendMode == BlendMode::BACK_COMPAT_SOURCE_IN) {
         rsNode_->SetBackgroundShader(nullptr);
         rsNode_->SetColorBlendMode(Rosen::RSColorBlendMode::NONE);
     } else {
