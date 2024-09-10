@@ -75,7 +75,6 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(KeyboardAvoidMode, WebKeyboardAvoidMode);
