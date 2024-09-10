@@ -521,7 +521,7 @@ private:
 
 class PretendChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
 public:
-    explicit PretendChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit PretendChangedListener(int32_t instanceId) {}
     ~PretendChangedListener() = default;
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override {}
