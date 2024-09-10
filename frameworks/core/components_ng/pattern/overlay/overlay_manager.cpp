@@ -803,7 +803,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
-        SubwindowManager::GetInstance()->HideSubWindowNG();
+        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
 }
 
