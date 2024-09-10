@@ -7458,10 +7458,6 @@ class ObserveV2 {
     static IsMakeObserved(value) {
         return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
     }
-    static IsTrackedProperty(parentObj, prop) {
-        const trackedKey = ObserveV2.OB_PREFIX + prop;
-        return (parentObj && typeof (parentObj) === 'object' && trackedKey in parentObj);
-    }
     static getCurrentRecordedId() {
         const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
         return bound ? bound[0] : -1;
@@ -8872,54 +8868,15 @@ class MonitorV2 {
     // record / update object dependencies by reading each object along the path
     // return the value, i.e. the value of the last path item
     analysisProp(isInit, monitoredValue) {
-        let parentObj = this.target_; // main pointer
-        let specialCur; // special pointer for Array
-        let obj; // main property
-        let lastProp; // last property name in path
-        let specialProp; // property name for Array
-        let props = monitoredValue.props; // get the props
-        for (let i = 0; i < props.length; i++) {
-            lastProp = props[i]; // get the current property name
-            if (typeof parentObj === 'object' && Reflect.has(parentObj, lastProp)) {
-                obj = parentObj[lastProp]; // store property value, obj maybe Proxy added by V2
-                if (Array.isArray(UIUtilsImpl.instance().getTarget(obj))) {
-                    // if obj is Array, store the infomation at the 'first' time.
-                    // if we reset the specialCur, that means we do not need to care Array.
-                    if (!specialCur) {
-                        // only for the 'first' time, store infomation.
-                        // this is for multi-dimension array, only the first Array need to be checked.
-                        specialCur = parentObj;
-                        specialProp = lastProp;
-                    }
-                }
-                else {
-                    if (specialCur && i === props.length - 1) {
-                        // if final target is the item of Array, return to use special info.
-                        break;
-                    }
-                    else {
-                        // otherwise turn back to normal property read...
-                        specialCur = undefined;
-                    }
-                }
-                if (i < props.length - 1) {
-                    // move the parentObj to its property, and go on
-                    parentObj = obj;
-                }
+        let obj = this.target_;
+        for (let prop of monitoredValue.props) {
+            if (typeof obj === 'object' && Reflect.has(obj, prop)) {
+                obj = obj[prop];
             }
             else {
-                isInit && stateMgmtConsole.warn(`@Monitor prop ${monitoredValue.path} initialize not found, make sure it exists!`);
+                isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
                 return [false, undefined];
             }
-        }
-        if (specialCur) {
-            // if case for Array, use special info..
-            lastProp = specialProp;
-            parentObj = specialCur;
-        }
-        if (!ObserveV2.IsMakeObserved(obj) && !ObserveV2.IsTrackedProperty(parentObj, lastProp)) {
-            stateMgmtConsole.applicationError(`@Monitor "${monitoredValue.path}" cannot be monitored, make sure it is decorated !!`);
-            return [false, undefined];
         }
         return [true, obj];
     }
