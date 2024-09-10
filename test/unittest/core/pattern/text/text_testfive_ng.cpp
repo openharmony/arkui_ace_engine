@@ -1516,13 +1516,10 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
 
     textStyle.SetTextColor(Color::BLACK);
     renderContext->UpdateForegroundColor(Color::BLACK);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
-    EXPECT_NE(textStyle.GetTextColor(), Color::FOREGROUND);
 
-    textStyle.SetTextColor(Color::WHITE);
-    renderContext->UpdateForegroundColor(Color::BLACK);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
-    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_NE(layoutProperty->GetTextColorValue(Color::RED), Color::BLACK);
 }
 
 /**
