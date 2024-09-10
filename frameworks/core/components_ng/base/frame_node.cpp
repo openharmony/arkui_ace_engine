@@ -2731,17 +2731,11 @@ void FrameNode::OnWindowHide()
 
 void FrameNode::OnWindowFocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(true);
-    }
     pattern_->OnWindowFocused();
 }
 
 void FrameNode::OnWindowUnfocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(false);
-    }
     pattern_->OnWindowUnfocused();
 }
 
