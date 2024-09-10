@@ -180,7 +180,7 @@ private:
     Rosen::Drawing::ImageInfo ImageInfo();
     void CompositeIconNotAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
         std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
-    void CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+    bool CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
         std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
     Rosen::Drawing::ImageInfo CreateRSImageInfo(OptionalPixelMap pixelmap, int32_t width, int32_t height);
     void TransformToPixelMap(const Rosen::Drawing::Bitmap& bitmap, const Rosen::Drawing::ImageInfo& imageInfo);
