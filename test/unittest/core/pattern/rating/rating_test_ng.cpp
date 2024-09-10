@@ -806,7 +806,7 @@ HWTEST_F(RatingTestNg, RatingTestNg002, TestSize.Level1)
 
 /**
  * @tc.name: RatingPaintMethodTest001
- * @tc.desc: Test Rating PaintMethod ShouldHightLight
+ * @tc.desc: Test Rating PaintMethod ShouldHighLight
  * @tc.type: FUNC
  */
 HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)

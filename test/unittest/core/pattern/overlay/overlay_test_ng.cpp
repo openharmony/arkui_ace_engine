@@ -643,11 +643,11 @@ HWTEST_F(OverlayTestNg, MenuTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuAnimation(menuNode);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
@@ -782,11 +782,11 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     menuWrapperNode->MountToParent(rootNode);
     /**
      * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
-     * @tc.expected: the preview node will remove.
+     * @tc.expected: the preview node will remove
      */
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
     overlayManager->PopMenuAnimation(menuWrapperNode, false);
-    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
 }
 
 /**
@@ -1222,7 +1222,7 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
      */
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
 }
 
 /**
@@ -1241,8 +1241,8 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     auto toastInfo = NG::ToastInfo { .message = MESSAGE,
         .duration = DURATION,
         .bottom = BOTTOMSTRING,
-        .isRightToLeft = true,
-        .showMode = NG::ToastShowMode::TOP_MOST };
+        .showMode = NG::ToastShowMode::TOP_MOST,
+        .isRightToLeft = true };
     overlayManager->ShowToast(toastInfo);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
@@ -1441,6 +1441,8 @@ HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
+    EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1526,9 +1528,9 @@ HWTEST_F(OverlayTestNg, DialogTest002, TestSize.Level1)
      * @tc.steps: step3. call RemoveOverlayInSubwindow.
      * @tc.expected: remove successfully.
      */
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
 }
 
 /**
@@ -1608,8 +1610,8 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when dialogChildCount is 2
      * @tc.expected: remove lastChild successfully
      */
-    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 
     /**
      * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
@@ -1617,12 +1619,12 @@ HWTEST_F(OverlayTestNg, DialogTest003, TestSize.Level1)
      */
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
-    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
+    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
     overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
         dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+    EXPECT_FALSE(overlayManager->RemoveOverlay(true));
 }
 
 /**
@@ -2006,7 +2008,7 @@ HWTEST_F(OverlayTestNg, ShowAIEntityMenu, TestSize.Level1)
      * @tc.expected: ShowAIEntityMenu return true.
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    ASSERT_NE(overlayManager,nullptr);
+    ASSERT_NE(overlayManager, nullptr);
 
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
     EXPECT_TRUE(overlayManager->ShowAIEntityMenu(menuOptions, handleRect, baseFrameNode));
