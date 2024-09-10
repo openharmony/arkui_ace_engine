@@ -54,10 +54,23 @@ bool TextFieldManagerNG::OnBackPressed()
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
-    auto pipeline =  PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
-    if (GreatOrEqual(position.GetY(), rootHeight) || LessOrEqual(position.GetY(), 0.0f)) {
+    if (GreatOrEqual(position.GetY(), rootHeight)) {
+        auto pattern = onFocusTextField_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        while (parent) {
+            if (parent->GetTag() == "Panel" || parent->GetTag() == "SheetPage") {
+                return;
+            }
+            parent = parent->GetAncestorNodeOfFrame();
+        }
+    }
+    if (LessOrEqual(position.GetY(), 0.0f)) {
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
