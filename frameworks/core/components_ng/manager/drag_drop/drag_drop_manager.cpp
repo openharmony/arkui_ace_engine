@@ -1849,16 +1849,32 @@ void DragDropManager::DragStartAnimation(
         option.GetOnFinishEvent());
 }
 
+void DragDropManager::NotifyEnterTextEditorArea(bool enable)
+{
+    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+        return;
+    }
+
+    hasNotifiedTransformation_ = true;
+}
+
 void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
     DragEventType type)
 {
     CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled())) {
+    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled()) || !isDragFwkShow_) {
         return;
     }
 
+    if (type == DragEventType::MOVE && IsEditableTextComponent(frameTag) && isDragFwkShow_ &&
+        !hasNotifiedTransformation_) {
+        NotifyEnterTextEditorArea(true);
+        return;
+    }
     if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
         TAG_LOGD(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
         return;
@@ -1875,13 +1891,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
         return;
     }
 
-    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
-        return;
-    }
-
-    hasNotifiedTransformation_ = true;
+    NotifyEnterTextEditorArea(true);
 }
 
 void DragDropManager::SetDragResult(
