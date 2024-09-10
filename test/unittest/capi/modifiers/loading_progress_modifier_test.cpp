@@ -78,6 +78,7 @@ public:
         MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
         MockContainer::TearDown();
+        MockThemeStyle::GetInstance()->SetAttributes({});
     }
 };
 
