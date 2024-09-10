@@ -260,12 +260,10 @@ namespace OHOS::Ace::NG {
         if (fromIter != cachedItems_.end() && toIter != cachedItems_.end()) {
             std::swap(fromIter->second, toIter->second);
         } else if (fromIter != cachedItems_.end()) {
-            expiringItem_.try_emplace(
-                fromIter->second.first, LazyForEachCacheChild(to, std::move(fromIter->second.second)));
+            expiringItem_[fromIter->second.first] = LazyForEachCacheChild(to, std::move(fromIter->second.second));
             cachedItems_.erase(fromIter);
         } else if (toIter != cachedItems_.end()) {
-            expiringItem_.try_emplace(
-                toIter->second.first, LazyForEachCacheChild(from, std::move(toIter->second.second)));
+            expiringItem_[toIter->second.first] = LazyForEachCacheChild(from, std::move(toIter->second.second));
             cachedItems_.erase(toIter);
         }
         return true;
@@ -377,7 +375,7 @@ namespace OHOS::Ace::NG {
                 for (int32_t i = 0; i < static_cast<int32_t>(info.extraKey.size()); i++) {
                     expiringTempItem_.try_emplace(index + i, LazyForEachChild(info.extraKey[i], nullptr));
                 }
-            } else if (info.node != nullptr) {
+            } else if (info.moveIn || info.isExchange) {
                 RepairMoveOrExchange(expiringTempItem_, info, child, index, changedIndex);
             } else {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
