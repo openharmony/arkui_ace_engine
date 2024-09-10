@@ -22,6 +22,7 @@ ace_unittest("capi_all_modifiers_test") {
     "checkboxgroup_modifier_test.cpp",
     "divider_modifier_test.cpp",
     "grid_item_modifier_test.cpp",
+    "loading_progress_modifier_test.cpp",
     "radio_modifier_test.cpp",
     "swiper_modifier_test.cpp",
   ]
