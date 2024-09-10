@@ -82,7 +82,7 @@ def run_single_test(tests_path, test_suite_name):
         print("TestSuite {} did not compile successfully.".format(test_suite_name))
 
 
-def run_tests_parallel(test_directory, path):
+def run_tests_parallel(test_directory, path, output):
     """
     Run all gtest test binaries in parallel.
     """
@@ -125,13 +125,13 @@ def run_tests_parallel(test_directory, path):
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
-    json_file_path = os.path.join(test_directory, "test_result.json")
+    json_file_path = output if output else os.path.join(test_directory, "test_result.json")
     flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
     mode = stat.S_IRUSR | stat.S_IWUSR
     with os.fdopen(os.open(json_file_path, flags, mode), 'w') as json_file:
         json.dump(test_result, json_file, indent=2)
 
-    print("The test results have been generated, path is {}".format(json_file_path))
+    print("The test results have been generated, path is {}".format(os.path.abspath(json_file_path)))
     return failed_tests_count + len(test_result["unavailable"])
 
 
@@ -153,6 +153,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
     parser.add_argument("-p", "--path", type=str, default=None)
+    parser.add_argument("-o", "--output", type=str, default=None)
     tests_out_path = get_tests_out_path()
     args = parser.parse_args()
     targets = args.target
@@ -160,7 +161,7 @@ def main():
         for target in targets:
             run_single_test(tests_out_path, target)
     else:
-        return run_tests_parallel(tests_out_path, args.path)
+        return run_tests_parallel(tests_out_path, args.path, args.output)
 
 
 if __name__ == "__main__":
