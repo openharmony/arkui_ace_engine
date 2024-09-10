@@ -2915,6 +2915,8 @@ void RichEditorPattern::HandleBlurEvent()
     }
     if (IsSelected()) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = false});
+    } else {
+        CloseSelectOverlay();
     }
     isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     if (reason != BlurReason::WINDOW_BLUR) {
@@ -3585,13 +3587,9 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     auto focusHub = GetFocusHub();
     if (event && focusHub && event->GetResult() != DragRet::DRAG_SUCCESS && focusHub->IsFocusable()) {
         HandleSelectionChange(recoverStart_, recoverEnd_);
-        FireOnSelectionChange(recoverStart_, recoverEnd_, true);
         showSelect_ = true;
         CalculateHandleOffsetAndShowOverlay();
-        if (!IsUsingMouse()) {
-            selectOverlay_->ProcessOverlay({ .menuIsShow = false});
-        }
-        focusHub->RequestFocusImmediately();
+        ResetSelection();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -7312,8 +7310,9 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     bool isForward)
 {
     bool hasFocus = HasFocus();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d", start, end, hasFocus);
-    CHECK_NULL_VOID(hasFocus);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d isEditing=%{public}d",
+        start, end, hasFocus, isEditing_);
+    CHECK_NULL_VOID(hasFocus && isEditing_);
     if (IsPreviewTextInputting()) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "SetSelection failed for previewText inputting");
         return;
@@ -7325,9 +7324,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         start = std::clamp(start, 0, GetTextContentLength());
         end = std::clamp(end, 0, GetTextContentLength());
     }
-    if (ResetOnInvalidSelection(start, end)) {
-        return;
-    }
+    CHECK_NULL_VOID(!ResetOnInvalidSelection(start, end));
     UpdateSelector(start, end);
 
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest()) {
@@ -8240,19 +8237,9 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
-    if (HasFocus()) {
-        auto func = [weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->RequestKeyboard(false, true, true);
-            pattern->HandleOnEditChanged(true);
-        };
-        PostTaskToLayutSwap(func);
-    } else {
-        focusHub->RequestFocusImmediately();
-    }
+    focusHub->LostFocusToViewRoot();
     isCursorAlwaysDisplayed_ = false;
-    StartTwinkling();
+    StopTwinkling();
 };
 
 void RichEditorPattern::HandleOnDragStatusCallback(
@@ -8771,6 +8758,7 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     // When the Enter key is triggered, perform a line feed operation.
     if (action == TextInputAction::NEW_LINE) {
         InsertValue("\n", true);
+        return;
     }
     // Enter key type callback
     TextFieldCommonEvent event;
