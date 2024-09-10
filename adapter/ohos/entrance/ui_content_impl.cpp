@@ -525,12 +525,6 @@ public:
     ~PretendChangedListener() = default;
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override {}
-
-private:
-    NG::SafeAreaInsets systemSafeArea_;
-    NG::SafeAreaInsets navigationBar_;
-    NG::SafeAreaInsets cutoutSafeArea_;
-    int32_t instanceId_ = -1;
 };
 
 class AvailableAreaChangedListener : public OHOS::Rosen::DisplayManager::IAvailableAreaListener {
