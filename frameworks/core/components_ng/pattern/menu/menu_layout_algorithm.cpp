@@ -339,7 +339,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitWrapperRect(props, menuPattern);
     InitializeParam(menuPattern);
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
-    if (menuPattern->IsSubMenu() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSubMenu()) &&
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_RIGHT);
     }
     dumpInfo_.originPlacement = PlacementUtils::ConvertPlacementToString(placement_);
