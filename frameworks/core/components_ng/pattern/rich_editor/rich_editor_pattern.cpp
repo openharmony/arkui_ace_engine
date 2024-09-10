@@ -1571,7 +1571,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
     newSpanNode->MountToParent(host, spanIndex + 1);
 
     auto newSpanItem = newSpanNode->GetSpanItem();
-    newSpanItem->rangeStart = offsetInSpan;
+    newSpanItem->rangeStart = spanStart + offsetInSpan;
     newSpanItem->position = spanEnd;
 
     auto spanIter = spans_.begin();

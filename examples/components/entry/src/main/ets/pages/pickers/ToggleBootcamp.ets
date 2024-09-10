@@ -80,7 +80,6 @@ export struct ToggleBootcamp {
       .onChange((isOn: boolean) => {
         console.info('Component status:' + isOn)
       })
-
     }
   }
 

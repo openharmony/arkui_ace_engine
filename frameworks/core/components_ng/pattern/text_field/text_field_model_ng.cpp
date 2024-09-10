@@ -586,9 +586,7 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
         unitFunction();
         unitNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    if (unitNode) {
-        pattern->SetUnitNode(unitNode);
-    }
+    pattern->SetUnitNode(unitNode);
 }
 
 void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
@@ -1797,6 +1795,13 @@ void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+void TextFieldModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
 }
 
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)

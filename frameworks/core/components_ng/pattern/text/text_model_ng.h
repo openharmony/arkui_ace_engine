@@ -83,6 +83,7 @@ public:
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
+    void SetEnableHapticFeedback(bool state) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);

@@ -329,6 +329,8 @@ public:
 
     void InitSideBarButtonUpdateCallbackIfNeeded();
 
+    void OnLanguageConfigurationUpdate() override;
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 

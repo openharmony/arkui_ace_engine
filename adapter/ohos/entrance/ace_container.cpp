@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 #include <cerrno>
-#include <dirent.h>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -360,9 +359,8 @@ void AceContainer::Destroy()
         } else {
             taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
         }
-
-        DestroyToastSubwindow(instanceId_);
     }
+    DestroyToastSubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -1332,6 +1330,9 @@ public:
             offset.deltaX = rect_.left - edgeDist;
             if (offset.deltaX > edgeDist) {
                 offset.deltaX = edgeDist;
+            }
+            if (edgeDist + size.width > windowRect_.width_) {
+                offset.deltaX = 0;
             }
         }
 

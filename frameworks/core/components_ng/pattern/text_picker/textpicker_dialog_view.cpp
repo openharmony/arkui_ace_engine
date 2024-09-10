@@ -1501,19 +1501,12 @@ const Dimension TextPickerDialogView::ConvertFontScaleValue(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
     float fontSizeScale = pipeline->GetFontScale();
-    Dimension fontSizeValueResult = 0.0_fp;
-    Dimension fontSizeValueResultVp = 0.0_vp;
+    Dimension fontSizeValueResult = fontSizeValue;
+    Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        Dimension fontSizeValueVp(fontSizeLimit.Value(), DimensionUnit::VP);
-        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeValueVp.ConvertToPx())) {
-            fontSizeValueResultVp = fontSizeValueVp;
-        } else {
-            fontSizeValueResultVp = fontSizeValue;
-        }
+        fontSizeValueResultVp = std::min(fontSizeValueResultVp, fontSizeValue);
         return fontSizeValueResultVp;
-    } else {
-        fontSizeValueResult = fontSizeValue;
     }
 
     if (NeedAdaptForAging()) {
@@ -1558,8 +1551,6 @@ const Dimension TextPickerDialogView::ConvertFontSizeLimit(
         if (!NearZero(fontScale)) {
             fontSizeValueResult = fontSizeLimit / fontScale;
         }
-    } else {
-        fontSizeValueResult = fontSizeValue;
     }
     return fontSizeValueResult;
 }

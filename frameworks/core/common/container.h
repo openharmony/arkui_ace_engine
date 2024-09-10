@@ -603,7 +603,7 @@ public:
     virtual void CheckAndSetFontFamily() {};
 
 protected:
-    bool IsFontFileExistInPath(std::string path);
+    bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
     bool endsWith(std::string str, std::string suffix);
 

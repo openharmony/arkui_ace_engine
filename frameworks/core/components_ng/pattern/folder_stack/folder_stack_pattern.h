@@ -49,6 +49,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<PaintProperty>();

@@ -474,6 +474,21 @@ bool Color::MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, C
     return true;
 }
 
+bool Color::MatchColorHexString(const std::string& colorStr)
+{
+    if (colorStr.empty()) {
+        return false;
+    }
+    std::smatch matches;
+    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC) ||
+        std::regex_match(colorStr, matches, COLOR_WITH_RGBA) ||
+        std::regex_match(colorStr, matches, COLOR_WITH_RGB) ||
+        std::regex_match(colorStr, matches, COLOR_WITH_MAGIC_MINI)) {
+        return true;
+    }
+    return false;
+}
+
 bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)
 {
     if (!FastCheckColorType(colorStr, "rgb(", {})) {

@@ -21,7 +21,6 @@ export struct DatePickerDialogBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   selectedDate: Date = new Date('2010-1-1');
-
   @State enableFormat: boolean = false;
   @State enableMilitaryTime: boolean = false;
   @State enableHourFormat: boolean = false;
@@ -153,7 +152,7 @@ export struct DatePickerDialogBootcamp {
   }
 
   @Builder
-  Parameters(){
+  Parameters() {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
@@ -167,6 +166,7 @@ export struct DatePickerDialogBootcamp {
             { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
+
         RadioBlock({
           title: '取消按钮类型',
           isEnabled: this.enabledCancelButtonType,
@@ -178,6 +178,7 @@ export struct DatePickerDialogBootcamp {
             { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
+
         RadioBlock({
           title: '确认按钮样式',
           isEnabled: this.enableAcceptButtonStyle,
@@ -188,6 +189,7 @@ export struct DatePickerDialogBootcamp {
             { label: '文本型', value: ButtonStyleMode.TEXTUAL }
           ]
         })
+
         RadioBlock({
           title: '取消按钮样式',
           isEnabled: this.enableCancelButtonStyle,
@@ -198,16 +200,19 @@ export struct DatePickerDialogBootcamp {
             { label: '文本型', value: ButtonStyleMode.TEXTUAL }
           ]
         })
+
         ColorBlock({
           title: '确认按钮字体颜色',
           isEnabled: this.enableAcceptButtonFontColor,
           color: this.acceptButtonFontColor
         })
+
         ColorBlock({
           title: '取消按钮字体颜色',
           isEnabled: this.enableCancelButtonFontColor,
           color: this.cancelButtonFontColor
         })
+
         RadioBlock({
           title: '确认按钮角色',
           isEnabled: this.enableAcceptButtonRole,
@@ -217,6 +222,7 @@ export struct DatePickerDialogBootcamp {
             { label: 'ERROR', value: ButtonRole.ERROR }
           ]
         })
+
         RadioBlock({
           title: '取消按钮角色',
           isEnabled: this.enableCancelButtonRole,
@@ -236,6 +242,7 @@ export struct DatePickerDialogBootcamp {
             { label: '小型', value: '12fp' },
           ]
         })
+
         RadioBlock({
           title: '取消按钮尺寸',
           isEnabled: this.enableCancelButtonFontSize,
@@ -255,6 +262,7 @@ export struct DatePickerDialogBootcamp {
             { label: '加粗', value: 800 },
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体粗细',
           isEnabled: this.enableCancelButtonFontWeight,
@@ -272,9 +280,9 @@ export struct DatePickerDialogBootcamp {
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic },
-
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体样式',
           isEnabled: this.enableCancelButtonFontStyle,
@@ -290,6 +298,7 @@ export struct DatePickerDialogBootcamp {
           isEnabled: this.enableAcceptButtonBackGroundColor,
           color: this.acceptButtonBackGroundColor
         })
+
         ColorBlock({
           title: '取消按钮背景颜色',
           isEnabled: this.enableCancelButtonBackGroundColor,
@@ -305,6 +314,7 @@ export struct DatePickerDialogBootcamp {
             { label: '较大', value: 100 },
           ]
         })
+
         RadioBlock({
           title: '取消按钮边框圆角半径',
           isEnabled: this.enableCancelButtonBorderRadius,
@@ -324,6 +334,7 @@ export struct DatePickerDialogBootcamp {
             { label: '无前导0', value: 'numeric' },
           ]
         })
+
         RadioBlock({
           title: '分钟是否有前导0',
           isEnabled: this.enableMinuteFormat,
@@ -341,7 +352,7 @@ export struct DatePickerDialogBootcamp {
 @Preview
 @Component
 struct DatePickerDialogBootcampPreviewer {
-  build(){
+  build() {
     DatePickerDialogBootcamp({
       title: '日期选择器弹窗/DatepickerDialog'
     })

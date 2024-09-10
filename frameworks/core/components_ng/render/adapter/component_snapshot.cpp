@@ -251,6 +251,11 @@ void ComponentSnapshot::Create(
     const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
     bool flag)
 {
+    if (!customNode) {
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! customNode is nullptr");
+        return;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());

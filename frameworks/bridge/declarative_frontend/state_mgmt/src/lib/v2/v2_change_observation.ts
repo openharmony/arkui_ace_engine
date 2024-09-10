@@ -424,7 +424,7 @@ class ObserveV2 {
         .then(this.updateDirty.bind(this))
         .catch(error => {
           stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
-          throw error;
+          _arkUIUncaughtPromiseError(error);
         });
       }
 

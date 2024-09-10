@@ -128,6 +128,7 @@ private:
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
+    bool isFirstRequestVsync_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };

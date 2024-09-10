@@ -497,7 +497,7 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
         for (const auto& item : responseRegion) {
             responseInfo.append(item.ToString()).append("; ");
         }
-        TAG_LOGI(AceLogTag::ACE_GESTURE,
+        TAG_LOGW(AceLogTag::ACE_GESTURE,
             "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s, point = "
             "%{public}s, frameRect = %{public}s, %{public}s",
             AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str(),

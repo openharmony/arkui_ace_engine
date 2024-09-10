@@ -360,7 +360,6 @@ void SwiperPattern::OnModifyDone()
     InitCapture();
     CheckSpecialItemCount();
     SetLazyLoadIsLoop();
-    SetRepeatLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
@@ -4435,20 +4434,13 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        CHECK_NULL_VOID(lazyForEachNode);
-        lazyForEachNode->SetIsLoop(IsLoop());
-    }
-}
-
-void SwiperPattern::SetRepeatLoadIsLoop() const
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto targetNode = FindRepeatVirtualNode(host);
-    if (targetNode.has_value()) {
-        auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
-        CHECK_NULL_VOID(repeatVirtualScrollNode);
-        repeatVirtualScrollNode->SetIsLoop(IsLoop());
+        if (lazyForEachNode) {
+            lazyForEachNode->SetIsLoop(IsLoop());
+        }
+        auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
+        if (repeatVirtualNode) {
+            repeatVirtualNode->SetIsLoop(IsLoop());
+        }
     }
 }
 
@@ -5747,20 +5739,6 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
         return baseNode;
     }
-    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
-        return std::nullopt;
-    }
-    for (const auto& child : baseNode->GetChildren()) {
-        auto targetNode = FindLazyForEachNode(child, false);
-        if (targetNode.has_value()) {
-            return targetNode;
-        }
-    }
-    return std::nullopt;
-}
-
-std::optional<RefPtr<UINode>> SwiperPattern::FindRepeatVirtualNode(RefPtr<UINode> baseNode, bool isSelfNode) const
-{
     if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
         return baseNode;
     }
@@ -5768,7 +5746,7 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindRepeatVirtualNode(RefPtr<UINode
         return std::nullopt;
     }
     for (const auto& child : baseNode->GetChildren()) {
-        auto targetNode = FindRepeatVirtualNode(child, false);
+        auto targetNode = FindLazyForEachNode(child, false);
         if (targetNode.has_value()) {
             return targetNode;
         }

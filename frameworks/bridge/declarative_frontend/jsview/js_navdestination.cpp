@@ -476,6 +476,17 @@ void JSNavDestination::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 
+void JSNavDestination::SetRecoverable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navDestination's recoverable is true
+        NavDestinationModel::GetInstance()->SetRecoverable(true);
+        return;
+    }
+    auto recoverable = info[0]->ToBoolean();
+    NavDestinationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -503,6 +514,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
+    JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

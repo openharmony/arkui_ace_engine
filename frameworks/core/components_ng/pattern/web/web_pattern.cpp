@@ -595,6 +595,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (!pattern->GetIsFixedNestedScrollMode() || !pattern->GetNestedScrollParent()) {
             pattern->SetParentScrollable();
         }
+        pattern->UpdateTouchpadSlidingStatus(event);
         pattern->GetParentAxis();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
@@ -610,7 +611,6 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (parent) {
             parent->OnScrollDragEndRecursive();
         }
-
         pattern->HandleFlingMove(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -630,7 +630,6 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
                 // not web pan event type, continue
                 return GestureJudgeResult::CONTINUE;
             }
-
             auto inputEventType = gestureInfo->GetInputEventType();
             if (inputEventType == InputEventType::AXIS) {
                 // axis event type of web pan, dispatch to panEvent to process
@@ -1968,14 +1967,21 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
 void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
-    if (!config.contentSizeChange || isInWindowDrag_) {
-        return;
-    }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rect = renderContext->GetPaintRectWithoutTransform();
+    auto heightBeforeUpdate = rect.Height();
+    if (isResizeContentAvoid_ && frameNode->SelfExpansive()) {
+        rect.SetHeight(heightAfterAvoid_);
+        renderContext->UpdatePaintRect(rect);
+        rect.SetHeight(heightBeforeUpdate);
+    }
+    
+    if (!config.contentSizeChange || isInWindowDrag_) {
+        return;
+    }
     auto drawSize = Size(rect.Width(), rect.Height());
     if (drawSize.IsInfinite() || drawSize.IsEmpty()) {
         return;
@@ -2026,6 +2032,8 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
             drawSize_.SetHeight(newHeight);
             visibleViewportSize_.SetWidth(-1.0);
             visibleViewportSize_.SetHeight(-1.0);
+            isResizeContentAvoid_ = true;
+            heightAfterAvoid_ = newHeight;
         }
         UpdateWebLayoutSize(width, height, true, isUpdate);
     }
@@ -2864,6 +2872,7 @@ bool WebPattern::IsNeedResizeVisibleViewport()
 
 bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled)
 {
+    isResizeContentAvoid_ = false;
     isKeyboardInSafeArea_ = false;
     if (safeAreaEnabled) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
@@ -5261,7 +5270,11 @@ ScrollResult WebPattern::HandleScroll(RefPtr<NestableScrollContainer> parent, fl
         expectedScrollAxis_,
         (parent != nullptr));
     if (parent) {
-        source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
+        if (isTouchpadSliding_) {
+            source = SCROLL_FROM_UPDATE;
+        } else {
+            source = isMouseEvent_ ? SCROLL_FROM_AXIS : source;
+        }
         return parent->HandleScroll(offset, source, state);
     }
     return { 0.0f, false };
@@ -5386,6 +5399,7 @@ void WebPattern::OnScrollState(bool scrollState)
     if (!scrollState) {
         OnScrollEndRecursive(std::nullopt);
     } else {
+        GetParentAxis();
         OnScrollStartRecursive(std::vector<float>({ 0.0, 0.0 }));
         if (imageAnalyzerManager_) {
             imageAnalyzerManager_->UpdateOverlayStatus(
@@ -5420,17 +5434,26 @@ void WebPattern::SetRenderMode(RenderMode renderMode)
     isInit = true;
 }
 
-Axis WebPattern::GetParentAxis()
+void WebPattern::GetParentAxis()
 {
     auto parent = GetNestedScrollParent();
-    CHECK_NULL_RETURN(parent, Axis::HORIZONTAL);
-    axis_ = parent->GetAxis();
-    parentsMap_ = { { axis_, parent } };
-    auto oppositeParent = SearchParent(axis_ == Axis::HORIZONTAL ? Axis::VERTICAL : Axis::HORIZONTAL);
-    if (oppositeParent) {
-        parentsMap_.emplace(oppositeParent->GetAxis(), oppositeParent);
+    if (parent) {
+        axis_ = parent->GetAxis();
+        parentsMap_ = { { axis_, parent } };
+        auto oppositeParent = SearchParent(axis_ == Axis::HORIZONTAL ? Axis::VERTICAL : Axis::HORIZONTAL);
+        if (oppositeParent) {
+            parentsMap_.emplace(oppositeParent->GetAxis(), oppositeParent);
+        }
+    } else {
+        auto verticalParent = SearchParent(Axis::VERTICAL);
+        auto horizontalParent = SearchParent(Axis::HORIZONTAL);
+        if (verticalParent) {
+            parentsMap_.emplace(verticalParent->GetAxis(), verticalParent);
+        }
+        if (horizontalParent) {
+            parentsMap_.emplace(horizontalParent->GetAxis(), horizontalParent);
+        }
     }
-    return axis_;
 }
 
 RefPtr<NestableScrollContainer> WebPattern::SearchParent()
@@ -5463,8 +5486,8 @@ RefPtr<NestableScrollContainer> WebPattern::SearchParent(Axis scrollAxis)
 void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt &nestedScroll)
 {
     NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::SELF_ONLY,
-        .backward = NestedScrollMode::SELF_ONLY,
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
     };
     if (nestedScroll.scrollUp == nestedScroll.scrollLeft) {
         nestedOpt.backward = nestedScroll.scrollUp;
@@ -6526,6 +6549,15 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
 {
     if (isEnabledHapticFeedback_) {
         NG::VibratorUtils::StartVibraFeedback(vibratorType);
+    }
+}
+
+void WebPattern::UpdateTouchpadSlidingStatus(const GestureEvent& event)
+{
+    isTouchpadSliding_ = false;
+    if ((event.GetInputEventType() == InputEventType::AXIS) &&
+        (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
+        isTouchpadSliding_ = true;
     }
 }
 } // namespace OHOS::Ace::NG

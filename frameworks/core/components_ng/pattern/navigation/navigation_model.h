@@ -89,6 +89,7 @@ public:
     virtual void SetIsCustomAnimation(bool isCustom);
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
+    virtual void SetRecoverable(bool recoverable) {}
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

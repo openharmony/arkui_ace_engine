@@ -1751,6 +1751,12 @@ void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
     }
 }
 
+void TextFieldPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
+}
+
 void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
 {
     scrollable_ = false;
@@ -1778,17 +1784,15 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
         previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
-        if (moveCaretState_.isMoveCaret && selectController_->GetCaretIndex() != preCaretIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
+        if (moveCaretState_.isMoveCaret) {
+            StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
         }
     } else {
         selectController_->UpdateCaretInfoByOffset(touchOffset);
         if (magnifierController_ && IsOperation()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
-        if (selectController_->GetCaretIndex() != preCaretIndex) {
-            VibratorUtils::StartVibraFeedback("slide");
-        }
+        StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
     }
 
     UpdateCaretInfoToController();
@@ -2293,6 +2297,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     } while (false);
     if (needCloseOverlay || GetIsPreviewText()) {
         CloseSelectOverlay(true);
+        StartTwinkling();
     }
     DoProcessAutoFill();
     // emulate clicking bottom of the textField
@@ -3094,6 +3099,12 @@ void TextFieldPattern::InitLongPressEvent()
     gesture->SetLongPressEvent(longPressEvent_);
 }
 
+void TextFieldPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
+}
+
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
@@ -3117,7 +3128,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    VibratorUtils::StartVibraFeedback("longPress.light");
+    StartVibratorByLongPress();
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
         return;
@@ -4715,7 +4726,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (!ProcessFocusIndexAction()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction  %{public}d", static_cast<int32_t>(action));
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction %{public}d", static_cast<int32_t>(action));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
@@ -4731,7 +4742,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         if (event.IsKeepEditable()) {
             return;
         }
-        FocusHub::LostFocusToViewRoot();
+        TextFieldLostFocusToViewRoot();
         return;
     }
     if (IsTextArea() && action == TextInputAction::NEW_LINE) {
@@ -4741,7 +4752,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
             }
         } else {
             CloseKeyboard(forceCloseKeyboard, false);
-            FocusHub::LostFocusToViewRoot();
+            TextFieldLostFocusToViewRoot();
         }
         return;
     }
@@ -4754,11 +4765,17 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     // which will call StopTwinkling on HandleBlurEvent method.
     if (textInputBlurOnSubmit_) {
         CloseKeyboard(forceCloseKeyboard, false);
-        FocusHub::LostFocusToViewRoot();
+        TextFieldLostFocusToViewRoot();
     }
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Textfield.onSubmit");
 #endif
+}
+
+void TextFieldPattern::TextFieldLostFocusToViewRoot()
+{
+    CHECK_NULL_VOID(HasFocus());
+    FocusHub::LostFocusToViewRoot();
 }
 
 void TextFieldPattern::RecordSubmitEvent() const

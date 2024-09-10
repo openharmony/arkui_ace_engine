@@ -154,7 +154,8 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
-    void DestroyToastWindow() override;
+    bool IsToastSubWindow() override;
+    void DestroyWindow() override;
 
 private:
     RefPtr<StackElement> GetStack();

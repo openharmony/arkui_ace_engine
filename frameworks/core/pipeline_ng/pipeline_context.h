@@ -1179,6 +1179,8 @@ private:
     std::list<WeakPtr<FrameNode>> changedNodes_;
     bool isHalfFoldHoverStatus_ = false;
     CancelableCallback<void()> foldStatusDelayTask_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
 };
 } // namespace OHOS::Ace::NG
 

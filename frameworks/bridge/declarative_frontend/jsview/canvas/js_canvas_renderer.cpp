@@ -634,6 +634,7 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
     // return the black image
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    CHECK_NULL_VOID(buffer);
     for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
         buffer[idx] = 0xffffffff;
     }

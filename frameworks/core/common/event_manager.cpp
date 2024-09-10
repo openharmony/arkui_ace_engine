@@ -199,11 +199,13 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
     int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
     if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
+#ifndef IS_RELEASE_VERSION
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
+#endif
         eventTree_.eventTreeList.clear();
         FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();

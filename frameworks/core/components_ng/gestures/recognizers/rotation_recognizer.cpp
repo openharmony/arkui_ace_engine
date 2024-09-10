@@ -273,6 +273,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "RotationRecognizer touchPoints size not equal fingers_, not send cancel callback.");
     }
 }
 

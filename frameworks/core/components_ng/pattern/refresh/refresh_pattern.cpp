@@ -271,7 +271,7 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
@@ -294,11 +294,9 @@ void RefreshPattern::OnColorConfigurationUpdate()
         return;
     }
     CHECK_NULL_VOID(progressChild_);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<RefreshTheme>();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -835,7 +833,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
             }
         });
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
 }

@@ -116,6 +116,12 @@ public:
     void SetNeedBuildNewInstance(int32_t index, bool need) override;
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
+    std::string GetStringifyParamByIndex(int32_t index) const override;
+    void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
+    bool IsFromRecovery(int32_t index) override;
+    void SetFromRecovery(int32_t index, bool fromRecovery) override;
+    int32_t GetRecoveredDestinationMode(int32_t index) override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;
@@ -153,6 +159,8 @@ private:
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
 
+    JSRef<JSArray> GetPathArray();
+    JSRef<JSObject> GetPathInfo(int32_t index);
 private:
     std::vector<NavPathInfoUINode> preBuildNodeList_;
     JSRef<JSObject> thisObj_;

@@ -59,7 +59,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
-  title(value: any, options?: NavigationTitleOptions): NavigationAttribute {
+  title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+    options?: NavigationTitleOptions): NavigationAttribute {
     if (isUndefined(value) || isNull(value)) {
       modifierWithKey(this._modifiersWithKeys, TitleModifier.identity,
         TitleModifier, undefined);
@@ -92,7 +93,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
-  menus(value: any): NavigationAttribute {
+  menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, undefined);
       return this;
@@ -314,25 +315,23 @@ class MenusModifier extends ModifierWithKey<Array<NavigationMenuItem> | undefine
   }
 
   checkObjectDiff(): boolean {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -428,6 +427,21 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandO
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
       !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
+  }
+}
+
+class RecoverableModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('recoverable');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetRecoverable(node);
+    } else {
+      getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
   }
 }
 

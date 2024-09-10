@@ -31,7 +31,7 @@ export const containersRoute: RouteGroup = {
 };
 
 @Builder
-export function ContainersDestination(name: string, route: Route){
+export function ContainersDestination(name: string, route: Route) {
   if (name === 'containers/text-picker-dialog') {
     TextPickerDialogBootcamp({ title: route.label })
   } else if (name === 'containers/time-picker-dialog') {

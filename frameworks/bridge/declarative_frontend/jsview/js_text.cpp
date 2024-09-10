@@ -1028,6 +1028,15 @@ void JSText::SetHalfLeading(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetHalfLeading(enable);
 }
 
+void JSText::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -1092,6 +1101,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::StaticMethod("halfLeading", &JSText::SetHalfLeading);
+    JSClass<JSText>::StaticMethod("enableHapticFeedback", &JSText::SetEnableHapticFeedback);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
