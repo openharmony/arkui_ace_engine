@@ -2194,7 +2194,7 @@ void UIContentImpl::SetWindowContainerColor(uint32_t activeColor, uint32_t inact
         TaskExecutor::TaskType::UI, "ArkUISetWindowContainerColor");
 }
 
-void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
+void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2207,12 +2207,30 @@ void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
     CHECK_NULL_VOID(stageNode);
     auto renderContext = stageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    auto rect = renderContext->GetPaintRectWithoutTransform();
     auto offset = stageNode->GetPaintRectOffset(false);
-    paintrect.posX_ = static_cast<int>(offset.GetX());
-    paintrect.posY_ = static_cast<int>(offset.GetY());
-    paintrect.width_ = static_cast<uint32_t>(paintRectf.Width());
-    paintrect.height_ = static_cast<uint32_t>(paintRectf.Height());
+    paintRect.posX_ = static_cast<int32_t>(offset.GetX());
+    paintRect.posY_ = static_cast<int32_t>(offset.GetY());
+    paintRect.width_ = static_cast<uint32_t>(rect.Width());
+    paintRect.height_ = static_cast<uint32_t>(rect.Height());
+}
+
+void UIContentImpl::GetWindowPaintSize(OHOS::Rosen::Rect& paintRect)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(window_);
+    auto windowRect = window_->GetRect();
+    NG::RectInt rect;
+    rect.SetRect(0, 0, windowRect.width_, windowRect.height_);
+    pipelineContext->GetWindowPaintRectWithoutMeasureAndLayout(rect);
+    paintRect.posX_ = static_cast<int32_t>(rect.GetX());
+    paintRect.posY_ = static_cast<int32_t>(rect.GetY());
+    paintRect.width_ = static_cast<uint32_t>(rect.Width());
+    paintRect.height_ = static_cast<uint32_t>(rect.Height());
 }
 
 bool UIContentImpl::ProcessBackPressed()
