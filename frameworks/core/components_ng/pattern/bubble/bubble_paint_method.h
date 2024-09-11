@@ -110,16 +110,6 @@ public:
         arrowHeight_ = arrowHeight;
     }
 
-    void SetOuterBorderWidth(const Dimension outerBorderWidth)
-    {
-        outerBorderWidth_ = outerBorderWidth.ConvertToPx();
-    }
-
-    void SetInnerBorderWidth(const Dimension innerBorderWidth)
-    {
-        innerBorderWidth_ = innerBorderWidth.ConvertToPx();
-    }
-
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);

@@ -64,9 +64,6 @@ class RichEditorOnIMEInputCompleteModifier extends ModifierWithKey<(value:RichEd
 }
 
 class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
-  constructor(value: CopyOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('richEditorCopyOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -254,6 +251,7 @@ class RichEditorOnCopyModifier extends ModifierWithKey<Callback<CopyEvent>> {
   }
 }
 
+
 class RichEditorEnterKeyTypeModifier extends ModifierWithKey<EnterKeyType> {
   constructor(value: EnterKeyType) {
     super(value);
@@ -316,12 +314,17 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectModifier.identity, RichEditorOnSelectModifier, callback);
     return this;
   }
+
   onSubmit(callback: SubmitCallback): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
     return this;
   }
   onSelectionChange(callback: (value: RichEditorRange) => void): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectionChangeModifier.identity, RichEditorOnSelectionChangeModifier, callback);
+    return this;
+  }
+  onSubmit(callback: SubmitCallback): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
     return this;
   }
   aboutToIMEInput(callback: (value: RichEditorInsertValue) => boolean): RichEditorAttribute {

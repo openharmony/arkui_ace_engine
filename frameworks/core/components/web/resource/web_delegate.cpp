@@ -3022,43 +3022,6 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
     webPattern->DestroyAnalyzerOverlay();
 }
 
-
-void WebDelegate::DragResize(const double& width, const double& height,
-                             const double& pre_height, const double& pre_width)
-{
-    if (width <= 0 || height <= 0) {
-        return;
-    }
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), width, height, pre_height, pre_width]() {
-            auto delegate = weak.Upgrade();
-            if (delegate && delegate->nweb_ && !delegate->window_) {
-                // Sur need int value, greater than this value in case show black line.
-                delegate->nweb_->DragResize(std::ceil(width), std::ceil(height),
-                                            std::ceil(pre_height), std::ceil(pre_width));
-                double offsetX = 0;
-                double offsetY = 0;
-                delegate->UpdateScreenOffSet(offsetX, offsetY);
-                delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebDragResize");
-}
-
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    isSmoothDragResizeEnabled_ = isSmoothDragResizeEnabled;
-}
-
-bool WebDelegate::GetIsSmoothDragResizeEnabled()
-{
-    return isSmoothDragResizeEnabled_;
-}
-
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 {
     auto context = context_.Upgrade();
@@ -6596,24 +6559,26 @@ void WebDelegate::SetAccessibilityState(bool state)
         return;
     }
     accessibilityState_ = state;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), state]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->SetAccessibilityState(state);
-            if (state) {
+    if (state) {
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), state]() {
+                auto delegate = weak.Upgrade();
+                CHECK_NULL_VOID(delegate);
+                CHECK_NULL_VOID(delegate->nweb_);
+                delegate->nweb_->SetAccessibilityState(state);
                 auto accessibilityEventListenerImpl =
                     std::make_shared<AccessibilityEventListenerImpl>();
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
-                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
-            }
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
+    } else {
+        CHECK_NULL_VOID(nweb_);
+        nweb_->SetAccessibilityState(state);
+    }
 }
 
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(

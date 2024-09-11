@@ -29,24 +29,39 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ForEachModel> ForEachModel::instance = nullptr;
+std::mutex ForEachModel::mutex_;
 
 ForEachModel* ForEachModel::GetInstance()
 {
     if (!instance) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance) {
 #ifdef NG_BUILD
-        instance.reset(new NG::ForEachModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             instance.reset(new NG::ForEachModelNG());
-        } else {
-            instance.reset(new Framework::ForEachModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance.reset(new NG::ForEachModelNG());
+            } else {
+                instance.reset(new Framework::ForEachModelImpl());
+            }
 #endif
+        }
     }
     return instance.get();
 }
 } // namespace OHOS::Ace
 
+namespace {
+
+enum {
+    PARAM_ELMT_ID = 0,
+    PARAM_JS_ARRAY = 1,
+    PARAM_DIFF_ID = 2,
+    PARAM_DUPLICATE_ID = 3,
+    PARAM_DELETE_ID = 4,
+    PARAM_ID_ARRAY_LENGTH = 5,
+};
+} // namespace
 
 namespace OHOS::Ace::Framework {
 // Create(...)
@@ -131,17 +146,17 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
 // no return value
 void JSForEach::SetIdArray(const JSCallbackInfo& info)
 {
-    if (info.Length() != 4 ||
-        !info[0]->IsNumber() || !info[1]->IsArray() ||
-        !info[2]->IsArray()  || !info[3]->IsArray()) {
+    if (info.Length() != PARAM_ID_ARRAY_LENGTH || !info[PARAM_ELMT_ID]->IsNumber() ||
+        !info[PARAM_JS_ARRAY]->IsArray() || !info[PARAM_DIFF_ID]->IsArray() ||
+        !info[PARAM_DUPLICATE_ID]->IsArray() || !info[PARAM_DELETE_ID]->IsArray()) {
         TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.SetIdArray");
         return;
     }
 
-    const auto elmtId = info[0]->ToNumber<int32_t>();
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
-    JSRef<JSArray> diffIds = JSRef<JSArray>::Cast(info[2]);
-    JSRef<JSArray> duplicateIds = JSRef<JSArray>::Cast(info[3]);
+    const auto elmtId = info[PARAM_ELMT_ID]->ToNumber<int32_t>();
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[PARAM_JS_ARRAY]);
+    JSRef<JSArray> diffIds = JSRef<JSArray>::Cast(info[PARAM_DIFF_ID]);
+    JSRef<JSArray> duplicateIds = JSRef<JSArray>::Cast(info[PARAM_DUPLICATE_ID]);
     std::list<std::string> newIdArr;
 
     if (diffIds->Length() > 0 || duplicateIds->Length() > 0) {
@@ -173,6 +188,18 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         }
     }
     ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));
+
+    std::list<int32_t> removedElmtIds;
+    ForEachModel::GetInstance()->SetRemovedElmtIds(removedElmtIds);
+
+    if (removedElmtIds.size()) {
+        JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[PARAM_DELETE_ID]);
+        size_t index = jsArr->Length();
+
+        for (const auto& rmElmtId : removedElmtIds) {
+            jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
+        }
+    }
 }
 
 // signature is

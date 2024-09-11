@@ -605,6 +605,22 @@ void GetTextAreaShowCounterOptions(ArkUINodeHandle node, ArkUIShowCountOptions* 
     options->thresholdPercentage = TextFieldModelNG::GetCounterType(frameNode);
     options->highlightBorder = TextFieldModelNG::GetShowCounterBorder(frameNode);
 }
+
+void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetTextAreaFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::string strValue = "";
+    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
 void SetTextAreaDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -653,21 +669,6 @@ void ResetTextAreaLineHeight(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     TextFieldModelNG::SetLineHeight(frameNode, value);
-}
-
-void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string strValue = value;
-    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
-}
-
-void ResetTextAreaFontFeature(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    std::string strValue = "";
-    TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
 
 void SetTextAreaWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
@@ -837,22 +838,6 @@ void ResetTextAreaTextIndent(ArkUINodeHandle node)
     TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
 }
 
-void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetLineSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
-}
-
-void ResetTextAreaLineSpacing(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CalcDimension value;
-    value.Reset();
-    TextFieldModelNG::SetLineSpacing(frameNode, value);
-}
-
 ArkUI_CharPtr GetTextAreaFontFeature(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -888,6 +873,22 @@ ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
     return TextFieldModelNG::GetMaxLines(frameNode);
 }
+void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetLineSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    TextFieldModelNG::SetLineSpacing(frameNode, value);
+}
+
 void SetTextAreaPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -1664,20 +1665,26 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow, SetTextAreaTextIndent,
         ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing, GetTextAreaSelectionMenuHidden,
         GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize, GetTextAreaLineHeight, GetgetTextAreaMaxLines,
-        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature, SetTextAreaOnChange, ResetTextAreaOnChange,
+        SetTextAreaPadding, ResetTextAreaPadding, GetTextAreaFontFeature,
+        SetTextAreaOnChange, ResetTextAreaOnChange,
         SetTextAreaEnterKeyType, ResetTextAreaEnterKeyType, SetTextAreaInputFilter, ResetTextAreaInputFilter,
-        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange, SetTextAreaOnContentScroll,
-        ResetTextAreaOnContentScroll, SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy,
-        ResetTextAreaOnCopy, SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
-        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy, SetTextAreaOnSubmitWithEvent,
-        ResetTextAreaOnSubmitWithEvent, SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill,
-        ResetTextAreaEnableAutoFill, SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth,
-        ResetTextAreaBorderWidth, SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle,
-        ResetTextAreaBorderStyle, SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin,
-        ResetTextAreaMargin, SetTextAreaCaret, GetTextAreaMargin, SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
-        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert, SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
-        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
-        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions };
+        SetTextAreaOnTextSelectionChange, ResetTextAreaOnTextSelectionChange,
+        SetTextAreaOnContentScroll, ResetTextAreaOnContentScroll,
+        SetTextAreaOnEditChange, ResetTextAreaOnEditChange, SetTextAreaOnCopy, ResetTextAreaOnCopy,
+        SetTextAreaOnCut, ResetTextAreaOnCut, SetTextAreaOnPaste, ResetTextAreaOnPaste,
+        SetTextAreaLineBreakStrategy, ResetTextAreaLineBreakStrategy,
+        SetTextAreaOnSubmitWithEvent, ResetTextAreaOnSubmitWithEvent,
+        SetTextAreaContentType, ResetTextAreaContentType, SetTextAreaEnableAutoFill, ResetTextAreaEnableAutoFill,
+        SetTextAreaBorder, ResetTextAreaBorder, SetTextAreaBorderWidth, ResetTextAreaBorderWidth,
+        SetTextAreaBorderColor, ResetTextAreaBorderColor, SetTextAreaBorderStyle, ResetTextAreaBorderStyle,
+        SetTextAreaBorderRadius, ResetTextAreaBorderRadius, SetTextAreaMargin, ResetTextAreaMargin,
+        GetTextAreaMargin, SetTextAreaCaret,
+        SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
+        SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
+        SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
+        SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete,
+        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText, GetTextAreaPadding,
+        SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions };
     return &modifier;
 }
 
@@ -1855,6 +1862,43 @@ void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
 
+void ResetOnTextAreaChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnChange(node);
+}
+void ResetOnTextAreaPaste(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnPaste(node);
+}
+void ResetOnTextAreaSelectionChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnTextSelectionChange(node);
+}
+void ResetOnTextAreaEditChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnEditChange(node);
+}
+void ResetOnTextAreaContentSizeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnContentSizeChange(frameNode, nullptr);
+}
+void ResetOnTextAreaInputFilterError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
+}
+void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnContentScroll(node);
+}
+void ResetTextAreaOnSubmit(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnSubmitWithEvent(node);
+}
+
 void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1930,43 +1974,6 @@ void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
-}
-
-void ResetOnTextAreaChange(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnChange(node);
-}
-void ResetOnTextAreaPaste(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnPaste(node);
-}
-void ResetOnTextAreaSelectionChange(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnTextSelectionChange(node);
-}
-void ResetOnTextAreaEditChange(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnEditChange(node);
-}
-void ResetOnTextAreaContentSizeChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetOnContentSizeChange(frameNode, nullptr);
-}
-void ResetOnTextAreaInputFilterError(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
-}
-void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnContentScroll(node);
-}
-void ResetTextAreaOnSubmit(ArkUINodeHandle node)
-{
-    GetTextAreaModifier()->resetTextAreaOnSubmitWithEvent(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

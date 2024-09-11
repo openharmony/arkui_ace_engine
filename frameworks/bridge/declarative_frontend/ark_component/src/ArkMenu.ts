@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,14 +25,15 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class MenuFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset || !this.value) {
@@ -59,9 +57,6 @@ class MenuFontModifier extends ModifierWithKey<Font> {
 }
 
 class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
-  constructor(value: Dimension | BorderRadiuses) {
-    super(value);
-  }
   static identity: Symbol = Symbol('radius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -425,11 +425,6 @@ void WaterFlowLayoutSW::ClearBack(float bound)
 {
     int32_t startIdx = info_->StartIndex();
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
-        if (!info_->idxToLane_.count(i)) {
-            TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d. Current startIndex = %{public}d", i,
-                startIdx);
-            break;
-        }
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
         float itemStartPos = lane.endPos - lane.items_.back().mainSize;
@@ -448,11 +443,6 @@ void WaterFlowLayoutSW::ClearFront()
 {
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
-        if (!info_->idxToLane_.count(i)) {
-            TAG_LOGW(
-                ACE_WATERFLOW, "Inconsistent data found on item %{public}d. Current endIndex = %{public}d", i, endIdx);
-            break;
-        }
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
         float itemEndPos = lane.startPos + lane.items_.front().mainSize;

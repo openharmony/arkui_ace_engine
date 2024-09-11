@@ -659,11 +659,6 @@ public:
         native_video_player_config_ = std::make_tuple(enable, shouldOverlay);
     }
 
-    void SetSmoothDragResizeEnabled(bool isEnabled)
-    {
-        isSmoothDragResizeEnabled_ = isEnabled;
-    }
-
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -1185,7 +1180,6 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
-    bool isSmoothDragResizeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;

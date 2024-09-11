@@ -171,8 +171,7 @@ void PagePattern::ProcessShowState()
     if (manager) {
         auto safeArea = manager->GetSafeArea();
         auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
-        auto geometryNode = host->GetGeometryNode();
-        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        auto frame = host->GetPaintRectWithTransform() + parentGlobalOffset;
         // if page's frameRect not fit current safeArea, need layout page again
         if (!NearEqual(frame.GetY(), safeArea.top_.end)) {
             host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
@@ -261,7 +260,7 @@ void PagePattern::OnShow()
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
-            param = entryPageInfo->GetPageParams();
+            param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
         Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);

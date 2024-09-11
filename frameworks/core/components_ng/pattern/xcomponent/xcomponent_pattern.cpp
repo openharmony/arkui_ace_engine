@@ -85,10 +85,6 @@ std::string XComponentTypeToString(XComponentType type)
             return "texture";
         case XComponentType::NODE:
             return "node";
-#ifdef PLATFORM_VIEW_SUPPORTED
-        case XComponentType::PLATFORM_VIEW:
-            return "platform_view";
-#endif
         default:
             return "unknown";
     }
@@ -360,74 +356,6 @@ void XComponentPattern::RequestFocus()
 
     focusHub->RequestFocusImmediately();
 }
-
-#ifdef PLATFORM_VIEW_SUPPORTED
-void* XComponentPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, nullptr);
-    auto nativeView = container->GetAceView();
-    CHECK_NULL_RETURN(nativeView, nullptr);
-    return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
-}
-
-void XComponentPattern::OnTextureRefresh(void* surface)
-{
-    CHECK_NULL_VOID(surface);
-    auto renderContextForPlatformView = renderContextForPlatformViewWeakPtr_.Upgrade();
-    CHECK_NULL_VOID(renderContextForPlatformView);
-    renderContextForPlatformView->MarkNewFrameAvailable(surface);
-    UpdatePlatformViewLayoutIfNeeded();
-}
-
-void XComponentPattern::RegisterPlatformViewEvent()
-{
-    CHECK_NULL_VOID(platformView_);
-    ContainerScope scope(GetHostInstanceId());
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    auto xcPattern = WeakClaim(this);
-
-    auto&& textureRefreshEvent = [xcPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
-        uiTaskExecutor.PostSyncTask([&xcPattern, instanceId, textureId] {
-            auto xComponentPattern = xcPattern.Upgrade();
-            CHECK_NULL_VOID(xComponentPattern);
-            void* nativeWindow = xComponentPattern->GetNativeWindow(instanceId, textureId);
-            if (!nativeWindow) {
-                LOGE("the native window is nullptr.");
-                return;
-            }
-            xComponentPattern->OnTextureRefresh(nativeWindow);
-            }, "ArkUIXComponentPatternTextureRefreshEvent");
-    };
-    platformView_->RegisterTextureEvent(textureRefreshEvent);
-
-    auto&& platformViewReadyEvent = [xcPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([&xcPattern] {
-            auto xComponentPattern = xcPattern.Upgrade();
-            CHECK_NULL_VOID(xComponentPattern);
-            auto host = xComponentPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            }, "ArkUIXComponentPatternPlatformViewReadyEvent");
-    };
-    platformView_->RegisterPlatformViewReadyEvent(platformViewReadyEvent);
-}
-
-void XComponentPattern::PrepareSurface()
-{
-    if (!platformView_ || renderSurface_->IsSurfaceValid()) {
-        return;
-    }
-    if (!SystemProperties::GetExtSurfaceEnabled()) {
-        renderSurface_->SetRenderContext(renderContextForPlatformView_);
-    }
-    renderSurface_->InitSurface();
-    platformView_->SetRenderSurface(renderSurface_);
-}
-#endif
 #endif
 
 void XComponentPattern::OnAttachToFrameNode()
@@ -452,73 +380,12 @@ void XComponentPattern::OnAttachToFrameNode()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type_ == XComponentType::PLATFORM_VIEW) {
-        PlatformViewInitialize();
-    }
-#endif
 }
-
-#ifdef PLATFORM_VIEW_SUPPORTED
-void XComponentPattern::PlatformViewInitialize()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    platformView_ = PlatformViewProxy::GetInstance().Attach(GetId());
-    platformView_->InitPlatformView();
-    renderSurface_ = RenderSurface::Create();
-    renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderContextForPlatformView_ = RenderContext::Create();
-    InitEvent();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_TEXTURE,
-                                                 "PlatformViewSurface", RenderContext::PatternType::PLATFORM_VIEW };
-    renderContextForPlatformView_->InitContext(false, param);
-    renderSurfaceWeakPtr_ = renderSurface_;
-    renderContextForPlatformViewWeakPtr_ = renderContextForPlatformView_;
-    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
-        auto xcomponentPattern = weak.Upgrade();
-        CHECK_NULL_VOID(xcomponentPattern);
-        if (auto renderSurface = xcomponentPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
-            renderSurface->AttachToGLContext(textureId, isAttach);
-        }
-    };
-    renderContextForPlatformView_->AddAttachCallBack(OnAttachCallBack);
-    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
-        auto xcomponentPattern = weak.Upgrade();
-        CHECK_NULL_VOID(xcomponentPattern);
-        if (auto renderSurface = xcomponentPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
-            renderSurface->UpdateTextureImage(matrix);
-        }
-    };
-    renderContextForPlatformView_->AddUpdateCallBack(OnUpdateCallBack);
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForPlatformView_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToBounds(true);
-}
-#endif
 
 void XComponentPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type_ == XComponentType::PLATFORM_VIEW) {
-        ContainerScope scope(GetHostInstanceId());
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-        platformTask.PostTask([weak = WeakClaim(this)] {
-            auto xComponentPattern = weak.Upgrade();
-            CHECK_NULL_VOID(xComponentPattern);
-            xComponentPattern->RegisterPlatformViewEvent();
-            xComponentPattern->PrepareSurface();
-            }, "ArkUIXComponentPatternOnModifyDone");
-    }
-#endif
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
@@ -580,17 +447,6 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
 
 void XComponentPattern::OnRebuildFrame()
 {
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type_ == XComponentType::PLATFORM_VIEW) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CHECK_NULL_VOID(renderContextForPlatformView_);
-        renderContext->AddChild(renderContextForPlatformView_, 0);
-        return;
-    }
-#endif
     if (type_ != XComponentType::SURFACE) {
         return;
     }
@@ -755,37 +611,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type_ == XComponentType::PLATFORM_VIEW) {
-        UpdatePlatformViewLayoutIfNeeded();
-    }
-#endif
     host->MarkNeedSyncRenderTree();
 }
-
-#ifdef PLATFORM_VIEW_SUPPORTED
-void XComponentPattern::UpdatePlatformViewLayoutIfNeeded()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto transformRelativeOffset = host->GetTransformRelativeOffset();
-    OffsetF offset = localPosition_ + transformRelativeOffset;
-    if (lastDrawSize_ != drawSize_ || lastOffset_ != offset) {
-        platformView_->UpdatePlatformViewLayout(drawSize_, offset);
-        if (renderContextForPlatformView_) {
-            renderContextForPlatformView_->SetBounds(localPosition_.GetX(), localPosition_.GetY(),
-                drawSize_.Width(), drawSize_.Height());
-        }
-        if (SystemProperties::GetExtSurfaceEnabled()) {
-            renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + localPosition_.GetX(),
-                transformRelativeOffset.GetY() + localPosition_.GetY(), drawSize_.Width(),
-                drawSize_.Height());
-        }
-        lastDrawSize_ = drawSize_;
-        lastOffset_ = offset;
-    }
-}
-#endif
 
 void XComponentPattern::DumpInfo()
 {
@@ -887,7 +714,9 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
     if (!isTypedNode_ && isNativeXComponent_ && !needFireNativeEvent) {
         return;
     }
-    OnSurfaceChanged(surfaceRect);
+    // When creating the surface for the first time, needFireNativeEvent = false, other time needFireNativeEvent = true
+    // the first time change size no need to resize nativeWindow
+    OnSurfaceChanged(surfaceRect, needFireNativeEvent);
 }
 
 void XComponentPattern::InitNativeNodeCallbacks()
@@ -1036,11 +865,6 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
 void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
 {
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type_ == XComponentType::PLATFORM_VIEW) {
-        return;
-    }
-#endif
     gestureHub->SetOnTouchIntercept(
         [weak = WeakClaim(this)](
             const TouchEventInfo& touchEvent) -> HitTestMode {
@@ -1137,36 +961,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
         RequestFocus();
     }
 #endif
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type_ == XComponentType::PLATFORM_VIEW) {
-        const auto& changedPoint = touchInfoList.front();
-        PlatformViewDispatchTouchEvent(changedPoint);
-    }
-#endif
 }
-
-#ifdef PLATFORM_VIEW_SUPPORTED
-void XComponentPattern::PlatformViewDispatchTouchEvent(const TouchLocationInfo& changedPoint)
-{
-    if (type_ != XComponentType::PLATFORM_VIEW) {
-        return;
-    }
-    CHECK_NULL_VOID(platformView_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto transformRelativeOffset = host->GetTransformRelativeOffset();
-    NG::OffsetF pointOffset = localPosition_ + transformRelativeOffset;
-    if (changedPoint.GetTouchType() == TouchType::DOWN) {
-        platformView_->HandleTouchDown(pointOffset);
-    } else if (changedPoint.GetTouchType() == TouchType::MOVE) {
-        platformView_->HandleTouchMove(pointOffset);
-    } else if (changedPoint.GetTouchType() == TouchType::UP) {
-        platformView_->HandleTouchUp(pointOffset);
-    } else if (changedPoint.GetTouchType() == TouchType::CANCEL) {
-        platformView_->HandleTouchCancel(pointOffset);
-    }
-}
-#endif
 
 #ifdef OHOS_PLATFORM
 void XComponentPattern::ReportSlideToRss()
@@ -1746,22 +1541,24 @@ void XComponentPattern::OnSurfaceCreated()
     }
 }
 
-void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect)
+void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow)
 {
     CHECK_RUN_ON(UI);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isNativeXComponent_) {
-        CHECK_NULL_VOID(nativeXComponent_);
-        CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto width = surfaceRect.Width();
+    auto height = surfaceRect.Height();
+    if (needResizeNativeWindow) {
         CHECK_NULL_VOID(renderSurface_);
         auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto viewScale = context->GetViewScale();
-        auto width = surfaceRect.Width();
-        auto height = surfaceRect.Height();
-        renderSurface_->AdjustNativeWindowSize(static_cast<uint32_t>(width * viewScale),
-            static_cast<uint32_t>(height * viewScale));
+        renderSurface_->AdjustNativeWindowSize(
+            static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
+    }
+    if (isNativeXComponent_) {
+        CHECK_NULL_VOID(nativeXComponent_);
+        CHECK_NULL_VOID(nativeXComponentImpl_);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());

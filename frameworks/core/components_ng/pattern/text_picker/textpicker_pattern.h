@@ -263,7 +263,7 @@ public:
     {
         return values_;
     }
-
+ 
     const std::vector<uint32_t>& GetSelecteds()
     {
         return selecteds_;
@@ -355,6 +355,7 @@ public:
     {
         return customDividerFlag_;
     }
+
     void SetGradientHeight(const Dimension& value)
     {
         value_ = value;
@@ -372,36 +373,6 @@ public:
         return canloop_;
     }
 
-    void HasUserDefinedDisappearFontFamily(bool isUserDefined)
-    {
-        hasUserDefinedDisappearFontFamily_ = isUserDefined;
-    }
-
-    bool GetHasUserDefinedDisappearFontFamily()
-    {
-        return hasUserDefinedDisappearFontFamily_;
-    }
-
-    void HasUserDefinedNormalFontFamily(bool isUserDefined)
-    {
-        hasUserDefinedNormalFontFamily_ = isUserDefined;
-    }
-
-    bool GetHasUserDefinedNormalFontFamily()
-    {
-        return hasUserDefinedNormalFontFamily_;
-    }
-
-    void HasUserDefinedSelectedFontFamily(bool isUserDefined)
-    {
-        hasUserDefinedSelectedFontFamily_ = isUserDefined;
-    }
-
-    bool GetHasUserDefinedSelectedFontFamily()
-    {
-        return hasUserDefinedSelectedFontFamily_;
-    }
-
     void SetRangeType(int32_t rangeType)
     {
         rangeType_ = rangeType;
@@ -410,6 +381,36 @@ public:
     int32_t GetRangeType()
     {
         return rangeType_;
+    }
+
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedDisappearFontFamily_ = isUserDefined;
+    }
+ 
+    bool GetHasUserDefinedDisappearFontFamily()
+    {
+        return hasUserDefinedDisappearFontFamily_;
+    }
+ 
+    void HasUserDefinedNormalFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedNormalFontFamily_ = isUserDefined;
+    }
+ 
+    bool GetHasUserDefinedNormalFontFamily()
+    {
+        return hasUserDefinedNormalFontFamily_;
+    }
+ 
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedSelectedFontFamily_ = isUserDefined;
+    }
+ 
+    bool GetHasUserDefinedSelectedFontFamily()
+    {
+        return hasUserDefinedSelectedFontFamily_;
     }
 
     void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
@@ -547,7 +548,7 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
-    
+
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;

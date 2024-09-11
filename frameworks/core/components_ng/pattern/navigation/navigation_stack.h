@@ -118,10 +118,10 @@ public:
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     RefPtr<UINode> Get();
+    RefPtr<UINode> Get(int32_t index);
     std::string GetNavDesNameByIndex(int32_t index);
     bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
-    RefPtr<UINode> Get(int32_t index);
     RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
@@ -180,14 +180,6 @@ public:
         navigationNode_ = navigationNode;
     }
 
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    void SetLastNavPathList(const NavPathList& navPathList)
-    {
-        lastNavPathList_ = navPathList;
-    }
-    bool isLastListContains(const std::string& name, const RefPtr<UINode>& navDestinationNode);
-#endif
-
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
     virtual void RecoveryNavigationStack() {}
     virtual bool NeedBuildNewInstance(int32_t index) { return false; }
@@ -220,10 +212,6 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    // backup NavPathList before push or pop
-    NavPathList lastNavPathList_;
-#endif
     // recovery NavPathList
     NavPathList recoveryList_;
     NavPathList cacheNodes_;

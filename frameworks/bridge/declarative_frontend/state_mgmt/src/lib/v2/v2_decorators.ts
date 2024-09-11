@@ -203,6 +203,32 @@ const Consumer = (aliasName?: string) => {
     // redefining the property happens when owning ViewV2 gets constructed
     // and @Consumer gets connected to @provide counterpart
     ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
+    const providerName = (aliasName === undefined || aliasName === null ||
+      (typeof aliasName === "string" && aliasName.trim() === "")
+    ) ? varName : aliasName;
+    let retVal = this[varName];
+    let providerInfo;
+
+    Reflect.defineProperty(proto, varName, {
+      get() {
+        providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+        if (providerInfo && providerInfo[0] && providerInfo[1]) {
+          retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+        }
+        return retVal;
+      },
+      set(val) {
+        if(!providerInfo) {
+          providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+          if (providerInfo && providerInfo[0] && providerInfo[1]) {
+            retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+          } else {
+            retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+          }
+        }
+      },
+      enumerable: true
+    })
   };
 }; // @Consumer
 

@@ -206,7 +206,6 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding.bottom.value_or(0.0);
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);

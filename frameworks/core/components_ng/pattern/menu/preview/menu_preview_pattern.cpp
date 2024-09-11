@@ -200,7 +200,7 @@ void MenuPreviewPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(targetGestureHub);
     auto dragEventActuator = targetGestureHub->GetDragEventActuator();
     auto actionStartTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](
-                               const GestureEvent& info) {
+    const GestureEvent& info) {
         auto dragEventActuator = actuator.Upgrade();
         CHECK_NULL_VOID(dragEventActuator);
         dragEventActuator->RestartDragTask(info);
@@ -233,7 +233,6 @@ void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float veloc
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu();
 }
 } // namespace OHOS::Ace::NG

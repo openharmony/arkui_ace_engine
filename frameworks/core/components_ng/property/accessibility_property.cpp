@@ -200,8 +200,8 @@ bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoin
         auto frameNode = AceType::DynamicCast<FrameNode>(virtualNode);
         CHECK_NULL_RETURN(frameNode, false);
 
-        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, frameNode, path, debugInfo,
-            recursiveParam.ancestorGroupFlag)) {
+        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint,
+            frameNode, path, debugInfo, recursiveParam.ancestorGroupFlag)) {
             return true;
         }
     } else {
@@ -249,7 +249,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf) {
+    if (hitSelf && shouldSearchSelf && IsAccessibilityFocusable(node)) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -291,6 +291,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
     bool shouldSearchChildren = true;
     bool currentGroupFlag = false;
     auto level = AccessibilityProperty::Level::AUTO;
+
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {

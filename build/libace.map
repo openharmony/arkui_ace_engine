@@ -35,7 +35,6 @@
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnReturnRequest*;
 
       OHOS_ACE_*;
-      GetArkUINodeAPI;
       GetArkUIAnyFullNodeAPI;
       GetCJUIFullNodeAPI;
 
@@ -80,7 +79,6 @@
       OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
-      OHOS::Ace::DynamicColor::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::Dimension::*;
@@ -211,6 +209,8 @@
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::ComponentGroupElement::*;
       OHOS::Ace::ComposedComponent::*;
+      OHOS::Ace::BoxComponent::*;
+      OHOS::Ace::PageTransitionComponent::*;
       OHOS::Ace::NG::CustomPaintPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::CustomNodeBase::*;
@@ -279,6 +279,8 @@
       vtable?for?OHOS::Ace::NG::PagePattern;
       vtable?for?OHOS::Ace::StackElement;
       vtable?for?OHOS::Ace::ComposedComponent;
+      vtable?for?OHOS::Ace::BoxComponent;
+      vtable?for?OHOS::Ace::PageTransitionComponent;
       vtable?for?OHOS::Ace::Framework::DOMDocument;
       vtable?for?OHOS::Ace::NG::TapGesture;
       vtable?for?OHOS::Ace::NG::LongPressGesture;
@@ -300,6 +302,8 @@
       VTT?for?OHOS::Ace::ComponentGroupElement;
       VTT?for?OHOS::Ace::NG::PagePattern;
       VTT?for?OHOS::Ace::ComposedComponent;
+      VTT?for?OHOS::Ace::BoxComponent;
+      VTT?for?OHOS::Ace::PageTransitionComponent;
       VTT?for?OHOS::Ace::Framework::DOMDocument;
       VTT?for?OHOS::Ace::NG::TapGesture;
       VTT?for?OHOS::Ace::NG::LongPressGesture;
@@ -386,6 +390,7 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      VTT?for?OHOS::Ace::ResourceWrapper;
     };
   local:
     *;

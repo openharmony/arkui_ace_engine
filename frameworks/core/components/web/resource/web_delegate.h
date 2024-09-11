@@ -906,9 +906,6 @@ public:
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
-    void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
-    bool GetIsSmoothDragResizeEnabled();
-    void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
@@ -1210,7 +1207,6 @@ private:
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
-    bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
     double resizeVisibleWidth_ = -1.0;

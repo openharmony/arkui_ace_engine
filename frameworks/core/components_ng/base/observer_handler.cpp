@@ -36,6 +36,7 @@ UIObserverHandler& UIObserverHandler::GetInstance()
 
 void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
 {
+    CHECK_NULL_VOID(navigationHandleFunc_);
     auto ref = weakPattern.Upgrade();
     CHECK_NULL_VOID(ref);
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
@@ -47,14 +48,12 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (state == NavDestinationState::ON_SHOWN || state == NavDestinationState::ON_HIDDEN) {
             NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
-            CHECK_NULL_VOID(navigationHandleFunc_);
             navigationHandleFunc_(info);
         }
         return;
     }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
-    CHECK_NULL_VOID(navigationHandleFunc_);
     navigationHandleFunc_(info);
 }
 
@@ -119,7 +118,7 @@ void UIObserverHandler::NotifyWillClick(
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
-
+ 
 void UIObserverHandler::NotifyDidClick(
     const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
 {
@@ -137,6 +136,11 @@ void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
 {
     CHECK_NULL_VOID(tabContentStateHandleFunc_);
     tabContentStateHandleFunc_(info);
+}
+
+UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNavDestinationSwitchFunc()
+{
+    return navDestinationSwitchHandleFunc_;
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
@@ -229,13 +233,7 @@ void UIObserverHandler::HandleDrawCommandSendCallBack()
 {
     CHECK_NULL_VOID(drawCommandSendHandleFunc_);
     ACE_LAYOUT_SCOPED_TRACE("drawCommandSend");
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [callback = drawCommandSendHandleFunc_] { callback(); },
-        TaskExecutor::TaskType::JS, "ArkUIObserverDrawCommandSend");
+    drawCommandSendHandleFunc_();
 }
 
 void UIObserverHandler::HandleLayoutDoneCallBack()
@@ -298,7 +296,7 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 {
     willClickHandleFunc_ = func;
 }
-
+ 
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;

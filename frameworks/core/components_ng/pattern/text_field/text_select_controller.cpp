@@ -205,8 +205,23 @@ int32_t TextSelectController::ConvertTouchOffsetToPosition(const Offset& localOf
 void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
 {
     CHECK_NULL_VOID(paragraph_ && !contentController_->IsEmpty());
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    auto textRect = textField->GetTextRect();
+    auto touchLocalOffset = localOffset;
+    if (textField->IsTextArea()) {
+        if (GreatNotEqual(touchLocalOffset.GetY(), textRect.Bottom())) {
+            // click at end of a paragraph.
+            touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Right() : textRect.Left());
+        } else if (LessNotEqual(touchLocalOffset.GetY(), textRect.Top())) {
+            // click at the beginning of a paragraph.
+            touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Left() : textRect.Right());
+        }
+    }
 
-    auto range = GetSelectRangeByOffset(localOffset);
+    auto range = GetSelectRangeByOffset(touchLocalOffset);
     int32_t start = range.first;
     int32_t end = range.second;
     UpdateHandleIndex(start, end);
@@ -236,7 +251,7 @@ void TextSelectController::UpdateSelectPragraphByOffset(const Offset& localOffse
 
 std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const Offset& localOffset)
 {
-    std::pair<int32_t, int32_t> err(-1, -1);
+    std::pair<int32_t, int32_t> err (-1, -1);
     CHECK_NULL_RETURN(paragraph_ && !contentController_->IsEmpty(), err);
     int32_t start = 0;
     int32_t end = 0;
@@ -295,7 +310,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
         TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
-    return { start, end };
+    return {start, end };
 }
 
 void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)
@@ -813,9 +828,31 @@ bool TextSelectController::IsTouchAtLineEnd(const Offset& localOffset)
     auto offset = localOffset - Offset(textRect.GetX(), textRect.GetY());
     LineMetrics lineMetrics;
     if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics)) {
-        return GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width);
+        if (textFiled->IsLTRLayout()) {
+            return GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width);
+        } else {
+            return LessNotEqual(offset.GetX(), lineMetrics.x);
+        }
     }
     return false;
 }
 
+void TextSelectController::UpdateSelectWithBlank(const Offset& localOffset)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    auto textRect = textField->GetTextRect();
+    auto touchLocalOffset = localOffset;
+    if (textField->IsTextArea() && GreatNotEqual(touchLocalOffset.GetY(), textRect.Bottom())) {
+        // click at end of a paragraph.
+        touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Right() : textRect.Left());
+    }
+    if (IsTouchAtLineEnd(touchLocalOffset)) {
+        UpdateCaretInfoByOffset(touchLocalOffset);
+    } else {
+        UpdateSelectByOffset(localOffset);
+    }
+}
 } // namespace OHOS::Ace::NG

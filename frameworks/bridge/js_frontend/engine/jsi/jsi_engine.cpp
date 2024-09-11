@@ -930,7 +930,7 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
         .showMode = NG::ToastShowMode::DEFAULT,
         .alignment = -1,
         .offset = std::nullopt };
-    GetFrontendDelegate(runtime)->ShowToast(toastInfo, nullptr);
+    GetFrontendDelegate(runtime)->ShowToast(toastInfo);
 }
 
 std::vector<ButtonInfo> ParseDialogButtons(

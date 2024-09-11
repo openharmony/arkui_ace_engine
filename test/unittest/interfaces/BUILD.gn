@@ -747,7 +747,6 @@ ohos_unittest("dialog_model_test") {
     "$ace_root/interfaces/native/node/node_transition_imp.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
-    "dialog_model_test.cpp",
   ]
 
   configs = [

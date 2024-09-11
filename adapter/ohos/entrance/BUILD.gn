@@ -46,12 +46,12 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
+      "$ace_root/adapter/ohos/entrance/utils.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
       "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
-      "$ace_root/adapter/ohos/entrance/utils.cpp",
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
@@ -63,11 +63,11 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.cpp",
       "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
 
-      #Miscdevice Vibrator
-      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
-
       # CJUtils
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
+
+      #Miscdevice Vibrator
+      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
 
       # AudioHaptic
       "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_factory.cpp",
@@ -89,8 +89,14 @@ template("ace_ohos_standard_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs = [ "$ace_root/interfaces/inner_api/ui_session" ]
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      configs += [
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:export_config",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
+      ]
+    }
 
+    include_dirs = [ "$ace_root/interfaces/inner_api/ui_session" ]
     deps = [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
       "$ace_root/interfaces/inner_api/ace:ace_uicontent",
@@ -103,13 +109,11 @@ template("ace_ohos_standard_source_set") {
       "ability_base:extractortool",
       "ability_base:view_data",
       "ability_base:want",
-      "ability_runtime:ability_connect_callback_stub",
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
       "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
-      "ability_runtime:napi_common",
       "ability_runtime:ui_extension",
       "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
@@ -118,6 +122,7 @@ template("ace_ohos_standard_source_set") {
       "eventhandler:libeventhandler",
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
+      "hilog:libhilog",
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",
@@ -135,11 +140,8 @@ template("ace_ohos_standard_source_set") {
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
     ]
-    defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
-    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
-      external_deps += [ "graphic_2d:librender_service_base" ]
-    }
 
+    defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (form_fwk_enable) {
       external_deps += [
         "form_fwk:fmskit_native",

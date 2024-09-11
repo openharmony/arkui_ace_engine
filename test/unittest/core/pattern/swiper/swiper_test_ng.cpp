@@ -1167,7 +1167,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
      * @tc.steps: step2. call InitSurfaceChangedCallback and then callback.
      * @tc.expected: Related function is called.
      */
-    auto pipeline = frameNode_->GetContextRefPtr();
+    auto pipeline = frameNode_->GetContext();
     pattern_->surfaceChangedCallbackId_.emplace(1);
     pattern_->InitSurfaceChangedCallback();
     pipeline->callbackId_ = 0;

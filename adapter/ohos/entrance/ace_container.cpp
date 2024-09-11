@@ -31,8 +31,6 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
-#include "root_scene.h"
-#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -1477,7 +1475,7 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isEnableArrow = false;
     if (!isNative) {
         // web component will manually destroy the popup
-        customConfig.isAutoCancel = false;
+        customConfig.isAutoCancel = true;
     }
 }
 
@@ -2285,26 +2283,15 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
 {
-    Rosen::WSRect avoidArea;
-    Rect sessionAvoidArea;
-    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return avoidArea;
     }
-    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
-        sessionAvoidArea.ToString().c_str());
-    return sessionAvoidArea;
+    return {};
 }
 
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
@@ -2314,17 +2301,6 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         return ConvertAvoidArea(avoidArea);
-    }
-    return {};
-}
-
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
-{
-    CHECK_NULL_RETURN(uiWindow_, {});
-    Rosen::AvoidArea avoidArea;
-    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
-    if (ret == Rosen::WMError::WM_OK) {
-        return avoidArea;
     }
     return {};
 }
@@ -2447,16 +2423,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 

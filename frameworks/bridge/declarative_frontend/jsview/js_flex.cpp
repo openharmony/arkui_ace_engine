@@ -70,6 +70,7 @@ void JSFlex::SetJustifyContent(int32_t value)
         FlexModel::GetInstance()->SetJustifyContent(value);
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         FlexModel::GetInstance()->SetJustifyContent(static_cast<int32_t>(FlexAlign::FLEX_START));
+        LOGE("invalid value for justifyContent");
     }
 }
 
@@ -81,6 +82,7 @@ void JSFlex::SetAlignItems(int32_t value)
         FlexModel::GetInstance()->SetAlignItems(value);
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         FlexModel::GetInstance()->SetAlignItems(static_cast<int32_t>(FlexAlign::FLEX_START));
+        LOGE("invalid value for alignItems");
     }
 }
 
@@ -92,12 +94,15 @@ void JSFlex::SetAlignContent(int32_t value)
         (value == static_cast<int32_t>(WrapAlignment::SPACE_BETWEEN)) ||
         (value == static_cast<int32_t>(WrapAlignment::STRETCH))) {
         FlexModel::GetInstance()->SetAlignContent(value);
+    } else {
+        LOGE("invalid value for alignContent");
     }
 }
 
 void JSFlex::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -116,6 +121,7 @@ void JSFlex::SetHeight(const JSRef<JSVal>& jsValue)
 void JSFlex::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -134,6 +140,7 @@ void JSFlex::SetWidth(const JSRef<JSVal>& jsValue)
 void JSFlex::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -144,6 +151,7 @@ void JSFlex::JsSize(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
         return;
     }
 

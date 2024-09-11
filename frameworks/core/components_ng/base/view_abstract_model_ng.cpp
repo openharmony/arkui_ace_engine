@@ -96,14 +96,7 @@ void ViewAbstractModelNG::BindMenu(
     if (menuNode) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
         auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
-        if (menuParam.hasTransitionEffect) {
-            auto renderContext = menuNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateChainedTransition(menuParam.transition);
-        }
         if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
             overlayManager->HideMenu(menuNode, targetId, false);
         }
     } else if (menuParam.isShow) {
@@ -193,9 +186,7 @@ void BindContextMenuSingle(
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
-                TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
@@ -277,11 +268,10 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
                 TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
-                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                    [builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
                         TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);

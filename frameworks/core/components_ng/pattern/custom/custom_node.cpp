@@ -49,8 +49,6 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 
 void CustomNode::Render()
 {
-    // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
-    bool needMarkParentBak = needMarkParent_;
     needMarkParent_ = false;
     if (renderFunction_) {
         RenderFunction renderFunction = nullptr;
@@ -81,17 +79,18 @@ void CustomNode::Render()
     {
         FireRecycleRenderFunc();
     }
-    needMarkParent_ = needMarkParentBak;
+    needMarkParent_ = true;
 }
 
-void CustomNode::DetachFromMainTree(bool recursive)
+void CustomNode::FireCustomDisappear()
 {
-    auto context = GetContext();
-    if (context && context->IsDestroyed()) {
-        FireOnDisappear();
-        Reset();
+    if (!CheckFireOnAppear()) {
+        FireOnAppear();
+        FireDidBuild();
     }
-    UINode::DetachFromMainTree(recursive);
+    FireOnDisappear();
+    Reset();
+    UINode::FireCustomDisappear();
 }
 
 // used in HotReload to update root view @Component

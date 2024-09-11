@@ -533,12 +533,6 @@ ArkUI_Float32 GetWaterFlowFriction(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, 1);
     return WaterFlowModelNG::GetFriction(frameNode);
 }
-void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
-}
 
 void SetWaterflowFooter(ArkUINodeHandle node, ArkUINodeHandle footer)
 {
@@ -554,6 +548,12 @@ void ResetWaterflowFooter(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetWaterflowFooter(frameNode, nullptr);
+}
+void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
 }
 
 void SetWaterFlowFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
@@ -631,7 +631,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
+        GetWaterFlowFriction, SetWaterflowFooter, ResetWaterflowFooter, SetScrollToIndex, SetWaterFlowFlingSpeedLimit,
         ResetWaterFlowFlingSpeedLimit, GetScrollController, SetWaterFlowScroller, SetWaterFlowLayoutMode,
         ResetWaterFlowLayoutMode, ResetWaterFlowSections };
     return &modifier;

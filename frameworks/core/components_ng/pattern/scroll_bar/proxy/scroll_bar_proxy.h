@@ -33,7 +33,6 @@ struct ScrollableNodeInfo {
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback;
     ScrollBarFRCallback scrollbarFRcallback;
-    std::function<void(bool, bool smooth)> scrollPageCallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
@@ -94,7 +93,7 @@ public:
     bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
 
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
-
+    
     void NotifyScrollBarNode(float distance, int32_t source) const;
 
     void SetScrollSnapTrigger_(bool scrollSnapTrigger)
@@ -106,8 +105,6 @@ public:
     {
         return scrollSnapTrigger_;
     }
-
-    void ScrollPage(bool reverse, bool smooth);
 
     void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
 

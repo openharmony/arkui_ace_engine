@@ -112,6 +112,7 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
     Media::VideoCodecFormat encoder = Media::H264;
 
     std::shared_ptr<Media::Recorder> recorder = Media::RecorderFactory::CreateRecorder();
+    CHECK_NULL_RETURN(recorder, nullptr);
     if ((ret = recorder->SetVideoSource(videoSource, videoSourceId)) != ERR_OK) {
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
         return nullptr;

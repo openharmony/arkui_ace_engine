@@ -365,7 +365,6 @@ public:
     // distribute
     std::string ProvideRestoreInfo() override;
 
-
     bool hasFocus_ = false;
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     void SetEditingValue(const std::string& text);

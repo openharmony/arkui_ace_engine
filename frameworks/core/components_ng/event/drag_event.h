@@ -151,8 +151,6 @@ public:
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
-    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart);
-    void UpdatePreviewPosition();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);

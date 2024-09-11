@@ -899,6 +899,22 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& v
     textPattern->SetTextDetectTypes(value);
 }
 
+void TextModelNG::SetOnClick(FrameNode* frameNode, GestureEventFunc&& click)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(std::move(click));
+}
+
+void TextModelNG::ClearOnClick(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(nullptr);
+}
+
 void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)
 {
     CHECK_NULL_VOID(frameNode);
@@ -919,13 +935,6 @@ FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
 {
     FONT_FEATURES_LIST value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
-    return value;
-}
-
-LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
-{
-    LineBreakStrategy value = LineBreakStrategy::GREEDY;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
     return value;
 }
 
@@ -960,6 +969,13 @@ void TextModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
     if (textLayoutProperty) {
         textLayoutProperty->ResetSelectedBackgroundColor();
     }
+}
+
+LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
+{
+    LineBreakStrategy value = LineBreakStrategy::GREEDY;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, LineBreakStrategy, value, frameNode, value);
+    return value;
 }
 
 void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value)

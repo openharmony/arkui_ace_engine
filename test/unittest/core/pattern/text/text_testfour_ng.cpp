@@ -264,23 +264,6 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTextRacePercent001
- * @tc.desc: test GetTextRacePercent.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFourNg, GetTextRacePercent001, TestSize.Level1)
-{
-    RefPtr<TextContentModifier> textContentModifier =
-        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
-    ASSERT_NE(textContentModifier, nullptr);
-
-    textContentModifier->GetTextRacePercent();
-    textContentModifier->racePercentFloat_->Set(1.0f);
-    auto ret = textContentModifier->GetTextRacePercent();
-    EXPECT_EQ(ret, 1.0f);
-}
-
-/**
  * @tc.name: SetAdaptMaxFontSize001
  * @tc.desc: test SetAdaptMaxFontSize.
  * @tc.type: FUNC

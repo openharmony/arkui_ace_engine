@@ -1644,39 +1644,6 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest046, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutWrapperTest048
- * @tc.desc: Test AdjustChildren.
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest048, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. rowFrameNode addChildren .
-     */
-    auto rowFrameNode = FrameNode::CreateFrameNode(
-        OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-
-    auto rowFrameNode1 = FrameNode::CreateFrameNode(
-        OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    RefPtr<CustomNode> cusNodeTemp = AceType::MakeRefPtr<CustomNode>(NODE_ID_2, OHOS::Ace::V2::FLEX_ETS_TAG);
-    rowFrameNode->AddChild(cusNodeTemp);
-    rowFrameNode->AddChild(rowFrameNode1);
-
-    /**
-     * @tc.steps: step2. create LayoutWrapper.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step3. Call AdjustChildren().
-     */
-    layoutWrapper->AdjustChildren(OffsetF(0, 10), false);
-    EXPECT_FALSE(rowFrameNode1->GetLayoutProperty()->GetSafeAreaExpandOpts());
-}
-
-/**
  * @tc.name: LayoutWrapperTest049
  * @tc.desc: Test AvoidKeyboard.
  * @tc.type: FUNC

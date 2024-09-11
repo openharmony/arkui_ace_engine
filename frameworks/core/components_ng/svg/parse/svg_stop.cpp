@@ -15,14 +15,13 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 
-#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components/declaration/svg/svg_stop_declaration.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 const char DOM_SVG_SRC_STOP_COLOR[] = "stop-color";
 const char DOM_SVG_SRC_STOP_OPACITY[] = "stop-opacity";
-const char VALUE_NONE[] = "none";
 }
 
 SvgStop::SvgStop() : SvgNode() {}
@@ -42,7 +41,7 @@ const GradientColor& SvgStop::GetGradientColor() const
 bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgStopAttribute&)> attrs[] = {
-        { SVG_OFFSET,
+        { DOM_SVG_OFFSET,
             [](const std::string& val, SvgStopAttribute& attribute) {
                 attribute.gradientColor.SetDimension(SvgAttributesParser::ParseDimension(val));
             } },
@@ -55,12 +54,12 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             [](const std::string& val, SvgStopAttribute& attribute) {
                 attribute.gradientColor.SetOpacity(SvgAttributesParser::ParseDouble(val));
             } },
-        { SVG_STOP_COLOR,
+        { DOM_SVG_STOP_COLOR,
             [](const std::string& val, SvgStopAttribute& attribute) {
                 Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
                 attribute.gradientColor.SetColor(color);
             } },
-        { SVG_STOP_OPACITY,
+        { DOM_SVG_STOP_OPACITY,
             [](const std::string& val, SvgStopAttribute& attribute) {
                 attribute.gradientColor.SetOpacity(SvgAttributesParser::ParseDouble(val));
             } },

@@ -154,7 +154,6 @@ public:
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
     static void TextAutosizing(const JSCallbackInfo& args);
     static void EnableNativeVideoPlayer(const JSCallbackInfo& args);
-    static void EnableSmoothDragResize(bool isSmoothDragResizeEnabled);
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
     static void OnViewportFitChanged(const JSCallbackInfo& args);

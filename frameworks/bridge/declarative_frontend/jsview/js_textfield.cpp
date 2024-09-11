@@ -1039,9 +1039,6 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }

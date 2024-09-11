@@ -198,9 +198,6 @@ void FfiOHOSAceFrameworkSwiperSetOnChange(void (*callback)(int32_t index))
 int64_t FfiOHOSAceFrameworkSwiperControllerCtor()
 {
     auto ret_ = FFIData::Create<NativeSwiperController>();
-    if (ret_ == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return ret_->GetID();
 }
 

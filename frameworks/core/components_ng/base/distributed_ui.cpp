@@ -603,7 +603,6 @@ void DistributedUI::AttachToTree(
             return;
         }
         parent->AddChild(uiNode);
-        parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 }
 
@@ -640,7 +639,6 @@ void DistributedUI::DelNode(const std::unique_ptr<NodeObject>& nodeObject)
         return;
     }
     parent->RemoveChild(sinkNode);
-    parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)

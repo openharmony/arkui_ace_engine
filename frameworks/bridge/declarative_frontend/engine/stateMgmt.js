@@ -4006,7 +4006,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.isActive_ = true;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
         this.isDeleting_ = false;
-        // KEEP
         this.isCompFreezeAllowed_ = false;
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
@@ -4089,15 +4088,12 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     aboutToReuse(_) { }
     aboutToRecycle() { }
-    // KEEP
     isDeleting() {
         return this.isDeleting_;
     }
-    // KEEP
     setDeleting() {
         this.isDeleting_ = true;
     }
-    // KEEP
     setDeleteStatusRecursively() {
         if (!this.childrenWeakrefMap_.size) {
             return;
@@ -4110,28 +4106,18 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             }
         });
     }
-    // KEEP
     isCompFreezeAllowed() {
         return this.isCompFreezeAllowed_;
     }
-    // KEEP, FIXME
-    purgeDeleteElmtId(rmElmtId) {
-        
-        const result = this.updateFuncByElmtId.delete(rmElmtId);
-        if (result) {
-            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
-            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
-            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
-        }
-        // FIXME: only do this if app uses V3
-        ObserveV2.getObserve().clearBinding(rmElmtId);
-        return result;
+    getChildViewV2ForElmtId(elmtId) {
+        const optComp = this.childrenWeakrefMap_.get(elmtId);
+        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ? optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
         // ViewPU overrides to unregister ViewPU from variables, 
         // not in use in ViewV2
     }
-    // KEEP, overwritten by sub classes
+    // overwritten by sub classes
     debugInfo__() {
         return `@Component '${this.constructor.name}'[${this.id__()}]`;
     }
@@ -4140,7 +4126,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     // for given elmtIds look up their component name/type and format a string out of this info
     // use function only for debug output and DFX.
-    // KEEP
     debugInfoElmtIds(elmtIds) {
         let result = '';
         let sepa = '';
@@ -4150,7 +4135,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         });
         return result;
     }
-    // KEEP
     debugInfoElmtId(elmtId, isProfiler = false) {
         return isProfiler ? {
             elementId: elmtId,
@@ -4168,7 +4152,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         stateMgmtConsole.warn(`Printing profiler information`);
         stateMgmtProfiler.report();
     }
-    // KEEP  
     updateStateVarsOfChildByElmtId(elmtId, params) {
         
         
@@ -4192,7 +4175,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs/ViewV2
     // this function equals purgeDeletedElmtIdsRecursively because it does un-registration for all ViewPU/V2's
-    // KEEP
     purgeDeletedElmtIds() {
         
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
@@ -4217,12 +4199,26 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        if (deep) {
-            for (const child of this.childrenWeakrefMap_.values()) {
-                const childView = child.deref();
-                if (childView) {
-                    childView.forceCompleteRerender(true);
+        if (!deep) {
+            
+            
+            return;
+        }
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (!childView) {
+                continue;
+            }
+            if (child instanceof ViewPU) {
+                if (!child.isRecycled()) {
+                    child.forceCompleteRerender(true);
                 }
+                else {
+                    child.delayCompleteRerender (deep);
+                }
+            }
+            else {
+                childView.forceCompleteRerender(true);
             }
         }
         
@@ -4259,11 +4255,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // if this component does not have updateFunc for elmtId, return false.
         return typeof updateFunc === 'function';
     }
-    // KEEP
     static pauseRendering() {
         PUV2ViewBase.renderingPaused = true;
     }
-    // KEEP
     static restoreRendering() {
         PUV2ViewBase.renderingPaused = false;
     }
@@ -4348,10 +4342,12 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
                 newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
         }
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to foreach change
+        let removedChildElmtIds = [];
         // Set new array on C++ side.
         // C++ returns array of indexes of newly added array items.
         // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates, removedChildElmtIds);
         // Its error if there are duplicate IDs.
         if (idDuplicates.length > 0) {
             idDuplicates.forEach((indx) => {
@@ -4374,6 +4370,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
+        // un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
+        // purging these elmtIds from state mgmt will make sure no more update function on any deleted child will be executed
+        
+        this.purgeDeletedElmtIds();
         
         
         
@@ -4395,7 +4396,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
      * @param elmtId -  the id of the component
      * @returns ArkComponent | undefined
      */
-    // KEEP
     getNodeById(elmtId) {
         const entry = this.updateFuncByElmtId.get(elmtId);
         return entry ? entry.getNode() : undefined;
@@ -4413,7 +4413,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     debugInfoViewHierarchy(recursive = false) {
         return this.debugInfoViewHierarchyInternal(0, recursive);
     }
-    // KEEP
     debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
         if (this.isCompFreezeAllowed()) {
@@ -4427,11 +4426,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         }
         return retVaL;
     }
-    // KEEP
     debugInfoUpdateFuncByElmtId(recursive = false) {
         return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
     }
-    // KEEP
     debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
         this.updateFuncByElmtId.forEach((value, key, map) => {
@@ -6069,7 +6066,6 @@ function uiNodeCleanUpIdleTask() {
     
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 class UINodeRegisterProxy {
     constructor() {
@@ -6373,6 +6369,16 @@ class ViewPU extends PUV2ViewBase {
         }
         (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
         this.localStoragebackStore_ = undefined;
+    }
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        return result;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
         this.ownObservedPropertiesStore_.forEach((stateVar) => {
@@ -8573,26 +8579,6 @@ class ProviderConsumerUtilV2 {
         const aliasProp = ProviderConsumerUtilV2.metaAliasKey(aliasName, deco);
         meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
-    static setupConsumeVarsV2(view) {
-        const meta = view && view[ObserveV2.V2_DECO_META];
-        if (!meta) {
-            return;
-        }
-        for (const [key, value] of Object.entries(meta)) {
-            // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
-            // do not check alias entries
-            // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-            if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
-                let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
-                if (result && result[0] && result[1]) {
-                    ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
-                }
-                else {
-                    ProviderConsumerUtilV2.defineConsumerWithoutProvider(view, key);
-                }
-            }
-        }
-    }
     /**
     * find a @Provider'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
@@ -8621,15 +8607,27 @@ class ProviderConsumerUtilV2 {
         stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
         return undefined;
     }
+    /**
+    * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
+    * This function establishes a link between the consumer and provider, allowing the consumer to access and update
+    * the provider's value directly. If the provider view is garbage collected, attempts to access the provider
+    * property will throw an error.
+    *
+    * @param consumeView - The view object that consumes data from the provider.
+    * @param consumeVarName - The name of the property in the consumer view that will be linked to the provider.
+    * @param provideView - The view object that provides the data to the consumer.
+    * @param provideVarName - The name of the property in the provider view that the consumer will access.
+    *
+    */
     static connectConsumer2Provider(consumeView, consumeVarName, provideView, provideVarName) {
         var _a;
         const weakView = new WeakRef(provideView);
         const provideViewName = (_a = provideView.constructor) === null || _a === void 0 ? void 0 : _a.name;
+        const view = weakView.deref();
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
                 
                 ObserveV2.getObserve().addRef(this, consumeVarName);
-                const view = weakView.deref();
                 if (!view) {
                     const error = `${this.debugInfo__()}: get() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
                     stateMgmtConsole.error(error);
@@ -8640,7 +8638,6 @@ class ProviderConsumerUtilV2 {
             set(val) {
                 // If the object has not been observed, you can directly assign a value to it. This improves performance.
                 
-                const view = weakView.deref();
                 if (!view) {
                     const error = `${this.debugInfo__()}: set() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
                     stateMgmtConsole.error(error);
@@ -8656,11 +8653,12 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
+        return view[provideVarName];
     }
-    static defineConsumerWithoutProvider(consumeView, consumeVarName) {
+    static defineConsumerWithoutProvider(consumeView, consumeVarName, consumerLocalVal) {
         
         const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
-        consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
+        consumeView[storeProp] = consumerLocalVal; // use local init value, also as backing store
         Reflect.defineProperty(consumeView, consumeVarName, {
             get() {
                 ObserveV2.getObserve().addRef(this, consumeVarName);
@@ -8676,6 +8674,7 @@ class ProviderConsumerUtilV2 {
             },
             enumerable: true
         });
+        return consumeView[storeProp];
     }
 }
 ProviderConsumerUtilV2.ALIAS_PREFIX = '___pc_alias_';
@@ -8853,7 +8852,7 @@ class MonitorV2 {
         this.values_.forEach((item) => {
             const [success, value] = this.analysisProp(isInit, item);
             if (!success) {
-
+                
                 return;
             }
             let dirty = item.setValue(isInit, value);
@@ -9121,7 +9120,6 @@ class ViewV2 extends PUV2ViewBase {
      * otherwise it inherits from its parent instance if its freezeState is true
      */
     finalizeConstruction(freezeState) {
-        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         // Always use ID_REFS in ViewV2
@@ -9169,6 +9167,29 @@ class ViewV2 extends PUV2ViewBase {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+    }
+    /**
+    * Virtual function implemented in ViewPU and ViewV2
+    * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
+    *
+    * @param rmElmtId - The Element ID to be purged and deleted
+    * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
+   */
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
+            if (childOpt) {
+                childOpt.setDeleting();
+                childOpt.setDeleteStatusRecursively();
+            }
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        // Needed only for V2
+        ObserveV2.getObserve().clearBinding(rmElmtId);
+        return result;
     }
     initialRenderView() {
         
@@ -9305,6 +9326,10 @@ class ViewV2 extends PUV2ViewBase {
         
     }
     UpdateElement(elmtId) {
+        if (this.isDeleting_) {
+            
+            return;
+        }
         
         if (elmtId === this.id__()) {
             // do not attempt to update itself
@@ -9665,6 +9690,31 @@ const Consumer = (aliasName) => {
         // redefining the property happens when owning ViewV2 gets constructed
         // and @Consumer gets connected to @provide counterpart
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
+        const providerName = (aliasName === undefined || aliasName === null ||
+            (typeof aliasName === "string" && aliasName.trim() === "")) ? varName : aliasName;
+        let retVal = this[varName];
+        let providerInfo;
+        Reflect.defineProperty(proto, varName, {
+            get() {
+                providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                    retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                }
+                return retVal;
+            },
+            set(val) {
+                if (!providerInfo) {
+                    providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+                    if (providerInfo && providerInfo[0] && providerInfo[1]) {
+                        retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+                    }
+                    else {
+                        retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+                    }
+                }
+            },
+            enumerable: true
+        });
     };
 }; // @Consumer
 /**

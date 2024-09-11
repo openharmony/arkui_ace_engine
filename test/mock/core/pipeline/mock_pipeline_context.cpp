@@ -18,8 +18,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -86,14 +86,16 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootHeight_);
 }
 
-std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
+    const std::string& id)
 {
     return nullptr;
 }
 
-void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node) {}
+void PipelineContext::AddOrReplaceNavigationNode(
+    const std::string& id, const WeakPtr<FrameNode>& node) {}
 
-void PipelineContext::DeleteNavigationNode(const std::string& id) {}
+void PipelineContext::DeleteNavigationNode(const std::string &id) {}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -162,39 +164,6 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
-}
-
-void PipelineContext::SetupSubRootElement()
-{
-    CHECK_RUN_ON(UI);
-    appBgColor_ = Color::TRANSPARENT;
-    rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
-    rootNode_->SetHostRootId(GetInstanceId());
-    rootNode_->SetHostPageId(-1);
-    rootNode_->SetActive(true);
-    CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    layoutConstraint.maxSize = idealSize;
-    rootNode_->UpdateLayoutConstraint(layoutConstraint);
-    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
-    rootFocusHub->SetFocusType(FocusType::SCOPE);
-    rootFocusHub->SetFocusable(true);
-    window_->SetRootFrameNode(rootNode_);
-    rootNode_->AttachToMainTree(false, this);
-    accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
-    // the subwindow for overlay not need stage
-    stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(nullptr);
-    if (!stageManager_) {
-        stageManager_ = MakeRefPtr<StageManager>(nullptr);
-    }
-    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
-    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
-    selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = GetOrCreateFocusManager();
-    postEventManager_ = MakeRefPtr<PostEventManager>();
 }
 
 void PipelineContext::SendEventToAccessibilityWithNode(
@@ -336,8 +305,6 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
 void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
-
-void PipelineContext::CheckVirtualKeyboardHeight() {}
 
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
@@ -728,7 +695,9 @@ namespace OHOS::Ace {
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
-
+class FontManager : public AceType {
+    DECLARE_ACE_TYPE(FontManager, AceType);
+};
 void PipelineBase::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}
@@ -759,11 +728,9 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight,
-    const bool supportAvoidance, bool forceChange)
-{}
+    const bool supportAvoidance, bool forceChange) {}
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
-{}
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange) {}
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
@@ -885,11 +852,18 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
     return Dimension();
 }
 
+void PipelineBase::SetUiDvsyncSwitch(bool on)
+{
+}
+
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
 }
 
-void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    return false;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

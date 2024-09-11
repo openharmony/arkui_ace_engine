@@ -1087,7 +1087,6 @@ export struct SegmentButton {
         }
         .direction(this.options.direction)
         .size(this.componentSize)
-        .animation({ duration: 0 })
         .borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
           this.componentSize.height as number / 2)
@@ -1169,7 +1168,8 @@ export struct SegmentButton {
           }),
         SwipeGesture()
           .onAction((event: GestureEvent) => {
-            if (this.options === void 0 || this.options.buttons === void 0 || event.sourceTool === SourceTool.TOUCHPAD) {
+            if (this.options === void 0 || this.options.buttons === void 0 ||
+              event.sourceTool === SourceTool.TOUCHPAD) {
               return
             }
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {

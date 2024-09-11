@@ -72,7 +72,7 @@ public:
         auto taskRunner = MakeTaskRunner();
         taskExecutorImpl_ = AceType::MakeRefPtr<TaskExecutorImpl>(taskRunner);
     }
-    static void TearDownTestSuite()
+    static void TeardownTestSuite()
     {
         MockContainer::TearDown();
     }

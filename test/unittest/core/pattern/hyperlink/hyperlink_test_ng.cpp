@@ -44,7 +44,6 @@ constexpr double RADIUS_DEFAULT = 300.0;
 const std::string HYPERLINK_ADDRESS = "https://www.baidu.com";
 const std::string HYPERLINK_CONTENT = "baidu";
 const std::string HYPERLINK_EXTRAINFO = "{\"url\":\"https://www.baidu.com\",\"title\":\"baidu\"}";
-const std::string HYPERLINK_NULL = "";
 } // namespace
 
 class HyperlinkTestNg : public testing::Test {
@@ -437,62 +436,4 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
     hyperlinkPattern->OnHoverEvent(false);
     EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::NONE);
 }
-
-/**
- * @tc.name: SetColor001
- * @tc.desc: Test SetColor.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, SetColor001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(LayoutProperty, nullptr);
-    HyperlinkModelNG hyperlinkModelNG;
-    hyperlinkModelNG.SetResponseRegion(true);
-    hyperlinkModelNG.SetColor(Color::BLACK);
-    frameNode->MarkModifyDone();
-    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::BLACK);
-}
-
-/**
- * @tc.name: SetColor002
- * @tc.desc: Test SetColor.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, SetColor002, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    HyperlinkModelNG hyperlinkModelNG;
-    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(LayoutProperty, nullptr);
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    hyperlinkModelNG.SetColor(frameNode, Color::RED);
-    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::RED);
-}
-
-/**
- * @tc.name: EnableDrag001
- * @tc.desc: Test EnableDrag().
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, EnableDrag001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(HYPERLINK_NULL);
-    textLayoutProperty->UpdateAddress(HYPERLINK_ADDRESS);
-    frameNode->SetDraggable(true);
-    frameNode->MarkModifyDone();
-    auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
-    ASSERT_NE(hyperlinkPattern, nullptr);
-    hyperlinkPattern->EnableDrag();
-}
-
 } // namespace OHOS::Ace::NG

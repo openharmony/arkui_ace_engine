@@ -340,25 +340,32 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
 }
 
 void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
-    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand,
+    const WeakPtr<TextInputClient>& pattern)
 {
-    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    auto patternPtr = pattern.Upgrade();
+    CHECK_NULL_VOID(patternPtr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(patternPtr);
     CHECK_NULL_VOID(textFieldPattern);
     bool isPopup = false;
     if (privateCommand.find(AUTO_FILL_PARAMS_USERNAME) != privateCommand.end()) {
         auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
         textFieldPattern->SetAutoFillUserName(std::get<std::string>(userName->second));
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "111111111");
         textFieldPattern->ProcessAutoFill(isPopup, true);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
-            "com.autofill.params.userName : %{private}s", std::get<std::string>(userName->second).c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.userName : %{private}s",
+            std::get<std::string>(userName->second).c_str());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD) != privateCommand.end()) {
         auto newPassword = privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD);
         textFieldPattern->SetAutoFillNewPassword(std::get<std::string>(newPassword->second));
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "22222222");
         textFieldPattern->ProcessAutoFill(isPopup, true, true);
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL,
-            "com.autofill.params.newPassword : %{private}s", std::get<std::string>(newPassword->second).c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.newPassword : %{private}s",
+            std::get<std::string>(newPassword->second).c_str());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_OTHERACCOUNT) != privateCommand.end()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.otherAccount");
         textFieldPattern->SetAutoFillOtherAccount(true);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "33333333333333");
         textFieldPattern->ProcessAutoFill(isPopup, true);
     } else {
         TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "invalid autofill data privateCommand");
@@ -367,8 +374,8 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
 
 int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, const MiscServices::Range &range)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText value %{private}s in range (%{public}d, %{public}d)",
-        StringUtils::Str16ToStr8(text).c_str(), range.start, range.end);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText length :%{public}d in range (%{public}d, %{public}d)",
+        static_cast<int32_t>(text.length()), range.start, range.end);
     int32_t ret = CheckPreviewTextParams(text, {range.start, range.end});
     if (ret != MiscServices::ErrorCode::NO_ERROR) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetPreviewText result is %{public}d}", ret);
@@ -399,9 +406,16 @@ void OnTextChangedListenerImpl::FinishTextPreview()
 }
 
 int32_t OnTextChangedListenerImpl::ReceivePrivateCommand(
-    const std::unordered_map<std::string, MiscServices::PrivateDataValue> &privateCommand)
+    const std::unordered_map<std::string, MiscServices::PrivateDataValue>& privateCommand)
 {
-    AutoFillReceivePrivateCommand(privateCommand);
+    auto uiTask = [textFieldPattern = pattern_, privateCommand] {
+        auto textInputClient = textFieldPattern.Upgrade();
+        CHECK_NULL_VOID(textInputClient);
+        ContainerScope scope(textInputClient->GetInstanceId());
+        OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(privateCommand, textFieldPattern);
+    };
+    PostTaskToUI(uiTask, "ArkUITextFieldAutoFillReceivePrivateCommand");
+
     int32_t ret = MiscServices::ErrorCode::NO_ERROR;
     if (privateCommand.empty()) {
         return ret;

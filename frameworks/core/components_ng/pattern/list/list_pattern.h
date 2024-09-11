@@ -180,8 +180,7 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    void ScrollPage(bool reverse, bool smooth = false,
-        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
+    bool ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
@@ -358,6 +357,7 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
+    void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(

@@ -76,6 +76,7 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
 
     RefPtr<FrameNode> startingWindow_;
@@ -90,8 +91,7 @@ protected:
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
-    std::function<void()> coldStartCallback_;
-    std::function<void()> hotStartCallback_;
+    std::function<void()> callback_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
 private:

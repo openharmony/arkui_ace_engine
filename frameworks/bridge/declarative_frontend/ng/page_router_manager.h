@@ -206,7 +206,7 @@ protected:
     void PopPage(const std::string& params, bool needShowNext, bool needTransition);
     void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition);
     void DealReplacePage(const RouterPageInfo& target);
-    virtual void ReplacePageInNewLifecycle(const RouterPageInfo& target);
+    virtual void ReplacePageInNewLifecycle(const RouterPageInfo& info);
 
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);

@@ -379,10 +379,12 @@ class JSBuilderNode extends BaseNode {
                 newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
         }
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to foreach change
+        let removedChildElmtIds = [];
         // Set new array on C++ side.
         // C++ returns array of indexes of newly added array items.
         // these are indexes in new child list.
-        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+        ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates, removedChildElmtIds);
         // Item gen is with index.
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
@@ -394,6 +396,10 @@ class JSBuilderNode extends BaseNode {
             }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
+        // un-registers the removed child elementIDs using proxy
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
+        // purging these elmtIds from state mgmt will make sure no more update function on any deleted child will be executed
+        this.purgeDeletedElmtIds();
     }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
         const oldBranchid = If.getBranchId();
@@ -1463,8 +1469,8 @@ class LengthMetrics {
         if (unit in LengthUnit) {
             this.unit = unit;
             this.value = value;
-        }
-        else {
+        } else {
+
             this.unit = LengthUnit.VP;
             this.value = unit === undefined ? value : 0;
         }
@@ -2274,6 +2280,8 @@ class Content {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
+
 class ComponentContent extends Content {
     constructor(uiContext, builder, params, options) {
         super();
@@ -2376,6 +2384,5 @@ class NodeContent extends Content {
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter
+    edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent, typeNode, NodeAdapter
 };

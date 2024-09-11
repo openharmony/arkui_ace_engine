@@ -53,18 +53,18 @@ struct TouchPointInfo {
 
 struct OverlayInfo : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayInfo, AceType);
-
+ 
 public:
     bool isSingleHandle = false;
     bool isShowMenu = false;
     bool isHiddenHandle = false;
-
+ 
     bool CanBackPressed()
     {
         return isSingleHandle && !isShowMenu && isHiddenHandle;
     }
 };
-
+ 
 class ACE_EXPORT SelectOverlayCallback : public virtual AceType {
     DECLARE_ACE_TYPE(SelectOverlayCallback, AceType);
 
@@ -134,6 +134,7 @@ public:
     virtual bool CheckSwitchToMode(HandleLevelMode mode) {
         return true;
     }
+    virtual void OnHandleIsHidden() {}
 
 private:
     bool isIntercept_ = false;

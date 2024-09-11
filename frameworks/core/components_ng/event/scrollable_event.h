@@ -135,32 +135,6 @@ public:
         }
     }
 
-    void SetBarCollectClickAndLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
-    {
-        barCollectLongPressTarget_ = std::move(barCollectLongPressTarget);
-    }
-
-    void SetInBarRectRegionCallback(const InBarRegionCallback&& inBarRectRegionCallback)
-    {
-        inBarRectRegionCallback_ = std::move(inBarRectRegionCallback);
-    }
-
-    bool InBarRectRegion(const PointF& localPoint, SourceType source) const
-    {
-        CHECK_NULL_RETURN(inBarRectRegionCallback_, false);
-        return inBarRectRegionCallback_ && barCollectLongPressTarget_ && inBarRectRegionCallback_(localPoint, source);
-    }
-
-    void BarCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult)
-    {
-        if (barCollectLongPressTarget_) {
-            barCollectLongPressTarget_(
-                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
-        }
-    }
-
     bool ClickJudge(const PointF& localPoint) const
     {
         return clickJudgeCallback_ && clickJudgeCallback_(localPoint);
@@ -171,18 +145,12 @@ public:
         clickJudgeCallback_ = std::move(clickJudgeCallback);
     }
 
-    void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
-
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enabled_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
-    BarCollectTouchTargetCallback barCollectLongPressTarget_;
     InBarRegionCallback inBarRegionCallback_;
-    InBarRegionCallback inBarRectRegionCallback_;
     GetAnimateVelocityCallback getAnimateVelocityCallback_;
     ClickJudgeCallback clickJudgeCallback_;
 };

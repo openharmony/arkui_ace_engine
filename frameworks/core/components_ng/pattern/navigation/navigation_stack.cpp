@@ -97,31 +97,14 @@ void NavigationStack::Add(const std::string& name, const RefPtr<UINode>& navDest
     }
 }
 
-#if defined(ENABLE_NAV_SPLIT_MODE)
-bool NavigationStack::isLastListContains(
-    const std::string& name, const RefPtr<UINode>& navDestinationNode)
-{
-    if (lastNavPathList_.empty()) {
-        return false;
-    }
-    // find from top to bottom
-    for (auto it = lastNavPathList_.rbegin(); it != lastNavPathList_.rend(); ++it) {
-        if ((*it).first == name && (*it).second == navDestinationNode) {
-            return true;
-        }
-    }
-    return false;
-}
-#endif
-
 void NavigationStack::Add(
     const std::string& name, const RefPtr<UINode>& navDestinationNode, const RefPtr<RouteInfo>& routeInfo)
 {
     // for the old page: keep the UINode, and keep in the stack
     auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
         RemoveIndex(index);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
     if (index != NOT_EXIST) {

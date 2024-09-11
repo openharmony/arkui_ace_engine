@@ -54,6 +54,24 @@ public:
     void FireNavigationUpdateCallback();
     std::shared_ptr<NavigationInfo> GetNavigationInfo(const RefPtr<AceType>& node);
 
+    bool IsInteractive() const
+    {
+        return isInteractive_;
+    }
+
+    void SetInteractive(int32_t frameNodeId)
+    {
+        isInteractive_ = true;
+        interactiveAnimationId_ = frameNodeId;
+    }
+
+    void FinishInteractiveAnimation()
+    {
+        isInteractive_ = false;
+    }
+
+    bool AddInteractiveAnimation(const std::function<void()>& addCallback);
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -70,6 +88,8 @@ private:
     };
     std::map<DumpMapKey, DumpCallback> dumpMap_;
     std::vector<std::function<void()>> updateCallbacks_;
+    bool isInteractive_ = false;
+    int32_t interactiveAnimationId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

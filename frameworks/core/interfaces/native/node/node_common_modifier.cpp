@@ -96,6 +96,7 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
@@ -2634,6 +2635,9 @@ void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == "Custom") {
+        ViewAbstract::SetFocusType(frameNode, focusable ? FocusType::SCOPE : FocusType::DISABLE);
+    }
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
@@ -3190,6 +3194,8 @@ void SetAlignRules(ArkUINodeHandle node, char** anchors, const ArkUI_Int32* dire
         rulesMap[static_cast<AlignDirection>(index)] = alignRule;
     }
     ViewAbstract::SetAlignRules(frameNode, rulesMap);
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    ViewAbstract::SetBias(frameNode, biasPair);
 }
 
 void SetAlignRulesWidthType(ArkUINodeHandle node, const ArkUIAlignRulesType* alignRulesType)
@@ -6196,7 +6202,7 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+        ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop };
 
     return &modifier;
 }
@@ -6428,21 +6434,14 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_CLICK;
-
         auto target = info.GetTarget();
-        event.touchEvent.target.id = target.id.c_str();
-        event.touchEvent.target.type = target.type.c_str();
-        event.touchEvent.target.area = {
-            static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetHeight().Value())
-        };
-        event.touchEvent.target.origin = {
-            static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
-            static_cast<ArkUI_Int32>(target.origin.GetY().Value())
-        };
-
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
@@ -6471,11 +6470,12 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
         SendArkUIAsyncEvent(&event);
     };
-    if (uiNode->GetTag() == "Span") {
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
-    } else {
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
+    }  else {
+        ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
     }
 }
 
@@ -6808,8 +6808,11 @@ void ResetOnClick(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    if (uiNode->GetTag() == "Span") {
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::ClearOnClick(uiNode);
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        TextModelNG::ClearOnClick(frameNode);
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         ViewAbstract::DisableOnClick(frameNode);

@@ -371,11 +371,10 @@ void JSTabs::SetWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto widthInfo = info[0];
-    if (widthInfo->IsString() && widthInfo->ToString().empty()) {
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
         return;
     }
-    if (widthInfo->IsString() && widthInfo->ToString() == "auto") {
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         TabsModel::GetInstance()->SetWidthAuto(true);
         return;
@@ -390,11 +389,10 @@ void JSTabs::SetHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto heightInfo = info[0];
-    if (heightInfo->IsString() && heightInfo->ToString().empty()) {
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
         return;
     }
-    if (heightInfo->IsString() && heightInfo->ToString() == "auto") {
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         TabsModel::GetInstance()->SetHeightAuto(true);
         return;

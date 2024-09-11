@@ -145,7 +145,15 @@ public:
 
     void PrepareOpenImplicitAnimation();
 
+    virtual bool CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+    {
+        return false;
+    }
+
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback = nullptr);
+
+    void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallback = nullptr);
 
     void PrepareCloseImplicitAnimation();
@@ -1054,8 +1062,6 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    virtual void SetupSubRootElement() = 0;
-
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
     void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
@@ -1252,8 +1258,6 @@ public:
     {
         return false;
     }
-
-    virtual void CheckVirtualKeyboardHeight() {}
 
     virtual void StartWindowAnimation() {}
 
