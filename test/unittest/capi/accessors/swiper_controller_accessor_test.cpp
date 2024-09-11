@@ -20,19 +20,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
-// #include "core/components/common/layout/constants.h"
-// #include "core/components/declaration/swiper/swiper_declaration.h"
-// #include "core/components/swiper/swiper_indicator_theme.h"
-// #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-
 #include "gmock/gmock.h"
-
-// #include "test/mock/core/common/mock_container.h"
-// #include "test/mock/core/common/mock_theme_manager.h"
-// #include "test/mock/core/common/mock_theme_style.h"
-// #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
-// #include "test/unittest/capi/modifiers/modifiers_test_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -59,12 +47,13 @@ public:
 };
 } // namespace
 
-class SwiperControllerTest : public AccessorTestBase<GENERATED_ArkUISwiperControllerAccessor,
+class SwiperControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUISwiperControllerAccessor,
     &GENERATED_ArkUIAccessors::getSwiperControllerAccessor, SwiperControllerPeer> {
 public:
-    static inline RefPtr<MockSwiperController> mockSwiperController_;
     static void SetUpTestCase()
     {
+        AccessorTestBase::SetUpTestCase();
+
         auto controller = new MockSwiperController();
         mockSwiperController_ = AceType::Claim(controller);
         EXPECT_CALL(*controller, ShowNext()).Times(1);
@@ -73,43 +62,31 @@ public:
     static void TearDownTestCase()
     {
         mockSwiperController_ = nullptr;
+
+        AccessorTestBase::TearDownTestCase();
     }
 
     virtual void SetUp(void) override
     {
         AccessorTestBase::SetUp();
 
+        auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperControllerModifier::SwiperControllerPeerImpl *>(peer_);
+        ASSERT_NE(peerImpl, nullptr);
+        peerImpl->AddListener(mockSwiperController_);
     }
 
-    virtual void TearDown(void)
-    {
-    }
+    static inline RefPtr<MockSwiperController> mockSwiperController_ = nullptr;
 };
 
 /**
  * @tc.name: showNextTest
- * @tc.desc: Check the functionality of 
+ * @tc.desc: Check the functionality of SwiperControllerAccessor.showNext
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperControllerTest, showNextTest, TestSize.Level1)
+HWTEST_F(SwiperControllerAccessorTest, showNextTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->ctor, nullptr);
-    ASSERT_NE(accessor_->getFinalizer, nullptr);
-    auto finalyzer = reinterpret_cast<void (*)(SwiperControllerPeer *)>(accessor_->getFinalizer());
-    ASSERT_NE(finalyzer, nullptr);
-
-    Ark_NativePointer aptr = accessor_->ctor();
-    auto peer = reinterpret_cast<SwiperControllerPeer *>(aptr);
-    ASSERT_NE(peer, nullptr);
-
-    auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperControllerModifier::SwiperControllerPeerImpl *>(peer);
-    ASSERT_NE(peerImpl, nullptr);
-    peerImpl->AddListener(mockSwiperController_);
-
     ASSERT_NE(accessor_->showNext, nullptr);
-    accessor_->showNext(peer);
-
-    finalyzer(peer);
+    accessor_->showNext(peer_);
 }
 
 } // namespace OHOS::Ace::NG

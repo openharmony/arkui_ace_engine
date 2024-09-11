@@ -28,42 +28,35 @@ extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 
 template <typename Accessor, auto GetAccessorFunc, typename PeerType>
 class AccessorTestBase : public testing::Test {
 public:
-    // ArkUINodeHandle node_ = nullptr;
+    static void SetUpTestCase()
+    {
+        ASSERT_NE(accessor_, nullptr);
+        ASSERT_NE(accessor_->ctor, nullptr);
+        ASSERT_NE(accessor_->getFinalizer, nullptr);
+        finalyzer_ = reinterpret_cast<void (*)(PeerType *)>(accessor_->getFinalizer());
+        ASSERT_NE(finalyzer_, nullptr);
+    }
 
-    // static ArkUINodeHandle CreateNode(GENERATED_Ark_NodeType nodeType)
-    // {
-    //     return basicAPI_ ? basicAPI_->createNode(nodeType, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
-    // }
-
-    // static void DisposeNode(ArkUINodeHandle &node)
-    // {
-    //     ViewModel::DisposeNode(node);
-    //     node = nullptr;
-    // }
-
-    // static const GENERATED_ArkUINodeModifiers *GetNodeModifiers()
-    // {
-    //     return nodeModifiers_;
-    // }
+    static void TearDownTestCase()
+    {
+        finalyzer_ = nullptr;
+    }
 
     virtual void SetUp(void)
     {
-        ASSERT_NE(accessor_, nullptr);
-        // node_ = CreateNode(NodeType);
-        // ASSERT_NE(node_, nullptr);
+        ASSERT_NE(accessor_->ctor, nullptr);
+        peer_ = reinterpret_cast<PeerType *>(accessor_->ctor());
+        ASSERT_NE(peer_, nullptr);
     }
 
     virtual void TearDown(void)
     {
-        // DisposeNode(node_);
+        ASSERT_NE(finalyzer_, nullptr);
+        finalyzer_(peer_);
+        peer_ = nullptr;
     }
 
 private:
-    // inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
-    //     = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
-    //         GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
-    //         GENERATED_ARKUI_BASIC_NODE_API_VERSION)
-    //     );
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_
         = reinterpret_cast<const GENERATED_ArkUIFullNodeAPI *>(
             GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_FULL),
@@ -73,8 +66,9 @@ private:
         = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
 
 public:
-    inline static const Accessor *accessor_
-        = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
+    inline static const Accessor *accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
+    inline static void (*finalyzer_)(PeerType *) = nullptr;
+    PeerType *peer_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
