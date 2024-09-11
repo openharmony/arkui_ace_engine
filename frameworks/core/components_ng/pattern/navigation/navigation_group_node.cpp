@@ -617,7 +617,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(preNavDesPattern);
             // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
             auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
-            if (shallowBuilder) {
+            if (shallowBuilder && !preNavDesNode->IsCacheNode()) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             }
             preNavDesNode->SetIsOnAnimation(false);
