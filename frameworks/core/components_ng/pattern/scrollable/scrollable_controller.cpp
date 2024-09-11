@@ -134,6 +134,7 @@ void ScrollableController::ScrollPage(bool reverse, bool /* smooth */)
     }
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    pattern->StopAnimate();
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
     ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
