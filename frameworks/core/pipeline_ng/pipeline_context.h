@@ -305,7 +305,7 @@ public:
 
     bool CheckNeedAvoidInSubWindow() override;
 
-    void CheckAndUpdateKeyboardInset() override;
+    void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
