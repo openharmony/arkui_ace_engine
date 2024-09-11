@@ -525,4 +525,84 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg015, TestSize.Level1)
     ASSERT_FALSE(pattern->IsSupportImageAnalyzerFeature());
     SystemProperties::extSurfaceEnabled_ = extSurfaceEnabled;
 }
+
+/**
+ * @tc.name: XComponentTestTwoNg016
+ * @tc.desc: Test ChangeSurfaceCallbackMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set surface life cycle callback, set id&libraryname to null and create XComponent
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.xcId = std::nullopt;
+    g_testProperty.libraryName = std::nullopt;
+    int32_t onSurfaceCreatedSurfaceCount = 0;
+    int32_t onSurfaceDestroyedSurfaceCount = 0;
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceCount](
+                                const std::string& surfaceId) { ++onSurfaceCreatedSurfaceCount; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceCount](
+                                  const std::string& surfaceId) { ++onSurfaceDestroyedSurfaceCount; };
+    g_testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
+    g_testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    pattern->RegisterSurfaceCallbackModeEvent();
+    EXPECT_EQ(pattern->surfaceCallbackMode_, SurfaceCallbackMode::DEFAULT);
+
+    /**
+     * @tc.steps: step2. attachTo&detachFrom main tree in DEFAULT mode
+     * @tc.expected: DEFAULT mode attach to(detach from) main tree will call onSurfaceCreated(onSurfaceDestroyed) once
+     */
+    frameNode->AttachToMainTree(false);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 1);
+    frameNode->DetachFromMainTree();
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 1);
+
+    /**
+     * @tc.steps: step3. detachFromFrameNode(in frameNode's destructor) in DEFAULT mode
+     * @tc.expected: will not call onSurfaceDestroyed
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 1);
+
+    /**
+     * @tc.steps: step4. ChangeSurfaceCallbackMode to PIP not in main tree
+     * @tc.expected: not in main tree change to pip will call onSurfaceCreated once
+     */
+    pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::PIP);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
+
+    /**
+     * @tc.steps: step5. attachTo&detachFrom main tree in PIP mode
+     * @tc.expected: PIP mode attach to(detach from) main tree will not call onSurfaceCreated(onSurfaceDestroyed)
+     */
+    frameNode->AttachToMainTree(false);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
+    frameNode->DetachFromMainTree();
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 1);
+
+    /**
+     * @tc.steps: step6. detachFromFrameNode(in frameNode's destructor) in PIP mode
+     * @tc.expected: call onSurfaceDestroyed once
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 2);
+
+    /**
+     * @tc.steps: step7. ChangeSurfaceCallbackMode in main tree
+     * @tc.expected: will not call onSurfaceCreated(onSurfaceDestroyed)
+     */
+    frameNode->AttachToMainTree(false);
+    pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::DEFAULT);
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 2);
+    pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::PIP);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
+}
 } // namespace OHOS::Ace::NG
