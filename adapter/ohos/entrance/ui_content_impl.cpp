@@ -205,6 +205,7 @@ void AddSetAppColorModeToResConfig(
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
+const std::string SUBWINDOW_TOAST_PREFIX = "ARK_APP_SUBWINDOW_TOPMOST_TOAST";
 const int32_t REQUEST_CODE = -1;
 constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
@@ -2748,8 +2749,10 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    touchOutsideListener_ = new TouchOutsideListener(instanceId_);
-    window_->RegisterTouchOutsideListener(touchOutsideListener_);
+    if (!StringUtils::StartWith(window_->GetWindowName(), SUBWINDOW_TOAST_PREFIX)) {
+        touchOutsideListener_ = new TouchOutsideListener(instanceId_);
+        window_->RegisterTouchOutsideListener(touchOutsideListener_);
+    }
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);

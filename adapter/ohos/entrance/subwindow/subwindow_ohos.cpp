@@ -116,6 +116,44 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
         instanceId);
 }
 
+Rosen::WindowType SubwindowOhos::GetToastRosenType(bool isSceneBoardEnable)
+{
+    auto toastType = GetToastWindowType();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+        "GetToastRosenType windowType: %d, isSceneBoardEnable: %d",
+        toastType, isSceneBoardEnable);
+    if (toastType == ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW) {
+        if (!isSceneBoardEnable) {
+            return Rosen::WindowType::WINDOW_TYPE_TOAST;
+        }
+        return Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (toastType ==  ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW) {
+        return Rosen::WindowType::WINDOW_TYPE_TOAST;
+    } else if (toastType == ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT) {
+        return Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    }
+    return Rosen::WindowType::WINDOW_TYPE_TOAST;
+}
+
+void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+    OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption, const Rosen::WindowType& toastWindowType)
+{
+    if (toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+    }
+    windowOption->SetWindowType(toastWindowType);
+    if (parentContainer->IsUIExtensionWindow()) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        auto hostWindowId = parentPipeline->GetFocusWindowId();
+        windowOption->SetExtensionTag(true);
+        windowOption->SetParentId(hostWindowId);
+    } else {
+        auto parentWindowId = parentContainer->GetWindowId();
+        windowOption->SetParentId(parentWindowId);
+    }
+}
+
 bool SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -133,11 +171,12 @@ bool SubwindowOhos::InitContainer()
         std::string windowTag = "";
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+        } else if (GetAboveApps()) {
+            auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
+            SetToastWindowOption(parentContainer, windowOption, toastWindowType);
+            windowTag = "TOPMOST_TOAST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-        } else if (GetAboveApps()) {
-            windowTag = "Toast_";
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
             auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
@@ -1193,15 +1232,23 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     }
 
     auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    RefPtr<Framework::FrontendDelegate> delegate;
     if (!engine) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
-            aceContainer->GetInstanceId());
-        return;
-    }
-    auto delegate = engine->GetFrontend();
-    if (!delegate) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d", childContainerId_);
-        return;
+        auto frontend = AceType::DynamicCast<DeclarativeFrontend>(aceContainer->GetFrontend());
+        CHECK_NULL_VOID(frontend);
+        delegate = frontend->GetDelegate();
+        if (!delegate) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
+                aceContainer->GetInstanceId());
+            return;
+        }
+    } else {
+        delegate = engine->GetFrontend();
+        if (!delegate) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d",
+                childContainerId_);
+            return;
+        }
     }
     ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -1277,7 +1324,8 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
 void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
+    if ((parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
+        parentContainerId_ < 0) {
         ShowToastForService(toastInfo, std::move(callback));
     } else {
         ShowToastForAbility(toastInfo, std::move(callback));
