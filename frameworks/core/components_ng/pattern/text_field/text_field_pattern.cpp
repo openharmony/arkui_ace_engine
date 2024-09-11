@@ -474,7 +474,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
     }
     if (!IsDragging()) {
-        dragParagraph_ = paragraph_;
         do {
             if (!dragNode_) {
                 break;
