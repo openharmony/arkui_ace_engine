@@ -41,7 +41,7 @@ function getUINativeModule() {
   if (arkUINativeModule) {
     return arkUINativeModule;
   }
-  return arkUINativeModule;
+  return globalThis.getArkUINativeModule();
 }
 let ModifierType;
 (function (ModifierType) {
@@ -56,8 +56,10 @@ const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 function applyUIAttributesInit(modifier, nativeNode) {
-  if (modifier.applyPressedAttribute == undefined && modifier.applyFocusedAttribute == undefined &&
-    modifier.applyDisabledAttribute == undefined && modifier.applySelectedAttribute == undefined) {
+  if (modifier.applyPressedAttribute === undefined &&
+    modifier.applyFocusedAttribute === undefined &&
+    modifier.applyDisabledAttribute === undefined &&
+    modifier.applySelectedAttribute === undefined) {
     return;
   }
   let state = 0;
@@ -2389,31 +2391,31 @@ class BackgroundBrightnessInternalModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
-          && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-          && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
-          && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree &&
+      this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff &&
+      this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB &&
+      this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
 BackgroundBrightnessInternalModifier.identity = Symbol('backgroundBrightnessInternal');
 class ForegroundBrightnessModifier extends ModifierWithKey {
-    constructor(params) {
-      super(params);
+  constructor(params) {
+    super(params);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetForegroundBrightness(node);
     }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().common.resetForegroundBrightness(node);
-      }
-      else {
-        getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
-          this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
-      }
+    else {
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff,
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
     }
-    checkObjectDiff() {
-      return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
-        && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
-        && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB
-        && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+  checkObjectDiff() {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree &&
+      this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff &&
+      this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB &&
+      this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
   }
 }
 ForegroundBrightnessModifier.identity = Symbol('foregroundBrightness');
@@ -2431,10 +2433,10 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(this.value.mode === this.stageValue.mode
-      && this.value.numberBadge === this.stageValue.numberBadge
-      && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
+    return !(this.value.mode === this.stageValue.mode &&
+      this.value.numberBadge === this.stageValue.numberBadge &&
+      this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled &&
+      this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -2864,6 +2866,7 @@ class FocusScopePriorityModifier extends ModifierWithKey {
   }
 }
 FocusScopePriorityModifier.identity = Symbol('focusScopePriority');
+
 class PixelRoundModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2972,47 +2975,47 @@ function modifierWithKey(modifiers, identity, modifierClass, value) {
 
 class ObservedMap {
   constructor() {
-      this.map_ = new Map();
-      this.isFrameNode_ = false;
+    this.map_ = new Map();
+    this.isFrameNode_ = false;
   }
   clear() {
-      this.map_.clear();
+    this.map_.clear();
   }
   delete(key) {
-      return this.map_.delete(key);
+    return this.map_.delete(key);
   }
   forEach(callbackfn, thisArg) {
-      this.map_.forEach(callbackfn, thisArg);
+    this.map_.forEach(callbackfn, thisArg);
   }
   get(key) {
-      return this.map_.get(key);
+    return this.map_.get(key);
   }
   has(key) {
-      return this.map_.has(key);
+    return this.map_.has(key);
   }
   set(key, value) {
-      const _a = this.changeCallback;
-      this.map_.set(key, value);
-      _a === null || _a === void 0 ? void 0 : _a(key, value);
-      return this;
+    const _a = this.changeCallback;
+    this.map_.set(key, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
+    return this;
   }
   get size() {
-      return this.map_.size;
+    return this.map_.size;
   }
   entries() {
-      return this.map_.entries();
+    return this.map_.entries();
   }
   keys() {
-      return this.map_.keys();
+    return this.map_.keys();
   }
   values() {
-      return this.map_.values();
+    return this.map_.values();
   }
   [Symbol.iterator]() {
-      return this.map_.entries();
+    return this.map_.entries();
   }
   get [Symbol.toStringTag]() {
-      return 'ObservedMapTag';
+    return 'ObservedMapTag';
   }
   setOnChange(callback) {
     this.changeCallback = callback;
@@ -3080,7 +3083,8 @@ class ArkComponent {
   }
   applyStateUpdatePtr(instance) {
     if (this.nativePtr !== instance.nativePtr) {
-      ArkLogConsole.info("modifier pointer changed");
+      ArkLogConsole.info('modifier pointer changed to ' + (instacne ?
+        instance.constructor.name.toString() : 'undefined'));
       this.nativePtr = instance.nativePtr;
       this._nativePtrChanged = true;
       if (instance._weakPtr) {
@@ -3460,22 +3464,26 @@ class ArkComponent {
         }
       }
     }
-    if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashGap) && (value === null || value === void 0 ? void 0 : value.dashGap) !== null) {
-      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) || isObject(value.dashGap) && isNumber(value.dashGap.value)) {
+    if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashGap) &&
+      (value === null || value === void 0 ? void 0 : value.dashGap) !== null) {
+      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) ||
+        isObject(value.dashGap) && isNumber(value.dashGap.value)) {
         arkBorder.arkDashGap.left = value.dashGap;
         arkBorder.arkDashGap.right = value.dashGap;
         arkBorder.arkDashGap.top = value.dashGap;
         arkBorder.arkDashGap.bottom = value.dashGap;
       }
       else {
-        arkBorder.arkDashGap.left = value.dashGap.hasOwnProperty("value");
+        arkBorder.arkDashGap.left = value.dashGap.left;
         arkBorder.arkDashGap.right = value.dashGap.right;
         arkBorder.arkDashGap.top = value.dashGap.top;
         arkBorder.arkDashGap.bottom = value.dashGap.bottom;
       }
     }
-    if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashWidth) && (value === null || value === void 0 ? void 0 : value.dashWidth) !== null) {
-      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) || isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
+    if (!isUndefined(value === null || value === void 0 ? void 0 : value.dashWidth) &&
+      (value === null || value === void 0 ? void 0 : value.dashWidth) !== null) {
+      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) ||
+        isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
         arkBorder.arkDashWidth.left = value.dashWidth;
         arkBorder.arkDashWidth.right = value.dashWidth;
         arkBorder.arkDashWidth.top = value.dashWidth;
@@ -4521,7 +4529,7 @@ class UICommonEvent {
 
 function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
-    ArkLogConsole.info("custom modifier is undefined");
+    ArkLogConsole.info('custom modifier is undefined');
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -4532,7 +4540,8 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier.isAttributeUpdater === true) {
     let modifierJS = globalThis.requireNapi('arkui.modifier');
     if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
-      ArkLogConsole.info("AttributeUpdater is created for the first time");
+      ArkLogConsole.info('AttributeUpdater is created for the first time in ' + (component ?
+        component.constructor.name.toString() : 'undefined'));
       modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
       modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
       modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
@@ -4808,7 +4817,7 @@ function __setCustomProperty__(nodeId, key, value) {
   }
 }
 
-function valueToArkBorder(value){
+function valueToArkBorder(value) {
   let borderValue = new ArkBorder();
   if (isUndefined(value)) {
     borderValue = undefined;
@@ -5706,6 +5715,7 @@ class ArkGridComponent extends ArkComponent {
   }
 
 }
+
 class GridColumnsTemplateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6423,6 +6433,19 @@ class ImageSyncLoadModifier extends ModifierWithKey {
   }
 }
 ImageSyncLoadModifier.identity = Symbol('imageSyncLoad');
+class ImageeEdgeAntialiasingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetEdgeAntialiasing(node);
+    } else {
+      getUINativeModule().image.setEdgeAntialiasing(node, this.value);
+    }
+  }
+}
+ImageeEdgeAntialiasingModifier.identity = Symbol('edgeAntialiasing');
 class ImageObjectFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6596,19 +6619,6 @@ class ImageOpacityModifier extends ModifierWithKey {
   }
 }
 ImageOpacityModifier.identity = Symbol('imageOpacity');
-class ImageeEdgeAntialiasingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().image.resetEdgeAntialiasing(node);
-    } else {
-      getUINativeModule().image.setEdgeAntialiasing(node, this.value);
-    }
-  }
-}
-ImageeEdgeAntialiasingModifier.identity = Symbol('edgeAntialiasing');
 class ImageTransitionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6688,6 +6698,20 @@ class ImageeResizableModifier extends ModifierWithKey {
   }
 }
 ImageeResizableModifier.identity = Symbol('resizable');
+class ImageSrcModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.setImageShowSrc(node, "");
+    }
+    else {
+      getUINativeModule().image.setImageShowSrc(node, this.value);
+    }
+  }
+}
+ImageSrcModifier.identity = Symbol('imageShowSrc');
 class ImageDynamicRangeModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -6722,20 +6746,6 @@ class ImageEnhancedImageQualityModifier extends ModifierWithKey {
   }
 }
 ImageObjectFitModifier.identity = Symbol('enhancedImageQuality');
-class ImageSrcModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().image.setImageShowSrc(node, "");
-    }
-    else {
-      getUINativeModule().image.setImageShowSrc(node, this.value);
-    }
-  }
-}
-ImageSrcModifier.identity = Symbol('imageShowSrc');
 
 class ImageEnableAnalyzerModifier extends ModifierWithKey {
   constructor(value) {
@@ -6743,14 +6753,13 @@ class ImageEnableAnalyzerModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().image.enableAnalyzer(node, "");
-    }
-    else {
+      getUINativeModule().image.enableAnalyzer(node, '');
+    } else {
       getUINativeModule().image.enableAnalyzer(node, this.value);
     }
   }
 }
-ImageSrcModifier.identity = Symbol('enableAnalyzer');
+ImageEnableAnalyzerModifier.identity = Symbol('enableAnalyzer');
 
 class ImageAnalyzerConfigModifier extends ModifierWithKey {
   constructor(value) {
@@ -6758,14 +6767,14 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().image.analyzerConfig(node, "");
+      getUINativeModule().image.analyzerConfig(node, '');
     }
     else {
       getUINativeModule().image.analyzerConfig(node, this.value);
     }
   }
 }
-ImageSrcModifier.identity = Symbol('analyzerConfig');
+ImageAnalyzerConfigModifier.identity = Symbol('analyzerConfig');
 
 class ImagePrivacySensitiveModifier extends ModifierWithKey {
   constructor(value) {
@@ -8560,34 +8569,22 @@ class SearchSelectedBackgroundColorModifier extends ModifierWithKey {
 }
 SearchSelectedBackgroundColorModifier.identity = Symbol('searchSelectedBackgroundColor');
 class SearchTextIndentModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetTextIndent(node);
+    } else {
+      getUINativeModule().search.setTextIndent(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetTextIndent(node);
-        } else {
-            getUINativeModule().search.setTextIndent(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 SearchTextIndentModifier.identity = Symbol('searchTextIndent');
-class SearchInputFilterModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
-    }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetInputFilter(node);
-        } else {
-            getUINativeModule().search.setInputFilter(node, this.value.value, this.value.error);
-        }
-    }
-}
-SearchInputFilterModifier.identity = Symbol('searchInputFilter');
+
 class SearchMaxLengthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9005,20 +9002,20 @@ class ArkSearchComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
     return this;
   }
-  selectedBackgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchSelectedBackgroundColorModifier.identity, SearchSelectedBackgroundColorModifier, value);
-    return this;
-  }
-  textIndent(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
-    return this;
-  }
   inputFilter(value, error) {
     let searchInputFilter = new ArkSearchInputFilter();
     searchInputFilter.value = value;
     searchInputFilter.error = error;
 
     modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
+    return this;
+  }
+  selectedBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedBackgroundColorModifier.identity, SearchSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  textIndent(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
     return this;
   }
   onWillInsert(callback) {
@@ -10930,20 +10927,6 @@ class TextContentModifier extends ModifierWithKey {
   }
 }
 TextContentModifier.identity = Symbol('textContent');
-class TextControllerModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().text.setTextController(node, '');
-    }
-    else {
-      getUINativeModule().text.setTextController(node, this.value);
-    }
-  }
-}
-TextControllerModifier.identity = Symbol('textController');
 class TextSelectionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11025,6 +11008,21 @@ class TextOnTextSelectionChangeModifier extends ModifierWithKey {
   }
 }
 TextOnTextSelectionChangeModifier.identity = Symbol('textOnTextSelectionChange');
+
+class TextControllerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.setTextController(node, '');
+    }
+    else {
+      getUINativeModule().text.setTextController(node, this.value);
+    }
+  }
+}
+TextControllerModifier.identity = Symbol('textController');
 
 class TextEditMenuOptionsModifier extends ModifierWithKey {
   constructor(value) {
@@ -11457,19 +11455,19 @@ class TextAreaLineBreakStrategyModifier extends ModifierWithKey {
 }
 TextAreaLineBreakStrategyModifier.identity = Symbol('textAreaLineBreakStrategy');
 class TextAreaSelectedBackgroundColorModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().textArea.setSelectedBackgroundColor(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textArea.resetSelectedBackgroundColor(node);
-        } else {
-            getUINativeModule().textArea.setSelectedBackgroundColor(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 TextAreaSelectedBackgroundColorModifier.identity = Symbol('textAreaSelectedBackgroundColor');
 class TextAreaCaretStyleModifier extends ModifierWithKey {
@@ -11489,35 +11487,35 @@ class TextAreaCaretStyleModifier extends ModifierWithKey {
 }
 TextAreaCaretStyleModifier.identity = Symbol('textAreaCaretStyle');
 class TextAreaTextOverflowModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetTextOverflow(node);
+    } else {
+      getUINativeModule().textArea.setTextOverflow(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textArea.resetTextOverflow(node);
-        } else {
-            getUINativeModule().textArea.setTextOverflow(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return this.stageValue !== this.value;
-    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
 }
 TextAreaTextOverflowModifier.identity = Symbol('textAreaTextOverflow');
 class TextAreaTextIndentModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetTextIndent(node);
+    } else {
+      getUINativeModule().textArea.setTextIndent(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textArea.resetTextIndent(node);
-        } else {
-            getUINativeModule().textArea.setTextIndent(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 TextAreaTextIndentModifier.identity = Symbol('textAreaTextIndent');
 class TextAreaCopyOptionModifier extends ModifierWithKey {
@@ -12878,36 +12876,36 @@ class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey {
 }
 TextInputHeightAdaptivePolicyModifier.identity = Symbol('textInputHeightAdaptivePolicy');
 class TextInputTextOverflowModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetTextOverflow(node);
+    } else {
+      getUINativeModule().textInput.setTextOverflow(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textInput.resetTextOverflow(node);
-        } else {
-            getUINativeModule().textInput.setTextOverflow(node, this.value);
-        }
-    }
-    checkObjectDiff() {
-        return this.stageValue !== this.value;
-    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
 }
 TextInputTextOverflowModifier.identity = Symbol('textInputTextOverflow');
 class TextInputTextIndentModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetTextIndent(node);
+    } else {
+      getUINativeModule().textInput.setTextIndent(node, this.value);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textInput.resetTextIndent(node);
-        } else {
-            getUINativeModule().textInput.setTextIndent(node, this.value);
-        }
-    }
+  }
 
-    checkObjectDiff() {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-    }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 TextInputTextIndentModifier.identity = Symbol('textInputTextIndent');
 class TextInputShowPasswordIconModifier extends ModifierWithKey {
@@ -12927,6 +12925,7 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey {
   }
 }
 TextInputShowPasswordIconModifier.identity = Symbol('textInputShowPasswordIcon');
+
 class TextInputShowPasswordModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12944,6 +12943,7 @@ class TextInputShowPasswordModifier extends ModifierWithKey {
   }
 }
 TextInputShowPasswordModifier.identity = Symbol('textInputShowPassword');
+
 class TextInputTextAlignModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12961,6 +12961,7 @@ class TextInputTextAlignModifier extends ModifierWithKey {
   }
 }
 TextInputTextAlignModifier.identity = Symbol('textInputTextAlign');
+
 class TextInputPlaceholderFontModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15401,10 +15402,10 @@ class ArkScrollSnapOptions {
     this.enableSnapToEnd = undefined;
   }
   isEqual(another) {
-    return ((this.snapAlign === another.snapAlign)
-      && (this.snapPagination === another.snapPagination)
-      && (this.enableSnapToStart === another.enableSnapToStart)
-      && (this.enableSnapToEnd === another.enableSnapToEnd));
+    return ((this.snapAlign === another.snapAlign) &&
+      (this.snapPagination === another.snapPagination) &&
+      (this.enableSnapToStart === another.enableSnapToStart) &&
+      (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
 class ArkScrollOffsetOptions {
@@ -28429,8 +28430,8 @@ class ArkParticleComponent extends ArkComponent {
 
   emitter(value) {
     modifierWithKey(this._modifiersWithKeys, ParticleEmitterModifier.identity, ParticleEmitterModifier, value);
-   return this;
- }
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.Particle !== undefined) {
@@ -28610,7 +28611,7 @@ class SymbolContentModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().symbolGlyph.setSymbolId(node, "");
+      getUINativeModule().symbolGlyph.setSymbolId(node, '');
     }
     else {
       getUINativeModule().symbolGlyph.setSymbolId(node, this.value);
@@ -28800,7 +28801,7 @@ class SymbolSpanIdModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().symbolSpan.setId(node, "");
+      getUINativeModule().symbolSpan.setId(node, '');
     }
     else {
       getUINativeModule().symbolSpan.setId(node, this.value);
@@ -28931,7 +28932,8 @@ class ContainerSpanTextBackgroundStyleModifier extends ModifierWithKey {
       if (!textBackgroundStyle.convertTextBackGroundStyleOptions(this.value)) {
         getUINativeModule().containerSpan.resetTextBackgroundStyle(node);
       } else {
-        getUINativeModule().containerSpan.setTextBackgroundStyle(node,textBackgroundStyle.color,
+        getUINativeModule().containerSpan.setTextBackgroundStyle(
+          node,textBackgroundStyle.color,
           textBackgroundStyle.radius.topLeft,
           textBackgroundStyle.radius.topRight,
           textBackgroundStyle.radius.bottomLeft,
@@ -28972,8 +28974,8 @@ if (globalThis.ContainerSpan !== undefined) {
 }
 
 function getArkUINodeFromNapi() {
-  if(globalThis.__XNode__ === undefined) {
-      globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
+  if (globalThis.__XNode__ === undefined) {
+    globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
   }
   return globalThis.__XNode__;
 }
