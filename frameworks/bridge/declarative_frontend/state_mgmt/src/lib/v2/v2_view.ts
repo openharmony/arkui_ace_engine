@@ -114,6 +114,32 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
     }
 
+     /**
+     * Virtual function implemented in ViewPU and ViewV2
+     * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
+     *
+     * @param rmElmtId - The Element ID to be purged and deleted
+     * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
+    */
+     public purgeDeleteElmtId(rmElmtId: number): boolean {
+        stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (V2) is purging the rmElmtId:${rmElmtId}`);
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
+            if (childOpt) {
+                childOpt.setDeleting();
+                childOpt.setDeleteStatusRecursively();
+            }
+
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+
+        // Needed only for V2
+        ObserveV2.getObserve().clearBinding(rmElmtId);
+        return result;
+    }
+
     public initialRenderView(): void {
         stateMgmtProfiler.begin(`ViewV2: initialRenderView`);
         this.initialRender();
@@ -269,6 +295,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
 
     public UpdateElement(elmtId: number): void {
+
+        if(this.isDeleting_) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement(${elmtId}) (V2) returns with NO UPDATE, this @ComponentV2 is under deletion!`);
+            return;
+        }
+
         stateMgmtProfiler.begin('ViewV2.UpdateElement');
         if (elmtId === this.id__()) {
             // do not attempt to update itself
