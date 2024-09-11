@@ -34,9 +34,17 @@ public:
     StubSwiperController()
     {
         SetShowNextImpl(std::bind(&StubSwiperController::ShowNext, this));
+        SetShowPrevImpl(std::bind(&StubSwiperController::ShowPrevious, this));
+        SetChangeIndexImpl(
+            std::bind(&StubSwiperController::ChangeIndex, this, std::placeholders::_1, std::placeholders::_2)
+        );
+        SetFinishImpl(std::bind(&StubSwiperController::FinishAnimation, this));
     }
     ~StubSwiperController() override = default;
     virtual void ShowNext() {}
+    virtual void ShowPrevious() {}
+    virtual void ChangeIndex(int, bool) {}
+    virtual void FinishAnimation() {}
 };
 
 class MockSwiperController : public StubSwiperController {
@@ -44,7 +52,12 @@ public:
     MockSwiperController() = default;
     ~MockSwiperController() override = default;
     MOCK_METHOD(void, ShowNext, ());
+    MOCK_METHOD(void, ShowPrevious, ());
+    MOCK_METHOD(void, ChangeIndex, (int, bool));
+    MOCK_METHOD(void, FinishAnimation, ());
 };
+
+constexpr int INDEX_VALID_VALUE = 10;
 } // namespace
 
 class SwiperControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUISwiperControllerAccessor,
@@ -57,6 +70,11 @@ public:
         auto controller = new MockSwiperController();
         mockSwiperController_ = AceType::Claim(controller);
         EXPECT_CALL(*controller, ShowNext()).Times(1);
+        EXPECT_CALL(*controller, ShowPrevious()).Times(1);
+        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, true)).Times(1);
+        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, false)).Times(3);
+        EXPECT_CALL(*controller, ChangeIndex(0, false)).Times(1);
+        EXPECT_CALL(*controller, FinishAnimation()).Times(3);
     }
 
     static void TearDownTestCase()
@@ -70,7 +88,7 @@ public:
     {
         AccessorTestBase::SetUp();
 
-        auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperControllerModifier::SwiperControllerPeerImpl *>(peer_);
+        auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperControllerPeerImpl *>(peer_);
         ASSERT_NE(peerImpl, nullptr);
         peerImpl->AddListener(mockSwiperController_);
     }
@@ -89,4 +107,67 @@ HWTEST_F(SwiperControllerAccessorTest, showNextTest, TestSize.Level1)
     accessor_->showNext(peer_);
 }
 
+/**
+ * @tc.name: showPreviousTest
+ * @tc.desc: Check the functionality of SwiperControllerAccessor.showPrevious
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerAccessorTest, showPreviousTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->showPrevious, nullptr);
+    accessor_->showPrevious(peer_);
+}
+
+/**
+ * @tc.name: changeIndexTest
+ * @tc.desc: Check the functionality of SwiperControllerAccessor.ChangeIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->changeIndex, nullptr);
+    auto arkNumValid = ArkValue<Ark_Number>(INDEX_VALID_VALUE);
+    auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
+    auto arkBoolTrue = ArkValue<Opt_Boolean>(true);
+    auto arkBoolFalse = ArkValue<Opt_Boolean>(false);
+    auto arkBoolUndef = ArkValue<Opt_Boolean>();
+
+    accessor_->changeIndex(peer_, &arkNumValid, &arkBoolTrue);
+    accessor_->changeIndex(peer_, &arkNumValid, &arkBoolFalse);
+    accessor_->changeIndex(peer_, &arkNumValid, &arkBoolUndef);
+    accessor_->changeIndex(peer_, &arkNumValid, nullptr);
+    accessor_->changeIndex(peer_, &arkNumInvalid, nullptr);
+}
+
+/**
+ * @tc.name: finishAnimationTest
+ * @tc.desc: Check the functionality of SwiperControllerAccessor.finishAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->finishAnimation, nullptr);
+
+    Opt_Function callbackValid = ArkValue<Opt_Function>(0);
+    Opt_Function callbackUndef = ArkValue<Opt_Function>();
+
+    // check initial callback state in target controller 
+    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+
+    // test the finish animation invoking with callback setting 
+    accessor_->finishAnimation(peer_, &callbackValid);
+    EXPECT_TRUE(mockSwiperController_->GetFinishCallback());
+
+    // force reset and check no callback in target controller 
+    mockSwiperController_->SetFinishCallback({});
+    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+
+    // test the finish animation invoking with invalid callback setting 
+    accessor_->finishAnimation(peer_, &callbackUndef);
+    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+
+    // test the finish animation invoking without callback setting 
+    accessor_->finishAnimation(peer_, nullptr);
+    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+}
 } // namespace OHOS::Ace::NG
