@@ -3210,6 +3210,8 @@ void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSwitchStyle));
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetContentModifierBuilder));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setToggleOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetToggleOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "toggle"), toggle);
 }
 

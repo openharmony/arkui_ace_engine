@@ -944,7 +944,7 @@ enum ArkUIAPIEventCallbackType {
 };
 
 enum ArkUIAPINodeFlags {
-    NONE = 0,
+    CUSTOM_NONE = 0,
     CUSTOM_MEASURE = 1 << 0,
     CUSTOM_LAYOUT = 1 << 1,
     CUSTOM_DRAW = 1 << 2,
@@ -3627,6 +3627,7 @@ struct ArkUIToggleModifier {
     void (*setToggleTrackBorderRadius)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetToggleTrackBorderRadius)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getToggleUnselectedColor)(ArkUINodeHandle node);
+    void (*setToggleState)(ArkUINodeHandle node, ArkUI_Bool isOn);
 };
 
 struct ArkUINavigationModifier {
