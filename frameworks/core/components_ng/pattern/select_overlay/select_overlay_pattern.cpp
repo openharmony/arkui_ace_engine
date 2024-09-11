@@ -102,6 +102,24 @@ void SelectOverlayPattern::SetGestureEvent()
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchEvent_);
+    InitMouseEvent();
+}
+
+void SelectOverlayPattern::InitMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleMouseEvent(info);
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
 }
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
@@ -419,6 +437,13 @@ void SelectOverlayPattern::HandlePanCancel()
 {
     GestureEvent info;
     HandlePanEnd(info);
+}
+
+void SelectOverlayPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    if (info_->onMouseEvent) {
+        info_->onMouseEvent(info);
+    }
 }
 
 void SelectOverlayPattern::CheckHandleReverse()
