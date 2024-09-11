@@ -765,6 +765,8 @@ public:
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
+    std::string GetPlaceHolder() const;
+
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
