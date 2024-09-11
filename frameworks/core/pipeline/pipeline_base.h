@@ -316,6 +316,11 @@ public:
         return false;
     }
 
+    virtual bool Activate(bool isActive, bool autoInactive = true)
+    {
+        return false;
+    }
+
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 

@@ -1462,12 +1462,15 @@ class ArkRelativeContainerBarrier {
 class ArkFocusScopeId {
   id: string | undefined;
   isGroup: boolean | undefined;
+  arrowKeyStepOut: boolean | undefined;
   constructor() {
     this.id = undefined;
     this.isGroup = undefined;
+    this.arrowKeyStepOut = undefined;
   }
   isEqual(another: ArkFocusScopeId): boolean {
-    return (this.id === another.id) && (this.isGroup === another.isGroup);
+    return ((this.id === another.id) && (this.isGroup === another.isGroup) &&
+       (this.arrowKeyStepOut === another.arrowKeyStepOut));
   }
 }
 

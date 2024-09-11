@@ -32,6 +32,12 @@ using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
 using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current)>;
 
+enum class FocusActiveTriggerType : int32_t {
+    TRIGGER_BY_MOUSE_TOUCH = 0,
+    TRIGGER_BY_ACTIVATE_API = 1,
+    TRIGGER_BY_OTHER = 2,
+};
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -126,6 +132,20 @@ public:
 
     static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
 
+    bool GetAutoInactive() const
+    {
+        return autoInactive_;
+    }
+
+    bool GetIsFocusActive() const
+    {
+        return isFocusActive_;
+    }
+
+    bool SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType, bool autoInactive = true);
+    void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
+    void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
     void ReportFocusSwitching();
@@ -150,6 +170,10 @@ private:
     std::optional<SwitchingStartReason> startReason_;
     std::optional<SwitchingEndReason> endReason_;
     std::optional<SwitchingUpdateReason> updateReason_;
+
+    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
+    bool autoInactive_ = true;
+    bool isFocusActive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

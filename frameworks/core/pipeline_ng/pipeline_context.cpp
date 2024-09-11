@@ -2278,26 +2278,16 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     return nullptr;
 }
 
-bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+bool PipelineContext::GetIsFocusActive() const
 {
-    if (isFocusActive_ == isFocusActive) {
-        return false;
-    }
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
-    isFocusActive_ = isFocusActive;
-    for (auto& pair : isFocusActiveUpdateEvents_) {
-        if (pair.second) {
-            pair.second(isFocusActive_);
-        }
-    }
-    CHECK_NULL_RETURN(rootNode_, false);
-    auto rootFocusHub = rootNode_->GetFocusHub();
-    CHECK_NULL_RETURN(rootFocusHub, false);
-    if (isFocusActive_) {
-        return rootFocusHub->PaintAllFocusState();
-    }
-    rootFocusHub->ClearAllFocusState();
-    return true;
+    CHECK_NULL_RETURN(focusManager_, false);
+    return focusManager_->GetIsFocusActive();
+}
+
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType)
+{
+    CHECK_NULL_RETURN(focusManager_, false);
+    return focusManager_->SetIsFocusActive(isFocusActive, triggerType);
 }
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
@@ -2376,7 +2366,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
     if (scalePoint.type == TouchType::DOWN) {
         // Set focus state inactive while touch down event received
-        SetIsFocusActive(false);
+        SetIsFocusActive(false, FocusActiveTriggerType::TRIGGER_BY_MOUSE_TOUCH);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -3030,7 +3020,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
-        SetIsFocusActive(false);
+        SetIsFocusActive(false, FocusActiveTriggerType::TRIGGER_BY_MOUSE_TOUCH);
     }
 
     auto manager = GetDragDropManager();
@@ -3352,6 +3342,12 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncR
     auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipelineBase);
     CHECK_NULL_RETURN(parentPipelineContext, false);
     return parentPipelineContext->RequestFocus(targetNodeId, isSyncRequest);
+}
+
+bool PipelineContext::Activate(bool isActive, bool autoInactive)
+{
+    CHECK_NULL_RETURN(focusManager_, false);
+    return focusManager_->SetIsFocusActive(isActive, FocusActiveTriggerType::TRIGGER_BY_ACTIVATE_API, autoInactive);
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
@@ -4226,17 +4222,14 @@ void PipelineContext::HandleSubwindow(bool isShow)
 void PipelineContext::AddIsFocusActiveUpdateEvent(
     const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
 {
-    CHECK_NULL_VOID(node);
-    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
+    CHECK_NULL_RETURN(focusManager_, false);
+    return focusManager_->AddIsFocusActiveUpdateEvent(node, eventCallback);
 }
 
 void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_VOID(node);
-    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
-    if (iter != isFocusActiveUpdateEvents_.end()) {
-        isFocusActiveUpdateEvents_.erase(iter);
-    }
+    CHECK_NULL_RETURN(focusManager_, false);
+    return focusManager_->RemoveIsFocusActiveUpdateEvent(node);
 }
 
 std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)

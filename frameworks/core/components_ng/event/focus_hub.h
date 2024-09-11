@@ -1007,7 +1007,7 @@ public:
     
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
@@ -1036,6 +1036,11 @@ public:
     FocusPriority GetFocusPriority() const
     {
         return focusPriority_;
+    }
+
+    bool GetArrowKeyStepOut() const
+    {
+        return arrowKeyStepOut_;
     }
 
     static void ToJsonValue(
@@ -1120,6 +1125,8 @@ private:
 
     bool SkipFocusMoveBeforeRemove();
 
+    bool CheckArrowKeyStepOut(bool ret, FocusStep moveStep);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1164,6 +1171,7 @@ private:
     bool isFocusScope_ { false };
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
+    bool arrowKeyStepOut_ { true };
 };
 } // namespace OHOS::Ace::NG
 

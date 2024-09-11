@@ -156,7 +156,7 @@ void FocusManager::PaintFocusState()
     CHECK_NULL_VOID(rootNode);
     auto rootFocusHub = rootNode->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
-    if (!pipeline->GetIsFocusActive()) {
+    if (!GetIsFocusActive()) {
         return;
     }
     rootFocusHub->ClearAllFocusState();
@@ -440,5 +440,56 @@ void FocusManager::WindowFocus(bool isFocus)
         rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
+}
+
+void FocusManager::AddIsFocusActiveUpdateEvent(
+    const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
+{
+    CHECK_NULL_VOID(node);
+    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
+}
+
+void FocusManager::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
+    if (iter != isFocusActiveUpdateEvents_.end()) {
+        isFocusActiveUpdateEvents_.erase(iter);
+    }
+}
+
+bool FocusManager::SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType, bool autoInactive)
+{
+    if (!isFocusActive && triggerType == FocusActiveTriggerType::TRIGGER_BY_MOUSE_TOUCH && !GetAutoInactive()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "not inactive by mouse or touch down when autoInactive is false");
+        return false;
+    }
+
+    if (triggerType == FocusActiveTriggerType::TRIGGER_BY_ACTIVATE_API) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "autoInactive turns to %{public}d", autoInactive);
+        autoInactive_ = autoInactive;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (isFocusActive_ == isFocusActive) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
+    isFocusActive_ = isFocusActive;
+    for (auto& pair : isFocusActiveUpdateEvents_) {
+        if (pair.second) {
+            pair.second(isFocusActive_);
+        }
+    }
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto rootFocusHub = rootNode->GetFocusHub();
+    CHECK_NULL_RETURN(rootFocusHub, false);
+    if (isFocusActive_) {
+        return rootFocusHub->PaintAllFocusState();
+    }
+    rootFocusHub->ClearAllFocusState();
+    return true;
 }
 } // namespace OHOS::Ace::NG
