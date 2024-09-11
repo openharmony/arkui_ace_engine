@@ -1161,12 +1161,12 @@ std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
 
     napi_value globalValue;
     napi_get_global(env, &globalValue);
-    napi_value jsonValue;
-    napi_get_named_property(env, globalValue, "JSON", &jsonValue);
-    napi_value stringifyValue;
-    napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
+    napi_value jsonClass;
+    napi_get_named_property(env, globalValue, "JSON", &jsonClass);
+    napi_value stringifyFunc;
+    napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
     napi_value stringifyParam;
-    if (napi_call_function(env, jsonValue, stringifyValue, 1, &param, &stringifyParam) != napi_ok) {
+    if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
         napi_get_and_clear_last_exception(env, &stringifyParam);
         return JS_STRINGIFIED_UNDEFINED;
