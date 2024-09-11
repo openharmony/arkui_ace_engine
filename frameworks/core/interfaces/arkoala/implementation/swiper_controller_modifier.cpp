@@ -14,19 +14,33 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "swiper_controller_modifier_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerModifier {
+
+static void DestroyAccessor(SwiperControllerPeerImpl *peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
+
 Ark_NativePointer CtorImpl()
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyAccessor);
 }
 void ShowNextImpl(SwiperControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerShowNext();
 }
 void ShowPreviousImpl(SwiperControllerPeer* peer)
 {
@@ -53,5 +67,4 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
     };
     return &SwiperControllerAccessorImpl;
 }
-
 }
