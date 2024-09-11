@@ -211,7 +211,7 @@ private:
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
-    bool CheckPlacement(const Rect& rect, const OffsetF& position, const SizeF& childSize);
+    bool CheckPlacement(const SizeF& childSize);
 
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);

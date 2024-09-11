@@ -352,8 +352,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     SizeF windowGlobalSizeF(windowGlobalRect.Width(), screenHeight - windowsOffsetY);
     float topSecurity = 0.0f;
     float bottomSecurity = 0.0f;
-    auto hasPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
-    if (hasPreview && SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             topSecurity = static_cast<float>(PORTRAIT_TOP_SECURITY_API12.ConvertToPx());
             bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY_API12.ConvertToPx());
@@ -361,7 +360,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
             topSecurity = static_cast<float>(PORTRAIT_TOP_SECURITY.ConvertToPx());
             bottomSecurity = static_cast<float>(PORTRAIT_BOTTOM_SECURITY.ConvertToPx());
         }
-    } else if (hasPreview) {
+    } else {
         topSecurity = static_cast<float>(LANDSCAPE_TOP_SECURITY.ConvertToPx());
         bottomSecurity = static_cast<float>(LANDSCAPE_BOTTOM_SECURITY.ConvertToPx());
     }
@@ -2368,6 +2367,7 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
+    OffsetF tempPos = position;
     if (state_ != prevState_) {
         if (prevState_ == -1) {
             prevState_ = state_;
@@ -2379,31 +2379,62 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
             auto outside = LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
                            LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom());
             if (!outside) {
+                preOffset_ = position;
+                preOffset_.SetX(x);
+                preOffset_.SetY(y);
+                preRect_.SetOffset(rect.GetOffset());
+                preRect_.SetSize(rect.GetSize());
                 return true;
             }
             flag_ = true;
             positionOffset_ = { 0.0f, 0.0f };
             return false;
         }
-        return CheckPlacement(rect, position, childSize);
+        return CheckPlacement(childSize);
     }
-    if (LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()) ||
-        LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom())) {
+    x = tempPos.GetX();
+    y = tempPos.GetY();
+    if (LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
+        LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom())) {
+        preOffset_ = position;
+        preOffset_.SetX(x);
+        preOffset_.SetY(y);
+        preRect_.SetOffset(rect.GetOffset());
+        preRect_.SetSize(rect.GetSize());
         return false;
     }
     return true;
 }
 
-bool MenuLayoutAlgorithm::CheckPlacement(const Rect& rect, const OffsetF& position, const SizeF& childSize)
+bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
 {
-    auto x = position.GetX();
-    auto y = position.GetY();
-    prevState_ = state_;
-    preRect_.SetOffset(rect.GetOffset());
-    preRect_.SetSize(rect.GetSize());
-    auto outSide = LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()) ||
-                   LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom());
-    return !outSide;
+    auto x = preOffset_.GetX();
+    auto y = preOffset_.GetY();
+
+    switch (prevState_) {
+        case static_cast<int>(DirectionState::Bottom_Direction):
+        case static_cast<int>(DirectionState::Top_Direction): {
+            if ((LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right())) &&
+                    !(LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom()))) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        case static_cast<int>(DirectionState::Right_Direction):
+        case static_cast<int>(DirectionState::Left_Direction): {
+            if ((LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom())) &&
+                !(LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()))) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        default:
+            return false;
+    }
+
+    return false;
 }
 
 bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& childSize)
