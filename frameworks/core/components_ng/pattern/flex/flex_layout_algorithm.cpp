@@ -458,10 +458,6 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
             auto childList = iter->second;
             if (outOfDisplay) {
                 for (auto& child : childList) {
-                    const auto& childLayoutWrapper = child.layoutWrapper;
-                    auto childLayoutConstraint = child.layoutConstraint;
-                    UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, childLayoutConstraint);
-                    child.layoutWrapper->ApplyConstraintWithoutMeasure(childLayoutConstraint);
                     child.layoutWrapper->SetActive(false);
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                 }
@@ -889,10 +885,8 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             mainAxisSize_ =
                 direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
-                    ? (mainAxisInf ? layoutConstraint->percentReference.Width()
-                                   : std::max(layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()))
-                    : (mainAxisInf ? layoutConstraint->percentReference.Height()
-                                   : std::max(layoutConstraint->minSize.Height(), layoutConstraint->maxSize.Height()));
+                    ? (mainAxisInf ? layoutConstraint->percentReference.Width() : layoutConstraint->maxSize.Width())
+                    : (mainAxisInf ? layoutConstraint->percentReference.Height() : layoutConstraint->maxSize.Height());
         }
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }
@@ -953,15 +947,10 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        finalMainAxisSize = std::max(mainAxisSizeMin, std::min(finalMainAxisSize, mainAxisSizeMax));
-        finalCrossAxisSize = std::max(crossAxisSizeMin, std::min(finalCrossAxisSize, crossAxisSizeMax));
-    } else {
-        finalMainAxisSize = std::clamp(
-            finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
-        finalCrossAxisSize = std::clamp(finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
-            std::max(crossAxisSizeMin, crossAxisSizeMax));
-    }
+    finalMainAxisSize = std::clamp(
+        finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+    finalCrossAxisSize = std::clamp(
+        finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
 
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
