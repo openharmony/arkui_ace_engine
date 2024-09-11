@@ -1482,5 +1482,8 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
 {
 return "";
 }
-
+bool WebDelegate::CloseImageOverlaySelection()
+{
+    return false;
+}
 } // namespace OHOS::Ace

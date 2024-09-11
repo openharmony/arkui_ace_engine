@@ -6383,6 +6383,17 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
         webPattern->OnTextSelected();
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    auto selectedTask = [weak = AceType::WeakClaim(this)](bool isSelected) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateOverlay selectedTask=%{public}d", isSelected);
+        webPattern->SetImageOverlaySelectedStatus(isSelected);
+        if (isSelected) {
+            webPattern->CloseSelectOverlay();
+            webPattern->SelectCancel();
+        }
+    };
+    imageAnalyzerManager_->SetNotifySelectedCallback(std::move(selectedTask));
     imageAnalyzerManager_->UpdatePressOverlay(
         pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(callback));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
@@ -6412,6 +6423,7 @@ void WebPattern::DestroyAnalyzerOverlay()
         delegate_->OnDestroyImageAnalyzerOverlay();
     }
     overlayCreating_ = false;
+    imageOverlayIsSelected_ = false;
 }
 
 bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
@@ -6559,5 +6571,15 @@ void WebPattern::UpdateTouchpadSlidingStatus(const GestureEvent& event)
         (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
         isTouchpadSliding_ = true;
     }
+}
+
+bool WebPattern::CloseImageOverlaySelection()
+{
+    if (imageOverlayIsSelected_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection");
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
