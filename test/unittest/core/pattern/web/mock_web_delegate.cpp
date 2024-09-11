@@ -1468,9 +1468,9 @@ void WebDelegate::OnTextSelected()
 void WebDelegate::OnDestroyImageAnalyzerOverlay()
 {
 }
-NG::WebInfoType WebDelegate::GetWebInfoType()
+std::string WebDelegate::GetWebInfoType()
 {
-return NG::WebInfoType::TYPE_UNKNOWN;
+return "";
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId)
 {

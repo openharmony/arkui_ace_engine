@@ -983,7 +983,7 @@ public:
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
-    NG::WebInfoType GetWebInfoType();
+    std::string GetWebInfoType();
     void OnInterceptKeyboardAttach(
         const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
         const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
