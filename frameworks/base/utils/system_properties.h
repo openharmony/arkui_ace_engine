@@ -514,7 +514,6 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -524,6 +523,8 @@ public:
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
     static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
+
+    static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
 
     static bool GetAcePerformanceMonitorEnabled()
     {

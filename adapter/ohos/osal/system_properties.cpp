@@ -325,8 +325,7 @@ bool IsNavigationBlurEnabled()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
-           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 
 bool IsAceCommercialLogEnable()
@@ -799,6 +798,11 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
 {
     traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
+}
+
+void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
+{
+    acePerformanceMonitorEnable_ = performanceMonitorEnable;
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
