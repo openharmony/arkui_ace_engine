@@ -56,6 +56,7 @@ struct MenuParam {
     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
+    bool enableHoverMode = false;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
     std::function<void()> aboutToAppear;

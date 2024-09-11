@@ -3360,6 +3360,11 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         }
     }
 
+    auto enableHoverModeValue = menuOptions->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        menuParam.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
     auto backgroundColorValue = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_COLOR));
     Color backgroundColor;
     if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
