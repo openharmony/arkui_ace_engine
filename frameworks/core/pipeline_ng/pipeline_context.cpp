@@ -109,7 +109,7 @@ constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it mean
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 2;
-constexpr int32_t MIN_IDLE_TIME = 1000;
+constexpr int32_t MIN_IDLE_TIME = 1000000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 
@@ -1140,7 +1140,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();

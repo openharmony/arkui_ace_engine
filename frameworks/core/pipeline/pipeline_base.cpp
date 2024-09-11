@@ -709,11 +709,6 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         gsVsyncCallback_();
     }
 
-    if (delaySurfaceChange_) {
-        delaySurfaceChange_ = false;
-        OnSurfaceChanged(width_, height_, type_, rsTransaction_);
-    }
-
     FlushVsync(nanoTimestamp, frameCount);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
