@@ -21,6 +21,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/divider/divider_theme.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -102,10 +103,10 @@ HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "#FF000000");
-    Ark_ResourceColor color = { .selector = 0, .value0 = 0x12345678 };
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal2, "#12345678");
+    EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
     Ark_ResourceColor numberInt = { .selector = 1, .value1 = ArkNum(0x123456) };
     modifier_->setColor(node_, &numberInt);
@@ -207,19 +208,19 @@ HWTEST_F(DividerModifierTest, DividerModifierTest003, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, LINE_CUP_BUTT);
 
-    modifier_->setLineCap(node_, static_cast<Ark_Int32>(OHOS::Ace::LineCap::SQUARE));
+    modifier_->setLineCap(node_, ARK_LINE_CAP_STYLE_SQUARE);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, LINE_CUP_SQUARE);
 
-    modifier_->setLineCap(node_, static_cast<Ark_Int32>(OHOS::Ace::LineCap::BUTT));
+    modifier_->setLineCap(node_, ARK_LINE_CAP_STYLE_BUTT);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, LINE_CUP_BUTT);
 
-    modifier_->setLineCap(node_, static_cast<Ark_Int32>(OHOS::Ace::LineCap::ROUND));
+    modifier_->setLineCap(node_, ARK_LINE_CAP_STYLE_ROUND);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, LINE_CUP_ROUND);
 
-    modifier_->setLineCap(node_, -25);
+    modifier_->setLineCap(node_, static_cast<Ark_LineCapStyle>(-25));
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, LINE_CUP_BUTT);
 }

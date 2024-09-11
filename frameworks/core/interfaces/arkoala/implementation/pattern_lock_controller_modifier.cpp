@@ -29,7 +29,7 @@ void ResetImpl(PatternLockControllerPeer* peer)
 {
 }
 void SetChallengeResultImpl(PatternLockControllerPeer* peer,
-                            Ark_Int32 result)
+                            enum Ark_PatternLockChallengeResult result)
 {
 }
 } // PatternLockControllerModifier

@@ -36,11 +36,11 @@ void FontWeightImpl(Ark_NativePointer node,
 {
 }
 void EffectStrategyImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        enum Ark_SymbolEffectStrategy value)
 {
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
-                           Ark_Int32 value)
+                           enum Ark_SymbolRenderingStrategy value)
 {
 }
 void SymbolEffect0Impl(Ark_NativePointer node,

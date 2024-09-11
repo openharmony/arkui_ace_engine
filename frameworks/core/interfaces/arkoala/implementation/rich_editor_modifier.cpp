@@ -47,6 +47,10 @@ void OnIMEInputCompleteImpl(Ark_NativePointer node,
                             Ark_Function callback)
 {
 }
+void OnDidIMEInputImpl(Ark_NativePointer node,
+                       Ark_Function callback)
+{
+}
 void AboutToDeleteImpl(Ark_NativePointer node,
                        Ark_Function callback)
 {
@@ -56,11 +60,11 @@ void OnDeleteCompleteImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionsImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_CopyOptions value)
 {
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
-                           Ark_Int32 spanType,
+                           enum Ark_RichEditorSpanType spanType,
                            const CustomBuilder* content,
                            const Type_RichEditorAttribute_bindSelectionMenu_Arg2* responseType,
                            const Opt_SelectionMenuOptions* options)
@@ -105,7 +109,7 @@ void OnEditingChangeImpl(Ark_NativePointer node,
 {
 }
 void EnterKeyTypeImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_EnterKeyType value)
 {
 }
 void OnSubmitImpl(Ark_NativePointer node,
@@ -132,6 +136,18 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_Materialized* editMenu)
 {
 }
+void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
+                               Ark_Boolean isEnabled)
+{
+}
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean isEnabled)
+{
+}
+void BarStateImpl(Ark_NativePointer node,
+                  enum Ark_BarState state)
+{
+}
 } // RichEditorAttributeModifier
 const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -143,6 +159,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::OnSelectionChangeImpl,
         RichEditorAttributeModifier::AboutToIMEInputImpl,
         RichEditorAttributeModifier::OnIMEInputCompleteImpl,
+        RichEditorAttributeModifier::OnDidIMEInputImpl,
         RichEditorAttributeModifier::AboutToDeleteImpl,
         RichEditorAttributeModifier::OnDeleteCompleteImpl,
         RichEditorAttributeModifier::CopyOptionsImpl,
@@ -163,6 +180,9 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::OnCutImpl,
         RichEditorAttributeModifier::OnCopyImpl,
         RichEditorAttributeModifier::EditMenuOptionsImpl,
+        RichEditorAttributeModifier::EnableKeyboardOnFocusImpl,
+        RichEditorAttributeModifier::EnableHapticFeedbackImpl,
+        RichEditorAttributeModifier::BarStateImpl,
     };
     return &ArkUIRichEditorModifierImpl;
 }

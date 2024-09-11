@@ -74,7 +74,7 @@ void FillColorImpl(Ark_NativePointer node,
     ImageModelNG::SetImageFill(frameNode, Converter::ConvertOrDefault(*value, Color()));
 }
 void ObjectFitImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   Ark_ImageFit value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -82,10 +82,10 @@ void ObjectFitImpl(Ark_NativePointer node,
     if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
         objectFitValue = ImageFit::COVER;
     }
-    ImageModelNG::SetImageFit(frameNode, Converter::ConvertOrDefault((Ark_Int32)objectFitValue, ImageFit::COVER));
+    ImageModelNG::SetImageFit(frameNode, Converter::ConvertOrDefault((Ark_ImageFit)objectFitValue, ImageFit::COVER));
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      Ark_ImageRepeat value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +93,8 @@ void ObjectRepeatImpl(Ark_NativePointer node,
     if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
         repeat = ImageRepeat::NO_REPEAT;
     }
-    ImageModelNG::SetImageRepeat(frameNode, Converter::ConvertOrDefault((Ark_Int32)repeat, ImageRepeat::NO_REPEAT));
+    ImageModelNG::SetImageRepeat(frameNode,
+        Converter::ConvertOrDefault((Ark_ImageRepeat)repeat, ImageRepeat::NO_REPEAT));
 }
 void AutoResizeImpl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -103,7 +104,7 @@ void AutoResizeImpl(Ark_NativePointer node,
     ImageModelNG::SetAutoResize(frameNode, Converter::ConvertOrDefault(value, false));
 }
 void RenderModeImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    Ark_ImageRenderMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -112,10 +113,10 @@ void RenderModeImpl(Ark_NativePointer node,
         renderMode = ImageRenderMode::ORIGINAL;
     }
     ImageModelNG::SetImageRenderMode(frameNode,
-                                     Converter::ConvertOrDefault((Ark_Int32)renderMode, ImageRenderMode::ORIGINAL));
+        Converter::ConvertOrDefault((Ark_ImageRenderMode)renderMode, ImageRenderMode::ORIGINAL));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
-                          Ark_Int32 value)
+                          Ark_DynamicRangeMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -123,11 +124,11 @@ void DynamicRangeModeImpl(Ark_NativePointer node,
     if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
         dynamicRangeModeValue = DynamicRangeMode::STANDARD;
     }
-    ImageModelNG::SetDynamicRangeMode(frameNode, Converter::ConvertOrDefault((Ark_Int32)dynamicRangeModeValue,
-                                                                             DynamicRangeMode::HIGH));
+    ImageModelNG::SetDynamicRangeMode(frameNode,
+        Converter::ConvertOrDefault((Ark_DynamicRangeMode)dynamicRangeModeValue, DynamicRangeMode::HIGH));
 }
 void InterpolationImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       Ark_ImageInterpolation value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -135,7 +136,7 @@ void InterpolationImpl(Ark_NativePointer node,
     if (interpolation < Ace::ImageInterpolation::NONE || interpolation > Ace::ImageInterpolation::HIGH) {
         interpolation = Ace::ImageInterpolation::NONE;
     }
-    ImageModelNG::SetImageInterpolation(frameNode, Converter::ConvertOrDefault((Ark_Int32)interpolation,
+    ImageModelNG::SetImageInterpolation(frameNode, Converter::ConvertOrDefault((Ark_ImageInterpolation)interpolation,
                                                                                ImageInterpolation::NONE));
 }
 void SourceSizeImpl(Ark_NativePointer node,
@@ -160,7 +161,7 @@ void ColorFilterImpl(Ark_NativePointer node,
     LOGE("Arkoala: Image.ColorFilterImpl - method not implemented");
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    Ark_CopyOptions value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -168,7 +169,8 @@ void CopyOptionImpl(Ark_NativePointer node,
     if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
         copyOptions = CopyOptions::None;
     }
-    ImageModelNG::SetCopyOption(frameNode, Converter::ConvertOrDefault((Ark_Int32)value, CopyOptions::None));
+    ImageModelNG::SetCopyOption(frameNode,
+        Converter::ConvertOrDefault((Ark_CopyOptions)copyOptions, CopyOptions::None));
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)

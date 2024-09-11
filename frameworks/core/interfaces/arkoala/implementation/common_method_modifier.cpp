@@ -13,13 +13,52 @@
  * limitations under the License.
  */
 
+#include <variant>
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
+
+namespace OHOS::Ace::NG {
+using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
+
+namespace Converter {
+template<>
+void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Color& src)
+{
+    dst = OptConvert<Color>(src);
+}
+
+template<>
+void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Resource& src)
+{
+    dst = OptConvert<Color>(src);
+}
+
+template<>
+void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_String& src)
+{
+    dst = OptConvert<Color>(src);
+}
+
+template<>
+void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_Number& src)
+{
+    dst = OptConvert<Color>(src);
+}
+
+template<>
+void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_ColoringStrategy& src)
+{
+    dst = OptConvert<ForegroundColorStrategy>(src);
+}
+}
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr int32_t CASE_0 = 0;
@@ -109,7 +148,7 @@ void TouchableImpl(Ark_NativePointer node,
     ViewAbstract::SetTouchable(frameNode, static_cast<bool>(value));
 }
 void HitTestBehaviorImpl(Ark_NativePointer node,
-                         Ark_Int32 value)
+                         enum Ark_HitTestMode value)
 {
 }
 void OnChildTouchTestImpl(Ark_NativePointer node,
@@ -204,7 +243,7 @@ void BackgroundImagePositionImpl(Ark_NativePointer node,
 {
 }
 void BackgroundBlurStyleImpl(Ark_NativePointer node,
-                             Ark_Int32 value,
+                             enum Ark_BlurStyle value,
                              const Opt_BackgroundBlurStyleOptions* options)
 {
 }
@@ -237,7 +276,7 @@ void CompositingFilterImpl(Ark_NativePointer node,
 {
 }
 void ForegroundBlurStyleImpl(Ark_NativePointer node,
-                             Ark_Int32 value,
+                             enum Ark_BlurStyle value,
                              const Opt_ForegroundBlurStyleOptions* options)
 {
 }
@@ -289,19 +328,31 @@ void OutlineRadiusImpl(Ark_NativePointer node,
                        const Type_CommonMethod_outlineRadius_Arg0* value)
 {
 }
+
 void ForegroundColorImpl(Ark_NativePointer node,
                          const Type_CommonMethod_foregroundColor_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    auto color = Converter::OptConvert<Color>(*value);
-    if (color) {
-        ViewAbstract::SetForegroundColor(frameNode, color.value());
+    auto var = Converter::OptConvert<ColorOrStrategy>(*value);
+    if (var && var->index() == 1) {
+        const auto& color = std::get<1>(*var);
+        if (color) {
+            ViewAbstract::SetForegroundColor(frameNode, color.value());
+        } else {
+            LOGI("#### CommonMethod::ForegroundColorImpl: color is empty");
+        }
     } else {
-        LOGI("#### CommonMethod::ForegroundColorImpl: color is empty");
+        LOGE("#### CommonMethod::ForegroundColorImpl: strategy handling is not implemented!");
     }
 }
-void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event)
+
+void OnClick0Impl(Ark_NativePointer node,
+                  Ark_Function event)
+{
+}
+void OnClick1Impl(Ark_NativePointer node,
+                  Ark_Function event,
+                  const Ark_Number* distanceThreshold)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -314,27 +365,18 @@ void OnClickImpl(Ark_NativePointer node,
 
         onClick.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onClick.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.displayX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.displayX.f32 = static_cast<float>(
-                PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+        onClick.displayX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+        onClick.displayY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
-        onClick.displayY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.displayY.f32 = static_cast<float>(
-                PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-        onClick.pressure.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.pressure.f32 = 0.0f;
+        onClick.pressure = Converter::ArkValue<Ark_Number>(0.0f);
         onClick.preventDefault.id = 0;
 
-        onClick.screenX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.screenX.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+        onClick.screenX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+        onClick.screenY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-        onClick.screenY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.screenY.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+        onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
 
-        onClick.source = static_cast<int32_t>(info.GetSourceDevice());
-
-        onClick.sourceTool = 0;
+        onClick.sourceTool = static_cast<Ark_SourceTool>(0);
         onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onClick.target.area.height.type = 0;
@@ -346,27 +388,19 @@ void OnClickImpl(Ark_NativePointer node,
         onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
 
-        onClick.tiltX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.tiltX.f32 = 0;
-        onClick.tiltY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.tiltY.f32 = 0;
-        
-        onClick.timestamp.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.timestamp.f32 = static_cast<float>(info.GetTimeStamp().time_since_epoch().count());
+        onClick.tiltX = Converter::ArkValue<Ark_Number>(0);
+        onClick.tiltY = Converter::ArkValue<Ark_Number>(0);
 
-        onClick.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.windowX.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+        onClick.timestamp = Converter::ArkValue<Ark_Number>(
+            static_cast<float>(info.GetTimeStamp().time_since_epoch().count()));
 
-        onClick.windowY.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.windowY.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+        onClick.windowX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+        onClick.windowY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-        onClick.x.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.x.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+        onClick.x = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+        onClick.y = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
-        onClick.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        onClick.y.f32 = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick(frameNode->GetId(), onClick);
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick1(frameNode->GetId(), onClick);
     };
 
     if (frameNode->GetTag() == "Span") {
@@ -384,7 +418,7 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
 {
 }
 void HoverEffectImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_HoverEffect value)
 {
 }
 void OnMouseImpl(Ark_NativePointer node,
@@ -414,8 +448,8 @@ void OnTouchImpl(Ark_NativePointer node,
         onTouch.pressure.tag = Ark_Tag::ARK_TAG_FLOAT32;
         onTouch.pressure.f32 = 0.0f;
         onTouch.preventDefault.id = 0;
-        onTouch.source = static_cast<int32_t>(eventInfo.GetSourceDevice());
-        onTouch.sourceTool = 0;
+        onTouch.source = static_cast<Ark_SourceType>(eventInfo.GetSourceDevice());
+        onTouch.sourceTool = static_cast<Ark_SourceTool>(0);
         onTouch.stopPropagation.id = 0;
         onTouch.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onTouch.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
@@ -433,7 +467,7 @@ void OnTouchImpl(Ark_NativePointer node,
         onTouch.tiltY.f32 = 0;
         onTouch.timestamp.tag = Ark_Tag::ARK_TAG_INT32;
         onTouch.timestamp.i32 = eventInfo.GetTimeStamp().time_since_epoch().count();
-        onTouch.type = 0;
+        onTouch.type = static_cast<Ark_TouchType>(0);
         onTouch.touches.array = nullptr;
         onTouch.touches.length = 0;
         auto touches = eventInfo.GetTouches();
@@ -664,7 +698,7 @@ void OnAreaChangeImpl(Ark_NativePointer node,
 {
 }
 void VisibilityImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_Visibility value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -683,7 +717,7 @@ void FlexBasisImpl(Ark_NativePointer node,
 {
 }
 void AlignSelfImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_ItemAlign value)
 {
 }
 void DisplayPriorityImpl(Ark_NativePointer node,
@@ -700,11 +734,11 @@ void SharedTransitionImpl(Ark_NativePointer node,
 {
 }
 void DirectionImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_Direction value)
 {
 }
 void AlignImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_Alignment value)
 {
 }
 void PositionImpl(Ark_NativePointer node,
@@ -784,8 +818,8 @@ void AlignRules1Impl(Ark_NativePointer node,
 {
 }
 void ChainModeImpl(Ark_NativePointer node,
-                   Ark_Int32 direction,
-                   Ark_Int32 style)
+                   enum Ark_Axis direction,
+                   enum Ark_ChainStyle style)
 {
 }
 void AspectRatioImpl(Ark_NativePointer node,
@@ -867,8 +901,13 @@ void ShadowImpl(Ark_NativePointer node,
 {
 }
 void BlendModeImpl(Ark_NativePointer node,
-                   Ark_Int32 value,
+                   enum Ark_BlendMode value,
                    const Opt_BlendApplyType* type)
+{
+}
+void AdvancedBlendModeImpl(Ark_NativePointer node,
+                           const Type_CommonMethod_advancedBlendMode_Arg0* effect,
+                           const Opt_BlendApplyType* type)
 {
 }
 void Clip0Impl(Ark_NativePointer node,
@@ -930,7 +969,7 @@ void BindMenu1Impl(Ark_NativePointer node,
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
                           const CustomBuilder* content,
-                          Ark_Int32 responseType,
+                          enum Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
 }
@@ -1030,7 +1069,7 @@ void ReuseIdImpl(Ark_NativePointer node,
 {
 }
 void RenderFitImpl(Ark_NativePointer node,
-                   Ark_Int32 fitMode)
+                   enum Ark_RenderFit fitMode)
 {
 }
 void GestureModifierImpl(Ark_NativePointer node,
@@ -1112,7 +1151,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OutlineColorImpl,
         CommonMethodModifier::OutlineRadiusImpl,
         CommonMethodModifier::ForegroundColorImpl,
-        CommonMethodModifier::OnClickImpl,
+        CommonMethodModifier::OnClick0Impl,
+        CommonMethodModifier::OnClick1Impl,
         CommonMethodModifier::OnHoverImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
         CommonMethodModifier::HoverEffectImpl,
@@ -1202,6 +1242,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::MotionPathImpl,
         CommonMethodModifier::ShadowImpl,
         CommonMethodModifier::BlendModeImpl,
+        CommonMethodModifier::AdvancedBlendModeImpl,
         CommonMethodModifier::Clip0Impl,
         CommonMethodModifier::Clip1Impl,
         CommonMethodModifier::ClipShapeImpl,

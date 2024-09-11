@@ -130,7 +130,7 @@ void* createToggleNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createLoadingProgress(ArkUI_Int32 nodeId)
+void* createLoadingProgressNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -202,7 +202,7 @@ void* createProgressNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createCheckBoxNode(ArkUI_Int32 nodeId)
+void* createCheckboxNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -291,6 +291,12 @@ void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& par
     auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
+}
+#else
+// Needed for generated C API
+void* createXComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
 }
 #endif
 
@@ -545,7 +551,7 @@ void* createMarqueeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
+void* createCheckboxGroupNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -561,6 +567,312 @@ void* createRatingNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createAbilityComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createAnimatorNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createCalendarNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createColumnSplitNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createCommonMethodNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createCommonShapeMethodNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createCommonNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createComponent3DNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createContainerSpanNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createCounterNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createDataPanelNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createEffectComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createEllipseNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createFolderStackNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createFormComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createFormLinkNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createGaugeNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createGridContainerNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createHyperlinkNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createLineNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createLocationButtonNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createMenuNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createMenuItemNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createNavDestinationNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createNavRouterNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createNavigatorNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createNodeContainerNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPanelNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPasteButtonNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPathNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPatternLockNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPluginComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPolygonNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createPolylineNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createQRCodeNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createRectNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createRichEditorNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createRichTextNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createRootSceneNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createRowSplitNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createSaveButtonNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createScreenNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createScrollBarNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createSecurityComponentMethodNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createShapeNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createBaseSpanNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createStepperNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createStepperItemNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createSymbolSpanNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createVideoNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createWebNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createWindowSceneNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createSideBarContainerNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createRemoteWindowNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createUIExtensionComponentNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+void* createLinearIndicatorNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
+
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -570,7 +882,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createImageSpanNode,
     createImageNode,
     createToggleNode,
-    createLoadingProgress,
+    createLoadingProgressNode,
     createTextInputNode,
     createStackNode,
     createScrollNode,
@@ -579,7 +891,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createTextAreaNode,
     createButtonNode,
     createProgressNode,
-    createCheckBoxNode,
+    createCheckboxNode,
     createColumnNode,
     createRowNode,
     createFlexNode,
@@ -628,7 +940,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createTextClockNode,
     createTextTimerNode,
     createMarqueeNode,
-    createCheckBoxGroupNode,
+    createCheckboxGroupNode,
     createRatingNode,
 };
 

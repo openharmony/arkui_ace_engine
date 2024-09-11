@@ -27,7 +27,7 @@ void ImagesImpl(Ark_NativePointer node,
 {
 }
 void StateImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_AnimationStatus value)
 {
 }
 void DurationImpl(Ark_NativePointer node,
@@ -47,7 +47,7 @@ void PreDecodeImpl(Ark_NativePointer node,
 {
 }
 void FillModeImpl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_FillMode value)
 {
 }
 void IterationsImpl(Ark_NativePointer node,

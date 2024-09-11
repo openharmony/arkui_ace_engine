@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,17 +20,24 @@ OHOS_DIR_ARG=$5
 
 OHOS_DIR=${OHOS_DIR_ARG:=../../../../../../..}
 
-if [[ ! -d $IDLIZE_PATH ]]; then
-   echo "Please define IDLIZE_PATH environment that points to idlize source directory."
-   exit 1
+if [[ ! -d $IDLIZE_PATH && "x$IDLIZE_VER" == "x" ]]; then
+    echo "Please define IDLIZE_PATH environment that points to idlize source directory."
+    echo "Or define IDLIZE_VER environment that points to version in repository."
+    lv=`npm view @azanat/idlize dist-tags.latest`
+    nv=`npm view @azanat/idlize dist-tags.next`
+    echo "Latest version: ${lv} Next version: ${nv}"
+    exit 1
 fi
 
 DEST_DIR=${DEST_DIR_ARG:=.}
 DTS_DIR=${DTS_DIR_ARG:=${OHOS_DIR}/interface/sdk-js/api/@internal/component/ets}
 TMP_DIR=${TMP_DIR_ARG:=${OHOS_DIR}/out/libace_c_api_generated}
-# GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@1.3.5 --dts2peer}
-# Use the below to run generator from your idlize workspace
-GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
+if [[ ! -d $IDLIZE_PATH ]]; then
+    GENERATOR=${GENERATOR_ARG:=npx --yes @azanat/idlize@$IDLIZE_VER --dts2peer}
+else
+    # Use the below to run generator from your idlize workspace
+    GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
+fi
 
 echo "Generating C API from ${DTS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 
@@ -40,4 +47,3 @@ ${GENERATOR} \
     --generator-target libace \
     --libace-destination ${DEST_DIR} \
     --api-version 99
-

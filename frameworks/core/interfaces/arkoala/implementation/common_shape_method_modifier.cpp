@@ -30,11 +30,11 @@ void StrokeDashOffsetImpl(Ark_NativePointer node,
 {
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_LineCapStyle value)
 {
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        enum Ark_LineJoinStyle value)
 {
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,

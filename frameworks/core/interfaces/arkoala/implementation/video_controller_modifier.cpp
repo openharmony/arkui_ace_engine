@@ -47,7 +47,7 @@ void ExitFullscreenImpl(VideoControllerPeer* peer)
 }
 void SetCurrentTime1Impl(VideoControllerPeer* peer,
                          const Ark_Number* value,
-                         Ark_Int32 seekMode)
+                         enum Ark_SeekMode seekMode)
 {
 }
 void ResetImpl(VideoControllerPeer* peer)

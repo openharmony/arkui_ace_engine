@@ -51,7 +51,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 }
 
 void LineCapImpl(Ark_NativePointer node,
-                 Ark_Int32 value)
+                 enum Ark_LineCapStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

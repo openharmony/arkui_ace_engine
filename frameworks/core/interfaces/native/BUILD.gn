@@ -47,6 +47,7 @@ template("ace_core_interfaces_native_node") {
 
     # add common source file needed by all product platform here
     sources = [
+      "../arkoala/utility/converter_enums.cpp",
       "node/alphabet_indexer_modifier.cpp",
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
@@ -241,6 +242,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "../../../bridge/common/utils/utils.cpp",
     "../../../bridge/js_frontend/engine/common/js_constants.cpp",
     "../../common/card_scope.cpp",
+    "../arkoala/utility/converter_enums.cpp",
     "node/extension_companion_node.cpp",
     "node/node_adapter_impl.cpp",
     "node/node_api.cpp",

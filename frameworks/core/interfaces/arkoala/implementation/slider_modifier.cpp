@@ -93,7 +93,7 @@ void StepSizeImpl(Ark_NativePointer node,
 {
 }
 void SliderInteractionModeImpl(Ark_NativePointer node,
-                               Ark_Int32 value)
+                               enum Ark_SliderInteraction value)
 {
 }
 void MinResponsiveDistanceImpl(Ark_NativePointer node,

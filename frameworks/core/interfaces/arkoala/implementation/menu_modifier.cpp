@@ -47,7 +47,7 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
 {
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              Ark_Int32 mode)
+                              enum Ark_SubMenuExpandingMode mode)
 {
 }
 } // MenuAttributeModifier

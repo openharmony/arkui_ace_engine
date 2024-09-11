@@ -22,7 +22,7 @@ void IconSizeImpl(Ark_NativePointer node,
 {
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
-                         Ark_Int32 value)
+                         enum Ark_SecurityComponentLayoutDirection value)
 {
 }
 void PositionImpl(Ark_NativePointer node,
@@ -42,7 +42,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FontStyle value)
 {
 }
 void FontWeightImpl(Ark_NativePointer node,
@@ -66,7 +66,7 @@ void BackgroundColorImpl(Ark_NativePointer node,
 {
 }
 void BorderStyleImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_BorderStyle value)
 {
 }
 void BorderWidthImpl(Ark_NativePointer node,

@@ -20,7 +20,7 @@ namespace ConsoleMessageModifier {
 Ark_NativePointer CtorImpl(const Ark_String* message,
                            const Ark_String* sourceId,
                            const Ark_Number* lineNumber,
-                           Ark_Int32 messageLevel)
+                           enum Ark_MessageLevel messageLevel)
 {
     return 0;
 }

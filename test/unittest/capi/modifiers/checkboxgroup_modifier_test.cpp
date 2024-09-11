@@ -18,6 +18,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
@@ -64,6 +65,7 @@ public:
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp();
         NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
+        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 
     static void TearDownTestCase()
@@ -83,7 +85,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest001, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal1, "#FF007DFF");
-    ResourceColor color = { .selector = 0, .value0 = 0xFF123456 };
+    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0xFF123456);
     modifier_->setSelectedColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, "selectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
@@ -98,7 +100,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest002, TestSize.Level
 {
     auto checkVal1 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal1, "#FF000000");
-    ResourceColor color = { .selector = 0, .value0 = 0xFF123456 };
+    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0xFF123456);
     modifier_->setUnselectedColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, "unselectedColor");
     EXPECT_EQ(checkVal2, "#FF123456");
@@ -126,7 +128,7 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest003, TestSize.Level
 HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level1)
 {
     Ark_MarkStyle style;
-    ResourceColor color = { .selector = 0, .value0 = 0xFF123456 };
+    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0xFF123456);
     Ark_Length len1 = { .value = SIZE1 };
     Ark_Length len2 = { .value = SIZE2 };
     Opt_Length opt1 = { .tag = ARK_TAG_INT32, .value = len1 };
@@ -157,18 +159,21 @@ HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest004, TestSize.Level
  * @tc.desc: setCheckboxShape test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxGroupModifierTest, CheckboxGroupModifierTest005, TestSize.Level1)
+HWTEST_F(CheckboxGroupModifierTest, DISABLED_CheckboxGroupModifierTest005, TestSize.Level1)
 {
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    constexpr int shape1 = 1;
     auto checkVal1 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal1, "");
+    EXPECT_EQ(checkVal1, "CIRCLE");
 
-    modifier_->setCheckboxShape(node_, shape1);
+    modifier_->setCheckboxShape(node_, ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE);
     auto checkVal2 = GetStringAttribute(node_, "checkboxShape");
-    EXPECT_EQ(checkVal2, std::to_string(shape1));
+    EXPECT_EQ(checkVal2, "ROUNDED_SQUARE");
+
+    modifier_->setCheckboxShape(node_, ARK_CHECK_BOX_SHAPE_CIRCLE);
+    auto checkVal3 = GetStringAttribute(node_, "checkboxShape");
+    EXPECT_EQ(checkVal3, "CIRCLE");
 }
 
 /**

@@ -24,7 +24,7 @@ void SetAnimatorOptionsImpl(Ark_NativePointer node,
 } // AnimatorInterfaceModifier
 namespace AnimatorAttributeModifier {
 void StateImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_AnimationStatus value)
 {
 }
 void DurationImpl(Ark_NativePointer node,
@@ -32,7 +32,7 @@ void DurationImpl(Ark_NativePointer node,
 {
 }
 void CurveImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_Curve value)
 {
 }
 void DelayImpl(Ark_NativePointer node,
@@ -40,7 +40,7 @@ void DelayImpl(Ark_NativePointer node,
 {
 }
 void FillModeImpl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_FillMode value)
 {
 }
 void IterationsImpl(Ark_NativePointer node,
@@ -48,7 +48,7 @@ void IterationsImpl(Ark_NativePointer node,
 {
 }
 void PlayModeImpl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_PlayMode value)
 {
 }
 void MotionImpl(Ark_NativePointer node,

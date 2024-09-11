@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ToggleInterfaceModifier {
 void SetToggleOptionsImpl(Ark_NativePointer node,
-                          const Type_ToggleInterface_setToggleOptions_Arg0* options)
+                          const Ark_ToggleOptions* options)
 {
 }
 } // ToggleInterfaceModifier
