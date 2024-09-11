@@ -149,11 +149,6 @@ public:
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
-    /**
-     * @param cacheStart number of items to cache before @c start
-     * @param cacheEnd number of items to cache after @c end
-     * @note To deactivate all children, set @c start and @c end to -1
-     */
     virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
     virtual void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt)
@@ -248,7 +243,6 @@ public:
     RectF GetFrameRectWithoutSafeArea() const;
     RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
     void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
-    void ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint);
 
 protected:
     void CreateRootConstraint();

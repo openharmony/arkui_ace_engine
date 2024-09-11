@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float MULTIPLE_FACTOR = 2.0;
+constexpr float MULTIPLE_FACTOR = 2.0f;
 } // namespace
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {

@@ -75,6 +75,7 @@ constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
+constexpr int32_t MEDIA_TYPE_AUD = 0;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -250,7 +251,8 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     rect.SetHeight(nodeHeightI);
     return rect;
 }
-Gradient ConvertToGradient(Color color) {
+Gradient ConvertToGradient(Color color)
+{
     Gradient gradient;
     GradientColor gradientColorBegin;
     gradientColorBegin.SetLinearColor(LinearColor(color));
@@ -767,7 +769,12 @@ void VideoPattern::UpdateMuted()
         platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            mediaPlayer->SetVolume(videoVolume, videoVolume);
+            if (NearZero(videoVolume)) {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+            } else {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
+                mediaPlayer->SetVolume(videoVolume, videoVolume);
+            }
         }, "ArkUIVideoUpdateMuted");
     }
 }
@@ -840,7 +847,7 @@ void VideoPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
+ 
 #ifdef RENDER_EXTRACT_SUPPORTED
     CHECK_NULL_VOID(renderSurface_);
     auto contextType = renderSurface_->IsTexture() ?
@@ -1909,7 +1916,8 @@ bool VideoPattern::IsSupportImageAnalyzer()
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-bool VideoPattern::ShouldUpdateImageAnalyzer() {
+bool VideoPattern::ShouldUpdateImageAnalyzer()
+{
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& constraint = layoutProperty->GetCalcLayoutConstraint();
@@ -1947,7 +1955,7 @@ void VideoPattern::StartImageAnalyzer()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+        }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
 }
 
 void VideoPattern::CreateAnalyzerOverlay()
@@ -1992,7 +2000,7 @@ void VideoPattern::StartUpdateImageAnalyzer()
         }
         pattern->UpdateAnalyzerOverlay();
         pattern->isContentSizeChanged_ = false;
-    }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
+        }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
 }
 

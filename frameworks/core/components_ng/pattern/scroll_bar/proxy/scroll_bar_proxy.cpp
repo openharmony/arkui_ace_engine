@@ -244,16 +244,6 @@ float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollab
     }
 }
 
-void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
-{
-    for (const auto& node : scrollableNodes_) {
-        if (node.scrollPageCallback == nullptr) {
-            continue;
-        }
-        node.scrollPageCallback(reverse, smooth);
-    }
-}
-
 void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const
 {
     auto scrollable = weakScrollableNode.Upgrade();

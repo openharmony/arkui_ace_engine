@@ -80,8 +80,8 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         DECLARE_NAPI_FUNCTION("transferToImageBitmap", JSOffscreenCanvas::JsTransferToImageBitmap),
         DECLARE_NAPI_FUNCTION("getContext", JSOffscreenCanvas::JsGetContext),
     };
-
     napi_define_properties(env, offscreenCanvas, sizeof(desc) / sizeof(*desc), desc);
+
     napi_coerce_to_native_binding_object(
         env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
     napi_wrap_with_size(
@@ -208,7 +208,6 @@ napi_value JSOffscreenCanvas::JsSetHeight(napi_env env, napi_callback_info info)
 }
 napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     if (me != nullptr && me->isDetached_) {
         JSException::Throw("%s", "Failed to execute 'transferToImageBitmap' on 'OffscreenCanvas': Cannot transfer an "

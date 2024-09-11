@@ -476,8 +476,7 @@ public:
 
     void SetMaxFlingVelocity(double max)
     {
-        double density = PipelineBase::GetCurrentDensity();
-        maxFlingVelocity_ = max * density;
+        maxFlingVelocity_ = max;
     }
 
 private:

@@ -20,7 +20,6 @@
 #endif
 #include <mutex>
 #include <cstring>
-#include <map>
 #include <unordered_map>
 
 #include "hilog/log.h"

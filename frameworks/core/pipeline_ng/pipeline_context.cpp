@@ -1728,6 +1728,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         CHECK_NULL_VOID(context);
         context->SetIsLayouting(false);
         context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        context->SetKeyboardAction(NearZero(keyboardHeight) ? KeyboardAction::CLOSING : KeyboardAction::OPENING);
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
@@ -1794,6 +1795,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         if (scrollResult) {
             context->FlushUITasks();
         }
+        context->SetKeyboardAction(KeyboardAction::NONE);
     };
     FlushUITasks();
     SetIsLayouting(true);

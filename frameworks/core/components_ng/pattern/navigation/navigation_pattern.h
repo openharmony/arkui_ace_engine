@@ -484,6 +484,7 @@ private:
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
         NavigationTransition navigationTransition);
+    bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

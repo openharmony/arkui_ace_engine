@@ -472,6 +472,10 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     }
     offset.SetY(geometryNode->GetFrameOffset().GetY());
     geometryNode->SetFrameOffset(offset);
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        renderContext->SavePaintRect();
+    }
     return true;
 }
 
@@ -1271,11 +1275,11 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     const auto& content = contentConstraint_.value();
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
         return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
-                content.EqualWithoutPercentWidth(preContentConstraint.value()));
+            content.EqualWithoutPercentWidth(preContentConstraint.value()));
     }
     if (!isNeedPercent && GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
         return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
-                content.EqualWithoutPercentHeight(preContentConstraint.value()));
+            content.EqualWithoutPercentHeight(preContentConstraint.value()));
     }
     return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
 }
