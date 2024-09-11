@@ -5322,6 +5322,17 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(
                  std::string("backgroundEffect:").append(backgroundEffect));
         }
+        auto && graphicProps = GetOrCreateGraphics();
+        if (graphicProps->propFgDynamicBrightnessOption.has_value()) {
+            auto fgDynamicBrightness = graphicProps->propFgDynamicBrightnessOption->GetJsonObject();
+            DumpLog::GetInstance().AddDesc(
+                std::string("foregroundBrightness:").append(fgDynamicBrightness->ToString().c_str()));
+        }
+        if (graphicProps->propBgDynamicBrightnessOption.has_value()) {
+            auto bgDynamicBrightness = graphicProps->propBgDynamicBrightnessOption->GetJsonObject();
+            DumpLog::GetInstance().AddDesc(
+                std::string("backgroundBrightnessInternal:").append(bgDynamicBrightness->ToString().c_str()));
+        }
         if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
             DumpLog::GetInstance().AddDesc(
                 std::string("CameraDistance:")
