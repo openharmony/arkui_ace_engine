@@ -94,7 +94,7 @@ public:
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
         CHECK_NULL_RETURN(switchTheme, FocusPattern());
 
-        auto focusPaintcolor = switchTheme->GetActiveColor();
+        auto focusPaintcolor = switchTheme->GetFocusLineColor();
         focusPaintParams.SetPaintColor(focusPaintcolor);
         focusPaintParams.SetFocusPadding(switchTheme->GetSwitchFocuPadding());
 

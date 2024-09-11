@@ -52,7 +52,6 @@ const int32_t COLUMNS_TWO = 2;
 const int32_t INDEX_YEAR = 0;
 const int32_t INDEX_MONTH = 1;
 const int32_t INDEX_DAY = 2;
-const Dimension FOCUS_SPACE = 2.0_vp;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -234,13 +233,17 @@ void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto stackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackNode);
     auto buttonNode = DynamicCast<FrameNode>(stackNode->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
     auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
     auto columnWidth = stackNode->GetGeometryNode()->GetFrameSize().Width();
-    auto focusSpace = FOCUS_SPACE.ConvertToPx();
+    auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
     focusButtonRect -= OffsetF(focusSpace, focusSpace);
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
     focusButtonRect += OffsetF(columnWidth * focusKeyID_, 0);

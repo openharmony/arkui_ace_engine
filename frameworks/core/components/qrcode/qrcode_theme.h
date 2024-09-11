@@ -73,6 +73,7 @@ public:
             theme->qrcodeType_ = QrcodeType(pattern->GetAttr<int>("qrcode_type", 0));
             theme->qrcodeWidth_ = pattern->GetAttr<Dimension>("qrcode_size", 200.0_px);
             theme->qrcodeHeight_ = pattern->GetAttr<Dimension>("qrcode_size", 200.0_px);
+            theme->focusStyleType_ = pattern->GetAttr<double>("qrcode_focus_style_type", 0.0);
         }
     };
 
@@ -118,6 +119,11 @@ public:
         return qrcodeFocusedPadding_;
     }
 
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
 protected:
     QrcodeTheme() = default;
 
@@ -130,6 +136,7 @@ private:
     Dimension qrcodeHeight_;
     Dimension qrcodeDefaultSize_;
     Dimension qrcodeFocusedPadding_;
+    double focusStyleType_ = 0.0;
 };
 
 } // namespace OHOS::Ace

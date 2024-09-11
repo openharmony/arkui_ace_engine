@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +46,14 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, focusPattern);
+        auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(menuTheme->GetFocusStyleType()));
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     RefPtr<EventHub> CreateEventHub() override

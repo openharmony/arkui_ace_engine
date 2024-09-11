@@ -32,6 +32,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr Dimension DIVIDER_THICKNESS = 1.0_px;
+constexpr Dimension PICKER_FOCUS_PADDING = 2.0_vp;
 constexpr uint32_t FOCUS_AREA_TYPE_IMPL = 1;
 } // namespace
 
@@ -170,6 +171,8 @@ public:
                 theme->focusOptionStyle_.SetTextColor(pattern->GetAttr<Color>(
                     "picker_focus_option_text_color", theme->selectedOptionStyle_.GetTextColor()));
                 theme->dividerColor_ = pattern->GetAttr<Color>("picker_select_divider_color", Color::TRANSPARENT);
+                theme->focusColor_ = pattern->GetAttr<Color>("picker_focus_color", Color(0xff0a59f7));
+                theme->focusPadding_ = pattern->GetAttr<Dimension>("picker_focus_padding", PICKER_FOCUS_PADDING);
             }
         }
 
@@ -243,6 +246,7 @@ public:
         theme->selectorItemFocusBorderColor_ = selectorItemFocusBorderColor_;
         theme->selectorItemFocusBgColor_ = selectorItemFocusBgColor_;
         theme->selectorItemNormalBgColor_ = selectorItemNormalBgColor_;
+        theme->focusPadding_ = focusPadding_;
     }
 
     const TextStyle& GetOptionStyle(bool selected, bool focus) const
@@ -579,6 +583,11 @@ public:
         return selectorItemFocusBorderWidth_;
     }
 
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
     const Color& GetSelectorItemBorderColor() const
     {
         return selectorItemBorderColor_;
@@ -683,6 +692,7 @@ private:
     Dimension selectorItemSpace_;
     Dimension selectorItemBorderWidth_;
     Dimension selectorItemFocusBorderWidth_;
+    Dimension focusPadding_;
     Color selectorItemBorderColor_;
     Color selectorItemFocusBorderColor_;
     Color selectorItemFocusBgColor_;
