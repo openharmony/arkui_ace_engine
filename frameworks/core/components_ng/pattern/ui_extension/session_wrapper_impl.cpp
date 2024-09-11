@@ -378,25 +378,23 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     CHECK_NULL_VOID(context);
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    SessionViewportConfig sessionViewportConfig = {
-        .isDensityFollowHost_ = pattern->GetDensityDpi(),
-        .density_ = context->GetCurrentDensity(),
-        .displayId_ = 0,
-        .orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()),
-        .transform_ = context->GetTransformHint(),
-    };
+    SessionViewportConfig sessionViewportConfig;
+    sessionViewportConfig.isDensityFollowHost_ = pattern->GetDensityDpi();
+    sessionViewportConfig.density_ = context->GetCurrentDensity();
+    sessionViewportConfig.displayId_ = 0;
+    sessionViewportConfig.orientation_ = static_cast<int32_t>(SystemProperties::GetDeviceOrientation());
+    sessionViewportConfig.transform_ = context->GetTransformHint();
     pattern->SetSessionViewportConfig(sessionViewportConfig);
-    Rosen::SessionInfo extensionSessionInfo = {
-        .bundleName_ = want.GetElement().GetBundleName(),
-        .abilityName_ = want.GetElement().GetAbilityName(),
-        .callerToken_ = callerToken,
-        .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
-        .want = wantPtr,
-        .realParentId_ = static_cast<int32_t>(realHostWindowId),
-        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
-        .isAsyncModalBinding_ = config.isAsyncModalBinding,
-        .config_ = *reinterpret_cast<Rosen::SessionViewportConfig*>(&sessionViewportConfig),
-    };
+    Rosen::SessionInfo extensionSessionInfo;
+    extensionSessionInfo.bundleName_ = want.GetElement().GetBundleName();
+    extensionSessionInfo.abilityName_ = want.GetElement().GetAbilityName();
+    extensionSessionInfo.callerToken_ = callerToken;
+    extensionSessionInfo.rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken;
+    extensionSessionInfo.want = wantPtr;
+    extensionSessionInfo.realParentId_ = static_cast<int32_t>(realHostWindowId);
+    extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
+    extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
+    extensionSessionInfo.config_ = *reinterpret_cast<Rosen::SessionViewportConfig*>(&sessionViewportConfig);
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     UpdateSessionConfig();
