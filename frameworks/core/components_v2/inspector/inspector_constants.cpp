@@ -578,6 +578,10 @@ const char PARTICLE_ETS_TAG[] = "Particle";
 // SelectOverlay
 const char SELECT_OVERLAY_ETS_TAG[] = "SelectOverlay";
 
+// ContainerSpan
+const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
+const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
+
 // Symbol
 const char SYMBOL_COMPONENT_TAG[] = "SymbolGlyphComponent";
 const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
@@ -585,10 +589,6 @@ const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 // IsolatedComponent
 const char ISOLATED_COMPONENT_TAG[] = "IsolatedComponent";
 const char ISOLATED_COMPONENT_ETS_TAG[] = "IsolatedComponent";
-
-// ContainerSpan
-const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
-const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
 
 //RenderNode
 const char RENDER_NODE_ETS_TAG[] = "RenderNode";
