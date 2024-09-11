@@ -13,8 +13,16 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components';
-
-export * from './src/main/ets/utils';
-
-export * from './src/main/ets/common/route';
+{
+  "module": {
+    "name": "feature_test",
+    "type": "feature",
+    "deviceTypes": [
+      "phone",
+      "tablet",
+      "2in1"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false
+  }
+}

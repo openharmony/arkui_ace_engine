@@ -13,8 +13,20 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components';
+import { Route, RouteGroup } from 'common/src/main/ets/common/route';
+import { SwiperBootcamp } from './SwiperBootcamp';
 
-export * from './src/main/ets/utils';
+export const navigatesRoute: RouteGroup = {
+  name: 'navigates',
+  label: '导航类',
+  children: [
+    { name: 'swiper', label: '轮播/Swiper' },
+  ]
+};
 
-export * from './src/main/ets/common/route';
+@Builder
+export function NavigatesDestination(name: string, route: Route) {
+  if (name === 'navigates/swiper') {
+    SwiperBootcamp({ title: route.label });
+  }
+}

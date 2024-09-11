@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components';
+import localUnitTest from './LocalUnit.test';
 
-export * from './src/main/ets/utils';
-
-export * from './src/main/ets/common/route';
+export default function testsuite() {
+  localUnitTest();
+}

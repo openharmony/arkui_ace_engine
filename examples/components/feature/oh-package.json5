@@ -13,8 +13,15 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components';
+{
+  "name": "feature",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "common": "file:../common"
+  }
+}
 
-export * from './src/main/ets/utils';
-
-export * from './src/main/ets/common/route';
