@@ -84,6 +84,11 @@ class FontManager;
 class ManagerInterface;
 class NavigationController;
 enum class FrontendType;
+enum class KeyboardAction {
+    NONE,
+    CLOSING,
+    OPENING,
+};
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
@@ -1279,6 +1284,15 @@ public:
         return frameCount_;
     }
 
+    KeyboardAction GetKeyboardAction()
+    {
+        return keyboardAction_;
+    }
+
+    void SetKeyboardAction(KeyboardAction action)
+    {
+        keyboardAction_ = action;
+    }
     virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
 
     virtual void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
@@ -1500,6 +1514,7 @@ private:
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
+    KeyboardAction keyboardAction_ = KeyboardAction::NONE;
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
