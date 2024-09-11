@@ -904,6 +904,7 @@ public:
 
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
+    RectF GetRectWithFrame();
     bool CheckAncestorPageShow();
 
     void SetRemoveCustomProperties(std::function<void()> func)

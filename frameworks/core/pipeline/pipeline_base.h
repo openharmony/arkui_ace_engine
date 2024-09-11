@@ -364,7 +364,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
