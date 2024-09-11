@@ -9534,13 +9534,18 @@ OffsetF RichEditorPattern::GetPaintRectGlobalOffset() const
     return textPaintOffset - rootOffset;
 }
 
-CaretOffsetInfo RichEditorPattern::GetCaretOffsetInfoByPosition()
+CaretOffsetInfo RichEditorPattern::GetCaretOffsetInfoByPosition(int32_t position)
 {
     CaretOffsetInfo caretInfo;
-
-    caretInfo.caretOffsetUp = CalcCursorOffsetByPosition(caretPosition_, caretInfo.caretHeightUp, false, false);
-    caretInfo.caretOffsetDown = CalcCursorOffsetByPosition(caretPosition_, caretInfo.caretHeightDown, true, false);
-    caretInfo.caretOffsetLine = CalcCursorOffsetByPosition(caretPosition_, caretInfo.caretHeightLine);
+    int32_t currrentPosition = 0;
+    if (position == -1) {
+        currrentPosition = caretPosition_;
+    } else {
+        currrentPosition = position;
+    }
+    caretInfo.caretOffsetUp = CalcCursorOffsetByPosition(currrentPosition, caretInfo.caretHeightUp, false, false);
+    caretInfo.caretOffsetDown = CalcCursorOffsetByPosition(currrentPosition, caretInfo.caretHeightDown, true, false);
+    caretInfo.caretOffsetLine = CalcCursorOffsetByPosition(currrentPosition, caretInfo.caretHeightLine);
     return caretInfo;
 }
 
@@ -9663,13 +9668,13 @@ float RichEditorPattern::GetTextThemeFontSize()
     return textStyle.GetFontSize().ConvertToPx();
 }
 
-int32_t RichEditorPattern::CalcLineEndPosition()
+int32_t RichEditorPattern::CalcLineEndPosition(int32_t index)
 {
     CaretOffsetInfo caretInfo;
     int32_t realCaretOffsetY = 0;
     int32_t realLastClickOffsetY = 0;
 
-    caretInfo = GetCaretOffsetInfoByPosition();
+    caretInfo = GetCaretOffsetInfoByPosition(index);
     if (NearEqual(richTextRect_.GetY(), contentRect_.GetY())) {
         realLastClickOffsetY = lastClickOffset_.GetY();
         realCaretOffsetY = caretInfo.caretOffsetDown.GetY();
@@ -9797,22 +9802,26 @@ bool RichEditorPattern::CursorMoveLineBegin()
 
 bool RichEditorPattern::CursorMoveLineEnd()
 {
-    int32_t currentPositionIndex = 0;
-    if (textSelector_.SelectNothing()) {
-        currentPositionIndex = caretPosition_;
+    int32_t position = 0;
+    if (!textSelector_.SelectNothing()) {
+        CaretOffsetInfo caretInfo = GetCaretOffsetInfoByPosition(textSelector_.GetTextEnd());
+        bool cursorAtLineEnd = !NearEqual(caretInfo.caretOffsetUp.GetX(), caretInfo.caretOffsetDown.GetX(), 0.5f);
+        if (cursorAtLineEnd) {
+            position = textSelector_.GetTextEnd();
+        } else {
+            position = CalcLineEndPosition(textSelector_.GetTextEnd());
+        }
     } else {
-        currentPositionIndex = textSelector_.GetTextEnd();
-        SetCaretPosition(currentPositionIndex);
+        position = CalcLineEndPosition();
     }
     CloseSelectOverlay();
     ResetSelection();
     float caretHeight = 0.0f;
-    auto position = CalcLineEndPosition();
     CHECK_NULL_RETURN(overlayMod_, false);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
     SetCaretPosition(position);
     StartTwinkling();
-    OffsetF caretOffset = CalcCursorOffsetByPosition(currentPositionIndex, caretHeight, false, false);
+    OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight, false, false);
     overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     SetLastClickOffset(caretOffset);
     caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;

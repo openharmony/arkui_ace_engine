@@ -461,12 +461,12 @@ public:
     bool CursorMoveEnd();
     void CalcLineSidesIndexByPosition(int32_t& startIndex, int32_t& endIndex);
     RectF CalcLineInfoByPosition();
-    CaretOffsetInfo GetCaretOffsetInfoByPosition();
+    CaretOffsetInfo GetCaretOffsetInfoByPosition(int32_t position = -1);
     int32_t CalcMoveUpPos(float& leadingMarginOffset);
     int32_t CalcMoveDownPos(float& leadingMarginOffset);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
-    int32_t CalcLineEndPosition();
+    int32_t CalcLineEndPosition(int32_t index = -1);
     int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
     int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
