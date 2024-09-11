@@ -51,9 +51,10 @@ action("run_linux_unittest_capi") {
   args = [
     "--path",
     "capi",
+    "--output",
+    rebase_path("$root_out_dir/tests/test_result.json", root_build_dir),
   ]
-  outputs =
-      [ "$root_out_dir/clang_x64/tests/unittest/ace_engine/test_result.json" ]
+  outputs = [ "$root_out_dir/tests/test_result.json" ]
   deps = [ ":linux_unittest_capi" ]
 }
 
