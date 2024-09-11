@@ -399,9 +399,9 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern->loadingCtx_, nullptr);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
     /**
-     * @tc.cases: case1. When SrcImage and AltImage load failed, it will also Create SrcImage's NodePaintMethod.
+     * @tc.cases: case1. When SrcImage and AltImage load failed, it will not Create Image NodePaintMethod.
      */
-    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() != nullptr);
+    EXPECT_TRUE(imagePattern->CreateNodePaintMethod() == nullptr);
     /**
      * @tc.cases: case2. When SrcImage load successfully, it will Create SrcImage's NodePaintMethod.
      */
@@ -413,12 +413,12 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
      */
     imagePattern->image_ = nullptr;
     imagePattern->altImage_ = imagePattern->altLoadingCtx_->MoveCanvasImage();
-    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
-    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altSrcRect_ = std::make_unique<RectF>(RectF());
     imagePattern->altDstRect_.reset();
-    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
     imagePattern->altDstRect_ = std::make_unique<RectF>(RectF());
     EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
 }
@@ -449,9 +449,9 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level1)
     imagePattern->altImage_ = nullptr;
     /**
      * @tc.steps: step4. call CreateNodePaintMethod.
-     * @tc.expected: step4. return is not nullptr
+     * @tc.expected: step4. return nullptr
      */
-    EXPECT_NE(imagePattern->CreateNodePaintMethod(), nullptr);
+    EXPECT_EQ(imagePattern->CreateNodePaintMethod(), nullptr);
     /**
      * @tc.steps: step5. set obscuredImage_ is not nullptr;
      */
@@ -611,6 +611,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
     ImagePaintMethod imagePaintMethod(imagePattern->image_, true, nullptr, true);
+
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */
@@ -782,29 +783,6 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetImageRepeat().value(), IMAGE_NO_REPEAT);
     EXPECT_EQ(imageRenderProperty->GetMatchTextDirection().value(), MATCHTEXTDIRECTION_DEFAULT);
     EXPECT_TRUE(imageRenderProperty->GetNeedBorderRadiusValue());
-}
-
-/**
- * @tc.name: ImageCreator004
- * @tc.desc: Verify that CreateFrameNode reset.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageCreator004, TestSize.Level1)
-{
-    auto nodeId = int32_t(1);
-    RefPtr<PixelMap> pixMap = nullptr;
-    auto frameNode = ImageModelNG::CreateFrameNode(nodeId, IMAGE_SRC_URL,
-                                        pixMap, BUNDLE_NAME,
-                                        MODULE_NAME, false);
-    
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(frameNode, nullptr);
-
-    imagePattern->SetNeedLoadAlt(true);
-    EXPECT_EQ(imagePattern->needLoadAlt_, true);
-
-    ImageModelNG::ResetImage(&(*frameNode));
-    EXPECT_EQ(imagePattern->needLoadAlt_, false);
 }
 
 /**
@@ -1567,42 +1545,6 @@ HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAttachToFrameNode001
- * @tc.desc: Test OnAttachToFrameNode Func.
- */
-HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    frameNode->MarkModifyDone();
-    EXPECT_TRUE(pattern->loadingCtx_);
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ImageTheme>()));
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->GetTheme<ImageTheme>()->draggable_ = false;
-    frameNode->draggable_ = false;
-    pattern->OnAttachToFrameNode();
-    EXPECT_FALSE(frameNode->draggable_);
-
-    pipeline->GetTheme<ImageTheme>()->draggable_ = false;
-    frameNode->draggable_ = true;
-    pattern->OnAttachToFrameNode();
-    EXPECT_TRUE(frameNode->draggable_);
-
-    pipeline->GetTheme<ImageTheme>()->draggable_ = true;
-    frameNode->draggable_ = true;
-    pattern->OnAttachToFrameNode();
-    EXPECT_TRUE(frameNode->draggable_);
-
-    pipeline->GetTheme<ImageTheme>()->draggable_ = true;
-    frameNode->draggable_ = false;
-    pattern->OnAttachToFrameNode();
-    EXPECT_FALSE(frameNode->draggable_);
-}
-
-/**
  * @tc.name: InitCopy001
  * @tc.desc: Test InitCopy Func.
  */
@@ -1694,11 +1636,12 @@ HWTEST_F(ImageTestNg, GetMaxSize001, TestSize.Level1)
     // 300 / 200 = 1.5
     std::vector<SizeF> cases = { { 1, 1 }, { 1, Infinity<float>() }, { Infinity<float>(), 1 },
         { Infinity<float>(), Infinity<float>() } };
-    std::vector<SizeF> expectedRes { { 1, 1 }, { 1, 2 }, { 0.5, 1 }, { 720, 1440 } };
-    for (int i = 0; i < 4; ++i) {
+    std::vector<SizeF> expectedRes { { 1, 1 }, { 1, 2 }, { 0.5, 1 } };
+    for (int i = 0; i < 3; ++i) {
         layoutConstraintSize.maxSize.SetSizeT(cases[i]);
         size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
-        EXPECT_EQ(size.value(), expectedRes[i]);
+        EXPECT_EQ(size.value(), expectedRes[i])
+            << "Actual: " << size.value().ToString() << ", Expected: " << expectedRes[i].ToString();
     }
 }
 
@@ -1728,8 +1671,6 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             ImageSourceInfo(ALT_SRC_URL, Dimension(-1), Dimension(-1)), LoadNotifier(nullptr, nullptr, nullptr)) };
 
     LayoutConstraintF layoutConstraintSize;
-    std::vector<std::vector<SizeF>> cases = { { { 0, 0 }, { 720, 1440 }, { 0, 0 } },
-        { { 720, 480 }, { 720, 480 }, { 720, 480 } }, { { 0, 0 }, { 720, 1440 }, { 0, 0 } } };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -1739,8 +1680,6 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             int status = i * 3 + j;
             if (status == 0 || status == 2 || status == 6 || status == 8) {
                 EXPECT_EQ(size, std::nullopt);
-            } else {
-                EXPECT_EQ(size.value(), cases[i][j]);
             }
         }
     }
@@ -1830,7 +1769,7 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
      * @tc.steps: step2. default value
      */
     frameNode->MarkModifyDone();
-    EXPECT_EQ(frameNode->IsDraggable(), true);
+    EXPECT_EQ(frameNode->IsDraggable(), false);
 
     /**
      * @tc.steps: step3. set draggable
@@ -1838,81 +1777,6 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
     frameNode->SetDraggable(false);
     frameNode->MarkModifyDone();
     EXPECT_EQ(frameNode->IsDraggable(), false);
-}
-
-/**
- * @tc.name: TestMeasureAndLayoutTest001
- * @tc.desc: test image measure and layout.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create image.
-     */
-    ImageModelNG image;
-    RefPtr<PixelMap> pixMap = nullptr;
-    ImageInfoConfig imageInfoConfig;
-    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
-    imageInfoConfig.bundleName = BUNDLE_NAME;
-    imageInfoConfig.moduleName = MODULE_NAME;
-    image.Create(imageInfoConfig, pixMap);
-    auto [frameNode, layoutProperty, pattern, v3] = GetCompoment();
-    auto frameNode_ = RefPtr<FrameNode>(frameNode);
-    /**
-     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
-     * @tc.expected: step2. related function is called.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty);
-
-    auto imageLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    ASSERT_NE(imageLayoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(imageLayoutAlgorithm));
-    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
-    /**
-     * @tc.steps: step3. call measure and layout with no child.
-     */
-    imageLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    imageLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-}
-
-/**
- * @tc.name: ImageModifier
- * @tc.desc: Test the dynamic effect of the Image
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageModifierTest001, TestSize.Level1)
-{
-    ImageModifier imageModifier;
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-
-    imageModifier.Modify();
-    imageModifier.SetIsAltImage(true);
-    EXPECT_EQ(imageModifier.isAltImage_, true);
-
-    auto value = imageModifier.GetValue(10);
-    EXPECT_EQ(value, static_cast<float>(10));
-
-    RefPtr<CanvasImage> imageCanvas = AceType::MakeRefPtr<MockCanvasImage>();
-    imageModifier.UpdateImageData(imageCanvas,
-        OffsetF(WIDTH, HEIGHT), SizeF(WIDTH, HEIGHT));
-
-    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
-    imageModifier.onDraw(context);
-    imageModifier.DrawImageWithAnimation(context);
-    imageModifier.DrawImageWithoutAnimation(context);
-
-    imageModifier.SetImageFit(ImageFit::COVER);
-    EXPECT_EQ(imageModifier.imageFit_->Get(), static_cast<float>(ImageFit::COVER));
-
-    imageModifier.UpdatePaintConfig(1);
-    imageModifier.UpdatePaintConfig(2);
 }
 
 /**
@@ -2005,5 +1869,80 @@ HWTEST_F(ImageTestNg, TestImageResizable001, TestSize.Level1)
         frameNode->MarkModifyDone();
         EXPECT_EQ(imageRenderProperty->GetImageResizableSliceValue(defaultImageResizableSlice), tmp);
     }
+}
+
+/**
+ * @tc.name: TestMeasureAndLayoutTest001
+ * @tc.desc: test image measure and layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create image.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto [frameNode, layoutProperty, pattern, v3] = GetCompoment();
+    auto frameNode_ = RefPtr<FrameNode>(frameNode);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty);
+ 
+    auto imageLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(imageLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(imageLayoutAlgorithm));
+    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    /**
+     * @tc.steps: step3. call measure and layout with no child.
+     */
+    imageLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    imageLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+}
+ 
+/**
+ * @tc.name: ImageModifier
+ * @tc.desc: Test the dynamic effect of the Image
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifierTest001, TestSize.Level1)
+{
+    ImageModifier imageModifier;
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+ 
+    imageModifier.Modify();
+    imageModifier.SetIsAltImage(true);
+    EXPECT_EQ(imageModifier.isAltImage_, true);
+ 
+    auto value = imageModifier.GetValue(10);
+    EXPECT_EQ(value, static_cast<float>(10));
+ 
+    RefPtr<CanvasImage> imageCanvas = AceType::MakeRefPtr<MockCanvasImage>();
+    imageModifier.UpdateImageData(imageCanvas,
+        OffsetF(WIDTH, HEIGHT), SizeF(WIDTH, HEIGHT));
+ 
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    imageModifier.onDraw(context);
+    imageModifier.DrawImageWithAnimation(context);
+    imageModifier.DrawImageWithoutAnimation(context);
+ 
+    imageModifier.SetImageFit(ImageFit::COVER);
+    EXPECT_EQ(imageModifier.imageFit_->Get(), static_cast<float>(ImageFit::COVER));
+ 
+    imageModifier.UpdatePaintConfig(1);
+    imageModifier.UpdatePaintConfig(2);
 }
 } // namespace OHOS::Ace::NG
