@@ -3053,6 +3053,25 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom);
 
     PixStretchEffectOption option;
+    bool illegalInput = InitPixStretchEffect(left, right, top, bottom);
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
+        option.left = left;
+        option.top = top;
+        option.right = right;
+        option.bottom = bottom;
+    } else {
+        illegalInput = true;
+    }
+    if (illegalInput) {
+        option.ResetValue();
+    }
+    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+}
+
+bool JSViewAbstract::InitPixStretchEffect(
+    CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom)
+{
     bool illegalInput = false;
     if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
         top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
@@ -3068,19 +3087,7 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
             illegalInput = true;
         }
     }
-    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
-        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
-        option.left = left;
-        option.top = top;
-        option.right = right;
-        option.bottom = bottom;
-    } else {
-        illegalInput = true;
-    }
-    if (illegalInput) {
-        option.ResetValue();
-    }
-    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+    return illegalInput;
 }
 
 void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
@@ -6678,6 +6685,14 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
     // direction
     auto direction = static_cast<GradientDirection>(
         jsObj->GetPropertyValue<int32_t>("direction", static_cast<int32_t>(GradientDirection::NONE)));
+    SetGradientDirection(newGradient, direction);
+    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
+    newGradient.SetRepeat(repeating);
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
+}
+
+void JSViewAbstract::SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction)
+{
     switch (direction) {
         case GradientDirection::LEFT:
             newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
@@ -6707,15 +6722,9 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
             newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
             newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
             break;
-        case GradientDirection::NONE:
-        case GradientDirection::START_TO_END:
-        case GradientDirection::END_TO_START:
         default:
             break;
     }
-    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
-    newGradient.SetRepeat(repeating);
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
