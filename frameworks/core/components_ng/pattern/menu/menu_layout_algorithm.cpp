@@ -375,10 +375,10 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     param_.bottomSecurity = bottomSecurity;
     param_.previewMenuGap = targetSecurity_;
 
-    InitializeSafaAreaPadding(menuPattern);
+    InitializeLayoutRegionMargin(menuPattern);
 }
 
-void MenuLayoutAlgorithm::InitializeSafaAreaPadding(const RefPtr<MenuPattern>& menuPattern)
+void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(menuPattern);
     auto menuWrapper = menuPattern->GetMenuWrapper();
@@ -387,29 +387,29 @@ void MenuLayoutAlgorithm::InitializeSafaAreaPadding(const RefPtr<MenuPattern>& m
     CHECK_NULL_VOID(menuWrapperPattern);
 
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    if (!menuParam.safeAreaPadding.has_value()) {
+    if (!menuParam.layoutRegionMargin.has_value()) {
         return;
     }
 
-    auto paddingProps = menuParam.safeAreaPadding.value();
-    if (paddingProps.start.has_value()) {
-        safeAreaPadding_.left = paddingProps.start.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
-        paddingStart_ = safeAreaPadding_.left.value();
+    auto marginProps = menuParam.layoutRegionMargin.value();
+    if (marginProps.start.has_value()) {
+        paddingStart_ = marginProps.start.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
+        layoutRegionMargin_.left = paddingStart_;
     }
 
-    if (paddingProps.end.has_value()) {
-        safeAreaPadding_.right = paddingProps.end.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
-        paddingEnd_ = safeAreaPadding_.right.value();
+    if (marginProps.end.has_value()) {
+        paddingEnd_ = marginProps.end.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
+        layoutRegionMargin_.right = paddingEnd_;
     }
 
-    if (paddingProps.top.has_value()) {
-        safeAreaPadding_.top = paddingProps.top.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
-        param_.topSecurity = safeAreaPadding_.top.value();
+    if (marginProps.top.has_value()) {
+        param_.topSecurity = marginProps.top.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
+        layoutRegionMargin_.top = param_.topSecurity;
     }
 
-    if (paddingProps.bottom.has_value()) {
-        safeAreaPadding_.bottom = paddingProps.bottom.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
-        param_.bottomSecurity = safeAreaPadding_.bottom.value();
+    if (marginProps.bottom.has_value()) {
+        param_.bottomSecurity = marginProps.bottom.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
+        layoutRegionMargin_.bottom = param_.bottomSecurity;
     }
 }
 
@@ -846,7 +846,7 @@ void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameN
     CHECK_NULL_VOID(geometryNode);
 
     auto maxWidth = wrapperSize_.Width();
-    if (safeAreaPadding_.left.has_value() || safeAreaPadding_.right.has_value()) {
+    if (layoutRegionMargin_.left.has_value() || layoutRegionMargin_.right.has_value()) {
         maxWidth = std::max(0.0f, wrapperSize_.Width() - paddingStart_ - paddingEnd_) / previewScale_;
     } else {
         RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);

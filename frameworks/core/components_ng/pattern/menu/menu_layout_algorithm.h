@@ -120,7 +120,7 @@ private:
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
-    void InitializeSafaAreaPadding(const RefPtr<MenuPattern>& menuPattern);
+    void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
@@ -282,7 +282,7 @@ private:
     float previewScale_ = 1.0f;
     PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
-    PaddingPropertyF safeAreaPadding_;
+    MarginPropertyF layoutRegionMargin_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
