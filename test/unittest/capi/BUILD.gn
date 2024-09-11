@@ -15,6 +15,7 @@ group("linux_capi_unittest") {
   testonly = true
   deps = [
     "modifiers:capi_modifiers_unittest",
+    "accessors:capi_accessors_unittest",
     "utils:capi_utils_unittest",
   ]
 }
