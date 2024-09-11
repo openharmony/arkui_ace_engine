@@ -33,6 +33,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/event/ace_event_helper.h"
 #include "core/image/image_file_cache.h"
