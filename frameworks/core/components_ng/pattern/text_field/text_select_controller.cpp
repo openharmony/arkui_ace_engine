@@ -309,7 +309,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
         TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
-    return {start, end };
+    return {start, end};
 }
 
 void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)
@@ -461,7 +461,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
     if (handleRect.GetX() < contentRect_.GetX()) {
         handleRect.SetOffset(OffsetF(contentRect_.GetX(), handleRect.GetY()));
     }
-
+ 
     auto textRectRightBoundary = contentRect_.GetX() + contentRect_.Width();
     if (GreatNotEqual(handleRect.GetX() + handleRect.Width(), textRectRightBoundary) &&
         GreatNotEqual(contentRect_.Width(), 0.0) && !textFiled->GetTextValue().empty()) {
