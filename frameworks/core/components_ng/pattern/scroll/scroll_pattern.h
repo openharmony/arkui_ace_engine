@@ -172,7 +172,7 @@ public:
     }
 
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
-    bool ScrollPage(bool reverse, bool smooth = false,
+    bool ScrollPage(bool reverse, bool smooth,
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL,
         const std::function<void()>& onFinish = nullptr);
     void ScrollTo(float position) override;
