@@ -1930,7 +1930,7 @@ void TextPattern::OnModifyDone()
     } else {
         copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     }
-
+    
 
     const auto& children = host->GetChildren();
     if (children.empty()) {

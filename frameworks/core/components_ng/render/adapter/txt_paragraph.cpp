@@ -615,6 +615,7 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
             boxes = getTextRects(extent, end);
         }
     }
+
     if (boxes.empty()) {
         return false;
     }
