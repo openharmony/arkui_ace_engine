@@ -869,6 +869,7 @@ void TextContentModifier::StartTextRace()
     option.SetTempo(RACE_TEMPO);
     raceAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
         float startPercent = modifier->GetTextRacePercent();
         modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent);
     });
