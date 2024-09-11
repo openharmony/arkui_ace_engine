@@ -469,9 +469,11 @@ void SubwindowOhos::HideWindow()
         rootNode->SetIsDefaultHasFocused(false);
     }
 #endif
+
     if (!window_->IsFocused()) {
         ContainerModalUnFocus();
     }
+
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
@@ -797,6 +799,7 @@ void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
     hotAreasMap_.erase(nodeId);
+
     std::vector<Rosen::Rect> hotAreas;
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
         hotAreas.insert(hotAreas.end(), it->second.begin(), it->second.end());
@@ -812,6 +815,7 @@ void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId)
 
     std::vector<Rosen::Rect> hotAreas;
     Rosen::Rect rosenRect {};
+
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "set hot area %{public}d", nodeId);
     for (const auto& rect : rects) {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set hot area rect %{public}s", rect.ToString().c_str());
@@ -1178,6 +1182,7 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo)
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
         return;
     }
+
     SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
     auto showDialogCallback = [toastInfo]() {
         int32_t posX = 0;
@@ -1209,7 +1214,8 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo)
         ContainerScope scope(childContainerId);
         subwindowOhos->UpdateAceView(width, height, density, childContainerId);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
-            "update ace view width: %{public}d, height: %{public}d, density: %{public}f, childContainerId: %{public}d",
+            "update ace view width: %{public}d,  height : %{public}d, density : %{public}f,childContainerId : "
+            "%{public}d",
             width, height, density, childContainerId);
         auto container = Platform::DialogContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
