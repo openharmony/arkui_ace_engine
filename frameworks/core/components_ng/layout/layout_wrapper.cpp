@@ -525,13 +525,6 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
     layoutProperty->UpdateLayoutConstraint(constraint);
 }
 
-void LayoutWrapper::ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint)
-{
-    if (constraint) {
-        ApplyConstraint(*constraint);
-    }
-}
-
 void LayoutWrapper::CreateRootConstraint()
 {
     LayoutConstraintF layoutConstraint;

@@ -245,7 +245,6 @@ public:
     RectF GetFrameRectWithoutSafeArea() const;
     RectF GetFrameRectWithSafeArea(bool checkPosition = false) const;
     void AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
-    void ApplyConstraintWithoutMeasure(const std::optional<LayoutConstraintF>& constraint);
 
 protected:
     void CreateRootConstraint();
