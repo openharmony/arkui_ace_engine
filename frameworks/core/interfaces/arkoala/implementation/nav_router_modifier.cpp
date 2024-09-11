@@ -31,7 +31,7 @@ void OnStateChangeImpl(Ark_NativePointer node,
 {
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_Int32 mode)
+              enum Ark_NavRouteMode mode)
 {
 }
 } // NavRouterAttributeModifier

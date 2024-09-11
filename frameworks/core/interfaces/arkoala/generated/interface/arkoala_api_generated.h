@@ -205,18 +205,18 @@ typedef struct Opt_ColoringStrategy {
 } Opt_ColoringStrategy;
 enum Ark_Color
 {
-    ARK_COLOR_DEPRECATED_WHITE,
-    ARK_COLOR_DEPRECATED_BLACK,
-    ARK_COLOR_DEPRECATED_BLUE,
-    ARK_COLOR_DEPRECATED_BROWN,
-    ARK_COLOR_DEPRECATED_GRAY,
-    ARK_COLOR_DEPRECATED_GREEN,
-    ARK_COLOR_DEPRECATED_GREY,
-    ARK_COLOR_DEPRECATED_ORANGE,
-    ARK_COLOR_DEPRECATED_PINK,
-    ARK_COLOR_DEPRECATED_RED,
-    ARK_COLOR_DEPRECATED_YELLOW,
-    ARK_COLOR_DEPRECATED_TRANSPARENT,
+    ARK_COLOR_WHITE,
+    ARK_COLOR_BLACK,
+    ARK_COLOR_BLUE,
+    ARK_COLOR_BROWN,
+    ARK_COLOR_GRAY,
+    ARK_COLOR_GREEN,
+    ARK_COLOR_GREY,
+    ARK_COLOR_ORANGE,
+    ARK_COLOR_PINK,
+    ARK_COLOR_RED,
+    ARK_COLOR_YELLOW,
+    ARK_COLOR_TRANSPARENT,
 };
 typedef struct Opt_Color {
     enum Ark_Tag tag;
@@ -301,12 +301,12 @@ typedef struct Opt_ShadowType {
 } Opt_ShadowType;
 enum Ark_FontWeight
 {
-    ARK_FONT_WEIGHT_DEPRECATED_LIGHTER,
-    ARK_FONT_WEIGHT_DEPRECATED_NORMAL,
-    ARK_FONT_WEIGHT_DEPRECATED_REGULAR,
-    ARK_FONT_WEIGHT_DEPRECATED_MEDIUM,
-    ARK_FONT_WEIGHT_DEPRECATED_BOLD,
-    ARK_FONT_WEIGHT_DEPRECATED_BOLDER,
+    ARK_FONT_WEIGHT_LIGHTER,
+    ARK_FONT_WEIGHT_NORMAL,
+    ARK_FONT_WEIGHT_REGULAR,
+    ARK_FONT_WEIGHT_MEDIUM,
+    ARK_FONT_WEIGHT_BOLD,
+    ARK_FONT_WEIGHT_BOLDER,
 };
 typedef struct Opt_FontWeight {
     enum Ark_Tag tag;
@@ -379,10 +379,10 @@ typedef struct Opt_ResourceColor {
 } Opt_ResourceColor;
 enum Ark_TextDecorationType
 {
-    ARK_TEXT_DECORATION_TYPE_DEPRECATED_NONE,
-    ARK_TEXT_DECORATION_TYPE_DEPRECATED_UNDERLINE,
-    ARK_TEXT_DECORATION_TYPE_DEPRECATED_OVERLINE,
-    ARK_TEXT_DECORATION_TYPE_DEPRECATED_LINE_THROUGH,
+    ARK_TEXT_DECORATION_TYPE_NONE,
+    ARK_TEXT_DECORATION_TYPE_UNDERLINE,
+    ARK_TEXT_DECORATION_TYPE_OVERLINE,
+    ARK_TEXT_DECORATION_TYPE_LINE_THROUGH,
 };
 typedef struct Opt_TextDecorationType {
     enum Ark_Tag tag;
@@ -437,19 +437,19 @@ typedef struct Opt_ICurve {
 } Opt_ICurve;
 enum Ark_Curve
 {
-    ARK_CURVE_DEPRECATED_LINEAR,
-    ARK_CURVE_DEPRECATED_EASE,
-    ARK_CURVE_DEPRECATED_EASE_IN,
-    ARK_CURVE_DEPRECATED_EASE_OUT,
-    ARK_CURVE_DEPRECATED_EASE_IN_OUT,
-    ARK_CURVE_DEPRECATED_FAST_OUT_SLOW_IN,
-    ARK_CURVE_DEPRECATED_LINEAR_OUT_SLOW_IN,
-    ARK_CURVE_DEPRECATED_FAST_OUT_LINEAR_IN,
-    ARK_CURVE_DEPRECATED_EXTREME_DECELERATION,
-    ARK_CURVE_DEPRECATED_SHARP,
-    ARK_CURVE_DEPRECATED_RHYTHM,
-    ARK_CURVE_DEPRECATED_SMOOTH,
-    ARK_CURVE_DEPRECATED_FRICTION,
+    ARK_CURVE_LINEAR,
+    ARK_CURVE_EASE,
+    ARK_CURVE_EASE_IN,
+    ARK_CURVE_EASE_OUT,
+    ARK_CURVE_EASE_IN_OUT,
+    ARK_CURVE_FAST_OUT_SLOW_IN,
+    ARK_CURVE_LINEAR_OUT_SLOW_IN,
+    ARK_CURVE_FAST_OUT_LINEAR_IN,
+    ARK_CURVE_EXTREME_DECELERATION,
+    ARK_CURVE_SHARP,
+    ARK_CURVE_RHYTHM,
+    ARK_CURVE_SMOOTH,
+    ARK_CURVE_FRICTION,
 };
 typedef struct Opt_Curve {
     enum Ark_Tag tag;
@@ -457,8 +457,8 @@ typedef struct Opt_Curve {
 } Opt_Curve;
 enum Ark_FontStyle
 {
-    ARK_FONT_STYLE_DEPRECATED_NORMAL,
-    ARK_FONT_STYLE_DEPRECATED_ITALIC,
+    ARK_FONT_STYLE_NORMAL,
+    ARK_FONT_STYLE_ITALIC,
 };
 typedef struct Opt_FontStyle {
     enum Ark_Tag tag;
@@ -552,9 +552,9 @@ typedef struct Opt_SheetSize {
 } Opt_SheetSize;
 enum Ark_SourceTool
 {
-    ARK_SOURCE_TOOL_DEPRECATED_UNKNOWN,
-    ARK_SOURCE_TOOL_DEPRECATED_FINGER,
-    ARK_SOURCE_TOOL_DEPRECATED_PEN,
+    ARK_SOURCE_TOOL_UNKNOWN,
+    ARK_SOURCE_TOOL_FINGER,
+    ARK_SOURCE_TOOL_PEN,
     ARK_SOURCE_TOOL_MOUSE,
     ARK_SOURCE_TOOL_TOUCHPAD,
     ARK_SOURCE_TOOL_JOYSTICK,
@@ -565,9 +565,9 @@ typedef struct Opt_SourceTool {
 } Opt_SourceTool;
 enum Ark_SourceType
 {
-    ARK_SOURCE_TYPE_DEPRECATED_UNKNOWN,
-    ARK_SOURCE_TYPE_DEPRECATED_MOUSE,
-    ARK_SOURCE_TYPE_DEPRECATED_TOUCH_SCREEN,
+    ARK_SOURCE_TYPE_UNKNOWN,
+    ARK_SOURCE_TYPE_MOUSE,
+    ARK_SOURCE_TYPE_TOUCH_SCREEN,
 };
 typedef struct Opt_SourceType {
     enum Ark_Tag tag;
@@ -590,12 +590,12 @@ typedef struct Opt_RichEditorLayoutStyle {
 } Opt_RichEditorLayoutStyle;
 enum Ark_ImageFit
 {
-    ARK_IMAGE_FIT_DEPRECATED_CONTAIN,
-    ARK_IMAGE_FIT_DEPRECATED_COVER,
-    ARK_IMAGE_FIT_DEPRECATED_AUTO,
-    ARK_IMAGE_FIT_DEPRECATED_FILL,
-    ARK_IMAGE_FIT_DEPRECATED_SCALE_DOWN,
-    ARK_IMAGE_FIT_DEPRECATED_NONE,
+    ARK_IMAGE_FIT_CONTAIN,
+    ARK_IMAGE_FIT_COVER,
+    ARK_IMAGE_FIT_AUTO,
+    ARK_IMAGE_FIT_FILL,
+    ARK_IMAGE_FIT_SCALE_DOWN,
+    ARK_IMAGE_FIT_NONE,
     ARK_IMAGE_FIT_TOP_START = 7,
     ARK_IMAGE_FIT_TOP = 8,
     ARK_IMAGE_FIT_TOP_END = 9,
@@ -662,9 +662,9 @@ typedef struct Opt_Union_Length_LeadingMarginPlaceholder {
 } Opt_Union_Length_LeadingMarginPlaceholder;
 enum Ark_TextAlign
 {
-    ARK_TEXT_ALIGN_DEPRECATED_CENTER,
-    ARK_TEXT_ALIGN_DEPRECATED_START,
-    ARK_TEXT_ALIGN_DEPRECATED_END,
+    ARK_TEXT_ALIGN_CENTER,
+    ARK_TEXT_ALIGN_START,
+    ARK_TEXT_ALIGN_END,
     ARK_TEXT_ALIGN_JUSTIFY,
 };
 typedef struct Opt_TextAlign {
@@ -753,9 +753,9 @@ typedef struct Opt_Union_Number_LeadingMarginPlaceholder {
 } Opt_Union_Number_LeadingMarginPlaceholder;
 enum Ark_TextOverflow
 {
-    ARK_TEXT_OVERFLOW_DEPRECATED_NONE,
-    ARK_TEXT_OVERFLOW_DEPRECATED_CLIP,
-    ARK_TEXT_OVERFLOW_DEPRECATED_ELLIPSIS,
+    ARK_TEXT_OVERFLOW_NONE,
+    ARK_TEXT_OVERFLOW_CLIP,
+    ARK_TEXT_OVERFLOW_ELLIPSIS,
     ARK_TEXT_OVERFLOW_MARQUEE,
 };
 typedef struct Opt_TextOverflow {
@@ -903,8 +903,8 @@ typedef struct Opt_Array_CustomObject {
 } Opt_Array_CustomObject;
 enum Ark_TitleHeight
 {
-    ARK_TITLE_HEIGHT_DEPRECATED_MAIN_ONLY,
-    ARK_TITLE_HEIGHT_DEPRECATED_MAIN_WITH_SUB,
+    ARK_TITLE_HEIGHT_MAIN_ONLY,
+    ARK_TITLE_HEIGHT_MAIN_WITH_SUB,
 };
 typedef struct Opt_TitleHeight {
     enum Ark_Tag tag;
@@ -942,15 +942,15 @@ typedef struct Opt_Array_Tuple_ResourceColor_Number {
 } Opt_Array_Tuple_ResourceColor_Number;
 enum Ark_GradientDirection
 {
-    ARK_GRADIENT_DIRECTION_DEPRECATED_LEFT,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_TOP,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_RIGHT,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_BOTTOM,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_LEFT_TOP,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_LEFT_BOTTOM,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_RIGHT_TOP,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_RIGHT_BOTTOM,
-    ARK_GRADIENT_DIRECTION_DEPRECATED_NONE,
+    ARK_GRADIENT_DIRECTION_LEFT,
+    ARK_GRADIENT_DIRECTION_TOP,
+    ARK_GRADIENT_DIRECTION_RIGHT,
+    ARK_GRADIENT_DIRECTION_BOTTOM,
+    ARK_GRADIENT_DIRECTION_LEFT_TOP,
+    ARK_GRADIENT_DIRECTION_LEFT_BOTTOM,
+    ARK_GRADIENT_DIRECTION_RIGHT_TOP,
+    ARK_GRADIENT_DIRECTION_RIGHT_BOTTOM,
+    ARK_GRADIENT_DIRECTION_NONE,
 };
 typedef struct Opt_GradientDirection {
     enum Ark_Tag tag;
@@ -1053,9 +1053,9 @@ typedef struct Opt_CanvasPath {
 } Opt_CanvasPath;
 enum Ark_BadgePosition
 {
-    ARK_BADGE_POSITION_DEPRECATED_RIGHT_TOP,
-    ARK_BADGE_POSITION_DEPRECATED_RIGHT,
-    ARK_BADGE_POSITION_DEPRECATED_LEFT,
+    ARK_BADGE_POSITION_RIGHT_TOP,
+    ARK_BADGE_POSITION_RIGHT,
+    ARK_BADGE_POSITION_LEFT,
 };
 typedef struct Opt_BadgePosition {
     enum Ark_Tag tag;
@@ -1063,9 +1063,9 @@ typedef struct Opt_BadgePosition {
 } Opt_BadgePosition;
 enum Ark_BorderStyle
 {
-    ARK_BORDER_STYLE_DEPRECATED_DOTTED,
-    ARK_BORDER_STYLE_DEPRECATED_DASHED,
-    ARK_BORDER_STYLE_DEPRECATED_SOLID,
+    ARK_BORDER_STYLE_DOTTED,
+    ARK_BORDER_STYLE_DASHED,
+    ARK_BORDER_STYLE_SOLID,
 };
 typedef struct Opt_BorderStyle {
     enum Ark_Tag tag;
@@ -1148,10 +1148,10 @@ typedef struct Opt_Array_TouchObject {
 } Opt_Array_TouchObject;
 enum Ark_TouchType
 {
-    ARK_TOUCH_TYPE_DEPRECATED_DOWN,
-    ARK_TOUCH_TYPE_DEPRECATED_UP,
-    ARK_TOUCH_TYPE_DEPRECATED_MOVE,
-    ARK_TOUCH_TYPE_DEPRECATED_CANCEL,
+    ARK_TOUCH_TYPE_DOWN,
+    ARK_TOUCH_TYPE_UP,
+    ARK_TOUCH_TYPE_MOVE,
+    ARK_TOUCH_TYPE_CANCEL,
 };
 typedef struct Opt_TouchType {
     enum Ark_Tag tag;
@@ -1443,11 +1443,11 @@ typedef struct Opt_WebController {
 } Opt_WebController;
 enum Ark_PlaybackSpeed
 {
-    ARK_PLAYBACK_SPEED_DEPRECATED_SPEED_FORWARD_0_75_X,
-    ARK_PLAYBACK_SPEED_DEPRECATED_SPEED_FORWARD_1_00_X,
-    ARK_PLAYBACK_SPEED_DEPRECATED_SPEED_FORWARD_1_25_X,
-    ARK_PLAYBACK_SPEED_DEPRECATED_SPEED_FORWARD_1_75_X,
-    ARK_PLAYBACK_SPEED_DEPRECATED_SPEED_FORWARD_2_00_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X,
 };
 typedef struct Opt_PlaybackSpeed {
     enum Ark_Tag tag;
@@ -1511,9 +1511,9 @@ typedef struct Opt_TabBarIconStyle {
 } Opt_TabBarIconStyle;
 enum Ark_VerticalAlign
 {
-    ARK_VERTICAL_ALIGN_DEPRECATED_TOP,
-    ARK_VERTICAL_ALIGN_DEPRECATED_CENTER,
-    ARK_VERTICAL_ALIGN_DEPRECATED_BOTTOM,
+    ARK_VERTICAL_ALIGN_TOP,
+    ARK_VERTICAL_ALIGN_CENTER,
+    ARK_VERTICAL_ALIGN_BOTTOM,
 };
 typedef struct Opt_VerticalAlign {
     enum Ark_Tag tag;
@@ -1729,8 +1729,8 @@ typedef struct Opt_SwipeActionItem {
 } Opt_SwipeActionItem;
 enum Ark_BreakpointsReference
 {
-    ARK_BREAKPOINTS_REFERENCE_DEPRECATED_WINDOW_SIZE,
-    ARK_BREAKPOINTS_REFERENCE_DEPRECATED_COMPONENT_SIZE,
+    ARK_BREAKPOINTS_REFERENCE_WINDOW_SIZE,
+    ARK_BREAKPOINTS_REFERENCE_COMPONENT_SIZE,
 };
 typedef struct Opt_BreakpointsReference {
     enum Ark_Tag tag;
@@ -1875,9 +1875,9 @@ typedef struct Opt_SheetTitleOptions {
 } Opt_SheetTitleOptions;
 enum Ark_BlurStyle
 {
-    ARK_BLUR_STYLE_DEPRECATED_THIN,
-    ARK_BLUR_STYLE_DEPRECATED_REGULAR,
-    ARK_BLUR_STYLE_DEPRECATED_THICK,
+    ARK_BLUR_STYLE_THIN,
+    ARK_BLUR_STYLE_REGULAR,
+    ARK_BLUR_STYLE_THICK,
     ARK_BLUR_STYLE_BACKGROUND_THIN,
     ARK_BLUR_STYLE_BACKGROUND_REGULAR,
     ARK_BLUR_STYLE_BACKGROUND_THICK,
@@ -1927,18 +1927,18 @@ typedef struct Opt_Union_MenuPreviewMode_CustomBuilder {
 } Opt_Union_MenuPreviewMode_CustomBuilder;
 enum Ark_Placement
 {
-    ARK_PLACEMENT_DEPRECATED_LEFT,
-    ARK_PLACEMENT_DEPRECATED_RIGHT,
-    ARK_PLACEMENT_DEPRECATED_TOP,
-    ARK_PLACEMENT_DEPRECATED_BOTTOM,
-    ARK_PLACEMENT_DEPRECATED_TOP_LEFT,
-    ARK_PLACEMENT_DEPRECATED_TOP_RIGHT,
-    ARK_PLACEMENT_DEPRECATED_BOTTOM_LEFT,
-    ARK_PLACEMENT_DEPRECATED_BOTTOM_RIGHT,
-    ARK_PLACEMENT_DEPRECATED_LEFT_TOP,
-    ARK_PLACEMENT_DEPRECATED_LEFT_BOTTOM,
-    ARK_PLACEMENT_DEPRECATED_RIGHT_TOP,
-    ARK_PLACEMENT_DEPRECATED_RIGHT_BOTTOM,
+    ARK_PLACEMENT_LEFT,
+    ARK_PLACEMENT_RIGHT,
+    ARK_PLACEMENT_TOP,
+    ARK_PLACEMENT_BOTTOM,
+    ARK_PLACEMENT_TOP_LEFT,
+    ARK_PLACEMENT_TOP_RIGHT,
+    ARK_PLACEMENT_BOTTOM_LEFT,
+    ARK_PLACEMENT_BOTTOM_RIGHT,
+    ARK_PLACEMENT_LEFT_TOP,
+    ARK_PLACEMENT_LEFT_BOTTOM,
+    ARK_PLACEMENT_RIGHT_TOP,
+    ARK_PLACEMENT_RIGHT_BOTTOM,
 };
 typedef struct Opt_Placement {
     enum Ark_Tag tag;
@@ -2047,9 +2047,9 @@ typedef struct Opt_ClickEffectLevel {
 } Opt_ClickEffectLevel;
 enum Ark_HorizontalAlign
 {
-    ARK_HORIZONTAL_ALIGN_DEPRECATED_START,
-    ARK_HORIZONTAL_ALIGN_DEPRECATED_CENTER,
-    ARK_HORIZONTAL_ALIGN_DEPRECATED_END,
+    ARK_HORIZONTAL_ALIGN_START,
+    ARK_HORIZONTAL_ALIGN_CENTER,
+    ARK_HORIZONTAL_ALIGN_END,
 };
 typedef struct Opt_HorizontalAlign {
     enum Ark_Tag tag;
@@ -2106,9 +2106,9 @@ typedef struct Opt_TranslateOptions {
 } Opt_TranslateOptions;
 enum Ark_TransitionType
 {
-    ARK_TRANSITION_TYPE_DEPRECATED_ALL,
-    ARK_TRANSITION_TYPE_DEPRECATED_INSERT,
-    ARK_TRANSITION_TYPE_DEPRECATED_DELETE,
+    ARK_TRANSITION_TYPE_ALL,
+    ARK_TRANSITION_TYPE_INSERT,
+    ARK_TRANSITION_TYPE_DELETE,
 };
 typedef struct Opt_TransitionType {
     enum Ark_Tag tag;
@@ -2266,10 +2266,10 @@ typedef struct Opt_ClientAuthenticationHandler {
 } Opt_ClientAuthenticationHandler;
 enum Ark_SslError
 {
-    ARK_SSL_ERROR_DEPRECATED_INVALID,
-    ARK_SSL_ERROR_DEPRECATED_HOST_MISMATCH,
-    ARK_SSL_ERROR_DEPRECATED_DATE_INVALID,
-    ARK_SSL_ERROR_DEPRECATED_UNTRUSTED,
+    ARK_SSL_ERROR_INVALID,
+    ARK_SSL_ERROR_HOST_MISMATCH,
+    ARK_SSL_ERROR_DATE_INVALID,
+    ARK_SSL_ERROR_UNTRUSTED,
 };
 typedef struct Opt_SslError {
     enum Ark_Tag tag;
@@ -2322,11 +2322,11 @@ typedef struct Opt_FileSelectorResult {
 } Opt_FileSelectorResult;
 enum Ark_RenderExitReason
 {
-    ARK_RENDER_EXIT_REASON_DEPRECATED_PROCESS_ABNORMAL_TERMINATION,
-    ARK_RENDER_EXIT_REASON_DEPRECATED_PROCESS_WAS_KILLED,
-    ARK_RENDER_EXIT_REASON_DEPRECATED_PROCESS_CRASHED,
-    ARK_RENDER_EXIT_REASON_DEPRECATED_PROCESS_OOM,
-    ARK_RENDER_EXIT_REASON_DEPRECATED_PROCESS_EXIT_UNKNOWN,
+    ARK_RENDER_EXIT_REASON_PROCESS_ABNORMAL_TERMINATION,
+    ARK_RENDER_EXIT_REASON_PROCESS_WAS_KILLED,
+    ARK_RENDER_EXIT_REASON_PROCESS_CRASHED,
+    ARK_RENDER_EXIT_REASON_PROCESS_OOM,
+    ARK_RENDER_EXIT_REASON_PROCESS_EXIT_UNKNOWN,
 };
 typedef struct Opt_RenderExitReason {
     enum Ark_Tag tag;
@@ -2526,8 +2526,8 @@ typedef struct Opt_DragBehavior {
 } Opt_DragBehavior;
 enum Ark_KeySource
 {
-    ARK_KEY_SOURCE_DEPRECATED_UNKNOWN,
-    ARK_KEY_SOURCE_DEPRECATED_KEYBOARD,
+    ARK_KEY_SOURCE_UNKNOWN,
+    ARK_KEY_SOURCE_KEYBOARD,
 };
 typedef struct Opt_KeySource {
     enum Ark_Tag tag;
@@ -2535,8 +2535,8 @@ typedef struct Opt_KeySource {
 } Opt_KeySource;
 enum Ark_KeyType
 {
-    ARK_KEY_TYPE_DEPRECATED_DOWN,
-    ARK_KEY_TYPE_DEPRECATED_UP,
+    ARK_KEY_TYPE_DOWN,
+    ARK_KEY_TYPE_UP,
 };
 typedef struct Opt_KeyType {
     enum Ark_Tag tag;
@@ -2544,10 +2544,10 @@ typedef struct Opt_KeyType {
 } Opt_KeyType;
 enum Ark_MouseAction
 {
-    ARK_MOUSE_ACTION_DEPRECATED_PRESS,
-    ARK_MOUSE_ACTION_DEPRECATED_RELEASE,
-    ARK_MOUSE_ACTION_DEPRECATED_MOVE,
-    ARK_MOUSE_ACTION_DEPRECATED_HOVER,
+    ARK_MOUSE_ACTION_PRESS,
+    ARK_MOUSE_ACTION_RELEASE,
+    ARK_MOUSE_ACTION_MOVE,
+    ARK_MOUSE_ACTION_HOVER,
 };
 typedef struct Opt_MouseAction {
     enum Ark_Tag tag;
@@ -2555,12 +2555,12 @@ typedef struct Opt_MouseAction {
 } Opt_MouseAction;
 enum Ark_MouseButton
 {
-    ARK_MOUSE_BUTTON_DEPRECATED_LEFT,
-    ARK_MOUSE_BUTTON_DEPRECATED_RIGHT,
-    ARK_MOUSE_BUTTON_DEPRECATED_MIDDLE,
-    ARK_MOUSE_BUTTON_DEPRECATED_BACK,
-    ARK_MOUSE_BUTTON_DEPRECATED_FORWARD,
-    ARK_MOUSE_BUTTON_DEPRECATED_NONE,
+    ARK_MOUSE_BUTTON_LEFT,
+    ARK_MOUSE_BUTTON_RIGHT,
+    ARK_MOUSE_BUTTON_MIDDLE,
+    ARK_MOUSE_BUTTON_BACK,
+    ARK_MOUSE_BUTTON_FORWARD,
+    ARK_MOUSE_BUTTON_NONE,
 };
 typedef struct Opt_MouseButton {
     enum Ark_Tag tag;
@@ -2589,9 +2589,9 @@ typedef struct Opt_RectResult {
 } Opt_RectResult;
 enum Ark_SelectStatus
 {
-    ARK_SELECT_STATUS_DEPRECATED_ALL,
-    ARK_SELECT_STATUS_DEPRECATED_PART,
-    ARK_SELECT_STATUS_DEPRECATED_NONE,
+    ARK_SELECT_STATUS_ALL,
+    ARK_SELECT_STATUS_PART,
+    ARK_SELECT_STATUS_NONE,
 };
 typedef struct Opt_SelectStatus {
     enum Ark_Tag tag;
@@ -2727,8 +2727,8 @@ typedef struct Opt_LaunchMode {
 } Opt_LaunchMode;
 enum Ark_Axis
 {
-    ARK_AXIS_DEPRECATED_VERTICAL,
-    ARK_AXIS_DEPRECATED_HORIZONTAL,
+    ARK_AXIS_VERTICAL,
+    ARK_AXIS_HORIZONTAL,
 };
 typedef struct Opt_Axis {
     enum Ark_Tag tag;
@@ -2759,14 +2759,14 @@ typedef struct Opt_ImageBitmap {
 } Opt_ImageBitmap;
 enum Ark_PanDirection
 {
-    ARK_PAN_DIRECTION_DEPRECATED_NONE,
-    ARK_PAN_DIRECTION_DEPRECATED_HORIZONTAL,
-    ARK_PAN_DIRECTION_DEPRECATED_LEFT,
-    ARK_PAN_DIRECTION_DEPRECATED_RIGHT,
-    ARK_PAN_DIRECTION_DEPRECATED_VERTICAL,
-    ARK_PAN_DIRECTION_DEPRECATED_UP,
-    ARK_PAN_DIRECTION_DEPRECATED_DOWN,
-    ARK_PAN_DIRECTION_DEPRECATED_ALL,
+    ARK_PAN_DIRECTION_NONE,
+    ARK_PAN_DIRECTION_HORIZONTAL,
+    ARK_PAN_DIRECTION_LEFT,
+    ARK_PAN_DIRECTION_RIGHT,
+    ARK_PAN_DIRECTION_VERTICAL,
+    ARK_PAN_DIRECTION_UP,
+    ARK_PAN_DIRECTION_DOWN,
+    ARK_PAN_DIRECTION_ALL,
 };
 typedef struct Opt_PanDirection {
     enum Ark_Tag tag;
@@ -2922,9 +2922,9 @@ typedef struct Opt_Union_Number_String_PlaybackSpeed {
 } Opt_Union_Number_String_PlaybackSpeed;
 enum Ark_ToggleType
 {
-    ARK_TOGGLE_TYPE_DEPRECATED_CHECKBOX,
-    ARK_TOGGLE_TYPE_DEPRECATED_SWITCH,
-    ARK_TOGGLE_TYPE_DEPRECATED_BUTTON,
+    ARK_TOGGLE_TYPE_CHECKBOX,
+    ARK_TOGGLE_TYPE_SWITCH,
+    ARK_TOGGLE_TYPE_BUTTON,
 };
 typedef struct Opt_ToggleType {
     enum Ark_Tag tag;
@@ -3001,8 +3001,8 @@ typedef struct Opt_TextContentStyle {
 } Opt_TextContentStyle;
 enum Ark_TextInputStyle
 {
-    ARK_TEXT_INPUT_STYLE_DEPRECATED_DEFAULT,
-    ARK_TEXT_INPUT_STYLE_DEPRECATED_INLINE,
+    ARK_TEXT_INPUT_STYLE_DEFAULT,
+    ARK_TEXT_INPUT_STYLE_INLINE,
 };
 typedef struct Opt_TextInputStyle {
     enum Ark_Tag tag;
@@ -3063,9 +3063,9 @@ typedef struct Opt_Literal_Opt_Union_String_Resource_icon_text {
 } Opt_Literal_Opt_Union_String_Resource_icon_text;
 enum Ark_EdgeEffect
 {
-    ARK_EDGE_EFFECT_DEPRECATED_SPRING,
-    ARK_EDGE_EFFECT_DEPRECATED_FADE,
-    ARK_EDGE_EFFECT_DEPRECATED_NONE,
+    ARK_EDGE_EFFECT_SPRING,
+    ARK_EDGE_EFFECT_FADE,
+    ARK_EDGE_EFFECT_NONE,
 };
 typedef struct Opt_EdgeEffect {
     enum Ark_Tag tag;
@@ -3098,8 +3098,8 @@ typedef struct Opt_TabsController {
 } Opt_TabsController;
 enum Ark_BarPosition
 {
-    ARK_BAR_POSITION_DEPRECATED_START,
-    ARK_BAR_POSITION_DEPRECATED_END,
+    ARK_BAR_POSITION_START,
+    ARK_BAR_POSITION_END,
 };
 typedef struct Opt_BarPosition {
     enum Ark_Tag tag;
@@ -3162,15 +3162,15 @@ typedef struct Opt_DotIndicator {
 } Opt_DotIndicator;
 enum Ark_Alignment
 {
-    ARK_ALIGNMENT_DEPRECATED_TOP_START,
-    ARK_ALIGNMENT_DEPRECATED_TOP,
-    ARK_ALIGNMENT_DEPRECATED_TOP_END,
-    ARK_ALIGNMENT_DEPRECATED_START,
-    ARK_ALIGNMENT_DEPRECATED_CENTER,
-    ARK_ALIGNMENT_DEPRECATED_END,
-    ARK_ALIGNMENT_DEPRECATED_BOTTOM_START,
-    ARK_ALIGNMENT_DEPRECATED_BOTTOM,
-    ARK_ALIGNMENT_DEPRECATED_BOTTOM_END,
+    ARK_ALIGNMENT_TOP_START,
+    ARK_ALIGNMENT_TOP,
+    ARK_ALIGNMENT_TOP_END,
+    ARK_ALIGNMENT_START,
+    ARK_ALIGNMENT_CENTER,
+    ARK_ALIGNMENT_END,
+    ARK_ALIGNMENT_BOTTOM_START,
+    ARK_ALIGNMENT_BOTTOM,
+    ARK_ALIGNMENT_BOTTOM_END,
 };
 typedef struct Opt_Alignment {
     enum Ark_Tag tag;
@@ -3201,8 +3201,8 @@ typedef struct Opt_SliderBlockType {
 } Opt_SliderBlockType;
 enum Ark_SliderStyle
 {
-    ARK_SLIDER_STYLE_DEPRECATED_OUT_SET,
-    ARK_SLIDER_STYLE_DEPRECATED_IN_SET,
+    ARK_SLIDER_STYLE_OUT_SET,
+    ARK_SLIDER_STYLE_IN_SET,
     ARK_SLIDER_STYLE_NONE,
 };
 typedef struct Opt_SliderStyle {
@@ -3241,9 +3241,9 @@ typedef struct Opt_SearchController {
 } Opt_SearchController;
 enum Ark_BarState
 {
-    ARK_BAR_STATE_DEPRECATED_OFF,
-    ARK_BAR_STATE_DEPRECATED_AUTO,
-    ARK_BAR_STATE_DEPRECATED_ON,
+    ARK_BAR_STATE_OFF,
+    ARK_BAR_STATE_AUTO,
+    ARK_BAR_STATE_ON,
 };
 typedef struct Opt_BarState {
     enum Ark_Tag tag;
@@ -3251,8 +3251,8 @@ typedef struct Opt_BarState {
 } Opt_BarState;
 enum Ark_ScrollBarDirection
 {
-    ARK_SCROLL_BAR_DIRECTION_DEPRECATED_VERTICAL,
-    ARK_SCROLL_BAR_DIRECTION_DEPRECATED_HORIZONTAL,
+    ARK_SCROLL_BAR_DIRECTION_VERTICAL,
+    ARK_SCROLL_BAR_DIRECTION_HORIZONTAL,
 };
 typedef struct Opt_ScrollBarDirection {
     enum Ark_Tag tag;
@@ -3282,9 +3282,9 @@ typedef struct Opt_ScrollSnapAlign {
 } Opt_ScrollSnapAlign;
 enum Ark_ButtonType
 {
-    ARK_BUTTON_TYPE_DEPRECATED_CAPSULE,
-    ARK_BUTTON_TYPE_DEPRECATED_CIRCLE,
-    ARK_BUTTON_TYPE_DEPRECATED_NORMAL,
+    ARK_BUTTON_TYPE_CAPSULE,
+    ARK_BUTTON_TYPE_CIRCLE,
+    ARK_BUTTON_TYPE_NORMAL,
     ARK_BUTTON_TYPE_ROUNDED_RECTANGLE = 3,
 };
 typedef struct Opt_ButtonType {
@@ -3372,8 +3372,8 @@ typedef struct Opt_RichEditorResponseType {
 } Opt_RichEditorResponseType;
 enum Ark_ResponseType
 {
-    ARK_RESPONSE_TYPE_DEPRECATED_RIGHT_CLICK,
-    ARK_RESPONSE_TYPE_DEPRECATED_LONG_PRESS,
+    ARK_RESPONSE_TYPE_RIGHT_CLICK,
+    ARK_RESPONSE_TYPE_LONG_PRESS,
 };
 typedef struct Opt_ResponseType {
     enum Ark_Tag tag;
@@ -3491,9 +3491,9 @@ typedef struct Opt_PanelHeight {
 } Opt_PanelHeight;
 enum Ark_NavigationType
 {
-    ARK_NAVIGATION_TYPE_DEPRECATED_PUSH,
-    ARK_NAVIGATION_TYPE_DEPRECATED_BACK,
-    ARK_NAVIGATION_TYPE_DEPRECATED_REPLACE,
+    ARK_NAVIGATION_TYPE_PUSH,
+    ARK_NAVIGATION_TYPE_BACK,
+    ARK_NAVIGATION_TYPE_REPLACE,
 };
 typedef struct Opt_NavigationType {
     enum Ark_Tag tag;
@@ -3676,8 +3676,8 @@ typedef struct Opt_ListItemGroupStyle {
 } Opt_ListItemGroupStyle;
 enum Ark_SwipeEdgeEffect
 {
-    ARK_SWIPE_EDGE_EFFECT_DEPRECATED_SPRING,
-    ARK_SWIPE_EDGE_EFFECT_DEPRECATED_NONE,
+    ARK_SWIPE_EDGE_EFFECT_SPRING,
+    ARK_SWIPE_EDGE_EFFECT_NONE,
 };
 typedef struct Opt_SwipeEdgeEffect {
     enum Ark_Tag tag;
@@ -3696,9 +3696,9 @@ typedef struct Opt_Union_CustomBuilder_SwipeActionItem {
 } Opt_Union_CustomBuilder_SwipeActionItem;
 enum Ark_EditMode
 {
-    ARK_EDIT_MODE_DEPRECATED_NONE,
-    ARK_EDIT_MODE_DEPRECATED_DELETABLE,
-    ARK_EDIT_MODE_DEPRECATED_MOVABLE,
+    ARK_EDIT_MODE_NONE,
+    ARK_EDIT_MODE_DELETABLE,
+    ARK_EDIT_MODE_MOVABLE,
 };
 typedef struct Opt_EditMode {
     enum Ark_Tag tag;
@@ -3759,8 +3759,8 @@ typedef struct Opt_ImageContent {
 } Opt_ImageContent;
 enum Ark_GridRowDirection
 {
-    ARK_GRID_ROW_DIRECTION_DEPRECATED_ROW,
-    ARK_GRID_ROW_DIRECTION_DEPRECATED_ROW_REVERSE,
+    ARK_GRID_ROW_DIRECTION_ROW,
+    ARK_GRID_ROW_DIRECTION_ROW_REVERSE,
 };
 typedef struct Opt_GridRowDirection {
     enum Ark_Tag tag;
@@ -3798,7 +3798,7 @@ typedef struct Opt_Union_Length_GutterOption {
 } Opt_Union_Length_GutterOption;
 enum Ark_SizeType
 {
-    ARK_SIZE_TYPE_DEPRECATED_AUTO,
+    ARK_SIZE_TYPE_AUTO,
     ARK_SIZE_TYPE_XS,
     ARK_SIZE_TYPE_SM,
     ARK_SIZE_TYPE_MD,
@@ -3885,11 +3885,11 @@ typedef struct Opt_FormRenderingMode {
 } Opt_FormRenderingMode;
 enum Ark_FormDimension
 {
-    ARK_FORM_DIMENSION_DEPRECATED_DIMENSION_1_2,
-    ARK_FORM_DIMENSION_DEPRECATED_DIMENSION_2_2,
-    ARK_FORM_DIMENSION_DEPRECATED_DIMENSION_2_4,
-    ARK_FORM_DIMENSION_DEPRECATED_DIMENSION_4_4,
-    ARK_FORM_DIMENSION_DEPRECATED_DIMENSION_2_1,
+    ARK_FORM_DIMENSION_DIMENSION_1_2,
+    ARK_FORM_DIMENSION_DIMENSION_2_2,
+    ARK_FORM_DIMENSION_DIMENSION_2_4,
+    ARK_FORM_DIMENSION_DIMENSION_4_4,
+    ARK_FORM_DIMENSION_DIMENSION_2_1,
     ARK_FORM_DIMENSION_DIMENSION_1_1 = 6,
     ARK_FORM_DIMENSION_DIMENSION_6_4,
 };
@@ -3907,12 +3907,12 @@ typedef struct Opt_FlexSpaceOptions {
 } Opt_FlexSpaceOptions;
 enum Ark_FlexAlign
 {
-    ARK_FLEX_ALIGN_DEPRECATED_START,
-    ARK_FLEX_ALIGN_DEPRECATED_CENTER,
-    ARK_FLEX_ALIGN_DEPRECATED_END,
-    ARK_FLEX_ALIGN_DEPRECATED_SPACE_BETWEEN,
-    ARK_FLEX_ALIGN_DEPRECATED_SPACE_AROUND,
-    ARK_FLEX_ALIGN_DEPRECATED_SPACE_EVENLY,
+    ARK_FLEX_ALIGN_START,
+    ARK_FLEX_ALIGN_CENTER,
+    ARK_FLEX_ALIGN_END,
+    ARK_FLEX_ALIGN_SPACE_BETWEEN,
+    ARK_FLEX_ALIGN_SPACE_AROUND,
+    ARK_FLEX_ALIGN_SPACE_EVENLY,
 };
 typedef struct Opt_FlexAlign {
     enum Ark_Tag tag;
@@ -3920,12 +3920,12 @@ typedef struct Opt_FlexAlign {
 } Opt_FlexAlign;
 enum Ark_ItemAlign
 {
-    ARK_ITEM_ALIGN_DEPRECATED_AUTO,
-    ARK_ITEM_ALIGN_DEPRECATED_START,
-    ARK_ITEM_ALIGN_DEPRECATED_CENTER,
-    ARK_ITEM_ALIGN_DEPRECATED_END,
-    ARK_ITEM_ALIGN_DEPRECATED_BASELINE,
-    ARK_ITEM_ALIGN_DEPRECATED_STRETCH,
+    ARK_ITEM_ALIGN_AUTO,
+    ARK_ITEM_ALIGN_START,
+    ARK_ITEM_ALIGN_CENTER,
+    ARK_ITEM_ALIGN_END,
+    ARK_ITEM_ALIGN_BASELINE,
+    ARK_ITEM_ALIGN_STRETCH,
 };
 typedef struct Opt_ItemAlign {
     enum Ark_Tag tag;
@@ -3933,9 +3933,9 @@ typedef struct Opt_ItemAlign {
 } Opt_ItemAlign;
 enum Ark_FlexWrap
 {
-    ARK_FLEX_WRAP_DEPRECATED_NO_WRAP,
-    ARK_FLEX_WRAP_DEPRECATED_WRAP,
-    ARK_FLEX_WRAP_DEPRECATED_WRAP_REVERSE,
+    ARK_FLEX_WRAP_NO_WRAP,
+    ARK_FLEX_WRAP_WRAP,
+    ARK_FLEX_WRAP_WRAP_REVERSE,
 };
 typedef struct Opt_FlexWrap {
     enum Ark_Tag tag;
@@ -3943,10 +3943,10 @@ typedef struct Opt_FlexWrap {
 } Opt_FlexWrap;
 enum Ark_FlexDirection
 {
-    ARK_FLEX_DIRECTION_DEPRECATED_ROW,
-    ARK_FLEX_DIRECTION_DEPRECATED_COLUMN,
-    ARK_FLEX_DIRECTION_DEPRECATED_ROW_REVERSE,
-    ARK_FLEX_DIRECTION_DEPRECATED_COLUMN_REVERSE,
+    ARK_FLEX_DIRECTION_ROW,
+    ARK_FLEX_DIRECTION_COLUMN,
+    ARK_FLEX_DIRECTION_ROW_REVERSE,
+    ARK_FLEX_DIRECTION_COLUMN_REVERSE,
 };
 typedef struct Opt_FlexDirection {
     enum Ark_Tag tag;
@@ -3962,8 +3962,8 @@ typedef struct Opt_Array_Union_ResourceColor_LinearGradient {
 } Opt_Array_Union_ResourceColor_LinearGradient;
 enum Ark_DataPanelType
 {
-    ARK_DATA_PANEL_TYPE_DEPRECATED_LINE,
-    ARK_DATA_PANEL_TYPE_DEPRECATED_CIRCLE,
+    ARK_DATA_PANEL_TYPE_LINE,
+    ARK_DATA_PANEL_TYPE_CIRCLE,
 };
 typedef struct Opt_DataPanelType {
     enum Ark_Tag tag;
@@ -4499,8 +4499,8 @@ typedef struct Opt_LocalizedPosition {
 } Opt_LocalizedPosition;
 enum Ark_SharedTransitionEffectType
 {
-    ARK_SHARED_TRANSITION_EFFECT_TYPE_DEPRECATED_STATIC,
-    ARK_SHARED_TRANSITION_EFFECT_TYPE_DEPRECATED_EXCHANGE,
+    ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC,
+    ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE,
 };
 typedef struct Opt_SharedTransitionEffectType {
     enum Ark_Tag tag;
@@ -4634,10 +4634,10 @@ typedef struct Opt_FinishCallbackType {
 } Opt_FinishCallbackType;
 enum Ark_PlayMode
 {
-    ARK_PLAY_MODE_DEPRECATED_NORMAL,
-    ARK_PLAY_MODE_DEPRECATED_REVERSE,
-    ARK_PLAY_MODE_DEPRECATED_ALTERNATE,
-    ARK_PLAY_MODE_DEPRECATED_ALTERNATE_REVERSE,
+    ARK_PLAY_MODE_NORMAL,
+    ARK_PLAY_MODE_REVERSE,
+    ARK_PLAY_MODE_ALTERNATE,
+    ARK_PLAY_MODE_ALTERNATE_REVERSE,
 };
 typedef struct Opt_PlayMode {
     enum Ark_Tag tag;
@@ -4702,10 +4702,10 @@ typedef struct Opt_Union_String_Resource_LinearGradient {
 } Opt_Union_String_Resource_LinearGradient;
 enum Ark_RepeatMode
 {
-    ARK_REPEAT_MODE_DEPRECATED_REPEAT,
-    ARK_REPEAT_MODE_DEPRECATED_STRETCH,
-    ARK_REPEAT_MODE_DEPRECATED_ROUND,
-    ARK_REPEAT_MODE_DEPRECATED_SPACE,
+    ARK_REPEAT_MODE_REPEAT,
+    ARK_REPEAT_MODE_STRETCH,
+    ARK_REPEAT_MODE_ROUND,
+    ARK_REPEAT_MODE_SPACE,
 };
 typedef struct Opt_RepeatMode {
     enum Ark_Tag tag;
@@ -4789,9 +4789,9 @@ typedef struct Opt_BlurStyleActivePolicy {
 } Opt_BlurStyleActivePolicy;
 enum Ark_ImageSize
 {
-    ARK_IMAGE_SIZE_DEPRECATED_AUTO,
-    ARK_IMAGE_SIZE_DEPRECATED_COVER,
-    ARK_IMAGE_SIZE_DEPRECATED_CONTAIN,
+    ARK_IMAGE_SIZE_AUTO,
+    ARK_IMAGE_SIZE_COVER,
+    ARK_IMAGE_SIZE_CONTAIN,
     ARK_IMAGE_SIZE_FILL = 3,
 };
 typedef struct Opt_ImageSize {
@@ -5341,10 +5341,10 @@ typedef struct Opt_SwiperAnimationEvent {
 } Opt_SwiperAnimationEvent;
 enum Ark_SliderChangeMode
 {
-    ARK_SLIDER_CHANGE_MODE_DEPRECATED_BEGIN,
-    ARK_SLIDER_CHANGE_MODE_DEPRECATED_MOVING,
-    ARK_SLIDER_CHANGE_MODE_DEPRECATED_END,
-    ARK_SLIDER_CHANGE_MODE_DEPRECATED_CLICK,
+    ARK_SLIDER_CHANGE_MODE_BEGIN,
+    ARK_SLIDER_CHANGE_MODE_MOVING,
+    ARK_SLIDER_CHANGE_MODE_END,
+    ARK_SLIDER_CHANGE_MODE_CLICK,
 };
 typedef struct Opt_SliderChangeMode {
     enum Ark_Tag tag;
@@ -5462,11 +5462,11 @@ typedef struct Opt_RichEditorSelection {
 } Opt_RichEditorSelection;
 enum Ark_RefreshStatus
 {
-    ARK_REFRESH_STATUS_DEPRECATED_INACTIVE,
-    ARK_REFRESH_STATUS_DEPRECATED_DRAG,
-    ARK_REFRESH_STATUS_DEPRECATED_OVER_DRAG,
-    ARK_REFRESH_STATUS_DEPRECATED_REFRESH,
-    ARK_REFRESH_STATUS_DEPRECATED_DONE,
+    ARK_REFRESH_STATUS_INACTIVE,
+    ARK_REFRESH_STATUS_DRAG,
+    ARK_REFRESH_STATUS_OVER_DRAG,
+    ARK_REFRESH_STATUS_REFRESH,
+    ARK_REFRESH_STATUS_DONE,
 };
 typedef struct Opt_RefreshStatus {
     enum Ark_Tag tag;
@@ -5611,9 +5611,9 @@ typedef struct Opt_DatePickerResult {
 } Opt_DatePickerResult;
 enum Ark_ScrollState
 {
-    ARK_SCROLL_STATE_DEPRECATED_IDLE,
-    ARK_SCROLL_STATE_DEPRECATED_SCROLL,
-    ARK_SCROLL_STATE_DEPRECATED_FLING,
+    ARK_SCROLL_STATE_IDLE,
+    ARK_SCROLL_STATE_SCROLL,
+    ARK_SCROLL_STATE_FLING,
 };
 typedef struct Opt_ScrollState {
     enum Ark_Tag tag;
@@ -5943,11 +5943,11 @@ typedef struct Opt_Union_String_Number_Resource_ArrayBuffer {
 } Opt_Union_String_Number_Resource_ArrayBuffer;
 enum Ark_MessageLevel
 {
-    ARK_MESSAGE_LEVEL_DEPRECATED_DEBUG,
-    ARK_MESSAGE_LEVEL_DEPRECATED_ERROR,
-    ARK_MESSAGE_LEVEL_DEPRECATED_INFO,
-    ARK_MESSAGE_LEVEL_DEPRECATED_LOG,
-    ARK_MESSAGE_LEVEL_DEPRECATED_WARN,
+    ARK_MESSAGE_LEVEL_DEBUG,
+    ARK_MESSAGE_LEVEL_ERROR,
+    ARK_MESSAGE_LEVEL_INFO,
+    ARK_MESSAGE_LEVEL_LOG,
+    ARK_MESSAGE_LEVEL_WARN,
 };
 typedef struct Opt_MessageLevel {
     enum Ark_Tag tag;
@@ -5999,10 +5999,10 @@ typedef struct Opt_Literal_String_script_Opt_Function_callback {
 } Opt_Literal_String_script_Opt_Function_callback;
 enum Ark_SeekMode
 {
-    ARK_SEEK_MODE_DEPRECATED_PREVIOUS_KEYFRAME,
-    ARK_SEEK_MODE_DEPRECATED_NEXT_KEYFRAME,
-    ARK_SEEK_MODE_DEPRECATED_CLOSEST_KEYFRAME,
-    ARK_SEEK_MODE_DEPRECATED_ACCURATE,
+    ARK_SEEK_MODE_PREVIOUS_KEYFRAME,
+    ARK_SEEK_MODE_NEXT_KEYFRAME,
+    ARK_SEEK_MODE_CLOSEST_KEYFRAME,
+    ARK_SEEK_MODE_ACCURATE,
 };
 typedef struct Opt_SeekMode {
     enum Ark_Tag tag;
@@ -6246,13 +6246,13 @@ typedef struct Opt_ScrollEdgeOptions {
 } Opt_ScrollEdgeOptions;
 enum Ark_Edge
 {
-    ARK_EDGE_DEPRECATED_TOP,
-    ARK_EDGE_DEPRECATED_CENTER,
-    ARK_EDGE_DEPRECATED_BOTTOM,
-    ARK_EDGE_DEPRECATED_BASELINE,
-    ARK_EDGE_DEPRECATED_START,
-    ARK_EDGE_DEPRECATED_MIDDLE,
-    ARK_EDGE_DEPRECATED_END,
+    ARK_EDGE_TOP,
+    ARK_EDGE_CENTER,
+    ARK_EDGE_BOTTOM,
+    ARK_EDGE_BASELINE,
+    ARK_EDGE_START,
+    ARK_EDGE_MIDDLE,
+    ARK_EDGE_END,
 };
 typedef struct Opt_Edge {
     enum Ark_Tag tag;
@@ -6390,8 +6390,8 @@ typedef struct Opt_Union_DividerStyle_Undefined {
 } Opt_Union_DividerStyle_Undefined;
 enum Ark_SideBarPosition
 {
-    ARK_SIDE_BAR_POSITION_DEPRECATED_START,
-    ARK_SIDE_BAR_POSITION_DEPRECATED_END,
+    ARK_SIDE_BAR_POSITION_START,
+    ARK_SIDE_BAR_POSITION_END,
 };
 typedef struct Opt_SideBarPosition {
     enum Ark_Tag tag;
@@ -6410,8 +6410,8 @@ typedef struct Opt_ButtonStyle {
 } Opt_ButtonStyle;
 enum Ark_SideBarContainerType
 {
-    ARK_SIDE_BAR_CONTAINER_TYPE_DEPRECATED_EMBED,
-    ARK_SIDE_BAR_CONTAINER_TYPE_DEPRECATED_OVERLAY,
+    ARK_SIDE_BAR_CONTAINER_TYPE_EMBED,
+    ARK_SIDE_BAR_CONTAINER_TYPE_OVERLAY,
     ARK_SIDE_BAR_CONTAINER_TYPE_AUTO,
 };
 typedef struct Opt_SideBarContainerType {
@@ -6537,9 +6537,9 @@ typedef struct Opt_WebMediaOptions {
 } Opt_WebMediaOptions;
 enum Ark_WebDarkMode
 {
-    ARK_WEB_DARK_MODE_DEPRECATED_OFF,
-    ARK_WEB_DARK_MODE_DEPRECATED_ON,
-    ARK_WEB_DARK_MODE_DEPRECATED_AUTO,
+    ARK_WEB_DARK_MODE_OFF,
+    ARK_WEB_DARK_MODE_ON,
+    ARK_WEB_DARK_MODE_AUTO,
 };
 typedef struct Opt_WebDarkMode {
     enum Ark_Tag tag;
@@ -6547,10 +6547,10 @@ typedef struct Opt_WebDarkMode {
 } Opt_WebDarkMode;
 enum Ark_CacheMode
 {
-    ARK_CACHE_MODE_DEPRECATED_DEFAULT,
-    ARK_CACHE_MODE_DEPRECATED_NONE,
-    ARK_CACHE_MODE_DEPRECATED_ONLINE,
-    ARK_CACHE_MODE_DEPRECATED_ONLY,
+    ARK_CACHE_MODE_DEFAULT,
+    ARK_CACHE_MODE_NONE,
+    ARK_CACHE_MODE_ONLINE,
+    ARK_CACHE_MODE_ONLY,
 };
 typedef struct Opt_CacheMode {
     enum Ark_Tag tag;
@@ -6570,9 +6570,9 @@ typedef struct Opt_JavaScriptProxy {
 } Opt_JavaScriptProxy;
 enum Ark_MixedMode
 {
-    ARK_MIXED_MODE_DEPRECATED_ALL,
-    ARK_MIXED_MODE_DEPRECATED_COMPATIBLE,
-    ARK_MIXED_MODE_DEPRECATED_NONE,
+    ARK_MIXED_MODE_ALL,
+    ARK_MIXED_MODE_COMPATIBLE,
+    ARK_MIXED_MODE_NONE,
 };
 typedef struct Opt_MixedMode {
     enum Ark_Tag tag;
@@ -6723,11 +6723,11 @@ typedef struct Opt_Union_TextInputStyle_TextContentStyle {
 } Opt_Union_TextInputStyle_TextContentStyle;
 enum Ark_InputType
 {
-    ARK_INPUT_TYPE_DEPRECATED_NORMAL,
-    ARK_INPUT_TYPE_DEPRECATED_NUMBER,
-    ARK_INPUT_TYPE_DEPRECATED_PHONE_NUMBER,
-    ARK_INPUT_TYPE_DEPRECATED_EMAIL,
-    ARK_INPUT_TYPE_DEPRECATED_PASSWORD,
+    ARK_INPUT_TYPE_NORMAL,
+    ARK_INPUT_TYPE_NUMBER,
+    ARK_INPUT_TYPE_PHONE_NUMBER,
+    ARK_INPUT_TYPE_EMAIL,
+    ARK_INPUT_TYPE_PASSWORD,
     ARK_INPUT_TYPE_NUMBER_PASSWORD = 8,
     ARK_INPUT_TYPE_SCREEN_LOCK_PASSWORD = 9,
     ARK_INPUT_TYPE_USER_NAME = 10,
@@ -6920,8 +6920,8 @@ typedef struct Opt_ScrollableBarModeOptions {
 } Opt_ScrollableBarModeOptions;
 enum Ark_BarMode
 {
-    ARK_BAR_MODE_DEPRECATED_SCROLLABLE = 0,
-    ARK_BAR_MODE_DEPRECATED_FIXED = 1,
+    ARK_BAR_MODE_SCROLLABLE = 0,
+    ARK_BAR_MODE_FIXED = 1,
 };
 typedef struct Opt_BarMode {
     enum Ark_Tag tag;
@@ -6974,8 +6974,8 @@ typedef struct Opt_Union_Number_String_SwiperAutoFill {
 } Opt_Union_Number_String_SwiperAutoFill;
 enum Ark_SwiperDisplayMode
 {
-    ARK_SWIPER_DISPLAY_MODE_DEPRECATED_STRETCH,
-    ARK_SWIPER_DISPLAY_MODE_DEPRECATED_AUTO_LINEAR,
+    ARK_SWIPER_DISPLAY_MODE_LEGACY_STRETCH,
+    ARK_SWIPER_DISPLAY_MODE_LEGACY_AUTO_LINEAR,
     ARK_SWIPER_DISPLAY_MODE_STRETCH,
     ARK_SWIPER_DISPLAY_MODE_AUTO_LINEAR,
 };
@@ -7013,10 +7013,10 @@ typedef struct Opt_SwiperController {
 } Opt_SwiperController;
 enum Ark_ItemState
 {
-    ARK_ITEM_STATE_DEPRECATED_NORMAL,
-    ARK_ITEM_STATE_DEPRECATED_DISABLED,
-    ARK_ITEM_STATE_DEPRECATED_WAITING,
-    ARK_ITEM_STATE_DEPRECATED_SKIP,
+    ARK_ITEM_STATE_NORMAL,
+    ARK_ITEM_STATE_DISABLED,
+    ARK_ITEM_STATE_WAITING,
+    ARK_ITEM_STATE_SKIP,
 };
 typedef struct Opt_ItemState {
     enum Ark_Tag tag;
@@ -7038,9 +7038,9 @@ typedef struct Opt_StackOptions {
 } Opt_StackOptions;
 enum Ark_TextCase
 {
-    ARK_TEXT_CASE_DEPRECATED_NORMAL,
-    ARK_TEXT_CASE_DEPRECATED_LOWER_CASE,
-    ARK_TEXT_CASE_DEPRECATED_UPPER_CASE,
+    ARK_TEXT_CASE_NORMAL,
+    ARK_TEXT_CASE_LOWER_CASE,
+    ARK_TEXT_CASE_UPPER_CASE,
 };
 typedef struct Opt_TextCase {
     enum Ark_Tag tag;
@@ -7265,10 +7265,10 @@ typedef struct Opt_Union_Color_Number_String {
 } Opt_Union_Color_Number_String;
 enum Ark_ScrollDirection
 {
-    ARK_SCROLL_DIRECTION_DEPRECATED_VERTICAL,
-    ARK_SCROLL_DIRECTION_DEPRECATED_HORIZONTAL,
-    ARK_SCROLL_DIRECTION_DEPRECATED_FREE,
-    ARK_SCROLL_DIRECTION_DEPRECATED_NONE,
+    ARK_SCROLL_DIRECTION_VERTICAL,
+    ARK_SCROLL_DIRECTION_HORIZONTAL,
+    ARK_SCROLL_DIRECTION_FREE,
+    ARK_SCROLL_DIRECTION_NONE,
 };
 typedef struct Opt_ScrollDirection {
     enum Ark_Tag tag;
@@ -7304,11 +7304,11 @@ typedef struct Opt_EditMenuOptions {
 } Opt_EditMenuOptions;
 enum Ark_EnterKeyType
 {
-    ARK_ENTER_KEY_TYPE_DEPRECATED_GO = 2,
-    ARK_ENTER_KEY_TYPE_DEPRECATED_SEARCH = 3,
-    ARK_ENTER_KEY_TYPE_DEPRECATED_SEND = 4,
-    ARK_ENTER_KEY_TYPE_DEPRECATED_NEXT = 5,
-    ARK_ENTER_KEY_TYPE_DEPRECATED_DONE = 6,
+    ARK_ENTER_KEY_TYPE_GO = 2,
+    ARK_ENTER_KEY_TYPE_SEARCH = 3,
+    ARK_ENTER_KEY_TYPE_SEND = 4,
+    ARK_ENTER_KEY_TYPE_NEXT = 5,
+    ARK_ENTER_KEY_TYPE_DONE = 6,
     ARK_ENTER_KEY_TYPE_PREVIOUS = 7,
     ARK_ENTER_KEY_TYPE_NEW_LINE = 8,
 };
@@ -7548,9 +7548,9 @@ typedef struct Opt_Union_Length_PanelHeight {
 } Opt_Union_Length_PanelHeight;
 enum Ark_PanelType
 {
-    ARK_PANEL_TYPE_DEPRECATED_MINIBAR = 0,
-    ARK_PANEL_TYPE_DEPRECATED_FOLDABLE = 1,
-    ARK_PANEL_TYPE_DEPRECATED_TEMPORARY = 2,
+    ARK_PANEL_TYPE_MINIBAR = 0,
+    ARK_PANEL_TYPE_FOLDABLE = 1,
+    ARK_PANEL_TYPE_TEMPORARY = 2,
     ARK_PANEL_TYPE_CUSTOM = 3,
 };
 typedef struct Opt_PanelType {
@@ -7559,9 +7559,9 @@ typedef struct Opt_PanelType {
 } Opt_PanelType;
 enum Ark_PanelMode
 {
-    ARK_PANEL_MODE_DEPRECATED_MINI,
-    ARK_PANEL_MODE_DEPRECATED_HALF,
-    ARK_PANEL_MODE_DEPRECATED_FULL,
+    ARK_PANEL_MODE_MINI,
+    ARK_PANEL_MODE_HALF,
+    ARK_PANEL_MODE_FULL,
 };
 typedef struct Opt_PanelMode {
     enum Ark_Tag tag;
@@ -7664,9 +7664,9 @@ typedef struct Opt_Union_Array_NavigationMenuItem_CustomBuilder {
 } Opt_Union_Array_NavigationMenuItem_CustomBuilder;
 enum Ark_NavigationTitleMode
 {
-    ARK_NAVIGATION_TITLE_MODE_DEPRECATED_FREE = 0,
-    ARK_NAVIGATION_TITLE_MODE_DEPRECATED_FULL,
-    ARK_NAVIGATION_TITLE_MODE_DEPRECATED_MINI,
+    ARK_NAVIGATION_TITLE_MODE_FREE = 0,
+    ARK_NAVIGATION_TITLE_MODE_FULL,
+    ARK_NAVIGATION_TITLE_MODE_MINI,
 };
 typedef struct Opt_NavigationTitleMode {
     enum Ark_Tag tag;
@@ -7700,9 +7700,9 @@ typedef struct Opt_Union_String_CustomObject_Resource_CustomObject {
 } Opt_Union_String_CustomObject_Resource_CustomObject;
 enum Ark_NavigationMode
 {
-    ARK_NAVIGATION_MODE_DEPRECATED_STACK,
-    ARK_NAVIGATION_MODE_DEPRECATED_SPLIT,
-    ARK_NAVIGATION_MODE_DEPRECATED_AUTO,
+    ARK_NAVIGATION_MODE_STACK,
+    ARK_NAVIGATION_MODE_SPLIT,
+    ARK_NAVIGATION_MODE_AUTO,
 };
 typedef struct Opt_NavigationMode {
     enum Ark_Tag tag;
@@ -7710,8 +7710,8 @@ typedef struct Opt_NavigationMode {
 } Opt_NavigationMode;
 enum Ark_NavBarPosition
 {
-    ARK_NAV_BAR_POSITION_DEPRECATED_START,
-    ARK_NAV_BAR_POSITION_DEPRECATED_END,
+    ARK_NAV_BAR_POSITION_START,
+    ARK_NAV_BAR_POSITION_END,
 };
 typedef struct Opt_NavBarPosition {
     enum Ark_Tag tag;
@@ -7963,9 +7963,9 @@ typedef struct Opt_Union_Boolean_EditMode {
 } Opt_Union_Boolean_EditMode;
 enum Ark_Sticky
 {
-    ARK_STICKY_DEPRECATED_NONE,
-    ARK_STICKY_DEPRECATED_NORMAL,
-    ARK_STICKY_DEPRECATED_OPACITY,
+    ARK_STICKY_NONE,
+    ARK_STICKY_NORMAL,
+    ARK_STICKY_OPACITY,
 };
 typedef struct Opt_Sticky {
     enum Ark_Tag tag;
@@ -7985,9 +7985,9 @@ typedef struct Opt_ChildrenMainSize {
 } Opt_ChildrenMainSize;
 enum Ark_StickyStyle
 {
-    ARK_STICKY_STYLE_DEPRECATED_NONE = 0,
-    ARK_STICKY_STYLE_DEPRECATED_HEADER = 1,
-    ARK_STICKY_STYLE_DEPRECATED_FOOTER = 2,
+    ARK_STICKY_STYLE_NONE = 0,
+    ARK_STICKY_STYLE_HEADER = 1,
+    ARK_STICKY_STYLE_FOOTER = 2,
 };
 typedef struct Opt_StickyStyle {
     enum Ark_Tag tag;
@@ -8008,9 +8008,9 @@ typedef struct Opt_ChainAnimationOptions {
 } Opt_ChainAnimationOptions;
 enum Ark_ListItemAlign
 {
-    ARK_LIST_ITEM_ALIGN_DEPRECATED_START,
-    ARK_LIST_ITEM_ALIGN_DEPRECATED_CENTER,
-    ARK_LIST_ITEM_ALIGN_DEPRECATED_END,
+    ARK_LIST_ITEM_ALIGN_START,
+    ARK_LIST_ITEM_ALIGN_CENTER,
+    ARK_LIST_ITEM_ALIGN_END,
 };
 typedef struct Opt_ListItemAlign {
     enum Ark_Tag tag;
@@ -8076,9 +8076,9 @@ typedef struct Opt_ImageAnalyzerConfig {
 } Opt_ImageAnalyzerConfig;
 enum Ark_CopyOptions
 {
-    ARK_COPY_OPTIONS_DEPRECATED_NONE = 0,
-    ARK_COPY_OPTIONS_DEPRECATED_IN_APP = 1,
-    ARK_COPY_OPTIONS_DEPRECATED_LOCAL_DEVICE = 2,
+    ARK_COPY_OPTIONS_NONE = 0,
+    ARK_COPY_OPTIONS_IN_APP = 1,
+    ARK_COPY_OPTIONS_LOCAL_DEVICE = 2,
     ARK_COPY_OPTIONS_CROSS_DEVICE = 3,
 };
 typedef struct Opt_CopyOptions {
@@ -8095,10 +8095,10 @@ typedef struct Opt_Literal_Number_width_height {
 } Opt_Literal_Number_width_height;
 enum Ark_ImageInterpolation
 {
-    ARK_IMAGE_INTERPOLATION_DEPRECATED_NONE,
-    ARK_IMAGE_INTERPOLATION_DEPRECATED_LOW,
-    ARK_IMAGE_INTERPOLATION_DEPRECATED_MEDIUM,
-    ARK_IMAGE_INTERPOLATION_DEPRECATED_HIGH,
+    ARK_IMAGE_INTERPOLATION_NONE,
+    ARK_IMAGE_INTERPOLATION_LOW,
+    ARK_IMAGE_INTERPOLATION_MEDIUM,
+    ARK_IMAGE_INTERPOLATION_HIGH,
 };
 typedef struct Opt_ImageInterpolation {
     enum Ark_Tag tag;
@@ -8116,8 +8116,8 @@ typedef struct Opt_DynamicRangeMode {
 } Opt_DynamicRangeMode;
 enum Ark_ImageRenderMode
 {
-    ARK_IMAGE_RENDER_MODE_DEPRECATED_ORIGINAL,
-    ARK_IMAGE_RENDER_MODE_DEPRECATED_TEMPLATE,
+    ARK_IMAGE_RENDER_MODE_ORIGINAL,
+    ARK_IMAGE_RENDER_MODE_TEMPLATE,
 };
 typedef struct Opt_ImageRenderMode {
     enum Ark_Tag tag;
@@ -8199,10 +8199,10 @@ typedef struct Opt_GridItemOptions {
 } Opt_GridItemOptions;
 enum Ark_GridDirection
 {
-    ARK_GRID_DIRECTION_DEPRECATED_ROW,
-    ARK_GRID_DIRECTION_DEPRECATED_COLUMN,
-    ARK_GRID_DIRECTION_DEPRECATED_ROW_REVERSE,
-    ARK_GRID_DIRECTION_DEPRECATED_COLUMN_REVERSE,
+    ARK_GRID_DIRECTION_ROW,
+    ARK_GRID_DIRECTION_COLUMN,
+    ARK_GRID_DIRECTION_ROW_REVERSE,
+    ARK_GRID_DIRECTION_COLUMN_REVERSE,
 };
 typedef struct Opt_GridDirection {
     enum Ark_Tag tag;
@@ -8406,9 +8406,9 @@ typedef struct Opt_CircleOptions {
 } Opt_CircleOptions;
 enum Ark_LineJoinStyle
 {
-    ARK_LINE_JOIN_STYLE_DEPRECATED_MITER,
-    ARK_LINE_JOIN_STYLE_DEPRECATED_ROUND,
-    ARK_LINE_JOIN_STYLE_DEPRECATED_BEVEL,
+    ARK_LINE_JOIN_STYLE_MITER,
+    ARK_LINE_JOIN_STYLE_ROUND,
+    ARK_LINE_JOIN_STYLE_BEVEL,
 };
 typedef struct Opt_LineJoinStyle {
     enum Ark_Tag tag;
@@ -8416,9 +8416,9 @@ typedef struct Opt_LineJoinStyle {
 } Opt_LineJoinStyle;
 enum Ark_LineCapStyle
 {
-    ARK_LINE_CAP_STYLE_DEPRECATED_BUTT,
-    ARK_LINE_CAP_STYLE_DEPRECATED_ROUND,
-    ARK_LINE_CAP_STYLE_DEPRECATED_SQUARE,
+    ARK_LINE_CAP_STYLE_BUTT,
+    ARK_LINE_CAP_STYLE_ROUND,
+    ARK_LINE_CAP_STYLE_SQUARE,
 };
 typedef struct Opt_LineCapStyle {
     enum Ark_Tag tag;
@@ -8650,10 +8650,10 @@ typedef struct Opt_Union_SpringMotion_FrictionMotion_ScrollMotion {
 } Opt_Union_SpringMotion_FrictionMotion_ScrollMotion;
 enum Ark_FillMode
 {
-    ARK_FILL_MODE_DEPRECATED_NONE,
-    ARK_FILL_MODE_DEPRECATED_FORWARDS,
-    ARK_FILL_MODE_DEPRECATED_BACKWARDS,
-    ARK_FILL_MODE_DEPRECATED_BOTH,
+    ARK_FILL_MODE_NONE,
+    ARK_FILL_MODE_FORWARDS,
+    ARK_FILL_MODE_BACKWARDS,
+    ARK_FILL_MODE_BOTH,
 };
 typedef struct Opt_FillMode {
     enum Ark_Tag tag;
@@ -8661,10 +8661,10 @@ typedef struct Opt_FillMode {
 } Opt_FillMode;
 enum Ark_AnimationStatus
 {
-    ARK_ANIMATION_STATUS_DEPRECATED_INITIAL,
-    ARK_ANIMATION_STATUS_DEPRECATED_RUNNING,
-    ARK_ANIMATION_STATUS_DEPRECATED_PAUSED,
-    ARK_ANIMATION_STATUS_DEPRECATED_STOPPED,
+    ARK_ANIMATION_STATUS_INITIAL,
+    ARK_ANIMATION_STATUS_RUNNING,
+    ARK_ANIMATION_STATUS_PAUSED,
+    ARK_ANIMATION_STATUS_STOPPED,
 };
 typedef struct Opt_AnimationStatus {
     enum Ark_Tag tag;
@@ -8672,8 +8672,8 @@ typedef struct Opt_AnimationStatus {
 } Opt_AnimationStatus;
 enum Ark_IndexerAlign
 {
-    ARK_INDEXER_ALIGN_DEPRECATED_LEFT,
-    ARK_INDEXER_ALIGN_DEPRECATED_RIGHT,
+    ARK_INDEXER_ALIGN_LEFT,
+    ARK_INDEXER_ALIGN_RIGHT,
     ARK_INDEXER_ALIGN_START,
     ARK_INDEXER_ALIGN_END,
 };
@@ -9144,9 +9144,9 @@ typedef struct Opt_Union_Position_LocalizedPosition {
 } Opt_Union_Position_LocalizedPosition;
 enum Ark_Direction
 {
-    ARK_DIRECTION_DEPRECATED_LTR,
-    ARK_DIRECTION_DEPRECATED_RTL,
-    ARK_DIRECTION_DEPRECATED_AUTO,
+    ARK_DIRECTION_LTR,
+    ARK_DIRECTION_RTL,
+    ARK_DIRECTION_AUTO,
 };
 typedef struct Opt_Direction {
     enum Ark_Tag tag;
@@ -9166,9 +9166,9 @@ typedef struct Opt_sharedTransitionOptions {
 } Opt_sharedTransitionOptions;
 enum Ark_Visibility
 {
-    ARK_VISIBILITY_DEPRECATED_VISIBLE,
-    ARK_VISIBILITY_DEPRECATED_HIDDEN,
-    ARK_VISIBILITY_DEPRECATED_NONE,
+    ARK_VISIBILITY_VISIBLE,
+    ARK_VISIBILITY_HIDDEN,
+    ARK_VISIBILITY_NONE,
 };
 typedef struct Opt_Visibility {
     enum Ark_Tag tag;
@@ -9215,8 +9215,8 @@ typedef struct Opt_LinearGradientBlurOptions {
 } Opt_LinearGradientBlurOptions;
 enum Ark_GestureMask
 {
-    ARK_GESTURE_MASK_DEPRECATED_NORMAL,
-    ARK_GESTURE_MASK_DEPRECATED_IGNORE_INTERNAL,
+    ARK_GESTURE_MASK_NORMAL,
+    ARK_GESTURE_MASK_IGNORE_INTERNAL,
 };
 typedef struct Opt_GestureMask {
     enum Ark_Tag tag;
@@ -9285,10 +9285,10 @@ typedef struct Opt_FocusBoxStyle {
 } Opt_FocusBoxStyle;
 enum Ark_HoverEffect
 {
-    ARK_HOVER_EFFECT_DEPRECATED_AUTO,
-    ARK_HOVER_EFFECT_DEPRECATED_SCALE,
-    ARK_HOVER_EFFECT_DEPRECATED_HIGHLIGHT,
-    ARK_HOVER_EFFECT_DEPRECATED_NONE,
+    ARK_HOVER_EFFECT_AUTO,
+    ARK_HOVER_EFFECT_SCALE,
+    ARK_HOVER_EFFECT_HIGHLIGHT,
+    ARK_HOVER_EFFECT_NONE,
 };
 typedef struct Opt_HoverEffect {
     enum Ark_Tag tag;
@@ -9449,7 +9449,7 @@ typedef struct Opt_Union_SizeOptions_ImageSize {
 } Opt_Union_SizeOptions_ImageSize;
 enum Ark_ImageRepeat
 {
-    ARK_IMAGE_REPEAT_DEPRECATED_NO_REPEAT,
+    ARK_IMAGE_REPEAT_NO_REPEAT,
     ARK_IMAGE_REPEAT_X,
     ARK_IMAGE_REPEAT_Y,
     ARK_IMAGE_REPEAT_XY,
@@ -9477,10 +9477,10 @@ typedef struct Opt_Literal_Opt_Alignment_align {
 } Opt_Literal_Opt_Alignment_align;
 enum Ark_HitTestMode
 {
-    ARK_HIT_TEST_MODE_DEPRECATED_DEFAULT,
-    ARK_HIT_TEST_MODE_DEPRECATED_BLOCK,
-    ARK_HIT_TEST_MODE_DEPRECATED_TRANSPARENT,
-    ARK_HIT_TEST_MODE_DEPRECATED_NONE,
+    ARK_HIT_TEST_MODE_DEFAULT,
+    ARK_HIT_TEST_MODE_BLOCK,
+    ARK_HIT_TEST_MODE_TRANSPARENT,
+    ARK_HIT_TEST_MODE_NONE,
 };
 typedef struct Opt_HitTestMode {
     enum Ark_Tag tag;
@@ -10124,7 +10124,7 @@ typedef struct GENERATED_ArkUIAlphabetIndexerModifier {
     void (*setFont)(Ark_NativePointer node,
                     const Ark_Font* value);
     void (*setAlignStyle)(Ark_NativePointer node,
-                          Ark_Int32 value,
+                          enum Ark_IndexerAlign value,
                           const Opt_Length* offset);
     void (*setOnSelect)(Ark_NativePointer node,
                         Ark_Function callback);
@@ -10143,7 +10143,7 @@ typedef struct GENERATED_ArkUIAlphabetIndexerModifier {
     void (*setItemBorderRadius)(Ark_NativePointer node,
                                 const Ark_Number* value);
     void (*setPopupBackgroundBlurStyle)(Ark_NativePointer node,
-                                        Ark_Int32 value);
+                                        enum Ark_BlurStyle value);
     void (*setPopupTitleBackground)(Ark_NativePointer node,
                                     const ResourceColor* value);
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
@@ -10154,19 +10154,19 @@ typedef struct GENERATED_ArkUIAnimatorModifier {
     void (*setAnimatorOptions)(Ark_NativePointer node,
                                const Ark_String* value);
     void (*setState)(Ark_NativePointer node,
-                     Ark_Int32 value);
+                     enum Ark_AnimationStatus value);
     void (*setDuration)(Ark_NativePointer node,
                         const Ark_Number* value);
     void (*setCurve)(Ark_NativePointer node,
-                     Ark_Int32 value);
+                     enum Ark_Curve value);
     void (*setDelay)(Ark_NativePointer node,
                      const Ark_Number* value);
     void (*setFillMode)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_FillMode value);
     void (*setIterations)(Ark_NativePointer node,
                           const Ark_Number* value);
     void (*setPlayMode)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_PlayMode value);
     void (*setMotion)(Ark_NativePointer node,
                       const Type_AnimatorAttribute_motion_Arg0* value);
     void (*setOnStart)(Ark_NativePointer node,
@@ -10205,15 +10205,15 @@ typedef struct GENERATED_ArkUIButtonModifier {
                               const ResourceStr* label,
                               const Opt_ButtonOptions* options);
     void (*setType)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_ButtonType value);
     void (*setStateEffect)(Ark_NativePointer node,
                            Ark_Boolean value);
     void (*setButtonStyle)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_ButtonStyleMode value);
     void (*setControlSize)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_ControlSize value);
     void (*setRole)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_ButtonRole value);
     void (*setFontColor)(Ark_NativePointer node,
                          const ResourceColor* value);
     void (*setFontSize)(Ark_NativePointer node,
@@ -10221,7 +10221,7 @@ typedef struct GENERATED_ArkUIButtonModifier {
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_ButtonAttribute_fontWeight_Arg0* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontFamily)(Ark_NativePointer node,
                           const Type_ButtonAttribute_fontFamily_Arg0* value);
     void (*setContentModifier)(Ark_NativePointer node,
@@ -10244,7 +10244,7 @@ typedef struct GENERATED_ArkUICalendarModifier {
     void (*setOffDays)(Ark_NativePointer node,
                        const Ark_Number* value);
     void (*setDirection)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_Axis value);
     void (*setCurrentDayStyle)(Ark_NativePointer node,
                                const Ark_CurrentDayStyle* value);
     void (*setNonCurrentDayStyle)(Ark_NativePointer node,
@@ -10265,7 +10265,7 @@ typedef struct GENERATED_ArkUICalendarPickerModifier {
     void (*setCalendarPickerOptions)(Ark_NativePointer node,
                                      const Opt_CalendarOptions* options);
     void (*setEdgeAlign)(Ark_NativePointer node,
-                         Ark_Int32 alignType,
+                         enum Ark_CalendarAlign alignType,
                          const Opt_Offset* offset);
     void (*setTextStyle)(Ark_NativePointer node,
                          const Ark_PickerTextStyle* value);
@@ -10293,7 +10293,7 @@ typedef struct GENERATED_ArkUICheckboxModifier {
     void (*setSelectedColor)(Ark_NativePointer node,
                              const ResourceColor* value);
     void (*setShape)(Ark_NativePointer node,
-                     Ark_Int32 value);
+                     enum Ark_CheckBoxShape value);
     void (*setUnselectedColor)(Ark_NativePointer node,
                                const ResourceColor* value);
     void (*setMark)(Ark_NativePointer node,
@@ -10318,7 +10318,7 @@ typedef struct GENERATED_ArkUICheckboxGroupModifier {
     void (*setOnChange)(Ark_NativePointer node,
                         Ark_Function callback);
     void (*setCheckboxShape)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_CheckBoxShape value);
 } GENERATED_ArkUICheckboxGroupModifier;
 
 typedef struct GENERATED_ArkUICircleModifier {
@@ -10330,9 +10330,9 @@ typedef struct GENERATED_ArkUIColumnModifier {
     void (*setColumnOptions)(Ark_NativePointer node,
                              const Opt_ColumnOptions* options);
     void (*setAlignItems)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_HorizontalAlign value);
     void (*setJustifyContent)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_FlexAlign value);
     void (*setPointLight)(Ark_NativePointer node,
                           const Ark_PointLightStyle* value);
     void (*setReverse)(Ark_NativePointer node,
@@ -10371,7 +10371,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setTouchable)(Ark_NativePointer node,
                          Ark_Boolean value);
     void (*setHitTestBehavior)(Ark_NativePointer node,
-                               Ark_Int32 value);
+                               enum Ark_HitTestMode value);
     void (*setOnChildTouchTest)(Ark_NativePointer node,
                                 Ark_Function event);
     void (*setLayoutWeight)(Ark_NativePointer node,
@@ -10395,7 +10395,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setBackgroundImagePosition)(Ark_NativePointer node,
                                        const Type_CommonMethod_backgroundImagePosition_Arg0* value);
     void (*setBackgroundBlurStyle)(Ark_NativePointer node,
-                                   Ark_Int32 value,
+                                   enum Ark_BlurStyle value,
                                    const Opt_BackgroundBlurStyleOptions* options);
     void (*setBackgroundEffect)(Ark_NativePointer node,
                                 const Ark_BackgroundEffectOptions* options);
@@ -10412,7 +10412,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setCompositingFilter)(Ark_NativePointer node,
                                  const Ark_CustomObject* filter);
     void (*setForegroundBlurStyle)(Ark_NativePointer node,
-                                   Ark_Int32 value,
+                                   enum Ark_BlurStyle value,
                                    const Opt_ForegroundBlurStyleOptions* options);
     void (*setOpacity)(Ark_NativePointer node,
                        const Type_CommonMethod_opacity_Arg0* value);
@@ -10450,7 +10450,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnAccessibilityHover)(Ark_NativePointer node,
                                     Ark_Function callback);
     void (*setHoverEffect)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_HoverEffect value);
     void (*setOnMouse)(Ark_NativePointer node,
                        Ark_Function event);
     void (*setOnTouch)(Ark_NativePointer node,
@@ -10556,7 +10556,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnAreaChange)(Ark_NativePointer node,
                             Ark_Function event);
     void (*setVisibility)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_Visibility value);
     void (*setFlexGrow)(Ark_NativePointer node,
                         const Ark_Number* value);
     void (*setFlexShrink)(Ark_NativePointer node,
@@ -10564,7 +10564,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setFlexBasis)(Ark_NativePointer node,
                          const Type_CommonMethod_flexBasis_Arg0* value);
     void (*setAlignSelf)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_ItemAlign value);
     void (*setDisplayPriority)(Ark_NativePointer node,
                                const Ark_Number* value);
     void (*setZIndex)(Ark_NativePointer node,
@@ -10573,9 +10573,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                 const Ark_String* id,
                                 const Opt_sharedTransitionOptions* options);
     void (*setDirection)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_Direction value);
     void (*setAlign)(Ark_NativePointer node,
-                     Ark_Int32 value);
+                     enum Ark_Alignment value);
     void (*setPosition)(Ark_NativePointer node,
                         const Type_CommonMethod_position_Arg0* value);
     void (*setMarkAnchor)(Ark_NativePointer node,
@@ -10591,8 +10591,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setAlignRules1)(Ark_NativePointer node,
                            const Ark_LocalizedAlignRuleOptions* alignRule);
     void (*setChainMode)(Ark_NativePointer node,
-                         Ark_Int32 direction,
-                         Ark_Int32 style);
+                         enum Ark_Axis direction,
+                         enum Ark_ChainStyle style);
     void (*setAspectRatio)(Ark_NativePointer node,
                            const Ark_Number* value);
     void (*setClickEffect)(Ark_NativePointer node,
@@ -10634,7 +10634,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setShadow)(Ark_NativePointer node,
                       const Type_CommonMethod_shadow_Arg0* value);
     void (*setBlendMode)(Ark_NativePointer node,
-                         Ark_Int32 value,
+                         enum Ark_BlendMode value,
                          const Opt_BlendApplyType* type);
     void (*setAdvancedBlendMode)(Ark_NativePointer node,
                                  const Type_CommonMethod_advancedBlendMode_Arg0* effect,
@@ -10672,7 +10672,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_MenuOptions* options);
     void (*setBindContextMenu0)(Ark_NativePointer node,
                                 const CustomBuilder* content,
-                                Ark_Int32 responseType,
+                                enum Ark_ResponseType responseType,
                                 const Opt_ContextMenuOptions* options);
     void (*setBindContextMenu1)(Ark_NativePointer node,
                                 Ark_Boolean isShown,
@@ -10728,7 +10728,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setReuseId)(Ark_NativePointer node,
                        const Ark_String* id);
     void (*setRenderFit)(Ark_NativePointer node,
-                         Ark_Int32 fitMode);
+                         enum Ark_RenderFit fitMode);
     void (*setGestureModifier)(Ark_NativePointer node,
                                const Ark_Materialized* modifier);
     void (*setBackgroundBrightness)(Ark_NativePointer node,
@@ -10755,9 +10755,9 @@ typedef struct GENERATED_ArkUICommonShapeMethodModifier {
     void (*setStrokeDashOffset)(Ark_NativePointer node,
                                 const Type_CommonShapeMethod_strokeDashOffset_Arg0* value);
     void (*setStrokeLineCap)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_LineCapStyle value);
     void (*setStrokeLineJoin)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_LineJoinStyle value);
     void (*setStrokeMiterLimit)(Ark_NativePointer node,
                                 const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value);
     void (*setStrokeOpacity)(Ark_NativePointer node,
@@ -10778,13 +10778,13 @@ typedef struct GENERATED_ArkUICommonModifier {
 
 typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
     void (*setScrollBar)(Ark_NativePointer node,
-                         Ark_Int32 barState);
+                         enum Ark_BarState barState);
     void (*setScrollBarColor)(Ark_NativePointer node,
                               const Type_ScrollableCommonMethod_scrollBarColor_Arg0* color);
     void (*setScrollBarWidth)(Ark_NativePointer node,
                               const Type_ScrollableCommonMethod_scrollBarWidth_Arg0* value);
     void (*setEdgeEffect)(Ark_NativePointer node,
-                          Ark_Int32 edgeEffect,
+                          enum Ark_EdgeEffect edgeEffect,
                           const Opt_EdgeEffectOptions* options);
     void (*setFadingEdge)(Ark_NativePointer node,
                           const Opt_Boolean* enabled,
@@ -10894,7 +10894,7 @@ typedef struct GENERATED_ArkUIDividerModifier {
     void (*setStrokeWidth)(Ark_NativePointer node,
                            const Type_DividerAttribute_strokeWidth_Arg0* value);
     void (*setLineCap)(Ark_NativePointer node,
-                       Ark_Int32 value);
+                       enum Ark_LineCapStyle value);
 } GENERATED_ArkUIDividerModifier;
 
 typedef struct GENERATED_ArkUIEffectComponentModifier {
@@ -10909,7 +10909,7 @@ typedef struct GENERATED_ArkUIEllipseModifier {
 typedef struct GENERATED_ArkUIEmbeddedComponentModifier {
     void (*setEmbeddedComponentOptions)(Ark_NativePointer node,
                                         const Ark_CustomObject* loader,
-                                        Ark_Int32 type);
+                                        enum Ark_EmbeddedType type);
     void (*setOnTerminated)(Ark_NativePointer node,
                             Ark_Function callback);
     void (*setOnError)(Ark_NativePointer node,
@@ -10931,7 +10931,7 @@ typedef struct GENERATED_ArkUIFolderStackModifier {
     void (*setFolderStackOptions)(Ark_NativePointer node,
                                   const Opt_FolderStackOptions* options);
     void (*setAlignContent)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_Alignment value);
     void (*setOnFolderStateChange)(Ark_NativePointer node,
                                    Ark_Function callback);
     void (*setOnHoverStatusChange)(Ark_NativePointer node,
@@ -10950,11 +10950,11 @@ typedef struct GENERATED_ArkUIFormComponentModifier {
     void (*setModuleName)(Ark_NativePointer node,
                           const Ark_String* value);
     void (*setDimension)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FormDimension value);
     void (*setAllowUpdate)(Ark_NativePointer node,
                            Ark_Boolean value);
     void (*setVisibility)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_Visibility value);
     void (*setOnAcquired)(Ark_NativePointer node,
                           Ark_Function callback);
     void (*setOnError)(Ark_NativePointer node,
@@ -11014,7 +11014,7 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setScrollBarColor)(Ark_NativePointer node,
                               const Type_GridAttribute_scrollBarColor_Arg0* value);
     void (*setScrollBar)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_BarState value);
     void (*setOnScrollBarUpdate)(Ark_NativePointer node,
                                  Ark_Function event);
     void (*setOnScrollIndex)(Ark_NativePointer node,
@@ -11032,7 +11032,7 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setCellLength)(Ark_NativePointer node,
                           const Ark_Number* value);
     void (*setLayoutDirection)(Ark_NativePointer node,
-                               Ark_Int32 value);
+                               enum Ark_GridDirection value);
     void (*setSupportAnimation)(Ark_NativePointer node,
                                 Ark_Boolean value);
     void (*setOnItemDragStart)(Ark_NativePointer node,
@@ -11046,7 +11046,7 @@ typedef struct GENERATED_ArkUIGridModifier {
     void (*setOnItemDrop)(Ark_NativePointer node,
                           Ark_Function event);
     void (*setEdgeEffect)(Ark_NativePointer node,
-                          Ark_Int32 value,
+                          enum Ark_EdgeEffect value,
                           const Opt_EdgeEffectOptions* options);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Ark_NestedScrollOptions* value);
@@ -11113,7 +11113,7 @@ typedef struct GENERATED_ArkUIGridRowModifier {
     void (*setOnBreakpointChange)(Ark_NativePointer node,
                                   Ark_Function callback);
     void (*setAlignItems)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_ItemAlign value);
 } GENERATED_ArkUIGridRowModifier;
 
 typedef struct GENERATED_ArkUIHyperlinkModifier {
@@ -11141,17 +11141,17 @@ typedef struct GENERATED_ArkUIImageModifier {
     void (*setFillColor)(Ark_NativePointer node,
                          const ResourceColor* value);
     void (*setObjectFit)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_ImageFit value);
     void (*setObjectRepeat)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_ImageRepeat value);
     void (*setAutoResize)(Ark_NativePointer node,
                           Ark_Boolean value);
     void (*setRenderMode)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_ImageRenderMode value);
     void (*setDynamicRangeMode)(Ark_NativePointer node,
-                                Ark_Int32 value);
+                                enum Ark_DynamicRangeMode value);
     void (*setInterpolation)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_ImageInterpolation value);
     void (*setSourceSize)(Ark_NativePointer node,
                           const Type_ImageAttribute_sourceSize_Arg0* value);
     void (*setSyncLoad)(Ark_NativePointer node,
@@ -11159,7 +11159,7 @@ typedef struct GENERATED_ArkUIImageModifier {
     void (*setColorFilter)(Ark_NativePointer node,
                            const Type_ImageAttribute_colorFilter_Arg0* value);
     void (*setCopyOption)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_CopyOptions value);
     void (*setDraggable)(Ark_NativePointer node,
                          Ark_Boolean value);
     void (*setPointLight)(Ark_NativePointer node,
@@ -11189,7 +11189,7 @@ typedef struct GENERATED_ArkUIImageAnimatorModifier {
     void (*setImages)(Ark_NativePointer node,
                       const Array_ImageFrameInfo* value);
     void (*setState)(Ark_NativePointer node,
-                     Ark_Int32 value);
+                     enum Ark_AnimationStatus value);
     void (*setDuration)(Ark_NativePointer node,
                         const Ark_Number* value);
     void (*setReverse)(Ark_NativePointer node,
@@ -11199,7 +11199,7 @@ typedef struct GENERATED_ArkUIImageAnimatorModifier {
     void (*setPreDecode)(Ark_NativePointer node,
                          const Ark_Number* value);
     void (*setFillMode)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_FillMode value);
     void (*setIterations)(Ark_NativePointer node,
                           const Ark_Number* value);
     void (*setOnStart)(Ark_NativePointer node,
@@ -11218,11 +11218,11 @@ typedef struct GENERATED_ArkUIImageSpanModifier {
     void (*setImageSpanOptions)(Ark_NativePointer node,
                                 const Type_ImageSpanInterface_setImageSpanOptions_Arg0* value);
     void (*setVerticalAlign)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_ImageSpanAlignment value);
     void (*setColorFilter)(Ark_NativePointer node,
                            const Type_ImageSpanAttribute_colorFilter_Arg0* filter);
     void (*setObjectFit)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_ImageFit value);
     void (*setOnComplete)(Ark_NativePointer node,
                           Ark_Function callback);
     void (*setOnError)(Ark_NativePointer node,
@@ -11247,13 +11247,13 @@ typedef struct GENERATED_ArkUIListModifier {
                      const Type_ListAttribute_lanes_Arg0* value,
                      const Opt_Dimension* gutter);
     void (*setAlignListItem)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_ListItemAlign value);
     void (*setListDirection)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_Axis value);
     void (*setScrollBar)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_BarState value);
     void (*setEdgeEffect)(Ark_NativePointer node,
-                          Ark_Int32 value,
+                          enum Ark_EdgeEffect value,
                           const Opt_EdgeEffectOptions* options);
     void (*setContentStartOffset)(Ark_NativePointer node,
                                   const Ark_Number* value);
@@ -11272,9 +11272,9 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setChainAnimationOptions)(Ark_NativePointer node,
                                      const Ark_ChainAnimationOptions* value);
     void (*setSticky)(Ark_NativePointer node,
-                      Ark_Int32 value);
+                      enum Ark_StickyStyle value);
     void (*setScrollSnapAlign)(Ark_NativePointer node,
-                               Ark_Int32 value);
+                               enum Ark_ScrollSnapAlign value);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Ark_NestedScrollOptions* value);
     void (*setEnableScrollInteraction)(Ark_NativePointer node,
@@ -11323,7 +11323,7 @@ typedef struct GENERATED_ArkUIListItemModifier {
     void (*setListItemOptions1)(Ark_NativePointer node,
                                 const Opt_String* value);
     void (*setSticky)(Ark_NativePointer node,
-                      Ark_Int32 value);
+                      enum Ark_Sticky value);
     void (*setEditable)(Ark_NativePointer node,
                         const Type_ListItemAttribute_editable_Arg0* value);
     void (*setSelectable)(Ark_NativePointer node,
@@ -11377,7 +11377,7 @@ typedef struct GENERATED_ArkUIMarqueeModifier {
     void (*setFontFamily)(Ark_NativePointer node,
                           const Type_MarqueeAttribute_fontFamily_Arg0* value);
     void (*setMarqueeUpdateStrategy)(Ark_NativePointer node,
-                                     Ark_Int32 value);
+                                     enum Ark_MarqueeUpdateStrategy value);
     void (*setOnStart)(Ark_NativePointer node,
                        Ark_Function event);
     void (*setOnBounce)(Ark_NativePointer node,
@@ -11406,7 +11406,7 @@ typedef struct GENERATED_ArkUIMenuModifier {
     void (*setMenuItemGroupDivider)(Ark_NativePointer node,
                                     const Type_MenuAttribute_menuItemGroupDivider_Arg0* options);
     void (*setSubMenuExpandingMode)(Ark_NativePointer node,
-                                    Ark_Int32 mode);
+                                    enum Ark_SubMenuExpandingMode mode);
 } GENERATED_ArkUIMenuModifier;
 
 typedef struct GENERATED_ArkUIMenuItemModifier {
@@ -11450,7 +11450,7 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setOnBackPressed)(Ark_NativePointer node,
                              Ark_Function callback);
     void (*setMode)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_NavDestinationMode value);
     void (*setBackButtonIcon)(Ark_NativePointer node,
                               const Type_NavDestinationAttribute_backButtonIcon_Arg0* value);
     void (*setMenus)(Ark_NativePointer node,
@@ -11471,7 +11471,7 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
     void (*setSystemBarStyle)(Ark_NativePointer node,
                               const Opt_CustomObject* style);
     void (*setSystemTransition)(Ark_NativePointer node,
-                                Ark_Int32 type);
+                                enum Ark_NavigationSystemTransitionType type);
 } GENERATED_ArkUINavDestinationModifier;
 
 typedef struct GENERATED_ArkUINavRouterModifier {
@@ -11481,7 +11481,7 @@ typedef struct GENERATED_ArkUINavRouterModifier {
     void (*setOnStateChange)(Ark_NativePointer node,
                              Ark_Function callback);
     void (*setMode)(Ark_NativePointer node,
-                    Ark_Int32 mode);
+                    enum Ark_NavRouteMode mode);
 } GENERATED_ArkUINavRouterModifier;
 
 typedef struct GENERATED_ArkUINavigationModifier {
@@ -11491,13 +11491,13 @@ typedef struct GENERATED_ArkUINavigationModifier {
     void (*setNavBarWidth)(Ark_NativePointer node,
                            const Ark_Length* value);
     void (*setNavBarPosition)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_NavBarPosition value);
     void (*setNavBarWidthRange)(Ark_NativePointer node,
                                 const Type_NavigationAttribute_navBarWidthRange_Arg0* value);
     void (*setMinContentWidth)(Ark_NativePointer node,
                                const Ark_Length* value);
     void (*setMode)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_NavigationMode value);
     void (*setBackButtonIcon)(Ark_NativePointer node,
                               const Type_NavigationAttribute_backButtonIcon_Arg0* value);
     void (*setHideNavBar)(Ark_NativePointer node,
@@ -11515,7 +11515,7 @@ typedef struct GENERATED_ArkUINavigationModifier {
     void (*setHideBackButton)(Ark_NativePointer node,
                               Ark_Boolean value);
     void (*setTitleMode)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_NavigationTitleMode value);
     void (*setMenus)(Ark_NativePointer node,
                      const Type_NavigationAttribute_menus_Arg0* value);
     void (*setToolBar)(Ark_NativePointer node,
@@ -11552,7 +11552,7 @@ typedef struct GENERATED_ArkUINavigatorModifier {
     void (*setActive)(Ark_NativePointer node,
                       Ark_Boolean value);
     void (*setType)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_NavigationType value);
     void (*setTarget)(Ark_NativePointer node,
                       const Ark_String* value);
     void (*setParams)(Ark_NativePointer node,
@@ -11568,9 +11568,9 @@ typedef struct GENERATED_ArkUIPanelModifier {
     void (*setPanelOptions)(Ark_NativePointer node,
                             Ark_Boolean show);
     void (*setMode)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_PanelMode value);
     void (*setType)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_PanelType value);
     void (*setDragBar)(Ark_NativePointer node,
                        Ark_Boolean value);
     void (*setCustomHeight)(Ark_NativePointer node,
@@ -11759,9 +11759,9 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setOnDeleteComplete)(Ark_NativePointer node,
                                 Ark_Function callback);
     void (*setCopyOptions)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_CopyOptions value);
     void (*setBindSelectionMenu)(Ark_NativePointer node,
-                                 Ark_Int32 spanType,
+                                 enum Ark_RichEditorSpanType spanType,
                                  const CustomBuilder* content,
                                  const Type_RichEditorAttribute_bindSelectionMenu_Arg2* responseType,
                                  const Opt_SelectionMenuOptions* options);
@@ -11786,7 +11786,7 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setOnEditingChange)(Ark_NativePointer node,
                                Ark_Function callback);
     void (*setEnterKeyType)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_EnterKeyType value);
     void (*setOnSubmit)(Ark_NativePointer node,
                         Ark_Function callback);
     void (*setOnWillChange)(Ark_NativePointer node,
@@ -11804,7 +11804,7 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
                                     Ark_Boolean isEnabled);
     void (*setBarState)(Ark_NativePointer node,
-                        Ark_Int32 state);
+                        enum Ark_BarState state);
 } GENERATED_ArkUIRichEditorModifier;
 
 typedef struct GENERATED_ArkUIRichTextModifier {
@@ -11825,9 +11825,9 @@ typedef struct GENERATED_ArkUIRowModifier {
     void (*setRowOptions)(Ark_NativePointer node,
                           const Opt_RowOptions* options);
     void (*setAlignItems)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_VerticalAlign value);
     void (*setJustifyContent)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_FlexAlign value);
     void (*setPointLight)(Ark_NativePointer node,
                           const Ark_PointLightStyle* value);
     void (*setReverse)(Ark_NativePointer node,
@@ -11857,7 +11857,7 @@ typedef struct GENERATED_ArkUIScrollModifier {
     void (*setScrollOptions)(Ark_NativePointer node,
                              const Opt_Scroller* scroller);
     void (*setScrollable)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_ScrollDirection value);
     void (*setOnScroll)(Ark_NativePointer node,
                         Ark_Function event);
     void (*setOnWillScroll)(Ark_NativePointer node,
@@ -11873,13 +11873,13 @@ typedef struct GENERATED_ArkUIScrollModifier {
     void (*setOnScrollStop)(Ark_NativePointer node,
                             Ark_Function event);
     void (*setScrollBar)(Ark_NativePointer node,
-                         Ark_Int32 barState);
+                         enum Ark_BarState barState);
     void (*setScrollBarColor)(Ark_NativePointer node,
                               const Type_ScrollAttribute_scrollBarColor_Arg0* color);
     void (*setScrollBarWidth)(Ark_NativePointer node,
                               const Type_ScrollAttribute_scrollBarWidth_Arg0* value);
     void (*setEdgeEffect)(Ark_NativePointer node,
-                          Ark_Int32 edgeEffect,
+                          enum Ark_EdgeEffect edgeEffect,
                           const Opt_EdgeEffectOptions* options);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   Ark_Function event);
@@ -11934,7 +11934,7 @@ typedef struct GENERATED_ArkUISearchModifier {
     void (*setTextFont)(Ark_NativePointer node,
                         const Opt_Font* value);
     void (*setEnterKeyType)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_EnterKeyType value);
     void (*setOnSubmit)(Ark_NativePointer node,
                         Ark_Function callback);
     void (*setOnChange)(Ark_NativePointer node,
@@ -11950,11 +11950,11 @@ typedef struct GENERATED_ArkUISearchModifier {
     void (*setOnPaste)(Ark_NativePointer node,
                        Ark_Function callback);
     void (*setCopyOption)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_CopyOptions value);
     void (*setMaxLength)(Ark_NativePointer node,
                          const Ark_Number* value);
     void (*setTextAlign)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_TextAlign value);
     void (*setEnableKeyboardOnFocus)(Ark_NativePointer node,
                                      Ark_Boolean value);
     void (*setSelectionMenuHidden)(Ark_NativePointer node,
@@ -11973,7 +11973,7 @@ typedef struct GENERATED_ArkUISearchModifier {
     void (*setLineHeight)(Ark_NativePointer node,
                           const Type_SearchAttribute_lineHeight_Arg0* value);
     void (*setType)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_SearchType value);
     void (*setFontFeature)(Ark_NativePointer node,
                            const Ark_String* value);
     void (*setOnWillInsert)(Ark_NativePointer node,
@@ -11994,7 +11994,7 @@ typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
     void (*setIconSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setLayoutDirection)(Ark_NativePointer node,
-                               Ark_Int32 value);
+                               enum Ark_SecurityComponentLayoutDirection value);
     void (*setPosition)(Ark_NativePointer node,
                         const Ark_Position* value);
     void (*setMarkAnchor)(Ark_NativePointer node,
@@ -12004,7 +12004,7 @@ typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
     void (*setFontSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_SecurityComponentMethod_fontWeight_Arg0* value);
     void (*setFontFamily)(Ark_NativePointer node,
@@ -12016,7 +12016,7 @@ typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
     void (*setBackgroundColor)(Ark_NativePointer node,
                                const ResourceColor* value);
     void (*setBorderStyle)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_BorderStyle value);
     void (*setBorderWidth)(Ark_NativePointer node,
                            const Ark_Length* value);
     void (*setBorderColor)(Ark_NativePointer node,
@@ -12067,9 +12067,9 @@ typedef struct GENERATED_ArkUISelectModifier {
     void (*setSpace)(Ark_NativePointer node,
                      const Ark_Length* value);
     void (*setArrowPosition)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_ArrowPosition value);
     void (*setMenuAlign)(Ark_NativePointer node,
-                         Ark_Int32 alignType,
+                         enum Ark_MenuAlignType alignType,
                          const Opt_Offset* offset);
     void (*setOptionWidth)(Ark_NativePointer node,
                            const Type_SelectAttribute_optionWidth_Arg0* value);
@@ -12078,9 +12078,9 @@ typedef struct GENERATED_ArkUISelectModifier {
     void (*setMenuBackgroundColor)(Ark_NativePointer node,
                                    const ResourceColor* value);
     void (*setMenuBackgroundBlurStyle)(Ark_NativePointer node,
-                                       Ark_Int32 value);
+                                       enum Ark_BlurStyle value);
     void (*setControlSize)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_ControlSize value);
     void (*setMenuItemContentModifier)(Ark_NativePointer node,
                                        const Ark_CustomObject* modifier);
     void (*setDivider)(Ark_NativePointer node,
@@ -12102,9 +12102,9 @@ typedef struct GENERATED_ArkUIShapeModifier {
     void (*setStrokeDashArray)(Ark_NativePointer node,
                                const Array_CustomObject* value);
     void (*setStrokeLineCap)(Ark_NativePointer node,
-                             Ark_Int32 value);
+                             enum Ark_LineCapStyle value);
     void (*setStrokeLineJoin)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_LineJoinStyle value);
     void (*setStrokeMiterLimit)(Ark_NativePointer node,
                                 const Type_ShapeAttribute_strokeMiterLimit_Arg0* value);
     void (*setStrokeOpacity)(Ark_NativePointer node,
@@ -12160,7 +12160,7 @@ typedef struct GENERATED_ArkUISliderModifier {
     void (*setStepSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setSliderInteractionMode)(Ark_NativePointer node,
-                                     Ark_Int32 value);
+                                     enum Ark_SliderInteraction value);
     void (*setMinResponsiveDistance)(Ark_NativePointer node,
                                      const Ark_Number* value);
     void (*setContentModifier)(Ark_NativePointer node,
@@ -12186,7 +12186,7 @@ typedef struct GENERATED_ArkUISpanModifier {
     void (*setFontSize)(Ark_NativePointer node,
                         const Type_SpanAttribute_fontSize_Arg0* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_SpanAttribute_fontWeight_Arg0* value);
     void (*setFontFamily)(Ark_NativePointer node,
@@ -12196,7 +12196,7 @@ typedef struct GENERATED_ArkUISpanModifier {
     void (*setLetterSpacing)(Ark_NativePointer node,
                              const Type_SpanAttribute_letterSpacing_Arg0* value);
     void (*setTextCase)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_TextCase value);
     void (*setLineHeight)(Ark_NativePointer node,
                           const Ark_Length* value);
     void (*setTextShadow)(Ark_NativePointer node,
@@ -12207,7 +12207,7 @@ typedef struct GENERATED_ArkUIStackModifier {
     void (*setStackOptions)(Ark_NativePointer node,
                             const Opt_StackOptions* options);
     void (*setAlignContent)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_Alignment value);
     void (*setPointLight)(Ark_NativePointer node,
                           const Ark_PointLightStyle* value);
 } GENERATED_ArkUIStackModifier;
@@ -12260,14 +12260,14 @@ typedef struct GENERATED_ArkUISwiperModifier {
     void (*setItemSpace)(Ark_NativePointer node,
                          const Type_SwiperAttribute_itemSpace_Arg0* value);
     void (*setDisplayMode)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_SwiperDisplayMode value);
     void (*setCachedCount)(Ark_NativePointer node,
                            const Ark_Number* value);
     void (*setDisplayCount)(Ark_NativePointer node,
                             const Type_SwiperAttribute_displayCount_Arg0* value,
                             const Opt_Boolean* swipeByGroup);
     void (*setEffectMode)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_EdgeEffect value);
     void (*setDisableSwipe)(Ark_NativePointer node,
                             Ark_Boolean value);
     void (*setCurve)(Ark_NativePointer node,
@@ -12289,7 +12289,7 @@ typedef struct GENERATED_ArkUISwiperModifier {
     void (*setOnGestureSwipe)(Ark_NativePointer node,
                               Ark_Function event);
     void (*setNestedScroll)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_SwiperNestedScrollMode value);
     void (*setCustomContentTransition)(Ark_NativePointer node,
                                        const Ark_SwiperContentAnimatedTransition* transition);
     void (*setOnContentDidScroll)(Ark_NativePointer node,
@@ -12308,9 +12308,9 @@ typedef struct GENERATED_ArkUISymbolGlyphModifier {
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_SymbolGlyphAttribute_fontWeight_Arg0* value);
     void (*setEffectStrategy)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_SymbolEffectStrategy value);
     void (*setRenderingStrategy)(Ark_NativePointer node,
-                                 Ark_Int32 value);
+                                 enum Ark_SymbolRenderingStrategy value);
     void (*setSymbolEffect0)(Ark_NativePointer node,
                              const Ark_SymbolEffect* symbolEffect,
                              const Opt_Boolean* isActive);
@@ -12329,9 +12329,9 @@ typedef struct GENERATED_ArkUISymbolSpanModifier {
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_SymbolSpanAttribute_fontWeight_Arg0* value);
     void (*setEffectStrategy)(Ark_NativePointer node,
-                              Ark_Int32 value);
+                              enum Ark_SymbolEffectStrategy value);
     void (*setRenderingStrategy)(Ark_NativePointer node,
-                                 Ark_Int32 value);
+                                 enum Ark_SymbolRenderingStrategy value);
 } GENERATED_ArkUISymbolSpanModifier;
 
 typedef struct GENERATED_ArkUITabsModifier {
@@ -12340,16 +12340,16 @@ typedef struct GENERATED_ArkUITabsModifier {
     void (*setVertical)(Ark_NativePointer node,
                         Ark_Boolean value);
     void (*setBarPosition)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_BarPosition value);
     void (*setScrollable)(Ark_NativePointer node,
                           Ark_Boolean value);
     void (*setBarMode0)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_BarMode value);
     void (*setBarMode1)(Ark_NativePointer node,
-                        Ark_Int32 value,
+                        enum Ark_BarMode value,
                         const Ark_ScrollableBarModeOptions* options);
     void (*setBarMode2)(Ark_NativePointer node,
-                        Ark_Int32 value,
+                        enum Ark_BarMode value,
                         const Opt_ScrollableBarModeOptions* options);
     void (*setBarWidth)(Ark_NativePointer node,
                         const Ark_Length* value);
@@ -12384,7 +12384,7 @@ typedef struct GENERATED_ArkUITabsModifier {
     void (*setCustomContentTransition)(Ark_NativePointer node,
                                        Ark_Function delegate);
     void (*setBarBackgroundBlurStyle)(Ark_NativePointer node,
-                                      Ark_Int32 value);
+                                      enum Ark_BlurStyle value);
     void (*setOnContentWillChange)(Ark_NativePointer node,
                                    Ark_Function handler);
 } GENERATED_ArkUITabsModifier;
@@ -12423,7 +12423,7 @@ typedef struct GENERATED_ArkUITextModifier {
     void (*setMaxFontScale)(Ark_NativePointer node,
                             const Type_TextAttribute_maxFontScale_Arg0* scale);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight0)(Ark_NativePointer node,
                            const Type_TextAttribute_fontWeight_Arg0* value);
     void (*setFontWeight1)(Ark_NativePointer node,
@@ -12432,7 +12432,7 @@ typedef struct GENERATED_ArkUITextModifier {
     void (*setLineSpacing)(Ark_NativePointer node,
                            const Ark_CustomObject* value);
     void (*setTextAlign)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_TextAlign value);
     void (*setLineHeight)(Ark_NativePointer node,
                           const Type_TextAttribute_lineHeight_Arg0* value);
     void (*setTextOverflow)(Ark_NativePointer node,
@@ -12446,38 +12446,38 @@ typedef struct GENERATED_ArkUITextModifier {
     void (*setLetterSpacing)(Ark_NativePointer node,
                              const Type_TextAttribute_letterSpacing_Arg0* value);
     void (*setTextCase)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_TextCase value);
     void (*setBaselineOffset)(Ark_NativePointer node,
                               const Type_TextAttribute_baselineOffset_Arg0* value);
     void (*setCopyOption)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_CopyOptions value);
     void (*setDraggable)(Ark_NativePointer node,
                          Ark_Boolean value);
     void (*setTextShadow)(Ark_NativePointer node,
                           const Type_TextAttribute_textShadow_Arg0* value);
     void (*setHeightAdaptivePolicy)(Ark_NativePointer node,
-                                    Ark_Int32 value);
+                                    enum Ark_TextHeightAdaptivePolicy value);
     void (*setTextIndent)(Ark_NativePointer node,
                           const Ark_Length* value);
     void (*setWordBreak)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_WordBreak value);
     void (*setLineBreakStrategy)(Ark_NativePointer node,
-                                 Ark_Int32 strategy);
+                                 enum Ark_LineBreakStrategy strategy);
     void (*setOnCopy)(Ark_NativePointer node,
                       Ark_Function callback);
     void (*setSelection)(Ark_NativePointer node,
                          const Ark_Number* selectionStart,
                          const Ark_Number* selectionEnd);
     void (*setEllipsisMode)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_EllipsisMode value);
     void (*setEnableDataDetector)(Ark_NativePointer node,
                                   Ark_Boolean enable);
     void (*setDataDetectorConfig)(Ark_NativePointer node,
                                   const Ark_TextDataDetectorConfig* config);
     void (*setBindSelectionMenu)(Ark_NativePointer node,
-                                 Ark_Int32 spanType,
+                                 enum Ark_TextSpanType spanType,
                                  const CustomBuilder* content,
-                                 Ark_Int32 responseType,
+                                 enum Ark_TextResponseType responseType,
                                  const Opt_SelectionMenuOptions* options);
     void (*setOnTextSelectionChange)(Ark_NativePointer node,
                                      Ark_Function callback);
@@ -12486,7 +12486,7 @@ typedef struct GENERATED_ArkUITextModifier {
     void (*setPrivacySensitive)(Ark_NativePointer node,
                                 Ark_Boolean supported);
     void (*setTextSelectable)(Ark_NativePointer node,
-                              Ark_Int32 mode);
+                              enum Ark_TextSelectableMode mode);
     void (*setEditMenuOptions)(Ark_NativePointer node,
                                const Ark_Materialized* editMenu);
     void (*setHalfLeading)(Ark_NativePointer node,
@@ -12501,9 +12501,9 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setPlaceholderFont)(Ark_NativePointer node,
                                const Ark_Font* value);
     void (*setEnterKeyType)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_EnterKeyType value);
     void (*setTextAlign)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_TextAlign value);
     void (*setCaretColor)(Ark_NativePointer node,
                           const ResourceColor* value);
     void (*setFontColor)(Ark_NativePointer node,
@@ -12511,13 +12511,13 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setFontSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_TextAreaAttribute_fontWeight_Arg0* value);
     void (*setFontFamily)(Ark_NativePointer node,
                           const ResourceStr* value);
     void (*setTextOverflow)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_TextOverflow value);
     void (*setTextIndent)(Ark_NativePointer node,
                           const Ark_Length* value);
     void (*setInputFilter)(Ark_NativePointer node,
@@ -12544,7 +12544,7 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setOnPaste)(Ark_NativePointer node,
                        Ark_Function callback);
     void (*setCopyOption)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_CopyOptions value);
     void (*setEnableKeyboardOnFocus)(Ark_NativePointer node,
                                      Ark_Boolean value);
     void (*setMaxLength)(Ark_NativePointer node,
@@ -12553,9 +12553,9 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                            Ark_Boolean value,
                            const Opt_InputCounterOptions* options);
     void (*setStyle)(Ark_NativePointer node,
-                     Ark_Int32 value);
+                     enum Ark_TextContentStyle value);
     void (*setBarState)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_BarState value);
     void (*setSelectionMenuHidden)(Ark_NativePointer node,
                                    Ark_Boolean value);
     void (*setMinFontSize)(Ark_NativePointer node,
@@ -12563,13 +12563,13 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setMaxFontSize)(Ark_NativePointer node,
                            const Type_TextAreaAttribute_maxFontSize_Arg0* value);
     void (*setHeightAdaptivePolicy)(Ark_NativePointer node,
-                                    Ark_Int32 value);
+                                    enum Ark_TextHeightAdaptivePolicy value);
     void (*setMaxLines)(Ark_NativePointer node,
                         const Ark_Number* value);
     void (*setWordBreak)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_WordBreak value);
     void (*setLineBreakStrategy)(Ark_NativePointer node,
-                                 Ark_Int32 strategy);
+                                 enum Ark_LineBreakStrategy strategy);
     void (*setCustomKeyboard)(Ark_NativePointer node,
                               const CustomBuilder* value,
                               const Opt_KeyboardOptions* options);
@@ -12582,11 +12582,11 @@ typedef struct GENERATED_ArkUITextAreaModifier {
     void (*setLineHeight)(Ark_NativePointer node,
                           const Type_TextAreaAttribute_lineHeight_Arg0* value);
     void (*setType)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_TextAreaType value);
     void (*setEnableAutoFill)(Ark_NativePointer node,
                               Ark_Boolean value);
     void (*setContentType)(Ark_NativePointer node,
-                           Ark_Int32 contentType);
+                           enum Ark_ContentType contentType);
     void (*setFontFeature)(Ark_NativePointer node,
                            const Ark_String* value);
     void (*setOnWillInsert)(Ark_NativePointer node,
@@ -12615,7 +12615,7 @@ typedef struct GENERATED_ArkUITextClockModifier {
     void (*setFontSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_TextClockAttribute_fontWeight_Arg0* value);
     void (*setFontFamily)(Ark_NativePointer node,
@@ -12634,19 +12634,19 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setTextInputOptions)(Ark_NativePointer node,
                                 const Opt_TextInputOptions* value);
     void (*setType)(Ark_NativePointer node,
-                    Ark_Int32 value);
+                    enum Ark_InputType value);
     void (*setContentType)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_ContentType value);
     void (*setPlaceholderColor)(Ark_NativePointer node,
                                 const ResourceColor* value);
     void (*setTextOverflow)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_TextOverflow value);
     void (*setTextIndent)(Ark_NativePointer node,
                           const Ark_Length* value);
     void (*setPlaceholderFont)(Ark_NativePointer node,
                                const Opt_Font* value);
     void (*setEnterKeyType)(Ark_NativePointer node,
-                            Ark_Int32 value);
+                            enum Ark_EnterKeyType value);
     void (*setCaretColor)(Ark_NativePointer node,
                           const ResourceColor* value);
     void (*setOnEditChanged)(Ark_NativePointer node,
@@ -12668,7 +12668,7 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setFontSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_TextInputAttribute_fontWeight_Arg0* value);
     void (*setFontFamily)(Ark_NativePointer node,
@@ -12683,11 +12683,11 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setOnPaste)(Ark_NativePointer node,
                        Ark_Function callback);
     void (*setCopyOption)(Ark_NativePointer node,
-                          Ark_Int32 value);
+                          enum Ark_CopyOptions value);
     void (*setShowPasswordIcon)(Ark_NativePointer node,
                                 Ark_Boolean value);
     void (*setTextAlign)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_TextAlign value);
     void (*setStyle)(Ark_NativePointer node,
                      const Type_TextInputAttribute_style_Arg0* value);
     void (*setCaretStyle)(Ark_NativePointer node,
@@ -12711,13 +12711,13 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setSelectionMenuHidden)(Ark_NativePointer node,
                                    Ark_Boolean value);
     void (*setBarState)(Ark_NativePointer node,
-                        Ark_Int32 value);
+                        enum Ark_BarState value);
     void (*setMaxLines)(Ark_NativePointer node,
                         const Ark_Number* value);
     void (*setWordBreak)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_WordBreak value);
     void (*setLineBreakStrategy)(Ark_NativePointer node,
-                                 Ark_Int32 strategy);
+                                 enum Ark_LineBreakStrategy strategy);
     void (*setCustomKeyboard)(Ark_NativePointer node,
                               const CustomBuilder* value,
                               const Opt_KeyboardOptions* options);
@@ -12733,7 +12733,7 @@ typedef struct GENERATED_ArkUITextInputModifier {
     void (*setMaxFontSize)(Ark_NativePointer node,
                            const Type_TextInputAttribute_maxFontSize_Arg0* value);
     void (*setHeightAdaptivePolicy)(Ark_NativePointer node,
-                                    Ark_Int32 value);
+                                    enum Ark_TextHeightAdaptivePolicy value);
     void (*setEnableAutoFill)(Ark_NativePointer node,
                               Ark_Boolean value);
     void (*setDecoration)(Ark_NativePointer node,
@@ -12801,7 +12801,7 @@ typedef struct GENERATED_ArkUITextTimerModifier {
     void (*setFontSize)(Ark_NativePointer node,
                         const Ark_Length* value);
     void (*setFontStyle)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_FontStyle value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Type_TextTimerAttribute_fontWeight_Arg0* value);
     void (*setFontFamily)(Ark_NativePointer node,
@@ -12862,7 +12862,7 @@ typedef struct GENERATED_ArkUIVideoModifier {
     void (*setLoop)(Ark_NativePointer node,
                     Ark_Boolean value);
     void (*setObjectFit)(Ark_NativePointer node,
-                         Ark_Int32 value);
+                         enum Ark_ImageFit value);
     void (*setOnStart)(Ark_NativePointer node,
                        Ark_Function event);
     void (*setOnPause)(Ark_NativePointer node,
@@ -12903,7 +12903,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setImageAccess)(Ark_NativePointer node,
                            Ark_Boolean imageAccess);
     void (*setMixedMode)(Ark_NativePointer node,
-                         Ark_Int32 mixedMode);
+                         enum Ark_MixedMode mixedMode);
     void (*setZoomAccess)(Ark_NativePointer node,
                           Ark_Boolean zoomAccess);
     void (*setGeolocationAccess)(Ark_NativePointer node,
@@ -12913,9 +12913,9 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setPassword)(Ark_NativePointer node,
                         Ark_Boolean password);
     void (*setCacheMode)(Ark_NativePointer node,
-                         Ark_Int32 cacheMode);
+                         enum Ark_CacheMode cacheMode);
     void (*setDarkMode)(Ark_NativePointer node,
-                        Ark_Int32 mode);
+                        enum Ark_WebDarkMode mode);
     void (*setForceDarkAccess)(Ark_NativePointer node,
                                Ark_Boolean access);
     void (*setMediaOptions)(Ark_NativePointer node,
@@ -12927,7 +12927,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setOverviewModeAccess)(Ark_NativePointer node,
                                   Ark_Boolean overviewModeAccess);
     void (*setOverScrollMode)(Ark_NativePointer node,
-                              Ark_Int32 mode);
+                              enum Ark_OverScrollMode mode);
     void (*setTextZoomAtio)(Ark_NativePointer node,
                             const Ark_Number* textZoomAtio);
     void (*setTextZoomRatio)(Ark_NativePointer node,
@@ -13091,7 +13091,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setJavaScriptOnDocumentEnd)(Ark_NativePointer node,
                                        const Array_ScriptItem* scripts);
     void (*setLayoutMode)(Ark_NativePointer node,
-                          Ark_Int32 mode);
+                          enum Ark_WebLayoutMode mode);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Type_WebAttribute_nestedScroll_Arg0* value);
     void (*setEnableNativeEmbedMode)(Ark_NativePointer node,
@@ -13106,7 +13106,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setOnNativeEmbedGestureEvent)(Ark_NativePointer node,
                                          Ark_Function callback);
     void (*setCopyOptions)(Ark_NativePointer node,
-                           Ark_Int32 value);
+                           enum Ark_CopyOptions value);
     void (*setOnOverrideUrlLoading)(Ark_NativePointer node,
                                     Ark_Function callback);
     void (*setTextAutosizing)(Ark_NativePointer node,
@@ -13128,7 +13128,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setOnAdsBlocked)(Ark_NativePointer node,
                             Ark_Function callback);
     void (*setKeyboardAvoidMode)(Ark_NativePointer node,
-                                 Ark_Int32 mode);
+                                 enum Ark_WebKeyboardAvoidMode mode);
     void (*setEditMenuOptions)(Ark_NativePointer node,
                                const Ark_Materialized* editMenu);
     void (*setEnableHapticFeedback)(Ark_NativePointer node,
@@ -13184,7 +13184,7 @@ typedef struct GENERATED_ArkUISideBarContainerModifier {
     void (*setAutoHide)(Ark_NativePointer node,
                         Ark_Boolean value);
     void (*setSideBarPosition)(Ark_NativePointer node,
-                               Ark_Int32 value);
+                               enum Ark_SideBarPosition value);
     void (*setDivider)(Ark_NativePointer node,
                        const Type_SideBarContainerAttribute_divider_Arg0* value);
     void (*setMinContentWidth)(Ark_NativePointer node,
@@ -13210,7 +13210,7 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
     void (*setRowsGap)(Ark_NativePointer node,
                        const Ark_Length* value);
     void (*setLayoutDirection)(Ark_NativePointer node,
-                               Ark_Int32 value);
+                               enum Ark_FlexDirection value);
     void (*setNestedScroll)(Ark_NativePointer node,
                             const Ark_NestedScrollOptions* value);
     void (*setEnableScrollInteraction)(Ark_NativePointer node,
@@ -13282,7 +13282,7 @@ typedef struct PanGestureOptionsPeer PanGestureOptionsPeer;
 typedef struct GENERATED_ArkUIPanGestureOptionsAccessor {
     Ark_NativePointer (*ctor)(const Opt_Literal_Opt_Number_fingers_distance_Opt_PanDirection_direction* value);
     Ark_NativePointer (*getFinalizer)();
-    void (*setDirection)(PanGestureOptionsPeer* peer, Ark_Int32 value);
+    void (*setDirection)(PanGestureOptionsPeer* peer, enum Ark_PanDirection value);
     void (*setDistance)(PanGestureOptionsPeer* peer, const Ark_Number* value);
     void (*setFingers)(PanGestureOptionsPeer* peer, const Ark_Number* value);
     Ark_NativePointer (*getDirection)(PanGestureOptionsPeer* peer);
@@ -13532,7 +13532,7 @@ typedef struct GENERATED_ArkUIScrollerAccessor {
     Ark_NativePointer (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     void (*scrollTo)(ScrollerPeer* peer, const Ark_ScrollOptions* options);
-    void (*scrollEdge)(ScrollerPeer* peer, Ark_Int32 value, const Opt_ScrollEdgeOptions* options);
+    void (*scrollEdge)(ScrollerPeer* peer, enum Ark_Edge value, const Opt_ScrollEdgeOptions* options);
     void (*fling)(ScrollerPeer* peer, const Ark_Number* velocity);
     void (*scrollPage0)(ScrollerPeer* peer, const Literal_Boolean_next* value);
     void (*scrollPage1)(ScrollerPeer* peer, const Literal_Boolean_next_Opt_Axis_direction* value);
@@ -13618,7 +13618,7 @@ typedef struct GENERATED_ArkUIPatternLockControllerAccessor {
     Ark_NativePointer (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     void (*reset)(PatternLockControllerPeer* peer);
-    void (*setChallengeResult)(PatternLockControllerPeer* peer, Ark_Int32 result);
+    void (*setChallengeResult)(PatternLockControllerPeer* peer, enum Ark_PatternLockChallengeResult result);
 } GENERATED_ArkUIPatternLockControllerAccessor;
 
 typedef struct EditMenuOptionsPeer EditMenuOptionsPeer;
@@ -13743,7 +13743,7 @@ typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
     void (*removeString)(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length);
     void (*replaceStyle)(MutableStyledStringPeer* peer, const Ark_SpanStyle* spanStyle);
     void (*setStyle)(MutableStyledStringPeer* peer, const Ark_SpanStyle* spanStyle);
-    void (*removeStyle)(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, Ark_Int32 styledKey);
+    void (*removeStyle)(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, enum Ark_StyledStringKey styledKey);
     void (*removeStyles)(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length);
     void (*clearStyles)(MutableStyledStringPeer* peer);
     void (*replaceStyledString)(MutableStyledStringPeer* peer, const Ark_Number* start, const Ark_Number* length, const Ark_Materialized* other);
@@ -13867,7 +13867,7 @@ typedef struct GENERATED_ArkUIVideoControllerAccessor {
     void (*setCurrentTime0)(VideoControllerPeer* peer, const Ark_Number* value);
     void (*requestFullscreen)(VideoControllerPeer* peer, Ark_Boolean value);
     void (*exitFullscreen)(VideoControllerPeer* peer);
-    void (*setCurrentTime1)(VideoControllerPeer* peer, const Ark_Number* value, Ark_Int32 seekMode);
+    void (*setCurrentTime1)(VideoControllerPeer* peer, const Ark_Number* value, enum Ark_SeekMode seekMode);
     void (*reset)(VideoControllerPeer* peer);
 } GENERATED_ArkUIVideoControllerAccessor;
 
@@ -13922,7 +13922,7 @@ typedef struct GENERATED_ArkUIJsResultAccessor {
 
 typedef struct ConsoleMessagePeer ConsoleMessagePeer;
 typedef struct GENERATED_ArkUIConsoleMessageAccessor {
-    Ark_NativePointer (*ctor)(const Ark_String* message, const Ark_String* sourceId, const Ark_Number* lineNumber, Ark_Int32 messageLevel);
+    Ark_NativePointer (*ctor)(const Ark_String* message, const Ark_String* sourceId, const Ark_Number* lineNumber, enum Ark_MessageLevel messageLevel);
     Ark_NativePointer (*getFinalizer)();
     void (*getMessage)(ConsoleMessagePeer* peer);
     void (*getSourceId)(ConsoleMessagePeer* peer);
@@ -14242,7 +14242,7 @@ typedef struct GENERATED_ArkUICommonMethodEventsReceiver {
                       const Ark_DragEvent event,
                       const Opt_String extraParams);
     void (*onPreDrag)(Ark_Int32 nodeId,
-                      const Ark_Int32 data);
+                      const enum Ark_PreDragStatus data);
     void (*onVisibleAreaChange)(Ark_Int32 nodeId,
                                 const Ark_Boolean isVisible,
                                 const Ark_Number currentRatio);
@@ -14267,10 +14267,10 @@ typedef struct GENERATED_ArkUICommonMethodEventsReceiver {
 typedef struct GENERATED_ArkUIScrollableCommonMethodEventsReceiver {
     void (*onScroll)(Ark_Int32 nodeId,
                      const Ark_Number scrollOffset,
-                     const Ark_Int32 scrollState);
+                     const enum Ark_ScrollState scrollState);
     void (*onDidScroll)(Ark_Int32 nodeId,
                         const Ark_Number scrollOffset,
-                        const Ark_Int32 scrollState);
+                        const enum Ark_ScrollState scrollState);
     void (*onReachStart)(Ark_Int32 nodeId);
     void (*onReachEnd)(Ark_Int32 nodeId);
     void (*onScrollStart)(Ark_Int32 nodeId);
@@ -14334,14 +14334,14 @@ typedef struct GENERATED_ArkUIGridEventsReceiver {
                        const Ark_Boolean isSuccess);
     void (*onScroll)(Ark_Int32 nodeId,
                      const Ark_Number scrollOffset,
-                     const Ark_Int32 scrollState);
+                     const enum Ark_ScrollState scrollState);
     void (*onReachStart)(Ark_Int32 nodeId);
     void (*onReachEnd)(Ark_Int32 nodeId);
     void (*onScrollStart)(Ark_Int32 nodeId);
     void (*onScrollStop)(Ark_Int32 nodeId);
     void (*onScrollFrameBegin)(Ark_Int32 nodeId,
                                const Ark_Number offset,
-                               const Ark_Int32 state);
+                               const enum Ark_ScrollState state);
 } GENERATED_ArkUIGridEventsReceiver;
 
 typedef struct GENERATED_ArkUIGridItemEventsReceiver {
@@ -14380,7 +14380,7 @@ typedef struct GENERATED_ArkUIImageSpanEventsReceiver {
 typedef struct GENERATED_ArkUIListEventsReceiver {
     void (*onScroll)(Ark_Int32 nodeId,
                      const Ark_Number scrollOffset,
-                     const Ark_Int32 scrollState);
+                     const enum Ark_ScrollState scrollState);
     void (*onScrollIndex)(Ark_Int32 nodeId,
                           const Ark_Number start,
                           const Ark_Number end,
@@ -14416,7 +14416,7 @@ typedef struct GENERATED_ArkUIListEventsReceiver {
                        const Ark_Boolean isSuccess);
     void (*onScrollFrameBegin)(Ark_Int32 nodeId,
                                const Ark_Number offset,
-                               const Ark_Int32 state);
+                               const enum Ark_ScrollState state);
 } GENERATED_ArkUIListEventsReceiver;
 
 typedef struct GENERATED_ArkUIListItemEventsReceiver {
@@ -14427,7 +14427,7 @@ typedef struct GENERATED_ArkUIListItemEventsReceiver {
 typedef struct GENERATED_ArkUILocationButtonEventsReceiver {
     void (*onClick)(Ark_Int32 nodeId,
                     const Ark_ClickEvent event,
-                    const Ark_Int32 result);
+                    const enum Ark_LocationButtonOnClickResult result);
 } GENERATED_ArkUILocationButtonEventsReceiver;
 
 typedef struct GENERATED_ArkUIMarqueeEventsReceiver {
@@ -14458,25 +14458,25 @@ typedef struct GENERATED_ArkUINavRouterEventsReceiver {
 
 typedef struct GENERATED_ArkUINavigationEventsReceiver {
     void (*onTitleModeChange)(Ark_Int32 nodeId,
-                              const Ark_Int32 titleMode);
+                              const enum Ark_NavigationTitleMode titleMode);
     void (*onNavBarStateChange)(Ark_Int32 nodeId,
                                 const Ark_Boolean isVisible);
     void (*onNavigationModeChange)(Ark_Int32 nodeId,
-                                   const Ark_Int32 mode);
+                                   const enum Ark_NavigationMode mode);
     void (*navDestination)(Ark_Int32 nodeId,
                            const Ark_String name,
                            const Ark_CustomObject param);
     void (*customNavContentTransition)(Ark_Int32 nodeId,
                                        const Ark_NavContentInfo from,
                                        const Ark_NavContentInfo to,
-                                       const Ark_Int32 operation);
+                                       const enum Ark_NavigationOperation operation);
 } GENERATED_ArkUINavigationEventsReceiver;
 
 typedef struct GENERATED_ArkUIPanelEventsReceiver {
     void (*onChange)(Ark_Int32 nodeId,
                      const Ark_Number width,
                      const Ark_Number height,
-                     const Ark_Int32 mode);
+                     const enum Ark_PanelMode mode);
     void (*onHeightChange)(Ark_Int32 nodeId,
                            const Ark_Number value);
 } GENERATED_ArkUIPanelEventsReceiver;
@@ -14484,7 +14484,7 @@ typedef struct GENERATED_ArkUIPanelEventsReceiver {
 typedef struct GENERATED_ArkUIPasteButtonEventsReceiver {
     void (*onClick)(Ark_Int32 nodeId,
                     const Ark_ClickEvent event,
-                    const Ark_Int32 result);
+                    const enum Ark_PasteButtonOnClickResult result);
 } GENERATED_ArkUIPasteButtonEventsReceiver;
 
 typedef struct GENERATED_ArkUIPatternLockEventsReceiver {
@@ -14510,7 +14510,7 @@ typedef struct GENERATED_ArkUIRatingEventsReceiver {
 
 typedef struct GENERATED_ArkUIRefreshEventsReceiver {
     void (*onStateChange)(Ark_Int32 nodeId,
-                          const Ark_Int32 state);
+                          const enum Ark_RefreshStatus state);
     void (*onRefreshing)(Ark_Int32 nodeId);
     void (*onOffsetChange)(Ark_Int32 nodeId,
                            const Ark_Number data);
@@ -14536,7 +14536,7 @@ typedef struct GENERATED_ArkUIRichEditorEventsReceiver {
     void (*onEditingChange)(Ark_Int32 nodeId,
                             const Ark_Boolean data);
     void (*onSubmit)(Ark_Int32 nodeId,
-                     const Ark_Int32 enterKey,
+                     const enum Ark_EnterKeyType enterKey,
                      const Ark_SubmitEvent event);
     void (*onWillChange)(Ark_Int32 nodeId,
                          const Ark_RichEditorChangeValue data);
@@ -14557,7 +14557,7 @@ typedef struct GENERATED_ArkUIRichTextEventsReceiver {
 typedef struct GENERATED_ArkUISaveButtonEventsReceiver {
     void (*onClick)(Ark_Int32 nodeId,
                     const Ark_ClickEvent event,
-                    const Ark_Int32 result);
+                    const enum Ark_SaveButtonOnClickResult result);
 } GENERATED_ArkUISaveButtonEventsReceiver;
 
 typedef struct GENERATED_ArkUIScrollEventsReceiver {
@@ -14567,15 +14567,15 @@ typedef struct GENERATED_ArkUIScrollEventsReceiver {
     void (*onDidScroll)(Ark_Int32 nodeId,
                         const Ark_Number xOffset,
                         const Ark_Number yOffset,
-                        const Ark_Int32 scrollState);
+                        const enum Ark_ScrollState scrollState);
     void (*onScrollEdge)(Ark_Int32 nodeId,
-                         const Ark_Int32 side);
+                         const enum Ark_Edge side);
     void (*onScrollStart)(Ark_Int32 nodeId);
     void (*onScrollEnd)(Ark_Int32 nodeId);
     void (*onScrollStop)(Ark_Int32 nodeId);
     void (*onScrollFrameBegin)(Ark_Int32 nodeId,
                                const Ark_Number offset,
-                               const Ark_Int32 state);
+                               const enum Ark_ScrollState state);
 } GENERATED_ArkUIScrollEventsReceiver;
 
 typedef struct GENERATED_ArkUISearchEventsReceiver {
@@ -14620,7 +14620,7 @@ typedef struct GENERATED_ArkUISelectEventsReceiver {
 typedef struct GENERATED_ArkUISliderEventsReceiver {
     void (*onChange)(Ark_Int32 nodeId,
                      const Ark_Number value,
-                     const Ark_Int32 mode);
+                     const enum Ark_SliderChangeMode mode);
 } GENERATED_ArkUISliderEventsReceiver;
 
 typedef struct GENERATED_ArkUIStepperEventsReceiver {
@@ -14697,7 +14697,7 @@ typedef struct GENERATED_ArkUITextAreaEventsReceiver {
     void (*inputFilter)(Ark_Int32 nodeId,
                         const Ark_String value);
     void (*onSubmit)(Ark_Int32 nodeId,
-                     const Ark_Int32 enterKey);
+                     const enum Ark_EnterKeyType enterKey);
     void (*onChange)(Ark_Int32 nodeId,
                      const Ark_String value,
                      const Opt_PreviewText previewText);
@@ -14737,7 +14737,7 @@ typedef struct GENERATED_ArkUITextInputEventsReceiver {
     void (*onEditChange)(Ark_Int32 nodeId,
                          const Ark_Boolean isEditing);
     void (*onSubmit)(Ark_Int32 nodeId,
-                     const Ark_Int32 enterKey,
+                     const enum Ark_EnterKeyType enterKey,
                      const Ark_SubmitEvent event);
     void (*onChange)(Ark_Int32 nodeId,
                      const Ark_String value,
@@ -14911,7 +14911,7 @@ typedef struct GENERATED_ArkUIWebEventsReceiver {
     void (*onOverScroll)(Ark_Int32 nodeId,
                          const Ark_OnOverScrollEvent data);
     void (*onSafeBrowsingCheckResult)(Ark_Int32 nodeId,
-                                      const Ark_Int32 threatType);
+                                      const enum Ark_ThreatType threatType);
     void (*onNavigationEntryCommitted)(Ark_Int32 nodeId,
                                        const Ark_LoadCommittedDetails loadCommittedDetails);
     void (*onIntelligentTrackingPreventionResult)(Ark_Int32 nodeId,
@@ -14928,7 +14928,7 @@ typedef struct GENERATED_ArkUIWebEventsReceiver {
                                          const Ark_RenderProcessNotRespondingData data);
     void (*onRenderProcessResponding)(Ark_Int32 nodeId);
     void (*onViewportFitChanged)(Ark_Int32 nodeId,
-                                 const Ark_Int32 viewportFit);
+                                 const enum Ark_ViewportFit viewportFit);
     void (*onInterceptKeyboardAttach)(Ark_Int32 nodeId,
                                       const Ark_WebKeyboardCallbackInfo keyboardCallbackInfo);
     void (*onAdsBlocked)(Ark_Int32 nodeId,
@@ -14951,7 +14951,7 @@ typedef struct GENERATED_ArkUIWaterFlowEventsReceiver {
     void (*onReachEnd)(Ark_Int32 nodeId);
     void (*onScrollFrameBegin)(Ark_Int32 nodeId,
                                const Ark_Number offset,
-                               const Ark_Int32 state);
+                               const enum Ark_ScrollState state);
     void (*onScrollIndex)(Ark_Int32 nodeId,
                           const Ark_Number first,
                           const Ark_Number last);
@@ -15230,6 +15230,7 @@ typedef struct GENERATED_ArkUIEventsAPI {
 } GENERATED_ArkUIEventsAPI;
 
 typedef enum GENERATED_Ark_NodeType {
+    GENERATED_ARKUI_ROOT,
     GENERATED_ARKUI_ABILITY_COMPONENT,
     GENERATED_ARKUI_ALPHABET_INDEXER,
     GENERATED_ARKUI_ANIMATOR,

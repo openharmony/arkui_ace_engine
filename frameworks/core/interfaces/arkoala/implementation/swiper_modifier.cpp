@@ -61,7 +61,7 @@ void ItemSpaceImpl(Ark_NativePointer node,
 {
 }
 void DisplayModeImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_SwiperDisplayMode value)
 {
 }
 void CachedCountImpl(Ark_NativePointer node,
@@ -74,7 +74,7 @@ void DisplayCountImpl(Ark_NativePointer node,
 {
 }
 void EffectModeImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_EdgeEffect value)
 {
 }
 void DisableSwipeImpl(Ark_NativePointer node,
@@ -116,7 +116,7 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
 {
 }
 void NestedScrollImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_SwiperNestedScrollMode value)
 {
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,

@@ -60,7 +60,7 @@ void TouchableImpl(Ark_NativePointer node,
 {
 }
 void HitTestBehaviorImpl(Ark_NativePointer node,
-                         Ark_Int32 value)
+                         enum Ark_HitTestMode value)
 {
 }
 void OnChildTouchTestImpl(Ark_NativePointer node,
@@ -106,7 +106,7 @@ void BackgroundImagePositionImpl(Ark_NativePointer node,
 {
 }
 void BackgroundBlurStyleImpl(Ark_NativePointer node,
-                             Ark_Int32 value,
+                             enum Ark_BlurStyle value,
                              const Opt_BackgroundBlurStyleOptions* options)
 {
 }
@@ -139,7 +139,7 @@ void CompositingFilterImpl(Ark_NativePointer node,
 {
 }
 void ForegroundBlurStyleImpl(Ark_NativePointer node,
-                             Ark_Int32 value,
+                             enum Ark_BlurStyle value,
                              const Opt_ForegroundBlurStyleOptions* options)
 {
 }
@@ -213,7 +213,7 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
 {
 }
 void HoverEffectImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_HoverEffect value)
 {
 }
 void OnMouseImpl(Ark_NativePointer node,
@@ -417,7 +417,7 @@ void OnAreaChangeImpl(Ark_NativePointer node,
 {
 }
 void VisibilityImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_Visibility value)
 {
 }
 void FlexGrowImpl(Ark_NativePointer node,
@@ -433,7 +433,7 @@ void FlexBasisImpl(Ark_NativePointer node,
 {
 }
 void AlignSelfImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_ItemAlign value)
 {
 }
 void DisplayPriorityImpl(Ark_NativePointer node,
@@ -450,11 +450,11 @@ void SharedTransitionImpl(Ark_NativePointer node,
 {
 }
 void DirectionImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_Direction value)
 {
 }
 void AlignImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_Alignment value)
 {
 }
 void PositionImpl(Ark_NativePointer node,
@@ -486,8 +486,8 @@ void AlignRules1Impl(Ark_NativePointer node,
 {
 }
 void ChainModeImpl(Ark_NativePointer node,
-                   Ark_Int32 direction,
-                   Ark_Int32 style)
+                   enum Ark_Axis direction,
+                   enum Ark_ChainStyle style)
 {
 }
 void AspectRatioImpl(Ark_NativePointer node,
@@ -569,7 +569,7 @@ void ShadowImpl(Ark_NativePointer node,
 {
 }
 void BlendModeImpl(Ark_NativePointer node,
-                   Ark_Int32 value,
+                   enum Ark_BlendMode value,
                    const Opt_BlendApplyType* type)
 {
 }
@@ -637,7 +637,7 @@ void BindMenu1Impl(Ark_NativePointer node,
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
                           const CustomBuilder* content,
-                          Ark_Int32 responseType,
+                          enum Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
 }
@@ -737,7 +737,7 @@ void ReuseIdImpl(Ark_NativePointer node,
 {
 }
 void RenderFitImpl(Ark_NativePointer node,
-                   Ark_Int32 fitMode)
+                   enum Ark_RenderFit fitMode)
 {
 }
 void GestureModifierImpl(Ark_NativePointer node,

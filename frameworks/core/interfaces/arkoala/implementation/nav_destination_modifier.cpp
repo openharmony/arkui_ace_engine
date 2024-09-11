@@ -49,7 +49,7 @@ void OnBackPressedImpl(Ark_NativePointer node,
 {
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_NavDestinationMode value)
 {
 }
 void BackButtonIconImpl(Ark_NativePointer node,
@@ -90,7 +90,7 @@ void SystemBarStyleImpl(Ark_NativePointer node,
 {
 }
 void SystemTransitionImpl(Ark_NativePointer node,
-                          Ark_Int32 type)
+                          enum Ark_NavigationSystemTransitionType type)
 {
 }
 } // NavDestinationAttributeModifier

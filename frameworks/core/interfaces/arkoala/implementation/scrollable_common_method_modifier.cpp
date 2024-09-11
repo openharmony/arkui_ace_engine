@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableCommonMethodModifier {
 void ScrollBarImpl(Ark_NativePointer node,
-                   Ark_Int32 barState)
+                   enum Ark_BarState barState)
 {
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
@@ -30,7 +30,7 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
 {
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_Int32 edgeEffect,
+                    enum Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
 {
 }

@@ -28,7 +28,7 @@ void SetListItemOptions1Impl(Ark_NativePointer node,
 } // ListItemInterfaceModifier
 namespace ListItemAttributeModifier {
 void StickyImpl(Ark_NativePointer node,
-                Ark_Int32 value)
+                enum Ark_Sticky value)
 {
 }
 void EditableImpl(Ark_NativePointer node,

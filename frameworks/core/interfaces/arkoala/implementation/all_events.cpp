@@ -230,7 +230,7 @@ void onDragEndImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onPreDragImpl(Ark_Int32 nodeId,
-                   const Ark_Int32 data)
+                   const enum Ark_PreDragStatus data)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -278,13 +278,13 @@ void onSizeChangeImpl(Ark_Int32 nodeId,
 namespace ScrollableCommonMethod {
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
-                  const Ark_Int32 scrollState)
+                  const enum Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onDidScrollImpl(Ark_Int32 nodeId,
                      const Ark_Number scrollOffset,
-                     const Ark_Int32 scrollState)
+                     const enum Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -412,7 +412,7 @@ void onItemDropImpl(Ark_Int32 nodeId,
 }
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
-                  const Ark_Int32 scrollState)
+                  const enum Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -434,7 +434,7 @@ void onScrollStopImpl(Ark_Int32 nodeId)
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const Ark_Int32 state)
+                            const enum Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -506,7 +506,7 @@ void onErrorImpl(Ark_Int32 nodeId,
 namespace List {
 void onScrollImpl(Ark_Int32 nodeId,
                   const Ark_Number scrollOffset,
-                  const Ark_Int32 scrollState)
+                  const enum Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -584,7 +584,7 @@ void onItemDropImpl(Ark_Int32 nodeId,
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const Ark_Int32 state)
+                            const enum Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -599,7 +599,7 @@ void onSelectImpl(Ark_Int32 nodeId,
 namespace LocationButton {
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event,
-                 const Ark_Int32 result)
+                 const enum Ark_LocationButtonOnClickResult result)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -664,7 +664,7 @@ void onStateChangeImpl(Ark_Int32 nodeId,
 }
 namespace Navigation {
 void onTitleModeChangeImpl(Ark_Int32 nodeId,
-                           const Ark_Int32 titleMode)
+                           const enum Ark_NavigationTitleMode titleMode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -674,7 +674,7 @@ void onNavBarStateChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onNavigationModeChangeImpl(Ark_Int32 nodeId,
-                                const Ark_Int32 mode)
+                                const enum Ark_NavigationMode mode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -687,7 +687,7 @@ void navDestinationImpl(Ark_Int32 nodeId,
 void customNavContentTransitionImpl(Ark_Int32 nodeId,
                                     const Ark_NavContentInfo from,
                                     const Ark_NavContentInfo to,
-                                    const Ark_Int32 operation)
+                                    const enum Ark_NavigationOperation operation)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -696,7 +696,7 @@ namespace Panel {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number width,
                   const Ark_Number height,
-                  const Ark_Int32 mode)
+                  const enum Ark_PanelMode mode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -709,7 +709,7 @@ void onHeightChangeImpl(Ark_Int32 nodeId,
 namespace PasteButton {
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event,
-                 const Ark_Int32 result)
+                 const enum Ark_PasteButtonOnClickResult result)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -748,7 +748,7 @@ void onChangeImpl(Ark_Int32 nodeId,
 }
 namespace Refresh {
 void onStateChangeImpl(Ark_Int32 nodeId,
-                       const Ark_Int32 state)
+                       const enum Ark_RefreshStatus state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -812,7 +812,7 @@ void onEditingChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const Ark_Int32 enterKey,
+                  const enum Ark_EnterKeyType enterKey,
                   const Ark_SubmitEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -852,7 +852,7 @@ void onCompleteImpl(Ark_Int32 nodeId)
 namespace SaveButton {
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event,
-                 const Ark_Int32 result)
+                 const enum Ark_SaveButtonOnClickResult result)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -867,12 +867,12 @@ void onScrollImpl(Ark_Int32 nodeId,
 void onDidScrollImpl(Ark_Int32 nodeId,
                      const Ark_Number xOffset,
                      const Ark_Number yOffset,
-                     const Ark_Int32 scrollState)
+                     const enum Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onScrollEdgeImpl(Ark_Int32 nodeId,
-                      const Ark_Int32 side)
+                      const enum Ark_Edge side)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -890,7 +890,7 @@ void onScrollStopImpl(Ark_Int32 nodeId)
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const Ark_Int32 state)
+                            const enum Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -977,7 +977,7 @@ void onSelectImpl(Ark_Int32 nodeId,
 namespace Slider {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number value,
-                  const Ark_Int32 mode)
+                  const enum Ark_SliderChangeMode mode)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1117,7 +1117,7 @@ void inputFilterImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const Ark_Int32 enterKey)
+                  const enum Ark_EnterKeyType enterKey)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1200,7 +1200,7 @@ void onEditChangeImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSubmitImpl(Ark_Int32 nodeId,
-                  const Ark_Int32 enterKey,
+                  const enum Ark_EnterKeyType enterKey,
                   const Ark_SubmitEvent event)
 {
     // GENERATED EMPTY IMPLEMENTATION
@@ -1608,7 +1608,7 @@ void onOverScrollImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onSafeBrowsingCheckResultImpl(Ark_Int32 nodeId,
-                                   const Ark_Int32 threatType)
+                                   const enum Ark_ThreatType threatType)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1652,7 +1652,7 @@ void onRenderProcessRespondingImpl(Ark_Int32 nodeId)
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onViewportFitChangedImpl(Ark_Int32 nodeId,
-                              const Ark_Int32 viewportFit)
+                              const enum Ark_ViewportFit viewportFit)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1696,7 +1696,7 @@ void onReachEndImpl(Ark_Int32 nodeId)
 }
 void onScrollFrameBeginImpl(Ark_Int32 nodeId,
                             const Ark_Number offset,
-                            const Ark_Int32 state)
+                            const enum Ark_ScrollState state)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }

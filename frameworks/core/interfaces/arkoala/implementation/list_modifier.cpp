@@ -29,19 +29,19 @@ void LanesImpl(Ark_NativePointer node,
 {
 }
 void AlignListItemImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_ListItemAlign value)
 {
 }
 void ListDirectionImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_Axis value)
 {
 }
 void ScrollBarImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_BarState value)
 {
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_Int32 value,
+                    enum Ark_EdgeEffect value,
                     const Opt_EdgeEffectOptions* options)
 {
 }
@@ -78,11 +78,11 @@ void ChainAnimationOptionsImpl(Ark_NativePointer node,
 {
 }
 void StickyImpl(Ark_NativePointer node,
-                Ark_Int32 value)
+                enum Ark_StickyStyle value)
 {
 }
 void ScrollSnapAlignImpl(Ark_NativePointer node,
-                         Ark_Int32 value)
+                         enum Ark_ScrollSnapAlign value)
 {
 }
 void NestedScrollImpl(Ark_NativePointer node,

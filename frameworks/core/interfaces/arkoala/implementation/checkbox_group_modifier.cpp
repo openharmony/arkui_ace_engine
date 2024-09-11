@@ -44,7 +44,7 @@ void OnChangeImpl(Ark_NativePointer node,
 {
 }
 void CheckboxShapeImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_CheckBoxShape value)
 {
 }
 } // CheckboxGroupAttributeModifier

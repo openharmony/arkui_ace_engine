@@ -32,7 +32,7 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
 void TypeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_ButtonType value)
 {
 }
 void StateEffectImpl(Ark_NativePointer node,
@@ -40,15 +40,15 @@ void StateEffectImpl(Ark_NativePointer node,
 {
 }
 void ButtonStyleImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_ButtonStyleMode value)
 {
 }
 void ControlSizeImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_ControlSize value)
 {
 }
 void RoleImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_ButtonRole value)
 {
 }
 void FontColorImpl(Ark_NativePointer node,
@@ -64,7 +64,7 @@ void FontWeightImpl(Ark_NativePointer node,
 {
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FontStyle value)
 {
 }
 void FontFamilyImpl(Ark_NativePointer node,

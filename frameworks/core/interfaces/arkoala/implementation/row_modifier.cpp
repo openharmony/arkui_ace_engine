@@ -24,11 +24,11 @@ void SetRowOptionsImpl(Ark_NativePointer node,
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_VerticalAlign value)
 {
 }
 void JustifyContentImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        enum Ark_FlexAlign value)
 {
 }
 void PointLightImpl(Ark_NativePointer node,

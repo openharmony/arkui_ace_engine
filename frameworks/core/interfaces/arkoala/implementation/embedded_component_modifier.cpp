@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EmbeddedComponentInterfaceModifier {
 void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
                                      const Ark_CustomObject* loader,
-                                     Ark_Int32 type)
+                                     enum Ark_EmbeddedType type)
 {
 }
 } // EmbeddedComponentInterfaceModifier

@@ -31,7 +31,7 @@ void NavBarWidthImpl(Ark_NativePointer node,
 {
 }
 void NavBarPositionImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        enum Ark_NavBarPosition value)
 {
 }
 void NavBarWidthRangeImpl(Ark_NativePointer node,
@@ -43,7 +43,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 {
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_NavigationMode value)
 {
 }
 void BackButtonIconImpl(Ark_NativePointer node,
@@ -77,7 +77,7 @@ void HideBackButtonImpl(Ark_NativePointer node,
 {
 }
 void TitleModeImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_NavigationTitleMode value)
 {
 }
 void MenusImpl(Ark_NativePointer node,

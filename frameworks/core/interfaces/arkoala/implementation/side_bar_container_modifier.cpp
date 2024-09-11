@@ -68,7 +68,7 @@ void AutoHideImpl(Ark_NativePointer node,
 {
 }
 void SideBarPositionImpl(Ark_NativePointer node,
-                         Ark_Int32 value)
+                         enum Ark_SideBarPosition value)
 {
 }
 void DividerImpl(Ark_NativePointer node,

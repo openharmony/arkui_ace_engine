@@ -49,7 +49,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 {
 }
 void ScrollBarImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_BarState value)
 {
 }
 void OnScrollBarUpdateImpl(Ark_NativePointer node,
@@ -85,7 +85,7 @@ void CellLengthImpl(Ark_NativePointer node,
 {
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
-                         Ark_Int32 value)
+                         enum Ark_GridDirection value)
 {
 }
 void SupportAnimationImpl(Ark_NativePointer node,
@@ -113,7 +113,7 @@ void OnItemDropImpl(Ark_NativePointer node,
 {
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_Int32 value,
+                    enum Ark_EdgeEffect value,
                     const Opt_EdgeEffectOptions* options)
 {
 }

@@ -30,7 +30,7 @@ void ScrollToImpl(ScrollerPeer* peer,
 {
 }
 void ScrollEdgeImpl(ScrollerPeer* peer,
-                    Ark_Int32 value,
+                    enum Ark_Edge value,
                     const Opt_ScrollEdgeOptions* options)
 {
 }

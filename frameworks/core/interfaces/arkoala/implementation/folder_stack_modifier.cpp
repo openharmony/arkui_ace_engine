@@ -24,7 +24,7 @@ void SetFolderStackOptionsImpl(Ark_NativePointer node,
 } // FolderStackInterfaceModifier
 namespace FolderStackAttributeModifier {
 void AlignContentImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_Alignment value)
 {
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,

@@ -32,7 +32,7 @@ void SelectedColorImpl(Ark_NativePointer node,
 {
 }
 void ShapeImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_CheckBoxShape value)
 {
 }
 void UnselectedColorImpl(Ark_NativePointer node,

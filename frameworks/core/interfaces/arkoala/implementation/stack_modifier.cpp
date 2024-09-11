@@ -24,7 +24,7 @@ void SetStackOptionsImpl(Ark_NativePointer node,
 } // StackInterfaceModifier
 namespace StackAttributeModifier {
 void AlignContentImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_Alignment value)
 {
 }
 void PointLightImpl(Ark_NativePointer node,

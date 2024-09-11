@@ -35,7 +35,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
 }
 void LineCapImpl(Ark_NativePointer node,
-                 Ark_Int32 value)
+                 enum Ark_LineCapStyle value)
 {
 }
 } // DividerAttributeModifier

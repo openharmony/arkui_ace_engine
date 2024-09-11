@@ -49,11 +49,11 @@ void FillColorImpl(Ark_NativePointer node,
 {
 }
 void ObjectFitImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_ImageFit value)
 {
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_ImageRepeat value)
 {
 }
 void AutoResizeImpl(Ark_NativePointer node,
@@ -61,15 +61,15 @@ void AutoResizeImpl(Ark_NativePointer node,
 {
 }
 void RenderModeImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_ImageRenderMode value)
 {
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
-                          Ark_Int32 value)
+                          enum Ark_DynamicRangeMode value)
 {
 }
 void InterpolationImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_ImageInterpolation value)
 {
 }
 void SourceSizeImpl(Ark_NativePointer node,
@@ -85,7 +85,7 @@ void ColorFilterImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_CopyOptions value)
 {
 }
 void DraggableImpl(Ark_NativePointer node,

@@ -58,7 +58,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FontStyle value)
 {
 }
 void FontWeight0Impl(Ark_NativePointer node,
@@ -75,7 +75,7 @@ void LineSpacingImpl(Ark_NativePointer node,
 {
 }
 void TextAlignImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_TextAlign value)
 {
 }
 void LineHeightImpl(Ark_NativePointer node,
@@ -103,7 +103,7 @@ void LetterSpacingImpl(Ark_NativePointer node,
 {
 }
 void TextCaseImpl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_TextCase value)
 {
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
@@ -111,7 +111,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_CopyOptions value)
 {
 }
 void DraggableImpl(Ark_NativePointer node,
@@ -123,7 +123,7 @@ void TextShadowImpl(Ark_NativePointer node,
 {
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                              Ark_Int32 value)
+                              enum Ark_TextHeightAdaptivePolicy value)
 {
 }
 void TextIndentImpl(Ark_NativePointer node,
@@ -131,11 +131,11 @@ void TextIndentImpl(Ark_NativePointer node,
 {
 }
 void WordBreakImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_WordBreak value)
 {
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
-                           Ark_Int32 strategy)
+                           enum Ark_LineBreakStrategy strategy)
 {
 }
 void OnCopyImpl(Ark_NativePointer node,
@@ -148,7 +148,7 @@ void SelectionImpl(Ark_NativePointer node,
 {
 }
 void EllipsisModeImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_EllipsisMode value)
 {
 }
 void EnableDataDetectorImpl(Ark_NativePointer node,
@@ -160,9 +160,9 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
 {
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
-                           Ark_Int32 spanType,
+                           enum Ark_TextSpanType spanType,
                            const CustomBuilder* content,
-                           Ark_Int32 responseType,
+                           enum Ark_TextResponseType responseType,
                            const Opt_SelectionMenuOptions* options)
 {
 }
@@ -179,7 +179,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
 }
 void TextSelectableImpl(Ark_NativePointer node,
-                        Ark_Int32 mode)
+                        enum Ark_TextSelectableMode mode)
 {
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,

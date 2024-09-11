@@ -44,7 +44,7 @@ void ImageAccessImpl(Ark_NativePointer node,
 {
 }
 void MixedModeImpl(Ark_NativePointer node,
-                   Ark_Int32 mixedMode)
+                   enum Ark_MixedMode mixedMode)
 {
 }
 void ZoomAccessImpl(Ark_NativePointer node,
@@ -64,11 +64,11 @@ void PasswordImpl(Ark_NativePointer node,
 {
 }
 void CacheModeImpl(Ark_NativePointer node,
-                   Ark_Int32 cacheMode)
+                   enum Ark_CacheMode cacheMode)
 {
 }
 void DarkModeImpl(Ark_NativePointer node,
-                  Ark_Int32 mode)
+                  enum Ark_WebDarkMode mode)
 {
 }
 void ForceDarkAccessImpl(Ark_NativePointer node,
@@ -92,7 +92,7 @@ void OverviewModeAccessImpl(Ark_NativePointer node,
 {
 }
 void OverScrollModeImpl(Ark_NativePointer node,
-                        Ark_Int32 mode)
+                        enum Ark_OverScrollMode mode)
 {
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
@@ -420,7 +420,7 @@ void JavaScriptOnDocumentEndImpl(Ark_NativePointer node,
 {
 }
 void LayoutModeImpl(Ark_NativePointer node,
-                    Ark_Int32 mode)
+                    enum Ark_WebLayoutMode mode)
 {
 }
 void NestedScrollImpl(Ark_NativePointer node,
@@ -449,7 +449,7 @@ void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionsImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_CopyOptions value)
 {
 }
 void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
@@ -493,7 +493,7 @@ void OnAdsBlockedImpl(Ark_NativePointer node,
 {
 }
 void KeyboardAvoidModeImpl(Ark_NativePointer node,
-                           Ark_Int32 mode)
+                           enum Ark_WebKeyboardAvoidMode mode)
 {
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,

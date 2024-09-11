@@ -24,11 +24,11 @@ void SetColumnOptionsImpl(Ark_NativePointer node,
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_HorizontalAlign value)
 {
 }
 void JustifyContentImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        enum Ark_FlexAlign value)
 {
 }
 void PointLightImpl(Ark_NativePointer node,

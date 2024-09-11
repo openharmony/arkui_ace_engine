@@ -28,7 +28,7 @@ void VerticalImpl(Ark_NativePointer node,
 {
 }
 void BarPositionImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_BarPosition value)
 {
 }
 void ScrollableImpl(Ark_NativePointer node,
@@ -36,16 +36,16 @@ void ScrollableImpl(Ark_NativePointer node,
 {
 }
 void BarMode0Impl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_BarMode value)
 {
 }
 void BarMode1Impl(Ark_NativePointer node,
-                  Ark_Int32 value,
+                  enum Ark_BarMode value,
                   const Ark_ScrollableBarModeOptions* options)
 {
 }
 void BarMode2Impl(Ark_NativePointer node,
-                  Ark_Int32 value,
+                  enum Ark_BarMode value,
                   const Opt_ScrollableBarModeOptions* options)
 {
 }
@@ -114,7 +114,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 {
 }
 void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                Ark_Int32 value)
+                                enum Ark_BlurStyle value)
 {
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
