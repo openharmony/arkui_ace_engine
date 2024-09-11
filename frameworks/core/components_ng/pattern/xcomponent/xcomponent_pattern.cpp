@@ -203,13 +203,14 @@ void XComponentPattern::InitSurface()
 
     renderContext->SetClipToFrame(true);
     renderContext->SetClipToBounds(true);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    renderSurface_ = RenderSurface::Create(CovertToRenderSurfaceType(type_));
+#else
     renderSurface_ = RenderSurface::Create();
+#endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
     if (type_ == XComponentType::SURFACE) {
-        renderContextForSurface_ = RenderContext::Create();
-        RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface" };
-        renderContextForSurface_->InitContext(false, param);
-        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+        InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
             renderSurface_->SetRenderContext(renderContextForSurface_);
         } else {
@@ -218,6 +219,9 @@ void XComponentPattern::InitSurface()
             pipelineContext->AddOnAreaChangeNode(host->GetId());
             extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
             renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
+#ifdef RENDER_EXTRACT_SUPPORTED
+            RegisterRenderContextCallBack();
+#endif
         }
         handlingSurfaceRenderContext_ = renderContextForSurface_;
     } else if (type_ == XComponentType::TEXTURE) {
@@ -599,13 +603,14 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
                 ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
                 eventHub->FireControllerDestroyedEvent(surfaceId_);
             }
+#ifdef RENDER_EXTRACT_SUPPORTED
+            if (renderContextForSurface_) {
+                renderContextForSurface_->RemoveSurfaceChangedCallBack();
+            }
+#endif
         }
     }
-#ifdef RENDER_EXTRACT_SUPPORTED
-    if (renderContextForSurface_) {
-        renderContextForSurface_->RemoveSurfaceChangedCallBack();
-    }
-#endif
+
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
