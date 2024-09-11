@@ -33,7 +33,7 @@ public:
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
     static void ParseTitleBarOptions(const JSCallbackInfo& info,
         bool needSetDefaultValue, NG::NavigationTitlebarOptions& options);
-    static void ParseToolbarBgOptions(const JSCallbackInfo& info, NG::NavigationToolbarOptions& options);
+    static void ParseToolbarOptions(const JSCallbackInfo& info, NG::NavigationToolbarOptions& options);
     static void ParseBarItems(const WeakPtr<NG::FrameNode>& targetNode,
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
 };

@@ -211,9 +211,9 @@ HWTEST_F(NavBarTestNg, AddChildToGroup001, TestSize.Level1)
     auto navBarNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto contentNode = FrameNode::GetOrCreateFrameNode(
         NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    navBarNode->SetNavBarContentNode(contentNode);
+    navBarNode->SetContentNode(contentNode);
     navBarNode->AddChildToGroup(frameNode);
-    auto group = navBarNode->GetNavBarContentNode();
+    auto group = navBarNode->GetContentNode();
     EXPECT_NE(group, nullptr);
 }
 
@@ -232,7 +232,7 @@ HWTEST_F(NavBarTestNg, AddChildToGroup002, TestSize.Level1)
     auto contentNode = FrameNode::GetOrCreateFrameNode(
         NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     navBarNode->AddChildToGroup(frameNode);
-    auto group = navBarNode->GetNavBarContentNode();
+    auto group = navBarNode->GetContentNode();
     EXPECT_EQ(group, nullptr);
 }
 
@@ -348,8 +348,8 @@ HWTEST_F(NavBarTestNg, SetNavBarContentNode001, TestSize.Level1)
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    barNode->SetNavBarContentNode(nullptr);
-    EXPECT_EQ(barNode->navBarContentNode_, nullptr);
+    barNode->SetContentNode(nullptr);
+    EXPECT_EQ(barNode->contentNode_, nullptr);
 }
 
 /**
@@ -362,7 +362,7 @@ HWTEST_F(NavBarTestNg, GetNavBarContentNode001, TestSize.Level1)
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
-    auto ret = barNode->GetNavBarContentNode();
+    auto ret = barNode->GetContentNode();
     EXPECT_EQ(ret, false);
 }
 
@@ -885,7 +885,7 @@ HWTEST_F(NavBarTestNg, NavBarNode005, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     navBarNode->pattern_ = AceType::MakeRefPtr<NavigationPattern>();
     auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
-    navBarNode->SetNavBarContentNode(frameNode);
+    navBarNode->SetContentNode(frameNode);
     navBarNode->AddChildToGroup(nullptr);
 }
 
@@ -1027,7 +1027,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern018, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     EXPECT_NE(frameNode, nullptr);
-    navBarNode->SetNavBarContentNode(frameNode);
+    navBarNode->SetContentNode(frameNode);
 
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);

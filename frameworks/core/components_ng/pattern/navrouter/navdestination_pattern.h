@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -34,8 +35,8 @@
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView, AutoFillTriggerStateHolder);
+class NavDestinationPattern : public NavDestinationPatternBase, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(NavDestinationPattern, NavDestinationPatternBase, AutoFillTriggerStateHolder);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
@@ -270,6 +271,11 @@ public:
     }
 
     void OnWindowHide() override;
+
+    Dimension GetTitleBarHeightBeforeMeasure() override
+    {
+        return isHideTitlebar_ ? 0.0_vp : SINGLE_LINE_TITLEBAR_HEIGHT;
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);

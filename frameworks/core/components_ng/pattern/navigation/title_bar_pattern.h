@@ -219,10 +219,7 @@ public:
         currentTitleOffsetX_ = currentTitleOffsetX;
     }
 
-    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
-    {
-        currentTitleBarHeight_ = currentTitleBarHeight;
-    }
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
     {
