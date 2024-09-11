@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_PATTERN_H
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
@@ -50,7 +51,7 @@ public:
         return true;
     }
 
-    void SetTopologicalResult(std::string result)
+    void SetTopologicalResult(const std::string& result)
     {
         topologicalResult_ = result;
     }
@@ -65,16 +66,73 @@ public:
         return { true, true, ScopeType::PROJECT_AREA };
     }
 
+    std::optional<std::list<std::string>>&& GetTopologicalResultCache()
+    {
+        return std::move(topologicalResultList_);
+    }
+
+    const std::optional<std::list<std::string>>& GetTopologicalResultCacheCopy()
+    {
+        return topologicalResultList_;
+    }
+
+    void SetTopologicalResultCache(std::list<std::string>&& cache)
+    {
+        topologicalResultList_ = std::move(cache);
+        CHECK_NULL_VOID(topologicalResultList_);
+    }
+
+    static std::string TopoListToString(const std::list<std::string>& topoList)
+    {
+        std::string result = "[";
+        for (const auto& nodeName : topoList) {
+            result += nodeName + ",";
+        }
+        if (!topoList.empty()) {
+            result = result.substr(0, result.length() - 1);
+        }
+        result += "]";
+        return result;
+    }
+
     void DumpInfo() override
     {
         DumpLog::GetInstance().AddDesc(std::string("topologicalResult:").append(topologicalResult_));
     }
 
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    bool GetChildAlignRulesChanged()
+    {
+        return childAlignRulesChanged_;
+    }
+
+    void SetChildAlignRulesChanged(bool changed)
+    {
+        childAlignRulesChanged_ = changed;
+    }
+
+    void BeforeCreateLayoutWrapper() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (const auto& child : host->GetAllChildrenWithBuild()) {
+            auto childNode = AceType::DynamicCast<NG::FrameNode>(child);
+            CHECK_NULL_CONTINUE(childNode);
+            auto layoutProperty = childNode->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+            CHECK_NULL_CONTINUE(flexItemProperty);
+            if (flexItemProperty->NeedMarkParentMeasure()) {
+                // will be reset when relativeContainer parent measure finish
+                childAlignRulesChanged_ = true;
+                flexItemProperty->SetMarkParentMeasure(false);
+            }
+        }
+    }
 
 private:
+    bool childAlignRulesChanged_ = true;
     std::string topologicalResult_;
-
+    std::optional<std::list<std::string>> topologicalResultList_;
 };
 
 } // namespace OHOS::Ace::NG
