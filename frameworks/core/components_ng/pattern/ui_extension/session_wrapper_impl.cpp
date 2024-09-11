@@ -411,10 +411,10 @@ void SessionWrapperImpl::UpdateSessionConfig()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hostConfig = pipeline->GetKeyboardAnimationConfig();
-    extConfig.keyboardAnimationConfig_.curveType_ = hostConfig.curveType_;
-    extConfig.keyboardAnimationConfig_.curveParams_ = hostConfig.curveParams_;
-    extConfig.keyboardAnimationConfig_.durationIn_ = hostConfig.durationIn_;
-    extConfig.keyboardAnimationConfig_.durationOut_ = hostConfig.durationOut_;
+    extConfig.animationIn_ = {
+        hostConfig.curveIn_.curveType_, hostConfig.curveIn_.curveParams_, hostConfig.curveIn_.duration_};
+    extConfig.animationOut_ = {
+        hostConfig.curveOut_.curveType_, hostConfig.curveOut_.curveParams_, hostConfig.curveOut_.duration_};
     session_->SetSystemConfig(extConfig);
 }
 
