@@ -477,6 +477,7 @@ FrameNode::FrameNode(
 
 FrameNode::~FrameNode()
 {
+    ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
@@ -2937,71 +2938,6 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
     return OffsetF(point.GetX(), point.GetY());
 }
 
-std::vector<Point> GetRectPoints(SizeF& frameSize)
-{
-    std::vector<Point> pointList;
-    pointList.push_back(Point(0, 0));
-    pointList.push_back(Point(frameSize.Width(), 0));
-    pointList.push_back(Point(0, frameSize.Height()));
-    pointList.push_back(Point(frameSize.Width(), frameSize.Height()));
-    return pointList;
-}
-
-RectF GetBoundingBox(std::vector<Point>& pointList)
-{
-    Point pMax = pointList[0];
-    Point pMin = pointList[0];
-    
-    for (auto &point: pointList) {
-        if (point.GetX() > pMax.GetX()) {
-            pMax.SetX(point.GetX());
-        }
-        if (point.GetX() < pMin.GetX()) {
-            pMin.SetX(point.GetX());
-        }
-        if (point.GetY() > pMax.GetY()) {
-            pMax.SetY(point.GetY());
-        }
-        if (point.GetY() < pMin.GetY()) {
-            pMin.SetY(point.GetY());
-        }
-    }
-    return RectF(pMin.GetX(), pMin.GetY(), pMax.GetX() - pMin.GetX(), pMax.GetY() - pMin.GetY());
-}
-
-bool FrameNode::GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const
-{
-    auto renderContext = parent->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-    auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
-    for (auto& point: pointList) {
-        point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
-        point = parentMatrix * point;
-    }
-    return true;
-}
-
-RectF FrameNode::GetPaintRectToWindowWithTransform()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, RectF());
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, RectF());
-    auto frameSize = geometryNode->GetFrameSize();
-    auto pointList = GetRectPoints(frameSize);
-    GetRectPointToParentWithTransform(pointList, Claim(this));
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (GetRectPointToParentWithTransform(pointList, parent)) {
-            parent = parent->GetAncestorNodeOfFrame();
-        } else {
-            return RectF();
-        }
-    }
-    return GetBoundingBox(pointList);
-}
-
 OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
@@ -3147,21 +3083,6 @@ void FrameNode::OnAccessibilityEvent(
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
-    }
-}
-
-void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType)
-{
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        AccessibilityEvent event;
-        event.type = eventType;
-        event.windowContentChangeTypes = windowsContentChangeType;
-        event.nodeId = GetAccessibilityId();
-        event.stackNodeId = stackNodeId;
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -5140,5 +5061,16 @@ void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
     }
     auto pattern = GetPattern();
     pattern->NotifyDataChange(updateFrom, count);
+}
+
+void FrameNode::ResetPredictNodes()
+{
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            frameNode->isLayoutDirtyMarked_ = false;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

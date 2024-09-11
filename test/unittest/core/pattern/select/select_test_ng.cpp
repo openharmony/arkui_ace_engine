@@ -16,7 +16,6 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <sys/select.h>
 
 #include "gtest/gtest.h"
 
@@ -1924,6 +1923,7 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
     EXPECT_NE(icon, nullptr);
     EXPECT_EQ(icon->GetTag(), V2::SYMBOL_ETS_TAG);
 }
+
 /**
  * @tc.name: SelectLayoutPropertyTest008
  * @tc.desc: Test select set textDirection.
@@ -1940,7 +1940,7 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest008, TestSize.Level1)
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     /**
-     * @tc.cases: case1. Verify the SetLayoutDirection function.
+     * @tc.cases: case1. verify the SetLayoutDirection function.
      */
     selectPattern->SetLayoutDirection(TextDirection::RTL);
     auto layoutProps = selectPattern->GetLayoutProperty<LayoutProperty>();

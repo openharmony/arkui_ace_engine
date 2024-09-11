@@ -36,6 +36,7 @@ public:
     std::list<std::string> GetCurrentIdList(int32_t nodeId) override;
 
     void SetNewIds(std::list<std::string>&& newIds) override;
+    void SetRemovedElmtIds(std::list<int32_t>& removedElmtId) override;
 
     // Partial Update path.
     void Create() override;

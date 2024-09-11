@@ -16,7 +16,8 @@
 #include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/svg/parse/svg_constants.h"
+#include "core/components/declaration/svg/svg_declaration.h"
+#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -153,7 +154,7 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 bool SvgFeColorMatrix::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeColorMatrixAttribute&)> attrs[] = {
-        { SVG_FE_TYPE,
+        { DOM_SVG_FE_TYPE,
             [](const std::string& type, SvgFeColorMatrixAttribute& attr) {
                 if (type == "saturate") {
                     attr.type = SvgFeColorMatrixType::SATURATE;
@@ -163,7 +164,7 @@ bool SvgFeColorMatrix::ParseAndSetSpecializedAttr(const std::string& name, const
                     attr.type = SvgFeColorMatrixType::LUMINACE_TO_ALPHA;
                 }
             } },
-        { SVG_FE_VALUES,
+        { DOM_SVG_FE_VALUES,
             [](const std::string& val, SvgFeColorMatrixAttribute& attr) {
                 attr.values = val;
             } },

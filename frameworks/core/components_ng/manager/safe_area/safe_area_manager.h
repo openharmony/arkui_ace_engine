@@ -254,7 +254,6 @@ private:
     std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
-
     float lastKeyboardY_ = 0.0f;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;

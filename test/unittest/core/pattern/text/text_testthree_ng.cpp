@@ -14,7 +14,6 @@
  */
 
 #include "text_base.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1132,11 +1131,6 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
 
-    auto customSpanNode = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId());
-    host->AddChild(customSpanNode);
-    customSpanNode->SetParent(host);
-
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     /**
      * @tc.steps: step3. textFrameNode Measure will call InitSpanItem/CollectSpanNodes.
@@ -1145,7 +1139,7 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     LayoutConstraintF layoutConstraintF;
     frameNode->Measure(layoutConstraintF);
     auto textPattern = frameNode->GetPattern<TextPattern>();
-    EXPECT_EQ(textPattern->spans_.size(), 6);
+    EXPECT_EQ(textPattern->spans_.size(), 5);
     auto gesture = childFrameNode->GetOrCreateGestureEventHub();
     EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
 }

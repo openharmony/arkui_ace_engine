@@ -21,6 +21,7 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
+#include "base/utils/utils.h"
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
@@ -29,6 +30,7 @@
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
+constexpr int32_t TWO_ARGS = 2;
 }
 
 using namespace OHOS::Ace::Framework;
@@ -133,8 +135,10 @@ public:
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == 2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
-
+        if (!(argc == TWO_ARGS && thisVar != nullptr && cb != nullptr)) {
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
             napi_close_handle_scope(env, scope);
@@ -263,6 +267,7 @@ private:
     {
         MediaQueryListener* listener = nullptr;
         napi_unwrap(env, thisVar, (void**)&listener);
+        CHECK_NULL_RETURN(listener, nullptr);
         listener->Initialize(env, thisVar);
         return listener;
     }

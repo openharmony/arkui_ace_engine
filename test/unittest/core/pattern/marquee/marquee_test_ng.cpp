@@ -23,6 +23,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -41,6 +42,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -89,13 +91,11 @@ protected:
 
 void MarqueeTestNg::SetUpTestSuite()
 {
-    MockContainer::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
 }
 void MarqueeTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& testProperty)
@@ -1472,5 +1472,4 @@ HWTEST_F(MarqueeTestNg, MarqueeTest023, TestSize.Level1)
     offset = pattern->GetTextOffset();
     EXPECT_EQ(offset, 0.0f);
 }
-
 } // namespace OHOS::Ace::NG

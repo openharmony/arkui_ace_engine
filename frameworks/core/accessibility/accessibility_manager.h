@@ -30,7 +30,6 @@ namespace OHOS::Ace {
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
-    int64_t stackNodeId = -1;
     uint32_t windowId = 0;
     WindowsContentChangeTypes windowContentChangeTypes = CONTENT_CHANGE_TYPE_INVALID;
     WindowUpdateType windowChangeTypes = WINDOW_UPDATE_INVALID;

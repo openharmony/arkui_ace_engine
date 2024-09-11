@@ -354,6 +354,13 @@ public:
      * @param callback callback func.
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
+
+    /**
+     * @description: Set UIContent callback after lastest layout finish.
+     * @param callback callback func.
+     */
+    virtual void SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
+
     // Actually paint size of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
@@ -413,12 +420,11 @@ public:
     virtual void PreLayout() {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
-    
+
     virtual sptr<IRemoteObject> GetRemoteObj()
     {
         return {};
     }
-
 };
 
 } // namespace OHOS::Ace

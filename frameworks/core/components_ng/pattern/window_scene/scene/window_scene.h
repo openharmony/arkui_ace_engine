@@ -40,29 +40,29 @@ protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnMountToParentDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnActivation() override;
     void OnConnect() override;
-    void OnBackground() override;
     void OnDisconnect() override;
+    void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();
     void BufferAvailableCallback();
-    void BufferAvailableCallbackForBlank();
+    void BufferAvailableCallbackForBlank(bool fromMainThread);
     void BufferAvailableCallbackForSnapshot();
+    void DisposeSnapshotAndBlankWindow();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
+    bool IsWindowSizeEqual();
     void RegisterResponseRegionCallback();
     void RegisterFocusCallback();
-    void DisposeSnapShotAndBlankWindow();
     void CleanBlankWindow();
     void SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
-    Rosen::WSRect lastWindowRect_;
     CancelableCallback<void()> deleteWindowTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);

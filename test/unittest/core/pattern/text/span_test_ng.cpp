@@ -684,7 +684,6 @@ HWTEST_F(SpanTestNg, SpanTextShadowTest002, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(spanNode->GetTextShadow(), TEXT_SHADOWS);
 }
-
 /**
  * @tc.name: SpanDecorationStyleTest001
  * @tc.desc: test span_model_ng.cpp SetTextDecorationStyle

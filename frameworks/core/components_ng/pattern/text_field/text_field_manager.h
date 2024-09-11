@@ -32,6 +32,7 @@ public:
     ~TextFieldManagerNG() override = default;
 
     void SetClickPosition(const Offset& position) override;
+    
     const Offset& GetClickPosition() override
     {
         return position_;

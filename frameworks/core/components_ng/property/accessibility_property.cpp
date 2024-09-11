@@ -249,7 +249,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf) {
+    if (hitSelf && shouldSearchSelf && IsAccessibilityFocusable(node)) {
         hitTarget = true;
         path.push_back(node);
     }

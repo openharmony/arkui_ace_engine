@@ -1799,7 +1799,7 @@ private:
     bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
     bool lockRecord_ = false;
-    bool isFillRequestFinish_ = false;
+    bool isFillRequestFinish_ = true;
     bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     bool keyboardAvoidance_ = false;

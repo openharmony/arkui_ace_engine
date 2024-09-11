@@ -57,6 +57,9 @@ enum class BlendMode : int16_t {
     SATURATION, // saturation of source with hue and luminosity of destination
     COLOR,      // hue and saturation of source with luminosity of destination
     LUMINOSITY, // luminosity of source with hue and saturation of destination
+
+    BACK_COMPAT_SOURCE_IN,
+    MAX
 };
 
 enum class BlendApplyType : int16_t {
@@ -64,6 +67,7 @@ enum class BlendApplyType : int16_t {
 
     OFFSCREEN,   // Apply blending by drawing the content onto an offscreen buffer and blend it when drawing it
                  // back to the screen
+    MAX
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_BLEND_MODE_H

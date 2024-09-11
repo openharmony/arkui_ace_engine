@@ -174,7 +174,6 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
             rightPoint.SetY(textFrameRect.Height());
         }
     }
-
     RSPen pen;
     pen.SetColor(ToRSColor(underlineColor_->Get()));
     pen.SetWidth(underlineWidth_->Get());

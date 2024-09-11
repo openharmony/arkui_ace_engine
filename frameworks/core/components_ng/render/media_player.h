@@ -50,6 +50,8 @@ public:
 
     virtual void SetVolume(float leftVolume, float rightVolume) {}
 
+    virtual void SetMediaMuted(int32_t type, bool isMuted) {}
+
     virtual bool SetSource(const std::string& /*src*/)
     {
         return false;

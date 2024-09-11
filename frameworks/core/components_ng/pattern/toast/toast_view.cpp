@@ -141,7 +141,6 @@ void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
-        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
         toastContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

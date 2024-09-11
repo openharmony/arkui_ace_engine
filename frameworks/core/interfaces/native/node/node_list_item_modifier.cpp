@@ -35,7 +35,7 @@ void SetOptionBuilder(FrameNode* frameNode, ArkUIListItemSwipeActionItemHandle i
             }
         };
         auto onEnterActionArea = [item]() {
-            if (item->onEnterActionArea) {
+            if (item->onExitActionArea) {
                 using FuncType = void (*)(void*);
                 FuncType func = reinterpret_cast<FuncType>(item->onEnterActionArea);
                 func(item->onEnterActionAreaUserData);

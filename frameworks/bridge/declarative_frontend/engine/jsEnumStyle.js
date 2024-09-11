@@ -350,7 +350,7 @@ var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
   BlendMode[BlendMode["DESTINATION_IN"] = 7] = "DESTINATION_IN";
-  BlendMode[BlendMode["SOURCE_IN"] = 6] = "SOURCE_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 5000] = "SOURCE_IN";
   BlendMode[BlendMode["NONE"] = 0] = "NONE";
   BlendMode[BlendMode["CLEAR"] = 1] = "CLEAR";
   BlendMode[BlendMode["SRC"] = 2] = "SRC";
@@ -2127,7 +2127,7 @@ class NavPathStack {
   initNavPathIndex(pathName) {
     this.popArray = [];
     for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
-      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+      if (pathName[i] === this.pathArray[i].name) {
         this.pathArray[i].index = i;
       }
     }
@@ -3266,6 +3266,16 @@ let MenuPolicy;
   MenuPolicy['SHOW'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
+let DataOperationType;
+(function (DataOperationType) {
+  DataOperationType['ADD'] = "add";
+  DataOperationType['DELETE'] = "delete";
+  DataOperationType['CHANGE'] = "change";
+  DataOperationType['MOVE'] = "move";
+  DataOperationType['EXCHANGE'] = "exchange";
+  DataOperationType['RELOAD'] = "reload";
+})(DataOperationType || (DataOperationType = {}));
+
 let PreDragStatus;
 (function (PreDragStatus) {
   PreDragStatus['ACTION_DETECTING_STATUS'] = 0;
@@ -3276,16 +3286,6 @@ let PreDragStatus;
   PreDragStatus['PREVIEW_LANDING_FINISHED'] = 5;
   PreDragStatus['ACTION_CANCELED_BEFORE_DRAG'] = 6;
 })(PreDragStatus || (PreDragStatus = {}));
-
-let DataOperationType;
-(function (DataOperationType) {
-  DataOperationType['ADD'] = "add";
-  DataOperationType['DELETE'] = "delete";
-  DataOperationType['CHANGE'] = "change";
-  DataOperationType['MOVE'] = "move";
-  DataOperationType['EXCHANGE'] = "exchange";
-  DataOperationType['RELOAD'] = "reload";
-})(DataOperationType || (DataOperationType = {}));
 
 let FocusPriority;
 (function (FocusPriority) {
@@ -3300,11 +3300,11 @@ var TextDeleteDirection;
     TextDeleteDirection[TextDeleteDirection["FORWARD"] = 1] = "FORWARD";
 })(TextDeleteDirection || (TextDeleteDirection = {}));
 
-var ViewportFit;
+let ViewportFit;
 (function (ViewportFit) {
-  ViewportFit[ViewportFit["AUTO"] = 0] = "AUTO";
-  ViewportFit[ViewportFit["CONTAINS"] = 1] = "CONTAINS";
-  ViewportFit[ViewportFit["COVER"] = 2] = "COVER";
+  ViewportFit[ViewportFit['AUTO'] = 0] = 'AUTO';
+  ViewportFit[ViewportFit['CONTAINS'] = 1] = 'CONTAINS';
+  ViewportFit[ViewportFit['COVER'] = 2] = 'COVER';
 })(ViewportFit || (ViewportFit = {}));
 var SubMenuExpandingMode;
 (function (SubMenuExpandingMode) {

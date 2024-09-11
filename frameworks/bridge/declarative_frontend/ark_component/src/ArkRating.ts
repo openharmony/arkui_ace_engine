@@ -20,7 +20,7 @@ class RatingStarsModifier extends ModifierWithKey<number> {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStars');
-  applyPeer(node: KNode, reset: boolean): void {
+  applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       getUINativeModule().rating.resetStars(node);
     } else {
@@ -48,7 +48,7 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStarStyle');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().rating.resetStarStyle(node);
     } else {

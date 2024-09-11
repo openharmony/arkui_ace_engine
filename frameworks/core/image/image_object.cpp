@@ -193,7 +193,7 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         auto key = GenerateCacheKey(imageSource, imageSize);
         // is already uploaded
         if (!ImageProvider::TryUploadingImage(key, successCallback, failedCallback)) {
-            LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
+            LOGI("other thread is uploading same image to gpu : %{private}s", imageSource.ToString().c_str());
             return;
         }
 

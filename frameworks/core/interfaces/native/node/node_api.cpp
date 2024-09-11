@@ -223,13 +223,6 @@ ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32
     return node;
 }
 
-ArkUINodeHandle GetNodeByViewStack()
-{
-    auto node = ViewStackProcessor::GetInstance()->Finish();
-    node->IncRefCount();
-    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
-}
-
 void DisposeNode(ArkUINodeHandle node)
 {
     ViewModel::DisposeNode(node);
@@ -1625,7 +1618,6 @@ const ArkUIBasicAPI* GetBasicAPI()
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
         CreateNodeWithParams,
-        GetNodeByViewStack,
         DisposeNode,
         GetName,
         DumpTreeNode,

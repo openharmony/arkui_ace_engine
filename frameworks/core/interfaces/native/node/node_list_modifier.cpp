@@ -674,8 +674,8 @@ const ArkUIListModifier* GetListModifier()
         SetContentEndOffset, ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
         ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
-        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
-        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider,
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions,
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider,
         SetInitialScroller, ResetInitialScroller, SetListMaintainVisibleContentPosition,
         ResetListMaintainVisibleContentPosition };
     return &modifier;

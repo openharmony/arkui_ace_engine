@@ -261,46 +261,6 @@ HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextDragCreateNodeTestNg003
- * @tc.desc: Test CreateDragNode with multi-lines-selected.
- * @tc.type: FUNC
- */
-HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init Text with dragNode.
-     * @tc.expected: call CreatDragNode, EXPECT_CALL mockparagraph GetRectsForRange
-     *     return multi-lines-selected rect.
-     */
-    MockParagraphExpectCallParas params = {
-        .heightValue = std::make_optional(EXPECT_MOCK_HEIGHT),
-        .longestLineValue = std::make_optional(EXPECT_MOCK_LONGEST_LINE),
-        .maxWidthValue = std::make_optional(EXPECT_MOCK_MAX_TEXT_WIDTH),
-        .lineCountValue = std::make_optional(EXPECT_MOCK_LINE_COUNT + 2), // 2: multi-lines
-        .textWidthValue = std::make_optional(EXPECT_MOCK_TEXT_WIDTH),
-    };
-    SystemProperties::SetDevicePhysicalHeight(2000);
-    SetMockParagraphExpectCallParas(params);
-    std::vector<RectF> rects { RectF(40, 40, 60, 60), RectF(100, 100, 60, 100)};
-    EXPECT_CALL(*paragraph_, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
-    const TextProperty textProperty = {
-        .fontSizeValue = std::make_optional(FONT_SIZE_VALUE),
-        .textAlignValue = std::make_optional(TextAlign::START),
-        .maxLinesValue = std::make_optional(10),
-        .lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE),
-        .textSelectionValue = std::make_optional(std::make_pair(0, TEXT_CONTENT2.size())),
-    };
-    CreateTextWithDragNode(TEXT_CONTENT2, textProperty);
-
-    /**
-     * @tc.steps: step1. construct dragNode.
-     * @tc.expected: lastLineHeight/textRect/contentoffset as expected.
-     */
-    EXPECT_EQ(dragPattern_->GetContentOffset(),  OffsetF(-8.f, 32.f));
-    EXPECT_EQ(dragPattern_->GetTextRect(),  RectF(8.f, -32.f, 460.f, 160.f));
-}
-
-/**
  * @tc.name: TextDragTestNg004
  * @tc.desc: Test TextDragPattern::CreateDragNode.
  * @tc.type: FUNC

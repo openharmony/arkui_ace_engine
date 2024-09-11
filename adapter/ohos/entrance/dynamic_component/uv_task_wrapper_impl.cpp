@@ -45,10 +45,10 @@ void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task)
     }
     UVWorkWrapper* workWrapper = new UVWorkWrapper(task);
     uv_queue_work(
-        loop_, workWrapper->GetWorkPtr(), [](uv_work_t* req) {},
+        loop_, workWrapper, [](uv_work_t* req) {},
         [](uv_work_t* req, int status) {
-            auto workWrapper = reinterpret_cast<UVWorkWrapper*>(req->data);
-            workWrapper->GetTask()();
+            auto workWrapper = static_cast<UVWorkWrapper*>(req);
+            (*workWrapper)();
             delete workWrapper;
         });
 }
