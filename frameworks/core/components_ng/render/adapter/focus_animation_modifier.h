@@ -42,8 +42,8 @@ private:
     void InitRoundRectTrajectory(const RSRoundRect&);
     void InitCircleTrajectory(float);
     void InitTrajectDataFunc();
-    std::tuple<float, float, float> GetRenderAngle(float, float, float);
-
+    std::tuple<float, float, float, std::vector<RSScalar>> GetRenderParams(float, float, float);
+    float GetSweepGradientRenderPos(float, float, float, float, float);
     RefPtr<AnimatablePropertyFloat> focusProcessFloat_;
     std::shared_ptr<AnimationUtils::Animation> focusAnimation_;
     bool isRise_ = true;

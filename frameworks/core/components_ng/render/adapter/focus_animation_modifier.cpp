@@ -34,12 +34,8 @@ constexpr int32_t BOTTOM_SIDE = 4;
 constexpr int32_t BOTTOM_LEFT = 5;
 constexpr int32_t LEFT_SIDE = 6;
 constexpr int32_t TOP_LEFT = 7;
-constexpr float FIRST_COLOR_LEVEL = 0.0f;
-constexpr float SECONDARY_COLOR_LEVEL = 0.1f;
-constexpr float TERTIARY_COLOR_LEVEL = 0.4f;
-constexpr float FOURTH_COLOR_LEVEL = 0.6f;
-constexpr float FIFTH_COLOR_LEVEL = 0.9f;
-constexpr float SIXTH_COLOR_LEVEL = 1.0f;
+constexpr float COLOR_POS_START = 0.0f;
+constexpr float COLOR_POS_END = 1.0f;
 constexpr float PERCENT_GLOW_LINE = 1.0f;
 constexpr float ILLUMINATION_ENHANCEMENT_FACTOR = 1.2f;
 constexpr float RISING_SLOPE = (153.0f - 25.5f) / 360.0f;
@@ -48,6 +44,8 @@ constexpr float DESECEND_SLOPE = (25.5f - 153.0f) / 360.0f;
 constexpr float DESECEND_CONSTANT = 153.0f;
 constexpr float CORNER_LEN_CONSTANT = 0.25f;
 constexpr uint32_t ANIMATION_DURATION = 3000;
+constexpr float GLOW_LINE_LEN_FACTOR = 0.2f;
+constexpr float TRANSITION_LINE_LEN_FACTOR = 0.4f;
 } // namespace
 
 FocusAnimationModifier::FocusAnimationModifier()
@@ -187,6 +185,7 @@ void FocusAnimationModifier::StartFocusAnimation()
     animating_ = true;
     if (focusAnimation_) {
         AnimationUtils::ResumeAnimation(focusAnimation_);
+        return;
     }
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
@@ -228,16 +227,12 @@ void FocusAnimationModifier::PaintFocusState(const RSRoundRect& rrect, RSCanvas&
     auto alpha = isRise_ ? RISING_SLOPE * percent + RISING_CONSTANT : DESECEND_SLOPE * percent + DESECEND_CONSTANT;
     RSColorQuad baseColor =
         RSColor::ColorQuadSetARGB(alpha, paintColor_.GetRed(), paintColor_.GetGreen(), paintColor_.GetBlue());
-    RSColorQuad transitionColor =
-        RSColor::ColorQuadSetARGB(
-            fmin(alpha * ILLUMINATION_ENHANCEMENT_FACTOR, 255), paintColor_.GetRed(), paintColor_.GetGreen(),
-            paintColor_.GetBlue());
+    RSColorQuad transitionColor = RSColor::ColorQuadSetARGB(fmin(alpha * ILLUMINATION_ENHANCEMENT_FACTOR, 255),
+        paintColor_.GetRed(), paintColor_.GetGreen(), paintColor_.GetBlue());
     RSColorQuad glowColor = RSColor::ColorQuadSetARGB(
         paintColor_.GetAlpha(), paintColor_.GetRed(), paintColor_.GetGreen(), paintColor_.GetBlue());
     std::vector<RSColorQuad> colors = { baseColor, transitionColor, glowColor, glowColor, transitionColor, baseColor };
-    std::vector<RSScalar> pos = { FIRST_COLOR_LEVEL, SECONDARY_COLOR_LEVEL, TERTIARY_COLOR_LEVEL, FOURTH_COLOR_LEVEL,
-        FIFTH_COLOR_LEVEL, SIXTH_COLOR_LEVEL };
-    auto [angleStart, angleEnd, rotateAngle] = GetRenderAngle(curProcess, centerX, centerY);
+    auto [angleStart, angleEnd, rotateAngle, pos] = GetRenderParams(curProcess, centerX, centerY);
     rsMatrix_.Translate(-centerX, -centerY);
     rsMatrix_.PostRotate(rotateAngle);
     rsMatrix_.PostTranslate(centerX, centerY);
@@ -265,19 +260,48 @@ void FocusAnimationModifier::PaintFocusState(const RSRoundRect& rrect, RSCanvas&
     rsCanvas.DetachPen();
 }
 
-std::tuple<float, float, float> FocusAnimationModifier::GetRenderAngle(float curProcess, float centerX, float centerY)
+std::tuple<float, float, float, std::vector<RSScalar>> FocusAnimationModifier::GetRenderParams(
+    float curProcess, float centerX, float centerY)
 {
     float glowLineLen = longerSide_ * PERCENT_GLOW_LINE;
     float halfLen = glowLineLen / 2.0f;
-    auto [leftX, leftY] = GetPosition(
-        curProcess * grith_ - halfLen < 0 ? curProcess * grith_ + grith_ - halfLen : curProcess * grith_ - halfLen);
-    auto [rightX, rightY] = GetPosition(curProcess * grith_ + halfLen > grith_ ? curProcess * grith_ + halfLen - grith_
-                                                                               : curProcess * grith_ + halfLen);
+    float curDistance = curProcess * grith_;
+    auto [leftX, leftY] =
+        GetPosition(curDistance - halfLen < 0 ? curDistance + grith_ - halfLen : curDistance - halfLen);
+    auto [rightX, rightY] =
+        GetPosition(curDistance + halfLen > grith_ ? curDistance + halfLen - grith_ : curDistance + halfLen);
     float leftAngle = GetIncludeAngleOfVector(centerX, centerY, centerX + 1, centerY, leftX, leftY);
     float rightAngle = GetIncludeAngleOfVector(centerX, centerY, centerX + 1, centerY, rightX, rightY);
-    float angleStart = 0.0f;
     float angleEnd = leftAngle <= rightAngle ? rightAngle - leftAngle : rightAngle - leftAngle + 360.0f;
-    return std::make_tuple(angleStart, angleEnd, leftAngle);
+    float glowDistance = glowLineLen * GLOW_LINE_LEN_FACTOR;
+    float transDistance = glowLineLen * TRANSITION_LINE_LEN_FACTOR;
+    float glowLeftBreakPoint =
+        curDistance - glowDistance < 0 ? curDistance + grith_ - glowDistance : curDistance - glowDistance;
+    float glowRightBreakPoint =
+        curDistance + glowDistance > grith_ ? curDistance + glowDistance - grith_ : curDistance + glowDistance;
+    float transLeftBreakPoint =
+        curDistance - transDistance < 0 ? curDistance + grith_ - transDistance : curDistance - transDistance;
+    float transRightBreakPoint =
+        curDistance + transDistance > grith_ ? curDistance + transDistance - grith_ : curDistance + transDistance;
+    float transLeftPos = GetSweepGradientRenderPos(transLeftBreakPoint, centerX, centerY, leftAngle, angleEnd);
+    float glowLeftPos = GetSweepGradientRenderPos(glowLeftBreakPoint, centerX, centerY, leftAngle, angleEnd);
+    float transRightPos = GetSweepGradientRenderPos(transRightBreakPoint, centerX, centerY, leftAngle, angleEnd);
+    float glowRightPos = GetSweepGradientRenderPos(glowRightBreakPoint, centerX, centerY, leftAngle, angleEnd);
+    std::vector<RSScalar> pos = { COLOR_POS_START, transLeftPos, glowLeftPos, glowRightPos, transRightPos,
+        COLOR_POS_END };
+    return std::make_tuple(0.0f, angleEnd, leftAngle, pos);
+}
+
+float FocusAnimationModifier::GetSweepGradientRenderPos(
+    float distance, float centerX, float centerY, float leftAngle, float renderAngle)
+{
+    auto [posX, posY] = GetPosition(distance);
+    float angle = GetIncludeAngleOfVector(centerX, centerY, centerX + 1, centerY, posX, posY);
+    float realAngle = leftAngle <= angle ? angle - leftAngle : angle - leftAngle + 360.0f;
+    if (renderAngle == 0) {
+        return 0.0f;
+    }
+    return realAngle / renderAngle;
 }
 
 float FocusAnimationModifier::CalArcAngle(float radius, float arcLen)
