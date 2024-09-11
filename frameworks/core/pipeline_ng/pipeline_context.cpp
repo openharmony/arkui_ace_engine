@@ -3544,21 +3544,6 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
     taskScheduler_->AddAfterRenderTask(std::move(task));
 }
 
-void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
-{
-    taskScheduler_->AddSafeAreaPaddingProcessTask(node);
-}
-
-void PipelineContext::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
-{
-    taskScheduler_->RemoveSafeAreaPaddingProcessTask(node);
-}
-
-void PipelineContext::FlushSafeAreaPaddingProcess()
-{
-    taskScheduler_->FlushSafeAreaPaddingProcess();
-}
-
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
 {
     auto child = nodeInfo->GetChild();

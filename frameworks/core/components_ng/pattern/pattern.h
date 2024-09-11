@@ -90,8 +90,6 @@ public:
         return false;
     }
 
-    virtual void ProcessSafeAreaPadding() {}
-
     virtual bool IsNeedPercent() const
     {
         return false;

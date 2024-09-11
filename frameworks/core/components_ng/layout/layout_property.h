@@ -89,11 +89,6 @@ public:
         return padding_;
     }
 
-    const std::unique_ptr<PaddingProperty>& GetSafeAreaPaddingProperty() const
-    {
-        return safeAreaPadding_;
-    }
-
     const std::unique_ptr<MarginProperty>& GetMarginProperty() const
     {
         return margin_;
@@ -142,8 +137,6 @@ public:
     }
 
     void UpdatePadding(const PaddingProperty& value);
-    void UpdateSafeAreaPadding(const PaddingProperty& value);
-    void ResetSafeAreaPadding();
 
     void UpdateMargin(const MarginProperty& value);
 
@@ -177,8 +170,8 @@ public:
     bool HasAspectRatio() const;
     float GetAspectRatio() const;
 
-    bool HasFixedWidth(bool checkPercent = true) const;
-    bool HasFixedHeight(bool checkPercent = true) const;
+    bool HasFixedWidth() const;
+    bool HasFixedHeight() const;
 
     void UpdateMeasureType(MeasureType measureType)
     {
@@ -275,7 +268,7 @@ public:
     LayoutConstraintF CreateContentConstraint() const;
 
     PaddingPropertyF CreatePaddingWithoutBorder(bool useRootConstraint = true, bool roundPixel = true);
-    PaddingPropertyF CreatePaddingAndBorder(bool includeSafeAreaPadding = true, bool forceReCreate = false);
+    PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
     BorderWidthPropertyF CreateBorder();
@@ -340,8 +333,6 @@ public:
     bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
         const std::optional<LayoutConstraintF>& preContentConstraint);
 
-    PaddingPropertyF GetOrCreateSafeAreaPadding(bool forceReCreate = false);
-
     void UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges)
     {
         needPositionLocalizedEdges_ = needPositionLocalizedEdges;
@@ -394,10 +385,6 @@ private:
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
-    void ConstraintContentByPadding();
-    void ConstraintContentByBorder();
-    void ConstraintContentBySafeAreaPadding();
-    PaddingPropertyF CreateSafeAreaPadding();
 
     const std::string PixelRoundToJsonValue() const;
 
@@ -412,7 +399,6 @@ private:
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
-    std::unique_ptr<PaddingProperty> safeAreaPadding_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
     std::optional<MarginPropertyF> marginResult_;
