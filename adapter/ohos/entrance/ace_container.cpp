@@ -103,6 +103,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -905,14 +906,6 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-
-        if (type != WindowSizeChangeReason::ROTATION) {
-            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
-            context->RequestFrame();
-            return;
-        }
-        context->ResetSurfaceChangeMsg();
-
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -1672,9 +1665,8 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
-    auto context = runtimeContext_.lock();
-    DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
-    DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
+    DumpLog::GetInstance().Print("bundleName:" + GetBundleName());
+    DumpLog::GetInstance().Print("moduleName:" + GetModuleName());
     result = DumpInfo(params);
     const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
     auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
@@ -2348,7 +2340,13 @@ void AceContainer::CheckAndSetFontFamily()
         return;
     }
     path = path.append(familyName);
-    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    if (isFormRender_) {
+        // Resolve garbled characters caused by FRS multi-thread async
+        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    } else {
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    }
 }
 
 bool AceContainer::IsFontFileExistInPath(std::string path)
