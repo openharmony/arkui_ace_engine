@@ -287,6 +287,7 @@ constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 constexpr char WEB_NODE_URL[] = "url";
 
 const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
+const std::string STRING_LF = "\n";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
@@ -3123,6 +3124,12 @@ void WebPattern::OnSelectHandleDone(const RectF& handleRect, bool isFirst)
             size.Width(), size.Height(), startSelectionHandle_->GetX(), startSelectionHandle_->GetY(),
             endSelectionHandle_->GetX(), endSelectionHandle_->GetY());
     }
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    if (overlayType == SELECTION_OVERLAY && !IsSelectInfoValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Close handles and menu.");
+        CloseSelectOverlay();
+        SelectCancel();
+    }
 }
 
 void WebPattern::OnSelectHandleMove(const RectF& handleRect, bool isFirst)
@@ -3564,6 +3571,12 @@ void WebPattern::SelectCancel() const
     }
     CHECK_NULL_VOID(quickMenuCallback_);
     quickMenuCallback_->Cancel();
+}
+
+bool WebPattern::IsSelectInfoValid()
+{
+    auto info = GetSelectInfo();
+    return !info.empty() && info != STRING_LF;
 }
 
 std::string WebPattern::GetSelectInfo() const
