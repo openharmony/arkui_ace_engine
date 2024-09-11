@@ -429,6 +429,7 @@ public:
                     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "uiExtension consumed");
                     taskExecutor->PostTask(
                         [id = instanceId_] {
+                            ContainerScope scope(id);
                             auto container = Platform::AceContainer::GetContainer(id);
                             CHECK_NULL_VOID(container);
                             auto context = container->GetPipelineContext();
