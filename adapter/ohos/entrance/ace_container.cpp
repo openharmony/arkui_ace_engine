@@ -2268,6 +2268,8 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetGetWindowStartMoveFlagCallBack(
+        [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
     windowManager->SetWindowSplitSecondaryCallBack(
@@ -2309,8 +2311,8 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        LOGI("SafeArea get success, area type is:%{public}d insets area is:%{public}s", static_cast<int32_t>(type),
-            safeAreaInsets.ToString().c_str());
+        TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
+            static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
     return {};

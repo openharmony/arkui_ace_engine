@@ -139,7 +139,6 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
@@ -188,6 +187,7 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
@@ -541,6 +541,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
+
     preContext_ = nullptr;
     if (preTopNavPath_.has_value()) {
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -1579,7 +1580,6 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
     realNavBarWidth_ = std::min(realNavBarWidth_, frameWidth);
     realNavBarWidth_ = std::min(realNavBarWidth_, maxNavBarWidthPx);
     realNavBarWidth_ = std::max(realNavBarWidth_, minNavBarWidthPx);
-
     // MEASURE
     if (realNavBarWidth_ != currentNavBarWidth) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -1797,7 +1797,6 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             auto preDestination = weakPreNavDestination.Upgrade();
             auto topDestination = weakNewNavDestination.Upgrade();
             proxy->SetIsFinished(true);
-
             // this flag will be update in cancelTransition or finishTransition
             if (proxy->GetIsSuccess()) {
                 pattern->GetNavigationStack()->ClearRecoveryList();
@@ -2556,7 +2555,6 @@ void NavigationPattern::RecoveryToLastStack(
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    // clear last sync stack last nodes
     hostNode->CleanHideNodes();
     CHECK_NULL_VOID(navigationStack_);
     navigationStack_->SetNavPathList(navigationStack_->GetRecoveryList());

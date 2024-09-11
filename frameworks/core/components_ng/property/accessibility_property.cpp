@@ -372,6 +372,14 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::FORM_ETS_TAG
 };
 
+bool AccessibilityProperty::IsAccessibilityFocusableTag(const std::string &tag)
+{
+    if (TAGS_FOCUSABLE.find(tag) != TAGS_FOCUSABLE.end()) {
+        return true;
+    }
+    return false;
+}
+
 bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node,
     std::unique_ptr<JsonValue>& info)
 {

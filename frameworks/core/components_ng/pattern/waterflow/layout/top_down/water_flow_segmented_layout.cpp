@@ -107,8 +107,8 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    wrapper_->SetActiveChildRange(
-        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
+        cacheCount, props->GetShowCachedItemsValue(false));
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;

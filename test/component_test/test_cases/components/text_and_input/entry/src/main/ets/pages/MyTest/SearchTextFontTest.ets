@@ -33,11 +33,11 @@ export default async function searchTextFontTest() {
    * 获取search3的TextFont属性textFont.style与期待值FontStyle.Normal比对
    * 点击button1，变更search1的TextFont属性textFont.size值为'10px'
    * 变更search1的TextFont属性textFont.weight值为'100'
-   * 变更search1的TextFont属性textFont.family值为'ITCBLKADRawFile'
+   * 变更search1的TextFont属性textFont.family值为'TESTFONTRawFile'
    * 变更search1的TextFont属性textFont.style值为FontStyle.Italic
    * 获取search1的TextFont属性textFont.size与期待值'10px'比对
    * 获取search1的TextFont属性textFont.weight与期待值'100'比对
-   * 获取search1的TextFont属性textFont.family与期待值'ITCBLKADRawFile'比对
+   * 获取search1的TextFont属性textFont.family与期待值'TESTFONTRawFile'比对
    * 获取search1的TextFont属性textFont.style与期待值FontStyle.Italic比对
    * 点击button2，变更search2的TextFont属性Font.weight值为FontWeight.Regular
    * 获取search2的TextFont属性Font.weight与期待值'FontWeight.Regular'比对
@@ -72,7 +72,7 @@ export default async function searchTextFontTest() {
     await button1.tap()
     let textFont4: string = await search1.getInspectorInfo()
     assertEqual(JSON.parse(textFont4).$attrs.textFont,
-      '{"fontSize":"10.00px","fontStyle":"FontStyle.Italic","fontWeight":"100","fontFamily":"ITCBLKADRawFile"}')
+      '{"fontSize":"10.00px","fontStyle":"FontStyle.Italic","fontWeight":"100","fontFamily":"TESTFONTRawFile"}')
     await button2.tap()
     let textFont5: string = await search3.getInspectorInfo()
     assertEqual(JSON.parse(JSON.parse(textFont5).$attrs.textFont).fontWeight, 'FontWeight.Regular')

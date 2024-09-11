@@ -63,6 +63,7 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 // Set the UIExtension type of the EmbeddedComponent.
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
+constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 } // namespace
@@ -752,8 +753,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto curWindow = pipeline->GetCurrentWindowRect();
-    displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    displayAreaWindow_ = pipeline->GetCurrentWindowRect();
+    displayArea_ = displayArea + OffsetF(displayAreaWindow_.Left(), displayAreaWindow_.Top());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
@@ -773,10 +774,11 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         }
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d]",
-        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration);
+        displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration);
     UIEXT_LOGI("NotifyDisplayArea displayArea = %{public}s, curWindow = %{public}s, "
         "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
-        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
+        displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
+        reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
         std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, "NotifyDisplayArea",
         transaction);
@@ -808,7 +810,34 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
     session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
+{
+    CHECK_NULL_RETURN(session_, false);
+    CHECK_NULL_RETURN(info, false);
+    CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    if (displayAreaWindow_ != curWindow && needWaitLayout && taskExecutor_) {
+        UIEXT_LOGI("OccupiedArea wait layout, displayAreaWindow: %{public}s, curWindow = %{public}s",
+            displayAreaWindow_.ToString().c_str(), curWindow.ToString().c_str());
+        taskExecutor_->PostDelayedTask(
+            [info, weak = AceType::WeakClaim(this)] {
+                auto session = weak.Upgrade();
+                if (session) {
+                    session->InnerNotifyOccupiedAreaChangeInfo(info);
+                }
+            },
+            TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChangeDelay");
+    }
+    InnerNotifyOccupiedAreaChangeInfo(info);
+    return true;
+}
+
+bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info) const
 {
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);

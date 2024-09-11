@@ -434,6 +434,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsOperation());
     auto localOffset = handleRect.GetOffset();
+    localOffset.SetY(localOffset.GetY() + handleRect.Height() / 2.0f);
     if (IsOverlayMode()) {
         localOffset = localOffset - GetPaintOffsetWithoutTransform();
     }
@@ -442,7 +443,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     int32_t startIndex = selectController->GetFirstHandleIndex();
     int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
-        auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
+        auto magnifierLocalOffsetY = localOffset.GetY();
         auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
         if (IsOverlayMode()) {
             GetLocalPointWithTransform(magnifierLocalOffset);
@@ -574,9 +575,9 @@ void TextFieldSelectOverlay::OnHandleIsHidden()
     pattern->StartTwinkling();
 }
 
-void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
+void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
-    BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
+    BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     auto pattern = GetPattern<TextFieldPattern>();

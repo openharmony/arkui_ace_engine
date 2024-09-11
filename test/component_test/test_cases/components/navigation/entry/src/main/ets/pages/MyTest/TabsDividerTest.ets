@@ -22,10 +22,10 @@ export default async function tabsDividerTest() {
 * 获取tabs的Divider属性与期待值{ strokeWidth: '2.00vp', color: '#FFFFF000', startMargin: '0.00vp', endMargin: '0.00vp' }比对
 * 点击button1，变更tabs的Divider属性值为{ strokeWidth: '50.00px', color: '#FFFF60FF', startMargin: '500.00px', endMargin: '500.00px' }
 * 获取tabs的Divider属性与期待值{ strokeWidth: '50.00px', color: '#FFFF60FF', startMargin: '500.00px', endMargin: '500.00px' }比对
-* 点击button2，变更tabs的Divider属性值为{ strokeWidth: $r("app.integer.tabs_resource2"), color: '#FFFFA500',
-* startMargin: $r("app.integer.tabs_resource2"), endMargin: $r("app.integer.tabs_resource2") }
-* 获取tabs的Divider属性与期待值{ strokeWidth: $r("app.integer.tabs_resource2"), color: '#FFFFA500',
-* startMargin: $r("app.integer.tabs_resource2"), endMargin: $r("app.integer.tabs_resource2") }比对
+* 点击button2，变更tabs的Divider属性值为{ strokeWidth: $r("app.string.tabs_resource2"), color: '#FFFFA500',
+* startMargin: $r("app.string.tabs_resource2"), endMargin: $r("app.string.tabs_resource2") }
+* 获取tabs的Divider属性与期待值{ strokeWidth: $r("app.string.tabs_resource2"), color: '#FFFFA500',
+* startMargin: $r("app.string.tabs_resource2"), endMargin: $r("app.string.tabs_resource2") }比对
 * 点击button3，变更tabs的Divider属性的color值为$r('app.color.tabs_color')
 * 获取tabs的Divider属性的color值与期待值$r('app.color.tabs_color')比对
 * 获取tabs的Divider属性与期待值{ strokeWidth: '0.00vp', color: '#33182431', startMargin: '0.00vp', endMargin: '0.00vp' }比对

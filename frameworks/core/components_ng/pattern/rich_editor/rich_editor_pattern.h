@@ -519,6 +519,7 @@ public:
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
+    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -629,6 +630,7 @@ public:
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);

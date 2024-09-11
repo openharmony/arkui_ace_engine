@@ -375,6 +375,43 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     param_.topSecurity = topSecurity;
     param_.bottomSecurity = bottomSecurity;
     param_.previewMenuGap = targetSecurity_;
+
+    InitializeSafaAreaPadding(menuPattern);
+}
+
+void MenuLayoutAlgorithm::InitializeSafaAreaPadding(const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto menuParam = menuWrapperPattern->GetMenuParam();
+    if (!menuParam.safeAreaPadding.has_value()) {
+        return;
+    }
+
+    auto paddingProps = menuParam.safeAreaPadding.value();
+    if (paddingProps.start.has_value()) {
+        safeAreaPadding_.left = paddingProps.start.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
+        paddingStart_ = safeAreaPadding_.left.value();
+    }
+
+    if (paddingProps.end.has_value()) {
+        safeAreaPadding_.right = paddingProps.end.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
+        paddingEnd_ = safeAreaPadding_.right.value();
+    }
+
+    if (paddingProps.top.has_value()) {
+        safeAreaPadding_.top = paddingProps.top.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
+        param_.topSecurity = safeAreaPadding_.top.value();
+    }
+
+    if (paddingProps.bottom.has_value()) {
+        safeAreaPadding_.bottom = paddingProps.bottom.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
+        param_.bottomSecurity = safeAreaPadding_.bottom.value();
+    }
 }
 
 void MenuLayoutAlgorithm::InitWrapperRect(
@@ -768,6 +805,41 @@ void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<Layou
     geometryNode = childGeometryNode;
 }
 
+void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect)
+{
+    CHECK_NULL_VOID(frameNode && frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto maxWidth = wrapperSize_.Width();
+    if (safeAreaPadding_.left.has_value() || safeAreaPadding_.right.has_value()) {
+        maxWidth = std::max(0.0f, wrapperSize_.Width() - paddingStart_ - paddingEnd_) / previewScale_;
+    } else {
+        RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+        CHECK_NULL_VOID(columnInfo);
+        auto parent = columnInfo->GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->BuildColumnWidth(std::min(windowGlobalRect.Width(), windowGlobalRect.Height()));
+        maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
+    }
+
+    auto frameSize = geometryNode->GetMarginFrameSize();
+    static SizeF previewSize;
+    static int32_t hostId = -1;
+    if (previewSize == SizeF(0.0f, 0.0f) || hostId != frameNode->GetId()) {
+        previewSize = frameSize;
+        hostId = frameNode->GetId();
+    } else {
+        frameSize = previewSize;
+    }
+
+    if (LessOrEqual(frameSize.Width(), maxWidth)) {
+        geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
+    } else {
+        geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
+    }
+}
+
 void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
     RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
 {
@@ -787,28 +859,9 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
         return;
     }
 
-    RefPtr<GridColumnInfo> columnInfo =
-        GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    CHECK_NULL_VOID(columnInfo);
-    auto parent = columnInfo->GetParent();
-    CHECK_NULL_VOID(parent);
-    parent->BuildColumnWidth(std::min(windowGlobalRect.Width(), windowGlobalRect.Height()));
-    auto maxWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4)) / previewScale_;
     auto frameSize = geometryNode->GetMarginFrameSize();
-    static SizeF previewSize;
-    static int32_t hostId = -1;
     if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
-        if (previewSize == SizeF(0.0f, 0.0f) || hostId != hostNode->GetId()) {
-            previewSize = frameSize;
-            hostId = hostNode->GetId();
-        } else {
-            frameSize = previewSize;
-        }
-        if (LessOrEqual(frameSize.Width(), maxWidth)) {
-            geometryNode->SetFrameSize(SizeF(frameSize.Width(), frameSize.Height()));
-        } else {
-            geometryNode->SetFrameSize(SizeF(maxWidth, frameSize.Height()));
-        }
+        CheckPreviewConstraint(hostNode, windowGlobalRect);
     } else {
         geometryNode->SetFrameSize(frameSize);
     }
@@ -958,11 +1011,10 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuLessThan(
     OffsetF offset(center.GetX() - previewSize.Width() / 2,
         std::max<float>(center.GetY() - previewSize.Height() / 2,
             param_.top + param_.topSecurity + totalSize.Height() - previewSize.Height() + param_.previewMenuGap));
-    auto x = std::clamp(offset.GetX(), param_.windowsOffsetX + paddingStart_ + param_.left,
-        param_.windowsOffsetX + param_.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_ - param_.right);
-    auto y = std::clamp(offset.GetY(), param_.windowsOffsetY + param_.top + param_.topSecurity,
-        param_.windowsOffsetY + param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom -
-            previewSize.Height());
+    auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
+        static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
+        static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
     x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
     y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
@@ -1011,11 +1063,10 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(
     OffsetF offset(center.GetX() - previewSize.Width() / 2,
         param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - previewSize.Height());
 
-    auto x = std::clamp(offset.GetX(), param_.windowsOffsetX + paddingStart_ + param_.left,
-        param_.windowsOffsetX + param_.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_ - param_.right);
-    auto y = std::clamp(offset.GetY(), param_.windowsOffsetY + param_.top + param_.topSecurity,
-        param_.windowsOffsetY + param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom -
-            previewSize.Height());
+    auto x = std::clamp(offset.GetX(), static_cast<float>(wrapperRect_.Left()) + paddingStart_,
+        static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
+        static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
     x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
     y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
@@ -1152,11 +1203,10 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / 2;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
         param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - menuSize.Height());
-    auto x = std::clamp(offsetX, param_.windowsOffsetX + paddingStart_ + param_.left,
-        param_.windowsOffsetX + param_.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_ - param_.right);
-    auto y = std::clamp(offsetY, param_.windowsOffsetY + param_.top + param_.topSecurity,
-        param_.windowsOffsetY + param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom -
-            previewSize.Height());
+    auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
+        static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
+        static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
     x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
     y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
@@ -1172,7 +1222,8 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
         targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
     targetCenterOffset_ = targetCenterOffset;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    auto widthLeftSpace = param_.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_ - param_.previewMenuGap;
+    auto widthLeftSpace = param_.windowGlobalSizeF.Width() - paddingStart_ - paddingEnd_ - param_.previewMenuGap -
+                          param_.left - param_.right;
     auto delta = totalSize.Width() - widthLeftSpace;
     if (GreatNotEqual(delta, 0.0f)) {
         auto unitSpace = delta / previewSize.Width();
@@ -1198,11 +1249,10 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
     auto offsetX = 0.0f;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
         param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - menuSize.Height());
-    auto x = std::clamp(offsetX, param_.windowsOffsetX + paddingStart_ + param_.left,
-        param_.windowsOffsetX + param_.windowGlobalSizeF.Width() - previewSize.Width() - paddingEnd_ - param_.right);
-    auto y = std::clamp(offsetY, param_.windowsOffsetY + param_.top + param_.topSecurity,
-        param_.windowsOffsetY + param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom -
-            previewSize.Height());
+    auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
+        static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
+    auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
+        static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
     x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
     y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
@@ -2326,8 +2376,9 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
             preOffset_.SetY(y);
             preRect_.SetOffset(rect.GetOffset());
             preRect_.SetSize(rect.GetSize());
-            if (!(x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
-                    (y + childSize.Height()) > rect.Bottom())) {
+            auto outside = LessNotEqual(x, rect.Left()) || GreatNotEqual(x + childSize.Width(), rect.Right()) ||
+                           LessNotEqual(y, rect.Top()) || GreatNotEqual(y + childSize.Height(), rect.Bottom());
+            if (!outside) {
                 return true;
             }
             flag_ = true;
@@ -2336,8 +2387,8 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
         }
         return CheckPlacement(rect, position, childSize);
     }
-    if (x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right() || y < preRect_.Top() ||
-        (y + childSize.Height()) > preRect_.Bottom()) {
+    if (LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()) ||
+        LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom())) {
         return false;
     }
     return true;
@@ -2350,55 +2401,53 @@ bool MenuLayoutAlgorithm::CheckPlacement(const Rect& rect, const OffsetF& positi
     prevState_ = state_;
     preRect_.SetOffset(rect.GetOffset());
     preRect_.SetSize(rect.GetSize());
-    if (!(x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right() || y < preRect_.Top() ||
-            (y + childSize.Height()) > preRect_.Bottom())) {
-        return true;
-    }
-    return false;
+    auto outSide = LessNotEqual(x, preRect_.Left()) || GreatNotEqual(x + childSize.Width(), preRect_.Right()) ||
+                   LessNotEqual(y, preRect_.Top()) || GreatNotEqual(y + childSize.Height(), preRect_.Bottom());
+    return !outSide;
 }
 
 bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& childSize)
 {
-    float targetOffsetX = targetOffset_.GetX();
-    float targetOffsetY = targetOffset_.GetY();
+    float xAvoid = wrapperRect_.Left() + paddingStart_;
     float yAvoid = wrapperRect_.Top() + paddingTop_ + param_.topSecurity;
+    float maxWidth = wrapperSize_.Width() - paddingEnd_ - paddingStart_;
+    float maxHeight = wrapperSize_.Height() - paddingTop_ - param_.topSecurity - paddingBottom_ - param_.bottomSecurity;
     Rect rect;
+    Rect targetRect = Rect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
     switch (placement_) {
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
             state_ = static_cast<int>(DirectionState::Bottom_Direction);
-            auto y = std::max(targetOffsetY + targetSize_.Height(), yAvoid);
-            auto height = std::min(
-                static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_ - targetOffsetY - targetSize_.Height(),
-                wrapperSize_.Height() - paddingBottom_ - paddingTop_);
-            rect.SetRect(paddingStart_, y, wrapperSize_.Width() - paddingEnd_ - paddingStart_, height);
+            auto y = std::max<float>(targetRect.Bottom(), yAvoid);
+            auto height = std::min<float>(
+                wrapperRect_.Bottom() - targetRect.Bottom() - paddingBottom_ - param_.bottomSecurity, maxHeight);
+            rect.SetRect(xAvoid, y, maxWidth, height);
             break;
         }
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
             state_ = static_cast<int>(DirectionState::Top_Direction);
-            auto height = std::min(targetOffsetY - yAvoid, wrapperSize_.Height() - paddingTop_ - paddingBottom_);
-            rect.SetRect(paddingStart_, yAvoid, wrapperSize_.Width() - paddingEnd_ - paddingStart_, height);
+            auto height = std::min<float>(targetRect.Top() - yAvoid, maxHeight);
+            rect.SetRect(xAvoid, yAvoid, maxWidth, height);
             break;
         }
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
             state_ = static_cast<int>(DirectionState::Right_Direction);
-            auto x = std::max(targetOffsetX + targetSize_.Width(), paddingStart_);
-            auto width = std::min(wrapperSize_.Width() - targetOffsetX - targetSize_.Width() - paddingEnd_,
-                wrapperSize_.Width() - paddingStart_ - paddingEnd_);
-            rect.SetRect(x, yAvoid, width, wrapperSize_.Height() - paddingBottom_ - paddingTop_);
+            auto x = std::max<float>(targetRect.Right(), xAvoid);
+            auto width = std::min<float>(wrapperRect_.Right() - targetRect.Right() - paddingEnd_, maxWidth);
+            rect.SetRect(x, yAvoid, width, maxHeight);
             break;
         }
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
             state_ = static_cast<int>(DirectionState::Left_Direction);
-            auto width = std::min(targetOffsetX - paddingStart_, wrapperSize_.Width() - paddingEnd_ - paddingStart_);
-            rect.SetRect(paddingStart_, yAvoid, width, wrapperSize_.Height() - paddingBottom_ - paddingTop_);
+            auto width = std::min<float>(targetRect.Left() - xAvoid, maxWidth);
+            rect.SetRect(xAvoid, yAvoid, width, maxHeight);
             break;
         }
         default:

@@ -793,10 +793,10 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
         dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
         dividerLayoutProperty->UpdateVertical(true);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_RETURN(theme, false);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
         dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
     }

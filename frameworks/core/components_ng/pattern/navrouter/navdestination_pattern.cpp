@@ -24,20 +24,20 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+std::atomic<uint64_t> g_navDestinationPatternNextAutoGenId = 0;
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
-std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
-} // namespace
+}
 
 NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
     : shallowBuilder_(shallowBuilder)
 {
-    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+    navDestinationId_ = g_navDestinationPatternNextAutoGenId.fetch_add(1);
 }
 
 NavDestinationPattern::NavDestinationPattern()
 {
-    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+    navDestinationId_ = g_navDestinationPatternNextAutoGenId.fetch_add(1);
 }
 
 NavDestinationPattern::~NavDestinationPattern()

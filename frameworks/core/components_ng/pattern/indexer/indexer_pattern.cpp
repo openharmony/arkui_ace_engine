@@ -769,6 +769,9 @@ void IndexerPattern::ApplyIndexChanged(
                 childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
                 childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
             }
+            if (selectChanged) {
+                host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+            }
         } else if (index == childFocusIndex_ || index == selected_) {
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();

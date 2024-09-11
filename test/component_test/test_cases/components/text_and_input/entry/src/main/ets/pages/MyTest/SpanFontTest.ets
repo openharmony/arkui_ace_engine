@@ -33,11 +33,11 @@ export default async function spanFontTest() {
    * 获取span1的Font属性Font.style与期待值FontStyle.Normal比对
    * 点击button1，变更span1的Font属性Font.size值为'30px'
    * 变更span1的Font属性Font.weight值为FontWeight.Regular
-   * 变更span1的Font属性Font.family值为'ITCBLKADRawFile'
+   * 变更span1的Font属性Font.family值为'TESTFONTRawFile'
    * 变更span1的Font属性Font.style值为FontStyle.Italic
    * 获取span1的Font属性Font.size与期待值'30px'比对
    * 获取span1的Font属性Font.weight与期待值FontWeight.Regular比对
-   * 获取span1的Font属性Font.family与期待值'ITCBLKADRawFile'比对
+   * 获取span1的Font属性Font.family与期待值'TESTFONTRawFile'比对
    * 获取span1的Font属性Font.style与期待值FontStyle.Italic比对
    * 获取span2的Font属性Font.size与期待值$r('app.string.length')比对
    * 获取span2的Font属性Font.weight与期待值FontWeight.Bolder比对
@@ -80,7 +80,7 @@ export default async function spanFontTest() {
 
     await button1.tap()
     let font5: string = await span1.getInspectorInfo()
-    assertEqual(JSON.parse(font5).$attrs.font.family, 'ITCBLKADRawFile')
+    assertEqual(JSON.parse(font5).$attrs.font.family, 'TESTFONTRawFile')
     assertEqual(JSON.parse(font5).$attrs.font.size, '30px')
     assertEqual(JSON.parse(font5).$attrs.font.weight, FontWeight.Regular)
     assertEqual(JSON.parse(font5).$attrs.font.style, FontStyle.Italic)

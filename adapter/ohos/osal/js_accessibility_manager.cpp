@@ -4835,6 +4835,14 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     parentElementId_ = parentElementId;
     parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
+
+    for (auto subContext : GetSubPipelineContexts()) {
+        auto context = subContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
+        interactionOperation->SetHandler(WeakClaim(this));
+        instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
+    }
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4866,6 +4874,13 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     parentTreeId_ = 0;
     parentWindowId_ = 0;
     NotifyChildTreeOnDeregister();
+
+    RefPtr<PipelineBase> context;
+    for (auto subContext : GetSubPipelineContexts()) {
+        context = subContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        instance->DeregisterElementOperator(context->GetWindowId());
+    }
 }
 
 void JsAccessibilityManager::SendUecOnTreeEvent(int64_t splitElementId)
@@ -5687,16 +5702,17 @@ void JsAccessibilityManager::DumpTreeNodeInfoInJson(
 
 
 void JsAccessibilityManager::TransferThirdProviderHoverEvent(
-    int64_t hostElementId, const NG::PointF &point, SourceType source,
+    const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
     NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(ngPipeline);
-    auto frameNode = GetFramenodeByAccessibilityId(
-        ngPipeline->GetRootElement(), hostElementId);
+    auto frameNode = hostNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     AccessibilityHoverForThirdConfig config;
-    config.hostElementId = hostElementId;
+    config.hostElementId = frameNode->GetAccessibilityId();
     config.point = point;
     config.sourceType = source;
     config.eventType = eventType;
