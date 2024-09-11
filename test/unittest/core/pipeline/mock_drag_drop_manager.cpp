@@ -63,7 +63,6 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
 
 void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
-    auto point = pointerEvent.GetPoint();
     currentId_ = static_cast<int32_t>(point.GetX());
 }
 
