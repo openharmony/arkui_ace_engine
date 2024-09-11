@@ -803,7 +803,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeight() - (height_ + sheetHeightUp_);
+    auto offset = pageHeight_ - (height_ + sheetHeightUp_);
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -1713,7 +1713,7 @@ void SheetPresentationPattern::TranslateTo(float height)
 
 void SheetPresentationPattern::ScrollTo(float height)
 {
-    // height >= 0
+    // height = 0 or height > 0
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
