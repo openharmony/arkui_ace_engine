@@ -51,6 +51,7 @@ constexpr Dimension FOCUS_OFFSET = 1.0_vp;
 constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
 constexpr Dimension SYMBOL_ICON_HEIGHT = 16.0_fp;
 constexpr Dimension ICON_MAX_SIZE = 32.0_vp;
+constexpr Dimension SEARCH_TEXTINPUT_BORDER_WIDTH = 0.0_vp;
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float TOUCH_OPACITY = 0.1f;
 constexpr float MAX_FONT_SCALE = 2.0f;
@@ -1404,6 +1405,9 @@ void SearchPattern::HandleBlurEvent()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(SEARCH_TEXTINPUT_BORDER_WIDTH);
+    textFieldLayoutProperty->UpdateBorderWidth(borderWidth);
 }
 
 void SearchPattern::InitClickEvent()

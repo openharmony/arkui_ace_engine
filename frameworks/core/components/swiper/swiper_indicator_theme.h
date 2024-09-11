@@ -140,7 +140,8 @@ public:
         void ParsePattern2(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme,
             const RefPtr<ThemeStyle> swiperPattern) const
         {
-            theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
+            theme->focusedBorderWidth_ =
+                swiperPattern->GetAttr<Dimension>("swiper_focus_border_width", SWIPER_FOCUSED_BORDER_WIDTH);
             theme->hoverArrowBackgroundColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);
             theme->clickArrowBackgroundColor_ =

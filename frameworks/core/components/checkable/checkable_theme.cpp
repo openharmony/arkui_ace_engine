@@ -16,6 +16,23 @@
 #include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace {
+void CheckboxTheme::Builder::SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants,
+    const RefPtr<CheckboxTheme>& theme) const
+{
+    RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
+    if (!checkboxPattern) {
+        LOGE("Pattern of checkbox is null, please check!");
+        return;
+    }
+    theme->focusBoardColor_ = checkboxPattern->GetAttr<Color>("color_focused_bg", Color(0xffff0000));
+    theme->focusBoardSize_ = checkboxPattern->GetAttr<Dimension>("size_focused_bg", 2.0_vp);
+    theme->borderFocusedColor_ = checkboxPattern->GetAttr<Color>("focused_border_color", Color(0xffff0000));
+    theme->focusedBGColorUnselected_ =
+        checkboxPattern->GetAttr<Color>("focused_bg_color_unselected", Color(0xffff0000));
+    theme->roundFocusBoardSize_ = checkboxPattern->GetAttr<Dimension>("round_size_focused_bg", 2.0_vp);
+    theme->focusLineColor_ = checkboxPattern->GetAttr<Color>("checkbox_focus_color_sys", Color(0xff007dff));
+}
+
 void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConstants,
     const RefPtr<SwitchTheme>& theme) const
 {
@@ -85,5 +102,6 @@ void SwitchTheme::Builder::ParseSubStylePattern(const RefPtr<ThemeConstants>& th
     theme->isUseDiffPointColor_ =
         static_cast<bool>(switchPattern->GetAttr<double>("switch_different_pointColor", 0.0));
     theme->focusPadding_ = switchPattern->GetAttr<Dimension>("switch_focus_box_padding", 0.0_vp);
+    theme->focusLineColor_ = switchPattern->GetAttr<Color>("switch_focus_color_sys", Color(0xff007dff));
 }
 } // namespace OHOS::Ace

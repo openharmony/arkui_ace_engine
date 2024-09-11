@@ -323,6 +323,7 @@ public:
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
             theme->menuItemContentAlign_ =
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_content_align", CONTENT_ALIGN_LEFT));
+            theme->focusStyleType_ = pattern->GetAttr<double>("select_focus_style_type", 0.0);
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -532,6 +533,7 @@ public:
         theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
         theme->menuItemFocusedShadowStyle_ = menuItemFocusedShadowStyle_;
         theme->menuItemContentAlign_ = menuItemContentAlign_;
+        theme->focusStyleType_ = focusStyleType_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1396,6 +1398,11 @@ public:
         return menuItemFocusedShadowStyle_;
     }
 
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1552,6 +1559,7 @@ private:
     Dimension menuTargetSecuritySpace_;
     Color menuItemFocusedBgColor_;
     Color menuItemFocusedTextColor_;
+    double focusStyleType_ = 0.0;
 };
 
 } // namespace OHOS::Ace

@@ -125,6 +125,7 @@ public:
             theme->backBlurColor_ = pattern->GetAttr<Color>("menu_back_blur_color", Color::TRANSPARENT);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
             theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
+            theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
         }
     };
 
@@ -355,6 +356,11 @@ public:
         return borderWidth_;
     }
 
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -404,6 +410,7 @@ private:
     Dimension borderWidth_;
     Color backBlurColor_ = Color::TRANSPARENT;
     Color borderColor_ = Color::TRANSPARENT;
+    double focusStyleType_ = 0.0;
 };
 
 } // namespace OHOS::Ace::NG

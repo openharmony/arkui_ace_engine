@@ -48,7 +48,6 @@ const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
 const Dimension FOUCS_WIDTH = 2.0_vp;
 const Dimension MARGIN_SIZE = 12.0_vp;
-const Dimension FOCUS_SPACE = 2.0_vp;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -356,13 +355,17 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto stackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackNode);
     auto buttonNode = DynamicCast<FrameNode>(stackNode->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
     auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
     auto columnWidth = stackNode->GetGeometryNode()->GetFrameSize().Width();
-    auto focusSpace = FOCUS_SPACE.ConvertToPx();
+    auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
     focusButtonRect -= OffsetF(focusSpace, focusSpace);
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
     focusButtonRect += OffsetF(columnWidth * focusKeyID_, 0);

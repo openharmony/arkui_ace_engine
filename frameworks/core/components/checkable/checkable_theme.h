@@ -216,6 +216,11 @@ public:
         return focusedBgUnchecked_;
     }
 
+    const Color& GetFocusLineColor() const
+    {
+        return focusLineColor_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -233,6 +238,7 @@ protected:
     Color focusBoardColor_;
     Color borderFocusedColor_;
     Color focusedBGColorUnselected_;
+    Color focusLineColor_;
     Dimension sizeFocusBg_;
     Dimension sizeHoverBg_;
     Dimension width_;
@@ -342,20 +348,7 @@ public:
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
         }
 
-        void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
-        {
-            RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
-            if (!checkboxPattern) {
-                LOGE("Pattern of checkbox is null, please check!");
-                return;
-            }
-            theme->focusBoardColor_ = checkboxPattern->GetAttr<Color>("color_focused_bg", Color(0xffff0000));
-            theme->focusBoardSize_ = checkboxPattern->GetAttr<Dimension>("size_focused_bg", 2.0_vp);
-            theme->borderFocusedColor_ = checkboxPattern->GetAttr<Color>("focused_border_color", Color(0xffff0000));
-            theme->focusedBGColorUnselected_ =
-                checkboxPattern->GetAttr<Color>("focused_bg_color_unselected", Color(0xffff0000));
-            theme->roundFocusBoardSize_ = checkboxPattern->GetAttr<Dimension>("round_size_focused_bg", 2.0_vp);
-        }
+        void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
     };
 
     const Dimension& GetBorderRadius() const
