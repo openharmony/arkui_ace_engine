@@ -20,12 +20,16 @@ class stateMgmtDFX {
   private static readonly DUMP_MAX_LENGTH: number = 10;
   private static readonly DUMP_LAST_LENGTH: number = 3;
 
-  public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
+  public static getObservedPropertyInfo<T>(observedProp: ObservedPropertyAbstractPU<T>, isProfiler: boolean,
+    changedTrackPropertyName?: string): ObservedPropertyInfo<T> {
     return {
-      decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+      decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+      changedTrackPropertyName: changedTrackPropertyName,
       value: stateMgmtDFX.getRawValue(observedProp),
-      inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
-      dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+      inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ?
+        -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+      dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ?
+        !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
       owningView: observedProp.getOwningView(),
       length: stateMgmtDFX.getRawValueLength(observedProp),
       syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
@@ -37,7 +41,7 @@ class stateMgmtDFX {
       return Object.prototype.toString.call(item);
     } catch (e) {
       stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
-      return "unknown type";
+      return 'unknown type';
     }
   }
 
@@ -59,7 +63,7 @@ class stateMgmtDFX {
   private static dumpMap(map: Map<RawValue, RawValue>): Array<DumpBuildInType> {
     let dumpKey = this.dumpItems(Array.from(map.keys()));
     let dumpValue = this.dumpItems(Array.from(map.values()));
-    return dumpKey.map((item: any, index: number) => [item, dumpValue[index]])
+    return dumpKey.map((item: any, index: number) => [item, dumpValue[index]]);
   }
 
   private static dumpObjectProperty(value: any): DumpObjectType | string {
@@ -77,7 +81,7 @@ class stateMgmtDFX {
       }
     } catch (e) {
       stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
-      return "unknown type";
+      return 'unknown type';
     }
     return tempObj;
   }
