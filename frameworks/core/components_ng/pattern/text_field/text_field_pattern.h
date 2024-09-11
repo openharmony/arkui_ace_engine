@@ -1300,6 +1300,9 @@ public:
 
     void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
 
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     OffsetF GetTextPaintOffset() const override;

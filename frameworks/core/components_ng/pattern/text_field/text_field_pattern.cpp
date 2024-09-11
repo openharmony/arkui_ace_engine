@@ -2029,23 +2029,21 @@ void TextFieldPattern::InitDragDropCallBack()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        pattern->SetDragMovingScrollback();
-        if (pattern->IsNormalInlineState()) {
-            return;
-        }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
             "%{public}d TextField onDragEnter, dragStatus_ is %{public}d, dragRecipientStatus_ is %{public}d",
             host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
             static_cast<int32_t>(pattern->dragRecipientStatus_));
-        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
-        pattern->ResetPreviewTextState();
-        auto pipeline = PipelineContext::GetCurrentContext();
+
+        auto pipeline = pattern->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto dragManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragManager);
-        if (!dragManager->IsDropAllowed(host)) {
+        if (pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)) {
             return;
         }
+        pattern->SetDragMovingScrollback();
+        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
+        pattern->ResetPreviewTextState();
         auto focusHub = pattern->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         if (focusHub->RequestFocusImmediately()) {
@@ -2060,14 +2058,14 @@ void TextFieldPattern::InitDragDropCallBack()
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        auto pipeline = pattern->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
+        auto dragManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragManager);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
 
-        if (pattern->IsNormalInlineState()) {
+        if (pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)) {
             return;
         }
         if (!pattern->HasFocus()) {
@@ -2109,14 +2107,17 @@ void TextFieldPattern::InitDragDropCallBack()
     auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "%{public}d TextField onDragEnd, dragStatus_ is %{public}d, dragRecipientStatus_ is %{public}d",
+            host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
+            static_cast<int32_t>(pattern->dragRecipientStatus_));
         pattern->StopContentScroll();
         ContainerScope scope(pattern->GetHostInstanceId());
         if (pattern->dragStatus_ == DragStatus::DRAGGING && !pattern->isDetachFromMainTree_) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-
             // Except for DRAG_SUCCESS, all of rest need to show
             auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
@@ -2157,6 +2158,17 @@ void TextFieldPattern::ClearDragDropEvent()
     eventHub->SetOnDragLeave(nullptr);
     eventHub->SetOnDragEnd(nullptr);
     eventHub->SetOnDrop(nullptr);
+}
+
+void TextFieldPattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnDragStatusCallback dragEventType=%{public}d", dragEventType);
+    if (dragEventType == DragEventType::DROP && dragRecipientStatus_ == DragStatus::DRAGGING) {
+        StopContentScroll();
+        StopTwinkling();
+    }
 }
 
 void TextFieldPattern::InitTouchEvent()
