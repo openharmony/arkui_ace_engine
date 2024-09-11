@@ -4222,14 +4222,14 @@ void PipelineContext::HandleSubwindow(bool isShow)
 void PipelineContext::AddIsFocusActiveUpdateEvent(
     const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
 {
-    CHECK_NULL_RETURN(focusManager_, false);
-    return focusManager_->AddIsFocusActiveUpdateEvent(node, eventCallback);
+    CHECK_NULL_VOID(focusManager_);
+    focusManager_->AddIsFocusActiveUpdateEvent(node, eventCallback);
 }
 
 void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(focusManager_, false);
-    return focusManager_->RemoveIsFocusActiveUpdateEvent(node);
+    CHECK_NULL_VOID(focusManager_);
+    focusManager_->RemoveIsFocusActiveUpdateEvent(node);
 }
 
 std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
