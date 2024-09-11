@@ -94,11 +94,6 @@ common_bin = [
     part_name = "graphic_2d"
   },
   {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
-  },
-  {
     label = "//third_party/glfw:glfw"
     subsystem_name = "thirdparty"
     part_name = "glfw"
@@ -110,6 +105,11 @@ common_bin = [
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
+    subsystem_name = "graphic"
+    part_name = "graphic_2d"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
     subsystem_name = "graphic"
     part_name = "graphic_2d"
   },
