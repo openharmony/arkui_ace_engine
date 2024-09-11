@@ -3302,18 +3302,18 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
-void ParseMenuSafeAreaPaddingParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
-    auto paddingVal = menuOptions->GetProperty("safeAreaPadding");
-    if (!paddingVal->IsObject()) {
+    auto marginVal = menuOptions->GetProperty("layoutRegionMargin");
+    if (!marginVal->IsObject()) {
         return;
     }
 
     CommonCalcDimension commonCalcDimension;
-    JSViewAbstract::ParseCommonMarginOrPaddingCorner(JSRef<JSObject>::Cast(paddingVal), commonCalcDimension);
+    JSViewAbstract::ParseCommonMarginOrPaddingCorner(JSRef<JSObject>::Cast(marginVal), commonCalcDimension);
     if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
         commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-        menuParam.safeAreaPadding = JSViewAbstract::GetLocalizedPadding(
+        menuParam.layoutRegionMargin = JSViewAbstract::GetLocalizedPadding(
             commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
     }
 }
@@ -3439,7 +3439,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
-    ParseMenuSafeAreaPaddingParam(menuOptions, menuParam);
+    ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
