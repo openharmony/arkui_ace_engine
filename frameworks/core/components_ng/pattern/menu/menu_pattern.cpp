@@ -226,13 +226,12 @@ void MenuPattern::OnAttachToFrameNode()
 
 void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 }
 
 void MenuPattern::OnModifyDone()
