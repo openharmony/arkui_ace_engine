@@ -118,8 +118,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         if (spanStringHasMaxLines_) {
             textStyle.SetMaxLines(UINT32_MAX);
         }
+        textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
+        textStyle_ = textStyle;
         if (!AddPropertiesAndAnimations(textStyle, textLayoutProperty, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }

@@ -991,6 +991,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
+    textStyle.SetTextColor(placeholderStyle.paragraphTextColor);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
