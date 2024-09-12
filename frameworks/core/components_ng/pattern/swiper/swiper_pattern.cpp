@@ -2180,7 +2180,7 @@ bool SwiperPattern::SpringOverScroll(float offset)
         return false;
     }
     targetIndex_.reset();
-
+    ResetParentNodeColor();
     auto visibleSize = CalculateVisibleSize();
     if (LessOrEqual(visibleSize, 0.0)) {
         return true;
