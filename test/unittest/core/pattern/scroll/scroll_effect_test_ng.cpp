@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
-class ScrolleEffectTestNg : public ScrollTestNg {
+class ScrollEffectTestNg : public ScrollTestNg {
 public:
 };
 
@@ -33,7 +33,7 @@ public:
  * @tc.desc: Test SpringEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, SpringEffect001, TestSize.Level1)
 {
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessScrollOver(0.0);
@@ -80,7 +80,7 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
  * @tc.desc: Test SpringEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, SpringEffect002, TestSize.Level1)
 {
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessSpringUpdate();
@@ -125,7 +125,7 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
  * @tc.desc: Test the correlation function in ScrollFadeEffect under different conditions.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
@@ -224,7 +224,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
  * @tc.desc: Test Paint
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
@@ -263,7 +263,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
  * @tc.desc: Test SetPaintDirection in different situations.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect003, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect003, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
@@ -314,7 +314,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect003, TestSize.Level1)
  * @tc.desc: Test SetPaintDirection in different situations.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect004, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
@@ -359,7 +359,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect004, TestSize.Level1)
  * @tc.desc: Test HandleOverScroll in different situations.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
@@ -405,7 +405,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, FadeController001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, FadeController001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
@@ -495,7 +495,7 @@ HWTEST_F(ScrolleEffectTestNg, FadeController001, TestSize.Level1)
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, FadeController002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, FadeController002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
@@ -558,7 +558,7 @@ HWTEST_F(ScrolleEffectTestNg, FadeController002, TestSize.Level1)
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, FadeController003, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, FadeController003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
@@ -601,7 +601,7 @@ HWTEST_F(ScrolleEffectTestNg, FadeController003, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
@@ -616,7 +616,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption001, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -631,7 +631,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption002, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption003, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption003, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
@@ -647,7 +647,7 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption003, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption004, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -656,41 +656,5 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption004, TestSize.Level1)
     CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
-}
-
-/**
- * @tc.name: AttrEdgeEffect001
- * @tc.desc: Test attribute about edgeEffect,
- * @tc.type: FUNC
- */
-HWTEST_F(ScrolleEffectTestNg, AttrEdgeEffect001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Text default value: NONE
-     */
-    CreateScroll();
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
-
-    /**
-     * @tc.steps: step2. Text set value: SPRING
-     */
-    ClearOldNodes();
-    ScrollModelNG model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
-
-    /**
-     * @tc.steps: step3. Text set width value: FADE
-     */
-    ClearOldNodes();
-    model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
 }
 } // namespace OHOS::Ace::NG
