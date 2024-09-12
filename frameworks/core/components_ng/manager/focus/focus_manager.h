@@ -132,20 +132,6 @@ public:
 
     static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
 
-    bool GetAutoInactive() const
-    {
-        return autoInactive_;
-    }
-
-    bool GetIsFocusActive() const
-    {
-        return isFocusActive_;
-    }
-
-    bool SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType, bool autoInactive = true);
-    void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
-    void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
-
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
     void ReportFocusSwitching();
@@ -170,10 +156,6 @@ private:
     std::optional<SwitchingStartReason> startReason_;
     std::optional<SwitchingEndReason> endReason_;
     std::optional<SwitchingUpdateReason> updateReason_;
-
-    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
-    bool autoInactive_ = true;
-    bool isFocusActive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

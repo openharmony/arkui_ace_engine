@@ -620,7 +620,7 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     return nullptr;
 }
 
-bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType)
+bool PipelineContext::SetIsFocusActive(bool isFocusActive)
 {
     return false;
 }
@@ -736,6 +736,11 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 }
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
+
+bool PipelineContext::Activate(bool isActive, bool autoInactive)
+{
+    return false;
+}
 
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

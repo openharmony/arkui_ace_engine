@@ -430,7 +430,10 @@ public:
         isFocusingByTab_ = isFocusingByTab;
     }
 
-    bool GetIsFocusActive() const;
+    bool GetIsFocusActive() const
+    {
+        return isFocusActive_;
+    }
 
     bool SetIsFocusActive(bool isFocusActive,
         FocusActiveTriggerType triggerType = FocusActiveTriggerType::TRIGGER_BY_OTHER);
@@ -451,10 +454,19 @@ public:
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
-    bool Activate(bool isActive, bool autoInactive = true) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
+
+    bool GetAutoInactive() const
+    {
+        return autoInactive_;
+    }
+    bool SetAutoInactive(bool autoInactive)
+    {
+        autoInactive_ = autoInactive;
+    }
+    bool Activate(bool isActive, bool autoInactive = true) override;
 
     void SetContainerWindow(bool isShow) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
@@ -1106,6 +1118,7 @@ private:
     uint64_t resampleTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
+    bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
@@ -1138,6 +1151,7 @@ private:
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
 
+    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;

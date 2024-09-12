@@ -2278,16 +2278,26 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     return nullptr;
 }
 
-bool PipelineContext::GetIsFocusActive() const
+bool PipelineContext::SetIsFocusActive(bool isFocusActive)
 {
-    CHECK_NULL_RETURN(focusManager_, false);
-    return focusManager_->GetIsFocusActive();
-}
-
-bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType)
-{
-    CHECK_NULL_RETURN(focusManager_, false);
-    return focusManager_->SetIsFocusActive(isFocusActive, triggerType);
+    if (isFocusActive_ == isFocusActive) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
+    isFocusActive_ = isFocusActive;
+    for (auto& pair : isFocusActiveUpdateEvents_) {
+        if (pair.second) {
+            pair.second(isFocusActive_);
+        }
+    }
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto rootFocusHub = rootNode_->GetFocusHub();
+    CHECK_NULL_RETURN(rootFocusHub, false);
+    if (isFocusActive_) {
+        return rootFocusHub->PaintAllFocusState();
+    }
+    rootFocusHub->ClearAllFocusState();
+    return true;
 }
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
@@ -3346,8 +3356,9 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncR
 
 bool PipelineContext::Activate(bool isActive, bool autoInactive)
 {
-    CHECK_NULL_RETURN(focusManager_, false);
-    return focusManager_->SetIsFocusActive(isActive, FocusActiveTriggerType::TRIGGER_BY_ACTIVATE_API, autoInactive);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "autoInactive turns to %{public}d", autoInactive);
+    SetAutoInactive(autoInactive);
+    return SetIsFocusActive(isActive, FocusActiveTriggerType::TRIGGER_BY_ACTIVATE_API, autoInactive);
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
@@ -4222,14 +4233,17 @@ void PipelineContext::HandleSubwindow(bool isShow)
 void PipelineContext::AddIsFocusActiveUpdateEvent(
     const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
 {
-    CHECK_NULL_VOID(focusManager_);
-    focusManager_->AddIsFocusActiveUpdateEvent(node, eventCallback);
+    CHECK_NULL_VOID(node);
+    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
 }
 
 void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_VOID(focusManager_);
-    focusManager_->RemoveIsFocusActiveUpdateEvent(node);
+    CHECK_NULL_VOID(node);
+    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
+    if (iter != isFocusActiveUpdateEvents_.end()) {
+        isFocusActiveUpdateEvents_.erase(iter);
+    }
 }
 
 std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
