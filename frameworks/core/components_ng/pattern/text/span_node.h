@@ -595,6 +595,8 @@ public:
             return;
         }
         spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
         if (!spanItem_->UpdateSpanTextColor(color)) {
             RequestTextFlushDirty();
         }
