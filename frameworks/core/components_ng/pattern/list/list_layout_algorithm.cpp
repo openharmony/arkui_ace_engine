@@ -1655,7 +1655,7 @@ void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWr
 void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,
     float referencePos, bool forwardLayout) const
 {
-    if (forwardFeature_ || backwardFeature_) {
+    if (targetIndex_.has_value()) {
         return;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
