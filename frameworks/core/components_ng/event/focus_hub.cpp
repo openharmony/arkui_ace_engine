@@ -600,16 +600,13 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
     auto onKeyPreIme = GetOnKeyPreIme();
     if (onKeyPreIme) {
         bool retPreIme = onKeyPreIme(info);
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_RETURN(frameNode, false);
-        auto* pipeline = frameNode->GetContext();
+        auto pipeline = PipelineContext::GetCurrentContext();
         auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->SetIsKeyConsumed(retPreIme);
         }
         return info.IsStopPropagation();
-    } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
-               GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+    } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         return ProcessOnKeyEventInternal(keyEvent);
     } else {
         return false;
@@ -631,9 +628,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         return false;
     }
 
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto* pipeline = frameNode->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     auto info = KeyEventInfo(keyEvent);
     if (pipeline &&
         (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
@@ -646,14 +641,15 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
-        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG) && !IsCurrentFocus()) {
+    if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG)
+        && !IsCurrentFocus()) {
         isBypassInner = false;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "return: %{public}d",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
     }
 
@@ -959,9 +955,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
         focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameId() : -1, focusNode->GetFrameName().c_str(),
         focusNode->GetFrameId());
     if (IsCurrentFocus()) {
-        auto focusManger = GetFocusManager();
-        CHECK_NULL_VOID(focusManger);
-        focusManger->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
+        GetFocusManager()->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
@@ -1442,7 +1436,7 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
 void FocusHub::ClearFocusState(bool isNeedStateStyles)
 {
     if (isNeedStateStyles) {
-        // check focus state style
+        // check focus state style.
         CheckFocusStateStyle(false);
     }
     if (onClearFocusStateCallback_) {
@@ -1531,6 +1525,9 @@ bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
                 }
                 ++iterNewFocusNode;
             }
+        } else {
+            LOGI("Invalid focus step: %{public}d for %{public}s/%{public}d specify focus child.", step,
+                GetFrameName().c_str(), GetFrameId());
         }
     }
     if (focusDepend_ == FocusDependence::CHILD) {
@@ -1629,7 +1626,6 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
 
     //  Calculate currentNode -> childNode offset
     auto uiNode = frameNode->GetParent();
-    CHECK_NULL_RETURN(uiNode, false);
     while (uiNode != GetFrameNode()) {
         auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
         if (!frameNode) {

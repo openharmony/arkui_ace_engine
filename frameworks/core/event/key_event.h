@@ -595,7 +595,6 @@ struct KeyEvent final {
     bool isRedispatch = false;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
-    std::string msg = "";
 
     std::string ToString() const
     {
@@ -608,6 +607,7 @@ struct KeyEvent final {
         ss << "]";
         return ss.str();
     }
+    std::string msg = "";
 };
 
 class ACE_EXPORT KeyEventInfo : public BaseEventInfo {
@@ -624,8 +624,8 @@ public:
         metaKey_ = event.metaKey;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
-        keyMsg_ = event.msg;
         SetPressedKeyCodes(event.pressedCodes);
+        keyMsg_ = event.msg;
     };
     ~KeyEventInfo() override = default;
 
