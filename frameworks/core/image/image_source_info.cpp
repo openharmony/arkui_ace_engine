@@ -217,7 +217,7 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 void ImageSourceInfo::GenerateCacheKey()
 {
     auto colorMode = GetColorModeToString();
-    auto name = GetSrc() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
+    auto name = ToString(false) + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
     cacheKey_ =
         std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_)) + colorMode;
     if (srcType_ == SrcType::BASE64) {
@@ -359,12 +359,12 @@ SrcType ImageSourceInfo::GetSrcType() const
     return srcType_;
 }
 
-std::string ImageSourceInfo::ToString() const
+std::string ImageSourceInfo::ToString(bool isNeedTruncated) const
 {
     auto& src = GetSrc();
     if (!src.empty()) {
         // Check if the src is a base64 image
-        if (srcType_ == SrcType::BASE64) {
+        if (srcType_ == SrcType::BASE64 && isNeedTruncated) {
             // Return the first 50 characters of the base64 image string
             return src.substr(0, MAX_BASE64_LENGTH) + "...(truncated)";
         }
