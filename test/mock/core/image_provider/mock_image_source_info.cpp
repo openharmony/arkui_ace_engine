@@ -24,6 +24,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t FILE_SUFFIX_LEN = 4;
+constexpr uint32_t URL_LENGTH = 12;
 
 bool CheckSvgExtension(const std::string& src)
 {
@@ -60,7 +61,7 @@ bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::Reso
 
 bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::string& pattern)
 {
-    return true;
+    return uri.size() > URL_LENGTH ? true : false;
 }
 
 bool ImageSourceInfo::IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern)
