@@ -352,6 +352,7 @@ bool EventManager::PostEventTouchTest(
         }
     }
     auto result = !hitTestResult.empty();
+    LogTouchTestResultRecognizers(hitTestResult, touchPoint.touchEventId);
     postEventTouchTestResults_[touchPoint.id] = std::move(hitTestResult);
     return result;
 }
