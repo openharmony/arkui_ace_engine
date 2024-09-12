@@ -3859,6 +3859,16 @@ export struct TreeViewInner {
     return inputTextMaxFontSize;
   }
 
+  getLeftIconColor(): ResourceColor {
+    if (this.item.getIsModify()) {
+      return $r('sys.color.icon_on_primary');
+    } else if (this.item.getIsSelected()) {
+      return this.treeViewTheme.leftIconActiveColor;
+    } else {
+      return this.treeViewTheme.leftIconColor;
+    }
+  }
+
   private checkInvalidPattern(title: string): boolean {
     return new RegExp('/[\\\/:*?"<>|]/').test(title);
   }
@@ -3916,8 +3926,7 @@ export struct TreeViewInner {
                     .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                       this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
                     .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
-                    .fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                    this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor)
+                    .fillColor(this.getLeftIconColor())
                     .matchTextDirection((this.item.getNodeItem()
                       .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
                       .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
