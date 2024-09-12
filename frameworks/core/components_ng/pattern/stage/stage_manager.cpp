@@ -328,6 +328,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
 
     // close keyboard
     PageChangeCloseKeyboard();
+
     AddPageTransitionTrace(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
