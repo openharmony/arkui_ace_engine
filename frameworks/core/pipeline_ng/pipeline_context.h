@@ -1095,6 +1095,8 @@ private:
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
 };
 } // namespace OHOS::Ace::NG
 
