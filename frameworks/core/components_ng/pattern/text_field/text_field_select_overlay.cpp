@@ -122,6 +122,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
             pattern->OnBackPressed();
         }
     }
+    pattern->StopContentScroll();
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
@@ -455,20 +456,21 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         }
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
+    TriggerContentToScroll(localOffset, false);
     if (IsSingleHandle()) {
         int32_t preIndex = selectController->GetCaretIndex();
-        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false);
         pattern->ShowCaretAndStopTwinkling();
         pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset, isFirst);
         if (isFirst) {
             pattern->StartVibratorByIndexChange(position, startIndex);
-            selectController->MoveFirstHandleToContentRect(position, false);
+            selectController->MoveFirstHandleToContentRect(position, false, false);
             UpdateSecondHandleOffset();
         } else {
             pattern->StartVibratorByIndexChange(position, endIndex);
-            selectController->MoveSecondHandleToContentRect(position, false);
+            selectController->MoveSecondHandleToContentRect(position, false, false);
             UpdateFirstHandleOffset();
         }
     }
@@ -496,6 +498,8 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
     auto selectController = pattern->GetTextSelectController();
+    TriggerContentToScroll(OffsetF(), true);
+    overlayManager->ShowOptionMenu();
     if (!IsSingleHandle()) {
         if (selectController->GetFirstHandleIndex() == selectController->GetSecondHandleIndex()) {
             CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
@@ -508,7 +512,6 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->StopTwinkling();
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
-    overlayManager->ShowOptionMenu();
     overlayManager->SetHandleCircleIsShow(isFirst, true);
     if (IsSingleHandle()) {
         overlayManager->SetIsHandleLineShow(true);
@@ -594,6 +597,20 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
             pattern->StartTwinkling();
         }
     }
+    pattern->StopContentScroll();
+}
+
+void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, bool isEnd)
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetScrollEnabled()) {
+        if (isEnd) {
+            pattern->StopContentScroll();
+        } else {
+            pattern->UpdateContentScroller(Offset(localOffset.GetX(), localOffset.GetY()));
+        }
+    }
 }
 
 void TextFieldSelectOverlay::OnHandleMarkInfoChange(
@@ -616,5 +633,32 @@ void TextFieldSelectOverlay::UpdateHandleColor()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+}
+
+void TextFieldSelectOverlay::UpdateAllHandlesOffset()
+{
+    if (dragHandleIndex_ == DragHandleIndex::NONE) {
+        BaseTextSelectOverlay::UpdateAllHandlesOffset();
+    } else if (dragHandleIndex_ == DragHandleIndex::FIRST) {
+        BaseTextSelectOverlay::UpdateSecondHandleOffset();
+    } else {
+        BaseTextSelectOverlay::UpdateFirstHandleOffset();
+    }
+}
+
+void TextFieldSelectOverlay::UpdateFirstHandleOffset()
+{
+    if (dragHandleIndex_ == DragHandleIndex::FIRST) {
+        return;
+    }
+    BaseTextSelectOverlay::UpdateFirstHandleOffset();
+}
+
+void TextFieldSelectOverlay::UpdateSecondHandleOffset()
+{
+    if (dragHandleIndex_ == DragHandleIndex::SECOND) {
+        return;
+    }
+    BaseTextSelectOverlay::UpdateSecondHandleOffset();
 }
 } // namespace OHOS::Ace::NG

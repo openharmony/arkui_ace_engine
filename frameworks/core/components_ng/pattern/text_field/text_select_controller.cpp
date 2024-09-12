@@ -156,7 +156,7 @@ void TextSelectController::UpdateCaretRectByPositionNearTouchOffset(int32_t posi
     UpdateCaretHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
+void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent)
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
     AdjustCursorPosition(index, localOffset);
@@ -164,7 +164,11 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
         auto offset = caretInfo_.rect.GetOffset();
-        MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+        if (moveContent) {
+            MoveHandleToContentRect(caretInfo_.rect, 0.0f);
+        } else {
+            AdjustHandleAtEdge(caretInfo_.rect);
+        }
         UpdateCaretOriginalRect(offset);
     } else {
         SetCaretRectAtEmptyValue();
@@ -669,7 +673,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
         float boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
         index = ConvertTouchOffsetToPosition({localOffset.GetX() + boundaryAdjustment, localOffset.GetY()});
     }
-    MoveSecondHandleToContentRect(index);
+    MoveSecondHandleToContentRect(index, false, false);
     caretInfo_.index = index;
     UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
