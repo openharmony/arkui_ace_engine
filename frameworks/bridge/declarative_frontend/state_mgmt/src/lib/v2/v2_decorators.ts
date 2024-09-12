@@ -204,7 +204,7 @@ const Consumer = (aliasName?: string) => {
     // and @Consumer gets connected to @provide counterpart
     ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
     const providerName = (aliasName === undefined || aliasName === null ||
-      (typeof aliasName === "string" && aliasName.trim() === "")
+      (typeof aliasName === 'string' && aliasName.trim() === '')
     ) ? varName : aliasName;
     let retVal = this[varName];
     let providerInfo;
@@ -218,7 +218,7 @@ const Consumer = (aliasName?: string) => {
         return retVal;
       },
       set(val) {
-        if(!providerInfo) {
+        if (!providerInfo) {
           providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
           if (providerInfo && providerInfo[0] && providerInfo[1]) {
             retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
@@ -228,7 +228,7 @@ const Consumer = (aliasName?: string) => {
         }
       },
       enumerable: true
-    })
+    });
   };
 }; // @Consumer
 
