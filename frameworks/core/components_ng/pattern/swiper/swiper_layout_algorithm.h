@@ -375,6 +375,8 @@ private:
     std::optional<int32_t> currentTargetIndex_;
     std::optional<int32_t> customAnimationToIndex_;
     std::optional<int32_t> removeFromRSTreeIndex_;
+    std::optional<SizeF> leftCaptureSize_ = std::nullopt;
+    std::optional<SizeF> rightCaptureSize_ = std::nullopt;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
     bool useCustomAnimation_ = false;
