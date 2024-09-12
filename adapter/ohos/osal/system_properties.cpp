@@ -325,8 +325,7 @@ bool IsNavigationBlurEnabled()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
-           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 
 bool IsAceCommercialLogEnable()
