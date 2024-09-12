@@ -84,6 +84,10 @@ extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+extern const char _binary_jsPreload_abc_start[];
+extern const char _binary_jsPreload_abc_end[];
+#endif
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
@@ -197,8 +201,13 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+#else
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
+    int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
+#endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
