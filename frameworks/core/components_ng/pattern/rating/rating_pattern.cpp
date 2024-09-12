@@ -36,6 +36,7 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b1111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
+constexpr int32_t NUMBER_TWO = 2;
 
 void RatingPattern::OnAttachToFrameNode()
 {
@@ -222,8 +223,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         ratingModifier_->UpdateImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
             secondaryImageLoadingCtx_->GetSourceInfo(), backgroundImageLoadingCtx_->GetSourceInfo());
-        ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, backgroundImageFocusCanvas_,
-            foregroundConfig_, secondaryConfig_, backgroundConfig_, backgroundFocusConfig_);
+        ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
+            backgroundImageFocusCanvas_, foregroundConfig_, secondaryConfig_,
+            backgroundConfig_, backgroundFocusConfig_);
     }
     if (!(foregroundImageCanvas_->IsStatic() && secondaryImageCanvas_->IsStatic() &&
             backgroundImageCanvas_->IsStatic())) {
@@ -536,30 +538,45 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     ratingRenderProperty->UpdateTouchStar(wholeStarNum);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
-    CHECK_NULL_VOID(ratingTheme);
-    auto radius = ratingTheme->GetFocusBorderRadius() + ratingTheme->GetFocusSpace();
+    float focusSpace = 0.0f;
+    float radius = GetFocusRectRadius(property, focusSpace);
     auto focusButtonRect = RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
         singleStarWidth_, singleStarHeight);
-    auto focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
     focusButtonRect -= OffsetF(focusSpace, focusSpace);
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
-    PaintFocusRect(paintRect, focusButtonRect, radius);
+    paintRect.SetRect(focusButtonRect);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
 }
 
-void RatingPattern::PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius)
+float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace)
 {
-    paintRect.SetRect(focusButtonRect);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
+    CHECK_NULL_RETURN(ratingModifier_, 0.0);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_RETURN(ratingTheme, 0.0);
+    focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
+    float radius = 0.0f;
+    if (!ratingTheme->GetIsCircleRadius()) {
+        radius = ratingTheme->GetFocusBorderRadius().ConvertToPx();
+    } else {
+        double starNum = property->GetStarsValue(themeStarNum_);
+        if (starNum != 0) {
+            auto contentSize = ratingModifier_->GetContentSize();
+            CHECK_NULL_RETURN(contentSize, 0.0);
+            auto isSquare = contentSize->Get().Width() / starNum == contentSize->Get().Height();
+            radius = isSquare ? contentSize->Get().Height() / NUMBER_TWO + ratingTheme->GetFocusSpace().ConvertToPx()
+                : ratingTheme->GetFocusBorderRadius().ConvertToPx();
+        }
+    }
+    return radius;
 }
 
 void RatingPattern::PaintFocusState(double ratingScore)
@@ -656,6 +673,7 @@ void RatingPattern::SetModifierFocus(bool isFocus)
         ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
     ratingModifier_->SetIsFocus(isFocus);
+    ratingModifier_->SetNeedDraw(true);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -885,7 +903,7 @@ void RatingPattern::LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layo
     }
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
     if (!iconPath.empty()) {
-        sourceInfo.SetSrc(iconPath, Color::GREEN);
+        sourceInfo.SetSrc(iconPath, ratingTheme->GetUnlitStarFocusColor());
     }
     if (sourceInfo.IsSvg()) {
         backgroundFocusConfig_.isSvg_ = true;

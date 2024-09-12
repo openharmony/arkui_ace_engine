@@ -19,6 +19,7 @@
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components/theme/icon_theme.h"
 
 namespace OHOS::Ace::NG {
 RatingModifier::RatingModifier()
@@ -72,13 +73,20 @@ void RatingModifier::PaintBoard(DrawingContext& context)
     CHECK_NULL_VOID(ratingTheme);
     // animate color
     LinearColor bgColor = boardColor_->Get();
-    auto pressBorderRadius = ratingTheme->GetFocusBorderRadius();
     auto& canvas = context.canvas;
     auto starNum = starNum_->Get();
     CHECK_EQUAL_VOID(starNum, 0);
     auto singleStarImagePaintConfig = foregroundImageCanvas_->GetPaintConfig();
     const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum);
     const float singleStarHeight = contentSize_->Get().Height();
+    float pressBorderRadius = 0.0f;
+    if (!ratingTheme->GetIsCircleRadius()) {
+        pressBorderRadius = ratingTheme->GetFocusBorderRadius().ConvertToPx();
+    } else {
+        auto isSquare = singleStarWidth == singleStarHeight;
+        pressBorderRadius = isSquare ? singleStarHeight / NUMBER_TWO + ratingTheme->GetFocusSpace().ConvertToPx()
+            : ratingTheme->GetFocusBorderRadius().ConvertToPx();
+    }
     auto offset = contentOffset_->Get();
     auto touchStar = touchStar_->Get();
     if (touchStar >= 0 && touchStar < starNum) {
@@ -86,8 +94,8 @@ void RatingModifier::PaintBoard(DrawingContext& context)
         rsBrush.SetAntiAlias(true);
         const RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar), offset.GetY(),
             offset.GetX() + singleStarWidth * static_cast<float>((touchStar + 1)), offset.GetY() + singleStarHeight);
-        const RSRoundRect rsRoundRect(rsRect, static_cast<float>(pressBorderRadius.ConvertToPx()),
-            static_cast<float>(pressBorderRadius.ConvertToPx()));
+        const RSRoundRect rsRoundRect(rsRect, static_cast<float>(pressBorderRadius),
+            static_cast<float>(pressBorderRadius));
         canvas.Save();
         canvas.ClipRoundRect(rsRoundRect, RSClipOp::INTERSECT);
         canvas.DrawBackground(rsBrush);
@@ -118,10 +126,10 @@ void RatingModifier::PaintStar(DrawingContext& context)
     canvas.Save();
     auto offsetTemp = offset;
     CHECK_NULL_VOID(ratingTheme_);
-    auto distance = ratingTheme_->GetIconBoardDistance();
+    auto distance = ratingTheme_->GetIconBoardDistance().ConvertToPx();
     offsetTemp.SetX((static_cast<float>(offsetTemp.GetX() + distance)));
     offsetTemp.SetY((static_cast<float>(offsetTemp.GetY() + distance)));
-    auto size = ratingTheme_->GetIconSubSize();
+    auto size = distance * 2;
     auto contentSize = SizeF(singleStarWidth - size, singleStarHeight - size);
 
     // step2.1: calculate the clip area in order to display the secondary image.
@@ -143,25 +151,24 @@ void RatingModifier::PaintStar(DrawingContext& context)
         // step3.1: calculate the clip area which already occupied by the foreground image.
         canvas.ClipRect(clipRect2, RSClipOp::INTERSECT);
         offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() - singleStarWidth));
-        secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
+        isFocus_ ? backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize) :
+            secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
         offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
         canvas.Restore();
     }
 
     // step4: draw background image.
-    if (foregroundImageRepeatNum == 0 && isFocus_) {
-        isScore_ = true;
-        backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize);
-        offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
-    }
-    int32_t i = isScore_ ? 1 : 0;
-    for (; i < backgroundImageRepeatNum; i++) {
+    for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
+        if (i == 0 && foregroundImageRepeatNum == 0 && isFocus_) {
+            backgroundFocusPainter.DrawImage(canvas, offsetTemp, contentSize);
+            offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
+            continue;
+        }
         backgroundPainter.DrawImage(canvas, offsetTemp, contentSize);
         if (i < backgroundImageRepeatNum - 1) {
             offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
         }
     }
-    isScore_ = false;
 }
 
 void RatingModifier::PaintReverseStar(DrawingContext& context)

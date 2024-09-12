@@ -52,8 +52,8 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RatingLayoutAlgorithm>(
-            foregroundImageLoadingCtx_, secondaryImageLoadingCtx_, backgroundImageLoadingCtx_, backgroundImageFocusLoadingCtx_);
+        return MakeRefPtr<RatingLayoutAlgorithm>(foregroundImageLoadingCtx_,
+            secondaryImageLoadingCtx_, backgroundImageLoadingCtx_, backgroundImageFocusLoadingCtx_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -125,7 +125,7 @@ private:
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
-    void PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius);
+    float GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace);
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);

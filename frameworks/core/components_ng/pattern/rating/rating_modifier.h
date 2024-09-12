@@ -135,6 +135,11 @@ public:
         }
     }
 
+    RefPtr<PropertySizeF> GetContentSize()
+    {
+        return contentSize_;
+    }
+
     void SetDrawScore(double drawScore)
     {
         if (drawScore_) {
@@ -226,7 +231,6 @@ private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
     bool isFocus_ = false;
-    bool isScore_ = false;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
@@ -247,6 +251,7 @@ private:
     RefPtr<AnimatablePropertyColor> boardColor_;
     RefPtr<PropertyBool> reverse_;
     RefPtr<RatingTheme> ratingTheme_;
+    static constexpr int32_t NUMBER_TWO = 2;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -74,11 +74,12 @@ public:
                 theme->borderRadius_ = pattern->GetAttr<Dimension>("hover_radius_size", BORDER_RADIUS);
                 theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
-                theme->iconSubSize_ = pattern->GetAttr<double>("rating_icon_sub_size", 0.0);
-                theme->iconBoardDistance_ = pattern->GetAttr<double>("rating_icon_board_distance", 0.0);
+                theme->iconBoardDistance_ = pattern->GetAttr<Dimension>("rating_icon_board_distance", 0.0_vp);
                 theme->focusColor_ = pattern->GetAttr<Color>("rating_focus_bgcolor", Color());
                 theme->focusSpace_ = pattern->GetAttr<Dimension>("rating_focus_space", 0.0_vp);
                 theme->cancelAnimation_ = pattern->GetAttr<double>("rating_focus_blur_cancel_animation", 0.0);
+                theme->isCircleRadius_ = static_cast<bool>(pattern->GetAttr<double>("rating_apply_circle_radius", 0.0));
+                theme->unlitStarFocusColor_ = pattern->GetAttr<Color>("rating_unlit_star_focus_color", Color());
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -93,14 +94,14 @@ public:
         return starNum_;
     }
 
-    double GetIconBoardDistance() const
+    const Dimension& GetIconBoardDistance() const
     {
         return iconBoardDistance_;
     }
 
-    double GetIconSubSize() const
+    Color GetUnlitStarFocusColor() const
     {
-        return iconSubSize_;
+        return unlitStarFocusColor_;
     }
 
     const Dimension& GetRatingWidth() const
@@ -233,6 +234,11 @@ public:
         return pressAnimationDuration_;
     }
 
+    bool GetIsCircleRadius() const
+    {
+        return isCircleRadius_;
+    }
+
 protected:
     RatingTheme() = default;
 
@@ -244,8 +250,7 @@ private:
     Dimension ratingMiniHeight_;
     Dimension paddingVertical_;
     Dimension focusSpace_;
-    double iconSubSize_ = 0.0;
-    double iconBoardDistance_ = 0.0;
+    Dimension iconBoardDistance_;
     double stepSize_ = 0.0;
     double ratingScore_ = 0.0;
     double ratingMiniScore_ = 0.0;
@@ -265,9 +270,11 @@ private:
     Color starColorActive_;
     Color starColorInactive_;
     Color focusColor_;
+    Color unlitStarFocusColor_;
     Dimension focusBorderWidth_;
     Dimension borderRadius_;
     double cancelAnimation_ = 0.0;
+    bool isCircleRadius_ = false;
 };
 
 } // namespace OHOS::Ace
