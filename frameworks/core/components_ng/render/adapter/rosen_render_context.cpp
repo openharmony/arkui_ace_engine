@@ -4488,6 +4488,7 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
         rsNode_->AddModifier(gradientStyleModifier_);
     }
     gradientStyleModifier_->SetGradient(gradient);
+    gradientStyleModifier_->SetSizeF(frameSize);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
