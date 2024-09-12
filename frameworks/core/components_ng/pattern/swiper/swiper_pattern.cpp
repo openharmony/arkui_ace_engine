@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
 #include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
+#include "core/components_ng/pattern/swiper/swiper_theme.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -50,7 +51,6 @@
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -2135,7 +2135,12 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
-            pattern->HandleDragEnd(info.GetMainVelocity());
+            pattern->isUsingTouchPad_ =
+                (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
+            auto velocity = pattern->isUsingTouchPad_ ? info.GetMainVelocity() * pattern->GetVelocityCoefficient()
+                                                      : info.GetMainVelocity();
+
+            pattern->HandleDragEnd(velocity);
         }
     };
 
@@ -2872,6 +2877,16 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
     }
 
     return nextIndex;
+}
+
+float SwiperPattern::GetVelocityCoefficient()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 1);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperTheme>();
+    CHECK_NULL_RETURN(swiperTheme, 1);
+    auto velocityCoefficient = swiperTheme->GetTouchPadVelocityCoefficient();
+    return velocityCoefficient;
 }
 
 int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const
@@ -5429,8 +5444,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
         return;
     }
 
-    if (releaseRightTouchBottom && currentIndex == 0 &&
-        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+    if (releaseRightTouchBottom && currentIndex == 0 && gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         return;
     }

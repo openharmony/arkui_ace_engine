@@ -762,6 +762,7 @@ private:
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     void SetLazyForEachFlag() const;
+    float GetVelocityCoefficient();
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
@@ -1080,6 +1081,7 @@ private:
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
+    bool isUsingTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;
