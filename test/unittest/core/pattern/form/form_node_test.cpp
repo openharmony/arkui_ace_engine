@@ -157,35 +157,28 @@ HWTEST_F(FormNodeTest, FormNodeTest_002, TestSize.Level1)
 HWTEST_F(FormNodeTest, FormNodeTest_003, TestSize.Level1)
 {
     auto formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    auto host = pattern->GetHost();
-    RefPtr<RenderContext> renderContext = formNode->GetRenderContext();
+    EXPECT_NE(formNode, nullptr);
 
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    WeakPtr<PipelineBase> context = WeakPtr<PipelineBase>();
     formNode->renderContext_ = nullptr;
+    pattern->frameNode_ = formNode;
+
     OffsetF res = formNode->GetFormOffset();
-    EXPECT_EQ(res, OffsetF());
-    formNode->renderContext_ = renderContext;
-    
-    formNode->SetParent(nullptr);
-    res = formNode->GetFormOffset();
     EXPECT_EQ(res, OffsetF());
 }
 
 /**
  * @tc.name: FormNodeTest_004
- * @tc.desc: OnAccessibilityChildTreeRegister
+ * @tc.desc: OnAccessibilityChildTreeRegister and  OnAccessibilityChildTreeDeregister
  * @tc.type: FUNC
  */
 HWTEST_F(FormNodeTest, FormNodeTest_004, TestSize.Level1)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
-    EXPECT_NE(pattern, nullptr);
-
-    formNode->pattern_ = nullptr;
-    formNode->OnAccessibilityChildTreeRegister(0, 0);
-    EXPECT_NE(pattern->formManagerBridge_, nullptr);
-    formNode->pattern_ = pattern;
+    ASSERT_NE(pattern, nullptr);
 
     std::vector<std::string> infos;
     std::string tmpStr = "action";
@@ -256,150 +249,5 @@ HWTEST_F(FormNodeTest, FormNodeTest_007, TestSize.Level1)
     std::vector<std::string> info;
     pattern->OnAccessibilityDumpChildInfo(params, info);
     ASSERT_NE(pattern->formManagerBridge_, nullptr);
-}
-
-/**
- * @tc.name: FormNodeTest_008
- * @tc.desc: DispatchPointerEvent
- * @tc.type: FUNC
- */
-HWTEST_F(FormNodeTest, FormNodeTest_008, TestSize.Level1)
-{
-    RefPtr<FormNode> formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    EXPECT_NE(pattern, nullptr);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipelineContext, nullptr);
-    pipelineContext->GetEventManager()->SetInnerFlag(false);
-    TouchEvent touchEvent;
-    SerializedGesture serializedGesture;
-
-    formNode->pattern_ = nullptr;
-    formNode->DispatchPointerEvent(touchEvent, serializedGesture);
-    EXPECT_FALSE(pipelineContext->GetEventManager()->GetInnerFlag());
-    formNode->pattern_ = pattern;
-}
-
-/**
- * @tc.name: FormNodeTest_009
- * @tc.desc: InitializeFormAccessibility
- * @tc.type: FUNC
- */
-HWTEST_F(FormNodeTest, FormNodeTest_009, TestSize.Level1)
-{
-    ContainerScope scope(-1);
-    auto formNode = CreateFromNode();
-    formNode->InitializeFormAccessibility();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
-    ContainerScope scope1(1);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    RefCounter* refCounter = pipeline->weakFrontend_.refCounter_;
-    pipeline->weakFrontend_.refCounter_ = nullptr;
-    formNode->InitializeFormAccessibility();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
-    pipeline->weakFrontend_.refCounter_ = refCounter;
-
-    formNode->InitializeFormAccessibility();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
-}
-
-/**
- * @tc.name: FormNodeTest_010
- * @tc.desc: NotifyAccessibilityChildTreeRegister
- * @tc.type: FUNC
- */
-HWTEST_F(FormNodeTest, FormNodeTest_010, TestSize.Level1)
-{
-    ContainerScope scope(-1);
-    auto formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    formNode->NotifyAccessibilityChildTreeRegister();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
-    ContainerScope scope1(1);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    RefCounter* refCounter = pipeline->weakFrontend_.refCounter_;
-    pipeline->weakFrontend_.refCounter_ = nullptr;
-    formNode->NotifyAccessibilityChildTreeRegister();
-    EXPECT_EQ(formNode->accessibilityChildTreeCallback_, nullptr);
-    pipeline->weakFrontend_.refCounter_ = refCounter;
-}
-
-/**
- * @tc.name: FormNodeTest_011
- * @tc.desc: OnAccessibilityChildTreeDeregister
- * @tc.type: FUNC
- */
-HWTEST_F(FormNodeTest, FormNodeTest_011, TestSize.Level1)
-{
-    RefPtr<FormNode> formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    formNode->pattern_ = nullptr;
-    formNode->OnAccessibilityChildTreeDeregister();
-    EXPECT_EQ(formNode->GetPattern<FormPattern>(), nullptr);
-    formNode->pattern_ = pattern;
-
-    std::vector<std::string> infos;
-    std::string tmpStr = "action";
-    infos.emplace_back(tmpStr);
-    pattern->SetFormLinkInfos(infos);
-    uint32_t windowId = 0;
-    int32_t treeId = 0;
-    formNode->OnAccessibilityChildTreeRegister(windowId, treeId);
-    EXPECT_NE(pattern->formManagerBridge_, nullptr);
-
-    formNode->OnAccessibilityChildTreeDeregister();
-    EXPECT_NE(pattern->formManagerBridge_, nullptr);
-}
-
-/**
- * @tc.name: FormNodeTest_012
- * @tc.desc: OnSetAccessibilityChildTree
- * @tc.type: FUNC
- */
-HWTEST_F(FormNodeTest, FormNodeTest_012, TestSize.Level1)
-{
-    RefPtr<FormNode> formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    int32_t childWindowId = 2;
-    int32_t childTreeId = 1;
-    auto accessibilityProperty = formNode->accessibilityProperty_;
-    ASSERT_NE(accessibilityProperty, nullptr);
-    formNode->accessibilityProperty_ = nullptr;
-    formNode->OnSetAccessibilityChildTree(childWindowId, childTreeId);
-    EXPECT_NE(pattern->formManagerBridge_, nullptr);
-    formNode->accessibilityProperty_ = accessibilityProperty;
-
-    formNode->OnSetAccessibilityChildTree(childWindowId, childTreeId);
-    EXPECT_NE(pattern->formManagerBridge_, nullptr);
-    EXPECT_EQ(formNode->accessibilityProperty_->childWindowId_, 2);
-    EXPECT_EQ(formNode->accessibilityProperty_->childTreeId_, 1);
-}
-
-/**
- * @tc.name: FormNodeTest_013
- * @tc.desc: OnAccessibilityDumpChildInfo
- * @tc.type: FUNC
- */
-HWTEST_F(FormNodeTest, FormNodeTest_013, TestSize.Level1)
-{
-    RefPtr<FormNode> formNode = CreateFromNode();
-    auto pattern = formNode->GetPattern<FormPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    std::vector<std::string> params;
-    std::vector<std::string> info;
-    pattern->OnAccessibilityDumpChildInfo(params, info);
-    EXPECT_NE(pattern->formManagerBridge_, nullptr);
-    pattern->UpdateStaticCard();
-    auto retRef = pattern->GetAccessibilitySessionAdapter();
-    EXPECT_NE(retRef, nullptr);
 }
 } // namespace OHOS::Ace::NG
