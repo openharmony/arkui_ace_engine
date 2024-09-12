@@ -155,3 +155,6 @@ class DumpInfo {
   public viewInfo?: ViewPUInfo;
   public observedPropertiesInfo: ObservedPropertyInfo<any>[] = []
 }
+
+// global function used to throw error in Promise
+declare function _arkUIUncaughtPromiseError(error: any);
