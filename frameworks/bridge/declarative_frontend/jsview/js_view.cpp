@@ -975,7 +975,9 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
     ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
     CHECK_NULL_VOID(navigationMgr);
@@ -1022,7 +1024,9 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     return;
 #else
     ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!LayoutInspector::GetStateProfilerStatus()) {
         return;
