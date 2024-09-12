@@ -209,12 +209,7 @@ void ButtonPattern::InitButtonLabel()
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     isTextFadeOut_ = textTheme->GetIsTextFadeout();
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-        textNode->MarkDirtyNode();
-    }
+    UpdateTexOverflow(false);
 }
 
 void ButtonPattern::AddIsFocusActiveUpdateEvent()
@@ -284,10 +279,7 @@ void ButtonPattern::SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPro
         textRenderContext->UpdateForegroundColor(buttonTheme_->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(isHover_);
-        textNode->MarkDirtyNode();
-    }
+    UpdateTexOverflow(isHover_);
 }
 
 void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode)
@@ -336,10 +328,7 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPr
         textRenderContext->UpdateForegroundColor(buttonTheme_->GetFocusTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(true);
-        textNode->MarkDirtyNode();
-    }
+    UpdateTexOverflow(true);
 }
 
 void ButtonPattern::UpdateButtonStyle()

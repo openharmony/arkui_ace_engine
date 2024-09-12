@@ -177,6 +177,7 @@ void MenuItemPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    InitTextFadeOut();
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -234,15 +235,15 @@ void MenuItemPattern::SetThemeProps(const RefPtr<FrameNode>& host)
     }
 }
 
-bool MenuItemPattern::IsTextFadeOut()
+void MenuItemPattern::InitTextFadeOut()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, false);
+    CHECK_NULL_VOID(context);
     auto textTheme = context->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, false);
-    return textTheme->GetIsTextFadeout();
+    CHECK_NULL_VOID(textTheme);
+    isTextFadeOut_ = textTheme->GetIsTextFadeout();
 }
 
 void MenuItemPattern::InitFocusEvent()
@@ -255,13 +256,7 @@ void MenuItemPattern::InitFocusEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
-        if (pattern->content_ && pattern->isTextFadeOut_) {
-            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
-            if (textLayoutProperty) {
-                textLayoutProperty->UpdateTextMarqueeStart(pattern->isFocused_);
-                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            }
-        }
+        pattern->UpdateTextMarquee(pattern->isFocused_);
     };
     focusHub->SetOnFocusInternal(focusTask);
 
@@ -269,13 +264,7 @@ void MenuItemPattern::InitFocusEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
-        if (pattern->content_ && pattern->isTextFadeOut_) {
-            auto textLayoutProperty = pattern->content_->GetLayoutProperty<TextLayoutProperty>();
-            if (textLayoutProperty) {
-                textLayoutProperty->UpdateTextMarqueeStart(pattern->isHovered_);
-                pattern->content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            }
-        }
+        pattern->UpdateTextMarquee(pattern->isHovered_);
     };
     focusHub->SetOnBlurInternal(blurTask);
 }
@@ -774,6 +763,20 @@ void MenuItemPattern::RegisterOnTouch()
     }
 }
 
+void MenuItemPattern::UpdateTextMarquee(bool isMarqueeStart)
+{
+    if (content_ && isTextFadeOut_) {
+        auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
+            textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+            textLayoutProperty->UpdateTextMarqueeFadeout(true);
+            textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
+            textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
+            content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 void MenuItemPattern::RegisterOnHover()
 {
     if (!onHoverEvent_) {
@@ -781,6 +784,7 @@ void MenuItemPattern::RegisterOnHover()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnHover(isHover);
+            pattern->UpdateTextMarquee(isHover || pattern->isFocused_);
         };
         onHoverEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     }
