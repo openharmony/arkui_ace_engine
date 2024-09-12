@@ -18,7 +18,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -610,7 +609,7 @@ void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-void PipelineContext::CheckAndUpdateKeyboardInset() {}
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
 bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
@@ -698,6 +697,7 @@ class ManagerInterface : public AceType {
 class FontManager : public AceType {
     DECLARE_ACE_TYPE(FontManager, AceType);
 };
+
 void PipelineBase::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}

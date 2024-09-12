@@ -203,6 +203,7 @@ void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& care
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
+    parentGlobalOffset_ = GetParentGlobalOffset();
     auto textContentGlobalOffset = selectOverlay_->GetHandleGlobalOffset() + contentRect_.GetOffset();
     auto paragraphPaintOffset = textContentGlobalOffset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
@@ -1929,7 +1930,7 @@ void TextPattern::OnModifyDone()
     } else {
         copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     }
-
+    
 
     const auto& children = host->GetChildren();
     if (children.empty()) {

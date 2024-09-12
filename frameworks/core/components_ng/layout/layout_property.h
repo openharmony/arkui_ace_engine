@@ -130,7 +130,7 @@ public:
     }
 
     TextDirection GetNonAutoLayoutDirection() const;
-
+    
     RefPtr<GeometryTransition> GetGeometryTransition() const
     {
         return geometryTransition_.Upgrade();

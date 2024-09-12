@@ -434,7 +434,7 @@ void DistributedUI::DumpNode(
     nodeObject->Put(DISTRIBUTE_UI_OPERATION, static_cast<int32_t>(op));
 
     std::unique_ptr<JsonValue> childObject = NodeObject::Create();
-    InspectorFilter filter;
+    InspectorFilter filter = InspectorFilter();
     node->ToJsonValue(childObject, filter);
     nodeObject->Put(DISTRIBUTE_UI_ATTRS, (std::unique_ptr<NodeObject>&)childObject);
 }

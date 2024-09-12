@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_H
 
+#include <mutex>
+
 #include "core/components/plugin/resource/plugin_request_data.h"
 #include "core/components_ng/pattern/plugin/plugin_event_hub.h"
 
@@ -35,6 +37,7 @@ public:
 
 private:
     static std::unique_ptr<PluginModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_H

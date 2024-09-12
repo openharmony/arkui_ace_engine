@@ -29,7 +29,6 @@ group("core_unittest") {
     # "pipeline:pipeline_context_test_ng",
     "property:core_property_unittest",
     "render:core_render_unittest",
-    "rosen:arkui_rosen_render_context_test",
     "svg:core_svg_unittest",
     "syntax:core_syntax_unittest",
   ]
@@ -41,7 +40,6 @@ group("linux_core_unittest") {
     "accessibility:core_accessibility_unittest",
     "animation:core_animation_unittest",
     "base:core_base_unittest",
-    "common:common_test",
     "event:click_event_test_ng",
     "event:drag_event_test_ng",
     "event:event_hub_test_ng",

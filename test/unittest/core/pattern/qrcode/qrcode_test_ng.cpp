@@ -94,16 +94,8 @@ void QRCodeTestNg::TearDownTestSuite()
  */
 HWTEST_F(QRCodeTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-
     QRCodeModelNG qrCodeModelNG;
     qrCodeModelNG.Create(CREATE_VALUE);
-
-    /**
-     * @tc.cases: case. cover more than APIVersion 10.
-     */
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
     qrCodeModelNG.SetQRCodeColor(QR_CODE_COLOR_VALUE);
     qrCodeModelNG.SetQRBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());

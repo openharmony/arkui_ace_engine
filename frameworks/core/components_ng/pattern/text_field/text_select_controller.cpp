@@ -27,7 +27,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
-constexpr float BOX_EPSILON = 1.0f;
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
@@ -310,7 +309,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
         TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
-    return {start, end };
+    return {start, end};
 }
 
 void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)
@@ -462,7 +461,7 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
     if (handleRect.GetX() < contentRect_.GetX()) {
         handleRect.SetOffset(OffsetF(contentRect_.GetX(), handleRect.GetY()));
     }
-
+ 
     auto textRectRightBoundary = contentRect_.GetX() + contentRect_.Width();
     if (GreatNotEqual(handleRect.GetX() + handleRect.Width(), textRectRightBoundary) &&
         GreatNotEqual(contentRect_.Width(), 0.0) && !textFiled->GetTextValue().empty()) {
@@ -481,14 +480,6 @@ void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
     auto textRect = textFiled->GetTextRect();
     if (LessNotEqual(handleRect.GetX(), textRect.GetX())) {
         handleRect.SetOffset(OffsetF(textRect.GetX(), handleRect.GetY()));
-    }
-
-    // Adjust the y-axis of the handle into the text
-    if (GreatNotEqual(handleRect.GetY() + handleRect.Height(), textRect.GetY() + textRect.Height() + BOX_EPSILON)) {
-        auto contentRight = contentRect_.GetX() + contentRect_.Width();
-        auto textRectRight = textRect.GetX() + textRect.Width();
-        handleRect.SetOffset(
-            OffsetF(std::min(contentRight, textRectRight), textRect.GetY() + textRect.Height() - handleRect.Height()));
     }
 }
 

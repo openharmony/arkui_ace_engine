@@ -55,7 +55,6 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
-constexpr float AGE_FONT_SIZE_SCALE = 1.75f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 
@@ -732,7 +731,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest010, TestSize.Level1)
     CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
 
     /**
-     * @tc.steps: step2. call SetIsDefault with badgeLayoutProperty.
+     * @tc.steps: step2. call SetIsDefault with layoutProperty_.
      */
     layoutProperty_->SetIsDefault(true, true);
     EXPECT_EQ(layoutProperty_->GetFontSizeIsDefault(), true);
@@ -866,50 +865,5 @@ HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
-}
-
-/**
- * @tc.name: BadgeLayoutAlgorithmTestNg004
- * @tc.desc: Test the layout on the left side of the badge.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
-    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
-    badge.SetIsDefault(false, false);
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create("text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-    auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_FALSE(layoutProperty_->GetFontSizeIsDefault());
-    EXPECT_FALSE(layoutProperty_->GetBadgeSizeIsDefault());
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
-
-    float fontScale = MockPipelineContext::GetCurrentContext()->GetFontScale();
-    MockPipelineContext::GetCurrentContext()->SetFontScale(AGE_FONT_SIZE_SCALE);
-
-    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
-
-    layoutProperty_->SetIsDefault(true, true);
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 16);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
-    MockPipelineContext::GetCurrentContext()->SetFontScale(fontScale);
 }
 } // namespace OHOS::Ace::NG

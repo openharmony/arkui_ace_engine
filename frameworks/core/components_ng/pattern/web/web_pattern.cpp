@@ -73,6 +73,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
+const std::string WEB_INFO_PC = "8";
+const std::string WEB_INFO_TABLET = "4";
+const std::string WEB_INFO_PHONE = "2";
+const std::string WEB_INFO_DEFAULT = "1";
 constexpr int32_t AUTO_FILL_CANCEL = 2;
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
@@ -5614,8 +5618,16 @@ void WebPattern::CloseKeyboard()
 
 WebInfoType WebPattern::GetWebInfoType()
 {
+    std::string factoryLevel;
     if (delegate_) {
-        return delegate_->GetWebInfoType();
+        factoryLevel = delegate_->GetWebInfoType();
+    }
+    if (factoryLevel == WEB_INFO_PHONE || factoryLevel == WEB_INFO_DEFAULT) {
+        return WebInfoType::TYPE_MOBILE;
+    } else if (factoryLevel == WEB_INFO_TABLET) {
+        return WebInfoType::TYPE_TABLET;
+    } else if (factoryLevel == WEB_INFO_PC) {
+        return WebInfoType::TYPE_2IN1;
     }
     return WebInfoType::TYPE_UNKNOWN;
 }

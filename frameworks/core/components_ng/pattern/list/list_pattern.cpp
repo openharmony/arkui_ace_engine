@@ -1555,7 +1555,7 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
-        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();

@@ -709,11 +709,6 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         gsVsyncCallback_();
     }
 
-    if (delaySurfaceChange_) {
-        delaySurfaceChange_ = false;
-        OnSurfaceChanged(width_, height_, type_, rsTransaction_);
-    }
-
     FlushVsync(nanoTimestamp, frameCount);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
@@ -761,15 +756,16 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
+    float keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
             // subwindow is shown, main window doesn't lift,  no need to handle the keyboard event
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
+            CheckAndUpdateKeyboardInset(keyboardHeight);
             return;
         }
     }
-    double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }

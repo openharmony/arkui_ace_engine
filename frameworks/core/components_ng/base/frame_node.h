@@ -897,6 +897,7 @@ public:
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
     RectF GetRectWithRender();
+    RectF GetRectWithFrame();
     void PaintDebugBoundary(bool flag) override;
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);

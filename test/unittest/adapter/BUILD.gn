@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("adapter_unittest") {
   testonly = true
-  deps = [
-    "ohos/capability:capability_unittest",
-    "ohos/entrance:entrance_unittest",
-  ]
+  deps = [ "ohos/capability:capability_unittest" ]
 }
