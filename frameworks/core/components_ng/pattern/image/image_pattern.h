@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,6 +222,11 @@ public:
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 
+    void SetImageAnimator(bool isImageAnimator)
+    {
+        isImageAnimator_ = isImageAnimator;
+    }
+
     //animation
     struct CacheImageStruct {
         CacheImageStruct() = default;
@@ -325,11 +330,6 @@ public:
     void SetSrcUndefined(bool isUndefined)
     {
         isSrcUndefined_ = isUndefined;
-    }
-
-    void SetImageAnimator(bool isImageAnimator)
-    {
-        isImageAnimator_ = isImageAnimator;
     }
 
     bool GetLoadInVipChannel()
@@ -532,6 +532,8 @@ private:
     bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
+    bool isImageAnimator_ = false;
+    bool hasSizeChanged = false;
 
     //animation
     ImageType imageType_ = ImageType::BASE;
@@ -549,8 +551,6 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
-    bool isImageAnimator_ = false;
-    bool hasSizeChanged = false;
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
 

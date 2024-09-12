@@ -49,9 +49,9 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 #ifdef USE_ROSEN_DRAWING
+constexpr float SIDE = 192.0f;
 constexpr float BADGED_SIDE_X = 21.0f;
 constexpr float BADGED_SIDE_Y = 7.0f;
-constexpr float SIDE = 192.0f;
 constexpr float NOT_ADAPTIVE_SIZE = 288.0f;
 constexpr float HALF = 0.5f;
 
@@ -499,7 +499,7 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
     Rosen::Drawing::Image image;
     if (mask) {
         image.BuildFromBitmap(*mask);
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
             Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
@@ -560,7 +560,7 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::
         bitmapCanvas.DetachBrush();
     }
     if (mask) {
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();
@@ -599,6 +599,7 @@ bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
     HILOGE("not support");
     return false;
 }
+
 #else
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {

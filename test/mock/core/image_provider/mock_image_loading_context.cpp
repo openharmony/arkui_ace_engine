@@ -146,6 +146,11 @@ bool ImageLoadingContext::NeedAlt() const
     return true;
 }
 
+const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
+{
+    return src_.GetFillColor();
+}
+
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
 void ImageLoadingContext::DownloadImage() {}
