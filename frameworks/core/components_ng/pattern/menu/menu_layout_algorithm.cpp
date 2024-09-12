@@ -392,24 +392,39 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
     }
 
     auto marginProps = menuParam.layoutRegionMargin.value();
-    if (marginProps.start.has_value()) {
-        paddingStart_ = marginProps.start.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
-        layoutRegionMargin_.left = paddingStart_;
+    float left = marginProps.start.has_value()
+                     ? marginProps.start.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width())
+                     : paddingStart_;
+    float right = marginProps.end.has_value()
+                      ? marginProps.end.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width())
+                      : paddingEnd_;
+    float top = marginProps.top.has_value()
+                    ? marginProps.top.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height())
+                    : param_.topSecurity;
+    float bottom = marginProps.bottom.has_value()
+                       ? marginProps.bottom.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height())
+                       : param_.bottomSecurity;
+
+    if (LessNotEqual(left + right, wrapperSize_.Width())) {
+        paddingStart_ = left;
+        paddingEnd_ = right;
+        if (marginProps.start.has_value()) {
+            layoutRegionMargin_.left = left;
+        }
+        if (marginProps.end.has_value()) {
+            layoutRegionMargin_.right = right;
+        }
     }
 
-    if (marginProps.end.has_value()) {
-        paddingEnd_ = marginProps.end.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Width());
-        layoutRegionMargin_.right = paddingEnd_;
-    }
-
-    if (marginProps.top.has_value()) {
-        param_.topSecurity = marginProps.top.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
-        layoutRegionMargin_.top = param_.topSecurity;
-    }
-
-    if (marginProps.bottom.has_value()) {
-        param_.bottomSecurity = marginProps.bottom.value().GetDimension().ConvertToPxWithSize(wrapperSize_.Height());
-        layoutRegionMargin_.bottom = param_.bottomSecurity;
+    if (LessNotEqual(top + bottom, wrapperSize_.Height())) {
+        param_.topSecurity = top;
+        param_.bottomSecurity = bottom;
+        if (marginProps.top.has_value()) {
+            layoutRegionMargin_.top = top;
+        }
+        if (marginProps.bottom.has_value()) {
+            layoutRegionMargin_.bottom = bottom;
+        }
     }
 }
 
