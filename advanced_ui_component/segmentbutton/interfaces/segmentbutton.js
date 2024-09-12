@@ -1836,7 +1836,7 @@ export class SegmentButton extends ViewPU {
       this,
       'selectedIndexes'
     );
-    this.onClicked = undefined;
+    this.onItemClicked = undefined;
     this.e3 = new ObservedPropertyObjectPU(
       { width: 0, height: 0 },
       this,
@@ -1942,8 +1942,8 @@ export class SegmentButton extends ViewPU {
   }
   setInitiallyProvidedValue(params) {
     this.l2.set(params.options);
-    if (params.onClicked !== undefined) {
-      this.onClicked = params.onClicked;
+    if (params.onItemClicked !== undefined) {
+      this.onItemClicked = params.onItemClicked;
     }
     if (params.componentSize !== undefined) {
       this.componentSize = params.componentSize;
@@ -2303,8 +2303,8 @@ export class SegmentButton extends ViewPU {
               ? false
               : true;
           let e4 = this.isShouldMirror() ? c4 - 1 - d4 : d4;
-          if (this.onClicked) {
-            this.onClicked(e4);
+          if (this.onItemClicked) {
+            this.onItemClicked(e4);
           }
           if (
             this.options.type === 'capsule' &&

@@ -887,7 +887,7 @@ class ItemProperty {
 export struct SegmentButton {
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
-  public onClicked?: Callback<number>
+  public onItemClicked?: Callback<number>
   @Provide componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
@@ -1162,8 +1162,8 @@ export struct SegmentButton {
                   this.buttonItemsSize.length) ? false : true
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
-              if (this.onClicked) {
-                this.onClicked(realClickIndex)
+              if (this.onItemClicked) {
+                this.onItemClicked(realClickIndex)
               }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                 let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
