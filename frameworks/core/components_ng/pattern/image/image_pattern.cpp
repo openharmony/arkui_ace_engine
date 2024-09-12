@@ -1440,6 +1440,17 @@ void ImagePattern::DumpRenderInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
     }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            "borderRadius:" + renderContext->GetBorderRadiusValue(BorderRadiusProperty()).ToString());
+    } else {
+        DumpLog::GetInstance().AddDesc("borderRadius: null");
+    }
 }
 
 void ImagePattern::DumpInfo()
