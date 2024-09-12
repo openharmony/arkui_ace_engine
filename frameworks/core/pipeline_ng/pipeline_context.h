@@ -462,7 +462,7 @@ public:
     {
         return autoInactive_;
     }
-    bool SetAutoInactive(bool autoInactive)
+    void SetAutoInactive(bool autoInactive)
     {
         autoInactive_ = autoInactive;
     }
@@ -1192,6 +1192,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool autoInactive_ = true;
 };
 } // namespace OHOS::Ace::NG
 

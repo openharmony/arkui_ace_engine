@@ -3363,7 +3363,7 @@ bool PipelineContext::Activate(bool isActive, bool autoInactive)
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "autoInactive turns to %{public}d", autoInactive);
     SetAutoInactive(autoInactive);
-    return SetIsFocusActive(isActive, FocusActiveTriggerType::TRIGGER_BY_ACTIVATE_API, autoInactive);
+    return SetIsFocusActive(isActive, FocusActiveTriggerType::TRIGGER_BY_ACTIVATE_API);
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
