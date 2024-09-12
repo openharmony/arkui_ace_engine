@@ -429,8 +429,8 @@ private:
     uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
-    OH_NativeXComponent_TouchEvent lastTouchInfo_;
-    std::atomic<int32_t> slideCount_ {0};
+    OH_NativeXComponent_TouchEvent lastTouchInfo_ {};
+    int32_t slideCount_  = 0;
     double physicalCoeff_ = 0.0;
 #endif
     bool isTypedNode_ = false;

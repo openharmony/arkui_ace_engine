@@ -198,6 +198,7 @@ public:
     bool ChangeRenderType(int32_t renderType);
 
 private:
+    static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
     RefPtr<AceType> frameNode_;
 };
 } // namespace OHOS::Ace::Framework

@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+
 #include <cmath>
 #include <cstdlib>
-#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
@@ -43,6 +44,7 @@
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "ui/rs_ext_node_operation.h"
+
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
@@ -368,19 +370,6 @@ void XComponentPattern::OnAttachToFrameNode()
 #ifdef OHOS_PLATFORM
     physicalCoeff_ = GRAVITY * INCH_UNIT * PipelineBase::GetCurrentDensity() * DPI_DENISTY_RATE * TUNNING_FACTOR;
 #endif
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(host->GetId());
-    SetRotation(pipeline->GetTransformHint());
-    auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->SetRotation(transform);
-        }
-    });
-    UpdateTransformHintChangedCallbackId(callbackId);
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
@@ -444,8 +433,8 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
     CHECK_NULL_VOID(rsSurfaceNode);
 
-    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(GetId(), parentNode->GetId(),
-        canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
+    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(
+        GetId(), parentNode->GetId(), canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
 #endif
 }
 
@@ -583,8 +572,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     CHECK_NULL_VOID(geometryNode);
     drawSize_ = geometryNode->GetContentSize();
     if (!drawSize_.IsPositive()) {
-        TAG_LOGW(
-            AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
         return;
     }
     globalPosition_ = geometryNode->GetFrameOffset();
@@ -752,8 +740,8 @@ void XComponentPattern::InitNativeNodeCallbacks()
         host->RemoveChild(node);
     };
 
-    nativeXComponentImpl_->registerNativeNodeCallbacks(std::move(OnAttachRootNativeNode),
-        std::move(OnDetachRootNativeNode));
+    nativeXComponentImpl_->registerNativeNodeCallbacks(
+        std::move(OnAttachRootNativeNode), std::move(OnDetachRootNativeNode));
 }
 
 void XComponentPattern::InitEvent()
@@ -870,20 +858,18 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
 void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
 {
-    gestureHub->SetOnTouchIntercept(
-        [weak = WeakClaim(this)](
-            const TouchEventInfo& touchEvent) -> HitTestMode {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
-            auto hostNode = pattern->GetHost();
-            CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
-            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
-            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
-            CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
-            auto event = touchEvent.ConvertToTouchEvent();
-            ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
-            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
-        });
+    gestureHub->SetOnTouchIntercept([weak = WeakClaim(this)](const TouchEventInfo& touchEvent) -> HitTestMode {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
+        auto hostNode = pattern->GetHost();
+        CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
+        CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
+        const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+        CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
+        auto event = touchEvent.ConvertToTouchEvent();
+        ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
+        return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
+    });
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -986,7 +972,7 @@ void XComponentPattern::ReportSlideToRss()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->slideCount_ --;
-        if (self->slideCount_.load() == 0) {
+        if (self->slideCount_ == 0) {
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         }
     }, GetFlingDuration(GetUpVelocity(lastTouchInfo_, touchEventPoint_)) + DELAY_TIME, "ArkUIXComponentSlideOff");
@@ -997,7 +983,7 @@ float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveIn
 {
     float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
     int64_t time = abs(lastMoveInfo.timeStamp - upEventInfo.timeStamp);
-    if (time == 0) {
+    if (time < SECOND_UNIT) {
         return 0.0f;
     }
     return distance * DISTANCE_UNIT / (time / SECOND_UNIT); // unit: pixel/ms
@@ -1006,6 +992,9 @@ float XComponentPattern::GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveIn
 
 int XComponentPattern::GetFlingDuration(float velocity)
 {
+    if (physicalCoeff_ - 0 < 1E-6 || velocity - 0 < 1E-6) {
+        return 0;
+    }
     double splineDeceleration = log(INFLEXION * velocity / (FLING_FRICTION * physicalCoeff_));
     return std::min((int)(SECOND_UNIT * exp(splineDeceleration / DECEL_MINUS_ONE)), MAX_SLIE_TIME);
 }
@@ -1174,8 +1163,8 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
     return historicalPoints;
 }
 
-void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
-    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
+void XComponentPattern::FireExternalEvent(
+    RefPtr<NG::PipelineContext> context, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_NULL_VOID(context);
 #ifdef NG_BUILD
@@ -1635,8 +1624,8 @@ void XComponentPattern::NativeSurfaceHide()
 
 void XComponentPattern::OnWindowHide()
 {
-    if (!hasXComponentInit_ || hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
     }
     NativeSurfaceHide();
@@ -1645,116 +1634,12 @@ void XComponentPattern::OnWindowHide()
 
 void XComponentPattern::OnWindowShow()
 {
-    if (!hasXComponentInit_ || !hasReleasedSurface_
-        || (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
+    if (!hasXComponentInit_ || !hasReleasedSurface_ ||
+        (type_ != XComponentType::SURFACE && type_ != XComponentType::TEXTURE)) {
         return;
     }
     NativeSurfaceShow();
     hasReleasedSurface_ = false;
-}
-
-void XComponentPattern::EnableAnalyzer(bool enable)
-{
-    isEnableAnalyzer_ = enable;
-    if (!isEnableAnalyzer_) {
-        DestroyAnalyzerOverlay();
-        return;
-    }
-
-    CHECK_NULL_VOID(!imageAnalyzerManager_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
-}
-
-void XComponentPattern::SetImageAIOptions(void *options)
-{
-    if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
-    }
-    CHECK_NULL_VOID(imageAnalyzerManager_);
-    imageAnalyzerManager_->SetImageAIOptions(options);
-}
-
-void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
-{
-    if (!IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(onAnalyzed);
-        (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
-        return;
-    }
-
-    CHECK_NULL_VOID(imageAnalyzerManager_);
-    imageAnalyzerManager_->SetImageAnalyzerConfig(config);
-    imageAnalyzerManager_->SetImageAnalyzerCallback(onAnalyzed);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto* context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask(
-        [weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->CreateAnalyzerOverlay();
-        },
-        "ArkUIXComponentCreateAnalyzerOverlay");
-}
-
-void XComponentPattern::StopImageAnalyzer()
-{
-    DestroyAnalyzerOverlay();
-}
-
-bool XComponentPattern::IsSupportImageAnalyzerFeature()
-{
-    return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
-}
-
-void XComponentPattern::CreateAnalyzerOverlay()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->SetOverlayNode(nullptr);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto pixelMap = context->GetThumbnailPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-    }
-}
-
-void XComponentPattern::UpdateAnalyzerOverlay()
-{
-    auto context = GetHost()->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto pixelMap = context->GetThumbnailPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    CHECK_NULL_VOID(imageAnalyzerManager_);
-    imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
-}
-
-void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
-{
-    if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
-    }
-}
-
-void XComponentPattern::DestroyAnalyzerOverlay()
-{
-    CHECK_NULL_VOID(imageAnalyzerManager_);
-    imageAnalyzerManager_->DestroyAnalyzerOverlay();
-}
-
-void XComponentPattern::ReleaseImageAnalyzer()
-{
-    CHECK_NULL_VOID(imageAnalyzerManager_);
-    imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
 RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
@@ -1831,6 +1716,110 @@ float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool f
         }
     }
     return value;
+}
+
+void XComponentPattern::EnableAnalyzer(bool enable)
+{
+    isEnableAnalyzer_ = enable;
+    if (!isEnableAnalyzer_) {
+        DestroyAnalyzerOverlay();
+        return;
+    }
+
+    CHECK_NULL_VOID(!imageAnalyzerManager_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
+}
+
+void XComponentPattern::SetImageAIOptions(void* options)
+{
+    if (!imageAnalyzerManager_) {
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
+    }
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAIOptions(options);
+}
+
+void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
+{
+    if (!IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(onAnalyzed);
+        (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
+        return;
+    }
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAnalyzerConfig(config);
+    imageAnalyzerManager_->SetImageAnalyzerCallback(onAnalyzed);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUIXComponentCreateAnalyzerOverlay");
+}
+
+void XComponentPattern::StopImageAnalyzer()
+{
+    DestroyAnalyzerOverlay();
+}
+
+bool XComponentPattern::IsSupportImageAnalyzerFeature()
+{
+    return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+}
+
+void XComponentPattern::CreateAnalyzerOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetOverlayNode(nullptr);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
+    }
+}
+
+void XComponentPattern::UpdateAnalyzerOverlay()
+{
+    auto context = GetHost()->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pixelMap = context->GetThumbnailPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
+}
+
+void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+{
+    if (IsSupportImageAnalyzerFeature()) {
+        CHECK_NULL_VOID(imageAnalyzerManager_);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+    }
+}
+
+void XComponentPattern::DestroyAnalyzerOverlay()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->DestroyAnalyzerOverlay();
+}
+
+void XComponentPattern::ReleaseImageAnalyzer()
+{
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
 void XComponentPattern::SetSurfaceRotation(bool isLock)

@@ -51,11 +51,11 @@ public:
     void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
-    void EnableAnalyzer(bool enable) override;
-    void SetImageAIOptions(void* options) override;
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
+    void EnableAnalyzer(bool enable) override;
+    void SetImageAIOptions(void* options) override;
     void SetRenderFit(RenderFit renderFit) override;
 
     static bool IsTexture(FrameNode* frameNode);
