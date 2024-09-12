@@ -8374,7 +8374,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
     info.selectLength = aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString());
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{private}s",
         info.selectStart, info.selectEnd, spanString->GetString().c_str());
 
     // serialize the sentenced-level text
@@ -8399,7 +8399,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
     spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
     spanString->EncodeTlv(info.sentenceBuffer);
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
 
     auto host = GetHost();
@@ -8436,7 +8436,7 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
 {
     RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
     auto resultText = spanString->GetString();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
         start, end, spanString->GetString().c_str());
     if (spanString->GetSpanItems().empty()) {
         return;
