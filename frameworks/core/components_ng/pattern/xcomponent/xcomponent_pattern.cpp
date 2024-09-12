@@ -1838,4 +1838,10 @@ void XComponentPattern::SetSurfaceRotation(bool isLock)
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
 }
+
+void XComponentPattern::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
+}
 } // namespace OHOS::Ace::NG

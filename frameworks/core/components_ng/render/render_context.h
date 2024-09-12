@@ -698,6 +698,8 @@ public:
         isNeedAnimate_ = isNeedAnimate;
     }
 
+    virtual void SetRenderFit(RenderFit renderFit) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
