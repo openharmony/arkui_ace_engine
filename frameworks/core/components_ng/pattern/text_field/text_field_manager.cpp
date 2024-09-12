@@ -74,7 +74,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
-    if (GreatOrEqual(position.GetX(), rootWidth) || LessOrEqual(position.GetX(), 0.0f)) {
+    if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
     position_ = position;
