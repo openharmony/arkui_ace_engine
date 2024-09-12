@@ -58,6 +58,12 @@ public:
 };
 
 constexpr int INDEX_VALID_VALUE = 10;
+constexpr int EXPECTED_SHOW_NEXT_TIMES = 1;
+constexpr int EXPECTED_SHOW_PREVIOUS_TIMES = 1;
+constexpr int EXPECTED_CHANGE_IDX_TRUE_TIMES = 1;
+constexpr int EXPECTED_CHANGE_IDX_FALSE_TIMES = 3;
+constexpr int EXPECTED_CHANGE_IDX_INVALID_TIMES = 1;
+constexpr int EXPECTED_FLASH_ANIM_TIMES = 3;
 } // namespace
 
 class SwiperControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUISwiperControllerAccessor,
@@ -69,12 +75,12 @@ public:
 
         auto controller = new MockSwiperController();
         mockSwiperController_ = AceType::Claim(controller);
-        EXPECT_CALL(*controller, ShowNext()).Times(1);
-        EXPECT_CALL(*controller, ShowPrevious()).Times(1);
-        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, true)).Times(1);
-        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, false)).Times(3);
-        EXPECT_CALL(*controller, ChangeIndex(0, false)).Times(1);
-        EXPECT_CALL(*controller, FinishAnimation()).Times(3);
+        EXPECT_CALL(*controller, ShowNext()).Times(EXPECTED_SHOW_NEXT_TIMES);
+        EXPECT_CALL(*controller, ShowPrevious()).Times(EXPECTED_SHOW_PREVIOUS_TIMES);
+        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, true)).Times(EXPECTED_CHANGE_IDX_TRUE_TIMES);
+        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, false)).Times(EXPECTED_CHANGE_IDX_FALSE_TIMES);
+        EXPECT_CALL(*controller, ChangeIndex(0, false)).Times(EXPECTED_CHANGE_IDX_INVALID_TIMES);
+        EXPECT_CALL(*controller, FinishAnimation()).Times(EXPECTED_FLASH_ANIM_TIMES);
     }
 
     static void TearDownTestCase()
@@ -84,7 +90,7 @@ public:
         AccessorTestBase::TearDownTestCase();
     }
 
-    virtual void SetUp(void) override
+    void SetUp(void) override
     {
         AccessorTestBase::SetUp();
 
@@ -151,22 +157,22 @@ HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
     Opt_Function callbackValid = ArkValue<Opt_Function>(0);
     Opt_Function callbackUndef = ArkValue<Opt_Function>();
 
-    // check initial callback state in target controller 
+    // check initial callback state in target controller
     EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
 
-    // test the finish animation invoking with callback setting 
+    // test the finish animation invoking with callback setting
     accessor_->finishAnimation(peer_, &callbackValid);
     EXPECT_TRUE(mockSwiperController_->GetFinishCallback());
 
-    // force reset and check no callback in target controller 
+    // force reset and check no callback in target controller
     mockSwiperController_->SetFinishCallback({});
     EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
 
-    // test the finish animation invoking with invalid callback setting 
+    // test the finish animation invoking with invalid callback setting
     accessor_->finishAnimation(peer_, &callbackUndef);
     EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
 
-    // test the finish animation invoking without callback setting 
+    // test the finish animation invoking without callback setting
     accessor_->finishAnimation(peer_, nullptr);
     EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
 }

@@ -18,47 +18,52 @@
 #include "base/utils/utils.h"
 #include "core/components/swiper/swiper_controller.h"
 
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_MODIFIER_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_MODIFIER_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class SwiperControllerPeerImpl : public Referenced {
 public:
     SwiperControllerPeerImpl() = default;
 
-    void AddListener(const RefPtr<SwiperController> &listener) {
+    void AddListener(const RefPtr<SwiperController> &listener)
+    {
         CHECK_NULL_VOID(listener);
         listeners_.push_back(listener);
     }
 
-    void TriggerShowNext() {
-        for(auto &listener: listeners_) {
+    void TriggerShowNext()
+    {
+        for (auto &listener: listeners_) {
             listener->ShowNext();
         }
     }
 
-    void TriggerShowPrevios() {
-        for(auto &listener: listeners_) {
+    void TriggerShowPrevios()
+    {
+        for (auto &listener: listeners_) {
             listener->ShowPrevious();
         }
     }
 
-    void TriggerChangeIndex(int32_t index, const std::optional<bool> &useAnimationOpt) {
+    void TriggerChangeIndex(int32_t index, const std::optional<bool> &useAnimationOpt)
+    {
         index = index < 0 ? 0 : index;
         bool useAnim = useAnimationOpt && *useAnimationOpt;
-        for(auto &listener: listeners_) {
+        for (auto &listener: listeners_) {
             listener->ChangeIndex(index, useAnim);
         }
     }
 
     void SetFinishCallback(const CommonFunc &callbackFunc)
     {
-        for(auto &listener: listeners_) {
+        for (auto &listener: listeners_) {
             listener->SetFinishCallback(callbackFunc);
         }
     }
-    void TriggerFinishAnimation() {
-        for(auto &listener: listeners_) {
+
+    void TriggerFinishAnimation(){
+        for (auto &listener: listeners_) {
             listener->FinishAnimation();
         }
     }
@@ -66,4 +71,4 @@ private:
     std::vector<RefPtr<SwiperController>> listeners_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
-#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_MODIFIER_PEER_IMPL_H
+#endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
