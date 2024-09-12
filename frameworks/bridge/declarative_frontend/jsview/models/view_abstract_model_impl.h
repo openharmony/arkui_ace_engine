@@ -270,7 +270,8 @@ public:
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack) override
     {}
     void DismissSheet() override {}
     void DismissContentCover() override {}

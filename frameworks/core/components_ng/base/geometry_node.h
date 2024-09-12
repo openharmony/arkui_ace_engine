@@ -382,8 +382,6 @@ public:
     void SetParentAdjust(RectF parentAdjust);
     RectF GetSelfAdjust() const;
     void SetSelfAdjust(RectF selfAdjust);
-    RectF GetFrameRectWithoutSafeArea() const;
-    RectF GetFrameRectWithSafeArea() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
