@@ -59,7 +59,7 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
         return;
     }
     auto jsOnTouchFuncLocalHandle = jsOnTouchFunc->GetLocalHandle();
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTouch = [vm, execCtx = args.GetExecutionContext(),
                        func = panda::CopyableGlobal(vm, jsOnTouchFuncLocalHandle),
                        node = frameNode](TouchEventInfo& info) {
@@ -104,7 +104,7 @@ void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
         return;
     }
     RefPtr<JsKeyFunction> JsOnPreImeEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onPreImeEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnPreImeEvent), node = frameNode](
                           KeyEventInfo& info) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);

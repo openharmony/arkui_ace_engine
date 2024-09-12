@@ -597,7 +597,7 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    bool IsLayoutSeperately() const
+    bool IsLayoutSeperaely() const
     {
         return layoutSeperately_;
     }
