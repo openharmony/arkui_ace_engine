@@ -244,8 +244,8 @@ let SegmentButtonOptions = (o = class SegmentButtonOptions {
     this.backgroundColor = options.backgroundColor ?? b1.BACKGROUND_COLOR;
     this.selectedBackgroundColor = options.selectedBackgroundColor ?? b1.t1;
     this.imageSize = options.imageSize ?? { width: 24, height: 24 };
-    this.buttonPadding = options.buttonPadding ?? 0;
-    this.textPadding = options.textPadding ?? 0;
+    this.buttonPadding = options.buttonPadding;
+    this.textPadding = options.textPadding;
     this.type = options.type;
     this.backgroundBlurStyle = options.backgroundBlurStyle ?? b1.a2;
     this.localizedTextPadding = options.localizedTextPadding;
@@ -1748,7 +1748,7 @@ class i1 extends ViewPU {
                               () => {},
                               {
                                 page: 'components/src/main/ets/components/SegmentButton.ets',
-                                line: 774,
+                                line: 767,
                                 q3: 15,
                               }
                             );
@@ -2522,7 +2522,7 @@ export class SegmentButton extends ViewPU {
                           () => {},
                           {
                             page: 'components/src/main/ets/components/SegmentButton.ets',
-                            line: 1052,
+                            line: 1045,
                             q3: 11,
                           }
                         );
@@ -2621,7 +2621,7 @@ export class SegmentButton extends ViewPU {
                                               () => {},
                                               {
                                                 page: 'components/src/main/ets/components/SegmentButton.ets',
-                                                line: 1063,
+                                                line: 1056,
                                                 q3: 23,
                                               }
                                             );
@@ -2725,7 +2725,7 @@ export class SegmentButton extends ViewPU {
                           () => {},
                           {
                             page: 'components/src/main/ets/components/SegmentButton.ets',
-                            line: 1091,
+                            line: 1082,
                             q3: 13,
                           }
                         );
@@ -2767,7 +2767,7 @@ export class SegmentButton extends ViewPU {
                           () => {},
                           {
                             page: 'components/src/main/ets/components/SegmentButton.ets',
-                            line: 1097,
+                            line: 1088,
                             q3: 13,
                           }
                         );
@@ -2814,7 +2814,7 @@ export class SegmentButton extends ViewPU {
                     () => {},
                     {
                       page: 'components/src/main/ets/components/SegmentButton.ets',
-                      line: 1112,
+                      line: 1103,
                       q3: 9,
                     }
                   );
