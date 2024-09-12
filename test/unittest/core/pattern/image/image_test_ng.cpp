@@ -263,7 +263,6 @@ HWTEST_F(ImageTestNg, SetImagePaintConfig002, TestSize.Level1)
     EXPECT_EQ(paintConfig.srcRect_, RectF());
     EXPECT_EQ(paintConfig.dstRect_, RectF());
     EXPECT_EQ(paintConfig.imageFit_, ImageFit::COVER);
-    EXPECT_TRUE(paintConfig.sourceInfo_.IsSvg());
 }
 
 /**
@@ -797,7 +796,7 @@ HWTEST_F(ImageTestNg, ImageCreator004, TestSize.Level1)
     auto frameNode = ImageModelNG::CreateFrameNode(nodeId, IMAGE_SRC_URL,
                                         pixMap, BUNDLE_NAME,
                                         MODULE_NAME, false);
-    
+
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1877,43 +1876,6 @@ HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
      */
     imageLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     imageLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-}
-
-/**
- * @tc.name: ImageModifier
- * @tc.desc: Test the dynamic effect of the Image
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImageModifierTest001, TestSize.Level1)
-{
-    ImageModifier imageModifier;
-    Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-
-    imageModifier.Modify();
-    imageModifier.SetIsAltImage(true);
-    EXPECT_EQ(imageModifier.isAltImage_, true);
-
-    auto value = imageModifier.GetValue(10);
-    EXPECT_EQ(value, static_cast<float>(10));
-
-    RefPtr<CanvasImage> imageCanvas = AceType::MakeRefPtr<MockCanvasImage>();
-    imageModifier.UpdateImageData(imageCanvas,
-        OffsetF(WIDTH, HEIGHT), SizeF(WIDTH, HEIGHT));
-
-    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
-    imageModifier.onDraw(context);
-    imageModifier.DrawImageWithAnimation(context);
-    imageModifier.DrawImageWithoutAnimation(context);
-
-    imageModifier.SetImageFit(ImageFit::COVER);
-    EXPECT_EQ(imageModifier.imageFit_->Get(), static_cast<float>(ImageFit::COVER));
-
-    imageModifier.UpdatePaintConfig(1);
-    imageModifier.UpdatePaintConfig(2);
 }
 
 /**

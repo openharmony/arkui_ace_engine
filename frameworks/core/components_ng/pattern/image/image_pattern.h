@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
@@ -112,6 +113,7 @@ public:
         return GetHost();
     }
 
+    void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -387,6 +389,7 @@ protected:
     bool isShow_ = true;
     bool gifAnimation_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
+    RefPtr<ImageContentModifier> contentMod_;
 
 private:
     class ObscuredImage : public CanvasImage {

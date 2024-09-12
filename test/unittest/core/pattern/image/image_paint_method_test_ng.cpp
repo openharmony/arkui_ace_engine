@@ -131,17 +131,17 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestS
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(isRightToLeft, false);
-    imagePaintMethod_->UpdatePaintConfig(imagePaintProperty_, imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     bool isRightToLeftEnd = AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(isRightToLeftEnd, true);
-    imagePaintMethod_->UpdatePaintConfig(imagePaintProperty_, imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     auto& config = imagePaintMethod_->canvasImage_->paintConfig_;
     EXPECT_NE(config, nullptr);
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     imagePaintProperty_->UpdateDrawingColorFilter(drawingColorFilter);
     imagePaintProperty_->UpdateNeedBorderRadius(false);
-    imagePaintMethod_->UpdatePaintConfig(imagePaintProperty_, imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     EXPECT_EQ(imagePaintMethod_->selected_, true);
 }
 } // namespace OHOS::Ace::NG

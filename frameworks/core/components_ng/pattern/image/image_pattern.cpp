@@ -24,6 +24,7 @@
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
@@ -519,49 +520,46 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
-    config.sourceInfo_ = sourceInfo;
-    auto host = GetHost();
-    if (!host) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-    auto renderContext = host->GetRenderContext();
-    if (!renderContext || !renderContext->HasBorderRadius()) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-
     canvasImage->SetPaintConfig(config);
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
+    CreateModifier();
     bool sensitive = false;
     if (isSensitive_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         sensitive = host->IsPrivacySensitive();
     }
-    if (!overlayMod_) {
-        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
-    }
     ImagePaintMethodConfig imagePaintMethodConfig {
         .selected = isSelected_,
-        .imageOverlayModifier = overlayMod_,
         .sensitive = sensitive,
-        .interpolation = interpolationDefault_
+        .interpolation = interpolationDefault_,
+        .imageOverlayModifier = overlayMod_,
+        .imageContentModifier = contentMod_
     };
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig, imageDfxConfig_);
+        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig, imageDfxConfig_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig, imageDfxConfig_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig);
     }
-    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig, imageDfxConfig_);
+    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig);
+}
+
+void ImagePattern::CreateModifier()
+{
+    if (!contentMod_) {
+        contentMod_ = MakeRefPtr<ImageContentModifier>();
+    }
+    if (!overlayMod_) {
+        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
+    }
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -753,7 +751,7 @@ void ImagePattern::OnModifyDone()
         default:
             break;
     }
-    
+
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         InitOnKeyEvent();
     }

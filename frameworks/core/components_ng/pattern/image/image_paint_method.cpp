@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,8 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "base/utils/utils.h"
-#include "core/components/image/image_theme.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
-#include "core/components_ng/render/image_painter.h"
 
 namespace {
 constexpr unsigned int TOP_LEFT = 0;
@@ -89,12 +87,12 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
     imageDfxConfig.borderRadiusValue_ = borderRadius->ToString();
 }
 
-void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)
+void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
 {
     auto&& config = canvasImage_->GetPaintConfig();
+    auto renderProps = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
-    ImageInterpolation intepolation = renderProps->GetImageInterpolation().value_or(interpolationDefault_);
-    config.imageInterpolation_ = intepolation;
+    config.imageInterpolation_ = renderProps->GetImageInterpolation().value_or(interpolationDefault_);
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
     config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
@@ -105,6 +103,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     config.colorFilter_.Reset();
+
     auto colorFilterMatrix = renderProps->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_.colorFilterMatrix_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
@@ -121,16 +120,11 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }
+    UpdateSvgColorFilter();
 }
 
-CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+void ImagePaintMethod::UpdateSvgColorFilter()
 {
-    CHECK_NULL_RETURN(canvasImage_, nullptr);
-    // update render props to ImagePaintConfig
-    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_RETURN(props, nullptr);
-    UpdatePaintConfig(props, paintWrapper);
-    auto contentSize = paintWrapper->GetContentSize();
     auto&& paintConfig = canvasImage_->GetPaintConfig();
     auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
     if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
@@ -144,17 +138,16 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
             svgCanvas->SetColorFilter(imageColorFilter);
         }
     }
-    ImagePainter imagePainter(canvasImage_, imageDfxConfig_);
-    return [imagePainter, contentSize, sensitive = sensitive_](RSCanvas& canvas) {
-        if (!sensitive) {
-            imagePainter.DrawImage(canvas, {}, contentSize);
-        }
-    };
 }
 
 RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
 {
     return imageOverlayModifier_;
+}
+
+RefPtr<Modifier> ImagePaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return imageContentModifier_;
 }
 
 void ImagePaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
@@ -166,5 +159,17 @@ void ImagePaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     imageOverlayModifier_->SetSize(size);
     imageOverlayModifier_->SetOffset(offset);
     imageOverlayModifier_->SetIsSelected(selected_);
+}
+
+void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(canvasImage_);
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(imageContentModifier_);
+    UpdatePaintConfig(paintWrapper);
+    auto size = paintWrapper->GetContentSize();
+    imageContentModifier_->SetSize(size);
+    imageContentModifier_->SetSensitive(sensitive_);
+    imageContentModifier_->SetCanvasImageWrapper(CanvasImageModifierWrapper(canvasImage_));;
 }
 } // namespace OHOS::Ace::NG
