@@ -2278,8 +2278,13 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     return nullptr;
 }
 
-bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveTriggerType triggerType)
 {
+    if (!isFocusActive && triggerType == FocusActiveTriggerType::TRIGGER_BY_MOUSE_TOUCH && !GetAutoInactive()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "not inactive by mouse or touch down when autoInactive is false");
+        return false;
+    }
+
     if (isFocusActive_ == isFocusActive) {
         return false;
     }
