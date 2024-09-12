@@ -377,6 +377,9 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
+    if (SystemProperties::GetDebugEnabled()) {
+        twinklingInterval_ = 3000; // 3000 : for AtuoUITest
+    }
 }
 
 TextFieldPattern::~TextFieldPattern()
