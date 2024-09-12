@@ -1536,16 +1536,33 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
     velocityTracker_.UpdateTrackerPoint(point.GetX(), point.GetY(), curTime, isEnd);
 }
 
+void DragDropManager::NotifyEnterTextEditorArea()
+{
+    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+        return;
+    }
+
+    hasNotifiedTransformation_ = true;
+}
+
 void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
     DragEventType type)
 {
     CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled())) {
+    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled()) || !isDragFwkShow_) {
         return;
     }
 
+    // When moving in an editable text component whithout animation, and has not notified msdp yet, notify msdp.
+    if (type == DragEventType::MOVE && IsEditableTextComponent(frameTag) && isDragFwkShow_ &&
+        !hasNotifiedTransformation_) {
+        NotifyEnterTextEditorArea();
+        return;
+    }
     if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
@@ -1563,12 +1580,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
         TAG_LOGI(AceLogTag::ACE_DRAG, "Coordinates have been transformed.");
         return;
     }
-    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
-        return;
-    }
-    hasNotifiedTransformation_ = true;
+    NotifyEnterTextEditorArea();
 }
 
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
