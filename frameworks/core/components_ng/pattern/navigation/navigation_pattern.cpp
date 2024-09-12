@@ -1065,14 +1065,15 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     }
 
     // navBar push navDestination
-    if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD &&
-        navigationMode_ == NavigationMode::STACK) {
-        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
-        if (navBar) {
-            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
-        }
+    if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
         newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
-        DealTransitionVisibility(navBarNode, false, true);
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        // current mode is stack, set navBar invisible
+        if (navigationMode_ == NavigationMode::STACK && navBar) {
+            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
+            DealTransitionVisibility(navBarNode, false, true);
+        }
+        // if current mode is auto, need set navBar need set invisible true
         navigationNode->SetNeedSetInvisible(true);
     }
 
