@@ -4229,7 +4229,7 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty()) {
+    if (children.empty() && spans_.empty()) {
         auto paragraphs = pManager_->GetParagraphs();
         for (auto &&info : paragraphs) {
             auto paragraph = info.paragraph;
