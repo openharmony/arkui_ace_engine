@@ -1481,6 +1481,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     if ((std::abs(dragDelta) >= std::abs(shiftDistance)) && !isOverScroll) {
         int32_t shiftDistanceCount = static_cast<int>(std::abs(dragDelta) / std::abs(shiftDistance));
         double additionalShift = dragDelta - shiftDistanceCount * shiftDistance;
+        if (GreatNotEqual(std::abs(additionalShift), std::abs(dragDelta))) {
+            additionalShift = dragDelta + shiftDistanceCount * shiftDistance;
+        }
         for (int32_t i = 0; i < shiftDistanceCount; i++) {
             ScrollOption(shiftDistance);
             InnerHandleScroll(dragDelta < 0, true, false);
