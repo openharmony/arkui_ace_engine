@@ -418,16 +418,16 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxOptions(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> nameArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    ArkUI_CharPtr nameStr = "";
-    ArkUI_CharPtr groupStr = "";
+    std::string nameStr;
+    std::string groupStr;
     if (!nameArg.IsNull() && nameArg->IsString(vm)) {
-        nameStr = nameArg->ToString(vm)->ToString(vm).c_str();
+        nameStr = nameArg->ToString(vm)->ToString(vm);
     }
     if (!groupArg->IsNull() && groupArg->IsString(vm)) {
-        groupStr = groupArg->ToString(vm)->ToString(vm).c_str();
+        groupStr = groupArg->ToString(vm)->ToString(vm);
     }
-    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxName(nativeNode, nameStr);
-    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxGroup(nativeNode, groupStr);
+    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxName(nativeNode, nameStr.c_str());
+    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxGroup(nativeNode, groupStr.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
