@@ -151,7 +151,7 @@ public:
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
-    void NotifyEnterTextEditorArea(bool enable);
+    void NotifyEnterTextEditorArea();
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
     void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEven,
         const std::string& extraInfo);
