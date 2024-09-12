@@ -232,6 +232,10 @@ public:
                 static_cast<uint32_t>(pattern->GetAttr<int>("textfield_hover_press_bg_color_enabled", 0));
             theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("text_input_need_focus_box", 0.0));
             theme->focusPadding_ = pattern->GetAttr<Dimension>("text_input_focus_padding", 0.0_vp);
+            theme->independentControlKeyboard_ =
+                static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
+            theme->directionKeysMoveFocusOut_ =
+                static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
         }
     };
 
@@ -425,6 +429,16 @@ public:
     bool GetErrorIsInner() const
     {
         return errorIsInner_;
+    }
+
+    bool GetIndependentControlKeyboard() const
+    {
+        return independentControlKeyboard_;
+    }
+
+    bool GetDirectionKeysMoveFocusOut() const
+    {
+        return directionKeysMoveFocusOut_;
     }
 
     const Dimension& GetErrorBorderWidth() const
@@ -806,6 +820,8 @@ private:
     Color textInputBorderColor_;
     bool showPasswordIcon_ = true;
     bool hoverAndPressBgColorEnabled_ = false;
+    bool independentControlKeyboard_ = false;
+    bool directionKeysMoveFocusOut_ = false;
 
     std::string cancelButton_;
 
