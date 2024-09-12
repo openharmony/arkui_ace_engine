@@ -34,7 +34,6 @@
 
 namespace OHOS::Ace::NG {
 const std::string BORDERZERO = "0.0";
-
 enum class MeasureType {
     MATCH_PARENT,
     MATCH_CONTENT,

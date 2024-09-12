@@ -148,14 +148,13 @@ OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, boo
     auto parent = host->GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
-        if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
-            parentRenderContext->GetPositionProperty()->HasPosition()) {
+        if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() && parentRenderContext->GetPositionProperty()->HasPosition()) {
             auto parentLayoutProp = parent->GetLayoutProperty();
             CHECK_NULL_RETURN(parentLayoutProp, offset);
             auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
             CHECK_NULL_RETURN(parentLayoutConstraint.has_value(), offset);
-            auto renderPosition = FrameNode::ContextPositionConvertToPX(
-                parentRenderContext, parentLayoutConstraint.value().percentReference);
+            auto renderPosition =
+                FrameNode::ContextPositionConvertToPX(parentRenderContext, parentLayoutConstraint.value().percentReference);
             offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
         } else {
             offset += parent->GetFrameRectWithSafeArea().GetOffset();
