@@ -148,7 +148,7 @@ void PagePattern::ProcessHideState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(false);
-    host->NotifyVisibleChange(false);
+    host->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -161,7 +161,7 @@ void PagePattern::ProcessShowState()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive(true);
-    host->NotifyVisibleChange(true);
+    host->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
@@ -171,8 +171,7 @@ void PagePattern::ProcessShowState()
     if (manager) {
         auto safeArea = manager->GetSafeArea();
         auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
-        auto geometryNode = host->GetGeometryNode();
-        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        auto frame = host->GetPaintRectWithTransform() + parentGlobalOffset;
         // if page's frameRect not fit current safeArea, need layout page again
         if (!NearEqual(frame.GetY(), safeArea.top_.end)) {
             host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
@@ -195,7 +194,7 @@ void PagePattern::OnAttachToMainTree()
     int32_t index = INVALID_PAGE_INDEX;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        index = delegate->GetCurrentPageIndex();
+        index = delegate->GetStackSize();
         GetPageInfo()->SetPageIndex(index);
     }
     state_ = RouterPageState::ABOUT_TO_APPEAR;
@@ -261,7 +260,7 @@ void PagePattern::OnShow()
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
-            param = entryPageInfo->GetPageParams();
+            param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
         Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,9 +71,14 @@ public:
         paintOffset_ = paintOffset;
     }
 
-    void SetIfPaintObscuration(bool value)
+    void SetObscured(const std::vector<ObscuredReasons>& reasons)
     {
-        ifPaintObscuration_ = value;
+        obscuredReasons_ = reasons;
+    }
+
+    void SetIfHaveSpanItemChildren(bool value)
+    {
+        ifHaveSpanItemChildren_ = value;
     }
 
     void SetDrawObscuredRects(const std::vector<RectF>& drawObscuredRects)
@@ -91,13 +97,11 @@ public:
     {
         imageNodeList_ = imageNodeList;
     }
-
 protected:
     OffsetF GetPaintOffset() const
     {
         return paintOffset_;
     }
-
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -111,7 +115,9 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
+
     float GetTextRacePercent();
+    TextDirection GetTextRaceDirection() const;
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);
@@ -178,7 +184,6 @@ private:
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
 
     WeakPtr<Pattern> pattern_;
-
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 
@@ -192,7 +197,8 @@ private:
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 
-    bool ifPaintObscuration_ = false;
+    std::vector<ObscuredReasons> obscuredReasons_;
+    bool ifHaveSpanItemChildren_ = false;
     std::vector<RectF> drawObscuredRects_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     MarqueeState marqueeState_ = MarqueeState::IDLE;

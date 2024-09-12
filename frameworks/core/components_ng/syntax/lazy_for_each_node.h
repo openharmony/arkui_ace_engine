@@ -165,7 +165,7 @@ public:
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChilrenDragManager(bool init);
-    
+
     /**
      * @brief Notify the change of dataSource to component.
      *
@@ -180,7 +180,7 @@ public:
      * @param dataOperations bulk change operations.
      */
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
-
+    
 private:
     void OnAttachToMainTree(bool recursive) override
     {
@@ -195,9 +195,9 @@ private:
         }
     }
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override
+    void OnDetachFromMainTree(bool recursive) override
     {
-        UINode::OnDetachFromMainTree(recursive, context);
+        UINode::OnDetachFromMainTree(recursive);
         if (builder_) {
             for (const auto& item : builder_->GetCachedUINodeMap()) {
                 if (item.second.second != nullptr) {

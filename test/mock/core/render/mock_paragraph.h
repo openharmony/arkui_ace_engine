@@ -52,7 +52,6 @@ public:
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
     MOCK_METHOD1(GetCharacterWidth, float(int32_t index));
     MOCK_METHOD1(SetParagraphSymbolAnimation, void(const RefPtr<FrameNode>& frameNode));
-    MOCK_METHOD1(SetParagraphId, void(uint32_t id));
     MOCK_METHOD1(GetLineMetrics, TextLineMetrics(size_t lineNumber));
     MOCK_METHOD1(GetGlyphPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
     MOCK_METHOD2(GetGlyphIndexByCoordinate, int32_t(const Offset& offset, bool isSelectionPos));

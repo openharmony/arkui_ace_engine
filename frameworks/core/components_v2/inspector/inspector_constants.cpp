@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -578,6 +578,10 @@ const char PARTICLE_ETS_TAG[] = "Particle";
 // SelectOverlay
 const char SELECT_OVERLAY_ETS_TAG[] = "SelectOverlay";
 
+// ContainerSpan
+const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
+const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
+
 // Symbol
 const char SYMBOL_COMPONENT_TAG[] = "SymbolGlyphComponent";
 const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
@@ -585,10 +589,6 @@ const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 // IsolatedComponent
 const char ISOLATED_COMPONENT_TAG[] = "IsolatedComponent";
 const char ISOLATED_COMPONENT_ETS_TAG[] = "IsolatedComponent";
-
-// ContainerSpan
-const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
-const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
 
 //RenderNode
 const char RENDER_NODE_ETS_TAG[] = "RenderNode";
@@ -602,10 +602,6 @@ const char NODE_CONTAINER_ETS_TAG[] = "NodeContainer";
 // MovingPhoto
 const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
 const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
-
-// LinearIndicator
-const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
-const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
 
 // CustomSpanNode
 const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";

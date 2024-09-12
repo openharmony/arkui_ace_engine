@@ -208,6 +208,7 @@ public:
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
 
+    void ClearItemPosition();
     void CalculateItemStartIndex();
     void UpdateActiveChildRange(bool forward, int32_t cacheCount);
     int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
@@ -246,6 +247,7 @@ private:
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
+    LayoutConstraintF layoutConstraint_;
 
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;

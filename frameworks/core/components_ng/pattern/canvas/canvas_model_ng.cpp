@@ -17,6 +17,7 @@
 
 #include <mutex>
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
@@ -46,6 +47,11 @@ RefPtr<AceType> CanvasModelNG::Create()
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
     stack->Push(frameNode);
     return frameNode->GetPattern<CanvasPattern>();
+}
+
+RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
+{
+    return pattern;
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)

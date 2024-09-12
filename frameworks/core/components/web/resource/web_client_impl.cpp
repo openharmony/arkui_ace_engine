@@ -1224,11 +1224,11 @@ void WebClientImpl::OnCursorUpdate(double x, double y, double width, double heig
     delegate->OnCursorUpdate(x, y, width, height);
 }
 
-void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility)
 {
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
+    delegate->OnNativeEmbedVisibilityChange(embedId, visibility);
 }
 } // namespace OHOS::Ace

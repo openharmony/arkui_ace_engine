@@ -60,12 +60,13 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override {}
 
-    // restore
+    // distribute
+    
     UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
-        napi_value storage, ContentInfoType type) override {
+        napi_value storage) override {
         return UIContentErrorCode::NO_ERRORS;
     }
-    std::string GetContentInfo(ContentInfoType type) const override;
+    std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
     // UI content event process

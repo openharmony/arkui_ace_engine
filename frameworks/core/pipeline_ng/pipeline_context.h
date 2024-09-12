@@ -89,7 +89,7 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
-
+    
     static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
 
 
@@ -103,7 +103,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement() override;
+    void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
 
@@ -273,10 +273,9 @@ public:
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
-    void AddAfterRenderTask(std::function<void()>&& task);
+    void AddLatestFrameLayoutFinishTask(std::function<void()>&& task);
 
-    void AddSafeAreaPaddingProcessTask(FrameNode* node);
-    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+    void AddAfterRenderTask(std::function<void()>&& task);
 
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
@@ -286,7 +285,6 @@ public:
     void FlushOnceVsyncTask() override;
 
     void FlushDirtyNodeUpdate();
-    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -303,7 +301,7 @@ public:
 
     bool CheckNeedAvoidInSubWindow() override;
 
-    void CheckAndUpdateKeyboardInset() override;
+    void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -683,8 +681,6 @@ public:
     bool PrintVsyncInfoIfNeed() const override;
     void SetUIExtensionImeShow(bool imeShow);
 
-    void CheckVirtualKeyboardHeight() override;
-
     void StartWindowAnimation() override
     {
         isWindowAnimation_ = true;
@@ -841,12 +837,15 @@ public:
         return homePageConfig_;
     }
 
+    bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
+
     bool IsWindowFocused() const override
     {
         return isWindowHasFocused_ && GetOnFoucs();
     }
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -892,7 +891,7 @@ private:
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void FlushTouchEvents();
-    void FlushWindowPatternInfo();
+
     void FlushFocusView();
     void FlushFocusScroll();
 

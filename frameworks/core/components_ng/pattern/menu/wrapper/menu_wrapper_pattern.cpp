@@ -15,15 +15,12 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
-#include <cstddef>
-
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/event/touch_event.h"
@@ -36,11 +33,10 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-
+    SetIsStopHoverImageAnimation(true);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->HideMenu();
-    SetIsStopHoverImageAnimation(true);
     CallMenuStateChangeCallback("false");
 }
 
@@ -58,7 +54,6 @@ void MenuWrapperPattern::InitFocusEvent()
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to lost focus");
         pattern->HideMenu();
     };
     focusHub->SetOnBlurInternal(std::move(blurTask));
@@ -410,7 +405,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             if (!menuPattern) {
                 continue;
             }
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu due to touch down");
             HideMenu(menuPattern, menuWrapperChildNode, position);
         }
     } else if (touch.GetTouchType() == TouchType::MOVE) {
@@ -707,8 +701,53 @@ void MenuWrapperPattern::ClearAllSubMenu()
         auto pattern = frameNode->GetPattern<MenuPattern>();
         if (pattern && pattern->IsSubMenu()) {
             host->RemoveChild(frameNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         }
     }
+}
+
+void MenuWrapperPattern::StopHoverImageToPreviewAnimation()
+{
+    auto menuWrapperNode = GetHost();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
+    auto flexContext = flexNode->GetRenderContext();
+    CHECK_NULL_VOID(flexContext);
+
+    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
+    CHECK_NULL_VOID(stackNode);
+    auto stackContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackContext);
+
+    auto menuChild = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuChild);
+    auto menuPattern = menuChild->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto originPosition = menuPattern->GetPreviewOriginOffset();
+
+    auto geometryNode = flexNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto position = geometryNode->GetFrameOffset();
+
+    auto flexPosition = originPosition;
+    if (Positive(hoverImageToPreviewRate_)) {
+        flexPosition += (position - originPosition) * hoverImageToPreviewRate_;
+    }
+
+    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0),
+        [stackContext, flexContext, flexPosition, scale = hoverImageToPreviewScale_]() {
+            if (flexContext) {
+                flexContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(flexPosition.GetX()), Dimension(flexPosition.GetY())));
+            }
+
+            CHECK_NULL_VOID(stackContext && Positive(scale));
+            stackContext->UpdateTransformScale(VectorF(scale, scale));
+        });
 }
 
 void MenuWrapperPattern::DumpInfo()

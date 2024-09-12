@@ -178,8 +178,6 @@ void JSRenderingContext::Constructor(const JSCallbackInfo& args)
             jsRenderContext->SetUnit(CanvasUnit::PX);
         }
     }
-    auto density = jsRenderContext->GetDensity();
-    jsRenderContext->SetCanvasDensity(density);
 }
 
 void JSRenderingContext::Destructor(JSRenderingContext* controller)

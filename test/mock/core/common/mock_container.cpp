@@ -45,11 +45,6 @@ int32_t Container::CurrentIdSafely()
     return g_id;
 }
 
-int32_t Container::CurrentIdSafelyWithCheck()
-{
-    return g_id;
-}
-
 RefPtr<Container> Container::GetActive()
 {
     RefPtr<Container> activeContainer;

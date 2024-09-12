@@ -41,8 +41,8 @@ ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* constraint)
 {
-    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     CHECK_NULL_RETURN(constraint, nullptr);
+    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     layoutConstraint->minWidth = constraint->minWidth;
     layoutConstraint->maxWidth = constraint->maxWidth;
     layoutConstraint->minHeight = constraint->minHeight;
@@ -141,14 +141,14 @@ int32_t OH_ArkUI_NodeCustomEvent_GetCustomSpanDrawInfo(
     if (!event || !info || !event->event) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    info->optionsX = event->event->numberData[0].f32;
-    info->optionsLineTop = event->event->numberData[1].f32;
-    info->optionsLineBottom = event->event->numberData[2].f32;
-    info->optionsBaseLine = event->event->numberData[3].f32;
+    info->optionsX = event->event->numberData[0].f32; // 0: x offset
+    info->optionsLineTop = event->event->numberData[1].f32; // 1: LineTop value
+    info->optionsLineBottom = event->event->numberData[2].f32; // 2: LineBottom value
+    info->optionsBaseLine = event->event->numberData[3].f32; // 3: BaseLine value
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create()
+ArkUI_CustomSpanMeasureInfo* OH_ArkUI_CustomSpanMeasureInfo_Create(void)
 {
     ArkUI_CustomSpanMeasureInfo* info = new ArkUI_CustomSpanMeasureInfo { 0 };
     return info;
@@ -171,7 +171,7 @@ float OH_ArkUI_CustomSpanMeasureInfo_GetFontSize(ArkUI_CustomSpanMeasureInfo* in
     return info->fontSize;
 }
 
-ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create()
+ArkUI_CustomSpanMetrics* OH_ArkUI_CustomSpanMetrics_Create(void)
 {
     ArkUI_CustomSpanMetrics* metrics = new ArkUI_CustomSpanMetrics { 0, 0 };
     return metrics;
@@ -204,7 +204,7 @@ int32_t OH_ArkUI_CustomSpanMetrics_SetHeight(ArkUI_CustomSpanMetrics* metrics, f
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create()
+ArkUI_CustomSpanDrawInfo* OH_ArkUI_CustomSpanDrawInfo_Create(void)
 {
     ArkUI_CustomSpanDrawInfo* info = new ArkUI_CustomSpanDrawInfo { 0, 0, 0, 0 };
     return info;
@@ -685,7 +685,7 @@ void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t
     value->max.value = max;
 }
 
-int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value) 
+int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value)
 {
     CHECK_NULL_RETURN(value, -1);
     return value->max.value;

@@ -26,7 +26,6 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_page.h"
 #include "core/common/js_message_dispatcher.h"
-#include "core/common/router_recover_record.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/pipeline_base.h"
 #include "interfaces/inner_api/ace/constants.h"
@@ -36,8 +35,6 @@ using FrontendDialogCallback = std::function<void(const std::string& event, cons
 typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
-
-enum class ContentInfoType;
 
 #ifndef WEARABLE_PRODUCT
 constexpr int32_t DEFAULT_DESIGN_WIDTH = 720;
@@ -139,7 +136,7 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
 
-    virtual UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params)
+    virtual UIContentErrorCode RunPageByNamedRouter(const std::string& name)
     {
         return UIContentErrorCode::NO_ERRORS;
     }
@@ -277,14 +274,13 @@ public:
     // navigator component call router
     virtual void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) {}
 
-    // restore
-    virtual std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
-        const std::string& contentInfo, ContentInfoType type)
+    // distribute
+    virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)
     {
-        return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NO_ERRORS);
+        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
     }
 
-    virtual std::string GetContentInfo(ContentInfoType type) const
+    virtual std::string GetContentInfo() const
     {
         return "";
     }

@@ -749,6 +749,10 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         info.placeChildrenFunc = std::move(placeChildren);
     }
 
+    if (isTitleNode) {
+        info.isCustomTitle = true;
+    }
+    
     JSRef<JSObject> jsViewExtraInfo = jsViewObject_->GetProperty("extraInfo_");
     if (!jsViewExtraInfo->IsUndefined()) {
         JSRef<JSVal> jsPage = jsViewExtraInfo->GetProperty("page");
@@ -756,10 +760,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         JSRef<JSVal> jsColumn = jsViewExtraInfo->GetProperty("col");
         info.extraInfo = {.page = jsPage->ToString(), .line = jsLine->ToNumber<int32_t>(),
             .col = jsColumn->ToNumber<int32_t>()};
-    }
-    
-    if (isTitleNode) {
-        info.isCustomTitle = true;
     }
 
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));

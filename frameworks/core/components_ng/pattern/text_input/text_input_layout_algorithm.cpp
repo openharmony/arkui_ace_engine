@@ -62,11 +62,11 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     if (isInlineStyle) {
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
-    }
-    if (showPlaceHolder_) {
+    } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
+    } else {
+        return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
     }
-    return TextInputMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper, 0);
 }
 
 void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -200,16 +200,19 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
 {
     OffsetF contentOffset =
         params.offsetBase + Alignment::GetAlignPosition(params.size, params.contentSize, params.align);
-    auto offsetBaseX = params.offsetBase.GetX();
     if (params.isRTL) {
         if (params.responseArea) {
-            offsetBaseX += params.responseArea->GetAreaRect().Width();
+            RectF responseAreaRect = params.responseArea->GetAreaRect();
+            content->SetOffset(OffsetF(params.offsetBase.GetX() + responseAreaRect.Width(), contentOffset.GetY()));
+        } else if (params.cleanResponseArea) {
+            RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
+            content->SetOffset(OffsetF(params.offsetBase.GetX() + cleanResponseAreaRect.Width(), contentOffset.GetY()));
+        } else {
+            content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
         }
-        if (params.cleanResponseArea) {
-            offsetBaseX += params.cleanResponseArea->GetAreaRect().Width();
-        }
+    } else {
+        content->SetOffset(OffsetF(params.offsetBase.GetX(), contentOffset.GetY()));
     }
-    content->SetOffset(OffsetF(offsetBaseX, contentOffset.GetY()));
 }
 
 void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)

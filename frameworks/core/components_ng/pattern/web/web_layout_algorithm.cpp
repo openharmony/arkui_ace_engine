@@ -38,17 +38,17 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<WebPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
-    int rootLayerWidth = pattern->GetRootLayerWidth();
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    int frameWidth = geometryNode->GetFrameSize().Width();
     int rootLayerHeight = pattern->GetRootLayerHeight();
     auto renderMode = pattern->GetRenderMode();
-    if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, renderMode) &&
+    if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(frameWidth, renderMode) &&
         IsValidRootLayer(rootLayerHeight, renderMode)) {
-        auto drawSize = SizeF(rootLayerWidth, rootLayerHeight);
-        auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-        MinusPaddingToSize(padding, drawSize);
+        auto drawSize = SizeF(frameWidth, rootLayerHeight);
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebLayoutAlgorithm::Measure,drawSize : %{public}s", drawSize.ToString().c_str());
         layoutWrapper->GetGeometryNode()->SetFrameSize(drawSize);
-    } else {
-        BoxLayoutAlgorithm::Measure(layoutWrapper);
     }
 }
 

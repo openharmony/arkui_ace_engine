@@ -42,7 +42,6 @@
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/resource/resource_configuration.h"
-#include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -74,8 +73,8 @@ struct ParsedConfig {
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
-                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
+                 colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty());
     }
 };
 
@@ -449,9 +448,9 @@ public:
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
-        int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
-    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
+    static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
+        int32_t instanceId, const std::string& contentInfo);
+    static std::string GetContentInfo(int32_t instanceId);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
@@ -546,8 +545,6 @@ public:
     NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
-
-    Rect GetSessionAvoidAreaByType(uint32_t safeAreaType) override;
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 

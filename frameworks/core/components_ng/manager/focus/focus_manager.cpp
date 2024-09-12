@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
+FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline) : pipeline_(pipeline)
 {
     if (pipeline && pipeline->GetRootElement()) {
         currentFocus_ = pipeline->GetRootElement()->GetFocusHub();
@@ -161,6 +161,9 @@ void FocusManager::PaintFocusState()
     CHECK_NULL_VOID(rootNode);
     auto rootFocusHub = rootNode->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
+    if (!pipeline->GetIsFocusActive()) {
+        return;
+    }
     rootFocusHub->ClearAllFocusState();
     rootFocusHub->PaintAllFocusState();
 }
@@ -404,7 +407,7 @@ FocusManager::FocusGuard::~FocusGuard()
         focusMng_->FocusSwitchingEnd();
     }
 }
-
+ 
 void FocusManager::WindowFocus(bool isFocus)
 {
     if (!isFocus) {
@@ -435,7 +438,10 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
+        auto focusDepend = rootFocusHub->GetFocusDependence();
+        rootFocusHub->SetFocusDependence(FocusDependence::SELF);
         rootFocusHub->RequestFocusImmediately();
+        rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
 }

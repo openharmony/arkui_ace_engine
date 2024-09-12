@@ -37,6 +37,11 @@ static void DragActionConvert(
     CHECK_NULL_VOID(internalDragAction);
     internalDragAction->pointer = dragAction->pointerId;
     internalDragAction->size = dragAction->size;
+    auto* pixelMapTemp = reinterpret_cast<std::shared_ptr<void*>*>(dragAction->pixelmapArray);
+    for (int index = 0; index < dragAction->size; index++) {
+        auto pixelMap = PixelMap::CreatePixelMap(&pixelMapTemp[index]);
+        internalDragAction->pixelMapList.push_back(pixelMap);
+    }
     internalDragAction->previewOption.isScaleEnabled = dragAction->dragPreviewOption.isScaleEnabled;
     if (!internalDragAction->previewOption.isScaleEnabled) {
         internalDragAction->previewOption.isDefaultShadowEnabled = dragAction->dragPreviewOption.isDefaultShadowEnabled;
@@ -85,11 +90,6 @@ ArkUI_Int32 StartDrag(ArkUIDragAction* dragAction)
         CHECK_NULL_VOID(listener);
         listener(&outInfo, userData);
     };
-    auto* pixelMapTemp = reinterpret_cast<std::shared_ptr<void*>*>(dragAction->pixelmapArray);
-    for (int index = 0; index < dragAction->size; index++) {
-        auto pixelMap = PixelMap::CreatePixelMap(&pixelMapTemp[index]);
-        internalDragAction->pixelMapList.push_back(pixelMap);
-    }
     internalDragAction->callback = callbacks;
     DragActionConvert(dragAction, internalDragAction);
     OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);

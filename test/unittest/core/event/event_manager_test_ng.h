@@ -46,7 +46,6 @@
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
@@ -60,6 +59,7 @@
 #include "frameworks/core/common/event_manager.h"
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/common/manager_interface.h"
+#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {

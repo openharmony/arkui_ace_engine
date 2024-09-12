@@ -534,7 +534,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyVisibleChange009, TestSize.Level1)
      * @tc.expected: expect The FRAME_NODE2 is not nullptr.
      */
     FRAME_NODE2->AddChild(FRAME_NODE3);
-    FRAME_NODE2->NotifyVisibleChange(false);
+    FRAME_NODE2->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     FRAME_NODE2->Clean();
     EXPECT_NE(FRAME_NODE2, nullptr);
 }
@@ -1014,32 +1014,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAccessibilityEvent0028, TestSize.Level1)
      */
     auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
     FRAME_NODE2->OnAccessibilityEvent(AccessibilityEventType::ACCESSIBILITY_FOCUSED);
-    EXPECT_FALSE(test1);
-}
-
-/**
- * @tc.name: FrameNodeTestNg0029
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeOnAccessibilityEventForVirtualNode0029, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. callback OnAccessibilityEventForVirtualNode.
-     * @tc.expected: expect The function is true.
-     */
-    AccessibilityEvent event;
-    auto accessibilityId = 1;
-    auto test = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
-    FRAME_NODE2->OnAccessibilityEventForVirtualNode(AccessibilityEventType::CHANGE, accessibilityId);
-    EXPECT_TRUE(test);
-
-    /**
-     * @tc.steps: step2. callback OnAccessibilityEventForVirtualNode.
-     * @tc.expected: expect The function is false.
-     */
-    auto test1 = AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
-    FRAME_NODE2->OnAccessibilityEventForVirtualNode(AccessibilityEventType::FOCUS, accessibilityId);
     EXPECT_FALSE(test1);
 }
 

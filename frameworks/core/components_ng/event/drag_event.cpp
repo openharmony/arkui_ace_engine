@@ -301,6 +301,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     return;
                 }
                 if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
+                    gestureHub->SetIsTextDraggable(true);
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }
@@ -789,15 +790,12 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
-        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
         dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
-        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
         dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
-    UpdatePreviewPosition();
 }
 
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
@@ -1033,7 +1031,6 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMap(
 {
     // Attempt to retrieve the PixelMap using the inspector ID.
     auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId);
-
     // If a preview PixelMap was found, return it.
     if (previewPixelMap != nullptr) {
         return previewPixelMap;
@@ -1340,30 +1337,6 @@ void DragEventActuator::HideFilter()
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
     manager->RemoveFilterAnimation();
-}
-
-void DragEventActuator::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
-{
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    if (overlay->IsContextMenuDragHideFinished()) {
-        return;
-    }
-    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
-}
-
-void DragEventActuator::UpdatePreviewPosition()
-{
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    if (overlay->GetHasPixelMap()) {
-        return;
-    }
-    overlay->UpdatePixelMapPosition(true);
 }
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
@@ -2189,10 +2162,6 @@ void DragEventActuator::PrepareShadowParametersForDragData(const RefPtr<FrameNod
     CHECK_NULL_VOID(gestureHub);
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
         gestureHub->GetIsTextDraggable()) {
-        if (frameTag != V2::RICH_EDITOR_ETS_TAG) {
-            arkExtraInfoJson->Put("shadow_enable", false);
-            return;
-        }
         auto stringPath = dragPreviewOption.options.shadowPath;
         RSPath path;
         if (path.BuildFromSVGString(stringPath)) {

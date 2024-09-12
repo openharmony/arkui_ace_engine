@@ -28,9 +28,9 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_box.h"
@@ -97,11 +97,6 @@ public:
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
-    virtual void ResetSafeAreaPadding() = 0;
-    virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
-    virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
-        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
-        const std::optional<CalcDimension>& right) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,

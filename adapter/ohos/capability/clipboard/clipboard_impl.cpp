@@ -18,7 +18,6 @@
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 
@@ -119,7 +118,7 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
                 pixmapOhos->GetPixelMapSharedPtr());
             CHECK_NULL_VOID(pasteData);
             pasteData->SetShareOption(shareOption);
-            TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Set pixmap to system clipboard");
+            LOGI("Set pixmap to system clipboard");
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetPixelMapWithCopyOption");
@@ -190,7 +189,7 @@ void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, con
     CHECK_NULL_VOID(peData);
     auto pixmapOhos = AceType::DynamicCast<PixelMapOhos>(pixmap);
     CHECK_NULL_VOID(pixmapOhos);
-    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add pixelMap record to pasteData");
+    LOGI("add pixelMap record to pasteData");
     peData->GetPasteDataData()->AddPixelMapRecord(pixmapOhos->GetPixelMapSharedPtr());
 #endif
 }
@@ -201,7 +200,7 @@ void ClipboardImpl::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const 
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
-    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add url %{private}s record to pasteData", uri.c_str());
+    LOGI("add url record to pasteData, url:  %{public}s", uri.c_str());
     peData->GetPasteDataData()->AddUriRecord(OHOS::Uri(uri));
 #endif
 }
@@ -212,7 +211,7 @@ void ClipboardImpl::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const s
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
-    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add text record to pasteData, length: %{public}d",
+    LOGI("add text record to pasteData, length: %{public}d",
         static_cast<int32_t>(StringUtils::ToWstring(selectedStr).length()));
     peData->GetPasteDataData()->AddTextRecord(selectedStr);
 #endif
@@ -224,8 +223,7 @@ void ClipboardImpl::AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, s
     CHECK_NULL_VOID(taskExecutor_);
     auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
     CHECK_NULL_VOID(peData);
-    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add spanstring record to pasteData, length: %{public}d",
-        static_cast<int32_t>(data.size()));
+    LOGI("add spanstring record to pasteData, length: %{public}d", static_cast<int32_t>(data.size()));
     peData->GetPasteDataData()->AddKvRecord(SPAN_STRING_TAG, data);
 #endif
 }
@@ -240,7 +238,7 @@ void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions c
         [peData, shareOption]() {
             auto pasteData = peData->GetPasteDataData();
             pasteData->SetShareOption(shareOption);
-            TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add pasteData to clipboard, shareOption:  %{public}d", shareOption);
+            LOGI("add pasteData to clipboard, shareOption:  %{public}d", shareOption);
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetMixDataWithCopyOption");
@@ -291,7 +289,7 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
                 if (pasteDataRecord == nullptr) {
                     continue;
                 }
-                if (pasteDataRecord->GetCustomData() != nullptr) {
+                if (pasteDataRecord->GetCustomData() == nullptr) {
                     auto customData = pasteDataRecord->GetCustomData();
                     auto itemData = customData->GetItemData();
                     if (itemData.find(SPAN_STRING_TAG) == itemData.end()) {
@@ -319,7 +317,7 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
                 result = *textData;
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataSync");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataAsync");
     callback(result);
 }
 
@@ -331,29 +329,30 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
             auto taskExecutor = weakExecutor.Upgrade();
             CHECK_NULL_VOID(taskExecutor);
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData()) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
+                LOGW("GetDataAsync: SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed");
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData)) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardData fail from MiscServices");
+                LOGW("GetDataAsync: Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed");
                 return;
             }
             std::string resText;
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                clip->ProcessPasteDataRecord(pasteDataRecord, resText);
+                if (clip->ProcessPasteDataRecord(pasteDataRecord, resText)) {
+                    break;
+                }
             }
             if (resText.empty()) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardTextData fail from MiscServices");
+                LOGW("GetDataAsync: Get SystemKeyboardTextData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed");
                 return;
             }
-            TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "resText len:%{public}d", static_cast<int32_t>(resText.length()));
             auto result = resText;
             taskExecutor->PostTask(
                 [callback, result]() { callback(result); },
@@ -362,11 +361,11 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
         TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
 }
 
-void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
+bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
     std::string& resText)
 {
     if (pasteDataRecord == nullptr) {
-        return;
+        return false;
     }
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
@@ -374,7 +373,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {
             resText = spanStr->GetString();
-            return;
+            return true;
         }
     }
     if (pasteDataRecord->GetCustomData() != nullptr) {
@@ -383,7 +382,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
             auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
             if (spanStr) {
                 resText = spanStr->GetString();
-                return;
+                return true;
             }
         }
     }
@@ -391,13 +390,14 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         auto textData = pasteDataRecord->GetPlainText();
         resText.append(*textData);
     }
+    return false;
 }
 
 void ClipboardImpl::GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback)
 {
-    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "get data from clipboard, sync");
+    LOGI("get data from clipboard, sync");
     OHOS::MiscServices::PasteData pasteData;
     taskExecutor_->PostSyncTask(
         [&pasteData]() {
@@ -436,7 +436,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback)
 {
-    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "get data from clipboard, async");
+    LOGI("get data from clipboard, async");
     taskExecutor_->PostTask(
         [textCallback, pixelMapCallback, urlCallback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
             auto taskExecutor = weakExecutor.Upgrade();
@@ -576,7 +576,7 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
             CHECK_NULL_VOID(taskExecutor);
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             if (!has) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
+                LOGW("SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed");
                 return;
@@ -584,14 +584,14 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
             OHOS::MiscServices::PasteData pasteData;
             auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
             if (!ok) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardData fail from MiscServices");
+                LOGW("Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed");
                 return;
             }
             auto imageData = pasteData.GetPrimaryPixelMap();
             if (!imageData) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardImageData fail from MiscServices");
+                LOGW("Get SystemKeyboardImageData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(nullptr); },
                     TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataFailed");

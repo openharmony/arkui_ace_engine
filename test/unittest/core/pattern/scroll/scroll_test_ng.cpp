@@ -528,8 +528,8 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateCurrentOffset003
- * @tc.desc: Test whether the isAnimateOverScroll_ can be set right.
+ * @tc.name:  UpdateCurrentOffset003
+ * @tc.desc: Test the correlation function in ScrollFadeEffect under different conditions.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, UpdateCurrentOffset003, TestSize.Level1)
@@ -592,6 +592,70 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCurrentOffset005
+ * @tc.desc: Test whether the isAnimateOverScroll_ can be set right.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, UpdateCurrentOffset005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model with spring edgeEffect.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    pattern_->isAnimationStop_ = false;
+
+    /**
+     * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: pattern_->isAnimateOverScroll_ can be set to true.
+     */
+    pattern_->animateCanOverScroll_ = true;
+    pattern_->isAnimateOverScroll_ = false;
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_EQ(pattern_->isAnimateOverScroll_, true);
+
+    /**
+     * @tc.steps: step3. Make animateCanOverScroll_ false, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: pattern_->isAnimateOverScroll_ can't be set to true.
+     */
+    pattern_->animateCanOverScroll_ = false;
+    pattern_->isAnimateOverScroll_ = false;
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_EQ(pattern_->isAnimateOverScroll_, false);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset006
+ * @tc.desc: Test return value of UpdateCurrentOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, UpdateCurrentOffset006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model with spring edgeEffect.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    /**
+     * @tc.steps: step2. Make animateCanOverScroll_ true, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: the return value of UpdateCurrentOffset is true.
+     */
+    pattern_->animateCanOverScroll_ = true;
+    EXPECT_EQ(pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER), true);
+
+    /**
+     * @tc.steps: step3. Make animateCanOverScroll_ false, UpdateCurrentOffset to a position where over the boundary.
+     * @tc.expected: the return value of UpdateCurrentOffset is false.
+     */
+    pattern_->animateCanOverScroll_ = false;
+    EXPECT_EQ(pattern_->UpdateCurrentOffset(100, SCROLL_FROM_ANIMATION_CONTROLLER), false);
+}
+
+/**
  * @tc.name: Measure001
  * @tc.desc: Test Measure
  * @tc.type: FUNC
@@ -621,6 +685,49 @@ HWTEST_F(ScrollTestNg, Measure001, TestSize.Level1)
     auto expectSize = SizeF(SCROLL_WIDTH, ITEM_HEIGHT * TOTAL_ITEM_NUMBER);
     EXPECT_EQ(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
                                       << " expectSize: " << expectSize.ToString();
+}
+
+namespace {
+constexpr float SCROLL_FIXED_VELOCITY = 200.f;
+constexpr float OFFSET_TIME = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS = 20;
+} // namespace
+/**
+ * @tc.name: ScrollPositionController004
+ * @tc.desc: Test ScrollPositionController with Axis::VERTICAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollPositionController004, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::VERTICAL);
+    CreateContent(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    auto controller = pattern_->GetScrollPositionController();
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, SCROLL_FIXED_VELOCITY);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY);
+    EXPECT_FALSE(pattern_->fixedVelocityMotion_);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, SCROLL_FIXED_VELOCITY);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), -SCROLL_FIXED_VELOCITY);
+    int32_t offsetTime = OFFSET_TIME;
+    for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY);
+    EXPECT_TRUE(pattern_->fixedVelocityMotion_);
+    EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY);
+    offsetTime = OFFSET_TIME;
+    for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
+        pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
+        offsetTime = offsetTime + OFFSET_TIME;
+        FlushLayoutTask(frameNode_);
+    }
+    EXPECT_TRUE(pattern_->IsAtTop());
 }
 
 /**
@@ -1010,62 +1117,6 @@ HWTEST_F(ScrollTestNg, ScrollTest005, TestSize.Level1)
     pattern_->scrollableDistance_ = 0.0;
     EXPECT_TRUE(accessibilityProperty_->ActActionScrollForward());
     EXPECT_TRUE(accessibilityProperty_->ActActionScrollBackward());
-}
-
-/**
- * @tc.name: ScrollTest006
- * @tc.desc: When setting a fixed length and width, verify the related functions in the scroll pattern.
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollTestNg, ScrollTest006, TestSize.Level1)
-{
-    double touchPosX = 150.0;
-    double touchPosY = 500.0;
-    float offset = 10.0f;
-    float velocity = 1200.0f;
-    ScrollModelNG model = CreateScroll();
-    model.SetAxis(Axis::HORIZONTAL);
-    model.SetDisplayMode(static_cast<int>(DisplayMode::OFF));
-    auto scrollProxy = model.CreateScrollBarProxy();
-    model.SetScrollBarProxy(scrollProxy);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-
-    GestureEvent info;
-    info.SetMainVelocity(velocity);
-    info.SetGlobalPoint(Point(touchPosX, touchPosY));
-    info.SetGlobalLocation(Offset(touchPosX, touchPosY));
-    info.SetSourceTool(SourceTool::FINGER);
-    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragStart(info);
-
-    // Update 1 finger position.
-    info.SetGlobalLocation(Offset(touchPosX, touchPosY + offset));
-    info.SetGlobalPoint(Point(touchPosX, touchPosY + offset));
-    info.SetMainVelocity(velocity);
-    info.SetMainDelta(offset);
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), -10.0f);
-
-    // Update 2 finger position.
-    info.SetGlobalLocation(Offset(touchPosX, touchPosY + offset));
-    info.SetGlobalPoint(Point(touchPosX, touchPosY + offset));
-    info.SetMainVelocity(velocity);
-    info.SetMainDelta(offset);
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), -20.0f);
-
-    // Lift finger and end List sliding.
-    info.SetMainVelocity(0.0);
-    info.SetMainDelta(0.0);
-    pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
-    pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), -20.0f);
 }
 
 /**

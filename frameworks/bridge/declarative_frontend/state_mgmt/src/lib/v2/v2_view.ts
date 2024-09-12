@@ -50,7 +50,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      */
     protected finalizeConstruction(freezeState?: boolean | undefined): void {
 
-        ProviderConsumerUtilV2.setupConsumeVarsV2(this);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
 
@@ -113,6 +112,32 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+    }
+
+     /**
+     * Virtual function implemented in ViewPU and ViewV2
+     * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
+     *
+     * @param rmElmtId - The Element ID to be purged and deleted
+     * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
+    */
+     public purgeDeleteElmtId(rmElmtId: number): boolean {
+        stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (V2) is purging the rmElmtId:${rmElmtId}`);
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
+            if (childOpt) {
+                childOpt.setDeleting();
+                childOpt.setDeleteStatusRecursively();
+            }
+
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+
+        // Needed only for V2
+        ObserveV2.getObserve().clearBinding(rmElmtId);
+        return result;
     }
 
     public initialRenderView(): void {
@@ -216,7 +241,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
-        if(!this.isActive_) {
+        if (!this.isActive_) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -270,6 +295,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
 
     public UpdateElement(elmtId: number): void {
+
+        if(this.isDeleting_) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement(${elmtId}) (V2) returns with NO UPDATE, this @ComponentV2 is under deletion!`);
+            return;
+        }
+
         stateMgmtProfiler.begin('ViewV2.UpdateElement');
         if (elmtId === this.id__()) {
             // do not attempt to update itself
@@ -333,24 +364,24 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     /* Adds the elmtId to elmtIdsDelayedUpdate for delayed update
         once the view gets active
     */
-    public scheduleDelayedUpdate(elmtId: number) : void {
+    public scheduleDelayedUpdate(elmtId: number): void {
         this.elmtIdsDelayedUpdate.add(elmtId);
     }
 
     // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
     // monitor fireChange will be triggered for all these watchIds once this view gets active
-    public addDelayedMonitorIds(watchId: number) {
+    public addDelayedMonitorIds(watchId: number): void {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);
         this.monitorIdsDelayedUpdate.add(watchId);
     }
 
-    public addDelayedComputedIds(watchId: number) {
+    public addDelayedComputedIds(watchId: number): void {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
         this.computedIdsDelayedUpdate.add(watchId);
     }
 
     public setActiveInternal(newState: boolean): void {
-        stateMgmtProfiler.begin("ViewV2.setActive");
+        stateMgmtProfiler.begin('ViewV2.setActive');
 
         if (!this.isCompFreezeAllowed()) {
             stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
@@ -361,7 +392,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
         this.isActive_ = newState;
         if (this.isActive_) {
-          this.onActiveInternal()
+          this.onActiveInternal();
         } else {
           this.onInactiveInternal();
         }
@@ -401,18 +432,18 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     private performDelayedUpdate(): void {
-        stateMgmtProfiler.begin("ViewV2: performDelayedUpdate");
-        if(this.computedIdsDelayedUpdate.size) {
+        stateMgmtProfiler.begin('ViewV2: performDelayedUpdate');
+        if (this.computedIdsDelayedUpdate.size) {
             // exec computed functions
             ObserveV2.getObserve().updateDirtyComputedProps([...this.computedIdsDelayedUpdate]);
         }
-        if(this.monitorIdsDelayedUpdate.size) {
+        if (this.monitorIdsDelayedUpdate.size) {
           // exec monitor functions
           ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
-        if(this.elmtIdsDelayedUpdate.size) {
+        if (this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active
-          if(this.dirtDescendantElementIds_.size === 0) {
+          if (this.dirtDescendantElementIds_.size === 0) {
             this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
           }
           else {

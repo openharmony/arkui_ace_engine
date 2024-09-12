@@ -96,6 +96,7 @@
         "src/ArkDatePicker.ts",
         "src/ArkEffectComponent.ts",
         "src/ArkRemoteWindow.ts",
+        "src/ArkMediaCachedImage.ts",
         "src/ArkSymbolGlyph.ts",
         "src/ArkSymbolSpan.ts",
         "src/ArkComponent3D.ts",

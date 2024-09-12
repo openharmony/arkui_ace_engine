@@ -17,15 +17,12 @@
 
 #include <unordered_map>
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
-#include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -38,6 +35,9 @@
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -237,6 +237,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             auto stage = weakStage.Upgrade();
             CHECK_NULL_VOID(stage);
             auto pageNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(pageNode);
             int64_t endTime = GetSysTimestamp();
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
@@ -273,38 +274,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-    return true;
-}
-
-bool StageManager::InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom)
-{
-    CHECK_NULL_RETURN(stageNode_, false);
-    CHECK_NULL_RETURN(node, false);
-    StopPageTransition();
-
-    const auto& children = stageNode_->GetChildren();
-    if (children.empty()) {
-        return false;
-    }
-
-    RefPtr<FrameNode> targetNode = nullptr;
-    if (bellowTopOrBottom) {
-        targetNode = AceType::DynamicCast<FrameNode>(children.back());
-    } else {
-        targetNode = AceType::DynamicCast<FrameNode>(children.front());
-    }
-    auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
-    rect.SetOffset({});
-    node->GetRenderContext()->SyncGeometryProperties(rect);
-    // mount to parent and mark build render tree.
-    stageNode_->AddChildBefore(node, targetNode);
-    // then build the total child. Build will trigger page create and onAboutToAppear
-    node->Build(nullptr);
-
-    stageNode_->RebuildRenderContextTree();
-
-    stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return true;
 }
 

@@ -20,8 +20,8 @@
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/dimension.h"
@@ -477,6 +477,7 @@ FrameNode::FrameNode(
 
 FrameNode::~FrameNode()
 {
+    ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
@@ -488,8 +489,7 @@ FrameNode::~FrameNode()
 
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree(false, GetContext());
-        LOGW("%{public}s %{public}d should do detach before destroy function", GetTag().c_str(), GetId());
+        OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
@@ -758,10 +758,6 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
-    }
-    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
-        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
-                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -1046,21 +1042,8 @@ void FrameNode::UpdateGeometryTransition()
     }
 }
 
-void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
-{
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    CHECK_NULL_VOID(renderContext_);
-    auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
-    if (callback) {
-        FrameNodeInfo info { GetId(), renderContext_->GetNodeId(), GetTag(), GetDebugLine() };
-        callback(info);
-    }
-#endif
-}
-
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear(recursive);
@@ -1112,6 +1095,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (ndkColorModeUpdateCallback_ && colorMode_ != SystemProperties::GetColorMode()) {
+            auto colorModeChange = ndkColorModeUpdateCallback_;
+            colorModeChange(SystemProperties::GetColorMode() == ColorMode::DARK);
+            colorMode_ = SystemProperties::GetColorMode();
+        }
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1142,24 +1130,37 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    if (configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) {
+        if (ndkFontUpdateCallback_) {
+            auto fontChangeCallback = ndkFontUpdateCallback_;
+            auto pipeline = GetContextWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
+        }
+    }
 }
 
-void FrameNode::NotifyVisibleChange(bool isVisible)
+void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility)
 {
-    pattern_->OnVisibleChange(isVisible);
-    UpdateChildrenVisible(isVisible);
+    if ((preVisibility != currentVisibility &&
+            (preVisibility == VisibleType::GONE || currentVisibility == VisibleType::GONE)) &&
+        SelfExpansive()) {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
+    UpdateChildrenVisible(preVisibility, currentVisibility);
 }
 
-void FrameNode::TryVisibleChangeOnDescendant(bool isVisible)
+void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
 {
     auto layoutProperty = GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;
     }
-    NotifyVisibleChange(isVisible);
+    NotifyVisibleChange(preVisibility, currentVisibility);
 }
 
-void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     auto focusHub = GetFocusHub();
     if (focusHub) {
@@ -1174,12 +1175,6 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
-    if (context) {
-        const auto& safeAreaManager = context->GetSafeAreaManager();
-        if (safeAreaManager) {
-            safeAreaManager->RemoveRestoreNode(WeakClaim(this));
-        }
-    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -1378,6 +1373,20 @@ void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
     eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
 }
 
+RectF FrameNode::GetRectWithFrame()
+{
+    auto currFrameRect = geometryNode_->GetFrameRect();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currFrameRect.SetOffset(
+                { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+        }
+    }
+    return currFrameRect;
+}
+
 RectF FrameNode::GetRectWithRender()
 {
     RectF currFrameRect;
@@ -1463,7 +1472,7 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
-    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    bool isFrameDisappear = !context->GetOnShow() || !AllowVisibleAreaCheck() || !IsVisible();
     if (isFrameDisappear) {
         cachedIsFrameDisappear_ = { timestamp, true };
         return true;
@@ -2925,71 +2934,6 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
     return OffsetF(point.GetX(), point.GetY());
 }
 
-std::vector<Point> GetRectPoints(SizeF& frameSize)
-{
-    std::vector<Point> pointList;
-    pointList.push_back(Point(0, 0));
-    pointList.push_back(Point(frameSize.Width(), 0));
-    pointList.push_back(Point(0, frameSize.Height()));
-    pointList.push_back(Point(frameSize.Width(), frameSize.Height()));
-    return pointList;
-}
-
-RectF GetBoundingBox(std::vector<Point>& pointList)
-{
-    Point pMax = pointList[0];
-    Point pMin = pointList[0];
-    
-    for (auto &point: pointList) {
-        if (point.GetX() > pMax.GetX()) {
-            pMax.SetX(point.GetX());
-        }
-        if (point.GetX() < pMin.GetX()) {
-            pMin.SetX(point.GetX());
-        }
-        if (point.GetY() > pMax.GetY()) {
-            pMax.SetY(point.GetY());
-        }
-        if (point.GetY() < pMin.GetY()) {
-            pMin.SetY(point.GetY());
-        }
-    }
-    return RectF(pMin.GetX(), pMin.GetY(), pMax.GetX() - pMin.GetX(), pMax.GetY() - pMin.GetY());
-}
-
-bool FrameNode::GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const
-{
-    auto renderContext = parent->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-    auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
-    for (auto& point: pointList) {
-        point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
-        point = parentMatrix * point;
-    }
-    return true;
-}
-
-RectF FrameNode::GetPaintRectToWindowWithTransform()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, RectF());
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, RectF());
-    auto frameSize = geometryNode->GetFrameSize();
-    auto pointList = GetRectPoints(frameSize);
-    GetRectPointToParentWithTransform(pointList, Claim(this));
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (GetRectPointToParentWithTransform(pointList, parent)) {
-            parent = parent->GetAncestorNodeOfFrame();
-        } else {
-            return RectF();
-        }
-    }
-    return GetBoundingBox(pointList);
-}
-
 OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
@@ -3135,21 +3079,6 @@ void FrameNode::OnAccessibilityEvent(
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
-    }
-}
-
-void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType)
-{
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        AccessibilityEvent event;
-        event.type = eventType;
-        event.windowContentChangeTypes = windowsContentChangeType;
-        event.nodeId = GetAccessibilityId();
-        event.stackNodeId = stackNodeId;
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -3469,12 +3398,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first) {
+    if (res.first || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second) {
+    if (res.second || pattern_->IsNeedPercent()) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -3722,11 +3651,6 @@ bool FrameNode::ParentExpansive()
     CHECK_NULL_RETURN(parentLayoutProperty, false);
     auto&& parentOpts = parentLayoutProperty->GetSafeAreaExpandOpts();
     return parentOpts && parentOpts->Expansive();
-}
-
-void FrameNode::ProcessSafeAreaPadding()
-{
-    pattern_->ProcessSafeAreaPadding();
 }
 
 void FrameNode::UpdateFocusState()
@@ -4605,13 +4529,18 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
     }
 }
 
+bool FrameNode::AllowVisibleAreaCheck() const
+{
+    return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
+}
+
 void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
     visibleInnerRect = visibleRect;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
-    if (!IsOnMainTree() || !parentUi) {
+    if (!AllowVisibleAreaCheck() || !parentUi) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
         visibleInnerRect.SetWidth(0.0f);
@@ -5110,12 +5039,6 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     UINode::NotifyWebPattern(isRegister);
 }
 
-uint32_t FrameNode::GetWindowPatternType() const
-{
-    CHECK_NULL_RETURN(pattern_, 0);
-    return pattern_->GetWindowPatternType();
-}
-
 void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
 {
     int32_t updateFrom = 0;
@@ -5129,5 +5052,16 @@ void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
     }
     auto pattern = GetPattern();
     pattern->NotifyDataChange(updateFrom, count);
+}
+
+void FrameNode::ResetPredictNodes()
+{
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            frameNode->isLayoutDirtyMarked_ = false;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

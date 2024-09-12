@@ -88,6 +88,7 @@ void LoadingProgressModelNG::SetForegroundColor(FrameNode* frameNode, const Colo
 
 void LoadingProgressModelNG::SetBuilderFunc(FrameNode* frameNode, NG::LoadingProgressMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

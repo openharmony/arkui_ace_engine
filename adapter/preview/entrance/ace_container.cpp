@@ -522,6 +522,8 @@ UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& 
         if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
             (type == FrontendType::ETS_CARD)) {
             return front->RunPage(url, params);
+        } else {
+            LOGE("Frontend type not supported when runpage");
         }
     }
     return UIContentErrorCode::NULL_POINTER;
@@ -1064,14 +1066,14 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
     return container;
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
+std::string AceContainer::GetContentInfo(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo(type);
+    return front->GetContentInfo();
 }
 
 void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)

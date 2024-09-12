@@ -37,6 +37,7 @@ public:
     void ResetMediaPlayer() override;
     bool IsMediaPlayerValid() override;
     void SetVolume(float leftVolume, float rightVolume) override;
+    void SetMediaMuted(int32_t type, bool isMuted) override;
     bool SetSource(const std::string& src) override;
     bool SetSourceByFd(int32_t fd) override;
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;

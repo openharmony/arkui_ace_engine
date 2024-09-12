@@ -40,11 +40,7 @@ public:
     LeadingMarginSize() = default;
     ~LeadingMarginSize() = default;
 
-    LeadingMarginSize(Dimension width, Dimension height)
-    {
-        width_ = UnitFilter(width);
-        height_ = UnitFilter(height);
-    }
+    LeadingMarginSize(Dimension width, Dimension height) : width_(width), height_(height) {}
 
     std::string ToString() const
     {
@@ -72,11 +68,6 @@ public:
     }
 
 private:
-    Dimension UnitFilter(Dimension& value)
-    {
-        return value.Unit() == DimensionUnit::PERCENT ? Dimension(0.0) : value;
-    }
-
     Dimension width_;
     Dimension height_;
 };
@@ -268,7 +259,6 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
-    virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
     virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;

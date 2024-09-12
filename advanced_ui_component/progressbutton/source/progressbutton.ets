@@ -33,17 +33,19 @@ const PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY = 'progress_button_containe
 const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasize_secondary_button_key';
 @Component
 export struct ProgressButton {
-  @Prop @Watch('getProgressContext') progress: number
-  @State textProgress: string = EMPTY_STRING
-  @Prop content: string = EMPTY_STRING
-  @State @Watch('getLoadingProgress')isLoading: boolean = false
-  progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH
-  clickCallback: () => void = () => {}
-  @Prop enable: boolean = true
+  @Prop @Watch('getProgressContext') progress: number;
+  @State textProgress: string = EMPTY_STRING;
+  @Prop content: string = EMPTY_STRING;
+  @State @Watch('getLoadingProgress')isLoading: boolean = false;
+  progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
+  clickCallback: () => void = () => {};
+  @Prop enable: boolean = true;
 
   @State progressColor: ResourceColor = '#330A59F7'
   @State containerBorderColor: ResourceColor = '#330A59F7'
   @State containerBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_foreground_contrary')
+  @State textHeight?: Length = BUTTON_NORMARL_HEIGHT;
+  @State buttonBorderRadius?: number = BUTTON_BORDER_RADIUS;
 
   onWillApplyTheme(theme: Theme) {
     this.progressColor = theme.colors.compEmphasizeSecondary;
@@ -75,7 +77,7 @@ export struct ProgressButton {
 
   private getLoadingProgress() {
     if (this.isLoading) {
-      if(this.progress < 0) {
+      if (this.progress < 0) {
         this.textProgress = MIN_PERCENTAGE
       } else if (this.progress >= MAX_PROGRESS) {
         this.textProgress = MAX_PERCENTAGE
@@ -90,8 +92,9 @@ export struct ProgressButton {
       Stack(){
         Progress({ value: this.getButtonProgress(), total: MAX_PROGRESS,
           style: ProgressStyle.Capsule })
-          .height(BUTTON_NORMARL_HEIGHT)
-          .borderRadius(BUTTON_BORDER_RADIUS)
+          .height(this.textHeight)
+          .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
+          .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
           .clip(false)
@@ -105,24 +108,34 @@ export struct ProgressButton {
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .padding({left: 8, right: 8})
+            .padding({ top: 4, left: 8, right: 8, bottom: 4})
             .opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY)
+            .onAreaChange((_, newValue)=>{
+              if (!newValue.height || newValue.height === this.textHeight) {
+                return;
+              }
+              this.textHeight = newValue.height > BUTTON_NORMARL_HEIGHT ? newValue.height : BUTTON_NORMARL_HEIGHT;
+              this.buttonBorderRadius = Number(this.textHeight) / 2;
+            })
         }
+        .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
         Row()
           .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
           .backgroundColor(Color.Transparent)
           .border({ width: 1, color: this.containerBorderColor})
-          .height(BUTTON_NORMARL_HEIGHT)
-          .borderRadius(BUTTON_BORDER_RADIUS)
+          .height(this.textHeight)
+          .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
+          .borderRadius(this.buttonBorderRadius)
           .width('100%')
       }
     }
-    .borderRadius(BUTTON_BORDER_RADIUS)
+    .borderRadius(this.buttonBorderRadius)
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
     .backgroundColor(this.containerBackgroundColor)
     .constraintSize({minWidth: 44})
+    .padding({ top: 0, bottom: 0})
     .width((!this.progressButtonWidth || this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ?
       BUTTON_NORMARL_WIDTH : this.progressButtonWidth)
     .stateEffect(this.enable)

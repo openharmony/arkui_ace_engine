@@ -39,8 +39,7 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range)
-    : // each ttype incl default has own L2 cache size
-      cacheCountL24ttype_(cacheCountL24ttype),
+    : cacheCountL24ttype_(cacheCountL24ttype), // each ttype incl default has own L2 cache size
       // request TS to create new sub-tree for given index or update existing
       // update subtree cached for (old) index
       // API might need to change to tell which old item to update
@@ -72,6 +71,7 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
 
     const bool isRebuildingKeyCaches =
         ((key4index_.size() == 0) && (to >= lastActiveRanges_[0].first) && (from <= lastActiveRanges_[0].second));
+
     if (isRebuildingKeyCaches) {
         // following a key4index_/ttype4index_ purge fetch the whole range
         to = (to < lastActiveRanges_[0].second) ? lastActiveRanges_[0].second : to;

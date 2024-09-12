@@ -72,7 +72,7 @@ class __RepeatVirtualScrollImpl<T> {
 
     /**/
     private initialRender(
-        owningView: ViewV2, 
+        owningView: ViewV2,
         repeatElmtId: number
     ): void {
 
@@ -306,7 +306,7 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     private purgeKeyCache(): void {
-        this.key4Index_.clear()
+        this.key4Index_.clear();
         this.index4Key_.clear();
     }
 };

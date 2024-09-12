@@ -58,7 +58,6 @@ const char ELLIPSIS[] = "...";
 constexpr Dimension DEFAULT_FOCUS_BORDER_WIDTH = 2.0_vp;
 constexpr uint32_t DEFAULT_FOCUS_BORDER_COLOR = 0xFF254FF7;
 constexpr double HALF = 0.5;
-constexpr char16_t OPTICITY = 255;
 
 } // namespace
 
@@ -615,19 +614,6 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
 #endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas)
-#else
-void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, RSCanvas* canvas)
-#endif
-{
-    if (scrollBar_ && scrollBar_->NeedPaint()) {
-        scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());
-        RefPtr<RosenScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
-        scrollBarPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), OPTICITY);
-    }
-}
-
 void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
 {
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
@@ -685,7 +671,6 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
 
     PaintTextField(offset, context, canvas);
     PaintTextField(offset, context, magnifierCanvas_.get(), true);
-    PaintScrollBar(offset, context, canvas);
 
 #ifndef USE_ROSEN_DRAWING
     magnifierCanvas_->scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
@@ -733,7 +718,6 @@ Size RosenRenderTextField::Measure()
     std::unique_ptr<Rosen::TextStyle> txtStyle;
 #endif
     double textAreaWidth = MeasureParagraph(paragraphStyle, txtStyle);
-    realTextWidth_ = textAreaWidth;
     ComputeExtendHeight(decorationHeight);
 
     double height = NearZero(extendHeight_) ? GetLayoutParam().GetMaxSize().Height() : extendHeight_;
@@ -894,14 +878,6 @@ double RosenRenderTextField::MeasureParagraph(
 #endif
             paragraph_->Layout(limitWidth);
         }
-        if (IsOverflowX()) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            (*paragraphStyle).max_lines = 1;
-#else
-            (*paragraphStyle).maxLines = 1;
-#endif
-            paragraph_->Layout(std::numeric_limits<double>::infinity());
-        }
     } else {
 #ifndef USE_GRAPHIC_TEXT_GINE
         std::unique_ptr<txt::ParagraphBuilder> placeholderBuilder =
@@ -969,11 +945,6 @@ void RosenRenderTextField::ComputeExtendHeight(double decorationHeight)
         extendHeight_ = std::max(heightInPx, decorationHeight);
     }
     extendHeight_ = std::min(extendHeight_, GetLayoutParam().GetMaxSize().Height());
-}
-
-double RosenRenderTextField::GetRealTextWidth() const
-{
-    return realTextWidth_;
 }
 
 void RosenRenderTextField::ComputeOffsetAfterLayout()
@@ -1071,6 +1042,7 @@ std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double 
         }
     }
 #ifndef USE_ROSEN_DRAWING
+
     return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
 #else
     std::vector<RSColorQuad> colors;
@@ -1606,11 +1578,8 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
-#ifndef USE_GRAPHIC_TEXT_GINE
-                                    ->GetGlyphPositionAtCoordinate(
-#else
                                     ->GetGlyphIndexByCoordinate(
-#endif
+
 #ifndef USE_GRAPHIC_TEXT_GINE
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
                                     .position);
@@ -1627,12 +1596,7 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-                                    ->GetGlyphPositionAtCoordinate(
-#else
                                     ->GetGlyphIndexByCoordinate(
-#endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
@@ -1655,13 +1619,7 @@ int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
     if (realTextDirection_ == TextDirection::RTL && GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
         return 0;
     }
-    return static_cast<int32_t>(
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
-#else
-        paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
-#endif
+    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
 }
 
 int32_t RosenRenderTextField::AdjustCursorAndSelection(int32_t currentCursorPosition)
@@ -1961,18 +1919,6 @@ void RosenRenderTextField::PaintTextField(
 void RosenRenderTextField::ResetStatus()
 {
     template_.reset();
-}
-
-double RosenRenderTextField::GetLongestLine() const
-{
-    if (paragraph_) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        return paragraph_->GetLongestLine();
-#else
-        return paragraph_->GetActualWidth();
-#endif
-    }
-    return RenderTextField::GetLongestLine();
 }
 
 } // namespace OHOS::Ace

@@ -30,6 +30,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MULTIPLE_FACTOR = 2.0f;
+} // namespace
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
@@ -273,7 +276,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
         }
     } else {
         if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
-            margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
+            margin.left = CalcLength(iconWidth * MULTIPLE_FACTOR + iconContentPadding * MULTIPLE_FACTOR);
         } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
             margin.left = CalcLength(iconWidth + iconContentPadding);
         } else {

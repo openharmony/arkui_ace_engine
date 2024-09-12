@@ -17,8 +17,8 @@
 
 #include "base/utils/utils.h"
 #include "base/base64/base64_util.h"
+#include "frameworks/core/components/declaration/svg/svg_image_declaration.h"
 #include "frameworks/base/network/download_manager.h"
-#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -167,27 +167,27 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
 bool SvgImage::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgImageAttribute&)> attrs[] = {
-        { SVG_HEIGHT,
+        { DOM_SVG_HEIGHT,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_HREF,
+        { DOM_SVG_HREF,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.href = val;
             } },
-        { SVG_WIDTH,
+        { DOM_SVG_WIDTH,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_X,
+        { DOM_SVG_X,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.x = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_XLINK_HREF,
+        { DOM_SVG_XLINK_HREF,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.href = val;
             } },
-        { SVG_Y,
+        { DOM_SVG_Y,
             [](const std::string& val, SvgImageAttribute& attr) {
                 attr.y = SvgAttributesParser::ParseDimension(val);
             } },

@@ -46,9 +46,9 @@ float GetScrollableNodeOffset(RefPtr<Pattern> pattern)
 
 double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
 {
-    auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
-    return scrollablePattern->GetScrollBarOutBoundaryExtent();
+    auto scrollPattern = AceType::DynamicCast<ScrollablePattern>(pattern);
+    CHECK_NULL_RETURN(scrollPattern, 0.0f);
+    return scrollPattern->GetScrollBarOutBoundaryExtent();
 }
 } // namespace
 
@@ -241,16 +241,6 @@ float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollab
         return delta * controlDistance / barScrollableDistance;
     } else {
         return 0.0f;
-    }
-}
-
-void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
-{
-    for (const auto& node : scrollableNodes_) {
-        if (node.scrollPageCallback == nullptr) {
-            continue;
-        }
-        node.scrollPageCallback(reverse, smooth);
     }
 }
 

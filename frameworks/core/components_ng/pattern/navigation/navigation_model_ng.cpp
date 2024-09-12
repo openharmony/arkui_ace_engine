@@ -41,10 +41,12 @@
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -663,7 +665,7 @@ void NavigationModelNG::Create()
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
-    auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     if (!CreateNavBarNodeIfNeeded(navigationGroupNode) ||  // navBar node
         !CreateContentNodeIfNeeded(navigationGroupNode) || // content node
@@ -792,10 +794,10 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
         dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
         dividerLayoutProperty->UpdateVertical(true);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_RETURN(theme, false);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
         dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
     }
@@ -1605,7 +1607,6 @@ void NavigationModelNG::SetMenuCount(int32_t menuCount)
 {
     return;
 }
-
 void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1985,7 +1986,7 @@ void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
 
 RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     // navBar node
     if (!navigationGroupNode->GetNavBarNode()) {

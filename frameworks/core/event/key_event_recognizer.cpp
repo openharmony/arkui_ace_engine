@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,9 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t LONG_PRESS_DURATION = 1;
+constexpr int32_t KEY_INTENTION_OFFSET = 16;
+constexpr int32_t KEY_INTENTION_ITEM_MIN_COUNT = 1;
+constexpr int32_t KEY_INTENTION_ITEM_MAX_COUNT = 3;
 
 // List Menu key on keyboard.
 constexpr int64_t KEY_COMPOSE = 2466;
@@ -428,25 +431,22 @@ const char* KeyCodeToString(int32_t keyCode)
         {KeyCode::KEY_VOICE_SOURCE_SWITCH, "KEYCODE_VOICE_SOURCE_SWITCH"},
         {KeyCode::KEY_LAUNCHER_MENU, "KEYCODE_LAUNCHER_MENU"},
     };
-
     auto iter = KEYCODE_TO_STRING.find(static_cast<KeyCode>(keyCode));
     if (iter == KEYCODE_TO_STRING.end()) {
         return "KEYCODE_INVALID";
     }
     return iter->second.c_str();
 }
-
 KeyIntention keyItemsTransKeyIntention(const std::vector<KeyCode> &items)
 {
-    if (items.size() < 1 || items.size() > 3) {
+    if (items.size() < KEY_INTENTION_ITEM_MIN_COUNT || items.size() > KEY_INTENTION_ITEM_MAX_COUNT) {
         return KeyIntention::INTENTION_UNKNOWN;
     }
 
-    int64_t keyCodes = 0;
+    uint64_t keyCodes = 0;
     for (const auto &item : items) {
-        keyCodes = (keyCodes << 16) + (int64_t)item;
+        keyCodes = (keyCodes << KEY_INTENTION_OFFSET) + static_cast<uint64_t>(item);
     }
-
     const static std::map<int64_t, KeyIntention> MAP_KEY_INTENTION = {
         {(int64_t)KeyCode::KEY_DPAD_UP, KeyIntention::INTENTION_UP},
         {(int64_t)KeyCode::KEY_DPAD_DOWN, KeyIntention::INTENTION_DOWN},
@@ -455,24 +455,36 @@ KeyIntention keyItemsTransKeyIntention(const std::vector<KeyCode> &items)
         {(int64_t)KeyCode::KEY_SPACE, KeyIntention::INTENTION_SELECT},
         {(int64_t)KeyCode::KEY_NUMPAD_ENTER, KeyIntention::INTENTION_SELECT},
         {(int64_t)KeyCode::KEY_ESCAPE, KeyIntention::INTENTION_ESCAPE},
-        {((int64_t)KeyCode::KEY_ALT_LEFT << 16) + (int64_t)KeyCode::KEY_DPAD_LEFT, KeyIntention::INTENTION_BACK},
-        {((int64_t)KeyCode::KEY_ALT_LEFT << 16) + (int64_t)KeyCode::KEY_DPAD_RIGHT, KeyIntention::INTENTION_FORWARD},
-        {((int64_t)KeyCode::KEY_ALT_RIGHT << 16) + (int64_t)KeyCode::KEY_DPAD_LEFT, KeyIntention::INTENTION_BACK},
-        {((int64_t)KeyCode::KEY_ALT_RIGHT << 16) + (int64_t)KeyCode::KEY_DPAD_RIGHT, KeyIntention::INTENTION_FORWARD},
-        {((int64_t)KeyCode::KEY_SHIFT_LEFT << 16) + (int64_t)KeyCode::KEY_F10, KeyIntention::INTENTION_MENU},
-        {((int64_t)KeyCode::KEY_SHIFT_RIGHT << 16) + (int64_t)KeyCode::KEY_F10, KeyIntention::INTENTION_MENU},
+        {((int64_t)KeyCode::KEY_ALT_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_DPAD_LEFT,
+            KeyIntention::INTENTION_BACK},
+        {((int64_t)KeyCode::KEY_ALT_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_DPAD_RIGHT,
+            KeyIntention::INTENTION_FORWARD},
+        {((int64_t)KeyCode::KEY_ALT_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_DPAD_LEFT,
+            KeyIntention::INTENTION_BACK},
+        {((int64_t)KeyCode::KEY_ALT_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_DPAD_RIGHT,
+            KeyIntention::INTENTION_FORWARD},
+        {((int64_t)KeyCode::KEY_SHIFT_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_F10,
+            KeyIntention::INTENTION_MENU},
+        {((int64_t)KeyCode::KEY_SHIFT_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_F10,
+            KeyIntention::INTENTION_MENU},
         {KEY_COMPOSE, KeyIntention::INTENTION_MENU},
         {(int64_t)KeyCode::KEY_PAGE_UP, KeyIntention::INTENTION_PAGE_UP},
         {(int64_t)KeyCode::KEY_PAGE_DOWN, KeyIntention::INTENTION_PAGE_DOWN},
-        {((int64_t)KeyCode::KEY_CTRL_LEFT << 16) + (int64_t)KeyCode::KEY_PLUS, KeyIntention::INTENTION_ZOOM_OUT},
-        {((int64_t)KeyCode::KEY_CTRL_RIGHT << 16) + (int64_t)KeyCode::KEY_PLUS, KeyIntention::INTENTION_ZOOM_OUT},
-        {((int64_t)KeyCode::KEY_CTRL_LEFT << 16) + (int64_t)KeyCode::KEY_NUMPAD_ADD, KeyIntention::INTENTION_ZOOM_OUT},
-        {((int64_t)KeyCode::KEY_CTRL_RIGHT << 16) + (int64_t)KeyCode::KEY_NUMPAD_ADD, KeyIntention::INTENTION_ZOOM_OUT},
-        {((int64_t)KeyCode::KEY_CTRL_LEFT << 16) + (int64_t)KeyCode::KEY_MINUS, KeyIntention::INTENTION_ZOOM_IN},
-        {((int64_t)KeyCode::KEY_CTRL_RIGHT << 16) + (int64_t)KeyCode::KEY_MINUS, KeyIntention::INTENTION_ZOOM_IN},
-        {((int64_t)KeyCode::KEY_CTRL_LEFT << 16) + (int64_t)KeyCode::KEY_NUMPAD_SUBTRACT,
+        {((int64_t)KeyCode::KEY_CTRL_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_PLUS,
+            KeyIntention::INTENTION_ZOOM_OUT},
+        {((int64_t)KeyCode::KEY_CTRL_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_PLUS,
+            KeyIntention::INTENTION_ZOOM_OUT},
+        {((int64_t)KeyCode::KEY_CTRL_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_NUMPAD_ADD,
+            KeyIntention::INTENTION_ZOOM_OUT},
+        {((int64_t)KeyCode::KEY_CTRL_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_NUMPAD_ADD,
+            KeyIntention::INTENTION_ZOOM_OUT},
+        {((int64_t)KeyCode::KEY_CTRL_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_MINUS,
             KeyIntention::INTENTION_ZOOM_IN},
-        {((int64_t)KeyCode::KEY_CTRL_RIGHT << 16) + (int64_t)KeyCode::KEY_NUMPAD_SUBTRACT,
+        {((int64_t)KeyCode::KEY_CTRL_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_MINUS,
+            KeyIntention::INTENTION_ZOOM_IN},
+        {((int64_t)KeyCode::KEY_CTRL_LEFT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_NUMPAD_SUBTRACT,
+            KeyIntention::INTENTION_ZOOM_IN},
+        {((int64_t)KeyCode::KEY_CTRL_RIGHT << KEY_INTENTION_OFFSET) + (int64_t)KeyCode::KEY_NUMPAD_SUBTRACT,
             KeyIntention::INTENTION_ZOOM_IN},
         {(int64_t)KeyCode::KEY_VOLUME_MUTE, KeyIntention::INTENTION_MEDIA_MUTE},
         {(int64_t)KeyCode::KEY_MUTE, KeyIntention::INTENTION_MEDIA_MUTE},
@@ -483,7 +495,7 @@ KeyIntention keyItemsTransKeyIntention(const std::vector<KeyCode> &items)
         {(int64_t)KeyCode::KEY_MOVE_HOME, KeyIntention::INTENTION_HOME},
     };
 
-    auto iter = MAP_KEY_INTENTION.find(keyCodes);
+    auto iter = MAP_KEY_INTENTION.find(static_cast<int64_t>(keyCodes));
     if (iter == MAP_KEY_INTENTION.end()) {
         return KeyIntention::INTENTION_UNKNOWN;
     }
@@ -500,17 +512,16 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
     std::vector<KeyEvent> keyEvents;
     auto event = KeyEvent(static_cast<KeyCode>(keyCode), static_cast<KeyAction>(keyAction), repeatTime,
         timeStamp, deviceId, static_cast<SourceType>(keySource));
-
     if ((keyCode != static_cast<int32_t>(KeyCode::KEY_UNKNOWN)) &&
         (keyAction == static_cast<int32_t>(KeyAction::DOWN))) {
         clearPressedKey();
-        if (metaKey & static_cast<int32_t>(CtrlKeysBit::CTRL)) {
+        if (static_cast<uint32_t>(metaKey) & static_cast<uint32_t>(CtrlKeysBit::CTRL)) {
             addPressedKey(static_cast<int32_t>(KeyCode::KEY_CTRL_LEFT));
         }
-        if (metaKey & static_cast<int32_t>(CtrlKeysBit::SHIFT)) {
+        if (static_cast<uint32_t>(metaKey) & static_cast<uint32_t>(CtrlKeysBit::SHIFT)) {
             addPressedKey(static_cast<int32_t>(KeyCode::KEY_SHIFT_LEFT));
         }
-        if (metaKey & static_cast<int32_t>(CtrlKeysBit::ALT)) {
+        if (static_cast<uint32_t>(metaKey) & static_cast<uint32_t>(CtrlKeysBit::ALT)) {
             addPressedKey(static_cast<int32_t>(KeyCode::KEY_ALT_LEFT));
         }
         addPressedKey(keyCode);
@@ -556,7 +567,6 @@ std::vector<KeyCode> KeyEventRecognizer::getPressedKeys() const
     }
     return result;
 }
-
 void KeyEventRecognizer::addPressedKey(const int32_t keyCode)
 {
     std::vector<KeyCode> pressedkeys = getPressedKeys();
@@ -566,7 +576,6 @@ void KeyEventRecognizer::addPressedKey(const int32_t keyCode)
         keys_.push_back(keyCode);
     }
 }
-
 void KeyEventRecognizer::removeReleasedKey(const int32_t keyCode)
 {
     for (auto it = keys_.begin(); it != keys_.end(); ++it) {
@@ -576,7 +585,6 @@ void KeyEventRecognizer::removeReleasedKey(const int32_t keyCode)
         }
     }
 }
-
 void KeyEventRecognizer::clearPressedKey()
 {
     keys_.clear();

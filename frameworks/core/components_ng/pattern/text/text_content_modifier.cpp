@@ -17,8 +17,6 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
@@ -65,14 +63,26 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
     : pattern_(pattern)
 {
+    auto patternUpgrade = pattern_.Upgrade();
+    CHECK_NULL_VOID(patternUpgrade);
+    auto textPattern = DynamicCast<TextPattern>(patternUpgrade);
+    CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
     contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
-    contentOffset_ = MakeRefPtr<PropertyOffsetF>(OffsetF());
-    contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
+
+    auto contentRect = geometryNode->GetContentRect();
+    contentOffset_ = MakeRefPtr<PropertyOffsetF>(contentRect.GetOffset());
+    contentSize_ = MakeRefPtr<PropertySizeF>(contentRect.GetSize());
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
+
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value());
     }
@@ -89,10 +99,14 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(fontFamilyString_);
     fontReady_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(fontReady_);
+
+    auto baselineOffset = textPattern->GetBaselineOffset();
+    paintOffset_ = contentRect.GetOffset() - OffsetF(0.0, std::min(baselineOffset, 0.0f));
 }
 
 void TextContentModifier::ChangeDragStatus()
 {
+    CHECK_NULL_VOID(dragStatus_);
     dragStatus_->Set(!dragStatus_->Get());
 }
 
@@ -111,7 +125,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
-        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -122,7 +136,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -135,7 +149,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -205,7 +219,7 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -346,6 +360,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
+    bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     if (pManager->GetParagraphs().empty()) {
@@ -355,9 +371,10 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
-
-    if (!ifPaintObscuration_) {
+    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
         auto& canvas = drawingContext.canvas;
+        CHECK_NULL_VOID(contentSize_);
+        CHECK_NULL_VOID(contentOffset_);
         auto contentSize = contentSize_->Get();
         auto contentOffset = contentOffset_->Get();
         canvas.Save();
@@ -372,7 +389,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             auto paintOffsetY = paintOffset_.GetY();
             textPattern->DumpRecord(",Paint id:" + std::to_string(host->GetId()));
             auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
+            for (auto && info : paragraphs) {
                 auto paragraph = info.paragraph;
                 CHECK_NULL_VOID(paragraph);
                 paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
@@ -396,7 +413,8 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
-    float textRacePercent = GetTextRacePercent();
+    float textRacePercent = GetTextRaceDirection() == TextDirection::LTR ? GetTextRacePercent()
+                                                                         : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
     float paragraph1Offset =
         (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
     if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
@@ -437,7 +455,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     for (auto i = 0U; i < drawObscuredRects_.size(); i++) {
         if (!NearEqual(drawObscuredRects_[i].Width(), 0.0f) && !NearEqual(drawObscuredRects_[i].Height(), 0.0f)) {
             currentLineWidth += drawObscuredRects_[i].Width();
-            if (i == (drawObscuredRects_.size() ? drawObscuredRects_.size() - 1 : 0)) {
+            if (i == drawObscuredRects_.size() - 1) {
                 textLineWidth.push_back(currentLineWidth);
                 maxLineCount += LessOrEqual(drawObscuredRects_[i].Bottom(), contentSize_->Get().Height()) ? 1 : 0;
             } else if (!NearEqual(drawObscuredRects_[i].Bottom(), drawObscuredRects_[i + 1].Bottom())) {
@@ -449,6 +467,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
             }
         }
     }
+    CHECK_NULL_VOID(baselineOffsetFloat_);
     auto baselineOffset = baselineOffsetFloat_->Get();
     int32_t obscuredLineCount = std::min(maxLineCount, static_cast<int32_t>(textLineWidth.size()));
     float offsetY = (contentSize_->Get().Height() - std::fabs(baselineOffset) - (obscuredLineCount * fontSize)) /
@@ -655,8 +674,7 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
 
 void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
@@ -664,8 +682,7 @@ void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textSty
 
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
@@ -673,8 +690,7 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle&
 
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue =
-        value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
@@ -782,7 +798,7 @@ void TextContentModifier::StartTextRace()
     }
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateImageNodeVisible(VisibleType::VISIBLE);
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
     }
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -844,6 +860,17 @@ float TextContentModifier::GetTextRacePercent()
         percent = racePercentFloat_->Get();
     }
     return percent;
+}
+
+TextDirection TextContentModifier::GetTextRaceDirection() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, TextDirection::LTR);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    return layoutProperty->GetNonAutoLayoutDirection();
 }
 
 void TextContentModifier::ContentChange()

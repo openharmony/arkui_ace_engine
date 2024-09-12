@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,8 @@ public:
 
     void CreateTempItems();
 
+    void CollectRemovingIds(std::list<int32_t>& removedElmtId);
+
     void CompareAndUpdateChildren();
 
     void FlushUpdateAndMarkDirty() override;
@@ -71,12 +73,18 @@ public:
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     void InitDragManager(const RefPtr<UINode>& childNode);
     void InitAllChildrenDragManager(bool init);
+    void MappingChildWithId(std::unordered_set<std::string>& oldIdsSet, std::list<RefPtr<UINode>>& additionalChildComps,
+        std::map<std::string, RefPtr<UINode>>& oldNodeByIdMap);
 private:
     std::list<std::string> ids_;
 
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
     std::list<RefPtr<UINode>> tempChildren_;
+    std::unordered_set<std::string> tempOldIdsSet_;
+
+    // create map id -> Node
+    std::map<std::string, RefPtr<UINode>> oldNodeByIdMap_;
 
     // RepeatNode only
     std::vector<RefPtr<UINode>> tempChildrenOfRepeat_;

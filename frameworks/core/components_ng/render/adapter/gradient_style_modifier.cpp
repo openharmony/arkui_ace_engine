@@ -79,6 +79,9 @@ Gradient GradientStyleModifier::GetGradient() const
     }
     auto size = colors.size();
     gradient.ClearColors();
+    if (size > stops.size()) {
+        return gradient;
+    }
     GradientColor color;
     for (size_t index = 0; index < size; index++) {
         color.SetColor(colors[index]);

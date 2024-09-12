@@ -28,6 +28,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 

@@ -35,12 +35,14 @@ struct MenuOptionsParam {
         result.append("id: ");
         result.append(id);
         result.append(", content: ");
+        result.append("content: ");
         result.append(content.value_or("na"));
         result.append(", icon: ");
         result.append(icon.value_or("na"));
         return result;
     }
 };
+
 struct MenuItemParam {
     MenuOptionsParam menuOptionsParam;
     int32_t start = -1;
@@ -58,6 +60,7 @@ struct MenuItemParam {
         return result;
     }
 };
+
 using OnCreateMenuCallback = std::function<std::vector<MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)>;
 using OnMenuItemClickCallback = std::function<bool(const NG::MenuItemParam&)>;
 } // namespace OHOS::Ace::NG

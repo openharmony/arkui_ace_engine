@@ -113,7 +113,7 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
         ACE_SCOPED_TRACE("ImageAnimator waitForCache src %s, index %d", traceTag.c_str(), index);
         return;
     }
-    // update cache images
+    // update cache images.
     CHECK_NULL_VOID(cacheImages_.size());
     int32_t nextIndex = GetNextIndex(index);
     for (auto& cacheImage : cacheImages_) {

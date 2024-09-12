@@ -52,7 +52,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/stylus/stylus_detector_default.h"
@@ -84,9 +83,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
-#endif
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -113,7 +109,7 @@ constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it mean
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 2;
-constexpr int32_t MIN_IDLE_TIME = 1000;
+constexpr int32_t MIN_IDLE_TIME = 1000000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 
@@ -595,6 +591,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
+    taskScheduler_->FlushLatestFrameLayoutFinishTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -620,7 +617,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_ = nullptr;
     }
     FlushMessages();
-    FlushWindowPatternInfo();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
@@ -646,26 +642,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
-}
-
-void PipelineContext::FlushWindowPatternInfo()
-{
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (!container->IsScenceBoardWindow()) {
-        return;
-    }
-    auto screenNode = screenNode_.Upgrade();
-    if (!screenNode) {
-        return;
-    }
-    ACE_SCOPED_TRACE("FlushWindowPatternInfo");
-    auto instance = WindowSceneLayoutManager::GetInstance();
-    if (instance != nullptr) {
-        instance->FlushWindowPatternInfo(screenNode);
-    }
-#endif
 }
 
 void PipelineContext::InspectDrew()
@@ -1032,7 +1008,6 @@ void PipelineContext::SetupRootElement()
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    fontManager_->AddFontObserver(selectOverlayManager_);
     if (!privacySensitiveManager_) {
         privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     }
@@ -1045,7 +1020,7 @@ void PipelineContext::SetupRootElement()
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
@@ -1102,7 +1077,6 @@ void PipelineContext::SetupSubRootElement()
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
-    fontManager_->AddFontObserver(selectOverlayManager_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = GetOrCreateFocusManager();
     postEventManager_ = MakeRefPtr<PostEventManager>();
@@ -1166,7 +1140,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -1447,9 +1420,8 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     }
 }
 
-void PipelineContext::CheckAndUpdateKeyboardInset()
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
 {
-    uint32_t keyboardHeight = safeAreaManager_->GetKeyboardInset().Length();
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
 
@@ -1548,23 +1520,6 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
             node->MarkDirtyNode(needMeasure ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_LAYOUT);
         }
     }
-}
-
-void PipelineContext::CheckVirtualKeyboardHeight()
-{
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_) {
-        return;
-    }
-#endif
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto keyboardArea = container->GetKeyboardSafeArea();
-    auto keyboardHeight = keyboardArea.bottom_.end - keyboardArea.bottom_.start;
-    if (keyboardHeight > 0) {
-        LOGI("Current View has keyboard.");
-    }
-    OnVirtualKeyboardHeightChange(keyboardHeight);
 }
 
 void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
@@ -1771,6 +1726,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         CHECK_NULL_VOID(context);
         context->SetIsLayouting(false);
         context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        context->SetKeyboardAction(NearZero(keyboardHeight) ? KeyboardAction::CLOSING : KeyboardAction::OPENING);
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
@@ -1837,6 +1793,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         if (scrollResult) {
             context->FlushUITasks();
         }
+        context->SetKeyboardAction(KeyboardAction::NONE);
     };
     FlushUITasks();
     SetIsLayouting(true);
@@ -2327,13 +2284,9 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     }
     CHECK_NULL_RETURN(dumpNode, false);
     dumpNode->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer, needsRecordData);
-    // The page path may not be obtained in the container, use the node tag as the page path.
-    if (node) {
-        const auto& nodeTag = node->GetTag();
-        if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
-            viewDataWrap->SetPageUrl(nodeTag);
-            return true;
-        }
+    if (node && node->GetTag() == V2::DIALOG_ETS_TAG) {
+        viewDataWrap->SetPageUrl(node->GetTag());
+        return true;
     }
     CHECK_NULL_RETURN(pageNode, false);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
@@ -3237,6 +3190,7 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     SetDestroyed();
     rootNode_->DetachFromMainTree();
+    rootNode_->FireCustomDisappear();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
@@ -3580,24 +3534,14 @@ void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
 }
 
+void PipelineContext::AddLatestFrameLayoutFinishTask(std::function<void()>&& task)
+{
+    taskScheduler_->AddLatestFrameLayoutFinishTask(std::move(task));
+}
+
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
-}
-
-void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
-{
-    taskScheduler_->AddSafeAreaPaddingProcessTask(node);
-}
-
-void PipelineContext::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
-{
-    taskScheduler_->RemoveSafeAreaPaddingProcessTask(node);
-}
-
-void PipelineContext::FlushSafeAreaPaddingProcess()
-{
-    taskScheduler_->FlushSafeAreaPaddingProcess();
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
@@ -4202,7 +4146,7 @@ void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId)
 bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node.Upgrade(), false);
-    if (changeInfoListeners_.empty()) {
+    if (changeInfoListeners_.empty() || !node.Upgrade()->IsOnMainTree()) {
         return false;
     }
     if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {
@@ -4267,4 +4211,13 @@ bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPi
     return false;
 }
 #endif
+
+bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    CHECK_NULL_RETURN(navigationMgr_, false);
+    if (navigationMgr_->IsInteractive()) {
+        return navigationMgr_->AddInteractiveAnimation(animationCallback);
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

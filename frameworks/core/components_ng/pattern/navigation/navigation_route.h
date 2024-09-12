@@ -35,7 +35,7 @@ struct RouteItem {
 };
 
 class ACE_EXPORT NavigationRoute : public PackageChangeListener {
-    DECLARE_ACE_TYPE(NavigationRoute, PackageChangeListener)
+    DECLARE_ACE_TYPE(NavigationRoute, PackageChangeListener);
 public:
     NavigationRoute() = default;
     ~NavigationRoute() = default;

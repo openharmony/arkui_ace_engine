@@ -1461,8 +1461,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_FONT_FAMILY, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_TEXT_CONTENT, &fontItem);
     nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &decorationItem);
-    value[0].i32 = true;
-    nodeAPI->setAttribute(rootNode, NODE_TEXT_HALF_LEADING, &item);
     decoration[2].i32 = -1;
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_TEXT_DECORATION, &decorationItem), ARKUI_ERROR_CODE_PARAM_INVALID);
 
@@ -1495,7 +1493,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TEXT_HALF_LEADING), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FONT_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_FONT_SIZE), nullptr);
@@ -1525,7 +1522,6 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_ENABLE_DATA_DETECTOR_CONFIG), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), nullptr);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), nullptr);
-    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_HALF_LEADING), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -2244,11 +2240,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest019, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
     value[0].i32 = ARKUI_XCOMPONENT_TYPE_TEXTURE;
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
-
+    value[0].f32 = 10.0f;
+    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_ID), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_TYPE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 

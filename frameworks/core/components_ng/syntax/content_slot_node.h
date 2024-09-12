@@ -68,9 +68,9 @@ public:
         }
     }
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override
+    void OnDetachFromMainTree(bool recursive) override
     {
-        UINode::OnDetachFromMainTree(recursive, context);
+        UINode::OnDetachFromMainTree(recursive);
         if (content_) {
             content_->OnDetachFromMainTree();
         }

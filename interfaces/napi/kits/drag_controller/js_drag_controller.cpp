@@ -613,6 +613,7 @@ void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode, const std::
     } else {
         napi_reject_deferred(asyncCtx->env, asyncCtx->deferred, result[0]);
     }
+    asyncCtx->deferred = nullptr;
 }
 
 void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
@@ -661,14 +662,6 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     }
 }
 
-static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
-{
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetIsDragging(isDragging);
-}
-
 bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 {
     CHECK_NULL_RETURN(shadowInfo.pixelMap, false);
@@ -680,6 +673,18 @@ bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
         return false;
     }
     return true;
+}
+
+static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
+{
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return;
+    }
+    pipelineContext->SetIsDragging(isDragging);
 }
 
 void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::DeviceStatus::DragData>& dragData)
@@ -711,10 +716,7 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
         } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
-            if (ret != 0) {
-                TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-            }
+            UdmfClient::GetInstance()->GetSummary(udKey, summary);
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
@@ -848,10 +850,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 if (ret != 0) {
                     TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set data failed, return value is %{public}d", ret);
                 } else {
-                    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
-                    if (ret != 0) {
-                        TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
-                    }
+                    UdmfClient::GetInstance()->GetSummary(udKey, summary);
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
@@ -876,11 +875,12 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             } else if (x < 0 || y < 0 || x > static_cast<double>(width) || y > static_cast<double>(height)) {
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(asyncCtx->env, &scope);
-                HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
+                HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range.");
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
             auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+            CHECK_NULL_VOID(container);
             auto arkExtraInfoJson = JsonUtil::Create(true);
             arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
             NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
@@ -1547,6 +1547,9 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     }
     if (CheckDragging(container)) {
         NapiThrow(env, "only one drag is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
+        napi_escape_handle(env, scope, result, &result);
+        delete dragAsyncContext;
+        dragAsyncContext = nullptr;
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
@@ -1599,7 +1602,9 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
 
     if (CheckDragging(container)) {
-        NapiThrow(env, "only one dragAction is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
+        NapiThrow(env, "only one drag is allowed at the same time", ERROR_CODE_INTERNAL_ERROR);
+        delete dragAsyncContext;
+        dragAsyncContext = nullptr;
         napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 
 class ComponentContent extends Content {
   // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.

@@ -22,10 +22,10 @@
 #include <string>
 #include <unistd.h>
 
-#include "dm_common.h"
-
-#include "display_manager.h"
 #include "locale_config.h"
+#include "dm_common.h"
+#include "display_manager.h"
+
 #include "parameter.h"
 #include "parameters.h"
 
@@ -220,19 +220,14 @@ bool IsLayoutDetectEnabled()
     return (system::GetParameter("persist.ace.layoutdetect.enabled", "0") == "1");
 }
 
-bool IsNavigationBlurEnabled()
+bool IsSideBarContainerBlurEnable()
 {
-    return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
+    return (system::GetParameter("persist.ace.sidebar.blur.enabled", "0") == "1");
 }
 
 bool IsGridCacheEnabled()
 {
     return (system::GetParameter("persist.ace.grid.cache.enabled", "1") == "1");
-}
-
-bool IsSideBarContainerBlurEnable()
-{
-    return (system::GetParameter("persist.ace.sidebar.blur.enabled", "0") == "1");
 }
 
 bool IsGpuUploadEnabled()
@@ -323,10 +318,14 @@ bool IsResourceDecoupling()
     return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
 }
 
+bool IsNavigationBlurEnabled()
+{
+    return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
+}
+
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
-           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 
 bool IsAceCommercialLogEnable()
@@ -421,9 +420,9 @@ ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount()
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
-bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
@@ -572,8 +571,8 @@ void SystemProperties::InitDeviceInfo(
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
-    gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+    gridCacheEnabled_ = IsGridCacheEnabled();
     acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
     faultInjectEnabled_  = IsFaultInjectEnabled();
     if (isRound_) {
@@ -709,14 +708,14 @@ int32_t SystemProperties::GetJankFrameThreshold()
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
 }
 
-ACE_WEAK_SYM std::string SystemProperties::GetCustomTitleFilePath()
-{
-    return system::GetParameter(CUSTOM_TITLE_KEY, "");
-}
-
 ACE_WEAK_SYM bool SystemProperties::Is24HourClock()
 {
     return Global::I18n::LocaleConfig::Is24HourClock();
+}
+
+ACE_WEAK_SYM std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }
 
 std::optional<bool> SystemProperties::GetRtlEnabled()
@@ -740,14 +739,9 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
-bool SystemProperties::GetGridCacheEnabled()
+bool SystemProperties::GetSideBarContainerBlurEnable()
 {
-    return gridCacheEnabled_;
-}
-
-bool SystemProperties::GetGridIrregularLayoutEnabled()
-{
-    return system::GetBoolParameter("persist.ace.grid.irregular.enabled", false);
+    return sideBarContainerBlurEnable_;
 }
 
 bool SystemProperties::WaterFlowUseSegmentedLayout()
@@ -755,9 +749,14 @@ bool SystemProperties::WaterFlowUseSegmentedLayout()
     return system::GetBoolParameter("persist.ace.water.flow.segmented", false);
 }
 
-bool SystemProperties::GetSideBarContainerBlurEnable()
+bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return sideBarContainerBlurEnable_;
+    return system::GetBoolParameter("persist.ace.grid.irregular.enabled", false);
+}
+
+bool SystemProperties::GetGridCacheEnabled()
+{
+    return gridCacheEnabled_;
 }
 
 void SystemProperties::AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback)
@@ -786,11 +785,6 @@ void SystemProperties::SetLayoutTraceEnabled(bool layoutTraceEnable)
     layoutTraceEnable_ = layoutTraceEnable && developerModeOn_;
 }
 
-void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
-{
-    traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
-}
-
 void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable)
 {
     layoutTraceEnable_ = layoutTraceEnable && IsLayoutTraceEnabled();
@@ -799,6 +793,11 @@ void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTra
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
     debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
+}
+
+void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
+{
+    traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()

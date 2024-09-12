@@ -31,7 +31,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
@@ -479,8 +478,6 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
-
     RefPtr<FrameNode> GetLastSelectedItem()
     {
         return lastSelectedItem_;
@@ -490,10 +487,13 @@ public:
     {
         lastSelectedItem_ = lastSelectedItem;
     }
+
     void UpdateLastPosition(std::optional<OffsetF> lastPosition)
     {
         lastPosition_ = lastPosition;
     }
+
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     void SetIsEmbedded()
     {
@@ -535,7 +535,6 @@ private:
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
-    void ResetScrollTheme(const RefPtr<FrameNode>& host);
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);

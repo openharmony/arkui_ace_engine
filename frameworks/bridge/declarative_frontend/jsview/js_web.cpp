@@ -1836,7 +1836,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
-    JSClass<JSWeb>::StaticMethod("enableSmoothDragResize", &JSWeb::EnableSmoothDragResize);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -1922,6 +1921,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedLifecycleChange", &JSWeb::OnNativeEmbedLifecycleChange);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedVisibilityChange", &JSWeb::OnNativeEmbedVisibilityChange);
     JSClass<JSWeb>::StaticMethod("onNativeEmbedGestureEvent", &JSWeb::OnNativeEmbedGestureEvent);
     JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
@@ -3183,11 +3183,6 @@ void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
-}
-
-void JSWeb::EnableSmoothDragResize(bool isSmoothDragResizeEnabled)
-{
-    WebModel::GetInstance()->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
@@ -4465,6 +4460,15 @@ JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> EmbedVisibilityChangeToJSValue(const NativeEmbedVisibilityInfo& visibilityInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("visibility", visibilityInfo.GetVisibility());
+    obj->SetProperty("embedId", visibilityInfo.GetEmbedId());
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -4481,6 +4485,24 @@ void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetNativeEmbedLifecycleChangeId(jsCallback);
+}
+
+void JSWeb::OnNativeEmbedVisibilityChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbedVisibilityInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), EmbedVisibilityChangeToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                            const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedVisibilityInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedVisibilityChangeId(jsCallback);
 }
 
 JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)

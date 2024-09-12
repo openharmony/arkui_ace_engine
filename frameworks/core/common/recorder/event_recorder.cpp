@@ -15,7 +15,6 @@
 #include "core/common/recorder/event_recorder.h"
 
 #include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
@@ -181,6 +180,11 @@ void EventRecorder::UpdateEventSwitch(const EventSwitch& eventSwitch)
 bool EventRecorder::IsPageRecordEnable() const
 {
     return pageEnable_ && eventSwitch_.pageEnable;
+}
+
+bool EventRecorder::IsPageParamRecordEnable() const
+{
+    return pageParamEnable_ && eventSwitch_.pageParamEnable;
 }
 
 bool EventRecorder::IsExposureRecordEnable() const

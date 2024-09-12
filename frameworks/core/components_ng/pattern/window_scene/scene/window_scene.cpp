@@ -19,7 +19,6 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -33,7 +32,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeOut",            Curves::EASE_OUT    },
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
-const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
+const uint32_t CLEAN_WINDOW_DELAY_TIME = 3000;
 const int32_t ANIMATION_DURATION = 200;
 } // namespace
 
@@ -50,34 +49,24 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
-    coldStartCallback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
+    callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
-        session->SetBufferAvailable(true);
-        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
+        ACE_SCOPED_TRACE("BufferAvailableCallback[id:%d]", session->GetPersistentId());
+        if (!session->GetBufferAvailable()) {
+            session->SetBufferAvailable(true);
+            Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
+        }
         // In a locked screen scenario, the lifetime of the session is larger than the lifetime of the object self
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        self->BufferAvailableCallback();
-    };
-    hotStartCallback_ = [weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        if (self->session_->IsAnco()) {
-            if (self->blankWindow_) {
-                self->BufferAvailableCallbackForBlank();
-            }
+        if (self->startingWindow_) {
+            self->BufferAvailableCallback();
             return;
         }
-        if (self->session_->GetBufferAvailableCallbackEnable()) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-                "buffer available callback enable is true, no need remove blank.");
-            return;
-        }
+        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->snapshotWindow_) {
             self->BufferAvailableCallbackForSnapshot();
-        } else if (self->blankWindow_) {
-            self->BufferAvailableCallbackForBlank();
         }
     };
 }
@@ -120,6 +109,7 @@ void WindowScene::OnAttachToFrameNode()
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+        SetSubWindowBufferAvailableCallback(surfaceNode);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSSystem]OnAttachToFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
             session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
@@ -261,13 +251,15 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 void WindowScene::BufferAvailableCallback()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self && self->session_);
+        CHECK_NULL_VOID(self);
+
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
-            auto context = self->startingWindow_->GetRenderContext();
+            auto context = AceType::DynamicCast<RosenRenderContext>(self->startingWindow_->GetRenderContext());
             CHECK_NULL_VOID(context);
             context->SetMarkNodeGroup(true);
             context->SetOpacity(config.opacityStart_);
@@ -298,49 +290,43 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailable", TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(
+        std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::BufferAvailableCallbackForBlank()
+void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForBlank");
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self && self->session_);
-
-        auto context = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        context->SetOpacity(1);
+        CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->blankWindow_);
-        auto blankWindowContext = AceType::DynamicCast<RosenRenderContext>(self->blankWindow_->GetRenderContext());
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        if (surfaceNode) {
+            surfaceNode->SetVisible(true);
+        }
+
+        RefPtr<Curve> curve = Curves::LINEAR;
+        auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(0);
+        effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, ANIMATION_DURATION));
+        auto blankWindowContext = self->blankWindow_->GetRenderContext();
         CHECK_NULL_VOID(blankWindowContext);
-        auto blankRsNode = blankWindowContext->GetRSNode();
-        CHECK_NULL_VOID(blankRsNode);
-        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
-        Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(ANIMATION_DURATION);
-        auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
-        Rosen::RSNode::Animate(protocol, curve, [blankRsNode, effect] {
-            AceAsyncTraceBegin(0, "BlankWindowExitAnimation");
-            blankRsNode->NotifyTransition(effect, false);
-        }, []() {
-            AceAsyncTraceEnd(0, "BlankWindowExitAnimation");
-        });
+        blankWindowContext->UpdateChainedTransition(effect);
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
+        self->RemoveChild(host, self->blankWindow_, self->blankWindowName_, true);
         self->blankWindow_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain] Remove blank window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
     };
+
+    CHECK_EQUAL_RETURN(fromMainThread, true, uiTask());
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIBufferAvailableForBlank", TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(
+        std::move(uiTask), "ArkUIBufferAvailableCallbackForBlank", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::BufferAvailableCallbackForSnapshot()
@@ -348,24 +334,22 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self && self->session_);
+        CHECK_NULL_VOID(self);
 
+        CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain] Remove snapshot window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
     };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(
-        std::move(uiTask), "ArkUIWindowSceneBufferAvailableForSnapshot", TaskExecutor::TaskType::UI);
+        std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnActivation()
@@ -373,20 +357,23 @@ void WindowScene::OnActivation()
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::OnActivation");
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self && self->session_);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
+        CHECK_NULL_VOID(self);
+
         bool showingInRecents = self->session_->GetShowRecent();
         self->session_->SetShowRecent(false);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
         if (self->destroyed_) {
             self->destroyed_ = false;
             self->RemoveChild(host, self->startingWindow_, self->startingWindowName_);
             self->RemoveChild(host, self->appWindow_, self->appWindowName_);
             self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+            self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
             self->startingWindow_.Reset();
             self->appWindow_.Reset();
             self->snapshotWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
+            self->blankWindow_.Reset();
             self->OnAttachToFrameNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else if (showingInRecents &&
@@ -403,9 +390,9 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(surfaceNode);
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            surfaceNode->SetBufferAvailableCallback(self->coldStartCallback_);
+            surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
-            self->DisposeSnapShotAndBlankWindow();
+            self->DisposeSnapshotAndBlankWindow();
         }
     };
 
@@ -415,7 +402,7 @@ void WindowScene::OnActivation()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::DisposeSnapShotAndBlankWindow()
+void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
     if (session_->GetBlankFlag()) {
@@ -425,30 +412,24 @@ void WindowScene::DisposeSnapShotAndBlankWindow()
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
     AddChild(host, appWindow_, appWindowName_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
+    surfaceNode->SetBufferAvailableCallback(callback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().uiType_, "pc");
-    if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
-        NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_, 1.0f)) {
-        return;
-    }
+    CHECK_EQUAL_VOID(session_->GetSystemConfig().freeMultiWindowEnable_, true);
+    CHECK_EQUAL_VOID(IsWindowSizeEqual(), true);
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
-    CreateBlankWindow();
-    AddChild(host, blankWindow_, blankWindowName_);
-    surfaceNode->SetIsNotifyUIBufferAvailable(true);
-    CleanBlankWindow();
+    if (!blankWindow_) {
+        CreateBlankWindow();
+        AddChild(host, blankWindow_, blankWindowName_);
+        CleanBlankWindow();
+    }
 }
 
 void WindowScene::OnConnect()
 {
-    lastWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionLastRect(lastWindowRect_);
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::OnConnect");
         auto self = weakThis.Upgrade();
@@ -472,20 +453,13 @@ void WindowScene::OnConnect()
             "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
 
-        surfaceNode->SetBufferAvailableCallback(self->coldStartCallback_);
+        surfaceNode->SetBufferAvailableCallback(self->callback_);
     };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneConnect", TaskExecutor::TaskType::UI);
-}
-
-void WindowScene::OnBackground()
-{
-    CHECK_NULL_VOID(session_);
-    lastWindowRect_ = session_->GetSessionRect();
-    session_->SetSessionLastRect(lastWindowRect_);
 }
 
 void WindowScene::OnDisconnect()
@@ -519,6 +493,33 @@ void WindowScene::OnDisconnect()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::OnLayoutFinished()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
+            self->session_->GetPersistentId(), host->GetId(), self->session_->GetBufferAvailableCallbackEnable());
+        if (self->session_->GetBufferAvailableCallbackEnable()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "buffer available callback enable is true, no need remove blank.");
+            return;
+        }
+        CHECK_EQUAL_VOID(self->IsWindowSizeEqual(), false);
+        if (self->blankWindow_) {
+            self->BufferAvailableCallbackForBlank(true);
+        }
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneLayoutFinished", TaskExecutor::TaskType::UI);
+}
+
 void WindowScene::OnDrawingCompleted()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
@@ -526,6 +527,10 @@ void WindowScene::OnDrawingCompleted()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
+        if (self->blankWindow_) {
+            self->BufferAvailableCallbackForBlank(true);
+            return;
+        }
         CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
@@ -542,23 +547,42 @@ void WindowScene::OnDrawingCompleted()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
+bool WindowScene::IsWindowSizeEqual()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameSize = geometryNode->GetFrameSize();
+    ACE_SCOPED_TRACE("WindowScene::IsWindowSizeEqual[id:%d][self:%d][%s][%s]",
+        session_->GetPersistentId(), host->GetId(),
+        frameSize.ToString().c_str(), session_->GetLayoutRect().ToString().c_str());
+    if (NearEqual(frameSize.Width(), session_->GetLayoutRect().width_, 1.0f) &&
+        NearEqual(frameSize.Height(), session_->GetLayoutRect().height_, 1.0f)) {
+        return true;
+    }
+    return false;
+}
+
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
     CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlankFlag(), false, false);
     ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
     attachToFrameNodeFlag_ = false;
-    CHECK_EQUAL_RETURN(session_->GetShowRecent(), true, false);
+    CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlankFlag(), true, false);
     auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_RETURN(surfaceNode, false);
-    surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
+    if (surfaceNode) {
+        surfaceNode->SetBufferAvailableCallback(callback_);
+    }
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().uiType_, "pc", false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto size = geometryNode->GetFrameSize();
-    if (NearEqual(size.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
-        NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f) && !session_->GetBlankFlag()) {
+    if (NearEqual(size.Width(), session_->GetLayoutRect().width_, 1.0f) &&
+        NearEqual(size.Height(), session_->GetLayoutRect().height_, 1.0f) && !session_->GetBlankFlag()) {
         return false;
     }
     session_->SetBlankFlag(false);
@@ -567,19 +591,22 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
-    auto context = AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
-    CHECK_NULL_RETURN(context, false);
-    context->SetOpacity(0);
+    RemoveChild(host, startingWindow_, startingWindowName_);
+    startingWindow_.Reset();
     AddChild(host, appWindow_, appWindowName_, 0);
-    CreateBlankWindow();
-    AddChild(host, blankWindow_, blankWindowName_);
-    auto blankWindowContext = blankWindow_->GetRenderContext();
-    CHECK_NULL_RETURN(blankWindowContext, false);
-    blankWindowContext->SyncGeometryProperties(RectF(0, 0, size.Width(), size.Height()));
-    blankWindow_->SetActive(true);
+    if (surfaceNode) {
+        surfaceNode->SetVisible(false);
+    }
+    if (!blankWindow_) {
+        CreateBlankWindow();
+        AddChild(host, blankWindow_, blankWindowName_);
+        auto blankWindowContext = blankWindow_->GetRenderContext();
+        CHECK_NULL_RETURN(blankWindowContext, false);
+        blankWindowContext->SyncGeometryProperties(RectF(0, 0, size.Width(), size.Height()));
+        blankWindow_->SetActive(true);
+        CleanBlankWindow();
+    }
     host->RebuildRenderContextTree();
-    surfaceNode->SetIsNotifyUIBufferAvailable(true);
-    CleanBlankWindow();
     return false;
 }
 
@@ -600,18 +627,31 @@ void WindowScene::CleanBlankWindow()
             self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
             self->blankWindow_.Reset();
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-            auto context = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
-            CHECK_NULL_VOID(context);
-            context->SetOpacity(1);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto surfaceNode = self->session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
+            surfaceNode->SetVisible(true);
         }
     });
     taskExecutor->PostDelayedTask(
         deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_WINDOW_DELAY_TIME, "ArkUICleanBlankWindow");
 }
 
-uint32_t WindowScene::GetWindowPatternType() const
+void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
-    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
+    CHECK_NULL_VOID(surfaceNode);
+    auto subWindowCallback = [weakSession = wptr(session_), weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "subWindowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+            session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
+        session->SetBufferAvailable(true);
+    };
+    surfaceNode->SetBufferAvailableCallback(subWindowCallback);
 }
 } // namespace OHOS::Ace::NG

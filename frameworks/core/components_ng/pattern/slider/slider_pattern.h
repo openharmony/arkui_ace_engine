@@ -233,22 +233,6 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
-    void AccessibilityVirtualNodeRenderTask();
-    void InitAccessibilityHoverEvent();
-    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
-    bool InitAccessibilityVirtualNode();
-    void ModifyAccessibilityVirtualNode();
-    void AddStepPointsAccessibilityVirtualNode();
-    void HandleTextOnAccessibilityFocusCallback();
-    void UpdateStepAccessibilityVirtualNode();
-    std::string GetPointAccessibilityTxt(
-        const RefPtr<SliderPaintProperty>& paintProperty, uint32_t pointIndex, float stepRatio, float min, float max);
-    int32_t GetCurrentStepIndex();
-    SizeF GetStepPointAccessibilityVirtualNodeSize();
-    void UpdateStepPointsAccessibilityVirtualNodeSelected();
-    void SetStepPointAccessibilityVirtualNode(
-        const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
-
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     void SetSkipGestureEvents()
@@ -316,10 +300,6 @@ private:
     RefPtr<FrameNode> imageFrameNode_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
-
-    RefPtr<FrameNode> parentAccessibilityNode_;
-    std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
-    bool isInitAccessibilityVirtualNode_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };

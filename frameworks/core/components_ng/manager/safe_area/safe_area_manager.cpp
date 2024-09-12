@@ -22,8 +22,11 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(pipeline->GetUseCutout(), false);
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 
@@ -31,13 +34,15 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
         cutoutArea.top_.start = 0;
     }
     if (safeArea.bottom_.IsValid()) {
-        cutoutArea.bottom_.end = PipelineContext::GetCurrentRootHeight();
+        cutoutArea.bottom_.end = rootSize.Height().has_value() ? rootSize.Height().value()
+                                                               : PipelineContext::GetCurrentRootHeight();
     }
     if (cutoutArea.left_.IsValid()) {
         cutoutArea.left_.start = 0;
     }
     if (cutoutArea.right_.IsValid()) {
-        cutoutArea.right_.end = PipelineContext::GetCurrentRootWidth();
+        cutoutArea.right_.end = rootSize.Width().has_value() ? rootSize.Width().value()
+                                                             : PipelineContext::GetCurrentRootWidth();
     }
 
     if (cutoutSafeArea_ == cutoutArea) {
@@ -65,13 +70,13 @@ bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
+bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     uint32_t bottom;
     if (systemSafeArea_.bottom_.IsValid()) {
         bottom = systemSafeArea_.bottom_.start;
     } else {
-        bottom = PipelineContext::GetCurrentRootHeight();
+        bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
     }
     SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
     if (inset == keyboardInset_) {
@@ -190,36 +195,6 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
-}
-
-PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
-{
-    if (!withoutProcess) {
-#ifdef PREVIEW
-        if (ignoreSafeArea_) {
-            return {};
-        }
-#else
-        if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
-            return {};
-        }
-#endif
-    }
-    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
-    PaddingPropertyF result;
-    if (combinedSafeArea.left_.IsValid()) {
-        result.left = combinedSafeArea.left_.Length();
-    }
-    if (combinedSafeArea.top_.IsValid()) {
-        result.top = combinedSafeArea.top_.Length();
-    }
-    if (combinedSafeArea.right_.IsValid()) {
-        result.right = combinedSafeArea.right_.Length();
-    }
-    if (combinedSafeArea.bottom_.IsValid()) {
-        result.bottom = combinedSafeArea.bottom_.Length();
-    }
-    return result;
 }
 
 float SafeAreaManager::GetKeyboardOffset() const

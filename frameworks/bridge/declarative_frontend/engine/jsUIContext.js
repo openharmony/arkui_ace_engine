@@ -259,6 +259,32 @@ class UIContext {
         return this.UIInspector_;
     }
 
+    getFilteredInspectorTree(filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTree();
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTree(filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    getFilteredInspectorTreeById(id, depth, filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth, filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
     getComponentSnapshot() {
         this.ComponentSnapshot_ = new ComponentSnapshot(this.instanceId_);
         return this.ComponentSnapshot_;
@@ -537,6 +563,22 @@ class UIContext {
         return node;
     }
 
+    getFocusController() {
+        if (this.focusController_ == null) {
+            this.focusController_ = new FocusController(this.instanceId_);
+        }
+        return this.focusController_;
+    }
+
+    setDynamicDimming(id, number) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        if (!nodePtr) {
+            return;
+        }
+        Context.setDynamicDimming(nodePtr, number);
+    }
+
     getFrameNodeByUniqueId(uniqueId) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByUniqueId(uniqueId);
@@ -567,29 +609,13 @@ class UIContext {
         return navigationInfo;
     }
 
-    getFocusController() {
-        if (this.focusController_ == null) {
-            this.focusController_ = new FocusController(this.instanceId_);
-        }
-        return this.focusController_;
-    }
-
-    setDynamicDimming(id, number) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
-        if (!nodePtr) {
-            return;
-        }
-        Context.setDynamicDimming(nodePtr, number);
-    }
-
     getCursorController() {
         if (this.cursorController_ == null) {
             this.cursorController_ = new CursorController(this.instanceId_);
         }
         return this.cursorController_;
     }
-    
+
     getContextMenuController() {
         if (this.contextMenuController_ == null) {
             this.contextMenuController_ = new ContextMenuController(this.instanceId_);
@@ -604,10 +630,6 @@ class UIContext {
         return windowName
     }
 
-    clearResourceCache() {
-        getUINativeModule().resource.clearCache();
-    }
-
     postFrameCallback(frameCallback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         getUINativeModule().common.postFrameCallback(frameCallback, 0);
@@ -620,6 +642,10 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    clearResourceCache() {
+        getUINativeModule().resource.clearCache();
+    }
+    
     requireDynamicSyncScene(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let dynamicSceneInfo = getUINativeModule().requireDynamicSyncScene(id);
@@ -635,8 +661,22 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return [];
     }
-}
 
+    isFollowingSystemFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let isFollowing = Context.isFollowingSystemFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return isFollowing;
+    }
+
+    getMaxFontScale() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let maxFontScale = Context.getMaxFontScale();
+        __JSScopeUtil__.restoreInstanceId();
+        return maxFontScale;
+    }
+}
+ 
 class DynamicSyncScene {
     /**
      * Construct new instance of DynamicSyncScene.
@@ -652,12 +692,12 @@ class DynamicSyncScene {
             this.nodePtr = this.nodeRef.getNativeHandle();
         }
     }
-
+ 
     getFrameRateRange() {
         return this.frameRateRange;
     }
 }
-
+ 
 class SwiperDynamicSyncScene extends DynamicSyncScene {
     static Create(nodeRef) {
         let swiperDynamicSyncScene = [new SwiperDynamicSyncScene(nodeRef, 0), new SwiperDynamicSyncScene(nodeRef, 1)];
@@ -671,7 +711,7 @@ class SwiperDynamicSyncScene extends DynamicSyncScene {
 
     setFrameRateRange(frameRateRange) {
         this.frameRateRange = { ...frameRateRange };
-        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type); // -> this.nodeRef -> SetFrameRate.
+        getUINativeModule().setFrameRateRange(this.nodePtr, frameRateRange, this.type);
     }
 }
 
@@ -716,7 +756,7 @@ class CursorController {
         cursorControl.restoreDefault();
         __JSScopeUtil__.restoreInstanceId();
     }
-    
+
     setCursor(value) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         cursorControl.setCursor(value);
@@ -755,7 +795,7 @@ class ComponentUtils {
     }
     getRectangleById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof this.ohos_componentUtils.getRectangleById !== 'function'){
+        if (typeof this.ohos_componentUtils.getRectangleById !== 'function') {
             throw Error('getRectangleById is not callable');
         }
         let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id);
@@ -935,19 +975,6 @@ class PromptAction {
     showToast(options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_prompt.showToast(options);
-        __JSScopeUtil__.restoreInstanceId();
-    }
-
-    openToast(options) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let promise = this.ohos_prompt.openToast(options);
-        __JSScopeUtil__.restoreInstanceId();
-        return promise;
-    }
-
-    closeToast(toastId) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_prompt.closeToast(toastId);
         __JSScopeUtil__.restoreInstanceId();
     }
 

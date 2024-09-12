@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -347,13 +347,12 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { PASTE_BUTTON_COMPONENT_TAG, PASTE_BUTTON_ETS_TAG },
     { SAVE_BUTTON_COMPONENT_TAG, SAVE_BUTTON_ETS_TAG },
     { PARTICLE_COMPONENT_TAG, PARTICLE_ETS_TAG },
+    { CONTAINER_SPAN_COMPONENT_TAG, CONTAINER_SPAN_ETS_TAG },
     { SYMBOL_COMPONENT_TAG, SYMBOL_ETS_TAG },
     { SYMBOL_SPAN_COMPONENT_TAG, SYMBOL_SPAN_ETS_TAG },
     { ISOLATED_COMPONENT_TAG, ISOLATED_COMPONENT_ETS_TAG },
-    { CONTAINER_SPAN_COMPONENT_TAG, CONTAINER_SPAN_ETS_TAG },
     { EMBEDDED_COMPONENT_TAG, EMBEDDED_COMPONENT_ETS_TAG },
     { MOVING_PHOTO_COMPONENT_TAG, MOVING_PHOTO_ETS_TAG },
-    { LINEARINDICATOR_COMPONENT_TAG, LINEARINDICATOR_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

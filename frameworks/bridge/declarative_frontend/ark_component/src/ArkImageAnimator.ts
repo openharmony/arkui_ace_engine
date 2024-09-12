@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
-  constructor(value: Array<ImageFrameInfo>) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorImages');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -94,9 +91,6 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
 }
 
 class ImageAnimatorDurationModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorDuration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -111,9 +105,6 @@ class ImageAnimatorDurationModifier extends ModifierWithKey<number> {
 }
 
 class ImageAnimatorReverseModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorReverse');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -128,9 +119,6 @@ class ImageAnimatorReverseModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageAnimatorStateModifier extends ModifierWithKey<AnimationStatus> {
-  constructor(value: AnimationStatus) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -145,9 +133,6 @@ class ImageAnimatorStateModifier extends ModifierWithKey<AnimationStatus> {
 }
 
 class ImageAnimatorFixedSizeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorFixedSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -162,9 +147,6 @@ class ImageAnimatorFixedSizeModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageAnimatorFillModeModifier extends ModifierWithKey<FillMode> {
-  constructor(value: FillMode) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorFillMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -179,9 +161,6 @@ class ImageAnimatorFillModeModifier extends ModifierWithKey<FillMode> {
 }
 
 class ImageAnimatorIterationsModeModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageAnimatorIterationsMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

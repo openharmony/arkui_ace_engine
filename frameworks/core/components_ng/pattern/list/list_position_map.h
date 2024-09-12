@@ -63,6 +63,18 @@ public:
         posMap_[index] = { posInfo.mainPos, posInfo.mainSize };
     }
 
+    void UpdatePosWithCheck(int32_t index, PositionInfo posInfo)
+    {
+        auto iter = posMap_.find(index);
+        if (iter == posMap_.end()) {
+            posMap_[index] = posInfo;
+            return;
+        }
+        if (LessNotEqual(iter->second.mainSize, posInfo.mainSize)) {
+            iter->second.mainSize = posInfo.mainSize;
+        }
+    }
+
     void ClearPosMap()
     {
         posMap_.clear();

@@ -73,36 +73,12 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
             if (!fontLoader || !context) {
                 return;
             }
+            std::vector<uint8_t> fontData;
             TAG_LOGI(AceLogTag::ACE_FONT, "begin to load font from network.");
-            DownloadCallback downloadCallback;
-            downloadCallback.successCallback = [weak, weakContext](
-                                                   const std::string&& imageData, bool async, int32_t instanceId) {
-                ContainerScope scope(instanceId);
-                auto context = weakContext.Upgrade();
-                CHECK_NULL_VOID(context);
-                context->GetTaskExecutor()->PostTask(
-                    [imageData, weak] {
-                        auto fontLoader = weak.Upgrade();
-                        CHECK_NULL_VOID(fontLoader);
-                        // Load font.
-                        RosenFontCollection::GetInstance().LoadFontFromList(
-                            reinterpret_cast<const uint8_t*>(imageData.c_str()), imageData.size(),
-                            fontLoader->familyName_);
-                        fontLoader->isLoaded_ = true;
-                        // When font is already loaded, notify all which used this font.
-                        fontLoader->NotifyCallbacks();
-                    },
-                    TaskExecutor::TaskType::UI, "ArkUIFontLoadFromList");
-            };
-            downloadCallback.failCallback = [](std::string errorMessage, bool async, int32_t instanceId) {
-                TAG_LOGW(
-                    AceLogTag::ACE_FONT, "Sync Download font Failed,errorMessage is %{public}s", errorMessage.c_str());
-            };
-            downloadCallback.cancelCallback = downloadCallback.failCallback;
-            if (!DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback),
-                fontLoader->familySrc_, context->GetInstanceId(), -1)) {
+            if (!DownloadManager::GetInstance()->Download(fontLoader->familySrc_, fontData) || fontData.empty()) {
                 return;
             }
+            fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
         TaskExecutor::TaskType::BACKGROUND, "ArkUIFontLoadFromNetwork");
 }
@@ -120,14 +96,13 @@ void RosenFontLoader::LoadFromFile(const RefPtr<PipelineBase>& context)
 
             auto filePath = fontLoader->RemovePathHead(fontLoader->familySrc_);
             if (filePath.length() > PATH_MAX) {
-                TAG_LOGW(AceLogTag::ACE_FONT, "src path is too long");
+                LOGE("src path is too long");
                 return;
             }
-            TAG_LOGI(AceLogTag::ACE_FONT, "begin to load font from file.");
 
             auto assetData = fontLoader->GetAssetFromFile(filePath);
             if (!assetData) {
-                TAG_LOGW(AceLogTag::ACE_FONT, "No asset data!");
+                LOGE("No asset data!");
                 return;
             }
             const std::vector<uint8_t> fontData(assetData->GetData(), assetData->GetData() + assetData->GetSize());
@@ -139,47 +114,46 @@ void RosenFontLoader::LoadFromFile(const RefPtr<PipelineBase>& context)
 RefPtr<Asset> RosenFontLoader::GetAssetFromFile(const std::string& fileName) const
 {
     errno = 0;
+    LOGI("GetFile: %{private}s", fileName.c_str());
     char realPath[PATH_MAX] = { 0x00 };
     if (!RealPath(fileName, realPath)) {
         return nullptr;
     }
     auto fp = std::fopen(realPath, "rb");
     if (!fp) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
+        LOGE("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
         return nullptr;
     }
 
     if (std::fseek(fp, 0, SEEK_END) != 0) {
-        TAG_LOGW(
-            AceLogTag::ACE_FONT, "[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
+        LOGE("[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
         std::fclose(fp);
         return nullptr;
     }
 
     size_t size = std::ftell(fp);
     if (size < 0) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
+        LOGE("[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
         std::fclose(fp);
         return nullptr;
     }
 
     auto data = std::make_unique<char[]>(size);
     if (data == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "[%{private}s] new uint8_t array failed", fileName.c_str());
+        LOGE("[%{private}s] new uint8_t array failed", fileName.c_str());
         std::fclose(fp);
         return nullptr;
     }
 
     if (std::fseek(fp, 0, SEEK_SET) != 0) {
-        TAG_LOGW(
-            AceLogTag::ACE_FONT, "[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
+        LOGE("[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
         std::fclose(fp);
         return nullptr;
     }
 
     auto rsize = std::fread(data.get(), 1, size, fp);
     if (rsize <= 0) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
+        LOGE("[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
         std::fclose(fp);
         return nullptr;
     }
@@ -192,7 +166,7 @@ std::string RosenFontLoader::RemovePathHead(const std::string& uri)
 {
     auto iter = uri.find_first_of(':');
     if (iter == std::string::npos) {
-        TAG_LOGI(AceLogTag::ACE_FONT, "No need RemovePathHead.");
+        LOGW("No need RemovePathHead.");
         return uri;
     }
     std::string head = uri.substr(0, iter);
@@ -203,7 +177,7 @@ std::string RosenFontLoader::RemovePathHead(const std::string& uri)
         // iter + 3 to get the absolutely file path substring : "/data/data..." or the font file name: "font.ttf"
         return uri.substr(iter + 3);
     }
-    TAG_LOGW(AceLogTag::ACE_FONT, "Wrong scheme, not a valid File!");
+    LOGE("Wrong scheme, not a valid File!");
     return std::string();
 }
 
@@ -267,9 +241,9 @@ void RosenFontLoader::LoadFromAsset(const RefPtr<PipelineBase>& context)
             }
             auto assetManager = context->GetAssetManager();
             if (!assetManager) {
+                LOGE("No asset manager!");
                 return;
             }
-            TAG_LOGI(AceLogTag::ACE_FONT, "begin to load font from asset.");
             std::string assetSrc(fontLoader->familySrc_);
             if (assetSrc[0] == '/') {
                 assetSrc = assetSrc.substr(1); // get the asset src without '/'.
@@ -278,7 +252,7 @@ void RosenFontLoader::LoadFromAsset(const RefPtr<PipelineBase>& context)
             }
             auto assetData = assetManager->GetAsset(assetSrc);
             if (!assetData) {
-                TAG_LOGW(AceLogTag::ACE_FONT, "No asset data!");
+                LOGE("No asset data!");
                 return;
             }
             const std::vector<uint8_t> fontData(assetData->GetData(), assetData->GetData() + assetData->GetSize());

@@ -118,11 +118,6 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
     json->PutExtAttr("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str(), filter);
 
-    ToJsonValueForOption(json, filter);
-}
-
-void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? CovertShadowToJson(shadow.front()) : CovertShadowsToJson(shadow);

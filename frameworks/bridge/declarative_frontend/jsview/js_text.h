@@ -54,8 +54,8 @@ public:
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetWordBreak(const JSCallbackInfo& info);
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
-    static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
+    static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelectableMode(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetBaselineOffset(const JSCallbackInfo& info);
@@ -73,7 +73,6 @@ public:
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
-    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
@@ -81,8 +80,8 @@ public:
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
     static void JsClip(const JSCallbackInfo& info);
-    static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo &info);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void SetHalfLeading(const JSCallbackInfo& info);

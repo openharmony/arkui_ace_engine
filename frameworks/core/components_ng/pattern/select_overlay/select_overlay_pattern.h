@@ -175,10 +175,9 @@ public:
     {
         return isHiddenHandle_;
     }
-
+ 
     void StartHiddenHandleTask(bool isDelay = true);
     virtual void UpdateSelectArea(const RectF& selectArea);
-
     void SetIsNewAvoid(bool isNewAvoid);
 
     bool CheckIfNeedMenu();
@@ -192,7 +191,6 @@ public:
     void SetGestureEvent();
 
     static float GetHandleDiameter();
-    void OnDpiConfigurationUpdate() override;
 
 protected:
     virtual void CheckHandleReverse();

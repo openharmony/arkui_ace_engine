@@ -754,7 +754,8 @@ void JSParticle::Create(const JSCallbackInfo& args)
     }
     ParticleModel::GetInstance()->Create(arrayValue);
 }
-void JSParticle::AddDisturbance(std::vector<OHOS::Ace::ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj)
+void JSParticle::AddDisturbance(
+    std::vector<OHOS::Ace::ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj)
 {
     float strength = paramObj->GetProperty("strength")->ToNumber<float>();
     int shape = paramObj->GetProperty("shape")->ToNumber<int>();
@@ -826,10 +827,8 @@ void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)
     std::vector<ParticleDisturbance> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
     for (size_t i = 0; i < dataJsArray->Length(); i++) {
-        if (dataJsArray->GetValueAt(i)->IsObject()) {
-            auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
-            AddDisturbance(dataArray, jsObject);
-        }
+        auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+        AddDisturbance(dataArray, jsObject);
     }
 
     ParticleModel::GetInstance()->DisturbanceField(dataArray);
@@ -879,7 +878,7 @@ void JSParticle::JsEmitter(const JSCallbackInfo& args)
     }
     std::vector<EmitterProperty> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
-    int length = dataJsArray->Length();
+    size_t length = dataJsArray->Length();
     for (size_t i = 0; i < length; i++) {
         if (dataJsArray->GetValueAt(i)->IsObject()) {
             auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
