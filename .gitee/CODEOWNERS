@@ -1135,6 +1135,8 @@ frameworks/bridge/declarative_frontend/jsview/js_navigation.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navigation.h @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navigation_stack.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navigation_stack.h @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/js_navigation_utils.cpp @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/js_navigation_utils.h @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navigator.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navigator.h @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.cpp @arkui_superman

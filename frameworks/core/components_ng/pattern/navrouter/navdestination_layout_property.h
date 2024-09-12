@@ -20,14 +20,15 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/navigation/navdestination_layout_property_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT NavDestinationLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(NavDestinationLayoutProperty, LayoutProperty);
+class ACE_EXPORT NavDestinationLayoutProperty : public NavDestinationLayoutPropertyBase {
+    DECLARE_ACE_TYPE(NavDestinationLayoutProperty, NavDestinationLayoutPropertyBase);
 
 public:
     NavDestinationLayoutProperty() = default;
@@ -36,8 +37,8 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto copy = MakeRefPtr<NavDestinationLayoutProperty>();
-        copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        copy->propHideTitleBar_ = CloneHideTitleBar();
+        copy->NavDestinationLayoutPropertyBase::UpdateBaseLayoutProperty(
+            DynamicCast<NavDestinationLayoutPropertyBase>(this));
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
         copy->propPixelMap_ = ClonePixelMap();
@@ -46,19 +47,16 @@ public:
 
     void Reset() override
     {
-        LayoutProperty::Reset();
-        ResetHideTitleBar();
+        NavDestinationLayoutPropertyBase::Reset();
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     // back button icon
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
