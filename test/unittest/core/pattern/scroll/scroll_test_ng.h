@@ -56,15 +56,13 @@ public:
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateContentChild(int32_t childNumber = 10);
-    void MouseOnScroll(MouseButton mouseButton, MouseAction mouseAction, Offset localLocation);
-    void TouchOnScroll(TouchType touchType);
     bool OnScrollCallback(float offset, int32_t source);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
+    void ScrollBy(float pixelX, float pixelY);
     Axis GetAxis();
     AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
     AssertionResult ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset);
-    AssertionResult IsEqualCurrentPosition(float expectOffset);
     AssertionResult VerifyTickPosition(float expectOffset);
     void DragStart(GestureEvent& gesture);
     void DragUpdate(GestureEvent& gesture);
@@ -82,5 +80,4 @@ public:
     RefPtr<Scrollable> scrollable_;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H

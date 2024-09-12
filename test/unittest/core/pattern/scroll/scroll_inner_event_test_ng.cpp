@@ -36,6 +36,8 @@ const float HORIZONTAL_RATIO = SCROLL_WIDTH / CONTENT_MAIN_SIZE;
 
 class ScrollInnerEventTestNg : public ScrollTestNg {
 private:
+    void MouseOnScroll(MouseButton mouseButton, MouseAction mouseAction, Offset localLocation);
+    void TouchOnScroll(TouchType touchType);
     void HoverOnScrollBar(bool isHover);
     void TouchOnScrollBar(TouchType touchType, SourceType sourceType, Offset localLocation);
     void MouseOnScrollBar(MouseButton mouseButton, MouseAction mouseAction, Offset localLocation);
@@ -45,6 +47,26 @@ private:
     void DragScrollBarAction(Offset startOffset, float dragDelta, float velocity = 0);
     void CollectTouchTarget(Point point);
 };
+
+void ScrollInnerEventTestNg::MouseOnScroll(MouseButton mouseButton, MouseAction mouseAction, Offset localLocation)
+{
+    auto mouseEvent = pattern_->mouseEvent_->GetOnMouseEventFunc();
+    MouseInfo mouseInfo;
+    mouseInfo.SetButton(mouseButton);
+    mouseInfo.SetAction(mouseAction);
+    mouseInfo.SetLocalLocation(localLocation);
+    mouseEvent(mouseInfo);
+}
+
+void ScrollInnerEventTestNg::TouchOnScroll(TouchType touchType)
+{
+    TouchLocationInfo locationInfo(1);
+    locationInfo.SetTouchType(touchType);
+    TouchEventInfo eventInfo("touch");
+    eventInfo.AddTouchLocationInfo(std::move(locationInfo));
+    auto touchEvent = pattern_->touchEvent_->GetTouchEventCallback();
+    touchEvent(eventInfo);
+}
 
 void ScrollInnerEventTestNg::HoverOnScrollBar(bool isHover)
 {
