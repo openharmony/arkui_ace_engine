@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
 
 #include <optional>
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/swiper/swiper_controller.h"
-
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class SwiperControllerPeerImpl : public Referenced {
@@ -62,7 +61,8 @@ public:
         }
     }
 
-    void TriggerFinishAnimation(){
+    void TriggerFinishAnimation()
+    {
         for (auto &listener: listeners_) {
             listener->FinishAnimation();
         }
