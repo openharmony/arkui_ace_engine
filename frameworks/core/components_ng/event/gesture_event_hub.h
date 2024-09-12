@@ -693,6 +693,16 @@ public:
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
 #endif
 
+    void SetMenuPreviewScale(float menuPreviewScale)
+    {
+        menuPreviewScale_ = menuPreviewScale;
+    }
+
+    float GetMenuPreviewScale() const
+    {
+        return menuPreviewScale_;
+    }
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -779,6 +789,7 @@ private:
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
+    float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
 };
 
 } // namespace OHOS::Ace::NG
