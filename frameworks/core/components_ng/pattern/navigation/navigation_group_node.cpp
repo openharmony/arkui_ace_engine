@@ -97,12 +97,12 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     CHECK_NULL_VOID(pattern);
     auto navBar = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBar);
-    auto contentNode = navBar->GetNavBarContentNode();
+    auto contentNode = navBar->GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        navBar->SetNavBarContentNode(contentNode);
+        navBar->SetContentNode(contentNode);
         navBar->AddChild(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {

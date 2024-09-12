@@ -472,7 +472,7 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
     }
 
     NG::NavigationToolbarOptions options;
-    JSNavigationUtils::ParseToolbarBgOptions(info, options);
+    JSNavigationUtils::ParseToolbarOptions(info, options);
     NavigationModel::GetInstance()->SetToolbarOptions(std::move(options));
 }
 

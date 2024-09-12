@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -28,9 +29,8 @@
 
 namespace OHOS::Ace::NG {
 
-class NavBarPattern : public Pattern, public FocusView {
-    DECLARE_ACE_TYPE(NavBarPattern, Pattern, FocusView);
-
+class NavBarPattern : public NavDestinationPatternBase {
+    DECLARE_ACE_TYPE(NavBarPattern, NavDestinationPatternBase);
 public:
     NavBarPattern() = default;
     ~NavBarPattern() override = default;
@@ -169,6 +169,8 @@ public:
         return avoidKeyboardOffset_;
     }
 
+    Dimension GetTitleBarHeightBeforeMeasure() override;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -181,8 +183,6 @@ private:
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
-    bool isHideToolbar_ = false;
-    bool isHideTitlebar_ = false;
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::vector<NG::BarItem> toolBarMenuItems_;
     std::optional<int32_t> menuNodeId_;

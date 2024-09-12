@@ -78,11 +78,18 @@ void NavDestinationPattern::OnModifyDone()
     titleBarNode->SetInnerParentId(hostNode->GetInspectorId().value_or(""));
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
+    auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    isHideTitlebar_ = navDestinationLayoutProperty->GetHideTitleBar().value_or(false);
+    bool safeAreaOptSet = UpdateBarSafeAreaPadding();
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && navDestinationContentNode) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
         navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        safeAreaOptSet = true;
+    }
+    if (safeAreaOptSet) {
         navDestinationContentNode->MarkModifyDone();
     }
 
@@ -179,7 +186,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
     }
 
-    if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
+    if (isHideTitlebar_) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         titleBarNode->SetJSViewActive(false);
     } else {

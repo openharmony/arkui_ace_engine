@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/property/property.h"
@@ -30,10 +31,11 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT NavBarNode : public GroupNode {
-    DECLARE_ACE_TYPE(NavBarNode, GroupNode)
+class ACE_EXPORT NavBarNode : public NavDestinationNodeBase {
+    DECLARE_ACE_TYPE(NavBarNode, NavDestinationNodeBase)
 public:
-    NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern) : GroupNode(tag, nodeId, pattern)
+    NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : NavDestinationNodeBase(tag, nodeId, pattern)
     {}
     ~NavBarNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
@@ -98,16 +100,6 @@ public:
     const RefPtr<UINode>& GetTitleBarNode() const
     {
         return titleBarNode_;
-    }
-
-    void SetNavBarContentNode(const RefPtr<UINode>& navBarContentNode)
-    {
-        navBarContentNode_ = navBarContentNode;
-    }
-
-    const RefPtr<UINode>& GetNavBarContentNode() const
-    {
-        return navBarContentNode_;
     }
 
     void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
@@ -194,7 +186,6 @@ private:
     RefPtr<UINode> toolbarMoreMenuNode_;
     RefPtr<UINode> moreLandscapeMenuNode_;
     RefPtr<UINode> titleBarNode_;
-    RefPtr<UINode> navBarContentNode_;
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;

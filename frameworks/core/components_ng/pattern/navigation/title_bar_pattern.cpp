@@ -1650,4 +1650,25 @@ void TitleBarPattern::OnLanguageConfigurationUpdate()
     std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 }
+
+void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
+{
+    currentTitleBarHeight_ = currentTitleBarHeight;
+    auto navBarNode = DynamicCast<NavBarNode>(GetHost()->GetParent());
+    if (!navBarNode || options_.brOptions.barStyle.value_or(BarStyle::STANDARD) != BarStyle::SAFE_AREA_PADDING) {
+        return;
+    }
+    auto navBarContentNode = DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    CHECK_NULL_VOID(navBarContentNode);
+    auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
+    PaddingProperty paddingProperty;
+    paddingProperty.left = CalcLength(0.0f);
+    paddingProperty.right = CalcLength(0.0f);
+    paddingProperty.top = CalcLength(currentTitleBarHeight);
+    paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
+
+    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
+}
 } // namespace OHOS::Ace::NG

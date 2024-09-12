@@ -1011,6 +1011,7 @@ let BarStyle;
 (function (BarStyle) {
   BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
   BarStyle[BarStyle.STACK = 1] = "STACK";
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {

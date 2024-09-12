@@ -21,6 +21,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
@@ -31,11 +32,11 @@ class CustomNodeBase;
 
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
-class ACE_EXPORT NavDestinationGroupNode : public GroupNode {
-    DECLARE_ACE_TYPE(NavDestinationGroupNode, GroupNode)
+class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
+    DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : GroupNode(tag, nodeId, pattern)
+        : NavDestinationNodeBase(tag, nodeId, pattern)
     {}
     ~NavDestinationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
@@ -52,16 +53,6 @@ public:
     const RefPtr<UINode>& GetTitleBarNode() const
     {
         return titleBarNode_;
-    }
-
-    void SetContentNode(const RefPtr<UINode>& contentNode)
-    {
-        contentNode_ = contentNode;
-    }
-
-    const RefPtr<UINode>& GetContentNode() const
-    {
-        return contentNode_;
     }
 
     void SetNavDestinationBackButtonEvent(const NavDestinationBackButtonEvent& backButtonEvent)
@@ -218,7 +209,6 @@ public:
     }
 private:
     RefPtr<UINode> titleBarNode_;
-    RefPtr<UINode> contentNode_;
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
