@@ -2240,11 +2240,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest019, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
     value[0].i32 = ARKUI_XCOMPONENT_TYPE_TEXTURE;
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
-
+    value[0].f32 = 10.0f;
+    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_ID), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_TYPE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
