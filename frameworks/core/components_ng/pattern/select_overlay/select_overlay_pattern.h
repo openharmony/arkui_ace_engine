@@ -191,6 +191,7 @@ public:
     void SetGestureEvent();
 
     static float GetHandleDiameter();
+    void OnDpiConfigurationUpdate() override;
 
 protected:
     virtual void CheckHandleReverse();
