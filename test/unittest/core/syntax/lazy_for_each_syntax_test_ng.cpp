@@ -1360,7 +1360,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyDataCountChangedTest001, Te
      * @tc.steps: step3. Invoke NotifyDataCountChanged.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyDataCountChanged(INDEX_0);
+    lazyForEachNode->NotifyChangeWithCount(INDEX_0, 0, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
