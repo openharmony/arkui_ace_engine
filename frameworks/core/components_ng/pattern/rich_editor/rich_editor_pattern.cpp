@@ -965,7 +965,6 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     }
     auto spanItem = placeholderSpanNode->GetSpanItem();
     spanItem->content = " ";
-    spanItem->spanItemType = SpanItemType::CustomSpan;
     spanItem->SetCustomNode(customNode);
     AddSpanItem(spanItem, spanIndex);
     placeholderCount_++;
@@ -10494,7 +10493,8 @@ void RichEditorPattern::ReplacePlaceholderWithRawSpans(
         options.offset = caretPosition_;
         AddImageSpan(options, true, caretPosition_, true);
         textIndex = index + PLACEHOLDER_LENGTH;
-    } else if (spanItem->spanItemType == SpanItemType::CustomSpan) {
+    } else if (spanItem->spanItemType == SpanItemType::CustomSpan ||
+               spanItem->spanItemType == SpanItemType::PLACEHOLDER) {
         auto customSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
         CHECK_NULL_VOID(customSpanItem);
         auto customNode = customSpanItem->GetCustomNode();

@@ -150,7 +150,7 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -459,6 +459,7 @@ public:
 
     void UpdateContent(const uint32_t& unicode)
     {
+        spanItem_->spanItemType = SpanItemType::SYMBOL;
         if (spanItem_->unicode == unicode) {
             return;
         }
@@ -620,7 +621,10 @@ public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
     PlaceholderRun run_;
-    PlaceholderSpanItem() = default;
+    PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::PLACEHOLDER;
+    }
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,

@@ -491,39 +491,54 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
             }
             child->paragraphIndex = paragraphIndex;
             child->SetTextPattern(pattern);
-            auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
-            if (imageSpanItem) {
-                if (iterItems == children.end() || !(*iterItems)) {
-                    continue;
+            switch (child->spanItemType) {
+                case SpanItemType::NORMAL:
+                    child->aiSpanMap = aiSpanMap;
+                    AddTextSpanToParagraph(child, spanTextLength, frameNode, paragraph);
+                    aiSpanMap = child->aiSpanMap;
+                    break;
+                case SpanItemType::IMAGE: {
+                    if (iterItems == children.end() || !(*iterItems)) {
+                        continue;
+                    }
+                    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
+                    if (!imageSpanItem) {
+                        continue;
+                    }
+                    AddImageToParagraph(
+                        imageSpanItem, (*iterItems), layoutConstrain, paragraph, spanTextLength, textStyle);
+                    auto imageNode = (*iterItems)->GetHostNode();
+                    imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
+                    iterItems++;
+                    break;
                 }
-                AddImageToParagraph(imageSpanItem, (*iterItems), layoutConstrain, paragraph, spanTextLength, textStyle);
-                auto imageNode = (*iterItems)->GetHostNode();
-                imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
-                iterItems++;
-            } else if (AceType::DynamicCast<CustomSpanItem>(child)) {
-                CustomSpanPlaceholderInfo customSpanPlaceholder;
-                customSpanPlaceholder.paragraphIndex = paragraphIndex;
-                auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
-                UpdateParagraphByCustomSpan(
-                    customSpanItem, layoutWrapper, paragraph, spanTextLength, customSpanPlaceholder);
-                customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
-            } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
-                if (iterItems == children.end() || !(*iterItems)) {
-                    continue;
+                case SpanItemType::CustomSpan: {
+                    auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+                    if (!customSpanItem) {
+                        continue;
+                    }
+                    CustomSpanPlaceholderInfo customSpanPlaceholder;
+                    customSpanPlaceholder.paragraphIndex = paragraphIndex;
+                    UpdateParagraphByCustomSpan(
+                        customSpanItem, layoutWrapper, paragraph, spanTextLength, customSpanPlaceholder);
+                    customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
+                    break;
                 }
-                auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
-                if (!placeholderSpanItem) {
-                    continue;
+                case SpanItemType::PLACEHOLDER: {
+                    if (iterItems == children.end() || !(*iterItems)) {
+                        continue;
+                    }
+                    auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
+                    if (!placeholderSpanItem) {
+                        continue;
+                    }
+                    AddPlaceHolderToParagraph(
+                        placeholderSpanItem, (*iterItems), placeHolderLayoutConstrain, paragraph, spanTextLength);
+                    iterItems++;
+                    break;
                 }
-                AddPlaceHolderToParagraph(
-                    placeholderSpanItem, (*iterItems), placeHolderLayoutConstrain, paragraph, spanTextLength);
-                iterItems++;
-            } else if (child->unicode != 0) {
-                AddSymbolSpanToParagraph(child, spanTextLength, frameNode, paragraph);
-            } else {
-                child->aiSpanMap = aiSpanMap;
-                AddTextSpanToParagraph(child, spanTextLength, frameNode, paragraph);
-                aiSpanMap = child->aiSpanMap;
+                case SpanItemType::SYMBOL:
+                    AddSymbolSpanToParagraph(child, spanTextLength, frameNode, paragraph);
             }
         }
         preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
