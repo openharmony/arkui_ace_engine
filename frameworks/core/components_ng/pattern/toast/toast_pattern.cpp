@@ -190,6 +190,14 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     // add toast wrapper rect's offsetY.
     offsetY += Dimension(wrapperRect_.Top());
+    auto deviceHeight = context->GetRootHeight();
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+    auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if ((showMode == ToastShowMode::TOP_MOST) && (offsetY.Value() + textHeight > deviceHeight - keyboardOffset)) {
+        offsetY = Dimension(deviceHeight - keyboardOffset - defaultBottom_.ConvertToPx() - textHeight);
+    }
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
@@ -204,7 +212,8 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, 0.0);
-    auto toastBottom = toastProp->GetBottomValue(toastTheme->GetBottom());
+    defaultBottom_ = toastTheme->GetBottom();
+    auto toastBottom = toastProp->GetBottomValue(defaultBottom_);
     if (toastBottom.Unit() == DimensionUnit::PERCENT) {
         toastBottom = rootHeight * toastBottom.Value();
     }
