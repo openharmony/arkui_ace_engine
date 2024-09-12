@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const TEXT_MARGIN_TOP_4 = 4;
@@ -25,17 +25,17 @@ const TEXT_MARGIN_RIGHT_48 = 48;
 export class SplitLayout extends ViewPU {
     constructor(n4, o4, p4, q4 = -1, r4 = undefined, s4) {
         super(n4, p4, q4, s4);
-        if (typeof r4 === "function") {
+        if (typeof r4 === 'function') {
             this.paramsGenerator_ = r4;
         }
         this.container = undefined;
-        this.__sizeValue = new ObservedPropertySimplePU('', this, "sizeValue");
-        this.__areaWidth = new ObservedPropertySimplePU(0, this, "areaWidth");
-        this.__imageBackgroundColor = new ObservedPropertySimplePU("#19000000", this, "imageBackgroundColor");
-        this.__mainImage = new ObservedPropertyObjectPU(undefined, this, "mainImage");
-        this.__primaryText = new SynchedPropertySimpleOneWayPU(o4.primaryText, this, "primaryText");
-        this.secondaryText = "";
-        this.tertiaryText = "";
+        this.__sizeValue = new ObservedPropertySimplePU('', this, 'sizeValue');
+        this.__areaWidth = new ObservedPropertySimplePU(0, this, 'areaWidth');
+        this.__imageBackgroundColor = new ObservedPropertySimplePU('#19000000', this, 'imageBackgroundColor');
+        this.__mainImage = new ObservedPropertyObjectPU(undefined, this, 'mainImage');
+        this.__primaryText = new SynchedPropertySimpleOneWayPU(o4.primaryText, this, 'primaryText');
+        this.secondaryText = '';
+        this.tertiaryText = '';
         this.setInitiallyProvidedValue(o4);
         this.finalizeConstruction();
     }
@@ -56,7 +56,7 @@ export class SplitLayout extends ViewPU {
             this.mainImage = m4.mainImage;
         }
         if (m4.primaryText === undefined) {
-            this.__primaryText.set("");
+            this.__primaryText.set('');
         }
         if (m4.secondaryText !== undefined) {
             this.secondaryText = m4.secondaryText;
@@ -166,31 +166,31 @@ export class SplitLayout extends ViewPU {
                         Column.create();
                         Column.alignItems(HorizontalAlign.Center);
                         Column.margin({
-                            left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                            right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                     }, Column);
                     this.observeComponentCreation2((k3, l3) => {
                         Text.create(this.primaryText);
                         Text.fontWeight(FontWeight.Medium);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Title_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((i3, j3) => {
                         Text.create(this.secondaryText);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Body_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ top: TEXT_MARGIN_TOP_4, bottom: TEXT_MARGIN_BOTTOM_8 });
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((g3, h3) => {
                         Text.create(this.tertiaryText);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Caption_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Caption_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ bottom: TEXT_MARGIN_BOTTOM_24 });
                     }, Text);
                     Text.pop();
@@ -255,21 +255,21 @@ export class SplitLayout extends ViewPU {
                     this.observeComponentCreation2((c2, d2) => {
                         Text.create(this.primaryText);
                         Text.fontWeight(FontWeight.Medium);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Title_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((a2, b2) => {
                         Text.create(this.secondaryText);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Body_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ top: TEXT_MARGIN_TOP_4, bottom: TEXT_MARGIN_BOTTOM_8 });
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((y1, z1) => {
                         Text.create(this.tertiaryText);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Caption_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Caption_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ bottom: TEXT_MARGIN_BOTTOM_24 });
                     }, Text);
                     Text.pop();
@@ -328,24 +328,24 @@ export class SplitLayout extends ViewPU {
                         Column.create();
                         Column.alignItems(HorizontalAlign.Center);
                         Column.margin({
-                            left: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                            right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                            left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                     }, Column);
                     this.observeComponentCreation2((w, x) => {
                         Text.create(this.primaryText);
                         Text.textAlign(TextAlign.Center);
                         Text.fontWeight(FontWeight.Medium);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Title_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Title_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ left: TEXT_MARGIN_LEFT_48, right: TEXT_MARGIN_RIGHT_48 });
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((u, v) => {
                         Text.create(this.secondaryText);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Body_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Body_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ top: TEXT_MARGIN_TOP_4, bottom: TEXT_MARGIN_BOTTOM_8,
                             left: TEXT_MARGIN_LEFT_48, right: TEXT_MARGIN_RIGHT_48 });
                     }, Text);
@@ -353,8 +353,8 @@ export class SplitLayout extends ViewPU {
                     this.observeComponentCreation2((s, t) => {
                         Text.create(this.tertiaryText);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.Caption_M'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.Caption_M'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.margin({ left: TEXT_MARGIN_LEFT_48, right: TEXT_MARGIN_RIGHT_48, bottom: TEXT_MARGIN_BOTTOM_24 });
                     }, Text);
                     Text.pop();
