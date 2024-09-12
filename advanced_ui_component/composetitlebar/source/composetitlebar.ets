@@ -217,7 +217,7 @@ struct CollapsibleMenuSection {
     }
   }
 
-  decideFontScale(): number{
+  decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
       this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
@@ -396,7 +396,7 @@ struct ImageMenuItem {
     customStyle: true,
   })
 
-  private textDialog(): ResourceStr{
+  private textDialog(): ResourceStr {
     if (this.item.value === PUBLIC_MORE) {
       return $r('sys.string.ohos_toolbar_more');
     } else if (this.item.value === PUBLIC_BACK) {
@@ -435,7 +435,7 @@ struct ImageMenuItem {
   }
 
 
-  decideFontScale(): number{
+  decideFontScale(): number {
     try {
       let uiContent: UIContext = this.getUIContext();
       this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
@@ -619,7 +619,7 @@ struct ComposeTitleBarDialog {
     }
   }
 
-  async aboutToAppear(): Promise<void>{
+  async aboutToAppear(): Promise<void> {
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
     this.mainWindowStage = context.windowStage.getMainWindowSync();
     let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
