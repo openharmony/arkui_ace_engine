@@ -1174,7 +1174,8 @@ class OperateItemStruct extends ViewPU {
             });
             Text.marqueeOptions({
                 start: this.isFocus,
-                fadeout: true
+                fadeout: true,
+                marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
             Text.maxLines(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_maxLines_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value);
             Text.focusable(true);
@@ -1245,7 +1246,7 @@ class OperateItemStruct extends ViewPU {
             Radio.radioStyle({
                 uncheckedBorderColor: this.getUnselectedColor()
             });
-            Radio.backgroundColor(this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent);
+            Radio.backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent);
             Radio.borderRadius(OPERATE_ITEM_RADIUS);
             Radio.onChange((isCheck) => {
                 this.radioState = isCheck;
@@ -1489,7 +1490,8 @@ class OperateItemStruct extends ViewPU {
                         });
                         Text.marqueeOptions({
                             start: this.isFocus,
-                            fadeout: true
+                            fadeout: true,
+                            marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
                         })
                         Text.maxLines(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.composeListItem_maxLines_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }).value);
                         Text.focusable(true);
@@ -2128,7 +2130,7 @@ export class ComposeListItem extends ViewPU {
                 y: this.isFocus ? FOCUSED_SCALE : RECOVER_YSCALE
             });
             Stack.shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW);
-            Stack.padding({
+            Stack.margin({
                 left: STACK_PADDING,
                 right: STACK_PADDING
             });

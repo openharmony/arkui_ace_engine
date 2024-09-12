@@ -539,7 +539,8 @@ struct OperateItemStruct {
       })
       .marqueeOptions({
         start: this.isFocus,
-        fadeout: true
+        fadeout: true,
+        marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
       })
       .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
       .focusable(true)
@@ -607,7 +608,7 @@ struct OperateItemStruct {
       .radioStyle({
         uncheckedBorderColor: this.getUnselectedColor()
       })
-      .backgroundColor(this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
+      .backgroundColor(!IS_CLOSE_CHILD_FOCUS && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
         this.radioState = isCheck;
@@ -779,7 +780,8 @@ struct OperateItemStruct {
             })
             .marqueeOptions({
               start: this.isFocus,
-              fadeout: true
+              fadeout: true,
+              marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
             })
             .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
             .focusable(true)
@@ -1251,7 +1253,7 @@ export struct ComposeListItem {
       y: this.isFocus ? FOCUSED_SCALE : RECOVER_YSCALE
     })
     .shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW)
-    .padding({
+    .margin({
       left: STACK_PADDING,
       right: STACK_PADDING
     })
