@@ -14,6 +14,7 @@
  */
 
 #include "image_base.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,16 +67,17 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdateBorderRadius, Test
      */
     RefPtr<PaintWrapper> paintWrapperNull = AceType::MakeRefPtr<PaintWrapper>(nullptr, nullptr, nullptr);
     PaintWrapper* imagePaintWrapperNullRaw_ = AceType::RawPtr(paintWrapperNull);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperNullRaw_);
+    ImageDfxConfig imageDfxConfig;
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperNullRaw_, imageDfxConfig);
     PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
     BorderWidthProperty borderWidth_;
     frameNode->GetRenderContext()->UpdateBorderWidth(borderWidth_);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
     borderWidth_.SetBorderWidth(IMAGE_SOURCEINFO_WIDTH);
     frameNode->GetRenderContext()->UpdateBorderWidth(borderWidth_);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
     EXPECT_EQ(imagePaintMethod_->selected_, true);
 }
 

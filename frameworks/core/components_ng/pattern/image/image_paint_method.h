@@ -52,7 +52,7 @@ public:
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
-    void UpdateBorderRadius(PaintWrapper* paintWrapper);
+    void UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxConfig& imageDfxConfig);
     RefPtr<CanvasImage> canvasImage_;
     bool selected_ = false;
     RefPtr<ImageOverlayModifier> imageOverlayModifier_;

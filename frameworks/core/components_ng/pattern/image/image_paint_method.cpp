@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/image/image_theme.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 
@@ -44,7 +45,7 @@ void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
 }
 } // namespace
 
-void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
+void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxConfig& imageDfxConfig)
 {
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
@@ -85,6 +86,7 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
     NormalizeRadius(radiusXY, paintWrapper->GetContentSize());
     auto&& config = canvasImage_->GetPaintConfig();
     config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
+    imageDfxConfig.borderRadiusValue_ = borderRadius->ToString();
 }
 
 void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)
@@ -117,7 +119,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     }
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
-        UpdateBorderRadius(paintWrapper);
+        UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }
 }
 
