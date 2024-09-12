@@ -205,10 +205,6 @@ class ArcList extends List {
         List.scrollBarColor(value);
     }
 
-    static childrenMainSize(value) {
-        List.childrenMainSize(!value ? new ChildrenMainSize(0) : value);
-    }
-
     static digitalCrownSensitivity(value) {
         __ArcList__.digitalCrownSensitivity(value);
     }

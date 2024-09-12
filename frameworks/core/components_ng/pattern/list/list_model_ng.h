@@ -76,6 +76,7 @@ public:
 
     DisplayMode GetDisplayMode() const override;
     void SetHeader(const RefPtr<FrameNode>& headerNode) override;
+    void ResetListChildrenMainSize() override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
