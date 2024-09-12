@@ -316,21 +316,20 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
-    FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
-
+    auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     RefPtr<FrameNode> inPageNode;
     if (needShowNext && children.size() >= transitionPageSize) {
         auto newPageNode = *(++children.rbegin());
-        FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+    FireAutoSave(outPageNode, inPageNode);
+    FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
+    FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
 
     // close keyboard
     PageChangeCloseKeyboard();
 
-    auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     AddPageTransitionTrace(outPageNode, inPageNode);
-    FireAutoSave(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
         inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -512,7 +511,6 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode)
 {
     CHECK_NULL_VOID(outPageNode);
-    CHECK_NULL_VOID(inPageNode);
     auto outPagePattern = outPageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(outPagePattern);
     auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(inPageNode)]() {
