@@ -1046,7 +1046,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
     CreateTabsDone(model);
     auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->SetIsFocusActive(true);
+    pipeline->isFocusActive_ = true;
     /**
      * @tc.steps: step1. call OnKeyEvent use Axis::HORIZONTAL and KeyCode::KEY_TAB and isCustomAnimation_ is true
      */
