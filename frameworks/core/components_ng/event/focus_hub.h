@@ -1007,7 +1007,7 @@ public:
     
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut = true);
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();

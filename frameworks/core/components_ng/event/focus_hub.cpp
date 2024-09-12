@@ -968,9 +968,9 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
 
 bool FocusHub::CheckArrowKeyStepOut(bool ret, FocusStep moveStep)
 {
-    if (!ret && !IsFocusStepTab(moveStep) && GetIsFocusScope() && !GetArrowKeyStepOut()) {
+    if (!ret && !IsFocusStepTab(moveStep) && GetIsFocusGroup() && !GetArrowKeyStepOut()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "CheckArrowKeyStepOut node(%{public}s/%{public}d), ret %{public}d, step(%{public}d),"
+            "CheckArrowKeyStepOut Node(%{public}s/%{public}d), ret %{public}d, step(%{public}d),"
             "this node is focus group and set can not step out!",
             GetFrameName().c_str(), GetFrameId(), ret, moveStep);
         return true;

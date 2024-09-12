@@ -94,7 +94,7 @@ static napi_value JSActivate(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, type == napi_boolean, "the type of argv[0] is not bool");
     bool isActive = false;
     napi_get_value_bool(env, argv[0], &isActive);
-    
+
     bool autoInactive = true;
     if (argc == ARGC_ACTIVATE_PARAMTER) {
         napi_typeof(env, argv[1], &type);

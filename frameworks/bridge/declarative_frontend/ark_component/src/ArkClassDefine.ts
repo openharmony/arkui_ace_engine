@@ -1470,7 +1470,7 @@ class ArkFocusScopeId {
   }
   isEqual(another: ArkFocusScopeId): boolean {
     return ((this.id === another.id) && (this.isGroup === another.isGroup) &&
-       (this.arrowKeyStepOut === another.arrowKeyStepOut));
+      (this.arrowKeyStepOut === another.arrowKeyStepOut));
   }
 }
 
