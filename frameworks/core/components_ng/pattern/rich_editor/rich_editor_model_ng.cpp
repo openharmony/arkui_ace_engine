@@ -547,8 +547,11 @@ void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
 
 void RichEditorModelNG::SetBarState(DisplayMode mode)
 {
-    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
-    CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetBarState(mode);
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode);
+}
+
+void RichEditorModelNG::SetBarState(FrameNode* frameNode, DisplayMode mode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode, frameNode);
 }
 } // namespace OHOS::Ace::NG
