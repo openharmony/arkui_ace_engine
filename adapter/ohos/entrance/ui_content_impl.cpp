@@ -20,17 +20,21 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
-#include "base/memory/referenced.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
 #include "configuration.h"
+#include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
+#include "iservice_registry.h"
 #include "js_runtime_utils.h"
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
 #include "service_extension_context.h"
+#include "system_ability_definition.h"
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -303,6 +307,94 @@ void AddAlarmLogFunc()
     OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
 
+
+void DeduplicateAvoidAreas(const RefPtr<NG::PipelineContext>& context,
+    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const ViewportConfig& config)
+{
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    for (auto& avoidArea : avoidAreas) {
+        if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
+            if (safeAreaManager->CheckSystemSafeArea(insets)) {
+                updatingInsets[avoidArea.first] = insets;
+            }
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
+            if (safeAreaManager->CheckNavArea(insets)) {
+                updatingInsets[avoidArea.first] = insets;
+            }
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
+            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
+            if (safeAreaManager->CheckCutoutSafeArea(insets,
+                NG::OptionalSize<uint32_t>(config.Width(), config.Height()))) {
+                updatingInsets[avoidArea.first] = insets;
+            }
+        }
+    }
+}
+
+void ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
+    const std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+    const ViewportConfig& config)
+{
+    if (updatingInsets.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    for (auto& insets : updatingInsets) {
+        if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            safeAreaManager->UpdateSystemSafeArea(insets.second);
+        } else if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            safeAreaManager->UpdateNavArea(insets.second);
+        } else if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
+            safeAreaManager->UpdateCutoutSafeArea(insets.second,
+                NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+        }
+    }
+    context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+}
+
+void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    if (avoidAreas.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    // for ui extension component
+    for (auto& avoidArea : avoidAreas) {
+        context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first));
+    }
+}
+
+void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
+    const std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const ViewportConfig& config,
+    const RefPtr<Platform::AceContainer>& container)
+{
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
+    if (updatingInsets.find(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) == updatingInsets.end()) {
+        safeAreaManager->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
+            NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+    }
+    ParseAvoidAreasUpdate(context, updatingInsets, config);
+    AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+}
+
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
 public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -386,12 +478,10 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d, instanceId %{public}d",
-            type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
-            (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_, instanceId_);
+        ACE_SCOPED_TRACE("OnAvoidAreaChanged: incoming avoidArea: %s, instanceId %d, type %d",
+            avoidArea.ToString().c_str(), instanceId_, type);
+        TAG_LOGI(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
+            avoidArea.ToString().c_str(), instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto pipeline = container->GetPipelineContext();
@@ -1261,10 +1351,17 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
         context->SetFollowSystem(isFollowSystem);
     }
     if (!maxAppFontScale.empty()) {
-        context->SetMaxAppFontScale(std::stof(maxAppFontScale));
+        context->SetMaxAppFontScale(StringUtils::StringToFloat(maxAppFontScale));
     }
     if (!isFollowSystem) {
         context->SetFontScale(1.0f);
+    }
+
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    bool useAppFontScale = !fontScale.empty();
+    context->SetUseAppFontScale(useAppFontScale);
+    if (useAppFontScale) {
+        context->SetAppFontScale(StringUtils::StringToFloat(fontScale));
     }
 }
 
@@ -1800,8 +1897,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
-        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
-            rsConfig.durationOut_ };
+        KeyboardAnimationCurve curveIn = {
+            rsConfig.curveIn.curveType_, rsConfig.curveIn.curveParams_, rsConfig.curveIn.duration_};
+        KeyboardAnimationCurve curveOut = {
+            rsConfig.curveOut.curveType_, rsConfig.curveOut.curveParams_, rsConfig.curveOut.duration_};
+        KeyboardAnimationConfig config = {curveIn, curveOut};
         pipeline->SetKeyboardAnimationConfig(config);
     }
     // Set sdk version in module json mode
@@ -1894,7 +1994,6 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
         (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
         avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
-        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         if (pipeline->GetUseCutout()) {
             pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
@@ -2095,7 +2194,7 @@ void UIContentImpl::SetWindowContainerColor(uint32_t activeColor, uint32_t inact
         TaskExecutor::TaskType::UI, "ArkUISetWindowContainerColor");
 }
 
-void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
+void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2108,12 +2207,30 @@ void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
     CHECK_NULL_VOID(stageNode);
     auto renderContext = stageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    auto rect = renderContext->GetPaintRectWithoutTransform();
     auto offset = stageNode->GetPaintRectOffset(false);
-    paintrect.posX_ = static_cast<int>(offset.GetX());
-    paintrect.posY_ = static_cast<int>(offset.GetY());
-    paintrect.width_ = static_cast<uint32_t>(paintRectf.Width());
-    paintrect.height_ = static_cast<uint32_t>(paintRectf.Height());
+    paintRect.posX_ = static_cast<int32_t>(offset.GetX());
+    paintRect.posY_ = static_cast<int32_t>(offset.GetY());
+    paintRect.width_ = static_cast<uint32_t>(rect.Width());
+    paintRect.height_ = static_cast<uint32_t>(rect.Height());
+}
+
+void UIContentImpl::GetWindowPaintSize(OHOS::Rosen::Rect& paintRect)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(window_);
+    auto windowRect = window_->GetRect();
+    NG::RectInt rect;
+    rect.SetRect(0, 0, windowRect.width_, windowRect.height_);
+    pipelineContext->GetWindowPaintRectWithoutMeasureAndLayout(rect);
+    paintRect.posX_ = static_cast<int32_t>(rect.GetX());
+    paintRect.posY_ = static_cast<int32_t>(rect.GetY());
+    paintRect.width_ = static_cast<uint32_t>(rect.Width());
+    paintRect.height_ = static_cast<uint32_t>(rect.Height());
 }
 
 bool UIContentImpl::ProcessBackPressed()
@@ -2260,14 +2377,16 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction);
+    UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
 }
 
 void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& config,
     OHOS::Rosen::WindowSizeChangeReason reason, AnimationOption animationOpt,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
@@ -2306,21 +2425,28 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
     }
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager,
-                    isDynamicRender = isDynamicRender_, animationOpt]() {
+    if (safeAreaManager) {
+        DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
+    }
+
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
+                    isDynamicRender = isDynamicRender_, animationOpt, updatingInsets, avoidAreas]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
-            if (safeAreaManager) {
-                uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
-                safeAreaManager->UpdateCutoutSafeArea(
-                    container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
-                    NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+            auto uiExtensionFlushFinishCallback = [rsWindow]() {
+                CHECK_NULL_VOID(rsWindow);
+                rsWindow->NotifyExtensionEventAsync(0);
+            };
+            if (container->IsUIExtensionWindow()) {
+                pipelineContext->EnWaitFlushFinish();
+                pipelineContext->SetUIExtensionFlushFinishCallback(uiExtensionFlushFinishCallback);
             }
+            UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
@@ -2366,11 +2492,13 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     };
     taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
-    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
+    bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
+    if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
-    } else if (rsTransaction != nullptr) {
+    } else if (rsTransaction != nullptr || !updatingInsets.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
+        // When avoidAreas need updating, the task shouldn't be cancelled.
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
@@ -2399,8 +2527,8 @@ void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config
 
 void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
+    TAG_LOGI(ACE_LAYOUT, "[%{public}s][%{public}s][%{public}d]: SetIgnoreViewSafeArea:%{public}u",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, ignoreViewSafeArea);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
@@ -2582,7 +2710,19 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     CHECK_NULL_VOID(window_);
     RefPtr<Container> container;
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
-
+    int32_t deviceWidth = 0;
+    int32_t deviceHeight = 0;
+    float density = 1.0f;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        auto displayInfo = defaultDisplay->GetDisplayInfo();
+        if (displayInfo) {
+            density = displayInfo->GetDensityInCurResolution();
+        }
+        deviceWidth = defaultDisplay->GetWidth();
+        deviceHeight = defaultDisplay->GetHeight();
+    }
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     auto context = context_.lock();
     bool isCJFrontend = CJUtils::IsCJFrontendContext(context.get());
@@ -2622,8 +2762,17 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
-        auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-        container->SetApiTargetVersion(apiTargetVersion);
+        // if window don't have context,like service eject a toast,find target version in bundle.
+        auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_NULL_VOID(systemAbilityMgr);
+        auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHECK_NULL_VOID(bundleObj);
+        auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+        CHECK_NULL_VOID(bundleMgrProxy);
+        AppExecFwk::BundleInfo bundleInfo;
+        bundleMgrProxy->GetBundleInfoForSelf(
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        container->SetApiTargetVersion(bundleInfo.targetVersion % 1000);
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -2762,6 +2911,18 @@ void UIContentImpl::RegisterAccessibilityChildTree(
 }
 
 void UIContentImpl::SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    auto accessibilityManager = front->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SetAccessibilityGetParentRectHandler(std::move(callback));
+}
+
+void UIContentImpl::SetAccessibilityGetParentRectHandler(
+    std::function<void(AccessibilityParentRectInfo&)>&& callback)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);

@@ -414,7 +414,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm010, TestSi
     layoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
     alignRule.anchor = "LEFT";
     std::map<AlignDirection, AlignRule> tempMap = { { AlignDirection::LEFT, alignRule } };
-    nextNodeFlexItem->propAlignRules = tempMap;
+    nextNodeFlexItem->propAlignRules_ = tempMap;
     relativeContainerLayoutAlgorithm->CheckNodeInHorizontalChain(
         currentNode, nextNode, currentAlignRules, chainNodes, rightAnchor);
     EXPECT_NE(currentAlignRules.size(), 0);

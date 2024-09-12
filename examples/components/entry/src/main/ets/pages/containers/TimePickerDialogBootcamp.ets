@@ -72,7 +72,6 @@ export struct TimePickerDialogBootcamp {
   @State enableCancelButtonBorderRadius: boolean = false;
   @State cancelButtonBorderRadius: Length = 10;
 
-
   build() {
     NavDestination() {
       Drawer({
@@ -165,6 +164,7 @@ export struct TimePickerDialogBootcamp {
             { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
+
         RadioBlock({
           title: '取消按钮类型',
           isEnabled: this.enabledCancelButtonType,
@@ -187,6 +187,7 @@ export struct TimePickerDialogBootcamp {
             { label: '文本型', value: ButtonStyleMode.TEXTUAL }
           ]
         })
+
         RadioBlock({
           title: '取消按钮样式',
           isEnabled: this.enableCancelButtonStyle,
@@ -218,6 +219,7 @@ export struct TimePickerDialogBootcamp {
             { label: 'ERROR', value: ButtonRole.ERROR }
           ]
         })
+
         RadioBlock({
           title: '取消按钮角色',
           isEnabled: this.enableCancelButtonRole,
@@ -237,6 +239,7 @@ export struct TimePickerDialogBootcamp {
             { label: '小型', value: '12fp' }
           ]
         })
+
         RadioBlock({
           title: '取消按钮尺寸',
           isEnabled: this.enableCancelButtonFontSize,
@@ -256,6 +259,7 @@ export struct TimePickerDialogBootcamp {
             { label: '加粗', value: 800 }
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体粗细',
           isEnabled: this.enableCancelButtonFontWeight,
@@ -275,6 +279,7 @@ export struct TimePickerDialogBootcamp {
             { label: 'Italic', value: FontStyle.Italic }
           ]
         })
+
         RadioBlock({
           title: '取消按钮字体样式',
           isEnabled: this.enableCancelButtonFontStyle,
@@ -290,6 +295,7 @@ export struct TimePickerDialogBootcamp {
           isEnabled: this.enableAcceptButtonBackGroundColor,
           color: this.acceptButtonBackGroundColor
         })
+
         ColorBlock({
           title: '取消按钮背景颜色',
           isEnabled: this.enableCancelButtonBackGroundColor,
@@ -305,6 +311,7 @@ export struct TimePickerDialogBootcamp {
             { label: '较大', value: 100 }
           ]
         })
+
         RadioBlock({
           title: '取消按钮边框圆角半径',
           isEnabled: this.enableCancelButtonBorderRadius,
@@ -335,7 +342,6 @@ export struct TimePickerDialogBootcamp {
           ]
         })
       }.width('100%')
-
     }.height('50%')
   }
 }
@@ -343,7 +349,7 @@ export struct TimePickerDialogBootcamp {
 @Preview
 @Component
 struct TimePickerDialogBootcampPreviewer {
-  build(){
+  build() {
     TimePickerDialogBootcamp({
       title: '时间选择器弹窗'
     })

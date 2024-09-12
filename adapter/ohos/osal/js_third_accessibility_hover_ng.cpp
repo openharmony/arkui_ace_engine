@@ -97,7 +97,26 @@ bool AccessibilityHoverManagerForThirdNG::HasAccessibilityTextOrDescription(
 bool AccessibilityHoverManagerForThirdNG::IsAccessibilityFocusable(
     const AccessibilityElementInfo& nodeInfo)
 {
-    return true;
+    auto level = nodeInfo.GetAccessibilityLevel();
+    if (level == NG::AccessibilityProperty::Level::YES_STR) {
+        return true;
+    }
+    if (level == NG::AccessibilityProperty::Level::NO_STR) {
+        return false;
+    }
+    if (nodeInfo.GetAccessibilityGroup() ||
+        !nodeInfo.GetActionList().empty() ||
+        HasAccessibilityTextOrDescription(nodeInfo) ||
+        !nodeInfo.GetContent().empty()) {
+        return true;
+    }
+    // expand to enabled and clickable
+    // default tag
+    if (NG::AccessibilityProperty::IsAccessibilityFocusableTag(
+        nodeInfo.GetComponentType()) == true) {
+        return true;
+    }
+    return false;
 }
 
 std::pair<bool, bool> AccessibilityHoverManagerForThirdNG::GetSearchStrategyForThird(
@@ -278,7 +297,7 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
             nodeInfo.GetAccessibilityId());
         return true;
     }
-
+    renderContext->UpdateAccessibilityFocus(false);
     auto [displayOffset, err] = hostNode->GetPaintRectGlobalOffsetWithTranslate();
     auto rectInScreen = nodeInfo.GetRectInScreen();
     auto left = rectInScreen.GetLeftTopXScreenPostion() - static_cast<int32_t>(displayOffset.GetX());
@@ -311,10 +330,10 @@ void AccessibilityHoverManagerForThirdNG::DeregisterJsThirdProviderInteractionOp
 
 namespace {
 enum class DumpMode {
-        TREE,
-        NODE,
-        HANDLE_EVENT,
-        HOVER_TEST
+    TREE,
+    NODE,
+    HANDLE_EVENT,
+    HOVER_TEST
 };
 
 struct DumpInfoArgument {
@@ -393,7 +412,7 @@ void AccessibilityHoverManagerForThirdNG::DumpPropertyForThird(
     }
 
     Accessibility::AccessibilityElementInfo info = infos.front();
-    jsAccessibilityManagerTemp->DumpCommonPropertyNG(info, splitTreeId); 
+    jsAccessibilityManagerTemp->DumpCommonPropertyNG(info, splitTreeId);
     jsAccessibilityManagerTemp->DumpAccessibilityPropertyNG(info);
     DumpLog::GetInstance().Print(0, info.GetComponentType(), info.GetChildCount());
 }

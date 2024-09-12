@@ -115,7 +115,7 @@ void SwiperPattern::OnAttachToFrameNode()
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -360,7 +360,6 @@ void SwiperPattern::OnModifyDone()
     InitCapture();
     CheckSpecialItemCount();
     SetLazyLoadIsLoop();
-    SetRepeatLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
@@ -434,11 +433,6 @@ int32_t SwiperPattern::CheckUserSetIndex(int32_t index)
 
 void SwiperPattern::UpdateIndicatorOnChildChange()
 {
-    if (GetIndicatorType() == SwiperIndicatorType::DOT && RealTotalCount() == 0) {
-        RemoveIndicatorNode();
-        return;
-    }
-
     if (HasIndicatorNode()) {
         StopIndicatorAnimation();
         auto host = GetHost();
@@ -448,8 +442,6 @@ void SwiperPattern::UpdateIndicatorOnChildChange()
             indicatorNode->MarkModifyDone();
             indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
-    } else {
-        InitIndicator();
     }
 }
 
@@ -560,7 +552,9 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     auto callback = [weak = WeakClaim(this), captureId, targetIndex, hostInstanceId = GetHostInstanceId()](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
         ContainerScope scope(hostInstanceId);
-        auto piplineContext = PipelineContext::GetCurrentContext();
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        auto piplineContext = swiper->GetContext();
         CHECK_NULL_VOID(piplineContext);
         auto taskExecutor = piplineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -574,7 +568,7 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     };
     if (forceUpdate) {
         // The size changes caused by layout need to wait for rendering before taking a screenshot
-        auto piplineContext = PipelineContext::GetCurrentContext();
+        auto piplineContext = GetContext();
         CHECK_NULL_VOID(piplineContext);
         auto taskExecutor = piplineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -621,9 +615,7 @@ void SwiperPattern::UpdateCaptureSource(
 
 void SwiperPattern::InitSurfaceChangedCallback()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
         auto callbackId = pipeline->RegisterSurfaceChangedCallback(
@@ -1000,7 +992,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         auto iter = itemPosition_.find(targetIndexValue);
         if (iter != itemPosition_.end()) {
             float targetPos = iter->second.startPos;
-            auto context = GetContext();
             auto props = GetLayoutProperty<SwiperLayoutProperty>();
             bool isNeedForwardTranslate = false;
             if (IsLoop()) {
@@ -1017,6 +1008,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             }
             bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ || isNeedForwardTranslate ||
                                                 isNeedBackwardTranslate || AutoLinearAnimationNeedReset(targetPos);
+            auto context = GetContext();
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -1482,7 +1474,7 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
     if (needUnmountIndexs_.find(index) == needUnmountIndexs_.end()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -1546,10 +1538,9 @@ void SwiperPattern::StopSpringAnimationAndFlushImmediately()
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
         MarkDirtyNodeSelf();
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
     }
 }
 
@@ -1587,10 +1578,9 @@ void SwiperPattern::SwipeTo(int32_t index)
         StopSpringAnimationImmediately();
         jumpIndex_ = currentIndex_;
         MarkDirtyNodeSelf();
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
     }
     StopAutoPlay();
     StopTranslateAnimation();
@@ -1704,10 +1694,9 @@ void SwiperPattern::ShowNext()
         targetIndex_ = CheckTargetIndex(currentIndex_ + stepItems);
         preTargetIndex_ = targetIndex_;
         MarkDirtyNodeSelf();
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
     } else {
         SwipeToWithoutAnimation(currentIndex_ + stepItems);
     }
@@ -1759,10 +1748,9 @@ void SwiperPattern::ShowPrevious()
         targetIndex_ = CheckTargetIndex(currentIndex_ - stepItems);
         preTargetIndex_ = targetIndex_;
         MarkDirtyNodeSelf();
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
     } else {
         SwipeToWithoutAnimation(currentIndex_ - stepItems);
     }
@@ -1858,9 +1846,8 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
 
         swiperPattern->FirePreloadFinishEvent(ERROR_CODE_NO_ERROR);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
+
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -2010,11 +1997,6 @@ void SwiperPattern::StopFadeAnimation()
 
 void SwiperPattern::InitIndicator()
 {
-    if (GetIndicatorType() == SwiperIndicatorType::DOT && RealTotalCount() == 0) {
-        RemoveIndicatorNode();
-        return;
-    }
-
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
@@ -2805,10 +2787,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         addEventCallback();
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITasks();
-    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushUITasks();
     if (itemPosition_.empty()) {
         return;
     }
@@ -3183,7 +3164,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GetDuration() == 0) {
         // if the duration is 0, the animation will be end immediately, so the start event should be triggered
@@ -4177,7 +4158,7 @@ void SwiperPattern::SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicat
 
 void SwiperPattern::PostTranslateTask(uint32_t delayTime)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -4204,10 +4185,9 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d",
                 delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_);
             swiper->MarkDirtyNodeSelf();
-            auto pipeline = PipelineContext::GetCurrentContext();
-            if (pipeline) {
-                pipeline->FlushUITasks();
-            }
+            auto pipeline = swiper->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->FlushUITasks();
         }
     });
 
@@ -4216,10 +4196,10 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
 
 void SwiperPattern::RegisterVisibleAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
 
     if (hasVisibleChangeRegistered_) {
@@ -4447,20 +4427,13 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        CHECK_NULL_VOID(lazyForEachNode);
-        lazyForEachNode->SetIsLoop(IsLoop());
-    }
-}
-
-void SwiperPattern::SetRepeatLoadIsLoop() const
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto targetNode = FindRepeatVirtualNode(host);
-    if (targetNode.has_value()) {
-        auto repeatVirtualScrollNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
-        CHECK_NULL_VOID(repeatVirtualScrollNode);
-        repeatVirtualScrollNode->SetIsLoop(IsLoop());
+        if (lazyForEachNode) {
+            lazyForEachNode->SetIsLoop(IsLoop());
+        }
+        auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
+        if (repeatVirtualNode) {
+            repeatVirtualNode->SetIsLoop(IsLoop());
+        }
     }
 }
 
@@ -4856,8 +4829,9 @@ void SwiperPattern::MarkDirtyNodeSelf()
 
 void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+
     targetIndex_.reset();
     if (preTargetIndex_.has_value()) {
         preTargetIndex_.reset();
@@ -4869,16 +4843,15 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         isVoluntarilyClear_ = true;
         jumpIndex_ = nextIndex;
         MarkDirtyNodeSelf();
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-        }
+        pipeline->FlushUITasks();
         isFinishAnimation_ = false;
     } else if (currentIndex_ != nextIndex) {
         UpdateCurrentIndex(nextIndex);
         if (currentFocusIndex_ < currentIndex_ || currentFocusIndex_ >= currentIndex_ + GetDisplayCount()) {
             currentFocusIndex_ = currentIndex_;
         }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         do {
             auto curChildFrame =
                 DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(GetLoopIndex(currentFocusIndex_)));
@@ -4892,11 +4865,10 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         currentFirstIndex_ = GetLoopIndex(nextIndex);
         turnPageRate_ = 0.0f;
         currentIndexOffset_ = 0.0f;
-        auto pipeline = PipelineContext::GetCurrentContext();
-        if (pipeline) {
-            pipeline->FlushUITasks();
-            pipeline->FlushMessages();
-        }
+
+        pipeline->FlushUITasks();
+        pipeline->FlushMessages();
+
         FireChangeEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         // lazyBuild feature.
         SetLazyLoadFeature(true);
@@ -5210,9 +5182,8 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
 
         currentProxyInAnimation_->SetHasOnChanged(true);
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-
     pipelineContext->AddAfterLayoutTask([weak = WeakClaim(this), fromIndex, toIndex]() {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
@@ -5251,7 +5222,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     info.targetOffset = GetCustomPropertyTargetOffset();
     FireAnimationStartEvent(fromIndex, toIndex, info);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -5290,11 +5261,10 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        pipeline->FlushUITasks();
-        pipeline->FlushMessages();
-    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushUITasks();
+    pipeline->FlushMessages();
 }
 
 void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
@@ -5759,20 +5729,6 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
         return baseNode;
     }
-    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
-        return std::nullopt;
-    }
-    for (const auto& child : baseNode->GetChildren()) {
-        auto targetNode = FindLazyForEachNode(child, false);
-        if (targetNode.has_value()) {
-            return targetNode;
-        }
-    }
-    return std::nullopt;
-}
-
-std::optional<RefPtr<UINode>> SwiperPattern::FindRepeatVirtualNode(RefPtr<UINode> baseNode, bool isSelfNode) const
-{
     if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
         return baseNode;
     }
@@ -5780,7 +5736,7 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindRepeatVirtualNode(RefPtr<UINode
         return std::nullopt;
     }
     for (const auto& child : baseNode->GetChildren()) {
-        auto targetNode = FindRepeatVirtualNode(child, false);
+        auto targetNode = FindLazyForEachNode(child, false);
         if (targetNode.has_value()) {
             return targetNode;
         }
@@ -5805,7 +5761,7 @@ void SwiperPattern::UpdateNodeRate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto frameRateManager = pipelineContext->GetFrameRateManager();
     CHECK_NULL_VOID(frameRateManager);

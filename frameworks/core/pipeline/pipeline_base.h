@@ -69,11 +69,15 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-struct KeyboardAnimationConfig {
+struct KeyboardAnimationCurve {
     std::string curveType_;
     std::vector<float> curveParams_;
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn_;
+    KeyboardAnimationCurve curveOut_;
 };
 
 struct FontInfo;
@@ -402,6 +406,26 @@ public:
     bool IsFollowSystem()
     {
         return followSystem_;
+    }
+
+    void SetUseAppFontScale(const bool useSystemFontScale)
+    {
+        useAppFontScale_ = useSystemFontScale;
+    }
+
+    bool UseAppFontScale()
+    {
+        return useAppFontScale_;
+    }
+
+    void SetAppFontScale(const float scale)
+    {
+        appFontScale_ = scale;
+    }
+
+    float GetAppFontScale()
+    {
+        return appFontScale_;
     }
 
     double NormalizeToPx(const Dimension& dimension) const;
@@ -1379,6 +1403,34 @@ public:
     {
         return dragNodeGrayscale_;
     }
+
+    bool IsWaitFlushFinish() const
+    {
+        return isWaitFlushFinish_;
+    }
+
+    void EnWaitFlushFinish()
+    {
+        isWaitFlushFinish_ = true;
+    }
+
+    void UnWaitFlushFinish()
+    {
+        isWaitFlushFinish_ = false;
+    }
+
+    void SetUIExtensionFlushFinishCallback(std::function<void(void)>&& callback)
+    {
+        uiExtensionFlushFinishCallback_ = callback;
+    }
+
+    void FireUIExtensionFlushFinishCallback()
+    {
+        if (uiExtensionFlushFinishCallback_) {
+            uiExtensionFlushFinishCallback_();
+        }
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1557,11 +1609,15 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
-    
+    bool useAppFontScale_;
+    float appFontScale_;
+
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
+    bool isWaitFlushFinish_ = false;
+    std::function<void(void)> uiExtensionFlushFinishCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

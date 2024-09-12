@@ -63,9 +63,9 @@ struct ActionStrTable {
 };
 
 struct FillEventInfoParam {
-    int64_t elementId;
-    int64_t stackNodeId;
-    uint32_t windowId;
+    int64_t elementId = 0;
+    int64_t stackNodeId = 0;
+    uint32_t windowId = 0;
 };
 
 struct AccessibilityActionParam {
@@ -230,6 +230,8 @@ public:
     void RegisterInteractionOperationAsChildTree(uint32_t parentWindowId, int32_t parentTreeId,
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
+    void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) override;
     void DeregisterInteractionOperationAsChildTree() override;
     void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
@@ -238,7 +240,7 @@ public:
     bool DeregisterInteractionOperationAsChildTree(uint32_t windowId, int32_t treeId) override;
 
     void TransferThirdProviderHoverEvent(
-        int64_t elementId, const NG::PointF &point, SourceType source,
+        const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
         NG::AccessibilityHoverEventType eventType, TimeStamp time) override;
 
     void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo);
@@ -523,8 +525,8 @@ private:
     void NotifyAccessibilitySAStateChange(bool state);
     void DumpTreeNodeInfoInJson(
         const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
-    void CreateNodeInfoJson(
-        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json);
+    void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        std::unique_ptr<JsonValue>& json, int32_t childSize);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -545,6 +547,7 @@ private:
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
+    std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
 };
 

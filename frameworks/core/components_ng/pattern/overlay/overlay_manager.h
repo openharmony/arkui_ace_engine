@@ -512,7 +512,7 @@ public:
         const RefPtr<FrameNode>& targetNode);
     bool ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
         const RectF& aiRect, const RefPtr<FrameNode>& targetNode);
-    void CloseAIEntityMenu();
+    void CloseAIEntityMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -570,6 +570,14 @@ public:
     const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo()
     {
         return gatherNodeChildrenInfo_;
+    }
+    bool IsGatherWithMenu() const
+    {
+        return isGatherWithMenu_;
+    }
+    void SetIsGatherWithMenu(bool isGatherWithMenu)
+    {
+        isGatherWithMenu_ = isGatherWithMenu;
     }
     void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
     void RemovePreviewBadgeNode();
@@ -857,11 +865,11 @@ private:
     int32_t dismissPopupId_ = 0;
 
     bool hasGatherNode_ { false };
+    bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
     bool isAttachToCustomNode_ = false;
-    int32_t aiEntityMenuTargetId_ = -1;
 
     // Only used when CreateModalUIExtension
     // No thread safety issue due to they are all run in UI thread

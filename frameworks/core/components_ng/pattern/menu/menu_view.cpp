@@ -264,14 +264,6 @@ OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
     return OffsetF(offsetX, offsetY);
 }
 
-RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuNode)
-{
-    CHECK_NULL_RETURN(menuNode, nullptr);
-    auto menuHostNode = menuNode->GetChildByIndex(0)->GetHostNode();
-    CHECK_NULL_RETURN(menuHostNode, nullptr);
-    return menuHostNode->GetPattern<MenuPattern>();
-}
-
 void UpdateContainerMaxSizeConstraint(const RefPtr<FrameNode>& node, const CalcSize& maxSize)
 {
     CHECK_NULL_VOID(node);
@@ -303,21 +295,22 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<MenuTheme>& menuTheme, cons
     AnimationOption option;
     option.SetDuration(menuTheme->GetPreviewAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
+    auto previewBorderRadius = BorderRadiusProperty(menuTheme->GetPreviewBorderRadius());
+    if (auto presetRad = imageContext->GetBorderRadius(); presetRad) {
+        previewBorderRadius = presetRad.value();
+        imageContext->ResetBorderRadius();
+    }
     AnimationUtils::Animate(
         option,
         [imageContext, previewBorderRadius, shadow, isShowHoverImage]() mutable {
-            if (imageContext) {
-                auto color = shadow->GetColor();
-                auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
-                shadow->SetColor(newColor);
-                imageContext->UpdateBackShadow(shadow.value());
+            CHECK_NULL_VOID(imageContext);
+            auto color = shadow->GetColor();
+            auto newColor = Color::FromARGB(100, color.GetRed(), color.GetGreen(), color.GetBlue());
+            shadow->SetColor(newColor);
+            imageContext->UpdateBackShadow(shadow.value());
 
-                CHECK_NULL_VOID(!isShowHoverImage);
-                BorderRadiusProperty borderRadius;
-                borderRadius.SetRadius(previewBorderRadius);
-                imageContext->UpdateBorderRadius(borderRadius);
-            }
+            CHECK_NULL_VOID(!isShowHoverImage);
+            imageContext->UpdateBorderRadius(previewBorderRadius);
         },
         option.GetOnFinishEvent());
 }
@@ -611,36 +604,6 @@ void ShowPixelMapScaleAnimationProc(
         scaleOption.GetOnFinishEvent());
 }
 
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
-{
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto manager = mainPipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    manager->UpdateGatherNodeToTop();
-    auto gatherNode = manager->GetGatherNode();
-    CHECK_NULL_VOID(gatherNode);
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID(textNode);
-    textNode->MountToParent(menuNode);
-    textNode->MarkModifyDone();
-    auto menuPattern = GetMenuPattern(menuNode);
-    CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
-        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
-        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
-        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
-        auto imageNode = weakImageNode.Upgrade();
-        auto manager = weakManager.Upgrade();
-        auto textNode = weakTextNode.Upgrade();
-        auto menuPattern = weakMenuPattern.Upgrade();
-        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
-        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
-        DragAnimationHelper::ShowBadgeAnimation(textNode);
-    });
-}
-
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
 {
     if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
@@ -804,13 +767,11 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     auto imageOffset = GetFloatImageOffset(target);
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
-    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    imageNode->GetPaintProperty<ImageRenderProperty>()->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    auto imagePattern = imageNode->GetPattern<ImagePattern>();
-    imagePattern->SetSyncLoad(true);
+    imageNode->GetPattern<ImagePattern>()->SetSyncLoad(true);
     SetAccessibilityPixelMap(target, imageNode);
     auto hub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
@@ -832,9 +793,13 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
+        if (menuParam.previewBorderRadius) {
+            imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
+        }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
-        ShowGatherAnimation(target, wrapperNode);
+        DragAnimationHelper::UpdateGatherNodeToTop();
+        MountTextNode(wrapperNode, previewNode);
     }
     
     auto geometryNode = imageNode->GetGeometryNode();
@@ -1158,8 +1123,14 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
     CHECK_NULL_RETURN(previewNode, nullptr);
-    CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetMenuParam(menuParam);
 
+    CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
+    menuPattern->SetHoverMode(menuParam.enableHoverMode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);

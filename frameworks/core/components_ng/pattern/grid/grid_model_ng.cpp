@@ -114,9 +114,10 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
 }
 
-void GridModelNG::SetCachedCount(int32_t value)
+void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show);
 }
 
 void GridModelNG::SetEditable(bool value)

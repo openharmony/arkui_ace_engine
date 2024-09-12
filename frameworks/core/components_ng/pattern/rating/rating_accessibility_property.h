@@ -37,6 +37,8 @@ public:
 
     std::string GetText() const override;
 
+    bool IsEditable() const override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RatingAccessibilityProperty);
 };

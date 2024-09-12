@@ -2088,6 +2088,64 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
 }
 
 /**
+ * @tc.name: AdjustCurrentIndexWithTotalCountChange001
+ * @tc.desc: Test SwiperPattern AdjustCurrentIndexWithTotalCountChange001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, ITEM_NUMBER);
+    /**
+     * @tc.steps: step1. turn page to last, let index change to -1.
+     */
+    ShowPrevious();
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+    /**
+     * @tc.steps: step2. add child, let totalCount increase.
+     */
+    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    frameNode_->AddChild(testNode, pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER + 1);
+    pattern_->BeforeCreateLayoutWrapper();
+    /**
+     * @tc.steps: step3. index will need not to be changed.
+     */
+    EXPECT_EQ(pattern_->currentIndex_, pattern_->oldChildrenSize_.value() - 1);
+}
+
+/**
+ * @tc.name: AdjustCurrentIndexWithTotalCountChange002
+ * @tc.desc: Test SwiperPattern AdjustCurrentIndexWithTotalCountChange002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, ITEM_NUMBER);
+    /**
+     * @tc.steps: step1. turn page to last, let index change to -1.
+     */
+    ShowPrevious();
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+    /**
+     * @tc.steps: step2. add child, let totalCount decrease.
+     */
+    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    frameNode_->RemoveChildAtIndex(0);
+    EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER - 1);
+    pattern_->BeforeCreateLayoutWrapper();
+    /**
+     * @tc.steps: step3. index will need to be changed to 0.
+     */
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
  * @tc.name: ComputeSwipePageNextIndex001
  * @tc.desc: Test SwiperPattern ComputeSwipePageNextIndex
  * @tc.type: FUNC

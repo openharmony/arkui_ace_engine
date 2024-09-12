@@ -536,7 +536,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info4.localLocation_ = Offset(1, 1);
     pattern->info_->isSingleHandle = false;
     callBackFlag = 0;
-    pattern->info_->onHandleMoveStart = [&](bool isFirst) {
+    pattern->info_->onHandleMoveStart = [&](const GestureEvent& event, bool isFirst) {
         callBackFlag = 1;
     };
     pattern->isFirstHandleTouchDown_ = true;

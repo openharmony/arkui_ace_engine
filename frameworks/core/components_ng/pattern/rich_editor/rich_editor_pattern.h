@@ -218,9 +218,21 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
+    };
+
+    struct OneStepDragParam {
+        std::function<void()> menuBuilder = nullptr;
+        std::function<void()> previewBuilder = nullptr;
+        std::function<void(int32_t, int32_t)> onAppear = nullptr;
+        MenuParam menuParam;
+        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
+        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -416,7 +428,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
@@ -494,7 +506,7 @@ public:
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
-    bool SetCaretOffset(int32_t caretPosition);
+    bool SetCaretOffset(int32_t caretPosition) override;
     void ResetFirstNodeStyle();
     void DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
@@ -510,6 +522,7 @@ public:
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
+    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -530,7 +543,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
-        bool isForward = false);
+        bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
@@ -620,6 +633,7 @@ public:
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
@@ -753,6 +767,8 @@ public:
     bool IsSelectAreaVisible();
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
+
+    std::string GetPlaceHolder() const;
 
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
@@ -915,6 +931,8 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool InsertOrDeleteSpace(int32_t index) override;
+
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
@@ -924,12 +942,7 @@ public:
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
 
-    void SetImagePreviewMenuParam(std::function<void()>& builder, const MenuParam& menuParam)
-    {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenuParam");
-        imagePreviewMenuBuilder_ = builder;
-        imagePreviewMenuParam_ = menuParam;
-    }
+    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
     void RequestFocusWhenSelected()
     {
         CHECK_NULL_VOID(!HasFocus());
@@ -955,6 +968,8 @@ protected:
         CHECK_NULL_RETURN(pipelineContext, {});
         return pipelineContext->GetTheme<T>();
     }
+
+    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
 
 private:
     friend class RichEditorSelectOverlay;
@@ -1048,7 +1063,7 @@ private:
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1057,7 +1072,7 @@ private:
 
     void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1242,6 +1257,7 @@ private:
     void SetImageSelfResponseEvent(bool isEnable);
     void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
+    void UpdateImagePreviewParam();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1355,8 +1371,8 @@ private:
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
-    std::function<void()> imagePreviewMenuBuilder_;
-    std::optional<MenuParam> imagePreviewMenuParam_ = std::nullopt;
+    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
+    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
     DisplayMode barDisplayMode_ = DisplayMode::AUTO;
 };

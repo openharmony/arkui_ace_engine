@@ -95,7 +95,7 @@ void ScrollablePattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> node)
     CHECK_NULL_VOID(overlayProperty);
     overlayProperty->SetIsOverlayNode(true);
     overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    overlayProperty->UpdateAlignment(Alignment::CENTER);
+    overlayProperty->UpdateAlignment(Alignment::TOP_LEFT);
     auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
     auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
     overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
@@ -114,8 +114,15 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     CHECK_NULL_VOID(host);
     auto overlayNode = host->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameRect();
     auto overlayRenderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(overlayRenderContext);
+    auto fadeFrameSize = GetAxis() == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height();
+    if (fadeFrameSize == 0) {
+        return;
+    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (!paintProperty->GetFadingEdge().value_or(false)) {
@@ -125,13 +132,25 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = !IsAtBottom();
+    float paddingBeforeContent = 0.0f;
+    float paddingAfterContent = 0.0f;
+    auto& padding = geometryNode->GetPadding();
+    if (padding) {
+        paddingBeforeContent = GetAxis() == Axis::HORIZONTAL ? *padding->left : *padding->top;
+        paddingAfterContent = GetAxis() == Axis::HORIZONTAL ? *padding->right : *padding->bottom;
+    }
+    startPercent_ = (paddingBeforeContent) / fadeFrameSize;
+    endPercent_ = (fadeFrameSize - paddingAfterContent) / fadeFrameSize;
     paint->SetOverlayRenderContext(overlayRenderContext);
-    UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
+    UpdateFadeInfo(isFadingTop, isFadingBottom, fadeFrameSize, paint);
 }
 
 void ScrollablePattern::UpdateFadeInfo(
-    bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint)
+    bool isFadingTop, bool isFadingBottom, float fadeFrameSize, const RefPtr<ScrollablePaintMethod>& paint)
 {
+    if (fadeFrameSize == 0) {
+        return;
+    }
     float percentFading = 0.0f;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -139,9 +158,10 @@ void ScrollablePattern::UpdateFadeInfo(
     if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
         percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
     } else {
-        percentFading = fadingEdgeLength.ConvertToPx() / std::abs(GetMainContentSize());
+        percentFading = fadingEdgeLength.ConvertToPx() / fadeFrameSize;
     }
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading)); // 0.5: Half
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading), startPercent_,
+        endPercent_); // 0.5: Half
 }
 
 void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -895,7 +915,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisappearDelayTask();
-        UpdateScrollBarOffset();
+        if (isInitialized_ && !host->CheckNeedForceMeasureAndLayout()) {
+            UpdateScrollBarOffset();
+        }
     }
     UpdateBorderRadius();
 }
@@ -2510,19 +2532,9 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
         auto parent = host->GetAncestorNodeOfFrame();
         CHECK_NULL_VOID(parent);
         parent->SetSuggestOpIncActivatedOnce();
-        host->SetSuggestOpIncActivatedOnce();
         // get 1st layer
-        for (auto child : host->GetAllChildren()) {
-            if (!child) {
-                continue;
-            }
-            auto frameNode = AceType::DynamicCast<FrameNode>(child);
-            if (!frameNode || frameNode->GetSuggestOpIncActivatedOnce()) {
-                continue;
-            }
-            std::string path(host->GetHostTag());
-            frameNode->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
-        }
+        std::string path("\\>");
+        host->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 0);
     }
 }
 

@@ -284,9 +284,10 @@ void WaterFlowModelNG::SetFriction(double friction)
     pattern->SetFriction(friction);
 }
 
-void WaterFlowModelNG::SetCachedCount(int32_t value)
+void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show);
 }
 
 void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, int32_t value)

@@ -218,22 +218,14 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     auto contentRect = richEditorPattern->GetTextContentRect();
-    if (!contentRect.IsEmpty()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
-        CHECK_NULL_VOID(richEditorTheme);
-        auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
-        if (contentRect.Height() < defaultCaretHeight) {
-            contentRect.SetHeight(defaultCaretHeight);
-        }
-        drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
-    }
+
+    drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
     PaintCaret(drawingContext);
     PaintPreviewTextDecoration(drawingContext);
     SetSelectedColor(selectedBackgroundColor_->Get());
     TextOverlayModifier::onDraw(drawingContext);
     drawingContext.canvas.Restore();
+
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
 }

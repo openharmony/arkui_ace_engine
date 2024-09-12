@@ -171,6 +171,7 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
     if (!isTypedNode_) {
         InitNativeXComponent();
     }
+    RegisterSurfaceCallbackModeEvent();
 }
 
 void XComponentPattern::InitNativeXComponent()
@@ -262,25 +263,15 @@ void XComponentPattern::Initialize()
 
 void XComponentPattern::OnAttachToMainTree()
 {
-    if (isTypedNode_) {
-        CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->RegisterSurface();
-        surfaceId_ = renderSurface_->GetUniqueId();
-        CHECK_NULL_VOID(xcomponentController_);
-        xcomponentController_->SetSurfaceId(surfaceId_);
-        OnSurfaceCreated();
+    if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
+        HandleSurfaceCreated();
     }
 }
 
 void XComponentPattern::OnDetachFromMainTree()
 {
-    if (isTypedNode_) {
-        CHECK_NULL_VOID(renderSurface_);
-        renderSurface_->ReleaseSurfaceBuffers();
-        renderSurface_->UnregisterSurface();
-        CHECK_NULL_VOID(xcomponentController_);
-        OnSurfaceDestroyed();
-        xcomponentController_->SetSurfaceId("");
+    if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
+        HandleSurfaceDestroyed();
     }
 }
 
@@ -583,6 +574,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility();
     if (isTypedNode_) {
+        if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
+            HandleSurfaceDestroyed();
+        }
         if (isNativeXComponent_) {
             OnNativeUnload(frameNode);
         }
@@ -1553,7 +1547,7 @@ void XComponentPattern::HandleSetExpectedRateRangeEvent()
     FrameRateRange frameRateRange;
     frameRateRange.Set(range->min, range->max, range->expected);
     displaySync_->SetExpectedFrameRateRange(frameRateRange);
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " SetExpectedFrameRateRange"
         "{%{public}d, %{public}d, %{public}d}", displaySync_->GetId(), range->min, range->max, range->expected);
 }
 
@@ -1569,7 +1563,7 @@ void XComponentPattern::HandleOnFrameEvent()
         xComponentPattern->nativeXComponentImpl_->GetOnFrameCallback()(xComponentPattern->nativeXComponent_.get(),
             displaySyncData->GetTimestamp(), displaySyncData->GetTargetTimestamp());
     });
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " RegisterOnFrame",
         displaySync_->GetId());
     displaySync_->AddToPipelineOnContainer();
 }
@@ -1580,7 +1574,7 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     CHECK_NULL_VOID(displaySync_);
     displaySync_->UnregisterOnFrame();
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
         displaySync_->GetId());
     displaySync_->DelFromPipelineOnContainer();
 }
@@ -1893,6 +1887,52 @@ void XComponentPattern::OnSurfaceDestroyed()
             eventHub->FireControllerDestroyedEvent(surfaceId_);
         }
     }
+}
+
+void XComponentPattern::RegisterSurfaceCallbackModeEvent()
+{
+    if (isTypedNode_ && !surfaceCallbackModeChangeEvent_) {
+        surfaceCallbackModeChangeEvent_ = [weak = WeakClaim(this)](SurfaceCallbackMode mode) {
+            auto xcPattern = weak.Upgrade();
+            CHECK_NULL_VOID(xcPattern);
+            xcPattern->OnSurfaceCallbackModeChange(mode);
+        };
+    }
+}
+
+void XComponentPattern::OnSurfaceCallbackModeChange(SurfaceCallbackMode mode)
+{
+    CHECK_EQUAL_VOID(surfaceCallbackMode_, mode);
+    surfaceCallbackMode_ = mode;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->IsOnMainTree()) {
+        if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
+            HandleSurfaceCreated();
+        } else if (surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
+            HandleSurfaceDestroyed();
+        }
+    }
+}
+
+void XComponentPattern::HandleSurfaceCreated()
+{
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->RegisterSurface();
+    surfaceId_ = renderSurface_->GetUniqueId();
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->SetSurfaceId(surfaceId_);
+    OnSurfaceCreated();
+}
+
+void XComponentPattern::HandleSurfaceDestroyed()
+{
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->ReleaseSurfaceBuffers();
+    renderSurface_->UnregisterSurface();
+    CHECK_NULL_VOID(xcomponentController_);
+    OnSurfaceDestroyed();
+    xcomponentController_->SetSurfaceId("");
 }
 
 void XComponentPattern::NativeSurfaceShow()

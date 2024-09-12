@@ -47,7 +47,6 @@ public:
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
-    static void SetImagePreviewMenu(std::function<void()>& builder, const NG::SelectMenuParam& selectMenuParam);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetPlaceholder(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);

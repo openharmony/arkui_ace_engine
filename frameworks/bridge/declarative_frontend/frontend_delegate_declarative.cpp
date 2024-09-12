@@ -3305,6 +3305,12 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::
             pageRouterManager_->RestoreFullPathInfo(std::move(fullPathInfo));
         }
     }
+    // restore navigation info
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    if (pipelineContextNG && pipelineContextNG->GetNavigationManager()) {
+        auto navigationRecoveryInfo = jsonContentInfo->GetValue("navigationInfo");
+        pipelineContextNG->GetNavigationManager()->StorageNavigationRecoveryInfo(std::move(navigationRecoveryInfo));
+    }
     return pageRouterManager_->RestoreRouterStack(std::move(routerStack), type);
 }
 
@@ -3330,6 +3336,11 @@ std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
             auto fullPathInfo = pageRouterManager_->GetFullPathInfo();
             if (fullPathInfo) {
                 jsonContentInfo->Put("fullPathInfo", std::move(fullPathInfo));
+            }
+            // add navigation stack info
+            auto navigationRecoveryInfo = GetNavigationJsonInfo();
+            if (navigationRecoveryInfo) {
+                jsonContentInfo->Put("navigationInfo", navigationRecoveryInfo);
             }
         }
     }
@@ -3455,4 +3466,14 @@ RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEf
 
     return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
 }
+
+std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
+{
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContextNG, nullptr);
+    auto navigationManager = pipelineContextNG->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, nullptr);
+    return navigationManager->GetNavigationJsonInfo();
+}
+
 } // namespace OHOS::Ace::Framework

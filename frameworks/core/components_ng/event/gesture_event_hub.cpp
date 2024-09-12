@@ -456,11 +456,9 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     CHECK_NULL_RETURN(pixelMap_, false);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-
-    RectF pixelRect(0, 0, pixelMap_->GetWidth(), pixelMap_->GetHeight());
-    auto maxDiagnal = DragDropManager::GetMaxDiagnalBaseOnScreen();
-    if (!frameNode->GetDragPreviewOption().isScaleEnabled ||
-        pixelRect.Diagnal() == 0 || pixelRect.Diagnal() < maxDiagnal) {
+    auto width = pixelMap_->GetWidth();
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
+    if (!frameNode->GetDragPreviewOption().isScaleEnabled || width == 0 || width < maxWidth) {
         return false;
     }
     return true;
@@ -1024,7 +1022,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         float previewScale =
             info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
         if (IsPixelMapNeedScale()) {
-            previewScale = DragDropManager::GetPreviewNodeScale(*imageNode);
+            previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
         auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
@@ -1114,7 +1112,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
         dragDropManager->DoDragStartAnimation(
-            subWindowOverlayManager, info, isMenuShow);
+            subWindowOverlayManager, info, eventHub->GetGestureEventHub(), isMenuShow);
         if (hasContextMenu) {
             //response: 0.347, dampingRatio: 0.99, blendDuration: 0.0
             const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);

@@ -279,6 +279,8 @@ private:
     void HandleLongPress();
     void HandleLongPressActionEnd();
     void OnFontScaleConfigurationUpdate() override;
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -291,8 +293,6 @@ private:
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
-    void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     float avoidKeyboardOffset_ = 0.0f;
 
     RefPtr<LongPressEvent> longPressEvent_;
@@ -301,7 +301,6 @@ private:
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H

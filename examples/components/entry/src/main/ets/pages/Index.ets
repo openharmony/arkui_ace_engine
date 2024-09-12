@@ -21,6 +21,7 @@ import { OperatesDestination, operatesRoute } from './operates';
 import { PickersDestination, pickersRoute } from './pickers';
 import { InputsDestination, inputsRoute } from './inputs';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
+import { NavigatesDestination, navigatesRoute } from './navigates';
 
 @Styles
 function CardPressedStyle() {
@@ -56,6 +57,8 @@ function Destination(name: string, route: Route) {
     PickersDestination(name, route)
   } else if (name.startsWith('inputs/')) {
     InputsDestination(name, route)
+  } else if (name.startsWith('navigates/')) {
+    NavigatesDestination(name, route)
   }
 }
 
@@ -69,6 +72,7 @@ struct Index {
     operatesRoute,
     pickersRoute,
     inputsRoute,
+    navigatesRoute,
   ];
   @State selection: string | null = null;
 

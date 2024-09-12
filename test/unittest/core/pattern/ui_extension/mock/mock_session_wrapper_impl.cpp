@@ -231,7 +231,8 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
 {
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
     return true;
 }
@@ -256,5 +257,10 @@ uint32_t SessionWrapperImpl::GetReasonDump() const
 
 void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+}
+
+WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+{
+    return static_cast<WindowSizeChangeReason>(0);
 }
 } // namespace OHOS::Ace::NG

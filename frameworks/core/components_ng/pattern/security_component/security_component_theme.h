@@ -169,26 +169,6 @@ public:
         return defaultTextMaxLines_;
     }
 
-    float GetBigFontSizeScale() const
-    {
-        return bigFontSizeScale_;
-    }
-
-    float GetLargeFontSizeScale() const
-    {
-        return largeFontSizeScale_;
-    }
-
-    float GetMaxFontSizeScale() const
-    {
-        return maxFontSizeScale_;
-    }
-
-    const Dimension& GetAgingPadding() const
-    {
-        return agingPadding_;
-    }
-
 private:
     SecurityComponentTheme() = default;
     static void ParseLocationDescriptions(RefPtr<ThemeStyle> securityComponentPattern,
@@ -314,10 +294,6 @@ private:
     std::vector<std::string> pasteDescriptions_;
     std::vector<std::string> saveDescriptions_;
     std::string emptyString_;
-    float bigFontSizeScale_ = 1.75f;
-    float largeFontSizeScale_ = 2.0f;
-    float maxFontSizeScale_ = 3.2f;
-    Dimension agingPadding_ = 8.0_vp;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_APP_BAR_THEME_H

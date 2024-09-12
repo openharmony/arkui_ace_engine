@@ -98,10 +98,6 @@ constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
-const std::string WEB_INFO_PC = "8";
-const std::string WEB_INFO_TABLET = "4";
-const std::string WEB_INFO_PHONE = "2";
-const std::string WEB_INFO_DEFAULT = "1";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -6838,7 +6834,16 @@ void WebDelegate::OnDetachContext()
 {
     UnRegisterScreenLockFunction();
     UnregisterSurfacePositionChangedCallback();
-    UnregisterAvoidAreaChangeListener();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->UnregisterAvoidAreaChangeListener();
+        });
 }
 
 void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
@@ -6846,13 +6851,20 @@ void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
     instanceId_ = context->GetInstanceId();
     context_ = context;
     RegisterSurfacePositionChangedCallback();
-    RegisterAvoidAreaChangeListener();
     if (nweb_) {
         auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
         nweb_->RegisterScreenLockFunction(instanceId_, screenLockCallback);
         auto windowId = context->GetFocusWindowId();
         nweb_->SetWindowId(windowId);
     }
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->RegisterAvoidAreaChangeListener();
+        });
 }
 
 void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
@@ -7168,7 +7180,7 @@ void WebDelegate::OnDestroyImageAnalyzerOverlay()
     nweb_->OnDestroyImageAnalyzerOverlay();
 }
 
-NG::WebInfoType WebDelegate::GetWebInfoType()
+std::string WebDelegate::GetWebInfoType()
 {
     std::string factoryLevel = NWebAdapterHelper::Instance()
         .ParsePerfConfig("factoryConfig", "factoryLevel");
@@ -7178,14 +7190,7 @@ NG::WebInfoType WebDelegate::GetWebInfoType()
             ParsePerfConfig("factoryConfig", "factoryLevel");
     }
     TAG_LOGD(AceLogTag::ACE_WEB, "read config factoryLevel: %{public}s ", factoryLevel.c_str());
-    if (factoryLevel == WEB_INFO_PHONE || factoryLevel == WEB_INFO_DEFAULT) {
-        return NG::WebInfoType::TYPE_MOBILE;
-    } else if (factoryLevel == WEB_INFO_TABLET) {
-        return NG::WebInfoType::TYPE_TABLET;
-    } else if (factoryLevel == WEB_INFO_PC) {
-        return NG::WebInfoType::TYPE_2IN1;
-    }
-    return NG::WebInfoType::TYPE_UNKNOWN;
+    return factoryLevel;
 }
 
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
@@ -7236,5 +7241,12 @@ void WebDelegate::StartVibraFeedback(const std::string& vibratorType)
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->StartVibraFeedback(vibratorType);
+}
+
+bool WebDelegate::CloseImageOverlaySelection()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->CloseImageOverlaySelection();
 }
 } // namespace OHOS::Ace

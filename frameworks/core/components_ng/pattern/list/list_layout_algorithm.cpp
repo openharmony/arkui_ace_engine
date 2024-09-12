@@ -1467,6 +1467,26 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     ResetLayoutItem(layoutWrapper);
     ProcessCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+    UpdateOverlay(layoutWrapper);
+}
+
+void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        return;
+    }
+    auto overlayNode = frameNode->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto listFrameSize = geometryNode->GetFrameSize();
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(listFrameSize);
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
@@ -1520,35 +1540,9 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     }
 }
 
-void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index,
-    float referencePos, bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
-    bool needAdjustRefPos)
+void ListLayoutAlgorithm::SetListItemGroupJumpIndex(const RefPtr<ListItemGroupLayoutAlgorithm>& itemGroup,
+    bool forwardLayout, int32_t index)
 {
-    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(itemGroup);
-    if (jumpIndexInGroup_.has_value() && scrollAlign_ == ScrollAlign::CENTER) {
-        referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
-    }
-    if (jumpIndex_) {
-        itemGroup->ClearItemPosition();
-    }
-    if (forwardLayout) {
-        float endPos = layoutEndMainPos_.value_or(endMainPos_);
-        itemGroup->SetListMainSize(startMainPos_, endPos, referencePos, prevContentMainSize_, forwardLayout);
-    } else {
-        float startPos = layoutStartMainPos_.value_or(startMainPos_);
-        itemGroup->SetListMainSize(startPos, endMainPos_, referencePos, prevContentMainSize_, forwardLayout);
-    }
-    bool needMeasureFormLastItem = index < preStartIndex_;
-    itemGroup->SetNeedMeasureFormLastItem(needMeasureFormLastItem);
-    itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
-    itemGroup->SetListLayoutProperty(layoutProperty);
-    itemGroup->SetNeedCheckOffset(isNeedCheckOffset_);
-    if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER) {
-        itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
-    }
     if (jumpIndex_.has_value() && jumpIndex_.value() == index) {
         if (!jumpIndexInGroup_.has_value()) {
             if (forwardLayout && (scrollAlign_ == ScrollAlign::START ||
@@ -1566,6 +1560,40 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
             jumpIndexInGroup_.reset();
         }
     }
+}
+
+void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index,
+    float referencePos, bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
+    bool needAdjustRefPos)
+{
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    if (jumpIndexInGroup_.has_value() && scrollAlign_ == ScrollAlign::CENTER) {
+        referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
+    }
+    if (jumpIndex_) {
+        itemGroup->ClearItemPosition();
+    }
+    if (forwardLayout) {
+        float endPos = layoutEndMainPos_.value_or(endMainPos_);
+        float startPos = endPos - contentMainSize_;
+        itemGroup->SetListMainSize(startPos, endPos, referencePos, prevContentMainSize_, forwardLayout);
+    } else {
+        float startPos = layoutStartMainPos_.value_or(startMainPos_);
+        float endPos = startPos + contentMainSize_;
+        itemGroup->SetListMainSize(startPos, endPos, referencePos, prevContentMainSize_, forwardLayout);
+    }
+    bool needMeasureFormLastItem = index < preStartIndex_;
+    itemGroup->SetNeedMeasureFormLastItem(needMeasureFormLastItem);
+    itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
+    itemGroup->SetListLayoutProperty(layoutProperty);
+    itemGroup->SetNeedCheckOffset(isNeedCheckOffset_);
+    if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER) {
+        itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
+    }
+    SetListItemGroupJumpIndex(itemGroup, forwardLayout, index);
 
     if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) ||
         (scrollSnapAlign_ != V2::ScrollSnapAlign::NONE && !childrenSize_)) {

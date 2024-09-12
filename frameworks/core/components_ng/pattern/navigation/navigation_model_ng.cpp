@@ -793,10 +793,10 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
         dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
         dividerLayoutProperty->UpdateVertical(true);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_RETURN(theme, false);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
         dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
     }
@@ -1893,6 +1893,21 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     titleBarNode->AddChild(backButtonNode, 0);
 }
 
+void NavigationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->SetRecoverable(recoverable);
+}
+
+void NavigationModelNG::SetRecoverable(bool recoverable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    navigationGroupNode->SetRecoverable(recoverable);
+}
+
 void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2073,10 +2088,10 @@ void NavigationModelNG::SetNavigationStack(FrameNode* frameNode)
     }
 }
 
-void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, bool hasSubTitle, bool hasMainTitle,
-    const std::string& subtitle, const std::string& title, bool ignoreMainTitle)
+void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
+    bool ignoreMainTitle)
 {
-    if (!hasSubTitle && !hasMainTitle) {
+    if (!titleInfo.hasSubTitle && !titleInfo.hasMainTitle) {
         return;
     }
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -2101,59 +2116,10 @@ void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, bool hasSubTitle,
     navBarNode->UpdatePrevTitleIsCustom(false);
 
     // create or update main title
-    do {
-        if (ignoreMainTitle) {
-            break;
-        }
-        auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-        if (!hasMainTitle) {
-            // remove main title if any.
-            titleBarNode->RemoveChild(mainTitle);
-            titleBarNode->SetTitle(nullptr);
-            break;
-        }
-
-        if (mainTitle) {
-            // update main title
-            auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
-            textLayoutProperty->UpdateContent(title);
-            break;
-        }
-        // create and init main title
-        mainTitle = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateContent(title);
-        titleBarPattern->SetNeedResetMainTitleProperty(true);
-        titleBarNode->SetTitle(mainTitle);
-        titleBarNode->AddChild(mainTitle);
-    } while (false);
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, titleInfo, ignoreMainTitle);
 
     // create or update subtitle
-    auto subTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    if (!hasSubTitle) {
-        // remove subtitle if any.
-        titleBarNode->RemoveChild(subTitle);
-        titleBarNode->SetSubtitle(nullptr);
-        return;
-    }
-    if (subTitle) {
-        // update subtitle
-        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateContent(subtitle);
-        auto renderContext = subTitle->GetRenderContext();
-        renderContext->UpdateOpacity(1.0);
-    } else {
-        // create and init subtitle
-        subTitle = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateContent(subtitle);
-        titleBarPattern->SetNeedResetSubTitleProperty(true);
-        titleBarNode->SetSubtitle(subTitle);
-        titleBarNode->AddChild(subTitle);
-    }
+    NavigationTitleUtil::CreateOrUpdateSubtitle(titleBarNode, titleInfo);
     return;
 }
 

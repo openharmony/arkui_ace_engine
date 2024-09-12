@@ -162,18 +162,13 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Failed to create image loader, Image source type not supported. src = %{private}s, nodeId = "
-            "%{public}d-%{public}lld.", src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
-        std::string errorMessage("Failed to create image loader, Image source type not supported");
+        std::string errorMessage("Failed to create image loader.");
         FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Fail load imageData. src = %{private}s, nodeId = %{public}d-%{public}lld.",
-            src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
         FailCallback(src.GetKey(), "Failed to load image data", sync);
         return;
     }

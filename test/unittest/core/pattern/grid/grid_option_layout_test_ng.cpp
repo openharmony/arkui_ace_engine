@@ -876,6 +876,47 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowCache001
+ * @tc.desc: Test Grid showCache items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ShowCache001, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetCachedCount(1, true);
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 7);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 8)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 8), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
+
+    UpdateCurrentOffset(-400.0f);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.endIndex_, 11);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 10), 650.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 650.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 860.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 13), 860.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 0), -400.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -400.0f);
+}
+
+/**
  * @tc.name: Refresh001
  * @tc.desc: Test Grid nested in refresh.
  * @tc.type: FUNC

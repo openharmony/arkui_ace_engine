@@ -530,6 +530,8 @@ public:
 
     virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
 
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
+
     void HandleSelectionChange(int32_t start, int32_t end);
 
     CopyOptions GetCopyOptions() const
@@ -691,6 +693,15 @@ public:
                 .count());
     }
 
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
+
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -700,6 +711,7 @@ protected:
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
+    void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
@@ -827,14 +839,20 @@ protected:
         WeakPtr<SpanItem> span;
     };
     std::vector<SubComponentInfoEx> subComponentInfos_;
+    void SetDefaultMouseStyle(MouseFormat mouseStyle)
+    {
+        defaultMouseStyle_ = mouseStyle;
+    }
+    virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
+    void InitUrlHoverEvent();
 
 private:
+    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitTouchEvent();
-    void InitUrlHoverEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
@@ -902,6 +920,7 @@ private:
     bool isLongPress_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
+    bool isEnableHapticFeedback_ = true;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;

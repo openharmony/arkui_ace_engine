@@ -1074,8 +1074,8 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage043, TestSi
     ASSERT_NE(frameNode, nullptr);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     auto manager = pipeline->GetOverlayManager();
-    OffsetF Offset = { 0.0, 0.0 };
-    dragDropManager->UpdateGatherNodeAttr(manager, Offset, 2.0f, 1.0f, 1.0f);
+    GatherAnimationInfo gatherAnimationInfo = { 2.0f, 1.0f, 1.0f, { 0.0, 0.0 } };
+    dragDropManager->UpdateGatherNodeAttr(manager, gatherAnimationInfo);
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1112,8 +1112,8 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage044, TestSi
     manager->gatherNodeChildrenInfo_.push_back(gatherNodeChildInfo2);
     manager->gatherNodeChildrenInfo_.push_back(gatherNodeChildInfo3);
     manager->gatherNodeChildrenInfo_.push_back(gatherNodeChildInfo4);
-    OffsetF Offset = { 0.0, 0.0 };
-    dragDropManager->UpdateGatherNodeAttr(manager, Offset, 2.0f, 1.0f, 1.0f);
+    GatherAnimationInfo gatherAnimationInfo = { 2.0f, 1.0f, 1.0f, { 0.0, 0.0 } };
+    dragDropManager->UpdateGatherNodeAttr(manager, gatherAnimationInfo);
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1180,12 +1180,13 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage047, TestSi
     dragDropManager->SetIsDragWithContextMenu(true);
     auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode2, nullptr);
-    dragDropManager->DoDragStartAnimation(overlayManager, event);
+    auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
     dragDropManager->TransDragWindowToDragFwk(111);
     dragDropManager->SetIsDragWithContextMenu(false);
     event.SetDeviceId(0xFFFFEEEE);
-    dragDropManager->DoDragStartAnimation(overlayManager, event);
-    dragDropManager->DoDragStartAnimation(overlayManager, event, true);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, true);
     EXPECT_NE(frameNode, nullptr);
 }
 

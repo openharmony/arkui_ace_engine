@@ -41,12 +41,12 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         isFadingBottom_ = tempFadingValue;
     }
     if (isFadingTop_) {
-        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(startPercent_ + percentFading_, Color::WHITE));
     }
     if (isFadingBottom_) {
-        gradient.AddColor(CreatePercentGradientColor(1 - percentFading_, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_ - percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
     }
     if (vertical_) {
         gradient.GetLinearGradient()->angle = isReverse_

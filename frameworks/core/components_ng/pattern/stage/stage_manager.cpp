@@ -191,10 +191,12 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         .GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
     if (!children.empty() && needHideLast) {
         hidePageNode = children.back();
+        outPageNode = AceType::DynamicCast<FrameNode>(hidePageNode);
+        FireAutoSave(outPageNode, node);
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        outPageNode = AceType::DynamicCast<FrameNode>(children.back());
+        
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -235,7 +237,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // close keyboard
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, node);
-    FireAutoSave(outPageNode, node);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {

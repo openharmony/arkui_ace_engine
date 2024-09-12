@@ -220,14 +220,6 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     pattern->SetRadioChecked(value);
 }
 
-void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (indicator.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
-    }
-}
-
 bool RadioModelNG::GetChecked(FrameNode* frameNode)
 {
     bool value = false;
@@ -292,5 +284,16 @@ std::string RadioModelNG::GetRadioGroup(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     return eventHub->GetGroup();
+}
+
+void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& value,
+    const std::string& group, int32_t indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(value);
+    eventHub->SetGroup(group);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator, frameNode);
 }
 } // namespace OHOS::Ace::NG

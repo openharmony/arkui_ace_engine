@@ -89,7 +89,8 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
     void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
-    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
+    bool NotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout) override;
     void SetDensityDpiImpl(bool isDensityDpi) override;
 
     // The interface to send the data for ArkTS
@@ -99,6 +100,10 @@ public:
     // The interface for UEC dump
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WindowSizeChangeReason GetSizeChangeReason() const override
+    {
+        return WindowSizeChangeReason::UNDEFINED;
+    }
 
 private:
     void InitAllCallback();

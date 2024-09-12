@@ -74,6 +74,16 @@ enum class AccessibilityVersion {
     JS_DECLARATIVE_VERSION,
 };
 
+struct AccessibilityParentRectInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    float scaleX = 1.0f;       // scale of parent interface
+    float scaleY = 1.0f;       // scale of parent interface
+    int32_t centerX = 0;       // center X of parent interface relative to real window
+    int32_t centerY = 0;       // center Y scale of parent interface relative to real window
+    int32_t rotateDegree = 0;  // final rotate degree of parent interface
+};
+
 class AccessibilitySAObserverCallback {
 public:
     explicit AccessibilitySAObserverCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
@@ -208,6 +218,8 @@ public:
     virtual void RegisterInteractionOperationAsChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) {};
+    virtual void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) {};
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
@@ -223,7 +235,7 @@ public:
         uint32_t windowId, int32_t treeId) { return false; };
 
     virtual void TransferThirdProviderHoverEvent(
-        int64_t elementId, const NG::PointF &point, SourceType source,
+        const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF &point, SourceType source,
         NG::AccessibilityHoverEventType eventType, TimeStamp time) {};
 
     virtual bool OnDumpChildInfoForThird(

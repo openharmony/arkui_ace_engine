@@ -3053,6 +3053,25 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom);
 
     PixStretchEffectOption option;
+    bool illegalInput = InitPixStretchEffect(left, right, top, bottom);
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
+        option.left = left;
+        option.top = top;
+        option.right = right;
+        option.bottom = bottom;
+    } else {
+        illegalInput = true;
+    }
+    if (illegalInput) {
+        option.ResetValue();
+    }
+    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+}
+
+bool JSViewAbstract::InitPixStretchEffect(
+    CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom)
+{
     bool illegalInput = false;
     if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
         top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
@@ -3068,19 +3087,7 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
             illegalInput = true;
         }
     }
-    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
-        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
-        option.left = left;
-        option.top = top;
-        option.right = right;
-        option.bottom = bottom;
-    } else {
-        illegalInput = true;
-    }
-    if (illegalInput) {
-        option.ResetValue();
-    }
-    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+    return illegalInput;
 }
 
 void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
@@ -3302,6 +3309,22 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
+void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto marginVal = menuOptions->GetProperty("layoutRegionMargin");
+    if (!marginVal->IsObject()) {
+        return;
+    }
+
+    CommonCalcDimension commonCalcDimension;
+    JSViewAbstract::ParseCommonMarginOrPaddingCorner(JSRef<JSObject>::Cast(marginVal), commonCalcDimension);
+    if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+        commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+        menuParam.layoutRegionMargin = JSViewAbstract::GetLocalizedPadding(
+            commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+    }
+}
+
 void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -3335,6 +3358,11 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
             menuParam.placement = PLACEMENT[placement];
         }
+    }
+
+    auto enableHoverModeValue = menuOptions->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        menuParam.enableHoverMode = enableHoverModeValue->ToBoolean();
     }
 
     auto backgroundColorValue = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_COLOR));
@@ -3423,6 +3451,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
+    ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
@@ -6661,6 +6690,14 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
     // direction
     auto direction = static_cast<GradientDirection>(
         jsObj->GetPropertyValue<int32_t>("direction", static_cast<int32_t>(GradientDirection::NONE)));
+    SetGradientDirection(newGradient, direction);
+    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
+    newGradient.SetRepeat(repeating);
+    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
+}
+
+void JSViewAbstract::SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction)
+{
     switch (direction) {
         case GradientDirection::LEFT:
             newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
@@ -6690,15 +6727,9 @@ void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradien
             newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
             newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
             break;
-        case GradientDirection::NONE:
-        case GradientDirection::START_TO_END:
-        case GradientDirection::END_TO_START:
         default:
             break;
     }
-    auto repeating = jsObj->GetPropertyValue<bool>("repeating", false);
-    newGradient.SetRepeat(repeating);
-    NewGetJsGradientColorStops(newGradient, jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS)));
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
@@ -7826,6 +7857,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
+    auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
@@ -7887,6 +7919,17 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(sheetScrollSizeMode);
         }
     }
+
+    if (keyboardAvoidMode->IsNull() || keyboardAvoidMode->IsUndefined()) {
+        sheetStyle.sheetKeyboardAvoidMode.reset();
+    } else if (keyboardAvoidMode->IsNumber()) {
+        auto sheetKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (sheetKeyboardAvoidMode >= static_cast<int>(NG::SheetKeyboardAvoidMode::NONE) &&
+            sheetKeyboardAvoidMode <= static_cast<int>(NG::SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL)) {
+            sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
+        }
+    }
+    
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;

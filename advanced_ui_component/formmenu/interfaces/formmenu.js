@@ -43,6 +43,7 @@ async function querySnapshotAsync(want, componentId, uiContext) {
     want.parameters['ohos.extra.param.key.add_form_to_host_screenx'] = compInfo.screenOffset.x.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_screeny'] = compInfo.screenOffset.y.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
+    hilog.info(0x3900, tag, 'pixelStr length:' + pixelStr.length);
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
   }
@@ -75,12 +76,12 @@ export function AddFormMenuItem(want, componentId, options, parent = null) {
         'moduleName': ''
       }
     });
-
+    let formBindingDataStr = JSON.stringify(options?.formBindingData);
     let uiContext = this.getUIContext();
     FormMenuItem.onClick(async () => {
       await querySnapshotAsync(want, componentId, uiContext);
       uiContext.runScopedTask(() => {
-        FormMenuItem.onRequestPublishFormWithSnapshot(want, options?.formBindingData?.data, options?.callback);
+        FormMenuItem.onRequestPublishFormWithSnapshot(want, formBindingDataStr, options?.callback);
       });
     });
   }, FormMenuItem);

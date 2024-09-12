@@ -16,6 +16,7 @@
 import { Route, RouteGroup } from '../../common/route';
 import { BindPopupBootcamp } from './BindPopupBootcamp';
 import { ToastBootcamp } from '../displays/ToastBootcamp';
+import { ImageboxGroupBootcamp } from '../displays/ImageBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -23,6 +24,7 @@ export const displaysRoute: RouteGroup = {
   children: [
     { name: 'bindpopup', label: '气泡/BindPopup' },
     { name: 'toast', label: '即时反馈/Toast' },
+    { name: 'image', label: '图片/Image' },
   ]
 };
 
@@ -32,6 +34,8 @@ export function DisplaysDestination(name: string, route: Route) {
     BindPopupBootcamp({ title: route.label })
   } else if (name === 'displays/toast') {
     ToastBootcamp({ title: route.label })
+  } else if (name === 'displays/image') {
+    ImageboxGroupBootcamp({ title: route.label })
   }
 }
 

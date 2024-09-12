@@ -1647,7 +1647,17 @@ export struct PopoverDialog {
   @Link visible: boolean;
   @Prop popover: PopoverOptions;
   @BuilderParam targetBuilder: Callback<void>;
-  @State dialogWidth: Dimension | undefined = this.popover.width;
+  @State dialogWidth: Dimension | undefined = this.popover?.width;
+
+  @Builder
+  emptyBuilder() {
+  }
+
+  aboutToAppear(): void {
+    if (this.targetBuilder === undefined || this.targetBuilder === null) {
+      this.targetBuilder = this.emptyBuilder;
+    }
+  }
 
   build() {
     Column() {

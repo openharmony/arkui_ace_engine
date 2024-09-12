@@ -97,7 +97,6 @@ const std::unordered_map<std::string, std::function<double(SvgBaseAttribute&)>> 
             return attr.opacity * (1.0 / UINT8_MAX);
         } },
 };
-
 } // namespace
 
 uint8_t OpacityDoubleToUint8(double opacity)
@@ -140,13 +139,15 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
         { SVG_FILL,
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 auto value = StringUtils::TrimStr(val);
+                Color color;
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
+                    attrs.fillState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
+                    return;
+                }
                 if (value.find("url(") == 0) {
                     auto src = std::regex_replace(value,
                         std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
                     attrs.fillState.SetHref(src);
-                } else {
-                    Color fill = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(value));
-                    attrs.fillState.SetColor(fill);
                 }
             } },
         { DOM_SVG_SRC_FILL_OPACITY,
@@ -199,13 +200,15 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
         { SVG_STROKE,
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 auto value = StringUtils::TrimStr(val);
+                Color color;
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
+                    attrs.strokeState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
+                    return;
+                }
                 if (value.find("url(") == 0) {
                     auto src = std::regex_replace(value,
                         std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
                     attrs.strokeState.SetHref(src);
-                } else {
-                    Color stroke = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                    attrs.strokeState.SetColor(stroke);
                 }
             } },
         { DOM_SVG_SRC_STROKE_DASHARRAY,

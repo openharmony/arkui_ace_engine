@@ -86,7 +86,8 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
     void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
-    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
+    bool NotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout) override;
 
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
@@ -98,11 +99,14 @@ public:
     // The interface for UEC dump
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WindowSizeChangeReason GetSizeChangeReason() const override;
 
 private:
     void InitAllCallback();
     void UpdateSessionConfig();
     int32_t GetWindowSceneId();
+    bool InnerNotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info) const;
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -112,6 +116,7 @@ private:
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
     bool isNotifyOccupiedAreaChange_ = true;
+    Rect displayAreaWindow_;
     RectF displayArea_;
     uint32_t reason_ = (uint32_t)Rosen::SizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;

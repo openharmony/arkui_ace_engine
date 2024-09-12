@@ -47,6 +47,7 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -440,6 +441,8 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
+    VectorF GetTransformScaleRelativeToWindow() const;
+
     RectF GetTransformRectRelativeToWindow() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
@@ -695,6 +698,10 @@ public:
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
     static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
+    double GetPreviewScaleVal() const;
+
+    bool IsPreviewNeedScale() const;
+
     void SetViewPort(RectF viewPort)
     {
         viewPort_ = viewPort;
@@ -766,7 +773,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;

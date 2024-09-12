@@ -613,6 +613,38 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird
     return 0;
 }
 
+bool JsThirdProviderInteractionOperation::HandleNativeFocusUpdate(
+    int64_t elementId,
+    Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+{
+    ExecuteActionForThird(
+        elementId,
+        accessibilityEventInfo.GetElementInfo(),
+        static_cast<int32_t>(
+            Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS));
+    return false;
+}
+
+bool JsThirdProviderInteractionOperation::HandleEventByFramework(
+    const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
+    Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+{
+    auto eventType = nativeAccessibilityEvent.GetEventType();
+    bool needSendEvent = true;
+    switch (eventType) {
+        case ArkUI_AccessibilityEventType::
+            ARKUI_ACCESSIBILITY_NATIVE_EVENT_TYPE_FOCUS_NODE_UPDATE:
+            if (nativeAccessibilityEvent.GetElementInfo()) {
+                needSendEvent = HandleNativeFocusUpdate(
+                    nativeAccessibilityEvent.GetElementInfo()->GetElementId(),
+                    accessibilityEventInfo);
+            }
+        default:
+            break;
+    }
+    return needSendEvent;
+}
+
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
     const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
     void (*callback)(int32_t errorCode))
@@ -622,13 +654,19 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
     GetAccessibilityEventInfoFromNativeEvent(
         nativeAccessibilityEvent, accessibilityEventInfo);
 
-    // 2. SendEvent
-    auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_RETURN(jsAccessibilityManager, -1);
-    auto host = host_.Upgrade();
-    CHECK_NULL_RETURN(host, -1);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Inner SendAccessibilityAsyncEvent");
-    SendAccessibilitySyncEventToService(accessibilityEventInfo, callback);
+    // 2. handleEvent by frame work
+    bool needSendEvent =  HandleEventByFramework(
+        nativeAccessibilityEvent,
+        accessibilityEventInfo);
+    // 3. SendEvent
+    if (needSendEvent) {
+        auto jsAccessibilityManager = GetHandler().Upgrade();
+        CHECK_NULL_RETURN(jsAccessibilityManager, -1);
+        auto host = host_.Upgrade();
+        CHECK_NULL_RETURN(host, -1);
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Inner SendAccessibilityAsyncEvent");
+        SendAccessibilitySyncEventToService(accessibilityEventInfo, callback);
+    }
     callback(0);
     return 0;
 }

@@ -11611,6 +11611,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
@@ -11624,6 +11627,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   font(value, options) {
+    if (value === undefined || value === null) {
+      return this;
+    }
     let arkTextFont = new ArkTextFont();
     arkTextFont.value = value;
     arkTextFont.enableVariableFontWeight = options?.enableVariableFontWeight;
@@ -17424,6 +17430,21 @@ class ArkToggleComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    if (this.toggleType === ToggleType.Button) {
+      return 1;
+    }
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      this.toggleType = value[0].type;
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, undefined);
+    }
+    return this;
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -17717,6 +17738,23 @@ class ToggleContentModifier extends ModifierWithKey {
   }
 }
 ToggleContentModifier.identity = Symbol('toggleContentModifier');
+class ToggleOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().toggle.setToggleOptions(node, undefined);
+    } else {
+      getUINativeModule().toggle.setToggleOptions(node, this.value?.isOn);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.isOn, this.value.isOn);
+  }
+}
+ToggleOptionsModifier.identity = Symbol('toggleOptions');
 // @ts-ignore
 if (globalThis.Toggle !== undefined) {
   globalThis.Toggle.attributeModifier = function (modifier) {
@@ -17741,6 +17779,17 @@ if (globalThis.Toggle !== undefined) {
 class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, undefined);
+    }
+    return this;
   }
   optionWidth(value) {
     modifierWithKey(this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
@@ -17854,6 +17903,40 @@ class ArkSelectComponent extends ArkComponent {
     return this;
   }
 }
+
+class SelectOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.setOptions(node, undefined, undefined, undefined, undefined);
+    } else {
+      const valueArray = [];
+      const iconArray = [];
+      const symbolIconArray = [];
+      const length = this.value?.length;
+      for (let i = 0; i < length; i++) {
+        valueArray.push(this.value[i]?.value);
+        iconArray.push(this.value[i]?.icon);
+        symbolIconArray.push(this.value[i]?.symbolIcon);
+      }
+      getUINativeModule().select.setOptions(node, valueArray, iconArray, symbolIconArray, length);
+    }
+  }
+
+  checkObjectDiff() {
+    return !(Array.isArray(this.stageValue) && Array.isArray(this.value) &&
+    this.stageValue.length === this.value.length &&
+    this.stageValue.every((eachValue, index) => {
+      return isBaseOrResourceEqual(eachValue.value, this.value[index].value) &&
+        isBaseOrResourceEqual(eachValue.icon, this.value[index].icon) &&
+        isBaseOrResourceEqual(eachValue.symbolIcon, this.value[index].symbolIcon);
+    }));
+  }
+}
+SelectOptionsModifier.identity = Symbol('SelectOptions');
+
 class MenuBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19110,6 +19193,17 @@ class ArkSliderComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, undefined);
+    }
+    return this;
+  }
   blockColor(value) {
     modifierWithKey(this._modifiersWithKeys, BlockColorModifier.identity, BlockColorModifier, value);
     return this;
@@ -19218,6 +19312,31 @@ class ArkSliderComponent extends ArkComponent {
     return this.sliderNode.getFrameNode();
   }
 }
+class SliderOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.setSliderOptions(node, undefined, undefined, undefined, undefined, undefined,
+        undefined, undefined);
+    } else {
+      getUINativeModule().slider.setSliderOptions(node, this.value.value, this.value.min, this.value.max,
+        this.value.step, this.value.style, this.value.direction, this.value.reverse);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.min, this.value.min) ||
+      !isBaseOrResourceEqual(this.stageValue.max, this.value.max) ||
+      !isBaseOrResourceEqual(this.stageValue.step, this.value.step) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style) ||
+      !isBaseOrResourceEqual(this.stageValue.direction, this.value.direction) ||
+      !isBaseOrResourceEqual(this.stageValue.reverse, this.value.reverse);
+  }
+}
+SliderOptionsModifier.identity = Symbol('sliderOptions');
 class BlockStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -20188,6 +20307,10 @@ class ArkNavDestinationComponent extends ArkComponent {
     }
     return this;
   }
+  recoverable(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
+    return this;
+  }
 }
 class HideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
@@ -20240,6 +20363,21 @@ class NavDestinationTitleModifier extends ModifierWithKey {
 }
 NavDestinationTitleModifier.identity = Symbol('title');
 
+class NavDestinationRecoverableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetRecoverable(node);
+    } else {
+      getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
+  }
+}
+NavDestinationRecoverableModifier.identity = Symbol('recoverable');
+
 class NavDestinationMenusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -20252,25 +20390,23 @@ class NavDestinationMenusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 NavDestinationMenusModifier.identity = Symbol('menus');
@@ -21036,6 +21172,10 @@ class ArkNavigationComponent extends ArkComponent {
     }
     return this;
   }
+  recoverable(value) {
+    modifierWithKey(this._modifiersWithKeys, NavigationRecoverableModifier.identity, NavigationRecoverableModifier, value);
+    return this;
+  }
 }
 class BackButtonIconModifier extends ModifierWithKey {
   constructor(value) {
@@ -21264,6 +21404,21 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey {
 }
 IgnoreNavLayoutSafeAreaModifier.identity = Symbol('ignoreLayoutSafeArea');
 
+class NavigationRecoverableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetRecoverable(node);
+    } else {
+      getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
+  }
+}
+NavigationRecoverableModifier.identity = Symbol('recoverable');
+
 class MenusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -21276,25 +21431,23 @@ class MenusModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
-      if (this.value.length !== this.stageValue.length) {
-        return true;
-      } else {
-        for (let i = 0; i < this.value.length; i++) {
-          if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
-            isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
-            isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
-            isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
-            isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
-          )) {
-            return true;
-          }
-        }
-        return false;
-      }
-    } else {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
       return true;
     }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 MenusModifier.identity = Symbol('menus');

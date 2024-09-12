@@ -4105,8 +4105,13 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
-    rsNode_->SetColorBlendMode(rsBlendMode);
+    if (blendMode == BlendMode::BACK_COMPAT_SOURCE_IN) {
+        rsNode_->SetBackgroundShader(nullptr);
+        rsNode_->SetColorBlendMode(Rosen::RSColorBlendMode::NONE);
+    } else {
+        auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+        rsNode_->SetColorBlendMode(rsBlendMode);
+    }
     RequestNextFrame();
 }
 
@@ -4454,6 +4459,13 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
 void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
 {
     CHECK_NULL_VOID(rsNode_);
+    // temporary code for back compat
+    auto& graphicProps = GetOrCreateGraphics();
+    if (graphicProps->GetBackBlendMode() == BlendMode::BACK_COMPAT_SOURCE_IN)
+    {
+        rsNode_->SetBackgroundShader(nullptr);
+        return;
+    }
     rsNode_->SetBackgroundShader(shader);
 }
 
@@ -5309,6 +5321,17 @@ void RosenRenderContext::DumpInfo()
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
             DumpLog::GetInstance().AddDesc(
                  std::string("backgroundEffect:").append(backgroundEffect));
+        }
+        auto && graphicProps = GetOrCreateGraphics();
+        if (graphicProps->propFgDynamicBrightnessOption.has_value()) {
+            auto fgDynamicBrightness = graphicProps->propFgDynamicBrightnessOption->GetJsonObject();
+            DumpLog::GetInstance().AddDesc(
+                std::string("foregroundBrightness:").append(fgDynamicBrightness->ToString().c_str()));
+        }
+        if (graphicProps->propBgDynamicBrightnessOption.has_value()) {
+            auto bgDynamicBrightness = graphicProps->propBgDynamicBrightnessOption->GetJsonObject();
+            DumpLog::GetInstance().AddDesc(
+                std::string("backgroundBrightnessInternal:").append(bgDynamicBrightness->ToString().c_str()));
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
             DumpLog::GetInstance().AddDesc(

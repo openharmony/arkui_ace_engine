@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/thread/task_executor.h"
 #include "bridge/declarative_frontend/jsview/js_form_menu_item.h"
 
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
@@ -65,7 +66,6 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
         return;
     }
 
-    int64_t formId = 0;
     AAFwk::Want& want = const_cast<AAFwk::Want&>(wantWrap->GetWant());
     if (!want.HasParameter("ohos.extra.param.key.add_form_to_host_snapshot") ||
         !want.HasParameter("ohos.extra.param.key.add_form_to_host_width") ||
@@ -76,21 +76,32 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
         return;
     }
 
-    std::string errMsg;
-    int32_t errCode = FormModel::GetInstance()->RequestPublishFormWithSnapshot(want, formBindingDataStr, formId,
-                                                                               errMsg);
-    if (!jsCBFunc) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "jsCBFunc is null");
-        return;
-    }
-
-    JSRef<JSVal> params[NUM_CALLBACKNUM];
-    JSRef<JSObject> errObj = JSRef<JSObject>::New();
-    errObj->SetProperty<int32_t>("code", errCode);
-    errObj->SetProperty<std::string>("message", errMsg);
-    params[0] = errObj;
-    params[1] = JSRef<JSVal>::Make(ToJSValue(formId));
-    jsCBFunc->ExecuteJS(NUM_CALLBACKNUM, params);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto numCallBack = [jsCBFunc, taskExecutor](int32_t errCode, int64_t& formId, std::string &errMsg) {
+        if (!jsCBFunc) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "jsCBFunc is null");
+            return;
+        }
+        taskExecutor->PostTask(
+            [jsCBFunc, errCode, formId, errMsg]() {
+                JSRef<JSVal> params[NUM_CALLBACKNUM];
+                JSRef<JSObject> errObj = JSRef<JSObject>::New();
+                errObj->SetProperty<int32_t>("code", errCode);
+                errObj->SetProperty<std::string>("message", errMsg);
+                params[0] = errObj;
+                params[1] = JSRef<JSVal>::Make(ToJSValue(formId));
+                jsCBFunc->ExecuteJS(NUM_CALLBACKNUM, params);
+            },
+            TaskExecutor::TaskType::UI, "RequestPublishFormWithSnapshot");
+    };
+    taskExecutor->PostTask(
+        [want, formBindingDataStr, numCallBack]() {
+            FormModel::GetInstance()->RequestPublishFormWithSnapshot(want, formBindingDataStr, numCallBack);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "RequestPublishFormWithSnapshot");
 }
 
 void JSFormMenuItem::JsOnRequestPublishFormWithSnapshot(const JSCallbackInfo& info)

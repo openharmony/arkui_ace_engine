@@ -70,8 +70,6 @@ constexpr uint8_t SUGGEST_OPINC_CHCKED_ONCE = 1 << 3;
 constexpr uint8_t SUGGEST_OPINC_CHECKED_THROUGH = 1 << 4;
 // Node has rendergroup marked.
 constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
-// OPINC must more then 2 leaf;
-constexpr int32_t THRESH_CHILD_NO = 2;
 // OPINC max ratio for scroll scope(height);
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
@@ -190,12 +188,6 @@ public:
                 AddFrameNode(child.node, allFrameNodeChildren_, partFrameNodeChildren_, count);
             }
         }
-        return ChildrenListWithGuard(allFrameNodeChildren_, *this);
-    }
-
-    ChildrenListWithGuard GetCurrentFrameChildren()
-    {
-        auto guard = GetGuard();
         return ChildrenListWithGuard(allFrameNodeChildren_, *this);
     }
 
@@ -2497,8 +2489,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     ResponseLinkResult& responseLinkResult, bool isDispatch)
 {
-    if (!isActive_ || !eventHub_->IsEnabled()) {
+    if (!isActive_) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
+        return HitTestResult::OUT_OF_REGION;
+    }
+    if (!eventHub_->IsEnabled()) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
@@ -2831,12 +2827,11 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
 
 void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList)
 {
-    ACE_LAYOUT_TRACE_BEGIN("GetResponseRegionListByTraversal");
+    CHECK_NULL_VOID(renderContext_);
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto rootRegionList = GetResponseRegionListForTouch(origRect);
     if (!rootRegionList.empty()) {
         responseRegionList.insert(responseRegionList.end(), rootRegionList.begin(), rootRegionList.end());
-        ACE_LAYOUT_TRACE_END()
         return;
     }
     for (auto childWeak = frameChildren_.rbegin(); childWeak != frameChildren_.rend(); ++childWeak) {
@@ -2846,7 +2841,6 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
         }
         child->GetResponseRegionListByTraversal(responseRegionList);
     }
-    ACE_LAYOUT_TRACE_END()
 }
 
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
@@ -3080,6 +3074,29 @@ OffsetF FrameNode::GetPositionToWindowWithTransform() const
     offset.SetX(pointNode.GetX());
     offset.SetY(pointNode.GetY());
     return offset;
+}
+
+VectorF FrameNode::GetTransformScaleRelativeToWindow() const
+{
+    VectorF finalScale {1.0f, 1.0f};
+    auto context = GetRenderContext();
+    if (context) {
+        auto scale = GetTransformScale();
+        finalScale.x = scale.x;
+        finalScale.y = scale.y;
+    }
+
+    auto parent = GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            auto scale = parent->GetTransformScale();
+            finalScale.x *= scale.x;
+            finalScale.y *= scale.y;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return finalScale;
 }
 
 RectF FrameNode::GetTransformRectRelativeToWindow() const
@@ -3627,6 +3644,24 @@ std::vector<FrameNode*> FrameNode::GetNodesPtrById(const std::unordered_set<int3
         nodes.emplace_back(frameNode);
     }
     return nodes;
+}
+
+double FrameNode::GetPreviewScaleVal() const
+{
+    double scale = 1.0;
+    auto maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(GetContextRefPtr());
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, scale);
+    auto width = geometryNode->GetFrameRect().Width();
+    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption_.isScaleEnabled) {
+        scale = maxWidth / width;
+    }
+    return scale;
+}
+
+bool FrameNode::IsPreviewNeedScale() const
+{
+    return GetPreviewScaleVal() < 1.0f;
 }
 
 int32_t FrameNode::GetNodeExpectedRate()
@@ -4207,9 +4242,14 @@ void FrameNode::RemoveAllChildInRenderTree()
     frameProxy_->RemoveAllChildInRenderTree();
 }
 
-void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+    if (showCached) {
+        frameProxy_->SetActiveChildRange(
+            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
+    } else {
+        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+    }
 }
 
 void FrameNode::SetActiveChildRange(
@@ -5122,12 +5162,6 @@ OPINC_TYPE_E FrameNode::IsOpIncValidNode(const SizeF& boundary, int32_t childNum
     return ret;
 }
 
-ChildrenListWithGuard FrameNode::GetAllChildren()
-{
-    // frameProxy_ never be null in frame node;
-    return frameProxy_->GetCurrentFrameChildren();
-}
-
 OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth)
 {
     if (GetSuggestOpIncActivatedOnce()) {
@@ -5152,13 +5186,14 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     } else if (status == OPINC_SUGGESTED_OR_EXCLUDED) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
     } else if (status == OPINC_PARENT_POSSIBLE) {
-        for (auto child : GetAllChildren()) {
-            if (!child) {
-                continue;
+        std::list<RefPtr<FrameNode>> childrens;
+        GenerateOneDepthVisibleFrame(childrens);
+        for (auto& child : childrens) {
+            if (child) {
+                status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
             }
-            auto frameNode = AceType::DynamicCast<FrameNode>(child);
-            if (frameNode) {
-                frameNode->FindSuggestOpIncNode(path, boundary, depth + 1);
+            if (status == OPINC_INVALID) {
+                    return OPINC_INVALID;
             }
         }
         return OPINC_PARENT_POSSIBLE;
@@ -5178,8 +5213,6 @@ void FrameNode::MarkAndCheckNewOpIncNode()
             parent->SetOpIncCheckedOnce();
             auto status = IsOpIncValidNode(parent->GetGeometryNode()->GetFrameSize());
             if (status == OPINC_NODE) {
-                parent->SetOpIncGroupCheckedThrough(true);
-            } else if (FrameNode::GetValidLeafChildNumber(Claim(this), THRESH_CHILD_NO) >= THRESH_CHILD_NO) {
                 parent->SetOpIncGroupCheckedThrough(true);
             } else {
                 parent->SetOpIncGroupCheckedThrough(false);

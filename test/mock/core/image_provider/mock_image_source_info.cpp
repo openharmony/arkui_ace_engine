@@ -232,7 +232,7 @@ SrcType ImageSourceInfo::GetSrcType() const
     return srcType_;
 }
 
-std::string ImageSourceInfo::ToString() const
+std::string ImageSourceInfo::ToString(bool isNeedTruncated) const
 {
     return std::string("empty source");
 }

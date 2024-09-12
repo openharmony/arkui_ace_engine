@@ -679,6 +679,17 @@ void SearchModelNG::SetEnablePreviewText(bool enablePreviewText)
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
+void SearchModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
@@ -1792,15 +1803,26 @@ void SearchModelNG::SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
-void SearchModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void SearchModelNG::OnCreateMenuCallbackUpdate(
+    FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    textFieldPattern->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
+}
+
+void SearchModelNG::OnMenuItemClickCallbackUpdate(
+    FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
 }
 
 void SearchModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)

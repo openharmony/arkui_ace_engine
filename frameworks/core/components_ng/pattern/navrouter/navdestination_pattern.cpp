@@ -24,20 +24,20 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+std::atomic<uint64_t> g_navDestinationPatternNextAutoGenId = 0;
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
-std::atomic<uint64_t> navDestinationPatternNextAutoGenId = 0;
-} // namespace
+}
 
 NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
     : shallowBuilder_(shallowBuilder)
 {
-    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+    navDestinationId_ = g_navDestinationPatternNextAutoGenId.fetch_add(1);
 }
 
 NavDestinationPattern::NavDestinationPattern()
 {
-    navDestinationId_ = navDestinationPatternNextAutoGenId.fetch_add(1);
+    navDestinationId_ = g_navDestinationPatternNextAutoGenId.fetch_add(1);
 }
 
 NavDestinationPattern::~NavDestinationPattern()
@@ -107,6 +107,12 @@ void NavDestinationPattern::OnLanguageConfigurationUpdate()
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto backButtonUINode = titleBarNode->GetBackButton();
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
+    CHECK_NULL_VOID(backButtonNode);
+    auto imageNode = backButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(imageNode);
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)

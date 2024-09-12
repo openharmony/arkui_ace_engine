@@ -89,8 +89,8 @@ public:
 
     bool HasDifferentDirectionGesture();
 
-    bool DispatchTouchEvent(const TouchEvent& point);
-    bool DispatchTouchEvent(const AxisEvent& event);
+    bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
+    bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     bool PostEventDispatchTouchEvent(const TouchEvent& point);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
@@ -306,15 +306,18 @@ private:
     void CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
-    void DispatchTouchEventAndCheck(const TouchEvent& event);
+    bool DispatchMultiContainerEvent(const TouchEvent& point);
+    void DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch = true);
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
-    void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint);
-    void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent);
+    void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
+    void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch = true);
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
+    void UpdateDragInfo(TouchEvent& point);
+    void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;

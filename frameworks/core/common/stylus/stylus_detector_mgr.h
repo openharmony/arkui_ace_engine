@@ -27,6 +27,10 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/touch_event.h"
+#include "core/components_ng/render/paragraph.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 
 namespace OHOS::Ace {
 constexpr int32_t HOT_AREA_EXPAND_TIME = 2;
@@ -53,7 +57,8 @@ public:
     bool IsNeedInterceptedTouchEvent(
         const TouchEvent& touchEvent, std::unordered_map<size_t, TouchTestResult> touchTestResults);
 
-    void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode);
+    void AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& textFieldNode,
+        const WeakPtr<NG::LayoutInfoInterface>& layoutInfo);
     void RemoveTextFieldFrameNode(const int32_t id);
 
     int32_t GetDefaultNodeId() const
@@ -69,15 +74,30 @@ private:
     public:
         explicit StylusDetectorCallBack() = default;
         virtual ~StylusDetectorCallBack() = default;
-        static void RequestFocus(int32_t nodeId);
-        static void SetText(int32_t nodeId, std::string args);
-        static std::string GetText(int32_t nodeId);
+        static int32_t RequestFocus(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
+        static int32_t SetText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler,
+            std::shared_ptr<IAceStylusCallback> callback);
+        static int32_t GetText(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler,
+            std::shared_ptr<IAceStylusCallback> callback);
+        static int32_t DeleteText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
+        static int32_t ChoiceText(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
+        static int32_t InsertSpace(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
+        static int32_t MoveCursor(int32_t nodeId, void* data, RefPtr<TaskExecutor> taskScheduler);
 
-        static void Redo(int32_t nodeId);
-        static void Undo(int32_t nodeId);
-        void OnDetector(
-            const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback) override;
+        static int32_t Redo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
+        static int32_t Undo(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler);
+        int32_t OnDetector(
+            const CommandType& command, void* data, std::shared_ptr<IAceStylusCallback> callback) override;
         bool OnDetectorSync(const CommandType& command) override;
+
+    private:
+        static int32_t HandleMoveCursor(const RefPtr<NG::FrameNode>& frameNode, NG::PositionWithAffinity sInd,
+            bool showHandle);
+        static NG::PositionWithAffinity GetGlyphPositionByGlobalOffset(const RefPtr<NG::FrameNode>& frameNode,
+            const Offset& offset);
+        static std::tuple<int32_t, int32_t, int32_t> CalculateIntersectedRegion(NG::PositionWithAffinity sInd,
+            NG::PositionWithAffinity eInd, int32_t wtextLength);
+        static NG::OffsetF GetPaintRectGlobalOffset(const RefPtr<NG::FrameNode>& frameNode);
     };
 
     bool IsStylusTouchEvent(const TouchEvent& touchEvent) const;
@@ -85,10 +105,12 @@ private:
         const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
 
     std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> textFieldNodes_;
+    std::unordered_map<int32_t, WeakPtr<NG::LayoutInfoInterface>> textFieldLayoutInfos_;
 
     StylusDetectorInstance engine_ = nullptr;
     bool isRegistered_ = false;
     int32_t nodeId_ = 0;
+    WeakPtr<NG::LayoutInfoInterface> layoutInfo_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STYLUS_STYLUS_DETECTOR_MGR_H

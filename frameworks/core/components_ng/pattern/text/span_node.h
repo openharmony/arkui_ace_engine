@@ -159,6 +159,7 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
     Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
+    Color paragraphTextColor = { Color::BLACK };
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -335,6 +336,11 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    void SetDefaultMouseStyle(MouseFormat mouseStyle)
+    {
+        defaultMouseStyle_ = mouseStyle;
+    }
+
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -352,6 +358,7 @@ private:
     WeakPtr<Pattern> pattern_;
     Dimension radius_ = 2.0_vp;
     std::string address_;
+    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     uint32_t symbolId_ = 0;
 };
 
@@ -557,6 +564,11 @@ public:
     void AddPropertyInfo(PropertyInfo value)
     {
         propertyInfoContainer_.erase(value);
+    }
+
+    void ResetPropertyInfo(PropertyInfo value)
+    {
+        propertyInfoContainer_.insert(value);
     }
 
     void CleanPropertyInfo()

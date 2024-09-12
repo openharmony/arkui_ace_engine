@@ -25,8 +25,8 @@ export default async function textAreaPlaceholderFontTest() {
    * 获取textArea4的PlaceholderFont属性PlaceholderFont.fontWeight与期待值'FontWeight.Bold'比对
    * 获取textArea5的PlaceholderFont属性PlaceholderFont.fontWeight与期待值'FontWeight.Bolder'比对
    * 获取textArea6的PlaceholderFont属性PlaceholderFont.weight与期待值'100'比对
-   * 点击button1，变更textArea5的PlaceholderFont属性值为{size:40,weight:FontWeight.Normal,family:'ITCBLKADRawFile',style:FontStyle.Italic}
-   * 获取textArea1的PlaceholderFont属性与期待值'{"style":"FontStyle.Italic","size":"40.00fp","fontWeight":"FontWeight.Normal","fontFamily":"ITCBLKADRawFile"}'比对
+   * 点击button1，变更textArea5的PlaceholderFont属性值为{size:40,weight:FontWeight.Normal,family:'TESTFONTRawFile',style:FontStyle.Italic}
+   * 获取textArea1的PlaceholderFont属性与期待值'{"style":"FontStyle.Italic","size":"40.00fp","fontWeight":"FontWeight.Normal","fontFamily":"TESTFONTRawFile"}'比对
    * 点击button2，变更textArea6的PlaceholderFont属性PlaceholderFont.weight值为900
    * 获取textArea6的PlaceholderFont属性PlaceholderFont.weight与期待值'900'比对
    */
@@ -61,7 +61,7 @@ export default async function textAreaPlaceholderFontTest() {
     await button1.tap()
     let placeholderFont7: string = await textArea1.getInspectorInfo()
     assertEqual(JSON.parse(placeholderFont7).$attrs.placeholderFont,
-      '{"style":"FontStyle.Italic","size":"40.00fp","fontWeight":"FontWeight.Normal","fontFamily":"ITCBLKADRawFile"}')
+      '{"style":"FontStyle.Italic","size":"40.00fp","fontWeight":"FontWeight.Normal","fontFamily":"TESTFONTRawFile"}')
     await button2.tap()
     let placeholderFont8: string = await textArea6.getInspectorInfo()
     assertEqual(JSON.parse(JSON.parse(placeholderFont8).$attrs.placeholderFont).weight, '900')

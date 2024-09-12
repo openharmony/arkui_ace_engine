@@ -351,7 +351,7 @@ var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
   BlendMode[BlendMode["DESTINATION_IN"] = 7] = "DESTINATION_IN";
-  BlendMode[BlendMode["SOURCE_IN"] = 6] = "SOURCE_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 5000] = "SOURCE_IN";
   BlendMode[BlendMode["NONE"] = 0] = "NONE";
   BlendMode[BlendMode["CLEAR"] = 1] = "CLEAR";
   BlendMode[BlendMode["SRC"] = 2] = "SRC";
@@ -717,10 +717,10 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
-var FormShape;
+let FormShape;
 (function (FormShape) {
-  FormShape["RECT"] = 1;
-  FormShape["CIRCLE"] = 2;
+  FormShape.RECT = 1;
+  FormShape.CIRCLE = 2;
 })(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
@@ -1629,6 +1629,14 @@ var ScrollSizeMode ;
   ScrollSizeMode[ScrollSizeMode["CONTINUOUS"] = 1] = "CONTINUOUS";
 })(ScrollSizeMode || (ScrollSizeMode = {}));
 
+var SheetKeyboardAvoidMode;
+(function (SheetKeyboardAvoidMode) {
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
+
 var FunctionKey;
 (function (FunctionKey) {
   FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
@@ -2111,6 +2119,8 @@ class NavPathInfo {
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
     this.isEntry = isEntry;
+    this.fromRecovery = false;
+    this.mode = undefined;
   }
 }
 
@@ -3285,27 +3295,27 @@ let DataOperationType;
 
 var StyledStringKey;
 (function (StyledStringKey) {
-  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
-  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
-  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
-  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
-  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
-  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
-  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
-  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
-  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
-  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
+  StyledStringKey[StyledStringKey['FONT'] = 0] = 'FONT';
+  StyledStringKey[StyledStringKey['DECORATION'] = 1] = 'DECORATION';
+  StyledStringKey[StyledStringKey['BASELINE_OFFSET'] = 2] = 'BASELINE_OFFSET';
+  StyledStringKey[StyledStringKey['LETTER_SPACING'] = 3] = 'LETTER_SPACING';
+  StyledStringKey[StyledStringKey['TEXT_SHADOW'] = 4] = 'TEXT_SHADOW';
+  StyledStringKey[StyledStringKey['LINE_HEIGHT'] = 5] = 'LINE_HEIGHT';
+  StyledStringKey[StyledStringKey['PARAGRAPH_STYLE'] = 200] = 'PARAGRAPH_STYLE';
+  StyledStringKey[StyledStringKey['BACKGROUND_COLOR'] = 6] = 'BACKGROUND_COLOR';
+  StyledStringKey[StyledStringKey['URL'] = 7] = 'URL';
+  StyledStringKey[StyledStringKey['GESTURE'] = 100] = 'GESTURE';
+  StyledStringKey[StyledStringKey['IMAGE'] = 300] = 'IMAGE';
+  StyledStringKey[StyledStringKey['CUSTOM_SPAN'] = 400] = 'CUSTOM_SPAN';
+  StyledStringKey[StyledStringKey['USER_DATA'] = 500] = 'USER_DATA';
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let FocusPriority;

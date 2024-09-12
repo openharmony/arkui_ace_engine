@@ -150,6 +150,7 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
+    virtual void SetEnableHapticFeedback(bool state) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

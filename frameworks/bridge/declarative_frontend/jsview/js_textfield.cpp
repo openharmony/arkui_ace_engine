@@ -1198,6 +1198,7 @@ void JSTextField::SetShowUnit(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     if (!jsValue->IsFunction()) {
+        TextFieldModel::GetInstance()->SetShowUnit(nullptr);
         return;
     }
 
@@ -1739,4 +1740,14 @@ void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
+
+void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
 } // namespace OHOS::Ace::Framework

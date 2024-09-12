@@ -147,21 +147,21 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
-    auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
     auto gridItem = host->FindChildByPosition(globalX, globalY);
     CHECK_NULL_VOID(gridItem);
     draggedIndex_ = GetGridItemIndex(gridItem);
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();

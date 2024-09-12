@@ -846,8 +846,8 @@ void SpanItem::HandeUrlHoverEvent(bool isHover, int32_t urlId,
         TextBackgroundStyle backgroundStyle;
         backgroundStyle.backgroundColor = Color::TRANSPARENT;
         spanItem->backgroundStyle = backgroundStyle;
-        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::DEFAULT);
-        pipelineContext->FreeMouseStyleHoldNode(urlId);
+        pipelineContext->SetMouseStyleHoldNode(urlId);
+        pipelineContext->ChangeMouseStyle(urlId, defaultMouseStyle_);
     }
 }
 
@@ -991,6 +991,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
+    textStyle.SetTextColor(placeholderStyle.paragraphTextColor);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
@@ -1022,6 +1023,9 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
     sameSpan->SetImageSpanOptions(options);
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
     return sameSpan;
 }
 
@@ -1120,6 +1124,9 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     sameSpan->onDraw = onDraw;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
     return sameSpan;
 }
 

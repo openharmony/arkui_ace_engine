@@ -651,13 +651,12 @@ void GetShadowInfoArray(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     std::set<Media::PixelMap*> scaledPixelMaps;
-    auto maxDiagnal = NG::DragDropFuncWrapper::GetScaleWidth();
+    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
-        NG::RectF rect(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
         double scale = 1.0;
         if (!scaledPixelMaps.count(pixelMap.get())) {
-            if (rect.Diagnal() > maxDiagnal && asyncCtx->dragPreviewOption.isScaleEnabled) {
-                scale = maxDiagnal / rect.Diagnal();
+            if (pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+                scale = minScaleWidth / pixelMap->GetWidth();
             }
             auto pixelMapScale = asyncCtx->windowScale * scale;
             pixelMap->scale(pixelMapScale, pixelMapScale, Media::AntiAliasingOption::HIGH);
@@ -911,11 +910,9 @@ void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSi
         dataSize = badgeNumber.value();
     }
     double scale = 1.0;
-    
-    auto maxDiagnal = NG::DragDropFuncWrapper::GetScaleWidth();
-    NG::RectF pixelRect(0, 0, asyncCtx->pixelMap->GetWidth(), asyncCtx->pixelMap->GetHeight());
-    if (pixelRect.Diagnal() > maxDiagnal && asyncCtx->dragPreviewOption.isScaleEnabled) {
-        scale = maxDiagnal / pixelRect.Diagnal();
+    auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(asyncCtx->instanceId);
+    if (asyncCtx->pixelMap->GetWidth() > minScaleWidth && asyncCtx->dragPreviewOption.isScaleEnabled) {
+        scale = minScaleWidth / asyncCtx->pixelMap->GetWidth();
     }
     auto pixelMapScale = asyncCtx->windowScale * scale;
     asyncCtx->pixelMap->scale(pixelMapScale, pixelMapScale, Media::AntiAliasingOption::HIGH);

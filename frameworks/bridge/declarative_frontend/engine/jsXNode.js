@@ -1488,6 +1488,21 @@ const __creatorMap__ = new Map([
                 return new ArkRatingComponent(node, type);
             });
         }],
+    ['Slider', (context) => {
+            return new TypedFrameNode(context, 'Slider', (node, type) => {
+                return new ArkSliderComponent(node, type);
+            });
+        }],
+    ['Select', (context) => {
+            return new TypedFrameNode(context, 'Select', (node, type) => {
+                return new ArkSelectComponent(node, type);
+            });
+        }],
+    ['Toggle', (context, options) => {
+            return new TypedFrameNode(context, 'Toggle', (node, type) => {
+                return new ArkToggleComponent(node, type);
+            }, options);
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {

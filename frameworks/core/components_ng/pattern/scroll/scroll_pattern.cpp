@@ -229,6 +229,9 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
+    if (LessNotEqual(scrollableDistance_, 0.0f)) {
+        return LessOrEqual(currentOffset_, 0.0f);
+    }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 
