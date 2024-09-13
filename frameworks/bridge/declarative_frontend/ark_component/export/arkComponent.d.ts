@@ -20,15 +20,15 @@ declare enum ModifierType {
     FRAME_NODE = 2,
     EXPOSE_MODIFIER = 3,
 }
+declare class JsPointerClass {
+    invalid(): boolean;
+}
 declare class ArkLogConsole {
   public static log(...args: Object[]): void;
   public static debug(...args: Object[]): void;
   public static info(...args: Object[]): void;
   public static warn(...args: Object[]): void;
   public static error(...args: Object[]): void;
-}
-declare class JsPointerClass {
-    invalid(): boolean;
 }
 interface Equable {
     isEqual(value: Equable): boolean;
@@ -234,7 +234,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     reuseId(id: string): this;
     renderFit(fitMode: RenderFit): this;
     attributeModifier(modifier: AttributeModifier<CommonAttribute>): this;
-    systemBarEffect(): this;
+    systemBarEffect(value: null): this;
 }
 declare class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1995,7 +1995,7 @@ declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanA
 
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
+    emitter(fields: Array<EmitterProps>): ParticleAttribute;
 }
 
 declare class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {
