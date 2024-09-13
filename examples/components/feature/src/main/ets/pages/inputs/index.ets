@@ -13,8 +13,21 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components';
+import { Route, RouteGroup } from 'common/src/main/ets/common/route';
+import { TextInputBootcamp } from './TextInputBootcamp';
 
-export * from './src/main/ets/utils';
 
-export * from './src/main/ets/common/route';
+export const inputsRoute: RouteGroup = {
+  name: 'inputs',
+  label: '输入类',
+  children: [
+    { name: 'text', label: '单行文本框/TextInput' }
+  ]
+};
+
+@Builder
+export function InputsDestination(name: string, route: Route) {
+  if (name === 'inputs/text') {
+    TextInputBootcamp({ title: route.label })
+  }
+}

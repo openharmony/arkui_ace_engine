@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components';
+export interface Route {
+  name: string;
+  label: ResourceStr;
+}
 
-export * from './src/main/ets/utils';
-
-export * from './src/main/ets/common/route';
+export interface RouteGroup extends Route {
+  children: Route[];
+}
