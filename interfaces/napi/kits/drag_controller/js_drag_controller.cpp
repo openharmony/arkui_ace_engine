@@ -99,6 +99,7 @@ struct DragControllerAsyncCtx {
     int32_t globalY = -1;
     uint64_t displayId = 0;
     int32_t sourceType = 0;
+    int32_t toolType = -1;
     float windowScale = 1.0f;
     float dipScale = 0.0;
     int parseBuilderCount = 0;
@@ -743,7 +744,7 @@ void EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
-        recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        recordSize, pointerId, asyncCtx->toolType, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
 
@@ -949,8 +950,8 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& r
     auto windowId = container->GetWindowId();
     Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
     Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
-        arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX,
-        asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
+        arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->toolType,
+        asyncCtx->globalX, asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
@@ -1553,6 +1554,7 @@ bool ConfirmCurPointerEventInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx
     } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         asyncCtx->pointerId = PEN_POINTER_ID;
     }
+    asyncCtx->toolType = sourceTool;
     return getPointSuccess;
 }
 
