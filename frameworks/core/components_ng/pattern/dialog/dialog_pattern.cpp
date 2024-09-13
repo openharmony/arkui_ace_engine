@@ -99,6 +99,10 @@ void DialogPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<DialogLayoutProperty>();
+    if (layoutProperty) {
+        direction_ = layoutProperty->GetNonAutoLayoutDirection();
+    }
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
@@ -1214,6 +1218,7 @@ void DialogPattern::OnLanguageConfigurationUpdate()
     }
 
     if (dialogProperties_.shadow.has_value()) {
+        CheckDirection();
         contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value());
     }
 
@@ -1230,6 +1235,19 @@ void DialogPattern::OnLanguageConfigurationUpdate()
 
     if (dialogProperties_.borderRadius.has_value()) {
         contentRenderContext_->UpdateBorderRadius(dialogProperties_.borderRadius.value());
+    }
+}
+
+void DialogPattern::CheckDirection()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    if ((direction_ == TextDirection::LTR && direction == TextDirection::RTL) ||
+        (direction_ == TextDirection::RTL && direction == TextDirection::LTR)) {
+        dialogProperties_.shadow->SetOffsetX(-1 * dialogProperties_.shadow->GetOffset().GetX());
     }
 }
 
