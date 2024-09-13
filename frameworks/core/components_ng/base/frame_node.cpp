@@ -2419,6 +2419,7 @@ bool FrameNode::GetMonopolizeEvents() const
     return gestureHub ? gestureHub->GetMonopolizeEvents() : false;
 }
 
+// get paint rect include graphic properties
 RectF FrameNode::GetPaintRectWithTransform() const
 {
     return renderContext_->GetPaintRectWithTransform();
@@ -2987,6 +2988,8 @@ void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCha
 }
 
 /* @deprecated  This func will be deleted, please use GetTransformRelativeOffset() instead. */
+// a node collect ancestor node position upto root node, if a node has "position" property
+// then node will use position value but not paint rect result value
 OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();
@@ -3022,6 +3025,9 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return offset;
 }
 
+// returns a node's collected offset(see GetOffsetRelativeToWindow)
+// with offset of window to screen
+// ex. textInput component wrap offset relative to screen into a config and send to ime framework
 OffsetF FrameNode::GetPositionToScreen()
 {
     auto offsetCurrent = GetOffsetRelativeToWindow();
@@ -3032,6 +3038,7 @@ OffsetF FrameNode::GetPositionToScreen()
     return offset;
 }
 
+// returns a node's offset relative to parent and consider graphic transform rotate properties
 OffsetF FrameNode::GetPositionToParentWithTransform() const
 {
     auto context = GetRenderContext();
@@ -3044,6 +3051,8 @@ OffsetF FrameNode::GetPositionToParentWithTransform() const
     return offset;
 }
 
+// returns a node's offset collected offset(see GetPositionToWindowWithTransform)
+// then plus window's offset relative to screen
 OffsetF FrameNode::GetPositionToScreenWithTransform()
 {
     auto pipelineContext = GetContext();
@@ -3054,6 +3063,9 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     return offset;
 }
 
+// returns a node's offset relative to window 
+// and consider every ancestor node's graphic transform rotate properties
+// ancestor will check boundary of window scene(exclude)
 OffsetF FrameNode::GetPositionToWindowWithTransform() const
 {
     auto context = GetRenderContext();
@@ -3099,6 +3111,10 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
+// returns a node's rect relative to window 
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
+// ancestor will check boundary of window scene(exclude)
 RectF FrameNode::GetTransformRectRelativeToWindow() const
 {
     auto context = GetRenderContext();
@@ -3112,6 +3128,10 @@ RectF FrameNode::GetTransformRectRelativeToWindow() const
     return rect;
 }
 
+// returns a node's offset relative to window 
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
+// ancestor will check boundary of window scene(exclude)
 OffsetF FrameNode::GetTransformRelativeOffset() const
 {
     auto context = GetRenderContext();
@@ -3128,6 +3148,9 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
+// returns a node's offset relative to window 
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// ancestor will NOT check boundary of window scene
 OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
 {
     auto context = GetRenderContext();
@@ -3143,6 +3166,10 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
+// returns a node's offset relative to window 
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// can exclude querying node
+// ancestor will NOT check boundary of window scene
 OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
 {
     auto context = GetRenderContext();
@@ -3194,6 +3221,7 @@ RectF GetBoundingBox(std::vector<Point>& pointList)
     return RectF(pMin.GetX(), pMin.GetY(), pMax.GetX() - pMin.GetX(), pMax.GetY() - pMin.GetY());
 }
 
+// returns node offset relate to parent and consider transform matrix of parent
 bool FrameNode::GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const
 {
     auto renderContext = parent->GetRenderContext();
@@ -3207,6 +3235,8 @@ bool FrameNode::GetRectPointToParentWithTransform(std::vector<Point>& pointList,
     return true;
 }
 
+// returns node accumulated offset upto an ancestor has no renderContext or window
+// and consider each ancestor's transform matrix
 RectF FrameNode::GetPaintRectToWindowWithTransform()
 {
     auto context = GetRenderContext();
@@ -3227,6 +3257,9 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
     return GetBoundingBox(pointList);
 }
 
+// returns a node's offset relative to window plus half of self rect size(w, h)
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// ancestor will NOT check boundary of window scene
 OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
@@ -3251,6 +3284,9 @@ OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
     return OffsetF(pointNode.GetX(), pointNode.GetY());
 }
 
+// returns a node's geometry offset relative to window
+// used when a node is in the process of layout
+// because offset during layout is NOT synced to renderContext yet
 OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
 {
     OffsetF offset {};
@@ -3262,6 +3298,9 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
     return offset;
 }
 
+// returns a node's offset relative to window
+// and accumulate every ancestor node's graphic translate properties
+// error means any ancestor node renderContext has hasScales_ bool
 std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
 {
     bool error = false;
@@ -3281,6 +3320,9 @@ std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool e
     return std::make_pair(offset, error);
 }
 
+// returns a node's offset relative to page node
+// and accumulate every ancestor node's graphic properties such as rotate and transform
+// most of applications has page offset of status bar height
 OffsetF FrameNode::GetPaintRectOffsetToPage() const
 {
     auto context = GetRenderContext();

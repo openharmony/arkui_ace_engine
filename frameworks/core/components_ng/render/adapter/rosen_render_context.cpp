@@ -2245,6 +2245,8 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     }
 }
 
+// comparing to frameRect of geometryNode,
+// paint rect has position, offset, markAnchor, pixelGridRound and safeArea properties
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
     return paintRect_;
