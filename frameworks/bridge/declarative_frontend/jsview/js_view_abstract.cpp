@@ -3309,6 +3309,18 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
+void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension)
+{
+    CalcDimension dimension;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(jsValue, dimension, true)) {
+        return;
+    }
+
+    if (dimension.IsNonNegative() && dimension.CalcValue().find("calc") == std::string::npos) {
+        calcDimension = dimension;
+    }
+}
+
 void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto marginVal = menuOptions->GetProperty("layoutRegionMargin");
@@ -3317,7 +3329,12 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
     }
 
     CommonCalcDimension commonCalcDimension;
-    JSViewAbstract::ParseCommonMarginOrPaddingCorner(JSRef<JSObject>::Cast(marginVal), commonCalcDimension);
+    auto object = JSRef<JSObject>::Cast(marginVal);
+    ParseLayoutRegionMargin(object->GetProperty(TOP_PROPERTY), commonCalcDimension.top);
+    ParseLayoutRegionMargin(object->GetProperty(BOTTOM_PROPERTY), commonCalcDimension.bottom);
+    ParseLayoutRegionMargin(object->GetProperty(LEFT_PROPERTY), commonCalcDimension.left);
+    ParseLayoutRegionMargin(object->GetProperty(RIGHT_PROPERTY), commonCalcDimension.right);
+
     if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
         commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
         menuParam.layoutRegionMargin = JSViewAbstract::GetLocalizedPadding(
