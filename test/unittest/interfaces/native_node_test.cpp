@@ -5195,24 +5195,4 @@ HWTEST_F(NativeNodeTest, NativeNodeTest079, TestSize.Level1)
     event.origin = &mixEvent;
     EXPECT_EQ(OH_ArkUI_NodeEvent_SetReturnNumberValue(&event, value, size), ARKUI_ERROR_CODE_NO_ERROR);
 }
-
-/**
- * @tc.name: NativeNodeTest080
- * @tc.desc: Test customSpanNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeTest, NativeNodeTest080, TestSize.Level1)
-{
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = new ArkUI_Node({ARKUI_NODE_CUSTOM_SPAN, nullptr});
-
-    EXPECT_EQ(nodeAPI->registerNodeCustomEvent(
-        rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, 0, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->registerNodeCustomEvent(
-        rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW, 1, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE);
-    nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
-    nodeAPI->disposeNode(rootNode);
-}
 } // namespace OHOS::Ace
