@@ -76,10 +76,6 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
     }
 
-    if (source->textLineStyle->HasTextAlign()) {
-        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
-    }
-
     if (source->textLineStyle->HasLineHeight()) {
         target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
     }
