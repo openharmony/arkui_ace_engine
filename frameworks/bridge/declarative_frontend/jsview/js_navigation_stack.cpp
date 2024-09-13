@@ -137,6 +137,7 @@ void JSNavigationStack::Pop()
 void JSNavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo>& routeInfo)
 {
     // obtain param from NavPathStack
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     JSRef<JSVal> param;
     if (routeInfo) {
         auto jsRouteInfo = AceType::DynamicCast<JSRouteInfo>(routeInfo);
@@ -165,6 +166,7 @@ void JSNavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo
 void JSNavigationStack::PushName(const std::string& name, const JSRef<JSVal>& param)
 {
     // obtain param from routeInfo
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     auto pushNameFunc = dataSourceObj_->GetProperty("pushName");
     if (pushNameFunc->IsFunction()) {
         auto pushFunc = JSRef<JSFunc>::Cast(pushNameFunc);
@@ -177,6 +179,7 @@ void JSNavigationStack::PushName(const std::string& name, const JSRef<JSVal>& pa
 
 void JSNavigationStack::Push(const std::string& name, int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     auto getParamByIndexFunc = dataSourceObj_->GetProperty("getParamByIndex");
     if (!getParamByIndexFunc->IsFunction()) {
         return ;
@@ -196,6 +199,7 @@ void JSNavigationStack::Push(const std::string& name, int32_t index)
 
 void JSNavigationStack::RemoveName(const std::string& name)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -211,6 +215,7 @@ void JSNavigationStack::RemoveName(const std::string& name)
 
 void JSNavigationStack::RemoveIndex(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -225,6 +230,7 @@ void JSNavigationStack::RemoveIndex(int32_t index)
 
 void JSNavigationStack::Clear()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -238,6 +244,7 @@ void JSNavigationStack::Clear()
 
 std::vector<std::string> JSNavigationStack::GetAllPathName()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, {});
     if (dataSourceObj_->IsEmpty()) {
         return {};
     }
@@ -267,6 +274,7 @@ std::vector<std::string> JSNavigationStack::GetAllPathName()
 
 std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, {});
     if (dataSourceObj_->IsEmpty()) {
         return {};
     }
@@ -296,6 +304,7 @@ std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
 
 void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNames)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -338,6 +347,7 @@ bool JSNavigationStack::CallByPushDestination(int32_t index)
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, nullptr);
     auto name = GetNameByIndex(index);
     auto param = GetParamByIndex(index);
     RefPtr<NG::UINode> node;
@@ -371,6 +381,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
     const WeakPtr<NG::UINode>& customNode)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, nullptr);
     auto jsRouteInfo = AceType::DynamicCast<JSRouteInfo>(routeInfo);
     if (!jsRouteInfo) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "route info is invalid");
@@ -441,6 +452,7 @@ JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
 
 bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     if (dataSourceObj_->IsEmpty()) {
         return false;
     }
@@ -460,6 +472,7 @@ bool JSNavigationStack::GetIsEntryByIndex(int32_t index)
 
 void JSNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     CHECK_NULL_VOID(dataSourceObj_->IsEmpty());
     if (dataSourceObj_->IsEmpty()) {
         return;
@@ -517,6 +530,7 @@ int32_t JSNavigationStack::GetReplaceValue() const
 
 void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -543,6 +557,7 @@ std::string JSNavigationStack::GetRouteParam() const
 
 int32_t JSNavigationStack::GetSize() const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
     if (dataSourceObj_->IsEmpty()) {
         return 0;
     }
@@ -560,6 +575,7 @@ int32_t JSNavigationStack::GetSize() const
 
 std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param, bool needLimit) const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, "");
     if (param->IsBoolean()) {
         bool ret = param->ToBoolean();
         return ret ? "true" : "false";
@@ -642,6 +658,7 @@ bool JSNavigationStack::GetAnimatedValue() const
 
 void JSNavigationStack::UpdateAnimatedValue(bool animated)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -709,6 +726,7 @@ void JSNavigationStack::OnDetachFromParent()
 
 void JSNavigationStack::SetJSParentStack(JSRef<JSVal> parent)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -726,6 +744,7 @@ void JSNavigationStack::SetJSParentStack(JSRef<JSVal> parent)
 
 void JSNavigationStack::RemoveInvalidPage(const JSRef<JSObject>& info)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -769,6 +788,7 @@ void JSNavigationStack::ClearPreBuildNodeList()
 
 int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, ERROR_CODE_DESTINATION_NOT_FOUND);
     auto pathName = navPathInfo->GetProperty("name");
     auto param = navPathInfo->GetProperty("param");
     JSRef<JSVal> params[ARGC_COUNT_TWO] = { pathName, param };
@@ -799,6 +819,7 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
 
 std::vector<std::string> JSNavigationStack::DumpStackInfo() const
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, {});
     std::vector<std::string> dumpInfos;
     for (size_t i = 0; i < navPathList_.size(); ++i) {
         const auto& name = navPathList_[i].first;
@@ -816,6 +837,7 @@ std::vector<std::string> JSNavigationStack::DumpStackInfo() const
 void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
     const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation, bool isAnimated)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     std::string targetName = isBefore ? "willShow" : "didShow";
     JSRef<JSFunc> targetFunc;
     if (!CheckAndGetInterceptionFunc(targetName, targetFunc)) {
@@ -855,6 +877,7 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
 
 void JSNavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     JSRef<JSFunc> modeFunc;
     if (!CheckAndGetInterceptionFunc("modeChange", modeFunc)) {
         return;
@@ -866,6 +889,7 @@ void JSNavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
 
 bool JSNavigationStack::CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     if (dataSourceObj_->IsEmpty()) {
         return false;
     }
@@ -962,6 +986,7 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
 
 int32_t JSNavigationStack::GetJsIndexFromNativeIndex(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, -1);
     if (dataSourceObj_->IsEmpty()) {
         return -1;
     }
@@ -980,6 +1005,7 @@ int32_t JSNavigationStack::GetJsIndexFromNativeIndex(int32_t index)
 
 void JSNavigationStack::MoveIndexToTop(int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
@@ -994,6 +1020,7 @@ void JSNavigationStack::MoveIndexToTop(int32_t index)
 
 void JSNavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t index)
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     bool needUpdate = GetNeedUpdatePathInfo(index);
     if (!needUpdate) {
         return;
@@ -1041,6 +1068,7 @@ void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
 
 void JSNavigationStack::RecoveryNavigationStack()
 {
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
     navPathList_ = preNavPathList_;
     if (dataSourceObj_->IsEmpty()) {
         return;
