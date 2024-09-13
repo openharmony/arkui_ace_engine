@@ -6715,7 +6715,16 @@ void WebDelegate::OnDetachContext()
 {
     UnRegisterScreenLockFunction();
     UnregisterSurfacePositionChangedCallback();
-    UnregisterAvoidAreaChangeListener();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->UnregisterAvoidAreaChangeListener();
+        });
 }
 
 void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
@@ -6723,13 +6732,20 @@ void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
     instanceId_ = context->GetInstanceId();
     context_ = context;
     RegisterSurfacePositionChangedCallback();
-    RegisterAvoidAreaChangeListener();
     if (nweb_) {
         auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
         nweb_->RegisterScreenLockFunction(instanceId_, screenLockCallback);
         auto windowId = context->GetFocusWindowId();
         nweb_->SetWindowId(windowId);
     }
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->RegisterAvoidAreaChangeListener();
+        });
 }
 
 void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
