@@ -1549,7 +1549,8 @@ struct ArkUICommonModifier {
         ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth,
+        ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
         ArkUI_Bool isAlign, ArkUI_Int32 size);
