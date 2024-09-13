@@ -1089,6 +1089,11 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
             return false;
         }
         if (!pattern || !pattern->GetIsOnShow()) {
+            // push more than one standard navDestination, need to set invisible below newTopDestination
+            auto navDestinationLayoutProperty = navDestination->GetLayoutProperty();
+            CHECK_NULL_RETURN(navDestinationLayoutProperty, false);
+            navDestinationLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+            navDestination->SetJSViewActive(false);
             return false;
         }
         eventHub->FireChangeEvent(false);
