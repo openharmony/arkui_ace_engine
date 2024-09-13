@@ -287,6 +287,8 @@ public:
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
+    void AddDirtyFreezeNode(FrameNode* node);
+
     void AddPredictTask(PredictTask&& task);
 
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
@@ -307,6 +309,7 @@ public:
 
     void FlushOnceVsyncTask() override;
 
+    void FlushFreezeNode();
     void FlushDirtyNodeUpdate();
     void FlushSafeAreaPaddingProcess();
 
@@ -1044,6 +1047,7 @@ private:
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
+    std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
