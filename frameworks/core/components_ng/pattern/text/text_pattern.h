@@ -850,6 +850,7 @@ protected:
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     void InitUrlHoverEvent();
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
 
 private:
     MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
@@ -954,7 +955,6 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool isInArea_ = false;
     std::vector<RectF> selectRects_;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     WeakPtr<PipelineContext> pipeline_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
