@@ -31,6 +31,7 @@ constexpr float SCROLL_HEIGHT = 400.f;
 constexpr float CONTENT_MAIN_SIZE = 1000.f;
 constexpr float ITEM_MAIN_SIZE = 100.f;
 constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
+constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_WIDTH;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
@@ -39,6 +40,7 @@ constexpr float NORMAL_WIDTH = 4.f;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t TICK = 2;
 constexpr float DRAG_VELOCITY = 1200.f;
+constexpr float BAR_WIDTH = 10.f;
 
 class ScrollTestNg : public TestNG {
 public:
@@ -47,17 +49,15 @@ public:
     void SetUp() override;
     void TearDown() override;
     void GetScroll();
+    RefPtr<PaintWrapper> CreateScrollDone(const RefPtr<FrameNode>& frameNode = nullptr);
 
     ScrollModelNG CreateScroll();
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
-
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateContentChild(int32_t childNumber = 10);
-    void Touch(TouchType touchType, Offset offset, SourceType sourceType);
-    void Mouse(Offset location, MouseButton mouseButton = MouseButton::NONE_BUTTON,
-        MouseAction mouseAction = MouseAction::NONE);
-    void Hover(bool isHover);
+    void MouseOnScroll(MouseButton mouseButton, MouseAction mouseAction, Offset localLocation);
+    void TouchOnScroll(TouchType touchType);
     bool OnScrollCallback(float offset, int32_t source);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
@@ -77,9 +77,9 @@ public:
     RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
     RefPtr<ScrollableController> positionController_;
-    RefPtr<ScrollBar> scrollBar_;
-
     std::vector<RefPtr<FrameNode>> contentChildren_;
+    RefPtr<ScrollBar> scrollBar_;
+    RefPtr<Scrollable> scrollable_;
 };
 } // namespace OHOS::Ace::NG
 
