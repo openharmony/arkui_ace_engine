@@ -700,7 +700,9 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (!IsFocusNodeInItemPosition(child->GetFrameNode())) {
+        if (!IsFocusNodeInItemPosition(child->GetFrameNode()) && !hasTabsAncestor_) {
+            child->SetParentFocusable(false);
+        } else if (child != showChildFocusHub) {
             child->SetParentFocusable(false);
         } else {
             child->SetParentFocusable(true);
