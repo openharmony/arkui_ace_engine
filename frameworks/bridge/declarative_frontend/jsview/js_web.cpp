@@ -1278,7 +1278,7 @@ private:
     }
 
     RefPtr<WebResponse> response_;
-    JsRef<JsValue> responseData_;
+    auto responseData_ = JSRef<JSVal>::Make(JSVal(ToJSValue(args[0])));
 };
 
 class JSWebResourceRequest : public Referenced {
