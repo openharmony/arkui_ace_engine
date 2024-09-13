@@ -495,4 +495,392 @@ void EventHub::OnDetachClear()
     FireOnDisappear();
     ClearStateStyle();
 }
+
+const RefPtr<GestureEventHub>& EventHub::GetOrCreateGestureEventHub()
+{
+    if (!gestureEventHub_) {
+        gestureEventHub_ = CreateGestureEventHub();
+    }
+    return gestureEventHub_;
+}
+
+const RefPtr<GestureEventHub>& EventHub::GetGestureEventHub() const
+{
+    return gestureEventHub_;
+}
+
+void EventHub::SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub)
+{
+    gestureEventHub_ = gestureEventHub;
+}
+
+const RefPtr<InputEventHub>& EventHub::GetOrCreateInputEventHub()
+{
+    if (!inputEventHub_) {
+        inputEventHub_ = MakeRefPtr<InputEventHub>(WeakClaim(this));
+    }
+    return inputEventHub_;
+}
+
+const RefPtr<InputEventHub>& EventHub::GetInputEventHub() const
+{
+    return inputEventHub_;
+}
+
+const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+    const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
+{
+    if (!focusHub_) {
+        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
+        focusHub_->SetFocusStyleType(focusStyleType);
+        if (paintParamsPtr) {
+            focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
+        }
+    }
+    return focusHub_;
+}
+
+const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
+{
+    if (!focusHub_) {
+        focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
+    }
+    return focusHub_;
+}
+
+const RefPtr<FocusHub>& EventHub::GetFocusHub() const
+{
+    return focusHub_;
+}
+
+void EventHub::OnContextAttached()
+{
+    if (gestureEventHub_) {
+        gestureEventHub_->OnContextAttached();
+    }
+}
+
+void EventHub::ClearUserOnAppear()
+{
+    if (onAppear_) {
+        onAppear_ = nullptr;
+    }
+}
+
+void EventHub::SetOnAppear(std::function<void()>&& onAppear)
+{
+    onAppear_ = std::move(onAppear);
+}
+
+void EventHub::ClearUserOnDisAppear()
+{
+    if (onDisappear_) {
+        onDisappear_ = nullptr;
+    }
+}
+
+void EventHub::SetOnDisappear(std::function<void()>&& onDisappear)
+{
+    onDisappear_ = std::move(onDisappear);
+}
+
+void EventHub::ClearUserOnAreaChanged()
+{
+    if (onAreaChanged_) {
+        onAreaChanged_ = nullptr;
+    }
+}
+
+void EventHub::SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
+{
+    onAreaChanged_ = std::move(onAreaChanged);
+}
+
+void EventHub::FireOnAreaChanged(
+    const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
+{
+    if (onAreaChanged_) {
+        // callback may be overwritten in its invoke so we copy it first
+        auto onAreaChanged = onAreaChanged_;
+        onAreaChanged(oldRect, oldOrigin, rect, origin);
+    }
+}
+
+void EventHub::FireInnerOnAreaChanged(
+    const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
+{
+    for (auto& innerCallbackInfo : onAreaChangedInnerCallbacks_) {
+        if (innerCallbackInfo.second) {
+            auto innerOnAreaCallback = innerCallbackInfo.second;
+            innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
+        }
+    }
+}
+
+bool EventHub::HasOnAreaChanged() const
+{
+    return static_cast<bool>(onAreaChanged_);
+}
+
+bool EventHub::HasInnerOnAreaChanged() const
+{
+    return !onAreaChangedInnerCallbacks_.empty();
+}
+
+void EventHub::SetOnPreDrag(OnPreDragFunc&& onPreDragFunc)
+{
+    onPreDragFunc_ = std::move(onPreDragFunc);
+}
+
+const OnPreDragFunc& EventHub::GetOnPreDrag() const
+{
+    return onPreDragFunc_;
+}
+
+void EventHub::SetOnDragStart(OnDragStartFunc&& onDragStart)
+{
+    onDragStart_ = std::move(onDragStart);
+}
+
+bool EventHub::HasOnDragStart() const
+{
+    return static_cast<bool>(onDragStart_) || static_cast<bool>(defaultOnDragStart_);
+}
+
+void EventHub::SetOnDragEnter(OnDragFunc&& onDragEnter)
+{
+    onDragEnter_ = std::move(onDragEnter);
+}
+
+void EventHub::SetOnDragLeave(OnDragFunc&& onDragLeave)
+{
+    onDragLeave_ = std::move(onDragLeave);
+}
+
+void EventHub::SetOnDragMove(OnDragFunc&& onDragMove)
+{
+    onDragMove_ = std::move(onDragMove);
+}
+
+bool EventHub::HasOnDragMove() const
+{
+    return static_cast<bool>(onDragMove_);
+}
+
+void EventHub::SetOnDrop(OnDragFunc&& onDrop)
+{
+    onDrop_ = std::move(onDrop);
+}
+
+void EventHub::SetOnDragEnd(OnNewDragFunc&& onDragEnd)
+{
+    onDragEnd_ = std::move(onDragEnd);
+}
+
+bool EventHub::HasOnDragEnter() const
+{
+    return static_cast<bool>(onDragEnter_);
+}
+
+bool EventHub::HasOnDragLeave() const
+{
+    return static_cast<bool>(onDragLeave_);
+}
+
+bool EventHub::HasOnDragEnd() const
+{
+    return static_cast<bool>(onDragEnd_);
+}
+
+bool EventHub::HasOnDrop() const
+{
+    return onDrop_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragEnter() const
+{
+    return customerOnDragEnter_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragLeave() const
+{
+    return customerOnDragLeave_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragMove() const
+{
+    return customerOnDragMove_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDragEnd() const
+{
+    return customerOnDragEnd_ != nullptr;
+}
+
+bool EventHub::HasCustomerOnDrop() const
+{
+    return customerOnDrop_ != nullptr;
+}
+
+bool EventHub::IsEnabled() const
+{
+    return enabled_;
+}
+
+bool EventHub::IsDeveloperEnabled() const
+{
+    return developerEnabled_;
+}
+
+void EventHub::SetEnabled(bool enabled)
+{
+    enabled_ = enabled;
+    developerEnabled_ = enabled;
+}
+
+void EventHub::SetEnabledInternal(bool enabled)
+{
+    enabled_ = enabled;
+}
+
+// restore enabled value to what developer sets
+void EventHub::RestoreEnabled()
+{
+    enabled_ = developerEnabled_;
+}
+
+void EventHub::UpdateCurrentUIState(UIState state)
+{
+    if (stateStyleMgr_) {
+        stateStyleMgr_->UpdateCurrentUIState(state);
+    }
+}
+
+void EventHub::ResetCurrentUIState(UIState state)
+{
+    if (stateStyleMgr_) {
+        stateStyleMgr_->ResetCurrentUIState(state);
+    }
+}
+
+UIState EventHub::GetCurrentUIState() const
+{
+    return stateStyleMgr_ ? stateStyleMgr_->GetCurrentUIState() : UI_STATE_NORMAL;
+}
+
+bool EventHub::HasStateStyle(UIState state) const
+{
+    if (stateStyleMgr_) {
+        return stateStyleMgr_->HasStateStyle(state);
+    }
+    return false;
+}
+
+void EventHub::SetKeyboardShortcut(
+    const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
+{
+    KeyboardShortcut keyboardShortcut;
+    for (auto&& ch : value) {
+        keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
+    }
+    keyboardShortcut.keys = keys;
+    keyboardShortcut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+
+    for (auto& shortCut : keyboardShortcut_) {
+        if (shortCut.IsEqualTrigger(keyboardShortcut)) {
+            shortCut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+            return;
+        }
+    }
+    keyboardShortcut_.emplace_back(keyboardShortcut);
+}
+
+void EventHub::ClearSingleKeyboardShortcut()
+{
+    if (keyboardShortcut_.size() == 1) {
+        keyboardShortcut_.clear();
+    }
+}
+
+std::vector<KeyboardShortcut>& EventHub::GetKeyboardShortcut()
+{
+    return keyboardShortcut_;
+}
+
+void EventHub::SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
+{
+    defaultOnDragStart_ = std::move(defaultOnDragStart);
+}
+
+bool EventHub::HasDefaultOnDragStart() const
+{
+    return static_cast<bool>(defaultOnDragStart_);
+}
+
+std::vector<double>& EventHub::GetThrottledVisibleAreaRatios()
+{
+    return throttledVisibleAreaRatios_;
+}
+
+VisibleCallbackInfo& EventHub::GetThrottledVisibleAreaCallback()
+{
+    return throttledVisibleAreaCallback_;
+}
+
+std::vector<double>& EventHub::GetVisibleAreaRatios(bool isUser)
+{
+    if (isUser) {
+        return visibleAreaUserRatios_;
+    } else {
+        return visibleAreaInnerRatios_;
+    }
+}
+
+VisibleCallbackInfo& EventHub::GetVisibleAreaCallback(bool isUser)
+{
+    if (isUser) {
+        return visibleAreaUserCallback_;
+    } else {
+        return visibleAreaInnerCallback_;
+    }
+}
+
+void EventHub::SetVisibleAreaRatiosAndCallback(
+    const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser)
+{
+    if (isUser) {
+        VisibleCallbackInfo* cbInfo =
+            (callback.period == 0) ? &visibleAreaUserCallback_ : &throttledVisibleAreaCallback_;
+        auto ratioInfo = (callback.period == 0) ? &visibleAreaUserRatios_ : &throttledVisibleAreaRatios_;
+        *cbInfo = callback;
+        *ratioInfo = radios;
+    } else {
+        visibleAreaInnerCallback_ = callback;
+        visibleAreaInnerRatios_ = radios;
+    }
+}
+
+void EventHub::CleanVisibleAreaCallback(bool isUser, bool isThrottled)
+{
+    if (!isUser) {
+        visibleAreaInnerRatios_.clear();
+        visibleAreaInnerCallback_.callback = nullptr;
+    } else if (isThrottled) {
+        throttledVisibleAreaRatios_.clear();
+        throttledVisibleAreaCallback_.callback = nullptr;
+    } else {
+        visibleAreaUserRatios_.clear();
+        visibleAreaUserCallback_.callback = nullptr;
+    }
+}
+
+bool EventHub::HasVisibleAreaCallback(bool isUser)
+{
+    if (isUser) {
+        return static_cast<bool>(visibleAreaUserCallback_.callback);
+    } else {
+        return static_cast<bool>(visibleAreaInnerCallback_.callback);
+    }
+}
+
 } // namespace OHOS::Ace::NG
