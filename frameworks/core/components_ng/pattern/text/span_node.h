@@ -157,6 +157,7 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
     Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
+    Color paragraphTextColor = { Color::BLACK };
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -504,6 +505,11 @@ public:
     void CleanPropertyInfo()
     {
         propertyInfo_.clear();
+    }
+
+    void ResetPropertyInfo(PropertyInfo value)
+    {
+        propertyInfo_.erase(value);
     }
 
     void MarkTextDirty() override
