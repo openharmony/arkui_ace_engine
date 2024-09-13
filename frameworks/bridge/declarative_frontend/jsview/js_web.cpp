@@ -1158,7 +1158,7 @@ public:
             return;
         }
 
-        responseData_ = args[0];
+        auto responseData = JSVal(ToJSValue(args[0]));
         if (args[0]->IsNumber()) {
             auto fd = args[0]->ToNumber<int32_t>();
             response_->SetFileHandle(fd);
@@ -1278,7 +1278,7 @@ private:
     }
 
     RefPtr<WebResponse> response_;
-    auto responseData_ = JSRef<JSVal>::Make(JSVal(ToJSValue(args[0])));
+    JSRef<JSVal> responseData_ = JSRef<JSVal>::Make(JSVal(ResponseData));
 };
 
 class JSWebResourceRequest : public Referenced {
