@@ -812,6 +812,12 @@ void ListModelNG::SetListChildrenMainSize(
     pattern->SetListChildrenMainSize(defaultSize, mainSize);
 }
 
+void ListModelNG::ResetListChildrenMainSize()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ResetListChildrenMainSize(frameNode);
+}
+
 void ListModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);

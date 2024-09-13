@@ -231,6 +231,7 @@ void JSList::Create(const JSCallbackInfo& args)
 void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
 {
     if (args.Length() != 1 || !(args[0]->IsObject())) {
+        ListModel::GetInstance()->ResetListChildrenMainSize();
         return;
     }
     JSRef<JSObject> childrenSizeObj = JSRef<JSObject>::Cast(args[0]);

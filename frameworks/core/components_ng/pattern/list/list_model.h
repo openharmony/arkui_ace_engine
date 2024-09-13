@@ -91,6 +91,7 @@ public:
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
 #endif
+    virtual void ResetListChildrenMainSize() {}
 
 private:
     static std::unique_ptr<ListModel> instance_;
