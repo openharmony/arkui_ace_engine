@@ -95,10 +95,10 @@ HWTEST_F(LoadingProgressModifierTest, setColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, THEME_LOADING_COLOR.ToString());
 
-    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color, int>(0xFF123400);
+    Ark_ResourceColor color = ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
     modifier_->setColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal2, "#FF123400");
+    EXPECT_EQ(checkVal2, "#FFFFFFFF");
 
     Ark_ResourceColor numberInt = ArkUnion<Ark_ResourceColor, Ark_Number>(0x123401);
     modifier_->setColor(node_, &numberInt);

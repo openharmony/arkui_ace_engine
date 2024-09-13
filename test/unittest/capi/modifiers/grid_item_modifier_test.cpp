@@ -91,14 +91,14 @@ HWTEST_F(GridItemModifierTest, setGridItemOptionsTestValidValues, TestSize.Level
     Opt_GridItemOptions opt_options;
 
     // check PLAIN style
-    options.style = Converter::ArkValue<Opt_GridItemStyle>(GridItemStyle::PLAIN);
+    options.style = Converter::ArkValue<Opt_GridItemStyle>(ARK_GRID_ITEM_STYLE_PLAIN);
     opt_options = Converter::ArkValue<Opt_GridItemOptions>(options);
     modifier_->setGridItemOptions(node_, &opt_options);
     strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);
     EXPECT_EQ(strResult, "PLAIN");
 
     // check NONE style
-    options.style = Converter::ArkValue<Opt_GridItemStyle>(GridItemStyle::NONE);
+    options.style = Converter::ArkValue<Opt_GridItemStyle>(ARK_GRID_ITEM_STYLE_NONE);
     opt_options = Converter::ArkValue<Opt_GridItemOptions>(options);
     modifier_->setGridItemOptions(node_, &opt_options);
     strResult = GetStringAttribute(node_, ATTRIBUTE_STYLE_NAME);

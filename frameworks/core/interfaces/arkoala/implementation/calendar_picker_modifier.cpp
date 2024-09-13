@@ -24,7 +24,7 @@ void SetCalendarPickerOptionsImpl(Ark_NativePointer node,
 } // CalendarPickerInterfaceModifier
 namespace CalendarPickerAttributeModifier {
 void EdgeAlignImpl(Ark_NativePointer node,
-                   Ark_Int32 alignType,
+                   enum Ark_CalendarAlign alignType,
                    const Opt_Offset* offset)
 {
 }

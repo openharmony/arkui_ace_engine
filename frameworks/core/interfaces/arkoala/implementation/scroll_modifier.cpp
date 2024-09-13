@@ -24,7 +24,7 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 } // ScrollInterfaceModifier
 namespace ScrollAttributeModifier {
 void ScrollableImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_ScrollDirection value)
 {
 }
 void OnScrollImpl(Ark_NativePointer node,
@@ -56,7 +56,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
 {
 }
 void ScrollBarImpl(Ark_NativePointer node,
-                   Ark_Int32 barState)
+                   enum Ark_BarState barState)
 {
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
@@ -68,7 +68,7 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
 {
 }
 void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_Int32 edgeEffect,
+                    enum Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
 {
 }

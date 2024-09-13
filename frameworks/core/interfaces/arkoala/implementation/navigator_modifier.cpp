@@ -31,7 +31,7 @@ void ActiveImpl(Ark_NativePointer node,
 {
 }
 void TypeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_NavigationType value)
 {
 }
 void TargetImpl(Ark_NativePointer node,

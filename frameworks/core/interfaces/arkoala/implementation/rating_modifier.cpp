@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RatingInterfaceModifier {
 void SetRatingOptionsImpl(Ark_NativePointer node,
-                          const Opt_Type_RatingInterface_setRatingOptions_Arg0* options)
+                          const Opt_RatingOptions* options)
 {
 }
 } // RatingInterfaceModifier
@@ -32,7 +32,7 @@ void StepSizeImpl(Ark_NativePointer node,
 {
 }
 void StarStyleImpl(Ark_NativePointer node,
-                   const Type_RatingAttribute_starStyle_Arg0* value)
+                   const Ark_StarStyleOptions* options)
 {
 }
 void OnChangeImpl(Ark_NativePointer node,

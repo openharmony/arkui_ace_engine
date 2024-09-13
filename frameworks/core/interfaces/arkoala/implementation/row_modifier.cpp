@@ -20,28 +20,44 @@
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+struct RowOptions {
+    std::optional<Dimension> space;
+};
+}
+
+namespace Converter {
+template<>
+RowOptions Convert(const Ark_RowOptions& src)
+{
+    return {
+        .space = OptConvert<Dimension>(src.space),
+    };
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowInterfaceModifier {
 void SetRowOptionsImpl(Ark_NativePointer node,
-                       const Opt_Type_RowInterface_setRowOptions_Arg0* value)
+                       const Opt_RowOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
-        *value, std::make_tuple(0.0f, (int)DimensionUnit::PX));
-    RowModelNG::SetSpace(
-        frameNode,
-        CalcDimension(std::get<0>(space), (DimensionUnit)std::get<1>(space)));
+    auto opts = Converter::OptConvert<RowOptions>(*options);
+    auto space = opts ? opts->space : std::nullopt;
+    RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    Ark_VerticalAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     RowModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value + 1));
 }
 void JustifyContentImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     RowModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
@@ -57,6 +73,10 @@ void PointLightImpl(Ark_NativePointer node,
     ACE_UPDATE_NODE_RENDER_CONTEXT(
         Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
+void ReverseImpl(Ark_NativePointer node,
+                 const Opt_Boolean* isReversed)
+{
+}
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()
 {
@@ -65,6 +85,7 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
         RowAttributeModifier::AlignItemsImpl,
         RowAttributeModifier::JustifyContentImpl,
         RowAttributeModifier::PointLightImpl,
+        RowAttributeModifier::ReverseImpl,
     };
     return &ArkUIRowModifierImpl;
 }

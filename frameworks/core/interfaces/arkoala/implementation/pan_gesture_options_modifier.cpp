@@ -26,7 +26,7 @@ Ark_NativePointer GetFinalizerImpl()
     return 0;
 }
 void SetDirectionImpl(PanGestureOptionsPeer* peer,
-                      Ark_Int32 value)
+                      enum Ark_PanDirection value)
 {
 }
 void SetDistanceImpl(PanGestureOptionsPeer* peer,

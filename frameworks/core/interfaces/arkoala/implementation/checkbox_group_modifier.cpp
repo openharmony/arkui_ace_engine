@@ -97,7 +97,7 @@ void OnChangeImpl(Ark_NativePointer node,
     eventHub->SetOnChange(std::move(onEvent));
 }
 void CheckboxShapeImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_CheckBoxShape value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

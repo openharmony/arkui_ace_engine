@@ -35,6 +35,9 @@ void OnDrawImpl(CustomSpanPeer* peer,
                 const Ark_CustomSpanDrawInfo* drawInfo)
 {
 }
+void InvalidateImpl(CustomSpanPeer* peer)
+{
+}
 } // CustomSpanModifier
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
 {
@@ -43,6 +46,7 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
         CustomSpanModifier::GetFinalizerImpl,
         CustomSpanModifier::OnMeasureImpl,
         CustomSpanModifier::OnDrawImpl,
+        CustomSpanModifier::InvalidateImpl,
     };
     return &CustomSpanAccessorImpl;
 }

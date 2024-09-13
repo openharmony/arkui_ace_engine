@@ -40,7 +40,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FontStyle value)
 {
 }
 void FontWeightImpl(Ark_NativePointer node,

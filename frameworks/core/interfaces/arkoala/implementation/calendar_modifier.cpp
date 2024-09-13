@@ -44,7 +44,7 @@ void OffDaysImpl(Ark_NativePointer node,
 {
 }
 void DirectionImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_Axis value)
 {
 }
 void CurrentDayStyleImpl(Ark_NativePointer node,

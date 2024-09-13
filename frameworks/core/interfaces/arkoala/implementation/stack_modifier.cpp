@@ -18,19 +18,39 @@
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components/common/properties/alignment.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+struct StackOptions {
+    std::optional<Alignment> alignContent;
+};
+}
+
+namespace Converter {
+template<>
+StackOptions Convert(const Ark_StackOptions& src)
+{
+    return {
+        .alignContent = OptConvert<Alignment>(src.alignContent),
+    };
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StackInterfaceModifier {
 
 void SetStackOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_StackInterface_setStackOptions_Arg0* value)
+                         const Opt_StackOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(*value, Alignment::CENTER));
+    auto opts = Converter::OptConvert<StackOptions>(*options);
+    auto align = opts ? opts->alignContent : std::nullopt;
+    StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
 }
 } // StackInterfaceModifier
 namespace StackAttributeModifier {
 void AlignContentImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      Ark_Alignment value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(value, Alignment::CENTER));

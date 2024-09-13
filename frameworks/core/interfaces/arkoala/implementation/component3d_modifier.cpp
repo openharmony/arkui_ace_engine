@@ -24,20 +24,20 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
 } // Component3DInterfaceModifier
 namespace Component3DAttributeModifier {
 void EnvironmentImpl(Ark_NativePointer node,
-                     const Ark_Resource* uri)
+                     const ResourceStr* uri)
 {
 }
 void CustomRenderImpl(Ark_NativePointer node,
-                      const Ark_Resource* uri,
+                      const ResourceStr* uri,
                       Ark_Boolean selfRenderUpdate)
 {
 }
 void ShaderImpl(Ark_NativePointer node,
-                const Ark_Resource* uri)
+                const ResourceStr* uri)
 {
 }
 void ShaderImageTextureImpl(Ark_NativePointer node,
-                            const Ark_Resource* uri)
+                            const ResourceStr* uri)
 {
 }
 void ShaderInputBufferImpl(Ark_NativePointer node,

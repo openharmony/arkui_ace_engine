@@ -31,7 +31,7 @@ void NavBarWidthImpl(Ark_NativePointer node,
 {
 }
 void NavBarPositionImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        enum Ark_NavBarPosition value)
 {
 }
 void NavBarWidthRangeImpl(Ark_NativePointer node,
@@ -43,7 +43,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 {
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_NavigationMode value)
 {
 }
 void BackButtonIconImpl(Ark_NativePointer node,
@@ -63,8 +63,13 @@ void SubTitleImpl(Ark_NativePointer node,
                   const Ark_String* value)
 {
 }
-void HideTitleBarImpl(Ark_NativePointer node,
-                      Ark_Boolean value)
+void HideTitleBar0Impl(Ark_NativePointer node,
+                       Ark_Boolean value)
+{
+}
+void HideTitleBar1Impl(Ark_NativePointer node,
+                       Ark_Boolean hide,
+                       Ark_Boolean animated)
 {
 }
 void HideBackButtonImpl(Ark_NativePointer node,
@@ -72,7 +77,7 @@ void HideBackButtonImpl(Ark_NativePointer node,
 {
 }
 void TitleModeImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_NavigationTitleMode value)
 {
 }
 void MenusImpl(Ark_NativePointer node,
@@ -88,8 +93,13 @@ void ToolbarConfigurationImpl(Ark_NativePointer node,
                               const Opt_NavigationToolbarOptions* options)
 {
 }
-void HideToolBarImpl(Ark_NativePointer node,
-                     Ark_Boolean value)
+void HideToolBar0Impl(Ark_NativePointer node,
+                      Ark_Boolean value)
+{
+}
+void HideToolBar1Impl(Ark_NativePointer node,
+                      Ark_Boolean hide,
+                      Ark_Boolean animated)
 {
 }
 void OnTitleModeChangeImpl(Ark_NativePointer node,
@@ -136,13 +146,15 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::HideNavBarImpl,
         NavigationAttributeModifier::TitleImpl,
         NavigationAttributeModifier::SubTitleImpl,
-        NavigationAttributeModifier::HideTitleBarImpl,
+        NavigationAttributeModifier::HideTitleBar0Impl,
+        NavigationAttributeModifier::HideTitleBar1Impl,
         NavigationAttributeModifier::HideBackButtonImpl,
         NavigationAttributeModifier::TitleModeImpl,
         NavigationAttributeModifier::MenusImpl,
         NavigationAttributeModifier::ToolBarImpl,
         NavigationAttributeModifier::ToolbarConfigurationImpl,
-        NavigationAttributeModifier::HideToolBarImpl,
+        NavigationAttributeModifier::HideToolBar0Impl,
+        NavigationAttributeModifier::HideToolBar1Impl,
         NavigationAttributeModifier::OnTitleModeChangeImpl,
         NavigationAttributeModifier::OnNavBarStateChangeImpl,
         NavigationAttributeModifier::OnNavigationModeChangeImpl,

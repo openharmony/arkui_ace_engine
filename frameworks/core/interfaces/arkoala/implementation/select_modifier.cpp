@@ -72,11 +72,11 @@ void SpaceImpl(Ark_NativePointer node,
 {
 }
 void ArrowPositionImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_ArrowPosition value)
 {
 }
 void MenuAlignImpl(Ark_NativePointer node,
-                   Ark_Int32 alignType,
+                   enum Ark_MenuAlignType alignType,
                    const Opt_Offset* offset)
 {
 }
@@ -93,11 +93,11 @@ void MenuBackgroundColorImpl(Ark_NativePointer node,
 {
 }
 void MenuBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                 Ark_Int32 value)
+                                 enum Ark_BlurStyle value)
 {
 }
 void ControlSizeImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_ControlSize value)
 {
 }
 void MenuItemContentModifierImpl(Ark_NativePointer node,

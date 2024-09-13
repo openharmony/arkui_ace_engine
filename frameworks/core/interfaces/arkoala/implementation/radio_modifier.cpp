@@ -20,6 +20,19 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<RadioIndicatorType>& dst, const Ark_RadioIndicatorType& src)
+{
+    switch (src) {
+        case ARK_RADIO_INDICATOR_TYPE_TICK: dst = RadioIndicatorType::TICK; break;
+        case ARK_RADIO_INDICATOR_TYPE_DOT: dst = RadioIndicatorType::DOT; break;
+        case ARK_RADIO_INDICATOR_TYPE_CUSTOM: dst = RadioIndicatorType::CUSTOM; break;
+        default: LOGE("Unexpected enum value in Ark_RadioIndicatorType: %{public}d", src);
+    }
+}
+} // namespace OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace RadioInterfaceModifier {
         void _setRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options)
@@ -31,18 +44,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RadioModelNG::SetRadioGroup(frameNode, group);
             auto radioValue = Converter::Convert<std::string>(options->value);
             RadioModelNG::SetRadioValue(frameNode, radioValue);
-            auto indicatorType = Converter::Convert<int32_t> (options->indicatorType.value);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                switch (indicatorType) {
-                    case static_cast<int32_t>(RadioPattern::RadioIndicatorType::TICK):
-                    case static_cast<int32_t>(RadioPattern::RadioIndicatorType::DOT):
-                    case static_cast<int32_t>(RadioPattern::RadioIndicatorType::CUSTOM):
-                        RadioModelNG::SetRadioIndicatorType(frameNode, indicatorType);
-                        break;
-                    default:
-                        RadioModelNG::SetRadioIndicatorType(frameNode, {});
-                        break;
-                }
+                auto indicatorType = Converter::OptConvert<RadioIndicatorType>(options->indicatorType);
+                RadioModelNG::SetRadioIndicatorType(frameNode, EnumToInt(indicatorType));
             }
             LOGE("ARKOALA Opt_CustomBuilder -> Method is not implemented.");
         }

@@ -27,10 +27,6 @@ Ark_Float32 GetDensity(Ark_Int32 deviceId);
 Ark_Float32 GetFontScale(Ark_Int32 deviceId);
 Ark_Float32 GetDesignWidthScale(Ark_Int32 deviceId);
 
-namespace NodeEvent {
-    int CheckEvent(ArkUINodeEvent* event);
-    void SendArkUIAsyncEvent(ArkUINodeEvent* event);
-}
 namespace ApiImpl {
     // Basic API
     Ark_NodeHandle GetNodeByViewStack();
@@ -51,7 +47,6 @@ namespace ApiImpl {
     Ark_Int32 GetCustomMethodFlag(Ark_NodeHandle node);
     void RegisterCustomNodeAsyncEvent(Ark_NodeHandle node, Ark_Int32 eventType, void* extraParam);
     Ark_Int32 UnregisterCustomNodeEvent(Ark_NodeHandle node, Ark_Int32 eventType);
-    void RegisterCustomNodeEventReceiver(CustomEventReceiver eventReceiver);
     void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle node, Ark_Int32 callback);
     Ark_Int32 MeasureLayoutAndDraw(Ark_VMContext vmContext, Ark_NodeHandle rootPtr);
     Ark_Int32 MeasureNode(Ark_VMContext vmContext, Ark_NodeHandle node, Ark_Float32* data);
@@ -76,7 +71,6 @@ namespace ApiImpl {
     Ark_PipelineContext GetPipelineContext(Ark_NodeHandle node);
     void SetVsyncCallback(Ark_VMContext vmContext, Ark_PipelineContext pipelineContext, Ark_Int32 callbackId);
     void UnblockVsyncWait(Ark_VMContext vmContext, Ark_PipelineContext pipelineContext);
-    void CallContinuation(Ark_Int32 continuationId, Ark_Int32 argCount, ArkUIEventCallbackArg* args);
     void SetChildTotalCount(Ark_NodeHandle node, Ark_Int32 totalCount);
     void ShowCrash(Ark_CharPtr message);
 } // namespace OHOS::Ace::NG::ApiImpl
@@ -84,22 +78,6 @@ namespace ApiImpl {
 namespace Bridge {
     Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
     void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
-    void RegisterCustomNodeEventReceiver(GENERATED_CustomEventReceiver eventReceiver)
-    {
-        ApiImpl::RegisterCustomNodeEventReceiver(reinterpret_cast<CustomEventReceiver>(eventReceiver));
-    }
-    int CheckEvent(GENERATED_Ark_NodeEvent* event)
-    {
-        return NodeEvent::CheckEvent(reinterpret_cast<ArkUINodeEvent*>(event));
-    }
-    void SendAsyncEvent(GENERATED_Ark_NodeEvent* event)
-    {
-        NodeEvent::SendArkUIAsyncEvent(reinterpret_cast<ArkUINodeEvent*>(event));
-    }
-    void CallContinuation(Ark_Int32 continuationId, Ark_Int32 argCount, GENERATED_Ark_EventCallbackArg* args)
-    {
-        ApiImpl::CallContinuation(continuationId, argCount, reinterpret_cast<ArkUIEventCallbackArg*>(args));
-    }
 }
 
 namespace GeneratedEvents {
@@ -536,9 +514,6 @@ const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
         OHOS::Ace::NG::Bridge::SetCallbackMethod,
         OHOS::Ace::NG::ApiImpl::SetCustomMethodFlag,
         OHOS::Ace::NG::ApiImpl::GetCustomMethodFlag,
-        OHOS::Ace::NG::ApiImpl::RegisterCustomNodeAsyncEvent,
-        OHOS::Ace::NG::ApiImpl::UnregisterCustomNodeEvent,
-        OHOS::Ace::NG::Bridge::RegisterCustomNodeEventReceiver,
         OHOS::Ace::NG::ApiImpl::SetCustomCallback,
         OHOS::Ace::NG::ApiImpl::MeasureLayoutAndDraw,
         OHOS::Ace::NG::ApiImpl::MeasureNode,
@@ -563,9 +538,6 @@ const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
         OHOS::Ace::NG::ApiImpl::GetPipelineContext,
         OHOS::Ace::NG::ApiImpl::SetVsyncCallback,
         OHOS::Ace::NG::ApiImpl::UnblockVsyncWait,
-        OHOS::Ace::NG::Bridge::CheckEvent,
-        OHOS::Ace::NG::Bridge::SendAsyncEvent,
-        OHOS::Ace::NG::Bridge::CallContinuation,
         OHOS::Ace::NG::ApiImpl::SetChildTotalCount,
         OHOS::Ace::NG::ApiImpl::ShowCrash
     };

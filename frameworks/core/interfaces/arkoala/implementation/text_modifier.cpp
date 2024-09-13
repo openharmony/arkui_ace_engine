@@ -24,8 +24,13 @@ void SetTextOptionsImpl(Ark_NativePointer node,
 }
 } // TextInterfaceModifier
 namespace TextAttributeModifier {
-void FontImpl(Ark_NativePointer node,
-              const Ark_Font* value)
+void Font0Impl(Ark_NativePointer node,
+               const Ark_Font* value)
+{
+}
+void Font1Impl(Ark_NativePointer node,
+               const Ark_Font* fontValue,
+               const Opt_FontSettingOptions* options)
 {
 }
 void FontColorImpl(Ark_NativePointer node,
@@ -53,11 +58,16 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FontStyle value)
 {
 }
-void FontWeightImpl(Ark_NativePointer node,
-                    const Type_TextAttribute_fontWeight_Arg0* value)
+void FontWeight0Impl(Ark_NativePointer node,
+                     const Type_TextAttribute_fontWeight_Arg0* value)
+{
+}
+void FontWeight1Impl(Ark_NativePointer node,
+                     const Type_TextAttribute_fontWeight1_Arg0* weight,
+                     const Opt_FontSettingOptions* options)
 {
 }
 void LineSpacingImpl(Ark_NativePointer node,
@@ -65,7 +75,7 @@ void LineSpacingImpl(Ark_NativePointer node,
 {
 }
 void TextAlignImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_TextAlign value)
 {
 }
 void LineHeightImpl(Ark_NativePointer node,
@@ -73,7 +83,7 @@ void LineHeightImpl(Ark_NativePointer node,
 {
 }
 void TextOverflowImpl(Ark_NativePointer node,
-                      const Type_TextAttribute_textOverflow_Arg0* value)
+                      const Ark_TextOverflowOptions* options)
 {
 }
 void FontFamilyImpl(Ark_NativePointer node,
@@ -93,7 +103,7 @@ void LetterSpacingImpl(Ark_NativePointer node,
 {
 }
 void TextCaseImpl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_TextCase value)
 {
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
@@ -101,7 +111,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_CopyOptions value)
 {
 }
 void DraggableImpl(Ark_NativePointer node,
@@ -113,7 +123,7 @@ void TextShadowImpl(Ark_NativePointer node,
 {
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                              Ark_Int32 value)
+                              enum Ark_TextHeightAdaptivePolicy value)
 {
 }
 void TextIndentImpl(Ark_NativePointer node,
@@ -121,11 +131,11 @@ void TextIndentImpl(Ark_NativePointer node,
 {
 }
 void WordBreakImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_WordBreak value)
 {
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
-                           Ark_Int32 strategy)
+                           enum Ark_LineBreakStrategy strategy)
 {
 }
 void OnCopyImpl(Ark_NativePointer node,
@@ -138,7 +148,7 @@ void SelectionImpl(Ark_NativePointer node,
 {
 }
 void EllipsisModeImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_EllipsisMode value)
 {
 }
 void EnableDataDetectorImpl(Ark_NativePointer node,
@@ -150,9 +160,9 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
 {
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
-                           Ark_Int32 spanType,
+                           enum Ark_TextSpanType spanType,
                            const CustomBuilder* content,
-                           Ark_Int32 responseType,
+                           enum Ark_TextResponseType responseType,
                            const Opt_SelectionMenuOptions* options)
 {
 }
@@ -164,24 +174,20 @@ void FontFeatureImpl(Ark_NativePointer node,
                      const Ark_String* value)
 {
 }
-void MarqueeOptionsImpl(Ark_NativePointer node,
-                        const Opt_MarqueeOptions* value)
-{
-}
-void OnMarqueeStateChangeImpl(Ark_NativePointer node,
-                              Ark_Function callback)
-{
-}
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           Ark_Boolean supported)
 {
 }
 void TextSelectableImpl(Ark_NativePointer node,
-                        Ark_Int32 mode)
+                        enum Ark_TextSelectableMode mode)
 {
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Ark_Materialized* editMenu)
+{
+}
+void HalfLeadingImpl(Ark_NativePointer node,
+                     Ark_Boolean halfLeading)
 {
 }
 } // TextAttributeModifier
@@ -189,7 +195,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
 {
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
         TextInterfaceModifier::SetTextOptionsImpl,
-        TextAttributeModifier::FontImpl,
+        TextAttributeModifier::Font0Impl,
+        TextAttributeModifier::Font1Impl,
         TextAttributeModifier::FontColorImpl,
         TextAttributeModifier::FontSizeImpl,
         TextAttributeModifier::MinFontSizeImpl,
@@ -197,7 +204,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::MinFontScaleImpl,
         TextAttributeModifier::MaxFontScaleImpl,
         TextAttributeModifier::FontStyleImpl,
-        TextAttributeModifier::FontWeightImpl,
+        TextAttributeModifier::FontWeight0Impl,
+        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::LineSpacingImpl,
         TextAttributeModifier::TextAlignImpl,
         TextAttributeModifier::LineHeightImpl,
@@ -223,11 +231,10 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::BindSelectionMenuImpl,
         TextAttributeModifier::OnTextSelectionChangeImpl,
         TextAttributeModifier::FontFeatureImpl,
-        TextAttributeModifier::MarqueeOptionsImpl,
-        TextAttributeModifier::OnMarqueeStateChangeImpl,
         TextAttributeModifier::PrivacySensitiveImpl,
         TextAttributeModifier::TextSelectableImpl,
         TextAttributeModifier::EditMenuOptionsImpl,
+        TextAttributeModifier::HalfLeadingImpl,
     };
     return &ArkUITextModifierImpl;
 }

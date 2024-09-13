@@ -349,7 +349,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorTestDotColor, TestSize.Level1)
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x12345678), "#12345678" },
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -517,9 +517,8 @@ HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontWeight, TestSize.Level1)
     static const std::string PROP_NAME("indicator");
     static const std::string DEFAULT_VALUE("FontWeight.Normal");
     static const std::vector<OneTestStep> testPlan = {
-        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(FontWeight::W500)}, "500" },
-        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(FontWeight::BOLD)}, "FontWeight.Bold" },
-        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(FontWeight::REGULAR)}, "FontWeight.Regular" },
+        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD)}, "FontWeight.Bold" },
+        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR)}, "FontWeight.Regular" },
         { {.weight = ArkUnion<FontWeightT, Ark_Number>(100)}, "100" },
         { {.weight = ArkUnion<FontWeightT, Ark_Number>(-111)}, DEFAULT_VALUE },
         { {.weight = ArkUnion<FontWeightT, Ark_Number>(300.00f)}, "300" },
@@ -577,7 +576,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontColor, TestSize.Level1)
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x12345678), "#12345678" },
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -814,7 +813,7 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColor, TestSize.Level1)
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x12345678), "#12345678" },
+        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -1012,22 +1011,22 @@ HWTEST_F(SwiperModifierTest, SwiperModifierTest11, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    auto arkValue0 = static_cast<Ark_Int32>(OHOS::Ace::SwiperDisplayMode::STRETCH);
+    auto arkValue0 = ARK_SWIPER_DISPLAY_MODE_STRETCH;
     modifier_->setDisplayMode(node_, arkValue0);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "SwiperDisplayMode.Stretch");
 
-    auto arkValue1 = static_cast<Ark_Int32>(OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
+    auto arkValue1 = ARK_SWIPER_DISPLAY_MODE_AUTO_LINEAR;
     modifier_->setDisplayMode(node_, arkValue1);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "SwiperDisplayMode.AutoLinear");
 
-    auto arkValue2 = static_cast<Ark_Int32>(INT_MAX);
+    auto arkValue2 = static_cast<Ark_SwiperDisplayMode>(INT_MAX);
     modifier_->setDisplayMode(node_, arkValue2);
     auto checkVal4 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "SwiperDisplayMode.AutoLinear"); // nothing changes
 
-    auto arkValue3 = static_cast<Ark_Int32>(INT_MIN);
+    auto arkValue3 = static_cast<Ark_SwiperDisplayMode>(INT_MIN);
     modifier_->setDisplayMode(node_, arkValue3);
     auto checkVal5 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "SwiperDisplayMode.AutoLinear"); // nothing changes
@@ -1120,7 +1119,7 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestString, TestSize.Level1)
     auto checkVal2 = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, 1234);
 
-    auto arkValue0 = ArkValue<Ark_Int32>(OHOS::Ace::SwiperDisplayMode::STRETCH);
+    auto arkValue0 = ArkValue<Ark_SwiperDisplayMode>(ARK_SWIPER_DISPLAY_MODE_STRETCH);
     modifier_->setDisplayMode(node_, arkValue0);
     auto autoVal = ArkUnion<Type_SwiperAttribute_displayCount_Arg0, Ark_String>("auto");
     modifier_->setDisplayCount(node_, &autoVal, nullptr);
@@ -1237,22 +1236,22 @@ HWTEST_F(SwiperModifierTest, setEffectModeTest, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    auto arkValue0 = static_cast<Ark_Int32>(OHOS::Ace::EdgeEffect::SPRING);
+    auto arkValue0 = ARK_EDGE_EFFECT_SPRING;
     modifier_->setEffectMode(node_, arkValue0);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "EdgeEffect.Spring");
 
-    auto arkValue1 = static_cast<Ark_Int32>(OHOS::Ace::EdgeEffect::FADE);
+    auto arkValue1 = ARK_EDGE_EFFECT_FADE;
     modifier_->setEffectMode(node_, arkValue1);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "EdgeEffect.Fade");
 
-    auto arkValue2 = static_cast<Ark_Int32>(INT_MAX);
+    auto arkValue2 = static_cast<Ark_EdgeEffect>(INT_MAX);
     modifier_->setEffectMode(node_, arkValue2);
     auto checkVal4 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "EdgeEffect.Fade"); // nothing changes
 
-    auto arkValue3 = static_cast<Ark_Int32>(INT_MIN);
+    auto arkValue3 = static_cast<Ark_EdgeEffect>(INT_MIN);
     modifier_->setEffectMode(node_, arkValue3);
     auto checkVal5 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "EdgeEffect.Fade"); // nothing changes
@@ -1294,7 +1293,7 @@ HWTEST_F(SwiperModifierTest, setCurveTestBuiltIn, TestSize.Level1)
     EXPECT_EQ(checkInitial, Curves::DEFAULT_CURVE_NAME);
 
     auto arkCurveEasyIn =
-        ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Int32>(ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN);
+        ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Curve>(ARK_CURVE_EASE_IN);
     modifier_->setCurve(node_, &arkCurveEasyIn);
     auto checkEasyIO = GetAttrValue<std::string>(node_, PROP_NAME);
     auto expectedCurveEasyIn =
@@ -1306,14 +1305,14 @@ HWTEST_F(SwiperModifierTest, setCurveTestBuiltIn, TestSize.Level1)
     EXPECT_EQ(checkNull, DEFAULT_VALUE);
 
     auto arkCurveLinear =
-        ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Int32>(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR);
+        ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Curve>(ARK_CURVE_LINEAR);
     modifier_->setCurve(node_, &arkCurveLinear);
     auto checkLinear = GetAttrValue<std::string>(node_, PROP_NAME);
     auto expectedCurveLinear =
         Framework::CreateCurve(Framework::CurveIntToString(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR));
     EXPECT_EQ(checkLinear, Curves::ToString(expectedCurveLinear));
 
-    auto arkCurveInv = ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Int32>(INT_MIN);
+    auto arkCurveInv = ArkUnion<Type_SwiperAttribute_curve_Arg0, Ark_Curve>(static_cast<Ark_Curve>(INT_MIN));
     modifier_->setCurve(node_, &arkCurveInv);
     auto checkInv = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInv, DEFAULT_VALUE);
@@ -1400,7 +1399,7 @@ HWTEST_F(SwiperModifierTest, setIndicatorStyleTest, TestSize.Level1)
         .bottom = OPT_LEN_VP_POS,
         .size = OPT_LEN_PX_POS,
         .mask = OPT_BOOL_TRUE,
-        .color = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x12345678),
+        .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x12345678),
         .selectedColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
     }};
     modifier_->setIndicatorStyle(node_, &style);

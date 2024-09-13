@@ -73,6 +73,12 @@ namespace OHOS::Ace::NG::Converter {
         dst.f32 = src;
     }
 
+    inline void AssignArkValue(Ark_Number& dst, const double& src)
+    {
+        dst.tag = ARK_TAG_FLOAT32;
+        dst.f32 = static_cast<float>(src);
+    }
+
     inline void AssignArkValue(Ark_NativePointer& dst, void *src)
     {
         dst = src;

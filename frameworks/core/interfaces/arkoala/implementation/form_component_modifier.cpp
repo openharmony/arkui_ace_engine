@@ -32,7 +32,7 @@ void ModuleNameImpl(Ark_NativePointer node,
 {
 }
 void DimensionImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FormDimension value)
 {
 }
 void AllowUpdateImpl(Ark_NativePointer node,
@@ -40,7 +40,7 @@ void AllowUpdateImpl(Ark_NativePointer node,
 {
 }
 void VisibilityImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_Visibility value)
 {
 }
 void OnAcquiredImpl(Ark_NativePointer node,

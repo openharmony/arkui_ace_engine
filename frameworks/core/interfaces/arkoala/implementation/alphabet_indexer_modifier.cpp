@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlphabetIndexerInterfaceModifier {
 void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
-                                   const Type_AlphabetIndexerInterface_setAlphabetIndexerOptions_Arg0* value)
+                                   const Ark_AlphabetIndexerOptions* options)
 {
 }
 } // AlphabetIndexerInterfaceModifier
@@ -84,7 +84,7 @@ void FontImpl(Ark_NativePointer node,
 {
 }
 void AlignStyleImpl(Ark_NativePointer node,
-                    Ark_Int32 value,
+                    enum Ark_IndexerAlign value,
                     const Opt_Length* offset)
 {
 }
@@ -121,7 +121,7 @@ void ItemBorderRadiusImpl(Ark_NativePointer node,
 {
 }
 void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                  Ark_Int32 value)
+                                  enum Ark_BlurStyle value)
 {
 }
 void PopupTitleBackgroundImpl(Ark_NativePointer node,

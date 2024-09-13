@@ -24,7 +24,7 @@ void SetImageSpanOptionsImpl(Ark_NativePointer node,
 } // ImageSpanInterfaceModifier
 namespace ImageSpanAttributeModifier {
 void VerticalAlignImpl(Ark_NativePointer node,
-                       Ark_Int32 value)
+                       enum Ark_ImageSpanAlignment value)
 {
 }
 void ColorFilterImpl(Ark_NativePointer node,
@@ -32,7 +32,7 @@ void ColorFilterImpl(Ark_NativePointer node,
 {
 }
 void ObjectFitImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_ImageFit value)
 {
 }
 void OnCompleteImpl(Ark_NativePointer node,

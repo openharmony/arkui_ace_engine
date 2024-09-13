@@ -40,7 +40,7 @@ void LoopImpl(Ark_NativePointer node,
 {
 }
 void ObjectFitImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_ImageFit value)
 {
 }
 void OnStartImpl(Ark_NativePointer node,

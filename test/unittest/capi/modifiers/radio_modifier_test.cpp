@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -75,7 +76,9 @@ inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
 }
 
 // custom colors
-const auto CUSTOM_COLOR_STRING = "#FF123456";
+const auto CUSTOM_COLOR_STRING = "#FFFFFFFF";
+const auto CUSTOM_COLOR = ARK_COLOR_WHITE;
+const auto CUSTOM_COLOR_INT_STRING = "#FF123456";
 const int CUSTOM_COLOR_INT = 0xFF123456;
 const float CUSTOM_COLOR_FLOAT = 0.1f;
 const auto CHECK_FLOAT_COLOR = "#00000000";
@@ -165,7 +168,7 @@ HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
     EXPECT_EQ(value, RADIO_VALUE_VALUE);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         Ark_RadioOptions radioOptionsTick = {
-            .indicatorType = { .value = static_cast<int32_t>(RadioPattern::RadioIndicatorType::TICK) },
+            .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_TICK),
         };
         modifier_->setRadioOptions(node_, &radioOptionsTick);
         auto groupEmpty = GetStringAttribute(node_, RADIO_GROUP_ATTR);
@@ -175,19 +178,19 @@ HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
         EXPECT_EQ(valueEmpty, RADIO_VALUE_VALUE);
         EXPECT_EQ(indicatorTypeTick, INDICATOR_TYPE_TICK);
         Ark_RadioOptions radioOptionsDot = {
-            .indicatorType = { .value = static_cast<int32_t>(RadioPattern::RadioIndicatorType::DOT) },
+            .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_DOT),
         };
         modifier_->setRadioOptions(node_, &radioOptionsDot);
         auto indicatorTypeDot = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
         EXPECT_EQ(indicatorTypeDot, INDICATOR_TYPE_DOT);
         Ark_RadioOptions radioOptionsCustom = {
-            .indicatorType = { .value = static_cast<int32_t>(RadioPattern::RadioIndicatorType::CUSTOM)},
+            .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_CUSTOM),
         };
         modifier_->setRadioOptions(node_, &radioOptionsCustom);
         auto indicatorTypeCustom = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
         EXPECT_EQ(indicatorTypeCustom, INDICATOR_TYPE_CUSTOM);
         Ark_RadioOptions radioOptionsInvalid = {
-            .indicatorType = { .value = 3},
+            .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(static_cast<Ark_RadioIndicatorType>(INT_MAX)),
         };
         modifier_->setRadioOptions(node_, &radioOptionsInvalid);
         auto indicatorTypeInvalid = GetStringAttribute(node_, INDICATOR_TYPE_ATTR);
@@ -232,7 +235,7 @@ HWTEST_F(RadioModifierTest, RadioModifierTest002, TestSize.Level1)
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest003, TestSize.Level1)
 {
-    const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = CUSTOM_COLOR_INT };
+    const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(CUSTOM_COLOR);
     Opt_RadioStyle radioStyleColors;
     radioStyleColors.value.checkedBackgroundColor.value = COLOR_COLOR;
     radioStyleColors.value.indicatorColor.value = COLOR_COLOR;
@@ -264,11 +267,11 @@ HWTEST_F(RadioModifierTest, RadioModifierTest004, TestSize.Level1)
     auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
     auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
     auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_STRING);
+    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_INT_STRING);
     auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_STRING);
+    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_INT_STRING);
     auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, CUSTOM_COLOR_STRING);
+    EXPECT_EQ(customIndicatorBackgroundColor, CUSTOM_COLOR_INT_STRING);
 }
 
 /**

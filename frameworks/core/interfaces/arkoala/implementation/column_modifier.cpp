@@ -20,32 +20,48 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+struct ColumnOptions {
+    std::optional<Dimension> space;
+};
+}
+
+namespace Converter {
+template<>
+ColumnOptions Convert(const Ark_ColumnOptions& src)
+{
+    return {
+        .space = OptConvert<Dimension>(src.space),
+    };
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ColumnInterfaceModifier {
 void SetColumnOptionsImpl(Ark_NativePointer node,
-                          const Opt_Type_ColumnInterface_setColumnOptions_Arg0* value)
+                          const Opt_ColumnOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    std::tuple<Ark_Float32, Ark_Int32> space = Converter::ConvertOrDefault(
-        *value, std::make_tuple(0.0f, (int)DimensionUnit::PX));
-    ColumnModelNG::SetSpace(frameNode, CalcDimension(std::get<0>(space), (DimensionUnit)std::get<1>(space)));
+    auto opts = Converter::OptConvert<ColumnOptions>(*options);
+    auto space = opts ? opts->space : std::nullopt;
+    ColumnModelNG::SetSpace(frameNode, space.value_or(0.0_px));
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    Ark_HorizontalAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     ColumnModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value + 1));
 }
-
 void JustifyContentImpl(Ark_NativePointer node,
-                        Ark_Int32 value)
+                        Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     ColumnModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
 }
-
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
@@ -56,8 +72,11 @@ void PointLightImpl(Ark_NativePointer node,
         (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
+void ReverseImpl(Ark_NativePointer node,
+                 const Opt_Boolean* isReversed)
+{
+}
 } // ColumnAttributeModifier
-
 const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
@@ -65,7 +84,9 @@ const GENERATED_ArkUIColumnModifier* GetColumnModifier()
         ColumnAttributeModifier::AlignItemsImpl,
         ColumnAttributeModifier::JustifyContentImpl,
         ColumnAttributeModifier::PointLightImpl,
+        ColumnAttributeModifier::ReverseImpl,
     };
     return &ArkUIColumnModifierImpl;
 }
+
 }

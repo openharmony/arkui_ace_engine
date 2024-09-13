@@ -32,11 +32,11 @@ void PlaceholderFontImpl(Ark_NativePointer node,
 {
 }
 void EnterKeyTypeImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_EnterKeyType value)
 {
 }
 void TextAlignImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_TextAlign value)
 {
 }
 void CaretColorImpl(Ark_NativePointer node,
@@ -52,7 +52,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_FontStyle value)
 {
 }
 void FontWeightImpl(Ark_NativePointer node,
@@ -64,7 +64,7 @@ void FontFamilyImpl(Ark_NativePointer node,
 {
 }
 void TextOverflowImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_TextOverflow value)
 {
 }
 void TextIndentImpl(Ark_NativePointer node,
@@ -117,7 +117,7 @@ void OnPasteImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_CopyOptions value)
 {
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -134,11 +134,11 @@ void ShowCounterImpl(Ark_NativePointer node,
 {
 }
 void StyleImpl(Ark_NativePointer node,
-               Ark_Int32 value)
+               enum Ark_TextContentStyle value)
 {
 }
 void BarStateImpl(Ark_NativePointer node,
-                  Ark_Int32 value)
+                  enum Ark_BarState value)
 {
 }
 void SelectionMenuHiddenImpl(Ark_NativePointer node,
@@ -154,7 +154,7 @@ void MaxFontSizeImpl(Ark_NativePointer node,
 {
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                              Ark_Int32 value)
+                              enum Ark_TextHeightAdaptivePolicy value)
 {
 }
 void MaxLinesImpl(Ark_NativePointer node,
@@ -162,11 +162,11 @@ void MaxLinesImpl(Ark_NativePointer node,
 {
 }
 void WordBreakImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_WordBreak value)
 {
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
-                           Ark_Int32 strategy)
+                           enum Ark_LineBreakStrategy strategy)
 {
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
@@ -191,7 +191,7 @@ void LineHeightImpl(Ark_NativePointer node,
 {
 }
 void TypeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_TextAreaType value)
 {
 }
 void EnableAutoFillImpl(Ark_NativePointer node,
@@ -199,7 +199,7 @@ void EnableAutoFillImpl(Ark_NativePointer node,
 {
 }
 void ContentTypeImpl(Ark_NativePointer node,
-                     Ark_Int32 contentType)
+                     enum Ark_ContentType contentType)
 {
 }
 void FontFeatureImpl(Ark_NativePointer node,

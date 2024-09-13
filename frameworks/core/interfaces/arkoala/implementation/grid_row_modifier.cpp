@@ -28,7 +28,7 @@ void OnBreakpointChangeImpl(Ark_NativePointer node,
 {
 }
 void AlignItemsImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_ItemAlign value)
 {
 }
 } // GridRowAttributeModifier

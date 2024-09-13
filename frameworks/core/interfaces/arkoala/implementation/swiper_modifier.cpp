@@ -379,7 +379,7 @@ void ItemSpaceImpl(Ark_NativePointer node,
     SwiperModelNG::SetItemSpace(frameNode, *aceOptVal);
 }
 void DisplayModeImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     enum Ark_SwiperDisplayMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -432,7 +432,7 @@ void DisplayCountImpl(Ark_NativePointer node,
     }
 }
 void EffectModeImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_EdgeEffect value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -577,7 +577,7 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
 }
 
 void NestedScrollImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_SwiperNestedScrollMode value)
 {
     using namespace OHOS::Ace;
     auto frameNode = reinterpret_cast<FrameNode *>(node);

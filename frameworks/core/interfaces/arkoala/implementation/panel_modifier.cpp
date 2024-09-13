@@ -24,11 +24,11 @@ void SetPanelOptionsImpl(Ark_NativePointer node,
 } // PanelInterfaceModifier
 namespace PanelAttributeModifier {
 void ModeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_PanelMode value)
 {
 }
 void TypeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_PanelType value)
 {
 }
 void DragBarImpl(Ark_NativePointer node,

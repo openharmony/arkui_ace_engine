@@ -52,7 +52,7 @@ void SetStyleImpl(MutableStyledStringPeer* peer,
 void RemoveStyleImpl(MutableStyledStringPeer* peer,
                      const Ark_Number* start,
                      const Ark_Number* length,
-                     Ark_Int32 styledKey)
+                     enum Ark_StyledStringKey styledKey)
 {
 }
 void RemoveStylesImpl(MutableStyledStringPeer* peer,

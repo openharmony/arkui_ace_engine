@@ -101,6 +101,11 @@ Ark_Int32 RemoveByNameImpl(NavPathStackPeer* peer,
 {
     return 0;
 }
+Ark_Boolean RemoveByNavDestinationIdImpl(NavPathStackPeer* peer,
+                                         const Ark_String* navDestinationId)
+{
+    return 0;
+}
 void Pop0Impl(NavPathStackPeer* peer,
               const Opt_Boolean* animated)
 {
@@ -202,6 +207,7 @@ const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor()
         NavPathStackModifier::ReplacePathByNameImpl,
         NavPathStackModifier::RemoveByIndexesImpl,
         NavPathStackModifier::RemoveByNameImpl,
+        NavPathStackModifier::RemoveByNavDestinationIdImpl,
         NavPathStackModifier::Pop0Impl,
         NavPathStackModifier::Pop1Impl,
         NavPathStackModifier::PopToName0Impl,

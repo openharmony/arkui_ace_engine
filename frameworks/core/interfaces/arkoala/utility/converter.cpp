@@ -22,13 +22,6 @@ constexpr int32_t OFFSET_0 = 0;
 constexpr int32_t OFFSET_1 = 1;
 constexpr int32_t OFFSET_2 = 2;
 
-void ParseDimension(const Ark_String &string, Ark_Length *result)
-{
-    auto dimension = Dimension::FromString(string.chars);
-    result->value = dimension.Value();
-    result->unit =  static_cast<Ark_Int32>(dimension.Unit());
-}
-
 Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
 {
     Ark_TouchObject touch;
@@ -53,7 +46,7 @@ Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
     touch.screenY.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-    touch.type = static_cast<int32_t>(info.GetTouchType());
+    touch.type = static_cast<Ark_TouchType>(info.GetTouchType());
 
     touch.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
     touch.windowX.f32 = static_cast<float>(

@@ -52,6 +52,10 @@ Ark_NativePointer GetEventTargetInfoImpl(GestureRecognizerPeer* peer)
 {
     return 0;
 }
+Ark_Boolean IsValidImpl(GestureRecognizerPeer* peer)
+{
+    return 0;
+}
 } // GestureRecognizerModifier
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
@@ -65,6 +69,7 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
         GestureRecognizerModifier::IsEnabledImpl,
         GestureRecognizerModifier::GetStateImpl,
         GestureRecognizerModifier::GetEventTargetInfoImpl,
+        GestureRecognizerModifier::IsValidImpl,
     };
     return &GestureRecognizerAccessorImpl;
 }

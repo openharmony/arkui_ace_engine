@@ -74,7 +74,7 @@ void TextFontImpl(Ark_NativePointer node,
 {
 }
 void EnterKeyTypeImpl(Ark_NativePointer node,
-                      Ark_Int32 value)
+                      enum Ark_EnterKeyType value)
 {
 }
 void OnSubmitImpl(Ark_NativePointer node,
@@ -106,7 +106,7 @@ void OnPasteImpl(Ark_NativePointer node,
 {
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_Int32 value)
+                    enum Ark_CopyOptions value)
 {
 }
 void MaxLengthImpl(Ark_NativePointer node,
@@ -114,7 +114,7 @@ void MaxLengthImpl(Ark_NativePointer node,
 {
 }
 void TextAlignImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   enum Ark_TextAlign value)
 {
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -151,7 +151,7 @@ void LineHeightImpl(Ark_NativePointer node,
 {
 }
 void TypeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              enum Ark_SearchType value)
 {
 }
 void FontFeatureImpl(Ark_NativePointer node,

@@ -26,9 +26,8 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
                          const Opt_Type_BlankInterface_setBlankOptions_Arg0* min)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    std::tuple<Ark_Float32, Ark_Int32> dimension = Converter::ConvertOrDefault(
-        *min, std::make_tuple(0.0f, (int)DimensionUnit::PX));
-    BlankModelNG::SetBlankMin(frameNode, CalcDimension(std::get<0>(dimension), (DimensionUnit)std::get<1>(dimension)));
+    auto minDim = Converter::OptConvert<Dimension>(*min);
+    BlankModelNG::SetBlankMin(frameNode, minDim.value_or(0.0_px));
 }
 } // BlankInterfaceModifier
 

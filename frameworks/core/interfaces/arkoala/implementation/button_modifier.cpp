@@ -65,7 +65,7 @@ constexpr int32_t DEFAULT_FONT_SIZE = 12;
 constexpr int32_t DEFAULT_MAX_LINES = 100;
 
 void TypeImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              Ark_ButtonType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -79,21 +79,21 @@ void StateEffectImpl(Ark_NativePointer node,
     ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(value, true));
 }
 void ButtonStyleImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     Ark_ButtonStyleMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(value, ButtonStyleMode::EMPHASIZE));
 }
 void ControlSizeImpl(Ark_NativePointer node,
-                     Ark_Int32 value)
+                     Ark_ControlSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(value, ControlSize::NORMAL));
 }
 void RoleImpl(Ark_NativePointer node,
-              Ark_Int32 value)
+              Ark_ButtonRole value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -121,7 +121,7 @@ void FontWeightImpl(Ark_NativePointer node,
     ButtonModelNG::SetFontWeight(frameNode, Converter::ConvertOrDefault(*value, FontWeight::NORMAL));
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   Ark_Int32 value)
+                   Ark_FontStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
