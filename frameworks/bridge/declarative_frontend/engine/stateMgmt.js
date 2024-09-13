@@ -7751,14 +7751,15 @@ class ObserveV2 {
         this.id2targets_ = {};
         // queued up Set of bindId
         // elmtIds of UINodes need re-render
-        // @monitor functions that need to execute
+        // @Monitor functions that need to executed
         this.elmtIdsChanged_ = new Set();
         this.computedPropIdsChanged_ = new Set();
         this.monitorIdsChanged_ = new Set();
+        this.monitorFuncsToRun_ = new Set();
         this.persistenceChanged_ = new Set();
         // avoid recursive execution of updateDirty
         // by state changes => fireChange while
-        // UINode rerender or @monitor function execution
+        // UINode rerender or @Monitor function execution
         this.startDirty_ = false;
         // flag to indicate change observation is disabled
         this.disabled_ = false;
@@ -7780,8 +7781,16 @@ class ObserveV2 {
         return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
     }
     static IsTrackedProperty(parentObj, prop) {
+        if (!parentObj || typeof parentObj !== 'object') {
+            return false;
+        }
         const trackedKey = ObserveV2.OB_PREFIX + prop;
-        return (parentObj && typeof (parentObj) === 'object' && trackedKey in parentObj);
+        const consumerKey = ObserveV2.CONSUMER_PREFIX + prop;
+        const computedKey = ComputedV2.COMPUTED_CACHED_PREFIX + prop;
+        if (trackedKey in parentObj || consumerKey in parentObj || computedKey in parentObj) {
+            return true;
+        }
+        return false;
     }
     static getCurrentRecordedId() {
         const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
@@ -7935,6 +7944,11 @@ class ObserveV2 {
         } // for id2targets_
         return [totalCount, aliveCount];
     }
+    // Register the "parent" @Monitor id to known components
+    // it's needed when running the dirty @Monitor functions
+    registerMonitor(monitor, id) {
+        this.id2cmp_[id] = new WeakRef(monitor);
+    }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
     addRef(target, attrName) {
@@ -7994,7 +8008,7 @@ class ObserveV2 {
     /**
      * Execute given task while state change observation is disabled
      * A state mutation caused by the task will NOT trigger UI rerender
-     * and @monitor function execution.
+     * and @Monitor function execution.
      *
      * !!! Use with Caution !!!
      *
@@ -8097,8 +8111,9 @@ class ObserveV2 {
         UINodeRegisterProxy.unregisterElmtIdsFromIViews();
         // priority order of processing:
         // 1- update computed properties until no more need computed props update
-        // 2- update monitors until no more monitors and no more computed props
-        // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
+        // 2- update monitors paths until no more monitors paths and no more computed props
+        // 3- run all monitor functions
+        // 4- update UINodes until no more monitors, no more computed props, and no more UINodes
         // FIXME prevent infinite loops
         do {
             do {
@@ -8118,9 +8133,15 @@ class ObserveV2 {
                 if (this.monitorIdsChanged_.size) {
                     const monitors = this.monitorIdsChanged_;
                     this.monitorIdsChanged_ = new Set();
-                    this.updateDirtyMonitors(monitors);
+                    this.updateDirtyMonitorPaths(monitors);
                 }
-            } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
+                if (this.monitorFuncsToRun_.size) {
+                    const monitorFuncs = this.monitorFuncsToRun_;
+                    this.monitorFuncsToRun_ = new Set();
+                    this.runDirtyMonitors(monitorFuncs);
+                }
+            } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size +
+                this.computedPropIdsChanged_.size + this.monitorFuncsToRun_.size > 0);
             if (this.elmtIdsChanged_.size) {
                 const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
                 this.elmtIdsChanged_ = new Set();
@@ -8149,9 +8170,28 @@ class ObserveV2 {
         });
         aceTrace.end();
     }
-    updateDirtyMonitors(monitors) {
+    updateDirtyMonitorPaths(monitors) {
         
-        aceTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
+        aceTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
+        let weakMonitor;
+        let monitor;
+        let ret = 0;
+        monitors.forEach((watchId) => {
+            ret = 0;
+            weakMonitor = this.id2cmp_[watchId];
+            if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
+                ret = monitor.notifyChange(watchId);
+            }
+            // Collect @Monitor functions that need to be executed later
+            if (ret > 0) {
+                this.monitorFuncsToRun_.add(ret);
+            }
+        });
+        aceTrace.end();
+    }
+    runDirtyMonitors(monitors) {
+        
+        aceTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
         let weakMonitor;
         let monitor;
         let monitorTarget;
@@ -8163,7 +8203,7 @@ class ObserveV2 {
                     monitorTarget.addDelayedMonitorIds(watchId);
                 }
                 else {
-                    monitor.notifyChange();
+                    monitor.runMonitorFunction();
                 }
             }
         });
@@ -8344,6 +8384,7 @@ ObserveV2.SYMBOL_PROXY_GET_TARGET = Symbol('__proxy_get_target');
 ObserveV2.SYMBOL_MAKE_OBSERVED = Symbol('___make_observed__');
 ObserveV2.OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
 ObserveV2.OB_PREFIX_LEN = 5;
+ObserveV2.CONSUMER_PREFIX = '__consumer_';
 // used by array Handler to create dependency on artificial 'length'
 // property of array, mark it as changed when array has changed.
 ObserveV2.OB_LENGTH = '___obj_length';
@@ -8650,10 +8691,11 @@ function observedV2Internal(BaseClass) {
  *
  */
 class MonitorValueV2 {
-    constructor(path) {
+    constructor(path, id) {
         this.path = path;
-        this.dirty = false;
+        this.id = id;
         this.props = path.split('.');
+        this.dirty = false;
     }
     setValue(isInit, newValue) {
         this.now = newValue;
@@ -8689,7 +8731,7 @@ class MonitorV2 {
         this.watchId_ = ++MonitorV2.nextWatchId_;
         // split space separated array of paths
         let paths = pathsString.split(/\s+/g);
-        paths.forEach(path => this.values_.push(new MonitorValueV2(path)));
+        paths.forEach(path => this.values_.push(new MonitorValueV2(path, ++MonitorV2.nextWatchId_)));
         // add watchId to owning ViewV2 or view model data object
         // ViewV2 uses to call clearBinding(id)
         // FIXME data object leave data inside ObservedV3, because they can not 
@@ -8726,44 +8768,65 @@ class MonitorV2 {
         return undefined;
     }
     InitRun() {
-        this.bindRun(true);
+        // Register this Monitor to known components
+        ObserveV2.getObserve().registerMonitor(this, this.watchId_);
+        // Record dependencies for all the paths
+        this.values_.forEach((item) => {
+            ObserveV2.getObserve().startRecordDependencies(this, item.id);
+            const [success, value] = this.analysisProp(true, item);
+            ObserveV2.getObserve().stopRecordDependencies();
+            if (!success) {
+                
+                return;
+            }
+            item.setValue(true, value);
+        });
         return this;
     }
-    notifyChange() {
-        if (this.bindRun(/* is init / first run */ false)) {
+    // Called by ObserveV2 when a monitor path has changed.
+    // Analyze the changed path and return this Monitor's
+    // watchId if the path was dirty and the monitor function
+    // needs to be executed later.
+    notifyChange(pathId) {
+        let value = this.values_.find((item) => item.id === pathId);
+        
+        return this.recordDependenciesForProp(value) ? this.watchId_ : -1;
+    }
+    // Called by ObserveV2 once if any monitored path was dirty.
+    // Executes the monitor function.
+    runMonitorFunction() {
+        if (this.dirty.length === 0) {
             
-            try {
-                // exec @Monitor function
-                this.monitorFunction.call(this.target_, this);
-            }
-            catch (e) {
-                stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
-                throw e;
-            }
-            finally {
-                this.reset();
-            }
+            return;
+        }
+        
+        try {
+            // exec @Monitor function
+            this.monitorFunction.call(this.target_, this);
+        }
+        catch (e) {
+            stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+            throw e;
+        }
+        finally {
+            this.reset();
         }
     }
     // called after @Monitor function call
     reset() {
         this.values_.forEach(item => item.reset());
     }
-    // analysisProp for each monitored path
-    bindRun(isInit = false) {
-        ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
-        let ret = false;
-        this.values_.forEach((item) => {
-            const [success, value] = this.analysisProp(isInit, item);
-            if (!success) {
-                
-                return;
-            }
-            let dirty = item.setValue(isInit, value);
-            ret = ret || dirty;
-        });
+    // record dependencies for given MonitorValue, when any monitored path
+    // has changed and notifyChange is called
+    recordDependenciesForProp(monitoredValue) {
+        ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
+        const [success, value] = this.analysisProp(false, monitoredValue);
         ObserveV2.getObserve().stopRecordDependencies();
-        return ret;
+        if (!success) {
+            
+            return false;
+        }
+        return monitoredValue.setValue(false, value); // dirty?
     }
     // record / update object dependencies by reading each object along the path
     // return the value, i.e. the value of the last path item
@@ -9365,7 +9428,7 @@ class ViewV2 extends PUV2ViewBase {
         }
         if (this.monitorIdsDelayedUpdate.size) {
             // exec monitor functions
-            ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+            ObserveV2.getObserve().runDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
         if (this.elmtIdsDelayedUpdate.size) {
             // update re-render of updated element ids once the view gets active
@@ -9601,6 +9664,8 @@ const Consumer = (aliasName) => {
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
         const providerName = (aliasName === undefined || aliasName === null ||
             (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
+        const storeProp = ObserveV2.CONSUMER_PREFIX + providerName;
+        proto[storeProp] = providerName;
         let retVal = this[varName];
         let providerInfo;
         Reflect.defineProperty(proto, varName, {
