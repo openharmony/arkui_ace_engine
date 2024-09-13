@@ -407,7 +407,7 @@ FocusManager::FocusGuard::~FocusGuard()
         focusMng_->FocusSwitchingEnd();
     }
 }
- 
+
 void FocusManager::WindowFocus(bool isFocus)
 {
     if (!isFocus) {
