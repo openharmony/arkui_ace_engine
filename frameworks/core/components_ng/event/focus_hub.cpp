@@ -1409,15 +1409,14 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     return PaintFocusStateToRenderContext();
 }
 
-Color FocusHub::GetPaintColor()
+void FocusHub::GetPaintColorFromBox(Color& paintColor)
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, Color());
+    CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, Color());
+    CHECK_NULL_VOID(context);
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, Color());
-    Color paintColor;
+    CHECK_NULL_VOID(appTheme);
     if (box_.paintStyle_ && box_.paintStyle_->strokeColor) {
         paintColor = box_.paintStyle_->strokeColor.value();
     } else if (HasPaintColor()) {
@@ -1425,18 +1424,16 @@ Color FocusHub::GetPaintColor()
     } else {
         paintColor = appTheme->GetFocusColor();
     }
-    return paintColor;
 }
 
-Dimension FocusHub::GetPaintWidth()
+void FocusHub::GetPaintWidthFromBox(Dimension& paintWidth)
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
+    CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, Dimension());
+    CHECK_NULL_VOID(context);
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, Dimension());
-    Dimension paintWidth;
+    CHECK_NULL_VOID(appTheme);
     if (box_.paintStyle_ && box_.paintStyle_->strokeWidth) {
         paintWidth = box_.paintStyle_->strokeWidth.value();
     } else if (HasPaintWidth()) {
@@ -1444,18 +1441,17 @@ Dimension FocusHub::GetPaintWidth()
     } else {
         paintWidth = appTheme->GetFocusWidthVp();
     }
-    return paintWidth;
 }
 
-Dimension FocusHub::GetPaintPaddingVp()
+void FocusHub::GetPaintPaddingVp(Dimension& focusPaddingVp)
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
+    CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, Dimension());
+    CHECK_NULL_VOID(context);
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, Dimension());
-    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+    CHECK_NULL_VOID(appTheme);
+    focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     if (box_.paintStyle_ && box_.paintStyle_->margin) {
         focusPaddingVp = box_.paintStyle_->margin.value();
     } else if (HasFocusPadding()) {
@@ -1465,7 +1461,6 @@ Dimension FocusHub::GetPaintPaddingVp()
     } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER || focusStyleType_ == FocusStyleType::FORCE_BORDER) {
         focusPaddingVp = appTheme->GetFocusOutPaddingVp();
     }
-    return focusPaddingVp;
 }
 
 bool FocusHub::PaintFocusStateToRenderContext()
@@ -1478,8 +1473,10 @@ bool FocusHub::PaintFocusStateToRenderContext()
     CHECK_NULL_RETURN(renderContext, false);
     auto appTheme = context->GetTheme<AppTheme>();
     CHECK_NULL_RETURN(appTheme, false);
-    Color paintColor = GetPaintColor();
-    Dimension paintWidth = GetPaintWidth();
+    Color paintColor;
+    GetPaintColorFromBox(paintColor);
+    Dimension paintWidth;
+    GetPaintWidthFromBox(paintWidth);
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
@@ -1492,7 +1489,8 @@ bool FocusHub::PaintFocusStateToRenderContext()
         return true;
     }
 
-    Dimension focusPaddingVp = GetPaintPaddingVp();
+    Dimension focusPaddingVp;
+    GetPaintPaddingVp(focusPaddingVp);
     if (HasPaintRect()) {
         renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
     } else {
