@@ -751,7 +751,7 @@ bool SystemProperties::WaterFlowUseSegmentedLayout()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return system::GetBoolParameter("persist.ace.grid.irregular.enabled", false);
+    return (system::GetParameter("persist.ace.grid.irregular.enabled", "0") == "1");
 }
 
 bool SystemProperties::GetGridCacheEnabled()
