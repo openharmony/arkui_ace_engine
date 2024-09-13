@@ -365,12 +365,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->ResetDragging();
         }
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            auto overlayManager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->RemovePixelMap();
+            return;
+        }
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
+        actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
-            actuator->HideEventColumn();
             actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         } else {
