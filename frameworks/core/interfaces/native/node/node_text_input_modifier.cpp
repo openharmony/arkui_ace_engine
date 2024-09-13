@@ -1741,18 +1741,15 @@ void SetTextInputSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCa
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-    }
-    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
-        TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
-    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
-        TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
-    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
-        TextFieldModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+        TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
     } else {
-        TextFieldModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+        TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
 }
 
@@ -1762,7 +1759,8 @@ void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 } // namespace
 namespace NodeModifier {
