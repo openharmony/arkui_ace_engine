@@ -1100,7 +1100,7 @@ export struct ComposeListItem {
     if (!IS_CLOSE_CHILD_FOCUS && this.isWrapText) {
       return { top: paddingNum, bottom: paddingNum, left: horizontalPadding, right: horizontalPadding };
     } else {
-      return { left: paddingNum, right: paddingNum };
+      return { left: horizontalPadding, right: horizontalPadding };
     }
   }
 

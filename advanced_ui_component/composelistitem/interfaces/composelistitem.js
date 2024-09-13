@@ -2086,7 +2086,7 @@ export class ComposeListItem extends ViewPU {
             return { top: paddingNum, bottom: paddingNum, left: horizontalPadding, right: horizontalPadding };
         }
         else {
-            return { left: paddingNum, right: paddingNum };
+            return { left: horizontalPadding, right: horizontalPadding };
         }
     }
     onMeasureSize(selfLayoutInfo, children, constraint) {
