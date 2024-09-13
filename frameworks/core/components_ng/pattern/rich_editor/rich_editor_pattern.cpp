@@ -3902,8 +3902,8 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
     std::list<RefPtr<SpanItem>> subSpans;
     std::string text;
     for (const auto& spanItem : spans_) {
-        if (!spanItem ||
-            (!AceType::InstanceOf<ImageSpanItem>(spanItem) && AceType::InstanceOf<PlaceholderSpanItem>(spanItem))) {
+        if (!spanItem || spanItem->spanItemType == SpanItemType::CustomSpan ||
+            spanItem->spanItemType == SpanItemType::SYMBOL) {
             continue;
         }
         auto spanEndPos = spanItem->position;
