@@ -351,6 +351,10 @@ void XComponentPattern::OnAttachToFrameNode()
 
 void XComponentPattern::OnModifyDone()
 {
+    // if surface has been reset by pip, do not set backgourndColor
+    if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -1292,6 +1296,7 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
         handlingSurfaceRenderContext_->SetBounds(
             localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
     }
+    host->MarkModifyDone();
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1313,6 +1318,10 @@ XComponentControllerErrorCode XComponentPattern::SetExtController(const RefPtr<X
     }
     if (extPattern_.Upgrade()) {
         return XCOMPONENT_CONTROLLER_REPEAT_SET;
+    }
+    if (handlingSurfaceRenderContext_) {
+        // backgroundColor of pip's surface is black
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
     }
     extPattern->SetHandlingRenderContextForSurface(handlingSurfaceRenderContext_);
     extPattern_ = extPattern;
