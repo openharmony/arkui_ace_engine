@@ -559,7 +559,6 @@ private:
     PointerEvent dragDropPointerEvent_;
     bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
-    OffsetF prePointerOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
