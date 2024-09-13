@@ -4351,14 +4351,8 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty() && spans_.empty()) {
-        auto paragraphs = pManager_->GetParagraphs();
-        for (auto &&info : paragraphs) {
-            auto paragraph = info.paragraph;
-            CHECK_NULL_VOID(paragraph);
-            auto length = paragraph->GetParagraphText().length();
-            paragraph->UpdateColor(0, length, value);
-        }
+    if (children.empty() && spans_.empty() && contentMod_) {
+        contentMod_->TextColorModifier(value);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
