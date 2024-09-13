@@ -750,13 +750,14 @@ const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Pl
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
     Placement::LEFT_BOTTOM, Placement::RIGHT_TOP, Placement::RIGHT_BOTTOM };
 
-DoubleBindCallback ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj)
+DoubleBindCallback ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj,
+    const char* arrowFuncName)
 {
-    JSRef<JSVal> changeEvent = callbackObj->GetProperty("changeEvent");
-    if (!changeEvent->IsFunction()) {
+    JSRef<JSVal> arrowFunc = callbackObj->GetProperty(arrowFuncName);
+    if (!arrowFunc->IsFunction()) {
         return {};
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEvent));
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(arrowFunc));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& param) {
@@ -3583,7 +3584,7 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         builderIndex = 1;
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
+        menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj, "$value");
         auto isShowObj = callbackObj->GetProperty("value");
         if (isShowObj->IsBoolean()) {
             menuParam.isShow = isShowObj->ToBoolean();
@@ -3620,7 +3621,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             }
         } else if (jsVal->IsObject()) {
             JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(jsVal);
-            menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
+            menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj, "$value");
             auto isShowObj = callbackObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
             if (isShowObj->IsBoolean()) {
                 menuParam.isShow = isShowObj->ToBoolean();
@@ -6550,7 +6551,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        auto callback = ParseDoubleBindCallback(info, showObj);
+        auto callback = ParseDoubleBindCallback(info, showObj, "$value");
         popupParam->SetDoubleBindCallback(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
@@ -7717,7 +7718,7 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     DoubleBindCallback callback = nullptr;
     if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj);
+        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
     }
 
     // parse builder
@@ -7800,7 +7801,7 @@ void JSViewAbstract::ParseSheetIsShow(
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj);
+        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
     }
