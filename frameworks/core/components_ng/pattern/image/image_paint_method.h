@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -29,36 +30,44 @@
 
 namespace OHOS::Ace::NG {
 struct ImagePaintMethodConfig {
+    bool sensitive = false;
     bool selected = false;
     RefPtr<ImageOverlayModifier> imageOverlayModifier;
-    bool sensitive = false;
+    RefPtr<ImageContentModifier> imageContentModifier;
     ImageInterpolation interpolation = ImageInterpolation::NONE;
 };
+
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage,
-        const ImagePaintMethodConfig& imagePainterMethodConfig = {}, const ImageDfxConfig& imageDfxConfig = {})
-        : canvasImage_(canvasImage), selected_(imagePainterMethodConfig.selected),
-          imageOverlayModifier_(std::move(imagePainterMethodConfig.imageOverlayModifier)),
-          sensitive_(imagePainterMethodConfig.sensitive), interpolationDefault_(imagePainterMethodConfig.interpolation),
-          imageDfxConfig_(imageDfxConfig)
+    explicit ImagePaintMethod(
+        const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig = {})
+        : selected_(imagePainterMethodConfig.selected), sensitive_(imagePainterMethodConfig.sensitive),
+          canvasImage_(canvasImage), interpolationDefault_(imagePainterMethodConfig.interpolation),
+          imageOverlayModifier_(imagePainterMethodConfig.imageOverlayModifier),
+          imageContentModifier_(imagePainterMethodConfig.imageContentModifier)
     {}
     ~ImagePaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+
 private:
-    void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
+    void UpdatePaintConfig(PaintWrapper* paintWrapper);
     void UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxConfig& imageDfxConfig);
-    RefPtr<CanvasImage> canvasImage_;
+    void UpdateSvgColorFilter();
+
     bool selected_ = false;
-    RefPtr<ImageOverlayModifier> imageOverlayModifier_;
     bool sensitive_ = false;
+
+    RefPtr<CanvasImage> canvasImage_;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
-    ImageDfxConfig imageDfxConfig_;
+
+    RefPtr<ImageOverlayModifier> imageOverlayModifier_;
+    RefPtr<ImageContentModifier> imageContentModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);
 };
