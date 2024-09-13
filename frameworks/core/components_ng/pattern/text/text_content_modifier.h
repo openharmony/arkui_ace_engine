@@ -52,7 +52,7 @@ public:
     void SetTextDecoration(const TextDecoration& value, bool isReset = false);
     void SetTextDecorationStyle(const TextDecorationStyle& value, bool isReset = false);
     void SetTextDecorationColor(const Color& value, bool isReset = false);
-    void SetBaselineOffset(const Dimension& value, bool isReset = false);
+    void SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
 

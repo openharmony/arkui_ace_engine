@@ -102,4 +102,8 @@ void ImageAnalyzerManager::UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>&
 void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight)
 {
 }
+
+void ImageAnalyzerManager::SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback)
+{
+}
 } // namespace OHOS::Ace

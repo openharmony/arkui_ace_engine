@@ -1867,15 +1867,15 @@ static void UpdateSpanList(std::vector<SpanInfo>& spansInfosList, std::string& s
         if (!spans.empty()) {
             spans.append(",");
         }
-        spans.append("span info, span id: ");
+        spans.append("\n\t span id: ");
         spans.append(std::to_string(span.GetSpanId()));
-        spans.append("span info, span text: ");
+        spans.append(", span text: ");
         spans.append(span.GetSpanText());
-        spans.append("span info, accessibility text: ");
+        spans.append(", accessibility text: ");
         spans.append(span.GetAccessibilityText());
-        spans.append("span info, accessibility description: ");
+        spans.append(", accessibility description: ");
         spans.append(span.GetAccessibilityDescription());
-        spans.append("span info, accessibility level: ");
+        spans.append(", accessibility level: ");
         spans.append(span.GetAccessibilityLevel());
     }
 }
@@ -2726,9 +2726,12 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
         pipeline = FindPipelineByElementId(nodeId, node);
         CHECK_NULL_VOID(pipeline);
         pipeline->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this), op, nodeId, paramsMap, pipeline]() {
+            [weak = WeakClaim(this), op, nodeId, paramsMap]() {
                 auto jsAccessibilityManager = weak.Upgrade();
                 CHECK_NULL_VOID(jsAccessibilityManager);
+                RefPtr<NG::FrameNode> node;
+                auto pipeline = jsAccessibilityManager->FindPipelineByElementId(nodeId, node);
+                CHECK_NULL_VOID(pipeline);
                 jsAccessibilityManager->ExecuteActionNG(nodeId, paramsMap, op, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
             },
             TaskExecutor::TaskType::UI, "ArkUIAccessibilityExecuteAction");
@@ -2737,9 +2740,11 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
     auto node = GetAccessibilityNodeFromPage(nodeId);
     CHECK_NULL_VOID(node);
     pipeline->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), op, node, paramsMap, pipeline]() {
+        [weak = WeakClaim(this), op, node, paramsMap]() {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+            auto pipeline = jsAccessibilityManager->context_.Upgrade();
+            CHECK_NULL_VOID(pipeline);
             jsAccessibilityManager->AccessibilityActionEvent(
                 op, paramsMap, node, AceType::DynamicCast<PipelineContext>(pipeline));
         },
@@ -4835,6 +4840,14 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     parentElementId_ = parentElementId;
     parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
+
+    for (auto subContext : GetSubPipelineContexts()) {
+        auto context = subContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
+        interactionOperation->SetHandler(WeakClaim(this));
+        instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
+    }
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4866,6 +4879,13 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     parentTreeId_ = 0;
     parentWindowId_ = 0;
     NotifyChildTreeOnDeregister();
+
+    RefPtr<PipelineBase> context;
+    for (auto subContext : GetSubPipelineContexts()) {
+        context = subContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        instance->DeregisterElementOperator(context->GetWindowId());
+    }
 }
 
 void JsAccessibilityManager::SendUecOnTreeEvent(int64_t splitElementId)
@@ -5687,16 +5707,17 @@ void JsAccessibilityManager::DumpTreeNodeInfoInJson(
 
 
 void JsAccessibilityManager::TransferThirdProviderHoverEvent(
-    int64_t hostElementId, const NG::PointF &point, SourceType source,
+    const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
     NG::AccessibilityHoverEventType eventType, TimeStamp time)
 {
     auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(ngPipeline);
-    auto frameNode = GetFramenodeByAccessibilityId(
-        ngPipeline->GetRootElement(), hostElementId);
+    auto frameNode = hostNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     AccessibilityHoverForThirdConfig config;
-    config.hostElementId = hostElementId;
+    config.hostElementId = frameNode->GetAccessibilityId();
     config.point = point;
     config.sourceType = source;
     config.eventType = eventType;

@@ -20,8 +20,8 @@ export default async function textInputFontFamilyTest() {
    * 找到画面id为textInputFontFamily的TextInput组件
    * 找到画面文本为TextInputFontFamily的Button组件
    * 获取textInput的FontFamily属性与期待值'Arial'比对
-   * 点击button，变更textInput的FontFamily属性值为'ITCBLKADRawFile'
-   * 获取textInput的FontFamily属性与期待值'ITCBLKADRawFile'比对
+   * 点击button，变更textInput的FontFamily属性值为'TESTFONTRawFile'
+   * 获取textInput的FontFamily属性与期待值'TESTFONTRawFile'比对
    */
   defineTest('textInputFontFamilyTestDemo', {
     level: TestCaseLevel.LEVEL0
@@ -36,6 +36,6 @@ export default async function textInputFontFamilyTest() {
 
     await button.tap()
     let fontFamily2: string = await textInput.getInspectorInfo()
-    assertEqual(JSON.parse(fontFamily2).$attrs.fontFamily, 'ITCBLKADRawFile')
+    assertEqual(JSON.parse(fontFamily2).$attrs.fontFamily, 'TESTFONTRawFile')
   }, 0)
 }

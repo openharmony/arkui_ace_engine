@@ -50,12 +50,9 @@ bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinat
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
         auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
 
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-        CHECK_NULL_RETURN(titleBarNode, false);
-        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-        CHECK_NULL_RETURN(titlePattern, false);
-        auto options = titlePattern->GetTitleBarOptions();
-        auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
+        auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(navDestinationPattern, false);
+        auto barStyle = navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
         if ((navDestinationLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK) &&
             safeAreaPos.top_.IsOverlapped(frame.Top())) {
             return true;
@@ -280,19 +277,11 @@ void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
 
 float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float titleBarHeight)
 {
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleBarNode, 0.0f);
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, 0.0f);
-    auto options = titlePattern->GetTitleBarOptions();
-    auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
-    float resetTitleBarHeight = 0.0f;
-    if (barStyle == BarStyle::STACK) {
-        resetTitleBarHeight = 0.0f;
-    } else {
-        resetTitleBarHeight = titleBarHeight;
-    }
-    return resetTitleBarHeight;
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, 0.0f);
+    return navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD) == BarStyle::STANDARD ?
+        titleBarHeight : 0.0f;
 }
 
 } // namespace

@@ -224,9 +224,8 @@ abstract class ViewPU extends PUV2ViewBase
     // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
     this.purgeDeletedElmtIds();
 
-    // un-registers its own id once its children are unregistered above
-    //FIXME: Uncomment once photos app avoids rerendering of removed elementIds
-    //UINodeRegisterProxy unregisterRemovedElmtsFromViewPUs([this id__()]);
+    // un-registers its own id once all its children are unregistered
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
 
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 

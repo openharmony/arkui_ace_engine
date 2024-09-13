@@ -110,7 +110,7 @@ const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = { Placement::LE
     Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::NONE };
 const Offset POPUP_PARAM_POSITION_OFFSET = Offset(100.0f, 100.0f);
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
-constexpr Dimension BUBBLE_CHILD_OFFSET = 16.0_vp;
+constexpr Dimension BUBBLE_CHILD_OFFSET = 8.0_vp;
 } // namespace
 struct TestProperty {
     // layout property

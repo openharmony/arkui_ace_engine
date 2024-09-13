@@ -461,9 +461,9 @@ void TimePickerRowPattern::UpdateConfirmButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -474,9 +474,9 @@ void TimePickerRowPattern::UpdateCancelButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
             ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);

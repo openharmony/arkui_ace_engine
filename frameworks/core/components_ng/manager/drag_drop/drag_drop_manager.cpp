@@ -1592,11 +1592,6 @@ bool DragDropManager::IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent)
     auto x = pointerEvent.GetPoint().GetX();
     auto y = pointerEvent.GetPoint().GetY();
     curPointerOffset_ = { x, y };
-    auto distanceToPrePointer = sqrt(pow(prePointerOffset_.GetX() - x, 2) + pow(prePointerOffset_.GetY() - y, 2));
-    if (distanceToPrePointer < MAX_DISTANCE_TO_PRE_POINTER) {
-        return false;
-    }
-    prePointerOffset_ = { x, y };
     return true;
 }
 
@@ -1790,22 +1785,11 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
     ResetPullMoveReceivedForCurrentDrag();
-    auto distance = CalcDragPreviewDistanceWithPoint(PRESERVE_HEIGHT, event.GetGlobalLocation().GetX(),
-        event.GetGlobalLocation().GetY(), info_);
     auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
-    auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager, gatherNodeCenter.GetX(),
-        gatherNodeCenter.GetY());
-    constexpr decltype(distance) MAX_DISTANCE = 5.0;
-    if ((distance < MAX_DISTANCE || !IsNeedScaleDragPreview()) &&
-        (maxDistance < MAX_DISTANCE || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_)) && !isSubwindowOverlay) {
-        TransDragWindowToDragFwk(containerId);
-        return;
-    }
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()) };
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
-    prePointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     curPointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     currentAnimationCnt_ = 0;
     allAnimationCnt_ = 0;

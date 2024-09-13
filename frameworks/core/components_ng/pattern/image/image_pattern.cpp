@@ -344,6 +344,31 @@ void ImagePattern::ClearAltData()
     altSrcRect_.reset();
 }
 
+void ImagePattern::ApplyAIModificationsToImage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (IsSupportImageAnalyzerFeature()) {
+        if (isPixelMapChanged_) {
+            UpdateAnalyzerOverlay();
+        }
+        UpdateAnalyzerUIConfig(geometryNode);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->GetHostInstanceId());
+                pattern->CreateAnalyzerOverlay();
+            },
+            "ArkUIImageCreateAnalyzerOverlay");
+    }
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -366,7 +391,9 @@ void ImagePattern::OnImageLoadSuccess()
         paintRect.Height(), paintRect.GetX(), paintRect.GetY());
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
-    UpdateSvgSmoothEdgeValue();
+    if (srcInfo.IsSvg()) {
+        UpdateSvgSmoothEdgeValue();
+    }
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
@@ -377,21 +404,8 @@ void ImagePattern::OnImageLoadSuccess()
         eventHub->FireCompleteEvent(event);
     }
 
-    if (IsSupportImageAnalyzerFeature()) {
-        if (isPixelMapChanged_) {
-            UpdateAnalyzerOverlay();
-        }
-        UpdateAnalyzerUIConfig(geometryNode);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            ContainerScope scope(pattern->GetHostInstanceId());
-            pattern->CreateAnalyzerOverlay();
-        }, "ArkUIImageCreateAnalyzerOverlay");
-    }
+    ApplyAIModificationsToImage();
+
     ACE_SCOPED_TRACE("OnImageLoadSuccess [%d]-[%lld], srr: [%s]", imageDfxConfig_.nodeId_,
         static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
     if (SystemProperties::GetDebugEnabled()) {
@@ -487,15 +501,9 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
 void ImagePattern::UpdateSvgSmoothEdgeValue()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID(theme);
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
-    renderProp->UpdateSmoothEdge(std::max(theme->GetMinEdgeAntialiasing(), renderProp->GetSmoothEdge().value_or(0.0f)));
+    renderProp->UpdateSmoothEdge(std::max(smoothEdge_, renderProp->GetSmoothEdge().value_or(0.0f)));
 }
 
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
@@ -1132,9 +1140,12 @@ void ImagePattern::OnAttachToFrameNode()
         pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    selectedColor_ = theme->GetSelectedColor();
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    selectedColor_ = textTheme->GetSelectedColor();
+    auto imageTheme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1428,6 +1439,17 @@ void ImagePattern::DumpRenderInfo()
     if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
         DumpLog::GetInstance().AddDesc(
             std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            "borderRadius:" + renderContext->GetBorderRadiusValue(BorderRadiusProperty()).ToString());
+    } else {
+        DumpLog::GetInstance().AddDesc("borderRadius: null");
     }
 }
 

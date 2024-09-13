@@ -4469,6 +4469,19 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
     containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
 }
 
+void PipelineContext::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->GetWindowPaintRectWithoutMeasureAndLayout(rect);
+}
+
 const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
 {
     return postEventManager_;

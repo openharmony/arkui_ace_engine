@@ -126,10 +126,8 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleDragStart(float offset);
-    void ProcessTitleDragUpdate(float offset);
 
-    void ProcessTitleDragEnd();
+    void ProcessTitleDragUpdate(float offset);
 
     void OnColorConfigurationUpdate() override;
 
@@ -221,10 +219,7 @@ public:
         currentTitleOffsetX_ = currentTitleOffsetX;
     }
 
-    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
-    {
-        currentTitleBarHeight_ = currentTitleBarHeight;
-    }
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
     {
@@ -340,7 +335,7 @@ private:
     float GetMappedOffset(float offset);
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
-    void AnimateTo(float offset);
+    void AnimateTo(float offset, bool isFullTitleMode = false);
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

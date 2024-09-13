@@ -161,6 +161,7 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
     void CallButtonsRectChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override
     {

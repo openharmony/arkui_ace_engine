@@ -231,7 +231,8 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
 {
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
     return true;
 }

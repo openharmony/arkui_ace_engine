@@ -319,6 +319,8 @@ public:
 
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
 
+    static bool CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode);
+
     static void NotifyPerfMonitorPageMsg(const std::string& pageName);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
@@ -360,6 +362,8 @@ public:
     void AddToDumpManager();
     void RemoveFromDumpManager();
 
+    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
+        NavDestinationLifecycle lifecycle);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
     void SetParentCustomNode(const RefPtr<UINode>& parentNode)
@@ -371,8 +375,6 @@ public:
     {
         return parentNode_;
     }
-    void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
-        NavDestinationLifecycle lifecycle, bool isNavigationChanged);
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
 

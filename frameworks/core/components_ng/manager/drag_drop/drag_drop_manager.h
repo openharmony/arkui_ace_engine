@@ -407,11 +407,6 @@ public:
     {
         return badgeNumber_;
     }
-    
-    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
-    {
-        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
-    }
 
     bool IsDragWithContextMenu() const
     {
@@ -564,11 +559,9 @@ private:
     PointerEvent dragDropPointerEvent_;
     bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
-    OffsetF prePointerOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
-    bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;

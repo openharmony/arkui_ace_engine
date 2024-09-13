@@ -1839,6 +1839,7 @@ HWTEST_F(ScrollableCoverTestNg, UpdateFadingEdgeTest001, TestSize.Level1)
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 99, AceType::MakeRefPtr<Pattern>());
     scrollPn->axis_ = Axis::VERTICAL;
     scroll_->overlayNode_ = overlayNode;
+    scroll_->GetGeometryNode()->SetFrameSize(SizeF(700.0, 800.0));
     auto paintProperty = scroll_->GetPaintProperty<ScrollablePaintProperty>();
     auto paint = AceType::MakeRefPtr<ScrollablePaintMethod>(false, false);
     /**

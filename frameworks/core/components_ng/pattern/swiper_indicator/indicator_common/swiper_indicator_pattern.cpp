@@ -88,7 +88,9 @@ void SwiperIndicatorPattern::OnModifyDone()
 
     swiperEventHub->SetIndicatorOnChange(
         [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
-            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            auto indicator = weak.Upgrade();
+            CHECK_NULL_VOID(indicator);
+            auto pipeline = indicator->GetContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->AddAfterLayoutTask([weak, context]() {
                 auto indicator = weak.Upgrade();

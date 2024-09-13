@@ -916,6 +916,50 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuViewTestNgCreate005
+ * @tc.desc: Verify Create SubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNgCreate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create custom node and menuWrapper node
+     * @tc.expected: menuWrapperNode not null
+     */
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    MenuParam menuParam;
+    menuParam.enableHoverMode = true;
+    RefPtr<NG::UINode> customNode;
+    auto menuWrapperNode =
+        MenuView::Create(textNode, TARGET_ID, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    /**
+     * @tc.steps: step2: create custom menu node
+     * @tc.expected: menuNode not null,menuWrapperNode->GetChildren() size is 1
+     */
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step3: create custom menu pattern
+     * @tc.expected: enableFold is ture
+     */
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_EQ(menuPattern->enableFold_, true);
+    ASSERT_EQ(menuPattern->GetHoverMode(), true);
+
+    /**
+     * @tc.steps: step4: menu pattern SetFold
+     * @tc.expected: enableFold is fasle/ture
+     */
+    menuPattern->SetHoverMode(true);
+    ASSERT_EQ(menuPattern->enableFold_, true);
+    menuPattern->SetHoverMode(false);
+    ASSERT_EQ(menuPattern->enableFold_, false);
+}
+
+/**
  * @tc.name: MenuViewTestNgSetFontSize001
  * @tc.desc: Verify SetFontSize.
  * @tc.type: FUNC

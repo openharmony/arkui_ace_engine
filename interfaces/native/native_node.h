@@ -2098,6 +2098,18 @@ typedef enum {
     NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT,
     NODE_IMAGE_SPAN_ALT,
     /**
+     * @brief Defines the image span baseline offset attribute
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: baseline offset, in fp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: baseline offset, in fp. \n
+     *
+     */
+    NODE_IMAGE_SPAN_BASELINE_OFFSET = 3003,
+    /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

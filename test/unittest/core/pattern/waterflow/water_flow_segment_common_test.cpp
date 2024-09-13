@@ -543,6 +543,33 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InsertAndJump001
+ * @tc.desc: insert data at top and jump to other index
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, InsertAndJump001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    CreateDone();
+
+    pattern_->ScrollToIndex(10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 10), 0.0f);
+
+    AddItems(2);
+    secObj->ChangeData(0, 1, SECTION_9);
+    frameNode_->ChildrenUpdatedFrom(4);
+    pattern_->ScrollToIndex(12, false, ScrollAlign::START, 20.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 12), -20.0f);
+}
+
+/**
  * @tc.name: ChangeHeight001
  * @tc.desc: Change height of items without notifying WaterFlow
  * @tc.type: FUNC

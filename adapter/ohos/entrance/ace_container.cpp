@@ -2311,8 +2311,8 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        LOGI("SafeArea get success, area type is:%{public}d insets area is:%{public}s", static_cast<int32_t>(type),
-            safeAreaInsets.ToString().c_str());
+        TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
+            static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
     return {};
@@ -2850,6 +2850,56 @@ bool AceContainer::IsMainWindow() const
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+bool AceContainer::IsSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+bool AceContainer::IsHostSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsHostDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsHostSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetParentWindowType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostSceneBoardWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
 }
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)

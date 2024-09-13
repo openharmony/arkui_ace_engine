@@ -224,8 +224,8 @@ FoldStatus Container::GetCurrentFoldStatus()
 
 void Container::DestroyToastSubwindow(int32_t instanceId)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetToastSubwindow(
-        instanceId, SubwindowManager::GetInstance()->GetToastWindowType());
+    auto toastWindowType = SubwindowManager::GetInstance()->GetToastWindowType(instanceId);
+    auto subwindow = SubwindowManager::GetInstance()->GetToastSubwindow(instanceId, toastWindowType);
     if (subwindow && subwindow->IsToastSubWindow()) {
         subwindow->DestroyWindow();
     }

@@ -196,6 +196,7 @@ private:
     void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
+    Rosen::WindowType GetToastRosenType(bool isSceneBoardEnable);
 
     static int32_t id_;
     int32_t windowId_ = 0;

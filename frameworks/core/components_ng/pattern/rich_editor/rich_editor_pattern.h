@@ -218,6 +218,9 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
@@ -519,6 +522,7 @@ public:
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
+    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -764,6 +768,8 @@ public:
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
+    std::string GetPlaceHolder() const;
+
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -947,9 +953,9 @@ public:
         isOnlyRequestFocus_ = true;
     }
 
-    void SetBarState(DisplayMode mode)
+    DisplayMode GetBarDisplayMode()
     {
-        barDisplayMode_ = mode;
+        return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
 
 protected:
@@ -996,6 +1002,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
@@ -1368,7 +1375,7 @@ private:
     std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
-    DisplayMode barDisplayMode_ = DisplayMode::AUTO;
+    std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

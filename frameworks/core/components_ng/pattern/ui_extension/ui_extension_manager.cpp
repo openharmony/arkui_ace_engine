@@ -156,7 +156,7 @@ bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::Occupied
     int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
     if (keyboardHeight != 0) {
         auto sessionWrapper = sessionWrapper_.Upgrade();
-        return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
+        return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info, true);
     }
     // keyboardHeight is 0, broadcast it.
     bool ret = false;

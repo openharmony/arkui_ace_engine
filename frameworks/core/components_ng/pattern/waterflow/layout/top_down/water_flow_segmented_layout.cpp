@@ -179,10 +179,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
     if (!wrapper_->IsConstraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
     }
-
-    if (info_->extraOffset_) {
-        postJumpOffset_ += *info_->extraOffset_;
-    }
 }
 
 void WaterFlowSegmentLayoutBase::SegmentedInit(const std::vector<WaterFlowSections::Section>& options,
@@ -325,6 +321,9 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
+    if (info_->extraOffset_) {
+        postJumpOffset_ += *info_->extraOffset_;
+    }
     if (jumpIdx >= info_->childrenCount_) {
         return;
     }

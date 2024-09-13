@@ -234,17 +234,20 @@ void JSBaseNode::FinishUpdateFunc(const JSCallbackInfo& info)
 void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
 {
     if (!viewNode_ || info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
     TouchEvent touchEvent = InitTouchEvent(info);
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (!pipelineContext) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent pipelineContext is invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
     auto postEventManager = pipelineContext->GetPostEventManager();
     if (!postEventManager) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent postEventManager is invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
@@ -317,11 +320,13 @@ TouchEvent JSBaseNode::InitTouchEvent(const JSCallbackInfo& info)
     if (changedTouchesJsVal->IsArray()) {
         JSRef<JSArray> changedTouchesArray = JSRef<JSArray>::Cast(changedTouchesJsVal);
         if (static_cast<int32_t>(changedTouchesArray->Length()) <= 0) {
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent event changedTouchesArray is invalid");
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
             return touchEvent;
         }
         JSRef<JSVal> item = changedTouchesArray->GetValueAt(0);
         if (!item->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent event changedTouchesArray item is not an object");
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
             return touchEvent;
         }

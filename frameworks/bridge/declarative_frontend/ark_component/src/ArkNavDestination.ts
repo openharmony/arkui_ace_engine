@@ -114,6 +114,10 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     }
     return this;
   }
+  recoverable(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
+    return this;
+  }
 }
 
 class NavDestinationTitleModifier extends ModifierWithKey<ArkNavigationTitle | undefined> {
@@ -229,8 +233,8 @@ class IgnoreLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandOpts
   }
 }
 
-class RecoverableModifier extends Modifier<boolean> {
-  constructor(value: boolean) {
+class NavDestinationRecoverableModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('recoverable');

@@ -87,12 +87,12 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     CHECK_NULL_VOID(pattern);
     auto navBar = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBar);
-    auto contentNode = navBar->GetNavBarContentNode();
+    auto contentNode = navBar->GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        navBar->SetNavBarContentNode(contentNode);
+        navBar->SetContentNode(contentNode);
         navBar->AddChild(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -921,8 +921,8 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
             } else {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
-                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
-                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE, true);
+                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE);
+                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE);
             }
         }
         return false;
@@ -972,12 +972,20 @@ bool NavigationGroupNode::FindNavigationParent(const std::string& parentName)
     auto parent = GetParent();
     while (parent) {
         if (parent->GetTag() == parentName) {
+            AddDestinationNode(parent);
             return true;
-            break;
         }
         parent = parent->GetParent();
     }
     return parent != nullptr;
+}
+
+void NavigationGroupNode::AddDestinationNode(const RefPtr<UINode>& parent)
+{
+    auto destinationNode = AceType::DynamicCast<NavDestinationGroupNode>(parent);
+    if (destinationNode) {
+        parentDestinationNode_ = destinationNode;
+    }
 }
 
 void NavigationGroupNode::OnAttachToMainTree(bool recursive)
@@ -1036,7 +1044,7 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
         if (lifecycle == NavDestinationLifecycle::ON_WILL_DISAPPEAR) {
             if (iter->second) {
                 navigationPattern->NotifyDestinationLifecycle(
-                    navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
+                    navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
             }
             continue;
         }
@@ -1045,11 +1053,11 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
             continue;
         }
         if (lifecycle == NavDestinationLifecycle::ON_WILL_HIDE) {
-            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
+            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE);
             continue;
         }
         if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
-            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE, true);
+            navigationPattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE);
         }
     }
 }
@@ -1093,11 +1101,11 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     if (navDestinationPattern->GetIsOnShow()) {
-        pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
-        pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE, true);
+        pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE);
+        pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_HIDE);
         navDestinationPattern->SetIsOnShow(false);
     }
-    pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
+    pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);

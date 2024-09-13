@@ -164,6 +164,10 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     }
     return this;
   }
+  recoverable(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationRecoverableModifier.identity, NavigationRecoverableModifier, value);
+    return this;
+  }
 }
 
 class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
@@ -430,8 +434,8 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandO
   }
 }
 
-class RecoverableModifier extends Modifier<boolean> {
-  constructor(value: boolean) {
+class NavigationRecoverableModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
     super(value);
   }
   static identity: Symbol = Symbol('recoverable');

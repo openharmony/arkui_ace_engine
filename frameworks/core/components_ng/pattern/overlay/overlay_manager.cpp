@@ -806,7 +806,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
-        SubwindowManager::GetInstance()->HideSubWindowNG();
+        SubwindowManager::GetInstance()->HideDialogSubWindow(currentId);
     }
 }
 
@@ -1519,10 +1519,8 @@ void OverlayManager::PopToast(int32_t toastId)
     auto toastProperty = toastUnderPop->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_VOID(toastProperty);
     toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CLOSE;
-    event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
-    pipeline->SendEventToAccessibility(event);
+    toastUnderPop->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::ClearToastInSubwindow()
@@ -3820,6 +3818,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<ModalPresentationPattern>(
             targetId, static_cast<ModalTransition>(modalTransition.value()), std::move(callback)));
+    CHECK_NULL_VOID(modalNode);
     if (modalStyle.backgroundColor.has_value()) {
         modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
     }
@@ -3843,18 +3842,20 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         MountToParentWithService(rootNode, modalNode);
     }
     modalNode->AddChild(builder);
-    if (!isAllowedBeCovered_ && modalNode->GetParent()) {
+    auto modalNodeParent = modalNode->GetParent();
+    CHECK_NULL_VOID(modalNodeParent);
+    if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
             "prohibitedRemoveByRouter: %{public}d.",
-            modalNode->GetParent()->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
+            modalNodeParent->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
         if (AddCurSessionId(targetId)) {
-            modalNode->GetParent()->UpdateModalUiextensionCount(true);
+            modalNodeParent->UpdateModalUiextensionCount(true);
         }
     }
 
     FireModalPageShow();
-    modalNode->GetParent()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    modalNodeParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (contentCoverParam.transitionEffect != nullptr) {
         PlayTransitionEffectIn(modalNode);
         return;

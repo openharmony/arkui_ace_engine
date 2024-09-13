@@ -377,6 +377,9 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
+    if (SystemProperties::GetDebugEnabled()) {
+        twinklingInterval_ = 3000; // 3000 : for AtuoUITest
+    }
 }
 
 TextFieldPattern::~TextFieldPattern()
@@ -474,7 +477,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
     }
     if (!IsDragging()) {
-        dragParagraph_ = paragraph_;
         do {
             if (!dragNode_) {
                 break;
@@ -1666,10 +1668,12 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
     }
+    auto touchInfo = GetAcceptedTouchLocationInfo(info);
+    CHECK_NULL_VOID(touchInfo);
     DoGestureSelection(info);
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchType = touchInfo->GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(info.GetTouches().front().GetLocalLocation());
+        HandleTouchDown(touchInfo->GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         OnCaretMoveDone(info);
         RequestKeyboardAfterLongPress();
@@ -1689,7 +1693,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
             return;
         }
         if (!IsUsingMouse()) {
-            HandleTouchMove(info);
+            HandleTouchMove(touchInfo.value());
         }
     } else if (touchType == TouchType::CANCEL) {
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
@@ -1707,7 +1711,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
 
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
         auto lastCaretRect = selectController_->GetCaretRect();
-        moveCaretState_.isTouchCaret = !IsSelected() && RepeatClickCaret(offset, lastCaretRect);
+        moveCaretState_.isTouchCaret = HasFocus() && !IsSelected() && RepeatClickCaret(offset, lastCaretRect);
         isTouchPreviewText_ = GetTouchInnerPreviewText(offset);
     }
 }
@@ -1735,12 +1739,15 @@ void TextFieldPattern::HandleTouchUp()
     ScheduleDisappearDelayTask();
 }
 
-void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
+void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
 {
     if (moveCaretState_.isTouchCaret && !moveCaretState_.isMoveCaret) {
-        auto offset = info.GetTouches().front().GetLocalLocation();
+        auto offset = info.GetLocalLocation();
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
         moveCaretState_.isMoveCaret = GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx());
+        if (moveCaretState_.isMoveCaret) {
+            moveCaretState_.touchFingerId = info.GetFingerId();
+        }
     }
     if (SelectOverlayIsOn() && moveCaretState_.isMoveCaret) {
         CloseSelectOverlay(false);
@@ -1757,12 +1764,12 @@ void TextFieldPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t 
     VibratorUtils::StartVibraFeedback("slide");
 }
 
-void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
+void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
 {
     scrollable_ = false;
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
-    auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    auto touchOffset = info.GetLocalLocation();
     int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
@@ -2025,23 +2032,21 @@ void TextFieldPattern::InitDragDropCallBack()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        pattern->SetDragMovingScrollback();
-        if (pattern->IsNormalInlineState()) {
-            return;
-        }
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
             "%{public}d TextField onDragEnter, dragStatus_ is %{public}d, dragRecipientStatus_ is %{public}d",
             host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
             static_cast<int32_t>(pattern->dragRecipientStatus_));
-        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
-        pattern->ResetPreviewTextState();
-        auto pipeline = PipelineContext::GetCurrentContext();
+
+        auto pipeline = pattern->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto dragManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragManager);
-        if (!dragManager->IsDropAllowed(host)) {
+        if (pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)) {
             return;
         }
+        pattern->SetDragMovingScrollback();
+        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
+        pattern->ResetPreviewTextState();
         auto focusHub = pattern->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         if (focusHub->RequestFocusImmediately()) {
@@ -2056,14 +2061,14 @@ void TextFieldPattern::InitDragDropCallBack()
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        auto pipeline = pattern->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
+        auto dragManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragManager);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
 
-        if (pattern->IsNormalInlineState()) {
+        if (pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)) {
             return;
         }
         if (!pattern->HasFocus()) {
@@ -2105,14 +2110,17 @@ void TextFieldPattern::InitDragDropCallBack()
     auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "%{public}d TextField onDragEnd, dragStatus_ is %{public}d, dragRecipientStatus_ is %{public}d",
+            host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
+            static_cast<int32_t>(pattern->dragRecipientStatus_));
         pattern->StopContentScroll();
         ContainerScope scope(pattern->GetHostInstanceId());
         if (pattern->dragStatus_ == DragStatus::DRAGGING && !pattern->isDetachFromMainTree_) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-
             // Except for DRAG_SUCCESS, all of rest need to show
             auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
@@ -2153,6 +2161,17 @@ void TextFieldPattern::ClearDragDropEvent()
     eventHub->SetOnDragLeave(nullptr);
     eventHub->SetOnDragEnd(nullptr);
     eventHub->SetOnDrop(nullptr);
+}
+
+void TextFieldPattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnDragStatusCallback dragEventType=%{public}d", dragEventType);
+    if (dragEventType == DragEventType::DROP && dragRecipientStatus_ == DragStatus::DRAGGING) {
+        StopContentScroll();
+        StopTwinkling();
+    }
 }
 
 void TextFieldPattern::InitTouchEvent()
@@ -8355,7 +8374,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
     info.selectLength = aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString());
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{private}s",
         info.selectStart, info.selectEnd, spanString->GetString().c_str());
 
     // serialize the sentenced-level text
@@ -8380,7 +8399,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
     spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
     spanString->EncodeTlv(info.sentenceBuffer);
-    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
         sentenceStart, sentenceEnd, spanString->GetString().c_str());
 
     auto host = GetHost();
@@ -8417,7 +8436,7 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
 {
     RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
     auto resultText = spanString->GetString();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{public}s",
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
         start, end, spanString->GetString().c_str());
     if (spanString->GetSpanItems().empty()) {
         return;
@@ -8718,5 +8737,22 @@ bool TextFieldPattern::IsTriggerAutoFillPassword()
 bool TextFieldPattern::IsNeedProcessAutoFill()
 {
     return true;
+}
+
+std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
+{
+    auto touchInfos = info.GetChangedTouches();
+    if (touchInfos.empty()) {
+        return std::nullopt;
+    }
+    if (!moveCaretState_.isMoveCaret) {
+        return touchInfos.front();
+    }
+    for (auto touchInfo : touchInfos) {
+        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId) {
+            return touchInfo;
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

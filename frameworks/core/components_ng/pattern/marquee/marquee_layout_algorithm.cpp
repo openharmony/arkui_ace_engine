@@ -63,9 +63,14 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    // init align center left, and get user defined alignment
-    auto align = Alignment::CENTER_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+    // init align, and get user defined alignment
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    auto align = (direction == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
+
+    if (layoutProperty->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     OffsetF translate;

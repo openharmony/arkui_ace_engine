@@ -59,7 +59,7 @@ struct TabsBarWidthSample {
         })
       Button('TabsBarWidth2')
         .onClick(() => {
-          this.barWidth = $r("app.integer.tabs_resource1")
+          this.barWidth = $r("app.string.tabs_resource1")
         })
       Button('TabsBarWidth3')
         .onClick(() => {

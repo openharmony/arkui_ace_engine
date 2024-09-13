@@ -437,6 +437,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     onDeleteComplete(callback: () => void): RichEditorAttribute;
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
+    barState(value: BarState): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1039,6 +1040,7 @@ declare class ArkNavDestinationComponent extends ArkComponent implements NavDest
     onHidden(callback: () => void): this;
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
+    recoverable(value: boolean | undefined): this;
 }
 declare class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1101,6 +1103,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     onNavigationModeChange(callback: (mode: NavigationMode) => void): NavigationAttribute;
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
+    recoverable(value: boolean | undefined): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1458,15 +1461,6 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onSslErrorEventReceive(callback: (event: {
         handler: SslErrorHandler;
         error: SslError;
-    }) => void): this;
-    onSslErrorEvent(callback: (event: {
-        handler: SslErrorHandler;
-        error: SslError;
-        url: string;
-        originalUrl: string;
-        referrer: string;
-        isFatalError: boolean;
-        isMainFrame:boolean;
     }) => void): this;
     onClientAuthenticationRequest(callback: (event: {
         handler: ClientAuthenticationHandler;

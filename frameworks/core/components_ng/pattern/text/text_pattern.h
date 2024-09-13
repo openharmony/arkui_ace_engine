@@ -707,6 +707,9 @@ protected:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
+    virtual void InitAISpanHoverEvent();
+    virtual void HandleAISpanHoverEvent(const MouseInfo& info);
+    void OnHover(bool isHover);
     void InitMouseEvent();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
@@ -795,6 +798,7 @@ protected:
     bool contChange_ = false;
     int32_t recoverStart_ = 0;
     int32_t recoverEnd_ = 0;
+    bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
@@ -845,6 +849,7 @@ protected:
     }
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     void InitUrlHoverEvent();
+    MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
 
 private:
     MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;

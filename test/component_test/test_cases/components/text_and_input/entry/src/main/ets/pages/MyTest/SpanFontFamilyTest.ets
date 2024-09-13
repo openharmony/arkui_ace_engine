@@ -28,8 +28,8 @@ export default async function spanFontFamilyTest() {
    * 找到画面id为spanFontFamily1的Span组件
    * 找到画面文本为SpanFontFamily的Button组件
    * 获取span1的FontFamily属性与期待值'Arial'比对
-   * 点击button1，变更span1的FontFamily属性值为'ITCBLKADRawFile'
-   * 获取span1的FontFamily属性与期待值'ITCBLKADRawFile'比对
+   * 点击button1，变更span1的FontFamily属性值为'TESTFONTRawFile'
+   * 获取span1的FontFamily属性与期待值'TESTFONTRawFile'比对
    */
   defineTest('spanFontFamilyTestDemo', {
     level: TestCaseLevel.LEVEL0
@@ -45,6 +45,6 @@ export default async function spanFontFamilyTest() {
 
     await button.tap()
     let fontFamily2: string = await span.getInspectorInfo()
-    assertEqual(JSON.parse(fontFamily2).$attrs.fontFamily, 'ITCBLKADRawFile')
+    assertEqual(JSON.parse(fontFamily2).$attrs.fontFamily, 'TESTFONTRawFile')
   }, 0)
 }

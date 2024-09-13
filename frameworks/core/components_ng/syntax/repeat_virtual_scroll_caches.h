@@ -137,9 +137,9 @@ public:
      */
     RefPtr<UINode> GetCachedNode4Index(uint32_t forIndex);
 
-    void AddKeyToL1(const std::string& key);
+    void AddKeyToL1(const std::string& key, bool shouldTriggerReuse = true);
 
-    void RemoveKeyFromL1(const std::string& key);
+    void RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle = true);
 
     bool IsInL1Cache(const std::string& key) const
     {
@@ -302,6 +302,9 @@ private:
 
     // Map Map key -> UINode
     std::unordered_map<std::string, CacheItem> node4key_;
+
+    // for tracking reused/recycled nodes
+    std::unordered_set<int32_t> reusedNodeIds_;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

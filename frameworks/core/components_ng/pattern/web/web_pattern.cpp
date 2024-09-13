@@ -78,6 +78,10 @@ const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/conte
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const std::string AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
 const std::string AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
+const std::string WEB_INFO_PC = "8";
+const std::string WEB_INFO_TABLET = "4";
+const std::string WEB_INFO_PHONE = "2";
+const std::string WEB_INFO_DEFAULT = "1";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
@@ -287,6 +291,7 @@ constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 constexpr char WEB_NODE_URL[] = "url";
 
 const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
+const std::string STRING_LF = "\n";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
@@ -3123,6 +3128,12 @@ void WebPattern::OnSelectHandleDone(const RectF& handleRect, bool isFirst)
             size.Width(), size.Height(), startSelectionHandle_->GetX(), startSelectionHandle_->GetY(),
             endSelectionHandle_->GetX(), endSelectionHandle_->GetY());
     }
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    if (overlayType == SELECTION_OVERLAY && !IsSelectInfoValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Close handles and menu.");
+        CloseSelectOverlay();
+        SelectCancel();
+    }
 }
 
 void WebPattern::OnSelectHandleMove(const RectF& handleRect, bool isFirst)
@@ -3564,6 +3575,12 @@ void WebPattern::SelectCancel() const
     }
     CHECK_NULL_VOID(quickMenuCallback_);
     quickMenuCallback_->Cancel();
+}
+
+bool WebPattern::IsSelectInfoValid()
+{
+    auto info = GetSelectInfo();
+    return !info.empty() && info != STRING_LF;
 }
 
 std::string WebPattern::GetSelectInfo() const
@@ -6172,8 +6189,16 @@ void WebPattern::CloseKeyboard()
 
 WebInfoType WebPattern::GetWebInfoType()
 {
+    std::string factoryLevel;
     if (delegate_) {
-        return delegate_->GetWebInfoType();
+        factoryLevel = delegate_->GetWebInfoType();
+    }
+    if (factoryLevel == WEB_INFO_PHONE || factoryLevel == WEB_INFO_DEFAULT) {
+        return WebInfoType::TYPE_MOBILE;
+    } else if (factoryLevel == WEB_INFO_TABLET) {
+        return WebInfoType::TYPE_TABLET;
+    } else if (factoryLevel == WEB_INFO_PC) {
+        return WebInfoType::TYPE_2IN1;
     }
     return WebInfoType::TYPE_UNKNOWN;
 }
@@ -6383,6 +6408,17 @@ void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int 
         webPattern->OnTextSelected();
     };
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+    auto selectedTask = [weak = AceType::WeakClaim(this)](bool isSelected) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateOverlay selectedTask=%{public}d", isSelected);
+        webPattern->SetImageOverlaySelectedStatus(isSelected);
+        if (isSelected) {
+            webPattern->CloseSelectOverlay();
+            webPattern->SelectCancel();
+        }
+    };
+    imageAnalyzerManager_->SetNotifySelectedCallback(std::move(selectedTask));
     imageAnalyzerManager_->UpdatePressOverlay(
         pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY, std::move(callback));
     imageAnalyzerManager_->CreateAnalyzerOverlay(nullptr);
@@ -6412,6 +6448,7 @@ void WebPattern::DestroyAnalyzerOverlay()
         delegate_->OnDestroyImageAnalyzerOverlay();
     }
     overlayCreating_ = false;
+    imageOverlayIsSelected_ = false;
 }
 
 bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
@@ -6559,5 +6596,15 @@ void WebPattern::UpdateTouchpadSlidingStatus(const GestureEvent& event)
         (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
         isTouchpadSliding_ = true;
     }
+}
+
+bool WebPattern::CloseImageOverlaySelection()
+{
+    if (imageOverlayIsSelected_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CloseImageOverlaySelection");
+        DestroyAnalyzerOverlay();
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -63,8 +63,7 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE,
-  PLATFORM_VIEW = 999
+  TEXTURE
 }
 
 declare interface XComponentController { }
@@ -217,6 +216,8 @@ declare class ArkRatingComponent extends ArkComponent {}
 declare class ArkSliderComponent extends ArkComponent {}
 
 declare class ArkSelectComponent extends ArkComponent {}
+
+declare class ArkToggleComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

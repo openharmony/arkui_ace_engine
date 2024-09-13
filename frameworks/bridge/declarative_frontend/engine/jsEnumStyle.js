@@ -351,7 +351,7 @@ var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
   BlendMode[BlendMode["DESTINATION_IN"] = 7] = "DESTINATION_IN";
-  BlendMode[BlendMode["SOURCE_IN"] = 6] = "SOURCE_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 5000] = "SOURCE_IN";
   BlendMode[BlendMode["NONE"] = 0] = "NONE";
   BlendMode[BlendMode["CLEAR"] = 1] = "CLEAR";
   BlendMode[BlendMode["SRC"] = 2] = "SRC";
@@ -717,10 +717,10 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
-var FormShape;
+let FormShape;
 (function (FormShape) {
-  FormShape["RECT"] = 1;
-  FormShape["CIRCLE"] = 2;
+  FormShape.RECT = 1;
+  FormShape.CIRCLE = 2;
 })(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
@@ -1011,6 +1011,7 @@ let BarStyle;
 (function (BarStyle) {
   BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
   BarStyle[BarStyle.STACK = 1] = "STACK";
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -2954,7 +2955,6 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
-  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
@@ -3311,11 +3311,11 @@ var StyledStringKey;
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let FocusPriority;

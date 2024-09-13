@@ -177,7 +177,7 @@ double Dimension::ConvertToPxDistribute(
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    if (!pipeline->IsFollowSystem() || !allowScale) {
+    if ((!pipeline->IsFollowSystem() && !pipeline->UseAppFontScale()) || !allowScale) {
         return value_ * pipeline->GetDipScale();
     }
     auto minFontScale = minOptional.value_or(0.0f);
@@ -192,7 +192,9 @@ double Dimension::ConvertToPxByCustomFontScale(float minFontScale, float maxFont
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
+    float fontScale = pipeline->UseAppFontScale() ?
+        pipeline->GetAppFontScale() : pipeline->GetFontScale();
+    fontScale = std::clamp(fontScale, minFontScale, maxFontScale);
     return value_ * pipeline->GetDipScale() * fontScale;
 }
 
@@ -200,10 +202,18 @@ double Dimension::ConvertToPxByAppFontScale(float minFontScale) const
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    CHECK_NULL_RETURN(pipeline->IsFollowSystem(), value_ * pipeline->GetDipScale());
+    double result = value_ * pipeline->GetDipScale();
     float maxFontScale = pipeline->GetMaxAppFontScale();
-    float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
-    return value_ * pipeline->GetDipScale() * fontScale;
+    if (pipeline->UseAppFontScale()) {
+        // app font scale
+        float fontScale = std::clamp(pipeline->GetAppFontScale(), minFontScale, maxFontScale);
+        result *= fontScale;
+    } else if (pipeline->IsFollowSystem()) {
+        // os font scale
+        float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
+        result *= fontScale;
+    }
+    return result;
 }
 
 double Dimension::ConvertToVpByAppFontScale() const

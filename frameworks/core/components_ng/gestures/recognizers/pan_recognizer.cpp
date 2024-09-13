@@ -287,9 +287,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if ((currentFingers_ <= fingers_) &&
         (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
         return;
     }
 
@@ -309,11 +306,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
     }
 
-    if (refereeState_ == RefereeState::FAIL) {
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
-    }
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();
@@ -545,36 +537,35 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
     return GreatNotEqual(totalDistance, judgeDistance) && static_cast<int32_t>(touchPointsDistance_.size()) >= fingers_;
 }
 
-PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInAllDirection(double judgeDistance) const
 {
-    auto judgeDistance = distance_;
-    if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
-        judgeDistance = mouseDistance_;
+    double offset = averageDistance_.GetDistance();
+    if (fabs(offset) < judgeDistance) {
+        return GestureAcceptResult::DETECTING;
     }
-    if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
-        double offset = averageDistance_.GetDistance();
+    return GestureAcceptResult::ACCEPT;
+}
+
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInHorizontalDirection(double judgeDistance) const
+{
+    if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
+        double offset = averageDistance_.GetX();
         if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
+        if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
+            return GestureAcceptResult::REJECT;
+        }
+        if ((direction_.type & PanDirection::RIGHT) == 0 && offset > 0) {
+            return GestureAcceptResult::REJECT;
+        }
         return GestureAcceptResult::ACCEPT;
     }
+    return GestureAcceptResult::DETECTING;
+}
 
-    if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
-        if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
-            double offset = averageDistance_.GetX();
-            if (fabs(offset) < judgeDistance) {
-                return GestureAcceptResult::DETECTING;
-            }
-            if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
-                return GestureAcceptResult::REJECT;
-            }
-            if ((direction_.type & PanDirection::RIGHT) == 0 && offset > 0) {
-                return GestureAcceptResult::REJECT;
-            }
-            return GestureAcceptResult::ACCEPT;
-        }
-        return GestureAcceptResult::DETECTING;
-    }
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInVerticalDirection(double judgeDistance) const
+{
     if ((direction_.type & PanDirection::VERTICAL) != 0) {
         double offset = averageDistance_.GetY();
         if (fabs(offset) < judgeDistance) {
@@ -598,6 +589,22 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
         return GestureAcceptResult::ACCEPT;
     }
     return GestureAcceptResult::DETECTING;
+}
+
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
+{
+    auto judgeDistance = distance_;
+    if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
+        judgeDistance = mouseDistance_;
+    }
+    if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
+        return IsPanGestureAcceptInAllDirection(judgeDistance);
+    }
+
+    if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
+        return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
+    }
+    return IsPanGestureAcceptInVerticalDirection(judgeDistance);
 }
 
 Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)

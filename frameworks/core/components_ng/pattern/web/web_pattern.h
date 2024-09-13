@@ -690,7 +690,11 @@ public:
     {
         return treeId_;
     }
-
+    bool CloseImageOverlaySelection();
+    void SetImageOverlaySelectedStatus(bool isSelected)
+    {
+        imageOverlayIsSelected_ = isSelected;
+    }
 private:
     friend class WebContextSelectOverlay;
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -932,6 +936,7 @@ private:
     bool CheckSafeAreaKeyBoard();
     bool IsDialogNested();
     void SelectCancel() const;
+    bool IsSelectInfoValid();
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
@@ -1126,7 +1131,7 @@ private:
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
-
+    bool imageOverlayIsSelected_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
