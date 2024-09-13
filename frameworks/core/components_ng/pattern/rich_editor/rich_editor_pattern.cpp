@@ -7911,6 +7911,11 @@ void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float
     auto keyboardOffset = GetCrossOverHeight();
     auto contentRect = GetTextContentRect();
     auto textRect = GetTextRect();
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarAppearAnimation();
+        scrollBar->ScheduleDisappearDelayTask();
+    }
     if (LessOrEqual(textRect.Height(), contentRect.Height() - keyboardOffset) || isShowPlaceholder_) {
         return;
     }
