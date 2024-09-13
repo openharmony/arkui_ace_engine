@@ -596,6 +596,18 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     JSMock::PreloadWorkerRequireNative(arkRuntime, global);
 }
 
+void JsiDeclarativeEngineInstance::ResetModulePreLoadFlag()
+{
+    isModulePreloaded_ = false;
+    isModuleInitialized_ = false;
+}
+
+void JsiDeclarativeEngineInstance::PrepareForResetModulePreLoadFlag()
+{
+    ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(nullptr);
+    JsiDeclarativeEngine::ResetNamedRouterRegisterMap();
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
 {
     JsiDeclarativeEngineInstance::PreloadAceModule(runtime);
@@ -2486,6 +2498,11 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
         return iter->second.pagePath;
     }
     return "";
+}
+
+void JsiDeclarativeEngine::ResetNamedRouterRegisterMap()
+{
+    namedRouterRegisterMap_.clear();
 }
 
 std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
