@@ -251,20 +251,17 @@ public:
         return moduleName_;
     }
 
-    virtual bool IsMainWindow() const
-    {
-        return false;
-    }
-
-    virtual bool IsSubContainer() const
-    {
-        return false;
-    }
-
-    virtual bool IsFormRender() const
-    {
-        return false;
-    }
+    virtual bool IsMainWindow() const { return false; }
+    virtual bool IsSubWindow() const { return false; }
+    virtual bool IsDialogWindow() const { return false; }
+    virtual bool IsSystemWindow() const { return false; }
+    virtual bool IsHostMainWindow() const { return false; }
+    virtual bool IsHostSubWindow() const { return false; }
+    virtual bool IsHostDialogWindow() const { return false; }
+    virtual bool IsHostSystemWindow() const { return false; }
+    virtual bool IsHostSceneBoardWindow() const { return false; }
+    virtual bool IsSubContainer() const { return false; }
+    virtual bool IsFormRender() const { return false; }
 
     virtual void SetIsFormRender(bool isFormRender) {};
 

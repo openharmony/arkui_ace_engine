@@ -112,7 +112,7 @@ public:
     const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId, const ToastWindowType& windowType);
     void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow, const ToastWindowType& windowType);
     void HideToastSubWindowNG();
-    ToastWindowType GetToastWindowType();
+    ToastWindowType GetToastWindowType(int32_t instanceId);
     void CloseToast(
         const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
