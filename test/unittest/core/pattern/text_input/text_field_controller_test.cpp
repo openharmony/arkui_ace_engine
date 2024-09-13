@@ -1152,9 +1152,11 @@ HWTEST_F(TextFieldControllerTest, GetGlobalPointsWithTransform, TestSize.Level1)
         point.SetX(-5.0f);
         point.SetY(5.0f);
     });
+    pattern_->FrameNode_.Upgrade()->renderContext_ = mockRenderContext;
     pattern_->selectOverlay_->GetGlobalPointsWithTransform(localPoints);
     EXPECT_EQ(localPoints[0].GetX(), -5.0f);
     EXPECT_EQ(localPoints[0].GetY(), 5.0f);
+    pattern_->FrameNode_.Upgrade()->renderContext_ = renderContext;
 }
 
 /**
@@ -1214,9 +1216,11 @@ HWTEST_F(TextFieldControllerTest, RevertLocalPointWithTransform, TestSize.Level1
         point.SetY(5.0f);
     });
     OffsetF offset(-5.0f, 5.0f);
+    pattern_->FrameNode_.Upgrade()->renderContext_ = mockRenderContext;
     pattern_->selectOverlay_->RevertLocalPointWithTransform(offset);
     EXPECT_EQ(offset.GetX(), 5.0f);
     EXPECT_EQ(offset.GetY(), 5.0f);
+    pattern_->FrameNode_.Upgrade()->renderContext_ = renderContext;
 }
 
 /**
