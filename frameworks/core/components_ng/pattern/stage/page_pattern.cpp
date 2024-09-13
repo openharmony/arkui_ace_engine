@@ -171,7 +171,8 @@ void PagePattern::ProcessShowState()
     if (manager) {
         auto safeArea = manager->GetSafeArea();
         auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
-        auto frame = host->GetPaintRectWithTransform() + parentGlobalOffset;
+        auto geometryNode = host->GetGeometryNode();
+        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
         // if page's frameRect not fit current safeArea, need layout page again
         if (!NearEqual(frame.GetY(), safeArea.top_.end)) {
             host->MarkDirtyNode(manager->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
