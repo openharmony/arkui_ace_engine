@@ -4149,6 +4149,10 @@ void RichEditorPattern::HandleAISpanHoverEvent(const MouseInfo& info)
     if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect()) {
         return;
     }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
+        return;
+    }
     if (dataDetectorAdapter_->aiSpanRects_.empty()) {
         for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
             auto& aiSpan = kv.second;
@@ -4222,14 +4226,10 @@ void RichEditorPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
     if (isHover && (!scrollBar || (!scrollBar->IsPressed() && !scrollBar->IsHover()))) {
-        SetDefaultMouseStyle(MouseFormat::TEXT_CURSOR);
         pipeline->SetMouseStyleHoldNode(frameId);
-        if (currentMouseStyle_ != MouseFormat::TEXT_CURSOR) {
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
-            currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
-        }
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+        currentMouseStyle_ = MouseFormat::TEXT_CURSOR;
     } else {
-        SetDefaultMouseStyle(MouseFormat::DEFAULT);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         currentMouseStyle_ = MouseFormat::DEFAULT;
         pipeline->FreeMouseStyleHoldNode(frameId);
