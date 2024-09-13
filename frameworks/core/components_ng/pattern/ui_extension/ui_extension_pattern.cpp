@@ -360,7 +360,7 @@ void UIExtensionPattern::OnConnect()
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     DispatchFollowHostDensity(GetDensityDpi());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
@@ -643,6 +643,7 @@ void UIExtensionPattern::HandleBlurEvent()
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
+        UIEXT_LOGE("The source type is not TOUCH.");
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
@@ -754,8 +755,14 @@ void UIExtensionPattern::DispatchFocusState(bool focusState)
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(pointerEvent);
-    CHECK_NULL_VOID(sessionWrapper_);
+    if (!pointerEvent) {
+        UIEXT_LOGE("DispatchPointerEvent pointerEvent is null.");
+        return;
+    }
+    if (!sessionWrapper_) {
+        UIEXT_LOGE("DispatchPointerEvent sessionWrapper is null.");
+        return;
+    }
     sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
 }
 
@@ -882,7 +889,7 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
             host->RemoveChildAtIndex(0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->NotifyDestroy(false);
         sessionWrapper_->DestroySession();
     }
     if (onErrorCallback_) {
