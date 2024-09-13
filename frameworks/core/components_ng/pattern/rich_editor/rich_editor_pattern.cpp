@@ -6163,6 +6163,13 @@ int32_t RichEditorPattern::ProcessDeleteNodes(std::list<RichEditorAbstractSpanRe
                 CHECK_NULL_RETURN(spanItem, eraseLength);
                 auto text = spanItem->content;
                 std::wstring textTemp = StringUtils::ToWstring(text);
+                auto textTempSize = static_cast<int32_t>(textTemp.size());
+                if (textTempSize < it.OffsetInSpan()) {
+                    TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "ProcessDeleteNodes failed, "
+                        "content = %{private}s, spanItemSize = %{public}d, offsetInSpan = %{public}d",
+                        text.c_str(), textTempSize, it.OffsetInSpan());
+                    continue;
+                }
                 textTemp.erase(it.OffsetInSpan(), it.GetEraseLength());
                 if (textTemp.size() == 0) {
                     deleteNodes.emplace(it.GetSpanIndex());
