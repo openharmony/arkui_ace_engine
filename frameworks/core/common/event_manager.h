@@ -336,7 +336,8 @@ private:
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
-    std::set<int32_t> downFingerIds_;
+    // downFingerIds_ key is pointId, value is originalId.
+    std::unordered_map<int32_t, int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;

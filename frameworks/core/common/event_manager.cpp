@@ -614,7 +614,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
             touchTestResults_.clear();
             downFingerIds_.clear();
         }
-        downFingerIds_.insert(touchEvent.id);
+        downFingerIds_[touchEvent.id] = touchEvent.originalId;
     }
 }
 
@@ -736,21 +736,25 @@ void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
     touchEvent.isMocked = true;
     touchEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
-        touchEvent.id = iter;
+        touchEvent.id = iter.first;
         DispatchTouchEvent(touchEvent);
     }
 }
 
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
-    downFingerIds_.erase(touchEvent.id);
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
+        touchEvent.isInterpolated = true;
+        if (downFingerIds_.find(iter.first) != downFingerIds_.end()) {
+            touchEvent.originalId = downFingerIds_[touchEvent.id];
+        }
         DispatchTouchEventToTouchTestResult(touchEvent, iter.second, true);
         refereeNG_->CleanGestureScope(touchEvent.id);
         referee_->CleanGestureScope(touchEvent.id);
     }
+    downFingerIds_.erase(touchEvent.id);
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
 }
@@ -2064,7 +2068,7 @@ void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
     mockedEvent.isMocked = true;
     mockedEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
-        mockedEvent.id = iter;
+        mockedEvent.id = iter.first;
         DispatchTouchEvent(mockedEvent);
     }
 }
