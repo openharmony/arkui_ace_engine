@@ -569,34 +569,42 @@ void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParamet
     auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
 
-    SwiperArrowParameters p = swiperArrowParameters;
-    if (!p.isShowBackground) {
-        p.isShowBackground = theme->GetIsShowArrowBackground();
+    if (swiperArrowParameters.isShowBackground.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, IsShowBackground, swiperArrowParameters.isShowBackground.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBackground, frameNode);
     }
-    if (!p.isSidebarMiddle) {
-        p.isSidebarMiddle = theme->GetIsSidebarMiddle();
+    if (swiperArrowParameters.backgroundSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, BackgroundSize, swiperArrowParameters.backgroundSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, frameNode);
     }
-    bool isBigArrow = *(p.isSidebarMiddle);
-    if (!p.backgroundSize || (p.backgroundSize->Unit() != DimensionUnit::PERCENT && p.backgroundSize->IsNegative())) {
-        p.backgroundSize = isBigArrow ? theme->GetBigArrowBackgroundSize() : theme->GetSmallArrowBackgroundSize();
+    if (swiperArrowParameters.backgroundColor.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, BackgroundColor, swiperArrowParameters.backgroundColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundColor, frameNode);
     }
-    if (!p.arrowSize || (p.arrowSize->Unit() != DimensionUnit::PERCENT && p.arrowSize->IsNegative())) {
-        p.arrowSize = isBigArrow ? theme->GetBigArrowSize() : theme->GetSmallArrowSize();
+    if (swiperArrowParameters.arrowSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, ArrowSize, swiperArrowParameters.arrowSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, frameNode);
     }
-    // the next should be removed for support of the dynamic Theme changes
-    if (!p.backgroundColor) {
-        p.backgroundColor = isBigArrow ? theme->GetBigArrowBackgroundColor() : theme->GetSmallArrowBackgroundColor();
+    if (swiperArrowParameters.arrowColor.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, ArrowColor, swiperArrowParameters.arrowColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, frameNode);
     }
-    if (!p.arrowColor) {
-        p.arrowColor = isBigArrow ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
+    if (swiperArrowParameters.isSidebarMiddle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            SwiperLayoutProperty, IsSidebarMiddle, swiperArrowParameters.isSidebarMiddle.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsSidebarMiddle, frameNode);
     }
-
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBackground, *(p.isShowBackground), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, *(p.backgroundSize), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundColor, *(p.backgroundColor), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, *(p.arrowSize), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, *(p.arrowColor), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsSidebarMiddle, *(p.isSidebarMiddle), frameNode);
 }
 
 void SwiperModelNG::SetDisplayArrow(FrameNode* frameNode, bool displayArrow)
