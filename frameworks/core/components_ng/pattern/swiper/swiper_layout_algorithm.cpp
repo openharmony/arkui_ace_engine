@@ -274,7 +274,9 @@ void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutC
     CHECK_NULL_VOID(lastNode);
     auto leftCaptureGeometryNode = leftCaptureWrapper->GetGeometryNode();
     CHECK_NULL_VOID(leftCaptureGeometryNode);
-    auto leftOldSize = leftCaptureGeometryNode->GetFrameSize();
+    if (!leftCaptureSize_.has_value()) {
+        leftCaptureSize_ = leftCaptureGeometryNode->GetFrameSize();
+    }
     childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(lastNode->GetMarginFrameSize()));
     leftCaptureWrapper->Measure(childLayoutConstraint);
 
@@ -284,11 +286,14 @@ void SwiperLayoutAlgorithm::CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutC
     CHECK_NULL_VOID(firstNode);
     auto rightCaptureGeometryNode = rightCaptureWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rightCaptureGeometryNode);
-    auto rightOldSize = rightCaptureGeometryNode->GetFrameSize();
+    if (!rightCaptureSize_.has_value()) {
+        rightCaptureSize_ = rightCaptureGeometryNode->GetFrameSize();
+    }
     childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(firstNode->GetMarginFrameSize()));
     rightCaptureWrapper->Measure(childLayoutConstraint);
 
-    isNeedUpdateCapture_ = leftOldSize != lastNode->GetFrameSize() || rightOldSize != firstNode->GetFrameSize();
+    isNeedUpdateCapture_ =
+        leftCaptureSize_ != lastNode->GetFrameSize() || rightCaptureSize_ != firstNode->GetFrameSize();
 }
 
 void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper)
