@@ -564,6 +564,15 @@ public:
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
+    bool IsSubWindow() const override;
+    bool IsDialogWindow() const override;
+    bool IsSystemWindow() const override;
+    bool IsHostMainWindow() const override;
+    bool IsHostSubWindow() const override;
+    bool IsHostDialogWindow() const override;
+    bool IsHostSystemWindow() const override;
+    bool IsHostScenceBoardWindow() const override;
+    uint32_t GetParentMainWindowId(uint32_t currentWindowId) const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
