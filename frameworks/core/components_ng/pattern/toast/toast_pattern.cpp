@@ -314,7 +314,10 @@ double ToastPattern::GetTextMaxHeight()
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto maxHeight = deviceHeight - bottom - top - toastBottom_;
-    auto limitHeight = (deviceHeight - bottom - top) * 0.65;
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_RETURN(toastTheme, 0.0);
+    auto toastLimitHeightRatio = toastTheme->GetTToastLimitHeightRatio();
+    auto limitHeight = (deviceHeight - bottom - top) * toastLimitHeightRatio;
     if (GreatNotEqual(maxHeight, limitHeight)) {
         maxHeight = limitHeight;
     }
