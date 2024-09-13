@@ -430,6 +430,20 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) co
     return children_;
 }
 
+void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze)
+{
+    if (!builder_) {
+        return;
+    }
+    std::vector<UINode*> children;
+    builder_->GetAllItems(children);
+    for (const auto& child : children) {
+        if (child) {
+            child->SetFreeze(isFreeze);
+        }
+    }
+}
+
 void LazyForEachNode::LoadChildren(bool notDetach) const
 {
     std::list<std::pair<std::string, RefPtr<UINode>>> childList;

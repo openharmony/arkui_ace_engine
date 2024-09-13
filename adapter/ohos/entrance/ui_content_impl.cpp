@@ -1775,6 +1775,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             rsConfig.durationOut_ };
         pipeline->SetKeyboardAnimationConfig(config);
     }
+    // Use metadata to control whether dirty mark is blocked.
+    bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
+    });
+    pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
         if (pipeline && appInfo) {
