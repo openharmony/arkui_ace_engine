@@ -31,14 +31,10 @@ namespace OHOS::Ace::NG {
 
 class NavBarPattern : public NavDestinationPatternBase {
     DECLARE_ACE_TYPE(NavBarPattern, NavDestinationPatternBase);
+
 public:
     NavBarPattern() = default;
     ~NavBarPattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -48,11 +44,6 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
-    }
-    
-    bool CheckCustomAvoidKeyboard() const override
-    {
-        return !NearZero(avoidKeyboardOffset_);
     }
 
     void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
@@ -129,21 +120,6 @@ public:
         WindowFocus(false);
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
-
-    std::list<int32_t> GetRouteOfFirstScope() override
-    {
-        return {};
-    }
-
-    bool IsEntryFocusView() override
-    {
-        return false;
-    }
-
     int32_t GetMaxMenuNum() const
     {
         return maxMenuNums_;
@@ -159,15 +135,6 @@ public:
         return !isHideTitlebar_ && titleMode_ == NavigationTitleMode::FREE;
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
-
-    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
-    {
-        avoidKeyboardOffset_ = avoidKeyboardOffset;
-    }
-    float GetAvoidKeyboardOffset()
-    {
-        return avoidKeyboardOffset_;
-    }
 
     Dimension GetTitleBarHeightBeforeMeasure() override;
 
@@ -191,7 +158,6 @@ private:
     RefPtr<Animator> controller_;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
-    float avoidKeyboardOffset_ = 0.0f;
     bool isWindowFocus_ = true;
 };
 

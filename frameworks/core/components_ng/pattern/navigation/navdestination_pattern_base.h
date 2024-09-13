@@ -16,9 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVDESTINATION_PATTERN_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVDESTINATION_PATTERN_BASE_H
 
-#include "core/components_ng/pattern/pattern.h"
+#include <vector>
+#include <optional>
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +54,39 @@ public:
         return 0.0_vp;
     }
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    bool CheckCustomAvoidKeyboard() const override
+    {
+        return !NearZero(avoidKeyboardOffset_);
+    }
+    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
+    {
+        avoidKeyboardOffset_ = avoidKeyboardOffset;
+    }
+    float GetAvoidKeyboardOffset()
+    {
+        return avoidKeyboardOffset_;
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    std::list<int32_t> GetRouteOfFirstScope() override
+    {
+        return {};
+    }
+
+    bool IsEntryFocusView() override
+    {
+        return false;
+    }
+
 protected:
     bool UpdateBarSafeAreaPadding();
 
@@ -55,6 +95,7 @@ protected:
     std::optional<BarStyle> titleBarStyle_;
     std::optional<BarStyle> toolBarStyle_;
     bool safeAreaPaddingChanged_ = false;
+    float avoidKeyboardOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

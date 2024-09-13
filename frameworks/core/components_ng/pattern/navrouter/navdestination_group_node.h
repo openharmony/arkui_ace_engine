@@ -36,24 +36,13 @@ class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
     DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : NavDestinationNodeBase(tag, nodeId, pattern)
-    {}
+        : NavDestinationNodeBase(tag, nodeId, pattern) {}
     ~NavDestinationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
-    void SetTitleBarNode(const RefPtr<UINode>& title)
-    {
-        titleBarNode_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitleBarNode() const
-    {
-        return titleBarNode_;
-    }
 
     void SetNavDestinationBackButtonEvent(const NavDestinationBackButtonEvent& backButtonEvent)
     {
@@ -65,20 +54,11 @@ public:
         return backButtonEvent_;
     }
 
-    // custom node checking
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
-    void OnPrevTitleIsCustomUpdate(bool value) {}
-
     void OnAttachToMainTree(bool recursive) override;
 
     void OnOffscreenProcess(bool recursive) override;
 
     void ProcessShallowBuilder();
-
-    void SetTransitionType(PageTransitionType type)
-    {
-        transitionType_ = type;
-    }
 
     void SetIsOnAnimation(bool isOnAnimation)
     {
@@ -88,11 +68,6 @@ public:
     bool IsOnAnimation() const
     {
         return isOnAnimation_;
-    }
-
-    PageTransitionType GetTransitionType() const
-    {
-        return transitionType_;
     }
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
@@ -170,11 +145,6 @@ public:
         return needRemoveInPush_;
     }
 
-    float GetLanguageDirection()
-    {
-        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
-    }
-
     void InitSystemTransitionPush(bool transitionIn);
     void StartSystemTransitionPush(bool transitionIn);
     void SystemTransitionPushCallback(bool transitionIn);
@@ -208,12 +178,10 @@ public:
         return needAppearFromRecovery_;
     }
 private:
-    RefPtr<UINode> titleBarNode_;
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
     int32_t index_ = -1;
-    PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
     bool isAnimated_ = true;

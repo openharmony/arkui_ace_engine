@@ -35,8 +35,7 @@ class ACE_EXPORT NavBarNode : public NavDestinationNodeBase {
     DECLARE_ACE_TYPE(NavBarNode, NavDestinationNodeBase)
 public:
     NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : NavDestinationNodeBase(tag, nodeId, pattern)
-    {}
+        : NavDestinationNodeBase(tag, nodeId, pattern) {}
     ~NavBarNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavBarNode> GetOrCreateNavBarNode(
@@ -92,16 +91,6 @@ public:
         return landscapeMenu_;
     }
 
-    void SetTitleBarNode(const RefPtr<UINode>& title)
-    {
-        titleBarNode_ = title;
-    }
-
-    const RefPtr<UINode>& GetTitleBarNode() const
-    {
-        return titleBarNode_;
-    }
-
     void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
     {
         toolBarNode_ = toolBarNode;
@@ -145,8 +134,6 @@ public:
     std::string GetBarItemsString(bool isMenu) const;
 
     // custom node checking
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
-    void OnPrevTitleIsCustomUpdate(bool value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevMenuIsCustom, bool);
     void OnPrevMenuIsCustomUpdate(bool value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevToolBarIsCustom, bool);
@@ -157,21 +144,6 @@ public:
     void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ToolBarNodeOperation, ChildNodeOperation);
     void OnToolBarNodeOperationUpdate(ChildNodeOperation value) {}
-
-    void SetTransitionType(PageTransitionType type)
-    {
-        transitionType_ = type;
-    }
-
-    PageTransitionType GetTransitionType() const
-    {
-        return transitionType_;
-    }
-
-    float GetLanguageDirection()
-    {
-        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
-    }
 
     void InitSystemTransitionPop();
     void SystemTransitionPushAction(bool isFinish);
@@ -185,12 +157,10 @@ private:
     RefPtr<UINode> moreMenuNode_;
     RefPtr<UINode> toolbarMoreMenuNode_;
     RefPtr<UINode> moreLandscapeMenuNode_;
-    RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;
     bool isNewToolbar_ = false;
-    PageTransitionType transitionType_ = PageTransitionType::NONE;
 };
 
 } // namespace OHOS::Ace::NG
