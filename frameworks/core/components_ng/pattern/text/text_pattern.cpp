@@ -1210,15 +1210,11 @@ void TextPattern::OnHover(bool isHover)
     auto nodeId = host->GetId();
     if (isHover) {
         pipeline->SetMouseStyleHoldNode(nodeId);
-        if (currentMouseStyle_ != MouseFormat::DEFAULT) {
-            pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
-            currentMouseStyle_ = MouseFormat::DEFAULT;
-        }
+        pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
     } else {
-        if (currentMouseStyle_ != MouseFormat::DEFAULT) {
-            pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
-            currentMouseStyle_ = MouseFormat::DEFAULT;
-        }
+        pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
         pipeline->FreeMouseStyleHoldNode(nodeId);
     }
 }
