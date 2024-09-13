@@ -104,6 +104,12 @@ ace_unittest("focus_view_test_ng") {
   sources = [ "focus_view_test_ng.cpp" ]
 }
 
+ace_unittest("safe_area_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "safe_area_manager_test_ng.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
@@ -118,6 +124,7 @@ group("core_manager_unittest") {
     ":frame_rate_manager_test_ng",
     ":full_screen_manager_test_ng",
     ":post_event_manager_test_ng",
+    ":safe_area_manager_test_ng",
     ":select_overlay_manager_test_ng",
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",

@@ -34,10 +34,10 @@ public:
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
 
-    MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
     MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
     MOCK_METHOD(float, GetFontScale, ());
+    MOCK_METHOD(SafeAreaInsets, GetSafeArea, (), (const));
 
     bool GetIsDeclarative() const override
     {
