@@ -1924,6 +1924,16 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     pattern->ProcessOverlay();
     pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchEvent(touchEventInfo);
+
+    RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(OffsetF(0.f, 0.f));
+    EXPECT_TRUE(controller->GetShowMagnifier());
+    touchLocationInfo.touchType_ = TouchType::CANCEL;
+    touchEventInfo.touches_.clear();
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_FALSE(controller->GetShowMagnifier());
 }
 
 /**
