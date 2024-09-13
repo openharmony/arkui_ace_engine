@@ -145,12 +145,15 @@ public:
         return needRemoveInPush_;
     }
 
+    std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
+    std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
+
     void InitSystemTransitionPush(bool transitionIn);
     void StartSystemTransitionPush(bool transitionIn);
     void SystemTransitionPushCallback(bool transitionIn);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback(bool transitionIn);
+    bool SystemTransitionPopCallback();
     void InitDialogTransition(bool isZeroY);
 
     void SetRecoverable(bool recoverable)
