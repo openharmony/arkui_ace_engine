@@ -1339,8 +1339,10 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
 void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
-    if ((parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
-        parentContainerId_ < 0) {
+    auto isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
+    // for pa service
+    if ((isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
+        (!isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID) || parentContainerId_ < 0) {
         ShowToastForService(toastInfo, std::move(callback));
     } else {
         ShowToastForAbility(toastInfo, std::move(callback));
