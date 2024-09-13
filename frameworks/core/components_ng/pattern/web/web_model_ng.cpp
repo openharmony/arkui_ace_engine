@@ -583,6 +583,13 @@ void WebModelNG::SetScreenCaptureRequestEventId(std::function<void(const BaseEve
     webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
 }
 
+Color WebModelNG::GetDefaultBackgroundColor()
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_RETURN(webPattern, Color::WHITE);
+    return webPattern->GetDefaultBackgroundColor();
+}
+
 void WebModelNG::SetBackgroundColor(Color backgroundColor)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

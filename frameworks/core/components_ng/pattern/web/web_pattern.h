@@ -204,6 +204,8 @@ public:
 
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
+    Color GetDefaultBackgroundColor();
+
     void SetWebSrc(const std::string& webSrc)
     {
         if (webSrc_ != webSrc_) {
