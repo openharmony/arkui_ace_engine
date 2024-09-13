@@ -303,7 +303,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f,
                     beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible, weak = WeakClaim(this)]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, weak = WeakClaim(this)]() {
                 auto containerModal = weak.Upgrade();
                 CHECK_NULL_VOID(containerModal);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
