@@ -114,6 +114,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr int32_t AVOID_DELAY_TIME = 20;
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -288,14 +289,13 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
     {
         auto rect = info->rect_;
-        auto type = info->type_;
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
              "instanceId_ %{public}d",
-            keyboardRect.ToString().c_str(), type, positionY, height, instanceId_);
-        if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
+            keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
+        if (info->type_ == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
@@ -322,12 +322,17 @@ public:
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
-            taskExecutor->PostTask(
-                [context, keyboardRect, rsTransaction, positionY, height] {
+            if (NearZero(keyboardRect.Height())) {
+                taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
+                        CHECK_NULL_VOID(context);
+                        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
+                }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+            } else {
+                taskExecutor->PostDelayedTask([context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+                }, TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
+            }
         }
     }
 
