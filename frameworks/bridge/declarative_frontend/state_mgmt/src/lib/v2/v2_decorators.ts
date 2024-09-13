@@ -206,7 +206,7 @@ const Consumer = (aliasName?: string) => {
     const providerName = (aliasName === undefined || aliasName === null ||
       (typeof aliasName === 'string' && aliasName.trim() === '')
     ) ? varName : aliasName;
-    const storeProp = ObserveV2.CONSUMER_PREFIX + providerName;
+    const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
     proto[storeProp] = providerName;
     let retVal = this[varName];
     let providerInfo;

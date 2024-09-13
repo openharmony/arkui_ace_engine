@@ -30,24 +30,35 @@ class MonitorValueV2<T> {
   public path: string;
   public id: number;
   // properties on the path
-  public props : string[];
+  public props: string[];
 
-  private dirty : boolean;
+  private dirty: boolean;
+  private isPresent: boolean;
 
   constructor(path: string, id: number) {
     this.path = path;
     this.id = id;
     this.props = path.split('.');
     this.dirty = false;
+    this.isPresent = false;
   }
 
   setValue(isInit: boolean, newValue: T): boolean {
     this.now = newValue;
     if (isInit) {
       this.before = this.now;
+      this.isPresent = true;
+      return false; // not dirty at init
     }
-    this.dirty = this.before !== this.now;
+    // Consider value dirty if it wasn't present before setting the new value
+    this.dirty = !this.isPresent || this.before !== this.now;
+    this.isPresent = true;
     return this.dirty;
+  }
+
+  setNotFound(): void {
+    this.isPresent = false;
+    this.before = undefined;
   }
 
   // mv newValue to oldValue, set dirty to false
@@ -194,8 +205,9 @@ class MonitorV2 {
     const [success, value] = this.analysisProp(false, monitoredValue);
     ObserveV2.getObserve().stopRecordDependencies();
 
-    if (!success ) {
+    if (!success) {
       stateMgmtConsole.debug(`@Monitor path '${monitoredValue.path}' no longer valid.`);
+      monitoredValue.setNotFound();
       return false;
     }
     return monitoredValue.setValue(false, value); // dirty?
@@ -203,7 +215,7 @@ class MonitorV2 {
 
   // record / update object dependencies by reading each object along the path
   // return the value, i.e. the value of the last path item
-  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [success: boolean, value : T]  {
+  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [success: boolean, value : T] {
     let parentObj = this.target_; // main pointer
     let specialCur; // special pointer for Array
     let obj; // main property
@@ -212,7 +224,7 @@ class MonitorV2 {
     let props = monitoredValue.props; // get the props
     for (let i = 0; i < props.length; i++) {
       lastProp = props[i]; // get the current property name
-      if (typeof parentObj === 'object' && Reflect.has(parentObj, lastProp)) {
+      if (parentObj && typeof parentObj === 'object' && Reflect.has(parentObj, lastProp)) {
         obj = parentObj[lastProp]; // store property value, obj maybe Proxy added by V2
         if (Array.isArray(UIUtilsImpl.instance().getTarget(obj))) {
           // if obj is Array, store the infomation at the 'first' time.
@@ -238,7 +250,7 @@ class MonitorV2 {
         }
       } else {
         isInit && stateMgmtConsole.warn(`@Monitor prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-        return [ false, undefined ];
+        return [false, undefined];
       }
     }
     if (specialCur) {
