@@ -5332,11 +5332,10 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t
 }
 
 
-void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
-    const std::map<std::string, std::string>& actionArguments) const
+void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action) const
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->ExecuteAction(accessibilityId, action, actionArguments);
+    delegate_->ExecuteAction(accessibilityId, action);
 }
 
 void WebPattern::SetAccessibilityState(bool state)
@@ -5879,23 +5878,6 @@ void WebPattern::DestroyAnalyzerOverlay()
         delegate_->OnDestroyImageAnalyzerOverlay();
     }
     overlayCreating_ = false;
-}
-
-bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
-{
-    CHECK_NULL_RETURN(delegate_, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto viewScale = pipelineContext->GetViewScale();
-    int32_t globalX = static_cast<int32_t>(point.GetX()) * viewScale;
-    int32_t globalY = static_cast<int32_t>(point.GetY()) * viewScale;
-    auto offset = GetCoordinatePoint().value_or(OffsetF());
-    globalX = static_cast<int32_t>(globalX - offset.GetX());
-    globalY = static_cast<int32_t>(globalY - offset.GetY());
-    delegate_->HandleAccessibilityHoverEvent(globalX, globalY);
-    return true;
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)

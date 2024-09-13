@@ -608,11 +608,6 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
-
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
