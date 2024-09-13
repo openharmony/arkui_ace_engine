@@ -188,17 +188,17 @@ void WindowPattern::OnAttachToFrameNode()
     }
 }
 
-void WindowPattern::CreateBlankWindow()
+void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateBlankWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
-    blankWindow_ = FrameNode::CreateFrameNode(
+    window = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    auto layoutProperty = blankWindow_->GetLayoutProperty<LayoutProperty>();
+    auto layoutProperty = window->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    blankWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+    window->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 }
 
 void WindowPattern::CreateAppWindow()
@@ -430,12 +430,33 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     snapshotWindow_->MarkModifyDone();
 }
 
+bool WindowPattern::IsSnapShotSizeChanged()
+{
+    // pc and pad use the same snapshot size
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
+    Rosen::WSRect lastRect = session_->GetLastLayoutRect();
+    Rosen::WSRect curRect = session_->GetLayoutRect();
+    if (!lastRect.IsInvalid() && lastRect != curRect && !session_->GetShowRecent()) {
+        return false;
+    }
+    return true;
+}
+
 void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     session_->SetNeedSnapshot(false);
+    isBlankForSnapShot_ = false;
+
+    if (IsSnapShotSizeChanged()) {
+        isBlankForSnapShot_ = true;
+        CreateBlankWindow(snapshotWindow_);
+        return;
+    }
+
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();

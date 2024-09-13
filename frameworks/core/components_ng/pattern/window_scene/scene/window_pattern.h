@@ -61,7 +61,7 @@ protected:
 #endif
 
     void CreateAppWindow();
-    void CreateBlankWindow();
+    void CreateBlankWindow(RefPtr<FrameNode>& window);
     void CreateStartingWindow();
     void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo);
@@ -88,6 +88,7 @@ protected:
     std::string snapshotWindowName_ = "SnapshotWindow";
     std::string blankWindowName_ = "BlankWindow";
     bool attachToFrameNodeFlag_ = false;
+    bool isBlankForSnapShot_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
@@ -104,6 +105,7 @@ private:
     void SetWindowSceneConsumed(int32_t action);
     void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateSnapshotWindowProperty();
+    bool IsSnapShotSizeChanged();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;
