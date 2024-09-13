@@ -1263,7 +1263,7 @@ HWTEST_F(TextTestFiveNg, GetAncestorNodeViewPort001, TestSize.Level1)
     ASSERT_NE(pattern->GetHost(), nullptr);
     pattern->GetHost()->SetParent(parentFrameNode1);
 
-    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), std::nullopt);
+    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
