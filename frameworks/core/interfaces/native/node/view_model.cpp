@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/form_link/form_link_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -654,7 +655,10 @@ void* createFormComponentNode(ArkUI_Int32 nodeId)
 
 void* createFormLinkNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = FormLinkModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createGaugeNode(ArkUI_Int32 nodeId)
