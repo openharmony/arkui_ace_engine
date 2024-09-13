@@ -1244,7 +1244,11 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     std::wstring deleteText = wss.str().substr(start, end - start);
     record.deleteText = StringUtils::ToString(deleteText);
     RichEditorChangeValue changeValue;
-    CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DEL_FORWARD, deleteText.length()));
+    changeValue.SetRangeBefore({ start, end });
+    changeValue.SetRangeAfter({ start, start });
+    if (auto eventHub = GetEventHub<RichEditorEventHub>(); eventHub) {
+        CHECK_NULL_VOID(eventHub->FireOnWillChange(changeValue));
+    }
     ClearRedoOperationRecords();
     record.afterCaretPosition = start;
     AddOperationRecord(record);
