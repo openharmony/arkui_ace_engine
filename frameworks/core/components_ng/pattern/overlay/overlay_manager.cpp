@@ -1011,6 +1011,7 @@ void OverlayManager::UpdateMenuVisibility(const RefPtr<FrameNode>& menu)
 void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
     int32_t instanceId)
 {
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu animation finished");
     auto menu = menuWK.Upgrade();
     auto overlayManager = weak.Upgrade();
     CHECK_NULL_VOID(menu && overlayManager);
@@ -1040,6 +1041,7 @@ void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
 
 void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
 {
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show menu animation enter");
     BlurLowerNode(menu);
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
