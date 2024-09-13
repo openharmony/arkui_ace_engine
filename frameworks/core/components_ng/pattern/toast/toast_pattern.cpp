@@ -297,7 +297,8 @@ void ToastPattern::OnColorConfigurationUpdate()
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
     auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(textColor);
+    auto toastInfo = GetToastInfo();
+    textLayoutProperty->UpdateTextColor(toastInfo.textColor.value_or(textColor));
     host->SetNeedCallChildrenUpdate(false);
     ToastView::UpdateToastNodeStyle(host);
 }
