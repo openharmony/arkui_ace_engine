@@ -1867,15 +1867,15 @@ static void UpdateSpanList(std::vector<SpanInfo>& spansInfosList, std::string& s
         if (!spans.empty()) {
             spans.append(",");
         }
-        spans.append("span info, span id: ");
+        spans.append("\n\t span id: ");
         spans.append(std::to_string(span.GetSpanId()));
-        spans.append("span info, span text: ");
+        spans.append(", span text: ");
         spans.append(span.GetSpanText());
-        spans.append("span info, accessibility text: ");
+        spans.append(", accessibility text: ");
         spans.append(span.GetAccessibilityText());
-        spans.append("span info, accessibility description: ");
+        spans.append(", accessibility description: ");
         spans.append(span.GetAccessibilityDescription());
-        spans.append("span info, accessibility level: ");
+        spans.append(", accessibility level: ");
         spans.append(span.GetAccessibilityLevel());
     }
 }
