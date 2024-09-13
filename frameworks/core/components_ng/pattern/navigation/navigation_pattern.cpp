@@ -892,6 +892,12 @@ bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinati
     return !destinationNodePattern->GetIsOnShow();
 }
 
+bool NavigationPattern::CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    return destinationNode->GetIndex() != -1 || destinationNode->GetNavDestinationCustomNode();
+}
+
 void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isOnShow)
 {
     CHECK_NULL_VOID(node);
@@ -985,7 +991,8 @@ void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
         if (navigation) {
             auto destinationNode = navigation->GetParentDestinationNode().Upgrade();
-            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode)) {
+            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode) &&
+                CheckDestinationIsPush(destinationNode)) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation parent is onhide");
                 continue;
             }
@@ -2377,7 +2384,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(navigationNode);
         auto parentDestinationNode = navigationNode->GetParentDestinationNode().Upgrade();
-        if (CheckParentDestinationIsOnhide(parentDestinationNode)) {
+        if (CheckParentDestinationIsOnhide(parentDestinationNode) && CheckDestinationIsPush(parentDestinationNode)) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parentDestinationNode is onhide");
             return;
         }
