@@ -560,7 +560,7 @@ void LayoutProperty::UpdateContentConstraint()
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
-            *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+            *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             contentConstraint_->MinusPaddingToNonNegativeSize(
                 borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
