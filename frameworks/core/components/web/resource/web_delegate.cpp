@@ -6561,6 +6561,7 @@ void WebDelegate::SetAccessibilityState(bool state)
                     std::make_shared<AccessibilityEventListenerImpl>();
                 CHECK_NULL_VOID(accessibilityEventListenerImpl);
                 accessibilityEventListenerImpl->SetWebDelegate(weak);
+                delegate->nweb_->PutAccessibilityIdGenerator(NG::UINode::GenerateAccessibilityId);
                 delegate->nweb_->PutAccessibilityEventCallback(accessibilityEventListenerImpl);
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetAccessibilityState");
