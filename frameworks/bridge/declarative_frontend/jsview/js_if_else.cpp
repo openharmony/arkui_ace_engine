@@ -21,27 +21,20 @@
 #include "frameworks/bridge/declarative_frontend/jsview/models/if_else_model_impl.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<IfElseModel> IfElseModel::instance = nullptr;
-std::mutex IfElseModel::mutex_;
-
 IfElseModel* IfElseModel::GetInstance()
 {
-    if (!instance) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance) {
 #ifdef NG_BUILD
-            instance.reset(new NG::IfElseModelNG());
+    static NG::IfElseModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance.reset(new NG::IfElseModelNG());
-            } else {
-                instance.reset(new Framework::IfElseModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::IfElseModelNG instance;
+        return &instance;
+    } else {
+        static Framework::IfElseModelImpl instance;
+        return &instance;
     }
-    return instance.get();
+#endif
 }
 } // namespace OHOS::Ace
 
