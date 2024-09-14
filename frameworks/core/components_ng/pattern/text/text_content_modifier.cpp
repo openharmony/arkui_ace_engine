@@ -409,6 +409,10 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             for (auto&& info : paragraphs) {
                 auto paragraph = info.paragraph;
                 CHECK_NULL_VOID(paragraph);
+                if (onlyTextColorAnimation_ && animatableTextColor_) {
+                    auto length = paragraph->GetParagraphText().length();
+                    paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
+                }
                 paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
                 paintOffsetY += paragraph->GetHeight();
             }
@@ -675,11 +679,17 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateAdaptMinFontSizeMeasureFlag(flag);
     UpdateAdaptMaxFontSizeMeasureFlag(flag);
     UpdateFontWeightMeasureFlag(flag);
-    UpdateTextColorMeasureFlag(flag);
     UpdateTextShadowMeasureFlag(flag);
     UpdateTextDecorationMeasureFlag(flag);
     UpdateBaselineOffsetMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    if (flag) {
+        onlyTextColorAnimation_ = false;
+    }
+    if (!onlyTextColorAnimation_) {
+        UpdateTextColorMeasureFlag(flag);
+        flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
     return flag;
 }
 
@@ -741,6 +751,7 @@ void TextContentModifier::SetFontWeight(const FontWeight& value, bool isReset)
 
 void TextContentModifier::SetTextColor(const Color& value, bool isReset)
 {
+    onlyTextColorAnimation_ = false;
     if (!isReset) {
         textColor_ = value;
     } else {
@@ -748,6 +759,12 @@ void TextContentModifier::SetTextColor(const Color& value, bool isReset)
     }
     CHECK_NULL_VOID(animatableTextColor_);
     animatableTextColor_->Set(LinearColor(value));
+}
+
+void TextContentModifier::TextColorModifier(const Color& value)
+{
+    SetTextColor(value);
+    onlyTextColorAnimation_ = true;
 }
 
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)

@@ -91,6 +91,7 @@ public:
     {
         imageNodeList_ = imageNodeList;
     }
+    void TextColorModifier(const Color& value);
 
 protected:
     OffsetF GetPaintOffset() const
@@ -160,6 +161,7 @@ private:
 
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
+    bool onlyTextColorAnimation_ = false;
 
     struct ShadowProp {
         Shadow shadow; // final shadow configuration of the animation
