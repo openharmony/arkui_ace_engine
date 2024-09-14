@@ -405,51 +405,52 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
     {
         auto rect = info->rect_;
-        auto type = info->type_;
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
              "instanceId_ %{public}d",
-            keyboardRect.ToString().c_str(), type, positionY, height, instanceId_);
-        if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
-            auto container = Platform::AceContainer::GetContainer(instanceId_);
-            CHECK_NULL_VOID(container);
-            auto taskExecutor = container->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            auto context = container->GetPipelineContext();
-            CHECK_NULL_VOID(context);
-            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-            if (pipeline) {
-                ContainerScope scope(instanceId_);
-                auto uiExtMgr = pipeline->GetUIExtensionManager();
-                if (uiExtMgr) {
-                    SetUIExtensionImeShow(keyboardRect);
-                }
-                if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
-                    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "uiExtension consumed");
-                    taskExecutor->PostTask(
-                        [id = instanceId_] {
-                            ContainerScope scope(id);
-                            auto container = Platform::AceContainer::GetContainer(id);
-                            CHECK_NULL_VOID(container);
-                            auto context = container->GetPipelineContext();
-                            CHECK_NULL_VOID(context);
-                            context->OnVirtualKeyboardAreaChange(Rect());
-                        },
-                        TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-                    return;
-                }
-            }
-            auto curWindow = context->GetCurrentWindowRect();
-            positionY -= curWindow.Top();
+            keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
+        CHECK_NULL_VOID(info->type_ == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        if (pipeline) {
             ContainerScope scope(instanceId_);
-            taskExecutor->PostDelayedTask(
-                [context, keyboardRect, rsTransaction, positionY, height] {
+            auto uiExtMgr = pipeline->GetUIExtensionManager();
+            if (uiExtMgr) {
+                SetUIExtensionImeShow(keyboardRect);
+            }
+            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "uiExtension consumed");
+                taskExecutor->PostTask([id = instanceId_] {
+                        ContainerScope scope(id);
+                        auto container = Platform::AceContainer::GetContainer(id);
+                        CHECK_NULL_VOID(container);
+                        auto context = container->GetPipelineContext();
+                        CHECK_NULL_VOID(context);
+                        context->OnVirtualKeyboardAreaChange(Rect());
+                    }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+                return;
+            }
+        }
+        auto curWindow = context->GetCurrentWindowRect();
+        positionY -= curWindow.Top();
+        ContainerScope scope(instanceId_);
+        if (NearZero(keyboardRect.Height())) {
+            taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                },
-                TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
+                }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+        } else {
+            taskExecutor->PostDelayedTask([context, keyboardRect, rsTransaction, positionY, height] {
+                    CHECK_NULL_VOID(context);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
+                }, TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
         }
     }
 
