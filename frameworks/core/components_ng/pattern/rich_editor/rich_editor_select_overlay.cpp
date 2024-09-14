@@ -591,7 +591,11 @@ void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 float RichEditorSelectOverlay::GetHandleHotZoneRadius()
 {
     auto hotZoneRadius = 0.0f;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, hotZoneRadius);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, hotZoneRadius);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, hotZoneRadius);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, hotZoneRadius);
