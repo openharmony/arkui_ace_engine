@@ -62,6 +62,21 @@ public:
                                           height_->GetDimension().Unit() != DimensionUnit::AUTO);
     }
 
+    bool IsDimensionUnitAuto() const
+    {
+        return IsWidthDimensionUnitAuto() || IsHeightDimensionUnitAuto();
+    }
+
+    bool IsWidthDimensionUnitAuto() const
+    {
+        return width_ && width_->GetDimension().Unit() == DimensionUnit::AUTO;
+    }
+
+    bool IsHeightDimensionUnitAuto() const
+    {
+        return height_ && height_->GetDimension().Unit() == DimensionUnit::AUTO;
+    }
+
     const std::optional<CalcLength>& Width() const
     {
         return width_;
