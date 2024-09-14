@@ -607,6 +607,9 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
     }
     for (const auto& pos : itemPosition_) {
         if (pos.second.isGroup) {
+            if (pos.second.groupInfo) {
+                groupItemAverageHeight_ = pos.second.groupInfo.value().averageHeight;
+            }
             return;
         }
     }
@@ -1164,8 +1167,14 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
         return;
     }
     if (forwardLayout) {
-        if (itemPosition_.begin()->second.isGroup) {
-            AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
+        for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); pos++) {
+            float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+            if (LessOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
+                break;
+            } else if (!pos->second.isGroup) {
+                continue;
+            }
+            AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
         }
         return;
     }
@@ -1602,7 +1611,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     itemGroup->SetNeedMeasureFormLastItem(needMeasureFormLastItem);
     itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
-    itemGroup->SetNeedCheckOffset(isNeedCheckOffset_);
+    itemGroup->SetNeedCheckOffset(isNeedCheckOffset_, groupItemAverageHeight_);
     if (scrollSnapAlign_ != V2::ScrollSnapAlign::CENTER) {
         itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
     }
