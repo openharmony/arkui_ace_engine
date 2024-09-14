@@ -44,7 +44,10 @@ public:
     using PositionMap = std::map<int32_t, SwiperItemInfo>;
 
     SwiperLayoutAlgorithm() = default;
-    ~SwiperLayoutAlgorithm() override = default;
+    ~SwiperLayoutAlgorithm() override
+    {
+        std::lock_guard<std::mutex> lock(swiperMutex_);
+    }
 
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -399,6 +402,8 @@ private:
     int32_t cachedCount_ = 0;
     LayoutConstraintF childLayoutConstraint_;
     Axis axis_ = Axis::HORIZONTAL;
+
+    std::mutex swiperMutex_;
 };
 
 } // namespace OHOS::Ace::NG

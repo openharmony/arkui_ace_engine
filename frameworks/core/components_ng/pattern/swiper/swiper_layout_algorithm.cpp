@@ -115,6 +115,7 @@ int32_t SwiperLayoutAlgorithm::GetLoopIndex(int32_t originalIndex) const
 
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    std::lock_guard<std::mutex> lock(swiperMutex_);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
