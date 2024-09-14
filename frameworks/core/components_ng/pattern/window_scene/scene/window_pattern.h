@@ -88,7 +88,7 @@ protected:
     std::string snapshotWindowName_ = "SnapshotWindow";
     std::string blankWindowName_ = "BlankWindow";
     bool attachToFrameNodeFlag_ = false;
-    bool isBlankForSnapShot_ = false;
+    bool isBlankForSnapshot_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();

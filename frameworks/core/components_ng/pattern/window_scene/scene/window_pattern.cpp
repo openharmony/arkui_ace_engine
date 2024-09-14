@@ -437,8 +437,9 @@ bool WindowPattern::IsSnapshotSizeChanged()
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     Rosen::WSRect lastRect = session_->GetLastLayoutRect();
     Rosen::WSRect curRect = session_->GetLayoutRect();
-    if (!lastRect.IsInvalid() && lastRect != curRect && !session_->GetShowRecent()) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id %{public}d, name %{public}s",
+    if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
+        NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, name:%{public}s",
             session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
         return true;
     }
@@ -451,10 +452,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     session_->SetNeedSnapshot(false);
-    isBlankForSnapShot_ = false;
+    isBlankForSnapshot_ = false;
 
     if (IsSnapshotSizeChanged()) {
-        isBlankForSnapShot_ = true;
+        isBlankForSnapshot_ = true;
         CreateBlankWindow(snapshotWindow_);
         return;
     }

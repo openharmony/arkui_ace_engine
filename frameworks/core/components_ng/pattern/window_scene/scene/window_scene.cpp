@@ -331,7 +331,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->snapshotWindow_);
-        if (self->isBlankForSnapShot_) {
+        if (self->isBlankForSnapshot_) {
             self->SetOpacityAnimation(self->snapshotWindow_);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank animation id %{public}d, name %{public}s",
                 self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
@@ -572,7 +572,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 {
     CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
     CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlankFlag(), false, false);
-    ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
     attachToFrameNodeFlag_ = false;
     CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlankFlag(), true, false);
     auto surfaceNode = session_->GetSurfaceNode();
@@ -585,6 +584,9 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto size = geometryNode->GetFrameSize();
+    ACE_SCOPED_TRACE("WindowSCENE::OnDirtyLayoutWrapperSwap[id:%d][%f %f][%d %d][blank:%d]",
+        session_->GetPersistentId(), size.Width(), size.Height(),
+        session_->GetLayoutRect().width_, session_->GetLayoutRect().height_, session_->GetBlankFlag());
     if (NearEqual(size.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(size.Height(), session_->GetLayoutRect().height_, 1.0f) && !session_->GetBlankFlag()) {
         return false;
