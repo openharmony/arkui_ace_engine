@@ -80,6 +80,10 @@ void SwiperLayoutAlgorithm::IndicatorAndArrowMeasure(LayoutWrapper* layoutWrappe
 void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
     const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint)
 {
+    if (jumpIndex_.has_value() || targetIndex_.has_value()) {
+        currentDelta_ = 0.0f;
+        currentOffset_ = 0.0f;
+    }
     currentOffset_ = currentDelta_;
     startMainPos_ = currentOffset_;
     ACE_SCOPED_TRACE("measure swiper startMainPos_:%f", startMainPos_);

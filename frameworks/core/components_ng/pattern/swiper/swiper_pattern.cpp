@@ -3107,17 +3107,6 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         } else {
             AceAsyncTraceEndCommercial(0, APP_TABS_FLING);
         }
-        OffsetF finalOffset =
-            swiper->itemPosition_.empty() ? OffsetF()
-            : swiper->itemPosition_.begin()->second.node
-                ? swiper->itemPosition_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty()
-                : OffsetF();
-        TAG_LOGI(AceLogTag::ACE_SWIPER,
-            "Swiper finish property animation with offsetX: %{public}f, offsetY: %{public}f isVerifiedSuc %{public}d",
-            finalOffset.GetX(), finalOffset.GetY(), !swiper->IsItemOverlay());
-        ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
-            swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
-            !swiper->IsItemOverlay());
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
     // initial translate info.
@@ -3216,8 +3205,19 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         // force stop.
         return;
     }
-
+    OffsetF finalOffset =
+        itemPositionInAnimation_.empty() ? OffsetF()
+        : itemPositionInAnimation_.begin()->second.node
+            ? itemPositionInAnimation_.begin()->second.node->GetRenderContext()->GetTranslateXYProperty()
+            : OffsetF();
+    TAG_LOGI(AceLogTag::ACE_SWIPER,
+        "Swiper finish property animation with offsetX: %{public}f, offsetY: %{public}f isVerifiedSuc %{public}d",
+        finalOffset.GetX(), finalOffset.GetY(), !IsItemOverlay());
+    ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f isVerifiedSuc %d",
+        hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY(),
+        !IsItemOverlay());
     usePropertyAnimation_ = false;
+    syncCancelAniIsFailed_ = false;
     targetIndex_.reset();
     // reset translate.
     for (auto& item : itemPositionInAnimation_) {
@@ -3238,15 +3238,42 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
 }
 
+void SwiperPattern::PropertyCancelAnimationFinish(
+    bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt)
+{
+    targetIndex_.reset();
+    OffsetF currentOffset;
+    for (auto& item : itemPositionInAnimation_) {
+        auto frameNode = item.second.node;
+        if (!frameNode) {
+            continue;
+        }
+        currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
+        frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        item.second.finalOffset = OffsetF();
+    }
+    ACE_SCOPED_TRACE("Swiper stop propertyAni offset %f", currentOffset.GetMainOffset(GetDirection()));
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper stop propertyAni offset %{public}f",
+        currentOffset.GetMainOffset(GetDirection()));
+    itemPositionInAnimation_.clear();
+    if (IsCaptureNodeValid()) {
+        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+        captureFinalOffset_ = OffsetF();
+    }
+    if (!isBeforeCreateLayoutWrapper) {
+        UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
+    }
+    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true, isInterrupt);
+}
+
 void SwiperPattern::StopPropertyTranslateAnimation(
     bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt)
 {
-    if (!usePropertyAnimation_) {
+    if (!usePropertyAnimation_ || syncCancelAniIsFailed_) {
         return;
     }
     usePropertyAnimation_ = false;
-    ACE_SCOPED_TRACE("Swiper stop property animation");
-    // Stop CurrentAnimationProperty.
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
@@ -3265,28 +3292,18 @@ void SwiperPattern::StopPropertyTranslateAnimation(
             swiper->GetRightCaptureNode()->GetRenderContext()->CancelTranslateXYAnimation();
         }
     };
-    AnimationUtils::Animate(option, propertyUpdateCallback);
-    targetIndex_.reset();
-    OffsetF currentOffset;
-    for (auto& item : itemPositionInAnimation_) {
-        auto frameNode = item.second.node;
-        if (!frameNode) {
-            continue;
-        }
-        currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
-        frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        item.second.finalOffset = OffsetF();
+    AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
+    propertyUpdateCallback();
+    bool isSyncSuc = AnimationUtils::CloseImplicitCancelAnimation();
+    if (!isSyncSuc) {
+        ACE_SCOPED_TRACE("Swiper stop propertyAni sync failed");
+        TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper stop propertyAni sync failed");
+        // sync cancel animation failed, need to wait for the animation to finish completely
+        syncCancelAniIsFailed_ = true;
+        usePropertyAnimation_ = true;
+        return;
     }
-    itemPositionInAnimation_.clear();
-    if (IsCaptureNodeValid()) {
-        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        captureFinalOffset_ = OffsetF();
-    }
-    if (!isBeforeCreateLayoutWrapper) {
-        UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
-    }
-    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true, isInterrupt);
+    PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);
 }
 
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()

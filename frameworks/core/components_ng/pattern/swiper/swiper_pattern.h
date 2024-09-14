@@ -677,6 +677,7 @@ private:
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
+    void PropertyCancelAnimationFinish(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt);
 
     // Implement of swiper controller
 
@@ -1073,6 +1074,7 @@ private:
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
     bool usePropertyAnimation_ = false;
+    bool syncCancelAniIsFailed_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
