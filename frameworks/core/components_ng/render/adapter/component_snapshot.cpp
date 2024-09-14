@@ -184,14 +184,17 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
 bool GetTaskExecutor(const RefPtr<UINode>& uiNode, RefPtr<PipelineContext>& pipeline, RefPtr<TaskExecutor>& executor)
 {
     if (!uiNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! uiNode is nullptr");
         return false;
     }
     pipeline = uiNode->GetContextRefPtr();
     if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! can't get pipeline");
         return false;
     }
     executor = pipeline->GetTaskExecutor();
     if (!executor) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! can't get executor");
         return false;
     }
 
@@ -257,6 +260,11 @@ void ComponentSnapshot::Create(
     const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
     bool flag)
 {
+    if (!customNode) {
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! customNode is nullptr");
+        return;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
@@ -265,7 +273,6 @@ void ComponentSnapshot::Create(
     RefPtr<TaskExecutor> executor = nullptr;
     if (!GetTaskExecutor(uiNode, pipeline, executor)) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
         return;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
