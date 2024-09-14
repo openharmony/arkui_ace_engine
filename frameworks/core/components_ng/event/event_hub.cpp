@@ -278,6 +278,8 @@ void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, co
 {
     if (IsFireOnDrop(info)) {
         FireOnDrop(info, extraParams);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "InternalOnDrop not exist");
     }
 }
 
