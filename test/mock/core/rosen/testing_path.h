@@ -22,7 +22,6 @@
 #include "testing_point.h"
 #include "testing_rect.h"
 #include "testing_round_rect.h"
-#include "testing_matrix.h"
 
 namespace OHOS::Ace::Testing {
 enum class TestingPathDirection {

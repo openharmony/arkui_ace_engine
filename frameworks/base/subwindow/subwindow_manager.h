@@ -73,10 +73,10 @@ public:
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,
         bool isRedragStart = false);
-    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
-        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void UpdatePreviewPosition();
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -132,6 +132,7 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     RefPtr<Subwindow> GetSystemToastWindow()
     {
@@ -142,7 +143,6 @@ public:
         systemToastWindow_ = systemToastWindow;
     }
     void ClearToastInSystemSubwindow();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
@@ -174,8 +174,8 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    RefPtr<Subwindow> systemToastWindow_;
     Rect uiExtensionWindowRect_;
+    RefPtr<Subwindow> systemToastWindow_;
 };
 
 } // namespace OHOS::Ace

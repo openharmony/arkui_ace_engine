@@ -4901,20 +4901,6 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 }
 
-void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
-{
-    if (sceneId == "") {
-        TAG_LOGE(AceLogTag::ACE_WEB, "sceneId is null, do not report.");
-        return;
-    }
-    ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
-    if (isStart) {
-        PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
-    } else {
-        PerfMonitor::GetPerfMonitor()->End(sceneId, false);
-    }
-}
-
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
@@ -5796,14 +5782,6 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
-{
-    ACE_DCHECK(nweb_ != nullptr);
-    if (nweb_) {
-        nweb_->SendAccessibilityHoverEvent(x, y);
-    }
-}
-
 void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
 {
     auto context = context_.Upgrade();
@@ -6530,8 +6508,7 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
-    const std::map<std::string, std::string>& actionArguments)
+void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
 {
     if (!accessibilityState_) {
         return;
@@ -6540,11 +6517,11 @@ void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
+        [weak = WeakClaim(this), accessibilityId, nwebAction]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
+            delegate->nweb_->ExecuteAction(accessibilityId, nwebAction);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
 }
@@ -6724,7 +6701,16 @@ void WebDelegate::OnDetachContext()
 {
     UnRegisterScreenLockFunction();
     UnregisterSurfacePositionChangedCallback();
-    UnregisterAvoidAreaChangeListener();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->UnregisterAvoidAreaChangeListener();
+        });
 }
 
 void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
@@ -6732,13 +6718,20 @@ void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
     instanceId_ = context->GetInstanceId();
     context_ = context;
     RegisterSurfacePositionChangedCallback();
-    RegisterAvoidAreaChangeListener();
     if (nweb_) {
         auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
         nweb_->RegisterScreenLockFunction(instanceId_, screenLockCallback);
         auto windowId = context->GetFocusWindowId();
         nweb_->SetWindowId(windowId);
     }
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->RegisterAvoidAreaChangeListener();
+        });
 }
 
 void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)

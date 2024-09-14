@@ -503,6 +503,9 @@ void RosenRenderSurface::DrawBufferForXComponent(
         static_cast<int32_t>(height) };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
+    CHECK_NULL_VOID(recordingCanvas.GetDrawCmdList());
+    recordingCanvas.GetDrawCmdList()->SetWidth(static_cast<int32_t>(width));
+    recordingCanvas.GetDrawCmdList()->SetHeight(static_cast<int32_t>(height));
 #endif
 }
 

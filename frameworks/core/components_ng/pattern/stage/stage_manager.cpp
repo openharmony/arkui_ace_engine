@@ -38,6 +38,7 @@
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -164,6 +165,7 @@ void StageManager::PageChangeCloseKeyboard()
 {
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
+    // If pushpage, close it
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
         auto container = Container::Current();

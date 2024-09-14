@@ -759,10 +759,6 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
     }
-    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
-        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
-                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
-    }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
@@ -2745,17 +2741,11 @@ void FrameNode::OnWindowHide()
 
 void FrameNode::OnWindowFocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(true);
-    }
     pattern_->OnWindowFocused();
 }
 
 void FrameNode::OnWindowUnfocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(false);
-    }
     pattern_->OnWindowUnfocused();
 }
 
@@ -3655,11 +3645,6 @@ bool FrameNode::ParentExpansive()
     CHECK_NULL_RETURN(parentLayoutProperty, false);
     auto&& parentOpts = parentLayoutProperty->GetSafeAreaExpandOpts();
     return parentOpts && parentOpts->Expansive();
-}
-
-void FrameNode::ProcessSafeAreaPadding()
-{
-    pattern_->ProcessSafeAreaPadding();
 }
 
 void FrameNode::UpdateFocusState()
@@ -5048,19 +5033,30 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     UINode::NotifyWebPattern(isRegister);
 }
 
-void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, NotificationType notificationType)
 {
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
+    int32_t updateFrom = CalcAbsPosition(index, id);
     auto pattern = GetPattern();
-    pattern->NotifyDataChange(updateFrom, count);
+    switch (notificationType) {
+        case NotificationType::START_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            break;
+        case NotificationType::END_CHANGE_POSITION:
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        case NotificationType::START_AND_END_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        default:
+            break;
+    }
+}
+
+// for Grid refresh GridItems
+void FrameNode::ChildrenUpdatedFrom(int32_t index)
+{
+    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
 void FrameNode::ResetPredictNodes()

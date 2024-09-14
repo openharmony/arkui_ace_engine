@@ -45,6 +45,10 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_adapter.h"
+#include "core/common/container.h"
+#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,9 +85,8 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
+                 "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -100,9 +103,8 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
+                 "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -119,9 +121,8 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
         if (currentSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "sourceInfo does not match, ignore current callback. "
+                 "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -348,26 +349,29 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(geometryNode);
 
     image_ = loadingCtx_->MoveCanvasImage();
+    CHECK_NULL_VOID(image_);
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
+    auto srcInfo = loadingCtx_->GetSourceInfo();
+    auto frameCount = loadingCtx_->GetFrameCount();
 
-    CHECK_NULL_VOID(image_);
     RectF paintRect = CalcImageContentPaintSize(geometryNode);
     LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
         paintRect.Height(), paintRect.GetX(), paintRect.GetY());
-    auto eventHub = GetEventHub<ImageEventHub>();
-    if (eventHub) {
-        eventHub->FireCompleteEvent(event);
-    }
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo(), loadingCtx_->GetFrameCount());
+    SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
     UpdateSvgSmoothEdgeValue();
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
     }
     ClearAltData();
+
+    auto eventHub = GetEventHub<ImageEventHub>();
+    if (eventHub) {
+        eventHub->FireCompleteEvent(event);
+    }
 
     if (IsSupportImageAnalyzerFeature()) {
         if (isPixelMapChanged_) {
@@ -387,8 +391,8 @@ void ImagePattern::OnImageLoadSuccess()
     ACE_LAYOUT_SCOPED_TRACE(
         "OnImageLoadSuccess[self:%d][src:%s]", host->GetId(), loadingCtx_->GetSourceInfo().ToString().c_str());
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(
-            AceLogTag::ACE_IMAGE, "OnImageLoadSuccess src=%{public}s", loadingCtx_->GetSourceInfo().ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
+            "imageLoadSuccess src=%{private}s", loadingCtx_->GetSourceInfo().ToString().c_str());
     }
     host->MarkNeedRenderOnly();
 }
@@ -436,7 +440,8 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     const auto& geometryNode = host->GetGeometryNode();
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageFailEvent event(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
+    LoadImageFailEvent event(
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
     imageEventHub->FireErrorEvent(event);
 }
 
@@ -558,8 +563,10 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
+
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
@@ -617,7 +624,7 @@ void ImagePattern::LoadImage(
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{private}s", src.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
     loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
     loadingCtx_->SetNodeId(GetHost()->GetId());
@@ -646,8 +653,14 @@ void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
+    std::optional<Color> svgFillColorOpt = std::nullopt;
+    if (src.IsSvg()) {
+        svgFillColorOpt = src.GetFillColor();
+    }
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
@@ -795,6 +808,7 @@ void ImagePattern::OnImageModifyDone()
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
+
     if (copyOption_ != CopyOptions::None) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -846,9 +860,8 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentAltSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSourceInfo != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt image sourceInfo does not match, ignore current callback. "
+                 "current: %{private}s vs callback's: %{private}s",
                 currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -879,9 +892,8 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         auto layoutProps = pattern->GetLayoutProperty<ImageLayoutProperty>();
         auto currentAltSrc = layoutProps->GetAlt().value_or(ImageSourceInfo(""));
         if (currentAltSrc != sourceInfo) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "alt image sourceInfo does not match, ignore current callback. "
-                "current: %{private}s vs callback's: %{private}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "alt image sourceInfo does not match, ignore current callback. "
+                 "current: %{private}s vs callback's: %{private}s",
                 currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -1073,8 +1085,8 @@ void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string&
-                         /* extraParams */) -> DragDropInfo {
+    auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
+                         const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
         CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
@@ -1379,7 +1391,7 @@ void ImagePattern::DumpAdvanceInfo()
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("url: ").append(layoutProp->GetImageSourceInfo()->ToString()));
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
@@ -1558,7 +1570,7 @@ void ImagePattern::CreateAnalyzerOverlay()
     if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
-
+ 
     CHECK_NULL_VOID(image_);
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);

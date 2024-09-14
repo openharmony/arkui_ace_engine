@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -40,6 +41,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
         onFocusTextField_ = nullptr;
         focusFieldIsInline = false;
         optionalPosition_ = std::nullopt;
+        usingCustomKeyboardAvoid_ = false;
     }
 }
 
@@ -301,5 +303,96 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navN
         }
     }
     navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TextFieldManagerNG::AddTextFieldInfo(const TextFieldInfo& textFieldInfo)
+{
+    if (textFieldInfo.nodeId == -1 || textFieldInfo.autoFillContainerNodeId == -1) {
+        return;
+    }
+
+    auto containerNodeIter = textFieldInfoMap_.find(textFieldInfo.autoFillContainerNodeId);
+    if (containerNodeIter != textFieldInfoMap_.end()) {
+        auto& innerTextFieldMap = containerNodeIter->second;
+        innerTextFieldMap[textFieldInfo.nodeId] = textFieldInfo;
+    } else {
+        std::unordered_map<int32_t, TextFieldInfo> innerTextFieldInfoMap;
+        innerTextFieldInfoMap[textFieldInfo.nodeId] = textFieldInfo;
+        textFieldInfoMap_[textFieldInfo.autoFillContainerNodeId] = innerTextFieldInfoMap;
+    }
+}
+
+void TextFieldManagerNG::RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId)
+{
+    auto containerNodeIter = textFieldInfoMap_.find(autoFillContainerNodeId);
+    if (containerNodeIter != textFieldInfoMap_.end()) {
+        auto& innerTextFieldInfoMap = containerNodeIter->second;
+        auto textFieldNodeIter = innerTextFieldInfoMap.find(nodeId);
+        if (textFieldNodeIter != innerTextFieldInfoMap.end()) {
+            innerTextFieldInfoMap.erase(textFieldNodeIter);
+        }
+    }
+}
+
+void TextFieldManagerNG::UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo)
+{
+    if (textFieldInfo.nodeId == -1 || textFieldInfo.autoFillContainerNodeId == -1) {
+        return;
+    }
+    auto containerNodeIter = textFieldInfoMap_.find(textFieldInfo.autoFillContainerNodeId);
+    if (containerNodeIter != textFieldInfoMap_.end()) {
+        auto& innerTextFieldInfoMap = containerNodeIter->second;
+        auto textFieldNodeIter = innerTextFieldInfoMap.find(textFieldInfo.nodeId);
+        if (textFieldNodeIter != innerTextFieldInfoMap.end()) {
+            innerTextFieldInfoMap.erase(textFieldNodeIter);
+        }
+        innerTextFieldInfoMap[textFieldInfo.nodeId] = textFieldInfo;
+    } else {
+        AddTextFieldInfo(textFieldInfo);
+    }
+}
+
+bool TextFieldManagerNG::HasAutoFillPasswordNodeInContainer(
+    const int32_t& autoFillContainerNodeId, const int32_t& nodeId)
+{
+    auto containerNodeIter = textFieldInfoMap_.find(autoFillContainerNodeId);
+    if (containerNodeIter == textFieldInfoMap_.end()) {
+        return false;
+    }
+
+    auto& innerTextFieldInfoMap = containerNodeIter->second;
+    auto textFieldNodeIter = innerTextFieldInfoMap.find(nodeId);
+    if (textFieldNodeIter == innerTextFieldInfoMap.end()) {
+        return false;
+    }
+
+    for (const auto& textField : innerTextFieldInfoMap) {
+        auto textFieldId = textField.first;
+        auto textFieldInfo = textField.second;
+        if (textFieldId == nodeId) {
+            continue;
+        }
+
+        auto isPasswordType = IsAutoFillPasswordType(textFieldInfo);
+        if (isPasswordType && textFieldInfo.enableAutoFill) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool TextFieldManagerNG::IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo)
+{
+    return textFieldInfo.inputType == TextInputType::VISIBLE_PASSWORD ||
+           textFieldInfo.inputType == TextInputType::NEW_PASSWORD ||
+           textFieldInfo.inputType == TextInputType::NUMBER_PASSWORD ||
+           textFieldInfo.contentType == TextContentType::VISIBLE_PASSWORD ||
+           textFieldInfo.contentType == TextContentType::NEW_PASSWORD;
+}
+
+TextFieldManagerNG::~TextFieldManagerNG()
+{
+    textFieldInfoMap_.clear();
 }
 } // namespace OHOS::Ace::NG

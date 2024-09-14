@@ -249,7 +249,7 @@ ActionType ConvertAceAction(AceAction aceAction)
 
 inline RangeInfo ConvertAccessibilityValue(const AccessibilityValue& value)
 {
-    return RangeInfo(value.min, value.max, value.current);
+    return RangeInfo(static_cast<int>(value.min), static_cast<int>(value.max), static_cast<int>(value.current));
 }
 
 int64_t ConvertToCardAccessibilityId(int64_t nodeId, int64_t cardId, int64_t rootNodeId)
@@ -1291,7 +1291,8 @@ static void UpdateWebAccessibilityElementInfo(
 {
     nodeInfo.SetContent(node->GetContent());
     nodeInfo.SetAccessibilityText(node->GetContent());
-    RangeInfo rangeInfo(node->GetRangeInfoMin(), node->GetRangeInfoMax(), node->GetRangeInfoCurrent());
+    RangeInfo rangeInfo(static_cast<int32_t>(node->GetRangeInfoMin()), static_cast<int32_t>(node->GetRangeInfoMax()),
+        static_cast<int32_t>(node->GetRangeInfoCurrent()));
     nodeInfo.SetRange(rangeInfo);
     nodeInfo.SetHint(node->GetHint());
     nodeInfo.SetHinting(node->GetIsHinting());
@@ -1332,7 +1333,6 @@ static void UpdateWebAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
-    nodeInfo.SetAccessibilityGroup(false);
 }
 
 void UpdateWebAccessibilityElementInfo(RefPtr<NG::WebAccessibilityNode> node,
@@ -4056,8 +4056,7 @@ bool JsAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId,
 
 #ifdef WEB_SUPPORTED
 bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType action,
-    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<NG::PipelineContext>& ngPipeline,
-    const std::map<std::string, std::string>& actionArguments)
+    const RefPtr<NG::FrameNode>& frameNode, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
     auto webAccessibilityNode = AceType::DynamicCast<NG::WebAccessibilityNode>(frameNode);
     CHECK_NULL_RETURN(webAccessibilityNode, false);
@@ -4065,7 +4064,7 @@ bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType ac
     CHECK_NULL_RETURN(webNode, false);
     auto webPattern = webNode->GetPattern<NG::WebPattern>();
     CHECK_NULL_RETURN(webPattern, false);
-    webPattern->ExecuteAction(elementId, ConvertAccessibilityAction(action), actionArguments);
+    webPattern->ExecuteAction(elementId, ConvertAccessibilityAction(action));
     return true;
 }
 
@@ -4119,7 +4118,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
 
 #ifdef WEB_SUPPORTED
     if (frameNode->GetTag() == V2::WEB_CORE_TAG) {
-        return ExecuteWebActionNG(elementId, action, frameNode, ngPipeline, actionArguments);
+        return ExecuteWebActionNG(elementId, action, frameNode, ngPipeline);
     }
 #endif
     auto enabled = frameNode->GetFocusHub() ? frameNode->GetFocusHub()->IsEnabled() : true;

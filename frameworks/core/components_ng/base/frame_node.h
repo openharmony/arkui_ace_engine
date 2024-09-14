@@ -775,7 +775,6 @@ public:
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
-    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -1036,7 +1035,13 @@ public:
     void GetInspectorValue() override;
     void NotifyWebPattern(bool isRegister) override;
 
-    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
 
 protected:
     void DumpInfo() override;
@@ -1268,6 +1273,8 @@ private:
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
     FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
     std::optional<RectF> syncedFramePaintRect_;
+
+    int32_t childrenUpdatedFrom_ = -1;
 
     friend class RosenRenderContext;
     friend class RenderContext;

@@ -64,7 +64,7 @@ public:
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
         if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
-            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
+            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>(WeakClaim(this));
         }
         SetContentModifierBounds(selectOverlayContentModifier_);
         SetSelectMenuHeight();
@@ -191,6 +191,15 @@ public:
     void SetGestureEvent();
 
     static float GetHandleDiameter();
+    void OnDpiConfigurationUpdate() override;
+    bool IsDraggingHandle(bool isFirst)
+    {
+        if (isFirst) {
+            return firstHandleDrag_;
+        } else {
+            return secondHandleDrag_;
+        }
+    }
 
 protected:
     virtual void CheckHandleReverse();

@@ -279,15 +279,14 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     UIEXT_LOGD("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
-    Rosen::SessionInfo extensionSessionInfo = {
-        .bundleName_ = want.GetElement().GetBundleName(),
-        .abilityName_ = want.GetElement().GetAbilityName(),
-        .callerToken_ = callerToken,
-        .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
-        .want = wantPtr,
-        .isAsyncModalBinding_ = config.isAsyncModalBinding,
-        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
-    };
+    Rosen::SessionInfo extensionSessionInfo;
+    extensionSessionInfo.bundleName_ = want.GetElement().GetBundleName();
+    extensionSessionInfo.abilityName_ = want.GetElement().GetAbilityName();
+    extensionSessionInfo.callerToken_ = callerToken;
+    extensionSessionInfo.rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken;
+    extensionSessionInfo.want = wantPtr;
+    extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
+    extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     UpdateSessionConfig();

@@ -7720,7 +7720,7 @@ class ObserveV2 {
                     .then(this.updateDirty.bind(this))
                     .catch(error => {
                     stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
-                    throw error;
+                    _arkUIUncaughtPromiseError(error);
                 });
             }
             // add bindId to the correct Set of pending changes.
@@ -8896,7 +8896,7 @@ class AsyncAddMonitorV2 {
                 .then(AsyncAddMonitorV2.run)
                 .catch(error => {
                 stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
-                throw error;
+                _arkUIUncaughtPromiseError(error);
             });
         }
         AsyncAddMonitorV2.watches.push([target, name]);
@@ -9001,7 +9001,7 @@ class AsyncAddComputedV2 {
                 .then(AsyncAddComputedV2.run)
                 .catch(error => {
                 stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
-                throw error;
+                _arkUIUncaughtPromiseError(error);
             });
         }
         AsyncAddComputedV2.computedVars.push({ target: target, name: name });

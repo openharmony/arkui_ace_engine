@@ -335,6 +335,10 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& men
     if (gestureHub) {
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+        auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
+        // set menu preview scale to drag.
+        gestureHub->SetMenuPreviewScale(
+            LessOrEqual(menuPreviewScale, 0.0) ? DEFALUT_DRAG_PPIXELMAP_SCALE : menuPreviewScale);
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }

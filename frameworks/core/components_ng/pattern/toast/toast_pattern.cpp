@@ -167,7 +167,6 @@ void ToastPattern::BeforeCreateLayoutWrapper()
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
         return;
     }
-
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     UpdateTextSizeConstraint(textNode);
@@ -277,6 +276,30 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     }
 }
 
+void ToastPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Message: " + toastInfo_.message);
+    DumpLog::GetInstance().AddDesc("Duration: " + std::to_string(toastInfo_.duration));
+    DumpLog::GetInstance().AddDesc("Bottom: " + toastInfo_.bottom);
+    std::string isRightToLeft = toastInfo_.isRightToLeft ? "true" : "false";
+    DumpLog::GetInstance().AddDesc("IsRightToLeft: " + isRightToLeft);
+    std::string showMode = toastInfo_.showMode == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST";
+    DumpLog::GetInstance().AddDesc("ShowMode: " + showMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    if (!toastProp->HasToastAlignment()) {
+        DumpLog::GetInstance().AddDesc("Alignment: NONE");
+    } else {
+        DumpLog::GetInstance().AddDesc(
+            "Alignment: " + toastProp->GetToastAlignmentValue().GetAlignmentStr(toastProp->GetLayoutDirection()));
+    }
+    auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
+    DumpLog::GetInstance().AddDesc(
+        "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
+}
+
 double ToastPattern::GetTextMaxHeight()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
@@ -314,7 +337,6 @@ double ToastPattern::GetTextMaxWidth()
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         deviceWidth = windowGlobalRect.Width();
     }
-
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto marging = toastTheme->GetMarging();
@@ -347,29 +369,5 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
         paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
     }
     return paragLineHeight;
-}
-
-void ToastPattern::DumpInfo()
-{
-    DumpLog::GetInstance().AddDesc("Message: " + toastInfo_.message);
-    DumpLog::GetInstance().AddDesc("Duration: " + std::to_string(toastInfo_.duration));
-    DumpLog::GetInstance().AddDesc("Bottom: " + toastInfo_.bottom);
-    std::string isRightToLeft = toastInfo_.isRightToLeft ? "true" : "false";
-    DumpLog::GetInstance().AddDesc("IsRightToLeft: " + isRightToLeft);
-    std::string showMode = toastInfo_.showMode == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST";
-    DumpLog::GetInstance().AddDesc("ShowMode: " + showMode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto toastProp = DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
-    CHECK_NULL_VOID(toastProp);
-    if (!toastProp->HasToastAlignment()) {
-        DumpLog::GetInstance().AddDesc("Alignment: NONE");
-    } else {
-        DumpLog::GetInstance().AddDesc(
-            "Alignment: " + toastProp->GetToastAlignmentValue().GetAlignmentStr(toastProp->GetLayoutDirection()));
-    }
-    auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
-    DumpLog::GetInstance().AddDesc(
-        "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
 }
 } // namespace OHOS::Ace::NG

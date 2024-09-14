@@ -789,7 +789,6 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -800,7 +799,6 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
-    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);

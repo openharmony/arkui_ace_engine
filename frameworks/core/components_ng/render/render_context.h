@@ -294,7 +294,6 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
-    virtual void UpdateWindowFocusState(bool isFocused) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -697,6 +696,8 @@ public:
     {
         isNeedAnimate_ = isNeedAnimate;
     }
+
+    virtual void SetRenderFit(RenderFit renderFit) {}
 
 protected:
     RenderContext() = default;

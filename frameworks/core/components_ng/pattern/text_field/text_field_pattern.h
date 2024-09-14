@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
@@ -323,6 +324,9 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
@@ -358,6 +362,7 @@ public:
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -1412,15 +1417,9 @@ public:
     bool IsTextEditableForStylus() const override;
 protected:
     virtual void InitDragEvent();
-    void OnAttachToMainTree() override
-    {
-        isDetachFromMainTree_ = false;
-    }
+    void OnAttachToMainTree() override;
 
-    void OnDetachFromMainTree() override
-    {
-        isDetachFromMainTree_ = true;
-    }
+    void OnDetachFromMainTree() override;
     
     bool IsReverse() const override
     {
@@ -1430,6 +1429,7 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    virtual bool IsNeedProcessAutoFill();
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1646,6 +1646,13 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    TextFieldInfo GenerateTextFieldInfo();
+    void AddTextFieldInfo();
+    void RemoveTextFieldInfo();
+    void UpdateTextFieldInfo();
+    bool IsAutoFillUserName(const AceAutoFillType& autoFillType);
+    bool HasAutoFillPasswordNode();
+    bool IsTriggerAutoFillPassword();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1827,6 +1834,7 @@ private:
     bool isTouchPreviewText_ = false;
     bool isTextChangedAtCreation_ = false;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    WeakPtr<FrameNode> firstAutoFillContainerNode_;
 };
 } // namespace OHOS::Ace::NG
 

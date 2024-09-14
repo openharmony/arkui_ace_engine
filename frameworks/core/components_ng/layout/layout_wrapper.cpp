@@ -34,11 +34,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-bool InRange(float number, float boundaryStart, float boundaryEnd)
-{
-    return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd);
-}
-
 bool IsSyntaxNode(const std::string& tag)
 {
     return tag == V2::JS_VIEW_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_FOR_EACH_ETS_TAG ||
@@ -53,6 +48,8 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
+    ACE_SCOPED_TRACE(
+        "ApplySafeArea: SafeAreaInsets: %s to constraint %s", insets.ToString().c_str(), constraint.ToString().c_str());
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
@@ -153,14 +150,13 @@ OffsetF LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool checkBoundary, boo
     auto parent = host->GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
-        if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() &&
-            parentRenderContext->GetPositionProperty()->HasPosition()) {
+        if (checkPosition && parentRenderContext && parentRenderContext->GetPositionProperty() && parentRenderContext->GetPositionProperty()->HasPosition()) {
             auto parentLayoutProp = parent->GetLayoutProperty();
             CHECK_NULL_RETURN(parentLayoutProp, offset);
             auto parentLayoutConstraint = parentLayoutProp->GetLayoutConstraint();
             CHECK_NULL_RETURN(parentLayoutConstraint.has_value(), offset);
-            auto renderPosition = FrameNode::ContextPositionConvertToPX(
-                parentRenderContext, parentLayoutConstraint.value().percentReference);
+            auto renderPosition =
+                FrameNode::ContextPositionConvertToPX(parentRenderContext, parentLayoutConstraint.value().percentReference);
             offset += OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second));
         } else {
             offset += parent->GetFrameRectWithSafeArea().GetOffset();
@@ -191,11 +187,11 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
         CHECK_NULL_RETURN(layoutProp, rect);
         auto layoutConstraint = layoutProp->GetLayoutConstraint();
         CHECK_NULL_RETURN(layoutConstraint.has_value(), rect);
-        auto renderPosition =
-            FrameNode::ContextPositionConvertToPX(renderContext, layoutConstraint.value().percentReference);
+        auto renderPosition = FrameNode::ContextPositionConvertToPX(
+            renderContext, layoutConstraint.value().percentReference);
         auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
-        rect =
-            RectF(OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second)), size);
+        rect = RectF(OffsetF(static_cast<float>(renderPosition.first),
+            static_cast<float>(renderPosition.second)), size);
         return rect;
     }
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
@@ -316,95 +312,6 @@ void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
     if (layoutProperty->HasAspectRatio()) {
         frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
     }
-}
-
-void LayoutWrapper::ResetSafeAreaPadding()
-{
-    // meant to reset everything each frame
-    const auto& geometryNode = GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->ResetResolvedSelfSafeAreaPadding();
-    geometryNode->ResetAccumulatedSafeAreaPadding();
-}
-
-bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand)
-{
-    auto host = GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    const auto& geometryNode = GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto& selfAccumulateExpand = geometryNode->GetAccumulatedSafeAreaExpand();
-    CHECK_NULL_RETURN(selfAccumulateExpand, false);
-    // if parent has expand cache that covers child's, for expample child expands toward left, top
-    // and parent already has cache toward left, top, bottom, then this is a cache hit
-    // and we can concatenate left and top cache to result
-    // otherwise meaning child is expanding toward a direction that parent does not have cache
-    CHECK_NULL_RETURN(selfAccumulateExpand->OptionalValueCover(totalExpand), false);
-    // if reaches page and totalExpand is still empty, then querying node is already as large as page
-    // then add page cache directly to total expand
-    totalExpand =
-        totalExpand.Plus(*(selfAccumulateExpand.get()), totalExpand.Empty() && host->GetTag() == V2::PAGE_ETS_TAG);
-    return true;
-}
-
-ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(bool includingSelf)
-{
-    ExpandEdges totalExpand;
-    auto host = GetHostNode();
-    CHECK_NULL_RETURN(host, totalExpand);
-    const auto& geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, totalExpand);
-    auto adjustingRect = geometryNode->GetFrameRect();
-    const auto& layoutProperty = GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, totalExpand);
-    if (includingSelf && geometryNode->GetResolvedSingleSafeAreaPadding()) {
-        totalExpand.Plus(*(geometryNode->GetResolvedSingleSafeAreaPadding()));
-    }
-    // CreateMargin does get or create
-    auto hostMargin = layoutProperty->CreateMargin();
-    if (hostMargin.AllSidesFilled(true)) {
-        return totalExpand;
-    }
-    // total expanding distance of four sides used to calculate cache
-    GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand);
-    geometryNode->SetAccumulatedSafeAreaEdges(totalExpand);
-    return totalExpand;
-}
-
-void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand)
-{
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(host);
-    // calculate page expand based on querying node
-    auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID(parent);
-    const auto& parentGeometryNode = parent->GetGeometryNode();
-    CHECK_NULL_VOID(parentGeometryNode);
-    ExpandEdges rollingExpand;
-    const auto& parentLayoutProperty = parent->GetLayoutProperty();
-    CHECK_NULL_VOID(parentLayoutProperty);
-    PaddingPropertyF parentSafeAreaPadding;
-    if (parent->GetTag() == V2::STAGE_ETS_TAG) {
-        const auto& pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        const auto& safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        parentSafeAreaPadding = safeAreaManager->SafeAreaToPadding();
-    } else {
-        parentSafeAreaPadding = parentLayoutProperty->GetOrCreateSafeAreaPadding();
-    }
-    // used to locate offset regions of safeAreaPaddings
-    auto parentInnerSpace = parentLayoutProperty->CreatePaddingAndBorder(false, false);
-    // check if current rect can overlap with four parent safeAreaPaddings
-    if (!NearZero(parentSafeAreaPadding.left.value_or(0.0f))) {
-        auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
-        // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
-            innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
-            rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
-        }
-    }
-    return;
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)

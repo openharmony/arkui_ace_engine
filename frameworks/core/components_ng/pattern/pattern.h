@@ -90,8 +90,6 @@ public:
         return false;
     }
 
-    virtual void ProcessSafeAreaPadding() {}
-
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -609,11 +607,6 @@ public:
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
-
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
 
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {

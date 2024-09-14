@@ -102,7 +102,7 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 
 RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
 {
-    LOGI("ContainerModalView BuildTitle called");
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalView BuildTitle called");
     auto customTitleContainer = BuildTitleContainer(containerNode, isFloatingTitle);
     CHECK_NULL_RETURN(customTitleContainer, nullptr);
     return customTitleContainer;

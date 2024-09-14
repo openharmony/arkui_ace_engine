@@ -692,14 +692,14 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
             return drawingData;
 #endif
         } else {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{private}u", uri.c_str(),
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);
         }
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
         if (!resourceWrapper->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{private}s",
                 uri.c_str(), resName.c_str());
             return nullptr;
         }
@@ -755,7 +755,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("LoadDecodedImageData[%s]", src.ToString().c_str());
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
@@ -764,7 +764,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     CHECK_NULL_RETURN(pixmap, nullptr);
-
+    
     TAG_LOGI(AceLogTag::ACE_IMAGE,
         "src=%{private}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
         src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
@@ -878,7 +878,7 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
-    ACE_SCOPED_TRACE("LoadDecodedImageData[%s]", src.ToString().c_str());
+    ACE_FUNCTION_TRACE();
     auto pipeline = pipelineWK.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();

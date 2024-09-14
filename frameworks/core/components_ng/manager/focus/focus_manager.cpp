@@ -407,7 +407,7 @@ FocusManager::FocusGuard::~FocusGuard()
         focusMng_->FocusSwitchingEnd();
     }
 }
- 
+
 void FocusManager::WindowFocus(bool isFocus)
 {
     if (!isFocus) {
@@ -438,7 +438,10 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
+        auto focusDepend = rootFocusHub->GetFocusDependence();
+        rootFocusHub->SetFocusDependence(FocusDependence::SELF);
         rootFocusHub->RequestFocusImmediately();
+        rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
 }

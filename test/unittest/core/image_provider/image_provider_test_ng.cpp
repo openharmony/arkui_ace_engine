@@ -198,42 +198,6 @@ HWTEST_F(ImageProviderTestNg, HandleCommand001, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifiersTest001
- * @tc.desc: Test NotifiersTest.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
-{
-    auto src = ImageSourceInfo(SRC_JPG);
-    auto ctx =
-        AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
-    EXPECT_NE(ctx, nullptr);
-
-    callbackFlag = 0;
-    auto callback1 = [](const ImageSourceInfo& src) {
-        callbackFlag = 1;
-        return ;
-    };
-    auto callback2 = [](const ImageSourceInfo& src) {
-        callbackFlag = 2;
-        return ;
-    };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
-        callbackFlag = 3;
-        return ;
-    };
-    ctx->notifiers_ = LoadNotifier(std::move(callback1), std::move(callback2), std::move(callback3));
-    std::function<void()> func = [](){};
-    ctx->pendingMakeCanvasImageTask_ = func;
-    ctx->OnLoadFail();
-    EXPECT_EQ(callbackFlag, 3);
-    ctx->OnDataReady();
-    EXPECT_EQ(callbackFlag, 1);
-    ctx->OnLoadSuccess();
-    EXPECT_EQ(callbackFlag, 2);
-}
-
-/**
  * @tc.name: ImageProviderTestNg001
  * @tc.desc: Test ImageProvider Synchronous CreateImageObj failure
  * @tc.type: FUNC
@@ -464,8 +428,6 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
     ctx->imageObj_ =
         AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(LENGTH_128, LENGTH_128), nullptr);
     SizeF dstSize(LENGTH_100, LENGTH_100);
-    std::function<void()> func = [](){};
-    ctx->pendingMakeCanvasImageTask_ = func;
     auto res = ctx->MakeCanvasImageIfNeed(dstSize, true, ImageFit::COVER);
     EXPECT_TRUE(res);
     EXPECT_EQ(ctx->dstSize_, SizeF(LENGTH_100, LENGTH_100));
@@ -708,21 +670,17 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, MakeCanvasImage, TestSize.Level1)
 {
-    const int32_t apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto src = ImageSourceInfo(SRC_THUMBNAIL);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     SizeF size(LENGTH_100, LENGTH_100);
     auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
-    pixmap = nullptr;
     auto pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
-    pixmapObj->MakeCanvasImage(ctx, size, true, false);
+    pixmapObj->MakeCanvasImage(ctx, size, true, true);
     EXPECT_EQ(ctx->canvasImage_, nullptr);
-    pixmap = AceType::MakeRefPtr<MockPixelMap>();
+    pixmap = nullptr;
     pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
     pixmapObj->MakeCanvasImage(ctx, size, true, true);
-    EXPECT_NE(ctx->canvasImage_, nullptr);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
+    EXPECT_EQ(ctx->canvasImage_, nullptr);
 }
 
 /**
@@ -820,7 +778,6 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg008, TestSize.Level1)
     ctx->GetDstRect();
     ctx->GetSrcRect();
     ctx->MoveCanvasImage();
-    ctx->GetFrameCount();
 
     EXPECT_EQ(ctx->syncLoad_, true);
     EXPECT_EQ(ctx->imageObj_, nullptr);

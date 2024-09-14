@@ -14,7 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+class ArkParticleComponent  extends ArkComponent implements ParticleAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -28,7 +28,6 @@ class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     return this;
   }
 }
-
 class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
   constructor(value: Array<DisturbanceFieldOptions>) {
     super(value);
@@ -39,7 +38,7 @@ class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
       getUINativeModule().particle.resetDisturbanceField(node);
     } else {
       let dataArray = [];
-      if (Array.isArray(this.value)) {
+      if (!Array.isArray(this.value)) {
         return;
       }
       for (let i = 0; i < this.value.length; i++) {
@@ -97,7 +96,7 @@ class ParticleEmitterModifier extends ModifierWithKey<Array<EmitterProperty>> {
     }
     else {
       let dataArray = [];
-      if (Array.isArray(this.value)) {
+      if (!Array.isArray(this.value)) {
         return;
       }
       for (let i = 0; i < this.value.length; i++) {

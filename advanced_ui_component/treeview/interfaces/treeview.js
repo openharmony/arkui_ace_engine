@@ -3681,6 +3681,22 @@ export class i3 extends ViewPU {
         return g7;
     }
 
+    getLeftIconColor() {
+        if (this.item.i7()) {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.icon_on_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else if (this.item.s6()) {
+            return this.treeViewTheme.h4;
+        } else {
+            return this.treeViewTheme.g4;
+        }
+    }
+
     checkInvalidPattern(title) {
         return new RegExp('/[\\\/:*?"<>|]/').test(title);
     }
@@ -3937,8 +3953,7 @@ export class i3 extends ViewPU {
                                     Image.opacity(!this.item.s6() && !this.item.g7() ?
                                         this.item.k6().v3?.opacity : this.item.k6().v3?.k15);
                                     Image.focusable(this.item.k6().w3 !== null ? false : true);
-                                    Image.fillColor(!this.item.s6() && !this.item.g7() ?
-                                    this.treeViewTheme.g4 : this.treeViewTheme.h4);
+                                    Image.fillColor(this.getLeftIconColor());
                                     Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT ||
                                         this.item.k6().x3?.c8 === s2) ? true : false);
                                 }, Image);
