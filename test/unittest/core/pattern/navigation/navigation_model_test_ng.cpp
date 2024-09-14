@@ -594,7 +594,7 @@ HWTEST_F(NavigationModelTestNg, ParseCommonTitle003, TestSize.Level1)
     bool hasSubTitle = true, hasMainTitle = true, ignoreMainTitle = false;
     NG::NavigationTitleInfo titleInfo = { hasSubTitle, hasMainTitle, "", "" };
     navBarNode->propPrevTitleIsCustom_ = false;
-    EXPECT_TRUE(hasSubTitle && hasMainTitle);
+    EXPECT_TRUE(titleInfo.hasSubTitle && titleInfo.hasMainTitle);
     EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(false));
     EXPECT_FALSE(ignoreMainTitle);
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
@@ -611,14 +611,14 @@ HWTEST_F(NavigationModelTestNg, ParseCommonTitle003, TestSize.Level1)
 
     // Make !hasMainTitle true
     titleInfo.hasMainTitle = false;
-    EXPECT_TRUE(hasSubTitle && !hasMainTitle);
+    EXPECT_TRUE(titleInfo.hasSubTitle && !titleInfo.hasMainTitle);
     NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 
     titleInfo.hasMainTitle = true;
     ignoreMainTitle = true;
     // Make !hasSubTitle true
     titleInfo.hasSubTitle = false;
-    EXPECT_TRUE(!hasSubTitle && hasMainTitle);
+    EXPECT_TRUE(!titleInfo.hasSubTitle && titleInfo.hasMainTitle);
     EXPECT_TRUE(ignoreMainTitle);
     NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 }
