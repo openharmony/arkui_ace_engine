@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -1124,6 +1125,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             if (NearZero(scroll->frictionVelocity_, FRICTION_VELOCITY_THRESHOLD)) {
                 scroll->StopFrictionAnimation();
+                ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
             }
         }
         scroll->lastVsyncTime_ = currentVsync;
