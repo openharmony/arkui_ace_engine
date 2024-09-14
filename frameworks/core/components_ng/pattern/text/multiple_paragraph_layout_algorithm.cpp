@@ -548,6 +548,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
+    placeholderStyle.paragraphTextColor = textStyle_.value_or(TextStyle()).GetTextColor();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
