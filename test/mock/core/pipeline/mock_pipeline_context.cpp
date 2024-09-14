@@ -913,5 +913,10 @@ bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>
 }
 
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+
+bool NG::PipelineContext::CheckThreadSafe()
+{
+    return false;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

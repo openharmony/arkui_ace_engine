@@ -900,6 +900,7 @@ public:
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+    bool CheckThreadSafe();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
