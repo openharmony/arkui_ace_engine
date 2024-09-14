@@ -337,7 +337,6 @@ void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTit
     maximizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
     minimizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
     closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    closeBtnRenderContext_->UpdateLightIntensity(LIGHT_ON_INTENSITY);
 
     auto mouseTask = [this, weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](MouseInfo& info) {
         auto closeBtn = weakCloseBtn.Upgrade();
