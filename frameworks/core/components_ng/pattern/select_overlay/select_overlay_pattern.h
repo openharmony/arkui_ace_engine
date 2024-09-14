@@ -191,7 +191,6 @@ public:
     void SetGestureEvent();
 
     static float GetHandleDiameter();
-    void OnDpiConfigurationUpdate() override;
     bool IsDraggingHandle(bool isFirst)
     {
         if (isFirst) {
@@ -200,6 +199,8 @@ public:
             return secondHandleDrag_;
         }
     }
+
+    void OnDpiConfigurationUpdate() override;
 
 protected:
     virtual void CheckHandleReverse();
