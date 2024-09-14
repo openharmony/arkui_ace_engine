@@ -14,7 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+class ArkParticleComponent  extends ArkComponent implements ParticleAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -28,7 +28,6 @@ class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     return this;
   }
 }
-
 class ParticleModifier extends ModifierWithKey<Array<DisturbanceFieldOptions>> {
   constructor(value: Array<DisturbanceFieldOptions>) {
     super(value);

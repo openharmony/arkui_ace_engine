@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/node/node_api.h"
 
+#include <array>
 #include <deque>
 #include <securec.h>
 
@@ -65,6 +66,7 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -479,6 +481,10 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWaterFlowReachStart,
 };
 
+const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnRadioChange,
+};
+
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
     nullptr,
@@ -486,12 +492,12 @@ const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnGridScrollIndex,
 };
 
-const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnIndexerSelected,
-    NodeModifier::SetOnIndexerRequestPopupData,
-    NodeModifier::SetOnIndexerPopupSelected,
-    NodeModifier::SetIndexerChangeEvent,
-    NodeModifier::SetIndexerCreatChangeEvent,
+const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageAnimatorOnStart,
+    NodeModifier::SetImageAnimatorOnPause,
+    NodeModifier::SetImageAnimatorOnRepeat,
+    NodeModifier::SetImageAnimatorOnCancel,
+    NodeModifier::SetImageAnimatorOnFinish,
 };
 
 const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -502,20 +508,16 @@ const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSearchPaste,
 };
 
-const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnRadioChange,
+const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnIndexerSelected,
+    NodeModifier::SetOnIndexerRequestPopupData,
+    NodeModifier::SetOnIndexerPopupSelected,
+    NodeModifier::SetIndexerChangeEvent,
+    NodeModifier::SetIndexerCreatChangeEvent,
 };
 
 const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSelectSelect,
-};
-
-const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetImageAnimatorOnStart,
-    NodeModifier::SetImageAnimatorOnPause,
-    NodeModifier::SetImageAnimatorOnRepeat,
-    NodeModifier::SetImageAnimatorOnCancel,
-    NodeModifier::SetImageAnimatorOnFinish,
 };
 
 const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -881,13 +883,22 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = GRID_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
-            // alphabet indexer event type.
-            if (subKind >= sizeof(ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+        case ARKUI_RADIO: {
+            // search event type.
+            if (subKind >= sizeof(RADIO_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
-            eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_ANIMATOR: {
+            // imageAnimator event type.
+            if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SEARCH: {
@@ -899,13 +910,13 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-        case ARKUI_RADIO: {
-            // search event type.
-            if (subKind >= sizeof(RADIO_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+        case ARKUI_ALPHABET_INDEXER: {
+            // alphabet indexer event type.
+            if (subKind >= sizeof(ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
-            eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SELECT: {
@@ -915,15 +926,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
-            break;
-        }
-        case ARKUI_IMAGE_ANIMATOR: {
-            // imageAnimator event type.
-            if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
-            }
-            eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -1816,7 +1818,7 @@ void ShowCrash(ArkUI_CharPtr message)
 ArkUIExtendedNodeAPI impl_extended = {
     ARKUI_EXTENDED_API_VERSION,
 
-    NodeModifier::GetUtilsModifier, // getUtilsModifier
+    NodeModifier::GetUtilsModifier,
     NodeModifier::GetCanvasRenderingContext2DModifier,
 
     SetCallbackMethod,
@@ -1851,7 +1853,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     SetVsyncCallback,
     UnblockVsyncWait,
     NodeEvent::CheckEvent,
-    NodeEvent::SendArkUIAsyncEvent, // sendEvent
+    NodeEvent::SendArkUIAsyncEvent,
     nullptr, // callContinuation
     nullptr, // setChildTotalCount
     ShowCrash,
