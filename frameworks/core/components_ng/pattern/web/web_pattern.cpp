@@ -2861,6 +2861,11 @@ bool WebPattern::IsNeedResizeVisibleViewport()
 bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled)
 {
     isKeyboardInSafeArea_ = false;
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardHide layoutMode is FIT_CONTENT");
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        return true;
+    }
     if (safeAreaEnabled) {
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         return false;
