@@ -363,6 +363,7 @@ void SvgNode::InitStyle(const SvgBaseAttribute& attr)
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     if (!OnCanvas(canvas)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Draw failed(Reason: Canvas is null).");
         return;
     }
     // mask and filter create extra layers, need to record initial layer count

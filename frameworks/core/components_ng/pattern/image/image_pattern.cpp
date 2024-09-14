@@ -379,7 +379,11 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(geometryNode);
 
     image_ = loadingCtx_->MoveCanvasImage();
-    CHECK_NULL_VOID(image_);
+    if (!image_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "nodeId = %{public}d OnImageLoadSuccess but Canvas image is null.",
+            imageDfxConfig_.nodeId_);
+        return;
+    }
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
@@ -998,6 +1002,8 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnNotifyMemoryLevel level = %{public}d. nodeId = %{public}d isShown = %{public}d",
+        level, imageDfxConfig_.nodeId_, isShow_);
     if (isShow_) {
         return;
     }
@@ -1022,6 +1028,7 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 // when recycle image component, release the pixelmap resource
 void ImagePattern::OnRecycle()
 {
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycle. nodeId = %{public}d", imageDfxConfig_.nodeId_);
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1072,6 +1079,8 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. nodeId = %{public}d isImageQualityChange_ = %{public}d",
+        imageDfxConfig_.nodeId_, isImageQualityChange_);
     isShow_ = true;
     LoadImageDataIfNeed();
 }
@@ -1079,6 +1088,7 @@ void ImagePattern::OnWindowShow()
 void ImagePattern::OnVisibleChange(bool visible)
 {
     if (!visible) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "OnInVisible. nodeId = %{public}d", imageDfxConfig_.nodeId_);
         CloseSelectOverlay();
     }
 }
@@ -1450,6 +1460,20 @@ void ImagePattern::DumpRenderInfo()
         DumpLog::GetInstance().AddDesc("borderRadius: null");
     }
 }
+void ImagePattern::DumpSvgInfo()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSourceInfo);
+    if (!imageSourceInfo->IsSvg()|| !loadingCtx_) {
+        return;
+    }
+    auto imageObject = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObject);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Svg:").append(imageObject->GetDumpInfo()));
+}
 
 void ImagePattern::DumpInfo()
 {
@@ -1475,6 +1499,7 @@ void ImagePattern::DumpInfo()
     }
 
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpSvgInfo();
 }
 
 void ImagePattern::DumpAdvanceInfo()
