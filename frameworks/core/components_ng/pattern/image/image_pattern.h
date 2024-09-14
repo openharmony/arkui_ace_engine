@@ -220,7 +220,7 @@ public:
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
-
+    void DumpSvgInfo();
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {
         return WeakClaim(AceType::RawPtr(loadingCtx_));

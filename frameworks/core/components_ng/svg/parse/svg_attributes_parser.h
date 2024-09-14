@@ -36,7 +36,6 @@ public:
     static double ParseDouble(const std::string& value);
     static bool CheckColorAlpha(const std::string& colorStr, Color& result);
 };
-
 enum class SvgFeColorMatrixType {
     MATRIX,
     SATURATE,

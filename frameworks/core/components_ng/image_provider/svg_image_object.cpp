@@ -34,6 +34,11 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
     return svgDomBase_;
 }
 
+std::string SvgImageObject::GetDumpInfo()
+{
+    return svgDomBase_->GetDumpInfo();
+}
+
 void SvgImageObject::MakeCanvasImage(
     const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
