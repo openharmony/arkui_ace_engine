@@ -215,7 +215,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
     pattern->FireOnSelect(selectStart, selectEnd);
     if (!IsSingleHandle()) {
-        pattern->SetCaretPosition(selectEnd);
+        pattern->SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
