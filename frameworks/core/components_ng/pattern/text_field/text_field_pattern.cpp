@@ -8477,10 +8477,9 @@ bool TextFieldPattern::IsTextEditableForStylus() const
 
 void TextFieldPattern::UpdateContentScroller(const Offset& localOffset)
 {
-    CHECK_NULL_VOID(IsScrollable());
     auto scrollStep = CalcAutoScrollStepOffset(localOffset);
     // 在热区外移动
-    if (!scrollStep) {
+    if (!scrollStep || !IsScrollable()) {
         contentScroller_.OnBeforeScrollingCallback(localOffset);
         PauseContentScroll();
         contentScroller_.hotAreaOffset.reset();
