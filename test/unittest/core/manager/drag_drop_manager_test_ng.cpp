@@ -1612,6 +1612,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest038, TestSize.Level1)
     auto childId = ElementRegister::GetInstance()->MakeUniqueId();
     auto childNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, childId, AceType::MakeRefPtr<Pattern>());
     childNode->SetGeometryNode(geometryNode);
+    childNode->isActive_ = true;
 
     /**
      * @tc.steps: step5. gridNode AddChild with childNode.
