@@ -905,7 +905,7 @@ std::optional<uint32_t> ParseColorResourceId(const EcmaVM* vm, const Local<JSVal
     if (!resIdArg->IsNumber()) {
         return std::nullopt;
     }
-    auto typeValue = -1;
+    uint32_t typeValue = 0;
     auto typeArg = colorObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     if (typeArg->IsNumber()) {
         typeValue = typeArg->Uint32Value(vm);
