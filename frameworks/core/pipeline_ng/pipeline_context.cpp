@@ -4833,14 +4833,17 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
     std::string responseRegionStrOrigin;
     std::string responseRegionStrFilter;
     for (const auto& rect : responseRegionList) {
-        int32_t x = static_cast<int32_t>(rect.GetX());
-        int32_t y = static_cast<int32_t>(rect.GetY());
+        int32_t left = static_cast<int32_t>(rect.Left());
+        int32_t top = static_cast<int32_t>(rect.Top());
         int32_t width = static_cast<int32_t>(rect.Width());
         int32_t height = static_cast<int32_t>(rect.Height());
-        std::string rectStr = std::to_string(x) + "," +
-                              std::to_string(y) + "," +
-                              std::to_string(x + width) + "," +
-                              std::to_string(y + height);
+        int32_t right = static_cast<int32_t>(rect.Right());
+        int32_t bottom = static_cast<int32_t>(rect.Bottom());
+        std::string rectStr = std::to_string(left) + "," +
+                              std::to_string(top) + "," +
+                              std::to_string(right) + "," +
+                              std::to_string(bottom);
+
         responseRegionStrOrigin += rectStr + "#";
         if (thpExtraMgr_ && width <= thpExtraMgr_->GetWidth() && height <= thpExtraMgr_->GetHeight()) {
             responseRegionStrFilter += rectStr + "#";

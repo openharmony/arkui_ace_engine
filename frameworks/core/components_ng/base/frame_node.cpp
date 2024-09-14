@@ -2833,9 +2833,23 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
 {
     CHECK_NULL_VOID(renderContext_);
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto offset = GetPositionToScreen();
+    RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
+    auto window = pipelineContext->GetCurrentWindowRect();
+    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
+
+    if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
+        rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
+        return;
+    }
+
     auto rootRegionList = GetResponseRegionListForTouch(origRect);
     if (!rootRegionList.empty()) {
-        responseRegionList.insert(responseRegionList.end(), rootRegionList.begin(), rootRegionList.end());
+        for (auto rect : rootRegionList) {
+            responseRegionList.push_back(rect.IntersectRectT(windowRect));
+        }
         return;
     }
     for (auto childWeak = frameChildren_.rbegin(); childWeak != frameChildren_.rend(); ++childWeak) {
