@@ -113,16 +113,6 @@ constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
-
-#define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
-void CheckThreadSafe(
-    bool isFormRender, OHOS::Ace::RefPtr<OHOS::Ace::TaskExecutor>& taskExecutor, const char* func, int line)
-{
-    if (!isFormRender && !taskExecutor->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
-        LOGW("[%{public}s:%{public}d] doesn't run on UI thread!", func, line);
-        OHOS::Ace::LogBacktrace();
-    }
-}
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -218,7 +208,9 @@ float PipelineContext::GetCurrentRootHeight()
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
 {
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
+    }
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -335,7 +327,9 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     // node api property diff before ets update.
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("FlushDirtyNodeUpdate doesn't run on UI thread!");
+    }
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& node : dirtyPropertyNodes) {
@@ -741,7 +735,9 @@ void PipelineContext::FlushMessages()
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("FlushUITasks doesn't run on UI thread!");
+    }
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -1546,7 +1542,9 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
         privacyManager->RemoveNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("DetachNode doesn't run on UI thread!");
+    }
     dirtyPropertyNodes_.erase(frameNode);
     needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
 
@@ -4236,5 +4234,15 @@ bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& an
         return navigationMgr_->AddInteractiveAnimation(animationCallback);
     }
     return false;
+}
+
+bool PipelineContext::CheckThreadSafe() const
+{
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
+        OHOS::Ace::LogBacktrace();
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

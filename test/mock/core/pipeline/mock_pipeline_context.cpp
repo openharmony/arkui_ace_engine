@@ -862,5 +862,10 @@ bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>
 {
     return false;
 }
+
+bool NG::PipelineContext::CheckThreadSafe() const
+{
+    return false;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

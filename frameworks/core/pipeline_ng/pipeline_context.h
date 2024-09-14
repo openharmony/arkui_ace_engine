@@ -855,6 +855,7 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    bool CheckThreadSafe() const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
