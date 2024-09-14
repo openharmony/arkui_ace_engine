@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -114,8 +115,13 @@ private:
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
     void UpdateSensitiveContent(std::string& content);
-    bool GetSuitableSize(TextStyle& textStyle, const std::string& content,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double& suitableSize);
+    std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
+    std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
+        
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
