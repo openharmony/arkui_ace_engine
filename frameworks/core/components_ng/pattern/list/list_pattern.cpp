@@ -561,6 +561,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
         jumpIndexInGroup_.reset();
     }
+    if (targetIndexInGroup_) {
+        listLayoutAlgorithm->SetTargetIndexInGroup(targetIndexInGroup_.value());
+    }
     if (predictSnapOffset_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
         listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
