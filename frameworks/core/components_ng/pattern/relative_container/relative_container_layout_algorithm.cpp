@@ -80,6 +80,11 @@ bool RelativeContainerLayoutAlgorithm::TopologicalResultHit(LayoutWrapper* layou
         return false;
     }
     renderList_ = std::move(cache.value());
+    for (const auto& childId : renderList_) {
+        if (idNodeMap_.find(childId) == idNodeMap_.end()) {
+            return false;
+        }
+    }
     return true;
 }
 

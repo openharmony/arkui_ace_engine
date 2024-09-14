@@ -79,7 +79,6 @@ public:
     void SetTopologicalResultCache(std::list<std::string>&& cache)
     {
         topologicalResultList_ = std::move(cache);
-        CHECK_NULL_VOID(topologicalResultList_);
     }
 
     static std::string TopoListToString(const std::list<std::string>& topoList)
