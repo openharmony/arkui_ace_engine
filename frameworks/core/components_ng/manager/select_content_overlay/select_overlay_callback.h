@@ -78,6 +78,7 @@ public:
     virtual void OnOverlayTouchUp(const TouchEventInfo& event) {}
     virtual void OnOverlayTouchMove(const TouchEventInfo& event) {}
     virtual void OnOverlayClick(const GestureEvent& event, bool isClickCaret) {}
+    virtual void OnHandleMouseEvent(const MouseInfo& event) {}
     virtual bool IsRegisterTouchCallback()
     {
         return false;
