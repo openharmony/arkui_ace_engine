@@ -22,7 +22,6 @@
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
