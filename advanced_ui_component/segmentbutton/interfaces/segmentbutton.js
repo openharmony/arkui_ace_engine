@@ -2343,7 +2343,7 @@ export class SegmentButton extends ViewPU {
           return;
         }
         if (
-          event.angle > 0 &&
+          Math.abs(event.angle) < 90 &&
           this.selectedIndexes[0] !==
             Math.min(this.options.buttons.length, this.buttonItemsSize.length) -
               1
@@ -2351,7 +2351,7 @@ export class SegmentButton extends ViewPU {
           this.doSelectedChangeAnimate = true;
           this.selectedIndexes[0] = this.selectedIndexes[0] + 1;
           this.doSelectedChangeAnimate = false;
-        } else if (event.angle < 0 && this.selectedIndexes[0] !== 0) {
+        } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
           this.doSelectedChangeAnimate = true;
           this.selectedIndexes[0] = this.selectedIndexes[0] - 1;
           this.doSelectedChangeAnimate = false;
