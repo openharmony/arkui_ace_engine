@@ -603,6 +603,8 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
             parsedConfig.direction = configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi =
                 configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.appFontScale =
+                configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
         TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration");
