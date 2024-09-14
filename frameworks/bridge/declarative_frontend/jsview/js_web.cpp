@@ -4729,7 +4729,7 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 
 bool JSWeb::CheckNestedScrollMode(const int32_t& modeValue)
 {
-    return modeValue > static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
+    return modeValue >= static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
            modeValue <= static_cast<int32_t>(NestedScrollMode::PARALLEL);
 }
 
