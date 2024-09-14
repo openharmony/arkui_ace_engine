@@ -199,7 +199,6 @@ public:
                       std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
     void OnQuickMenuDismissed() override;
     void HideHandleAndQuickMenuIfNecessary(bool hide) override;
-    void ChangeVisibilityOfQuickMenu() override;
     void OnTouchSelectionChanged(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
