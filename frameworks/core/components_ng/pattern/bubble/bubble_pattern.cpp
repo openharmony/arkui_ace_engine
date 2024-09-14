@@ -118,8 +118,8 @@ void BubblePattern::OnAttachToFrameNode()
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);

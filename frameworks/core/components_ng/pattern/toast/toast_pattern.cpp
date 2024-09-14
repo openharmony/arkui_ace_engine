@@ -303,9 +303,9 @@ void ToastPattern::DumpInfo()
 double ToastPattern::GetTextMaxHeight()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
     auto containerId = Container::CurrentId();
-    double deviceHeight = 0.0f;
+    double deviceHeight = 0.0;
     if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
         deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
     } else {
@@ -328,9 +328,9 @@ double ToastPattern::GetTextMaxHeight()
 double ToastPattern::GetTextMaxWidth()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
     auto containerId = Container::CurrentId();
-    double deviceWidth = 0.0f;
+    double deviceWidth = 0.0;
     if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
         deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
     } else {
@@ -338,7 +338,7 @@ double ToastPattern::GetTextMaxWidth()
         deviceWidth = windowGlobalRect.Width();
     }
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
-    CHECK_NULL_RETURN(toastTheme, 0.0);
+    CHECK_NULL_RETURN(toastTheme, 0.0f);
     auto marging = toastTheme->GetMarging();
     auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
     auto maxLimitWidth = toastTheme->GetMaxWidth();
@@ -360,7 +360,7 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
-    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
+    auto paragraph = textLayoutAlgorithm->GetParagraph();
     CHECK_NULL_RETURN(paragraph, 0);
     auto paragHeight = paragraph->GetHeight();
     auto paragLineCount = paragraph->GetLineCount();
