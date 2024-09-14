@@ -1045,11 +1045,18 @@ bool GetPixelMapByCustom(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     }
     auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode,
         std::function<void()> finishCallback) {
-        if (finishCallback) {
-            finishCallback();
-        }
-        CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
+        auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [finishCallback]() {
+                CHECK_NULL_VOID(finishCallback);
+                finishCallback();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIGetPixelMapByCustom");
+        CHECK_NULL_VOID(pixelMap);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMap = std::move(pixelMap);
         OnComplete(asyncCtx);
@@ -1078,11 +1085,18 @@ bool GetPixelMapArrayByCustom(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     }
     auto callback = [asyncCtx, arrayLength](
         std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()> finishCallback) {
-        if (finishCallback) {
-            finishCallback();
-        }
-        CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
+        auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [finishCallback]() {
+                CHECK_NULL_VOID(finishCallback);
+                finishCallback();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIGetPixelMapArrayByCustom");
+        CHECK_NULL_VOID(pixelMap);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMapList.push_back(std::move(pixelMap));
         asyncCtx->parseBuilderCount++;
