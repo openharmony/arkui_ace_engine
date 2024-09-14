@@ -144,12 +144,9 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     }
     crossGaps_[0] = cross.second;
 
-    itemsCrossSize_.resize(1);
+    itemsCrossSize_ = std::vector<std::vector<float>>(1);
     for (const auto& len : cross.first) {
         itemsCrossSize_[0].push_back(static_cast<float>(len));
-    }
-    if (itemsCrossSize_.empty()) {
-        itemsCrossSize_[0].push_back(crossSize);
     }
     info_->lanes_[0].resize(itemsCrossSize_[0].size());
 }
@@ -171,7 +168,7 @@ bool WaterFlowLayoutSW::ItemHeightChanged() const
 
 void WaterFlowLayoutSW::CheckReset()
 {
-    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);

@@ -36,7 +36,7 @@ export struct SwipeRefresher {
   minFontSize: number = 1.75;
   maxFontSize: number = 2;
 
-  aboutToAppear(){
+  aboutToAppear() {
     try {
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
@@ -48,7 +48,7 @@ export struct SwipeRefresher {
     }
   }
 
-  updateFontScale(): number{
+  updateFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
     let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.isFollowingSystemFontScale) {

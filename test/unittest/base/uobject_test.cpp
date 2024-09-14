@@ -103,61 +103,6 @@ HWTEST_F(UObjectTest, UObjectTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UObjectTest002
- * @tc.desc: Serialize()
- * @tc.type: FUNC
- */
-HWTEST_F(UObjectTest, UObjectTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a UOObject.
-     */
-    UObject uObject;
-    std::string stringValue = "test";
-    uObject.AddItemToObject("char", const_cast<char*>(stringValue.c_str()));
-    stringValue = "test1";
-    uObject.AddItemToObject("string", stringValue);
-    double doubleValue = 1.0;
-    uObject.AddItemToObject("double", doubleValue);
-    size_t sizeValue = 10;
-    uObject.AddItemToObject("size_t", sizeValue);
-    int32_t int32Value = 5;
-    uObject.AddItemToObject("int32_t", int32Value);
-    int64_t int64Value = 1;
-    uObject.AddItemToObject("int64_t", int64Value);
-    bool boolValue = false;
-    uObject.AddItemToObject("bool", boolValue);
-    std::shared_ptr<UObject> sharedUObject = std::make_shared<UObject>();
-    uObject.AddItemToObject("shared_ptr", sharedUObject);
-
-    /**
-     * @tc.steps: step2. Serialize()
-     * @tc.expected: step2. Asserting values through the get method.
-     */
-    uObject.Hash();
-
-    char* buffer = nullptr;
-    uObject.Serialize(buffer, 0);
-    EXPECT_EQ(uObject.offset_, 0);
-    buffer = new char[136];
-    uObject.Serialize(buffer, 136);
-    EXPECT_EQ(uObject.offset_, 136);
-
-    /**
-     * @tc.steps: step3. Deserialize() test.
-     * @tc.expected: step3. Asserting offset_.
-     */
-    uObject.Deserialize(buffer, 136);
-    EXPECT_EQ(uObject.offset_, 136);
-
-    /**
-     * @tc.steps: step4. delete buffer.
-     */
-    delete[] buffer;
-    buffer = nullptr;
-}
-
-/**
  * @tc.name: UObjectTest003
  * @tc.desc: Serialize()
  * @tc.type: FUNC

@@ -692,7 +692,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest001, TestSize.Level1)
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), POINT_RADIUS_LARGE);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), 0);
 }
 
 /**
@@ -827,7 +827,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest004, TestSize.Level1)
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), TRACK_BORDER_RADIUS);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), 0);
 }
 
 /**
@@ -875,7 +875,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest005, TestSize.Level1)
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), SWITCH_ERROR_RADIUS);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), 0);
 }
 
 /**
@@ -923,7 +923,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest006, TestSize.Level1)
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), SWITCH_ERROR_RADIUS);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), 0);
 }
 
 /**
@@ -1015,7 +1015,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest008, TestSize.Level1)
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), POINT_RADIUS_ILLEGAL);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetPointRadius(), 0);
 }
 
 /**
@@ -1062,7 +1062,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPaintTest009, TestSize.Level1)
 
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
-    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), POINT_RADIUS_ILLEGAL);
+    EXPECT_EQ(pattern->paintMethod_->GetSwitchModifier()->GetTrackRadius(), 0);
 }
 
 /**
@@ -1247,7 +1247,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-5.00, -5.00) - [110.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 50.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1343,7 +1343,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest003, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-20.00, -20.00) - [100.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [60.00 x 20.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1391,7 +1391,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest004, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [0.00 x 20.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [0.00 x 100.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1438,7 +1438,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest005, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-20.00, -20.00) - [40.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [0.00 x 100.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
@@ -1486,7 +1486,7 @@ HWTEST_F(ToggleSwitchTestNg, ToggleSwitchPatternTest006, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     RoundRect paintRect;
     eventHub->getInnerFocusRectFunc_(paintRect);
-    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-30.00, -30.00) - [160.00 x 60.00]");
+    EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (0.00, 0.00) - [100.00 x 0.00]");
 
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }

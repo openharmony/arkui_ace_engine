@@ -450,8 +450,8 @@ sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindowInner() const
     return uiWindow_;
 }
 
-void DialogContainer::ShowToast(
-    int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom)
+void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration,
+    const std::string& bottom)
 {
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);

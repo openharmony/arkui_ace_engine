@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to  in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -17,8 +17,8 @@ const Chip = requireNapi('arkui.advanced.Chip').Chip;
 const ChipSize = requireNapi('arkui.advanced.Chip').ChipSize;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 if (PUV2ViewBase.contextStack === undefined) {
     Reflect.set(PUV2ViewBase, "contextStack", []);
@@ -30,26 +30,26 @@ const colorStops = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]];
 const defaultTheme = {
     itemStyle: {
         size: ChipSize.NORMAL,
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        fontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        selectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        selectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        selectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        fontColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        selectedFontColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        selectedBackgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        fillColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        selectedFillColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
     },
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
     chipGroupPadding: { top: 14, bottom: 14 }
 };
 const iconGroupSuffixTheme = {
-    backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-    borderRadius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    backgroundColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_button_normal'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+    borderRadius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
     smallIconSize: 16,
     normalIconSize: 24,
     smallBackgroundSize: 28,
     normalBackgroundSize: 36,
     marginLeft: 8,
     marginRight: 16,
-    fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    fillColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
     defaultEffect: -1
 };
 var ChipGroupHeight;
@@ -398,9 +398,6 @@ export class ChipGroup extends ViewPU {
     }
     aboutToAppear() {
         this.itemStyleOnChange();
-        if (this.getSelectedIndexes().length === 0) {
-            this.selectedIndexes = [0];
-        }
     }
     getChipSize() {
         if (this.itemStyle && this.itemStyle.size) {
@@ -499,6 +496,9 @@ export class ChipGroup extends ViewPU {
                 array.indexOf(element) === index &&
                 element < (this.items || []).length);
         });
+        if (temp.length == 0) {
+            temp = [0];
+        }
         return temp;
     }
     isMultiple() {
@@ -535,6 +535,22 @@ export class ChipGroup extends ViewPU {
             });
         }
     }
+    getChipGroupHeight() {
+        if (typeof this.chipSize === 'string') {
+            if (this.chipSize === ChipSize.NORMAL) {
+                return ChipGroupHeight.NORMAL;
+            }
+            else {
+                return ChipGroupHeight.SMALL;
+            }
+        }
+        else if (typeof this.chipSize === 'object') {
+            return this.chipSize.height;
+        }
+        else {
+            return ChipGroupHeight.NORMAL;
+        }
+    }
     getPaddingTop() {
         if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
             return defaultTheme.chipGroupPadding.top;
@@ -553,10 +569,12 @@ export class ChipGroup extends ViewPU {
             Row.create();
             Row.align(Alignment.End);
             Row.width("100%");
+            Row.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
             Row.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
+            Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
@@ -575,10 +593,7 @@ export class ChipGroup extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: this.getChipGroupItemSpace() });
             Row.padding({ left: this.getChipGroupStartSpace(),
-                right: this.getChipGroupEndSpace(),
-                top: this.getPaddingTop(),
-                bottom: this.getPaddingBottom()
-            });
+                right: this.getChipGroupEndSpace() });
             Row.constraintSize({ minWidth: '100%' });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -645,7 +660,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
+                        Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);
@@ -666,11 +681,7 @@ export class ChipGroup extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.padding({ left: iconGroupSuffixTheme.marginLeft,
-                            right: iconGroupSuffixTheme.marginRight,
-                            top: this.getPaddingTop(),
-                            bottom: this.getPaddingBottom()
-                        });
+                        Row.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight });
                     }, Row);
                     this.suffix.bind(this)();
                     Row.pop();

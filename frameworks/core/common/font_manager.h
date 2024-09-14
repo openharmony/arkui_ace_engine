@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
+#include "core/common/font_change_observer.h"
 #include "core/common/font_loader.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -119,6 +120,8 @@ public:
     bool IsUseAppCustomFont() const;
     void SetAppCustomFont(const std::string& familyName);
     const std::string& GetAppCustomFont() const;
+    void AddFontObserver(WeakPtr<FontChangeObserver> node);
+    void RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node);
 
 protected:
     static float fontWeightScale_;
@@ -133,6 +136,7 @@ private:
     // Render nodes need to layout when wght scale is changed.
     std::set<WeakPtr<RenderNode>> variationNodes_;
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
+    std::set<WeakPtr<FontChangeObserver>> observers_;
 };
 
 } // namespace OHOS::Ace

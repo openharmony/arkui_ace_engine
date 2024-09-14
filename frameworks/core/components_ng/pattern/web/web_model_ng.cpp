@@ -1044,6 +1044,13 @@ void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     webPattern->JavaScriptOnDocumentEnd(scriptItems);
 }
 
+void WebModelNG::SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetDefaultFileSelectorShowCallback(std::move(jsCallback));
+}
+
 void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1060,13 +1067,6 @@ void WebModelNG::SetOpenAppLinkFunction(std::function<void(const std::shared_ptr
     webPattern->SetOnOpenAppLinkCallback(std::move(jsCallback));
 }
 
-void WebModelNG::SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
-{
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetDefaultFileSelectorShowCallback(std::move(jsCallback));
-}
-
 void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1080,13 +1080,6 @@ void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     CHECK_NULL_VOID(webPattern);
 
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
-}
-
-void WebModelNG::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void WebModelNG::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -1107,6 +1100,15 @@ void WebModelNG::SetRenderProcessRespondingId(std::function<void(const BaseEvent
     webEventHub->SetOnRenderProcessRespondingEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1122,13 +1124,13 @@ void WebModelNG::SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMen
     webPattern->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
-void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
     auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
+    webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnInterceptKeyboardAttach(std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback)
@@ -1140,15 +1142,6 @@ void WebModelNG::SetOnInterceptKeyboardAttach(std::function<WebKeyboardOption(co
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInterceptKeyboardAttachEvent(std::move(uiCallback));
-}
-
-void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
-{
-    auto func = jsCallback;
-    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)

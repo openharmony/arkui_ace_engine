@@ -19,19 +19,31 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
+
+struct TextFieldInfo {
+    int32_t nodeId = -1;
+    TextInputType inputType;
+    TextContentType contentType;
+    int32_t autoFillContainerNodeId = -1;
+    bool enableAutoFill = true;
+};
+
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
     DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
 public:
     TextFieldManagerNG() = default;
-    ~TextFieldManagerNG() override = default;
+    ~TextFieldManagerNG() override;
 
     void SetClickPosition(const Offset& position) override;
+    
     const Offset& GetClickPosition() override
     {
         return position_;
@@ -102,6 +114,14 @@ public:
     void SetImeAttached(bool imeAttached)
     {
         imeAttachCalled_ = imeAttached;
+    }
+
+    bool UsingCustomKeyboardAvoid() {
+        return usingCustomKeyboardAvoid_;
+    }
+
+    void SetUsingCustomKeyboardAvoid(bool usingCustomKeyboardAvoid) {
+        usingCustomKeyboardAvoid_ = usingCustomKeyboardAvoid;
     }
 
     void SetUIExtensionImeShow(bool imeShow) override
@@ -175,16 +195,23 @@ public:
         return lastRequestKeyboardId_;
     }
 
+    void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
+    void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
+    void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
+    bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
+    bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
 
     bool focusFieldIsInline = false;
     double inlinePositionY_ = 0.0f;
     double inlineHeight_ = 0.0f;
     bool hasMove_ = false;
     bool imeShow_ = false;
+    bool usingCustomKeyboardAvoid_ = false;
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
     Offset position_;
@@ -197,6 +224,7 @@ private:
     int32_t lastRequestKeyboardId_ = -1;
     bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
+    std::unordered_map<int32_t, std::unordered_map<int32_t, TextFieldInfo>> textFieldInfoMap_;
 };
 
 } // namespace OHOS::Ace::NG

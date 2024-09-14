@@ -107,24 +107,22 @@ SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSiz
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
-    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel, bool nonNegative)
+    const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
     if (!padding) {
         return {};
     }
-    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference, roundPixel, nonNegative);
+    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference, roundPixel);
 }
 
-PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
-    float percentReference, bool roundPixel, bool nonNegative)
+PaddingPropertyF ConvertToPaddingPropertyF(
+    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
     auto left = ConvertToPx(padding.left, scaleProperty, percentReference);
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
-    bool versionSatisfy =
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
-    if (roundPixel && versionSatisfy) {
+    if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (left.has_value()) {
             left = floor(left.value());
         }
@@ -136,20 +134,6 @@ PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const
         }
         if (bottom.has_value()) {
             bottom = floor(bottom.value());
-        }
-    }
-    if (nonNegative && versionSatisfy) {
-        if (left.has_value()) {
-            left = std::max(left.value(), 0.0f);
-        }
-        if (right.has_value()) {
-            right = std::max(right.value(), 0.0f);
-        }
-        if (top.has_value()) {
-            top = std::max(top.value(), 0.0f);
-        }
-        if (bottom.has_value()) {
-            bottom = std::max(bottom.value(), 0.0f);
         }
     }
     return PaddingPropertyF { left, right, top, bottom };

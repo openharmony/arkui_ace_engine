@@ -64,6 +64,7 @@ public:
     bool GetAutoResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
+    const std::optional<Color>& GetSvgFillColor() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
@@ -85,17 +86,27 @@ public:
     void FailCallback(const std::string& errorMsg);
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
-    void DownloadImage();
-    void PerformDownload();
-    void CacheDownloadedImage();
-    bool Downloadable();
-    void OnDataReady();
-
     // Needed to restore the relevant containerId from the originating thread
     int32_t GetContainerId()
     {
         return containerId_;
     }
+    void DownloadImage();
+    void PerformDownload();
+    void CacheDownloadedImage();
+    bool Downloadable();
+    void OnDataReady();
+    bool RemoveDownloadTask(const std::string& src);
+
+    void FinishMearuse()
+    {
+        measureFinish_ = true;
+    }
+
+    void CallbackAfterMeasureIfNeed();
+
+    void OnDataReadyOnCompleteCallBack();
+    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
 
     void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
     {
@@ -127,11 +138,6 @@ public:
         return imageQuality_;
     }
 
-    void FinishMearuse()
-    {
-        measureFinish_ = true;
-    }
-
     bool GetLoadInVipChannel()
     {
         return loadInVipChannel_;
@@ -142,10 +148,6 @@ public:
         loadInVipChannel_ = loadInVipChannel;
     }
 
-    void CallbackAfterMeasureIfNeed();
-
-    void OnDataReadyOnCompleteCallBack();
-    void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
     const std::string& GetErrorMsg()
     {
         return errorMsg_;
@@ -187,7 +189,7 @@ private:
     {
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
-
+    
     ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
@@ -200,9 +202,9 @@ private:
     // the container of the creator thread of this image loading context
     const int32_t containerId_ {0};
 
-    bool isHdrDecoderNeed_ = false;
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool isHdrDecoderNeed_ = false;
     bool loadInVipChannel_ = false;
 
     DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;

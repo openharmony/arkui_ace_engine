@@ -1589,6 +1589,16 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
+    if (isDragWithContextMenu_) {
+        auto gestureHub = imageNode->GetOrCreateGestureEventHub();
+        if (gestureHub) {
+            auto menuPreviewScale = gestureHub->GetMenuPreviewScale();
+            // use menuPreviewScale only for 1.0f menu scale.
+            if (NearEqual(menuPreviewScale, 1.0f)) {
+                dragPreviewInfo.scale = menuPreviewScale;
+            }
+        }
+    }
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
     dragPreviewInfo.width = static_cast<double>(width);
     dragPreviewInfo.maxWidth = maxWidth;

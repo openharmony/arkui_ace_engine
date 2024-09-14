@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -587,6 +587,10 @@ ACE_EXPORT extern const char PARTICLE_ETS_TAG[];
 // SelectOverlay
 ACE_EXPORT extern const char SELECT_OVERLAY_ETS_TAG[];
 
+// ContainerSpan
+ACE_EXPORT extern const char CONTAINER_SPAN_COMPONENT_TAG[];
+ACE_EXPORT extern const char CONTAINER_SPAN_ETS_TAG[];
+
 // Symbol
 ACE_EXPORT extern const char SYMBOL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
@@ -594,10 +598,6 @@ ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
 // DynamicComponent
 ACE_EXPORT extern const char ISOLATED_COMPONENT_TAG[];
 ACE_EXPORT extern const char ISOLATED_COMPONENT_ETS_TAG[];
-
-// ContainerSpan
-ACE_EXPORT extern const char CONTAINER_SPAN_COMPONENT_TAG[];
-ACE_EXPORT extern const char CONTAINER_SPAN_ETS_TAG[];
 
 //RenderNode
 ACE_EXPORT extern const char RENDER_NODE_ETS_TAG[];

@@ -466,26 +466,25 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     auto message = param->GetMessage();
     auto primaryButton = param->GetPrimaryButtonProperties();
     auto secondaryButton = param->GetSecondaryButtonProperties();
-    if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-        if (primaryButton.showButton || secondaryButton.showButton) {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            float popupMaxWidth = 0.0f;
-            float popupMaxHeight = 0.0f;
-            GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-            auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
-            CHECK_NULL_VOID(buttonTheme);
-            auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
-            CHECK_NULL_VOID(childNode);
-            const auto& children = childNode->GetChildren();
-            for (const auto& uinode : children) {
-                if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
-                    auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
-                    CHECK_NULL_VOID(scrollNode);
-                    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-                    scrollProps->UpdateCalcMaxSize(CalcSize(
-                        std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
-                }
+    if ((primaryButton.showButton || secondaryButton.showButton) &&
+        !Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        float popupMaxWidth = 0.0f;
+        float popupMaxHeight = 0.0f;
+        GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+        auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+        const auto& children = childNode->GetChildren();
+        for (const auto& uinode : children) {
+            if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
+                auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
+                CHECK_NULL_VOID(scrollNode);
+                auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+                scrollProps->UpdateCalcMaxSize(CalcSize(
+                    std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
             }
         }
     }
@@ -699,7 +698,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         auto buttonFontSize = popupTheme->GetButtonFontSize();
         scrollProps->UpdateCalcMaxSize(CalcSize(std::nullopt,
             CalcLength(Dimension(popupMaxHeight) -
-	    GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+	        GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
         scrollNode->MarkModifyDone();
         message->MountToParent(scrollNode);
         scrollNode->MountToParent(columnNode);

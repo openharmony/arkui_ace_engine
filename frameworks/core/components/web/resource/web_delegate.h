@@ -39,7 +39,6 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
-#include "core/components_ng/pattern/web/web_pattern.h"
 #include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
@@ -794,7 +793,6 @@ public:
     {
         richtextData_ = richtextData;
     }
-    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
@@ -805,7 +803,6 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
-    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -910,9 +907,6 @@ public:
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
-    void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
-    bool GetIsSmoothDragResizeEnabled();
-    void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
@@ -944,8 +938,7 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
-        const std::map<std::string, std::string>& actionArguments);
+    void ExecuteAction(int64_t accessibilityId, AceAction action);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
@@ -976,7 +969,7 @@ public:
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
-    NG::WebInfoType GetWebInfoType();
+    std::string GetWebInfoType();
     void OnInterceptKeyboardAttach(
         const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
         const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
@@ -1209,7 +1202,6 @@ private:
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
-    bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
     double resizeVisibleWidth_ = -1.0;

@@ -25,7 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/bubble/bubble_event_hub.h"
+#include "core/components_ng/pattern/bubble//bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
@@ -46,7 +46,6 @@ enum class DismissReason {
     TOUCH_OUTSIDE,
     CLOSE_BUTTON,
 };
-
 class BubblePattern : public PopupBasePattern, public FocusView {
     DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView);
 
@@ -189,7 +188,6 @@ public:
             onWillDismiss_(reason);
         }
     }
-    
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;

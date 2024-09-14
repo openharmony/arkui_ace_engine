@@ -301,6 +301,7 @@ public:
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
+    void SetRenderFit(RenderFit renderFit);
 
 private:
     void OnAttachToFrameNode() override;
@@ -323,7 +324,7 @@ private:
     void OnNativeUnload(FrameNode* frameNode);
 
     void OnSurfaceCreated();
-    void OnSurfaceChanged(const RectF& surfaceRect);
+    void OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow);
 
     void NativeSurfaceShow();
     void NativeSurfaceHide();
@@ -428,8 +429,8 @@ private:
     uint32_t rotation_ = 0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
-    OH_NativeXComponent_TouchEvent lastTouchInfo_;
-    std::atomic<int32_t> slideCount_ {0};
+    OH_NativeXComponent_TouchEvent lastTouchInfo_ {};
+    int32_t slideCount_  = 0;
     double physicalCoeff_ = 0.0;
 #endif
     bool isTypedNode_ = false;

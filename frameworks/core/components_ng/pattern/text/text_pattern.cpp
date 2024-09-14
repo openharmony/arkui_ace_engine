@@ -203,6 +203,7 @@ void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& care
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
+    parentGlobalOffset_ = GetParentGlobalOffset();
     auto textContentGlobalOffset = selectOverlay_->GetHandleGlobalOffset() + contentRect_.GetOffset();
     auto paragraphPaintOffset = textContentGlobalOffset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
@@ -619,6 +620,7 @@ bool TextPattern::MaxLinesZero()
     }
     return false;
 }
+
 void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -1589,7 +1591,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
             }
             return;
         }
-
+ 
         if (resultObj.type == SelectSpanType::TYPEIMAGE) {
             if (isDragging) {
                 pattern->dragSpanItems_.emplace_back(spanItem);
@@ -1771,7 +1773,7 @@ std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, 
     }
     auto min = std::min(start, end);
     auto max = std::max(start, end);
-
+ 
     return StringUtils::ToString(value.substr(min, max - min));
 }
 
@@ -1928,6 +1930,7 @@ void TextPattern::OnModifyDone()
     } else {
         copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     }
+    
 
     const auto& children = host->GetChildren();
     if (children.empty()) {
@@ -2169,6 +2172,7 @@ void TextPattern::ProcessOverlayAfterLayout()
     if (selectOverlay_->SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
+        selectOverlay_->UpdateViewPort();
     }
 }
 
@@ -3342,7 +3346,7 @@ void TextPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<S
     CHECK_NULL_VOID(spanItem);
     resultObject.valueString = spanItem->content;
 }
-
+ 
 ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
 {
     int32_t itemLength = 1;

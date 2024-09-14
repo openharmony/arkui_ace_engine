@@ -129,9 +129,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
-    }
+
     UpdateBackgroundStyle(renderContext, dialogProperties);
 }
 
@@ -340,7 +338,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(calendarNode, nullptr);
 
     InitCalendarProperty(calendarNode);
-
     auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (settingData.entryNode.Upgrade() != nullptr) {
         auto entryNode = settingData.entryNode.Upgrade();
@@ -386,7 +383,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
 
 void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarNode)
 {
-    auto pipelineContext = calendarNode->GetContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
@@ -886,6 +883,10 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
 void CalendarDialogView::UpdateBackgroundStyle(
     const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties)
 {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    }
+
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(

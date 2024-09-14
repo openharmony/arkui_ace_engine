@@ -52,6 +52,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/stylus/stylus_detector_default.h"
@@ -108,8 +109,8 @@ constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
-constexpr int32_t VSYNC_PERIOD_COUNT = 2;
-constexpr int32_t MIN_IDLE_TIME = 1000;
+constexpr int32_t VSYNC_PERIOD_COUNT = 5;
+constexpr int32_t MIN_IDLE_TIME = 1000000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 
@@ -280,6 +281,10 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     } while (false);
 #endif
     hasIdleTasks_ = true;
+    if (dirty->GetTag() == V2::ROOT_ETS_TAG && isFirstRootLayout_) {
+        isFirstRootLayout_ = false;
+        LOGI("Root node request first frame.");
+    }
     RequestFrame();
 }
 
@@ -616,6 +621,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         dragWindowVisibleCallback_();
         dragWindowVisibleCallback_ = nullptr;
     }
+    if (isFirstFlushMessages_) {
+        isFirstFlushMessages_ = false;
+        LOGI("ArkUi flush first frame messages.");
+    }
     FlushMessages();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
@@ -723,6 +732,7 @@ void PipelineContext::FlushMessages()
     ACE_FUNCTION_TRACE();
     if (IsFreezeFlushMessage()) {
         SetIsFreezeFlushMessage(false);
+        LOGI("Flush message is freezed.");
         return;
     }
     window_->FlushTasks();
@@ -1008,6 +1018,7 @@ void PipelineContext::SetupRootElement()
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    fontManager_->AddFontObserver(selectOverlayManager_);
     if (!privacySensitiveManager_) {
         privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     }
@@ -1077,6 +1088,7 @@ void PipelineContext::SetupSubRootElement()
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    fontManager_->AddFontObserver(selectOverlayManager_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = GetOrCreateFocusManager();
     postEventManager_ = MakeRefPtr<PostEventManager>();
@@ -1140,7 +1152,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -1421,9 +1432,8 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     }
 }
 
-void PipelineContext::CheckAndUpdateKeyboardInset()
+void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
 {
-    uint32_t keyboardHeight = safeAreaManager_->GetKeyboardInset().Length();
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
 }
 
@@ -1604,7 +1614,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
         float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
         if (manager) {
-            positionY = static_cast<float>(manager->GetClickPosition().GetY());
+            positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
             textfieldHeight = manager->GetHeight();
         }
         if (!NearZero(keyboardOffset)) {
@@ -1711,6 +1721,12 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
         return;
     }
+
+    if (manager->UsingCustomKeyboardAvoid()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Using Custom Avoid Instead");
+        return;
+    }
+
     manager->UpdatePrevHasTextFieldPattern();
     prevKeyboardAvoidMode_ = safeAreaManager_->KeyboardSafeAreaEnabled();
 
@@ -1728,6 +1744,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         CHECK_NULL_VOID(context);
         context->SetIsLayouting(false);
         context->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        context->SetKeyboardAction(NearZero(keyboardHeight) ? KeyboardAction::CLOSING : KeyboardAction::OPENING);
         if (keyboardHeight > 0) {
             // add height of navigation bar
             keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
@@ -1794,6 +1811,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         if (scrollResult) {
             context->FlushUITasks();
         }
+        context->SetKeyboardAction(KeyboardAction::NONE);
     };
     FlushUITasks();
     SetIsLayouting(true);
@@ -3262,12 +3280,12 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.emplace(nodeId);
+    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
 }
 
 void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId)
 {
-    onWindowFocusChangedCallbacks_.erase(nodeId);
+    onWindowFocusChangedCallbacks_.emplace_back(nodeId);
 }
 
 void PipelineContext::FlushWindowFocusChangedCallback(bool isFocus)
@@ -3542,21 +3560,6 @@ void PipelineContext::AddLatestFrameLayoutFinishTask(std::function<void()>&& tas
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
-}
-
-void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
-{
-    taskScheduler_->AddSafeAreaPaddingProcessTask(node);
-}
-
-void PipelineContext::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
-{
-    taskScheduler_->RemoveSafeAreaPaddingProcessTask(node);
-}
-
-void PipelineContext::FlushSafeAreaPaddingProcess()
-{
-    taskScheduler_->FlushSafeAreaPaddingProcess();
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)

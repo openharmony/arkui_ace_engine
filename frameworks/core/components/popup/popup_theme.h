@@ -213,6 +213,11 @@ public:
         return buttonTextInsideMargin_;
     }
 
+    const Dimension& GetButtonTextSpacing() const
+    {
+        return buttonTextSpacing_;
+    }
+
     const Dimension& GetButtonSpacing() const
     {
         return buttonSpacing;
@@ -347,6 +352,7 @@ private:
     Dimension ageButtonLeftPadding_ = 0.0_vp;
     Dimension ageButtonRightPadding_ = 0.0_vp;
     Dimension buttonTextInsideMargin_ = 8.0_vp;
+    Dimension buttonTextSpacing_ = 12.0_vp;
     Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
     Dimension arrowHeight_ = 8.0_vp;

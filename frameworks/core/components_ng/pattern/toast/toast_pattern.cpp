@@ -167,7 +167,6 @@ void ToastPattern::BeforeCreateLayoutWrapper()
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast get pipelineContext failed");
         return;
     }
-
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     UpdateTextSizeConstraint(textNode);
@@ -277,78 +276,6 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     }
 }
 
-double ToastPattern::GetTextMaxHeight()
-{
-    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto containerId = Container::CurrentId();
-    double deviceHeight = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
-        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
-    } else {
-        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceHeight = windowGlobalRect.Height();
-    }
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
-    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
-    auto maxHeight = deviceHeight - bottom - top - toastBottom_;
-    auto limitHeight = (deviceHeight - bottom - top) * 0.65;
-    if (GreatNotEqual(maxHeight, limitHeight)) {
-        maxHeight = limitHeight;
-    }
-
-    maxHeight = GreatOrEqual(maxHeight, 0.0) ? maxHeight : 0.0;
-    return maxHeight;
-}
-
-double ToastPattern::GetTextMaxWidth()
-{
-    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto containerId = Container::CurrentId();
-    double deviceWidth = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
-        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
-    } else {
-        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceWidth = windowGlobalRect.Width();
-    }
-
-    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
-    CHECK_NULL_RETURN(toastTheme, 0.0);
-    auto marging = toastTheme->GetMarging();
-    auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
-    auto maxLimitWidth = toastTheme->GetMaxWidth();
-    if (GreatNotEqual(maxWidth, maxLimitWidth.ConvertToPx())) {
-        maxWidth = maxLimitWidth.ConvertToPx();
-    }
-    return maxWidth;
-}
-
-int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, 0);
-    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
-    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
-    CHECK_NULL_RETURN(textLayoutWrapper, 0);
-    textLayoutWrapper->Measure(layoutConstraint);
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(textLayoutWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
-    auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
-    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
-    CHECK_NULL_RETURN(paragraph, 0);
-    auto paragHeight = paragraph->GetHeight();
-    auto paragLineCount = paragraph->GetLineCount();
-    int32_t paragLineHeight = 0;
-    if (paragLineCount > 0) {
-        paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
-    }
-    return paragLineHeight;
-}
-
 void ToastPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("Message: " + toastInfo_.message);
@@ -371,5 +298,76 @@ void ToastPattern::DumpInfo()
     auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
     DumpLog::GetInstance().AddDesc(
         "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
+}
+
+double ToastPattern::GetTextMaxHeight()
+{
+    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto containerId = Container::CurrentId();
+    double deviceHeight = 0.0;
+    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    } else {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        deviceHeight = windowGlobalRect.Height();
+    }
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
+    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
+    auto maxHeight = deviceHeight - bottom - top - toastBottom_;
+    auto limitHeight = (deviceHeight - bottom - top) * 0.65;
+    if (GreatNotEqual(maxHeight, limitHeight)) {
+        maxHeight = limitHeight;
+    }
+
+    maxHeight = GreatOrEqual(maxHeight, 0.0) ? maxHeight : 0.0;
+    return maxHeight;
+}
+
+double ToastPattern::GetTextMaxWidth()
+{
+    auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto containerId = Container::CurrentId();
+    double deviceWidth = 0.0;
+    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    } else {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        deviceWidth = windowGlobalRect.Width();
+    }
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_RETURN(toastTheme, 0.0f);
+    auto marging = toastTheme->GetMarging();
+    auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
+    auto maxLimitWidth = toastTheme->GetMaxWidth();
+    if (GreatNotEqual(maxWidth, maxLimitWidth.ConvertToPx())) {
+        maxWidth = maxLimitWidth.ConvertToPx();
+    }
+    return maxWidth;
+}
+
+int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, 0);
+    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(textLayoutWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
+    auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
+    auto paragraph = textLayoutAlgorithm->GetParagraph();
+    CHECK_NULL_RETURN(paragraph, 0);
+    auto paragHeight = paragraph->GetHeight();
+    auto paragLineCount = paragraph->GetLineCount();
+    int32_t paragLineHeight = 0;
+    if (paragLineCount > 0) {
+        paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
+    }
+    return paragLineHeight;
 }
 } // namespace OHOS::Ace::NG

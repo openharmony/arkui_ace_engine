@@ -346,10 +346,16 @@ ArkUINativeModuleValue ArkUINativeModule::SetFrameRateRange(ArkUIRuntimeCallInfo
     if (type != SwiperDynamicSyncSceneType::ANIMATE) {
         type = SwiperDynamicSyncSceneType::GESTURE;
     }
-    auto nativeNode = nodePtr(swiperNode->ToNativePointer(vm)->Value());
+    auto nativePointer = swiperNode->ToNativePointer(vm);
+    if (nativePointer.IsEmpty()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto nativeNode = nodePtr(nativePointer->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     auto* swiperFrameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(swiperFrameNode, panda::JSValueRef::Undefined(vm));
     auto swiperPattern = swiperFrameNode->GetPattern();
-
+    CHECK_NULL_RETURN(swiperPattern, panda::JSValueRef::Undefined(vm));
     swiperPattern->SetFrameRateRange(frameRateRange, type);
 
     return panda::JSValueRef::Undefined(vm);

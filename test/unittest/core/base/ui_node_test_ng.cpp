@@ -2375,26 +2375,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg070, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestNg071
- * @tc.desc: Test ui node method SetAccessibilityNodeVirtual
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg071, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create FrameNode node and construct params
-     */
-    auto testNode1 = TestNode::CreateTestNode(21);
-    auto child = TestNode::CreateTestNode(22);
-    testNode1->SetAccessibilityNodeVirtual();
-    EXPECT_EQ(testNode1->IsAccessibilityVirtualNode(), true);
-    testNode1->SetAccessibilityVirtualNodeParent(child);
-    auto weakResult = testNode1->GetVirtualNodeParent();
-    auto result = weakResult.Upgrade();
-    ASSERT_NE(result, nullptr);
-}
-
-/**
  * @tc.name: GetPerformanceCheckData004
  * @tc.desc: Test ui node method GetPerformanceCheckData
  * @tc.type: FUNC

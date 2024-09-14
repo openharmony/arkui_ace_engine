@@ -417,7 +417,7 @@ public:
     void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-    Axis GetParentAxis();
+    void GetParentAxis();
     RefPtr<NestableScrollContainer> SearchParent() override;
     RefPtr<NestableScrollContainer> SearchParent(Axis scrollAxis);
     /**
@@ -474,7 +474,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
@@ -606,8 +605,7 @@ public:
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
-        const std::map<std::string, std::string>& actionArguments) const;
+    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
@@ -658,7 +656,6 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
@@ -751,7 +748,6 @@ private:
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void WindowDrag(int32_t width, int32_t height);
-    void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     int GetWebId();

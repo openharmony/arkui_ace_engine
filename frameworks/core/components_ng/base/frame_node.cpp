@@ -477,6 +477,7 @@ FrameNode::FrameNode(
 
 FrameNode::~FrameNode()
 {
+    ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
@@ -757,10 +758,6 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
-    }
-    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
-        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
-                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -1374,6 +1371,20 @@ void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
+}
+
+RectF FrameNode::GetRectWithFrame()
+{
+    auto currFrameRect = geometryNode_->GetFrameRect();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currFrameRect.SetOffset(
+                { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+        }
+    }
+    return currFrameRect;
 }
 
 RectF FrameNode::GetRectWithRender()
@@ -2730,17 +2741,11 @@ void FrameNode::OnWindowHide()
 
 void FrameNode::OnWindowFocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(true);
-    }
     pattern_->OnWindowFocused();
 }
 
 void FrameNode::OnWindowUnfocused()
 {
-    if (renderContext_) {
-        renderContext_->UpdateWindowFocusState(false);
-    }
     pattern_->OnWindowUnfocused();
 }
 
@@ -2921,71 +2926,6 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
         parent = parent->GetAncestorNodeOfFrame();
     }
     return OffsetF(point.GetX(), point.GetY());
-}
-
-std::vector<Point> GetRectPoints(SizeF& frameSize)
-{
-    std::vector<Point> pointList;
-    pointList.push_back(Point(0, 0));
-    pointList.push_back(Point(frameSize.Width(), 0));
-    pointList.push_back(Point(0, frameSize.Height()));
-    pointList.push_back(Point(frameSize.Width(), frameSize.Height()));
-    return pointList;
-}
-
-RectF GetBoundingBox(std::vector<Point>& pointList)
-{
-    Point pMax = pointList[0];
-    Point pMin = pointList[0];
-    
-    for (auto &point: pointList) {
-        if (point.GetX() > pMax.GetX()) {
-            pMax.SetX(point.GetX());
-        }
-        if (point.GetX() < pMin.GetX()) {
-            pMin.SetX(point.GetX());
-        }
-        if (point.GetY() > pMax.GetY()) {
-            pMax.SetY(point.GetY());
-        }
-        if (point.GetY() < pMin.GetY()) {
-            pMin.SetY(point.GetY());
-        }
-    }
-    return RectF(pMin.GetX(), pMin.GetY(), pMax.GetX() - pMin.GetX(), pMax.GetY() - pMin.GetY());
-}
-
-bool FrameNode::GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const
-{
-    auto renderContext = parent->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
-    auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
-    for (auto& point: pointList) {
-        point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
-        point = parentMatrix * point;
-    }
-    return true;
-}
-
-RectF FrameNode::GetPaintRectToWindowWithTransform()
-{
-    auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, RectF());
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, RectF());
-    auto frameSize = geometryNode->GetFrameSize();
-    auto pointList = GetRectPoints(frameSize);
-    GetRectPointToParentWithTransform(pointList, Claim(this));
-    auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (GetRectPointToParentWithTransform(pointList, parent)) {
-            parent = parent->GetAncestorNodeOfFrame();
-        } else {
-            return RectF();
-        }
-    }
-    return GetBoundingBox(pointList);
 }
 
 OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
@@ -3705,11 +3645,6 @@ bool FrameNode::ParentExpansive()
     CHECK_NULL_RETURN(parentLayoutProperty, false);
     auto&& parentOpts = parentLayoutProperty->GetSafeAreaExpandOpts();
     return parentOpts && parentOpts->Expansive();
-}
-
-void FrameNode::ProcessSafeAreaPadding()
-{
-    pattern_->ProcessSafeAreaPadding();
 }
 
 void FrameNode::UpdateFocusState()
@@ -5098,18 +5033,40 @@ void FrameNode::NotifyWebPattern(bool isRegister)
     UINode::NotifyWebPattern(isRegister);
 }
 
-void FrameNode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, NotificationType notificationType)
 {
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
+    int32_t updateFrom = CalcAbsPosition(index, id);
     auto pattern = GetPattern();
-    pattern->NotifyDataChange(updateFrom, count);
+    switch (notificationType) {
+        case NotificationType::START_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            break;
+        case NotificationType::END_CHANGE_POSITION:
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        case NotificationType::START_AND_END_CHANGE_POSITION:
+            ChildrenUpdatedFrom(updateFrom);
+            pattern->NotifyDataChange(updateFrom, count);
+            break;
+        default:
+            break;
+    }
+}
+
+// for Grid refresh GridItems
+void FrameNode::ChildrenUpdatedFrom(int32_t index)
+{
+    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
+}
+
+void FrameNode::ResetPredictNodes()
+{
+    auto predictLayoutNode = std::move(predictLayoutNode_);
+    for (auto& node : predictLayoutNode) {
+        auto frameNode = node.Upgrade();
+        if (frameNode && frameNode->isLayoutDirtyMarked_) {
+            frameNode->isLayoutDirtyMarked_ = false;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

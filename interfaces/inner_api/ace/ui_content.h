@@ -420,12 +420,11 @@ public:
     virtual void PreLayout() {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
-    
+
     virtual sptr<IRemoteObject> GetRemoteObj()
     {
         return {};
     }
-
 };
 
 } // namespace OHOS::Ace

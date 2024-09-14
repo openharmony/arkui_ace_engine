@@ -85,6 +85,7 @@ if (!defined(aosp_libs_dir)) {
 libs_root = "${aosp_libs_dir}/sdk"
 
 ability_runtime_path = "//foundation/ability/ability_runtime"
+ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"

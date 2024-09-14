@@ -300,7 +300,16 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlurStyle(bgBlurStyle);
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+    }
 }
 
 void ViewAbstract::SetForegroundEffect(float radius)
@@ -329,7 +338,18 @@ void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
+    }
 }
 
 void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
@@ -493,52 +513,6 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
-}
-
-void ViewAbstract::SetSafeAreaPadding(const CalcLength& value)
-{
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        return;
-    }
-    PaddingProperty padding;
-    padding.SetEdges(value);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding);
-}
-
-void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
-{
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        return;
-    }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value);
-}
-
-void ViewAbstract::ResetSafeAreaPadding()
-{
-    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        return;
-    }
-    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding);
-}
-
-void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    PaddingProperty padding;
-    padding.SetEdges(value);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
-}
-
-void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value, frameNode);
-}
-
-void ViewAbstract::ResetSafeAreaPadding(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, frameNode);
 }
 
 void ViewAbstract::SetMargin(const CalcLength& value)
@@ -3003,13 +2977,6 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 
 void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
 {
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
-    } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
-    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackgroundEffect().has_value()) {
@@ -3245,7 +3212,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
         layoutProperty->UpdateVisibility(visible, true);
     }
 
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -3510,13 +3477,6 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
-    } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
-    }
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackBlurRadius().has_value()) {

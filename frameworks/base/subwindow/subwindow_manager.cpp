@@ -280,6 +280,14 @@ void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float m
     }
 }
 
+void SubwindowManager::UpdatePreviewPosition()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->UpdatePreviewPosition();
+    }
+}
+
 void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
     const NG::OffsetF& offset)
 {
@@ -287,14 +295,6 @@ void SubwindowManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fr
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->ContextMenuSwitchDragPreviewAnimationtNG(dragPreviewNode, offset);
-    }
-}
-
-void SubwindowManager::UpdatePreviewPosition()
-{
-    auto subwindow = GetCurrentWindow();
-    if (subwindow) {
-        subwindow->UpdatePreviewPosition();
     }
 }
 
@@ -961,20 +961,6 @@ void SubwindowManager::MarkDirtyDialogSafeArea()
     subwindow->MarkDirtyDialogSafeArea();
 }
 
-void SubwindowManager::HideSystemTopMostWindow()
-{
-    CHECK_NULL_VOID(systemToastWindow_);
-    systemToastWindow_->HideSubWindowNG();
-}
-
-void SubwindowManager::ClearToastInSystemSubwindow()
-{
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast in system subwindow enter");
-    auto subwindow = GetSystemToastWindow();
-    if (subwindow) {
-        subwindow->ClearToast();
-    }
-}
 void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
 {
     auto container = Container::GetContainer(instanceId);
@@ -990,6 +976,21 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
     CHECK_NULL_VOID(overlayManager);
     overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
+}
+
+void SubwindowManager::HideSystemTopMostWindow()
+{
+    CHECK_NULL_VOID(systemToastWindow_);
+    systemToastWindow_->HideSubWindowNG();
+}
+
+void SubwindowManager::ClearToastInSystemSubwindow()
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast in system subwindow enter");
+    auto subwindow = GetSystemToastWindow();
+    if (subwindow) {
+        subwindow->ClearToast();
+    }
 }
 
 bool SubwindowManager::IsSubwindowExist(RefPtr<Subwindow> subwindow)

@@ -509,7 +509,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo,
         GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey, GetAttachedFrameNodeById, GetFirstUINode,
         GetLayoutSize, GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
-        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent};
+        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent };
     return &modifier;
 }
 

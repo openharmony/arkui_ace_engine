@@ -484,6 +484,85 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxSetOnMoveFunctionTest001, TestSiz
 }
 
 /**
+ * @tc.name: ForEachSyntaxMoveDataFunctionTest001
+ * @tc.desc: Create LazyForEach, update its Items and invoke MoveData function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxMoveDataFunctionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+
+    lazyForEachNode->MoveData(INDEX_LESS_THAN_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+
+     /**
+     * @tc.steps: step4. builder_ is null.
+     */
+    lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->MoveData(INDEX_LESS_THAN_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+}
+
+/**
+ * @tc.name: ForEachSyntaxFireOnMoveFunctionTest001
+ * @tc.desc: Create LazyForEach, update its Items and invoke FireOnMove function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxFireOnMoveFunctionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step3. From index is less than start index, and to index is greater than end index.
+     * @tc.expected: Both out of range, ignored.
+     */
+    lazyForEachNode->FireOnMove(INDEX_LESS_THAN_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+
+    /**
+     * @tc.steps: step4. builder_ is null.
+     */
+    lazyForEachNode->builder_ = nullptr;
+    lazyForEachNode->FireOnMove(INDEX_LESS_THAN_START_INDEX, INDEX_MIDDLE);
+    EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
+}
+
+/**
  * @tc.name: ForEachSyntaxMoveDataFunctionTest008
  * @tc.desc: Create LazyForEach, update its Items and invoke OnDataMoved function.
  * @tc.type: FUNC
@@ -1281,7 +1360,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyDataCountChangedTest001, Te
      * @tc.steps: step3. Invoke NotifyDataCountChanged.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyDataCountChanged(INDEX_0);
+    lazyForEachNode->NotifyChangeWithCount(INDEX_0, 0, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
@@ -1695,12 +1774,16 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataDeletedTest002, TestSiz
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    // init historicalTotalCount_
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
     std::list<V2::Operation> DataOperations;
     V2::Operation operation1 = {.type = "delete", .index = INDEX_0, .count = 1};
     DataOperations.push_back(operation1);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
     EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
     DataOperations.clear();
+    // update historicalTotalCount_
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
     V2::Operation operation2 = {.type = "delete", .index = INDEX_0, .count = 2};
     DataOperations.push_back(operation2);
     lazyForEachBuilder->OnDatasetChange(DataOperations);

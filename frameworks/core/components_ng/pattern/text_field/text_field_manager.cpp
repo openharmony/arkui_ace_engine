@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -40,6 +41,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
         onFocusTextField_ = nullptr;
         focusFieldIsInline = false;
         optionalPosition_ = std::nullopt;
+        usingCustomKeyboardAvoid_ = false;
     }
 }
 
@@ -54,10 +56,23 @@ bool TextFieldManagerNG::OnBackPressed()
 
 void TextFieldManagerNG::SetClickPosition(const Offset& position)
 {
-    auto pipeline =  PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rootHeight = pipeline->GetRootHeight();
-    if (GreatOrEqual(position.GetY(), rootHeight) || LessOrEqual(position.GetY(), 0.0f)) {
+    if (GreatOrEqual(position.GetY(), rootHeight)) {
+        auto pattern = onFocusTextField_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        while (parent) {
+            if (parent->GetTag() == "Panel" || parent->GetTag() == "SheetPage") {
+                return;
+            }
+            parent = parent->GetAncestorNodeOfFrame();
+        }
+    }
+    if (LessOrEqual(position.GetY(), 0.0f)) {
         return;
     }
     auto rootWidth = pipeline->GetRootWidth();
@@ -106,27 +121,25 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         CHECK_NULL_RETURN(scrollableRect.Top() < bottomInset.start, false);
     }
 
-    auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
+    auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
-    if (isShowKeyboard) {
-        if (diffTop <= 0 &&
-            LessNotEqual(bottomInset.start, (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
-            return false;
-        }
+    if (isShowKeyboard && diffTop <= 0 && LessNotEqual(bottomInset.start,
+        (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
+        return false;
     }
 
     // caret above scroll's content region
     if (diffTop < 0) {
+        TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffTop=%{public}f",
+            scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffTop);
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
         return true;
     }
 
     // caret inner scroll's content region
-    if (isShowKeyboard) {
-        if (LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
-            return false;
-        }
+    if (isShowKeyboard && LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
+        return false;
     }
 
     // caret below safeArea
@@ -141,6 +154,8 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
     CHECK_NULL_RETURN(diffBot < 0, false);
+    TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffBot=%{public}f",
+        scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffBot);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;
 }
@@ -288,5 +303,96 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navN
         }
     }
     navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TextFieldManagerNG::AddTextFieldInfo(const TextFieldInfo& textFieldInfo)
+{
+    if (textFieldInfo.nodeId == -1 || textFieldInfo.autoFillContainerNodeId == -1) {
+        return;
+    }
+
+    auto containerNodeIter = textFieldInfoMap_.find(textFieldInfo.autoFillContainerNodeId);
+    if (containerNodeIter != textFieldInfoMap_.end()) {
+        auto& innerTextFieldMap = containerNodeIter->second;
+        innerTextFieldMap[textFieldInfo.nodeId] = textFieldInfo;
+    } else {
+        std::unordered_map<int32_t, TextFieldInfo> innerTextFieldInfoMap;
+        innerTextFieldInfoMap[textFieldInfo.nodeId] = textFieldInfo;
+        textFieldInfoMap_[textFieldInfo.autoFillContainerNodeId] = innerTextFieldInfoMap;
+    }
+}
+
+void TextFieldManagerNG::RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId)
+{
+    auto containerNodeIter = textFieldInfoMap_.find(autoFillContainerNodeId);
+    if (containerNodeIter != textFieldInfoMap_.end()) {
+        auto& innerTextFieldInfoMap = containerNodeIter->second;
+        auto textFieldNodeIter = innerTextFieldInfoMap.find(nodeId);
+        if (textFieldNodeIter != innerTextFieldInfoMap.end()) {
+            innerTextFieldInfoMap.erase(textFieldNodeIter);
+        }
+    }
+}
+
+void TextFieldManagerNG::UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo)
+{
+    if (textFieldInfo.nodeId == -1 || textFieldInfo.autoFillContainerNodeId == -1) {
+        return;
+    }
+    auto containerNodeIter = textFieldInfoMap_.find(textFieldInfo.autoFillContainerNodeId);
+    if (containerNodeIter != textFieldInfoMap_.end()) {
+        auto& innerTextFieldInfoMap = containerNodeIter->second;
+        auto textFieldNodeIter = innerTextFieldInfoMap.find(textFieldInfo.nodeId);
+        if (textFieldNodeIter != innerTextFieldInfoMap.end()) {
+            innerTextFieldInfoMap.erase(textFieldNodeIter);
+        }
+        innerTextFieldInfoMap[textFieldInfo.nodeId] = textFieldInfo;
+    } else {
+        AddTextFieldInfo(textFieldInfo);
+    }
+}
+
+bool TextFieldManagerNG::HasAutoFillPasswordNodeInContainer(
+    const int32_t& autoFillContainerNodeId, const int32_t& nodeId)
+{
+    auto containerNodeIter = textFieldInfoMap_.find(autoFillContainerNodeId);
+    if (containerNodeIter == textFieldInfoMap_.end()) {
+        return false;
+    }
+
+    auto& innerTextFieldInfoMap = containerNodeIter->second;
+    auto textFieldNodeIter = innerTextFieldInfoMap.find(nodeId);
+    if (textFieldNodeIter == innerTextFieldInfoMap.end()) {
+        return false;
+    }
+
+    for (const auto& textField : innerTextFieldInfoMap) {
+        auto textFieldId = textField.first;
+        auto textFieldInfo = textField.second;
+        if (textFieldId == nodeId) {
+            continue;
+        }
+
+        auto isPasswordType = IsAutoFillPasswordType(textFieldInfo);
+        if (isPasswordType && textFieldInfo.enableAutoFill) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool TextFieldManagerNG::IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo)
+{
+    return textFieldInfo.inputType == TextInputType::VISIBLE_PASSWORD ||
+           textFieldInfo.inputType == TextInputType::NEW_PASSWORD ||
+           textFieldInfo.inputType == TextInputType::NUMBER_PASSWORD ||
+           textFieldInfo.contentType == TextContentType::VISIBLE_PASSWORD ||
+           textFieldInfo.contentType == TextContentType::NEW_PASSWORD;
+}
+
+TextFieldManagerNG::~TextFieldManagerNG()
+{
+    textFieldInfoMap_.clear();
 }
 } // namespace OHOS::Ace::NG

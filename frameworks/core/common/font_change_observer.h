@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-#include "base/resource/internal_resource.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_CHANGE_OBSERVER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_CHANGE_OBSERVER_H
+
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
-InternalResource::InternalResource() = default;
+class ACE_EXPORT FontChangeObserver : public virtual AceType {
+    DECLARE_ACE_TYPE(FontChangeObserver, AceType);
 
-InternalResource::~InternalResource() = default;
-
-const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) const
-{
-    return nullptr;
-}
-
+public:
+    FontChangeObserver() = default;
+    ~FontChangeObserver() override = default;
+    virtual void OnFontChanged() {}
+};
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_CHANGE_OBSERVER_H

@@ -75,6 +75,7 @@ constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
+constexpr int32_t MEDIA_TYPE_AUD = 0;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -250,7 +251,8 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     rect.SetHeight(nodeHeightI);
     return rect;
 }
-Gradient ConvertToGradient(Color color) {
+Gradient ConvertToGradient(Color color)
+{
     Gradient gradient;
     GradientColor gradientColorBegin;
     gradientColorBegin.SetLinearColor(LinearColor(color));
@@ -767,7 +769,12 @@ void VideoPattern::UpdateMuted()
         platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            mediaPlayer->SetVolume(videoVolume, videoVolume);
+            if (NearZero(videoVolume)) {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+            } else {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
+                mediaPlayer->SetVolume(videoVolume, videoVolume);
+            }
         }, "ArkUIVideoUpdateMuted");
     }
 }
@@ -840,7 +847,7 @@ void VideoPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
+ 
 #ifdef RENDER_EXTRACT_SUPPORTED
     CHECK_NULL_VOID(renderSurface_);
     auto contextType = renderSurface_->IsTexture() ?
@@ -881,33 +888,7 @@ void VideoPattern::OnDetachFromMainTree()
 
 void VideoPattern::RegisterRenderContextCallBack()
 {
-#ifndef RENDER_EXTRACT_SUPPORTED
-    auto isFullScreen = IsFullScreen();
-    if (!isFullScreen) {
-        auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
-            auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID(videoPattern);
-            auto host = videoPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto videoNodeSize = geometryNode->GetContentSize();
-            auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
-            Rect rect = Rect(x + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height());
-            if (videoPattern->renderSurface_) {
-                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(
-                        rect.Left(), rect.Top(), rect.Width(), rect.Height())) {
-                    videoPattern->lastBoundsRect_ = rect;
-                }
-            }
-        };
-        renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
-    }
-#else
+#ifdef RENDER_EXTRACT_SUPPORTED
     renderSurfaceWeakPtr_ = renderSurface_;
     renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
     auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
@@ -1185,12 +1166,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
-#ifndef RENDER_EXTRACT_SUPPORTED
-    auto isFullScreen = IsFullScreen();
-    if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
-#else
     if (SystemProperties::GetExtSurfaceEnabled()) {
-#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1785,9 +1761,11 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderContextForMediaPlayer_) {
         renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
     }
+#endif
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
@@ -1909,7 +1887,8 @@ bool VideoPattern::IsSupportImageAnalyzer()
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-bool VideoPattern::ShouldUpdateImageAnalyzer() {
+bool VideoPattern::ShouldUpdateImageAnalyzer()
+{
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& constraint = layoutProperty->GetCalcLayoutConstraint();
@@ -1947,7 +1926,7 @@ void VideoPattern::StartImageAnalyzer()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+        }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
 }
 
 void VideoPattern::CreateAnalyzerOverlay()
@@ -1992,7 +1971,7 @@ void VideoPattern::StartUpdateImageAnalyzer()
         }
         pattern->UpdateAnalyzerOverlay();
         pattern->isContentSizeChanged_ = false;
-    }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
+        }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
 }
 

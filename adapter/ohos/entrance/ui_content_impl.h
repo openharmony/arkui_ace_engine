@@ -353,6 +353,7 @@ private:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;

@@ -46,12 +46,12 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
+      "$ace_root/adapter/ohos/entrance/utils.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
       "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
-      "$ace_root/adapter/ohos/entrance/utils.cpp",
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
@@ -63,11 +63,11 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.cpp",
       "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
 
-      #Miscdevice Vibrator
-      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
-
       # CJUtils
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
+
+      #Miscdevice Vibrator
+      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
 
       # AudioHaptic
       "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_factory.cpp",
@@ -140,6 +140,7 @@ template("ace_ohos_standard_source_set") {
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
     ]
+
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (form_fwk_enable) {
       external_deps += [

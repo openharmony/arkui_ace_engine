@@ -277,9 +277,6 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
-    void AddSafeAreaPaddingProcessTask(FrameNode* node);
-    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
-
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
         dragWindowVisibleCallback_ = std::move(task);
@@ -288,7 +285,6 @@ public:
     void FlushOnceVsyncTask() override;
 
     void FlushDirtyNodeUpdate();
-    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -305,7 +301,7 @@ public:
 
     bool CheckNeedAvoidInSubWindow() override;
 
-    void CheckAndUpdateKeyboardInset() override;
+    void CheckAndUpdateKeyboardInset(float keyboardHeight) override;
 
     void UpdateSizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -977,7 +973,7 @@ private:
     // window on show or on hide
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
-    std::set<int32_t> onWindowFocusChangedCallbacks_;
+    std::list<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
 
@@ -1099,6 +1095,8 @@ private:
     uint32_t transform_ = 0;
     std::list<WeakPtr<FrameNode>> changeInfoListeners_;
     std::list<WeakPtr<FrameNode>> changedNodes_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -153,7 +153,11 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
     nodeInfo->Put("id", node->GetAccessibilityId());
     nodeInfo->Put("tag", node->GetTag().c_str());
     if (!node->IsRootNode()) {
-        nodeInfo->Put("parent", node->GetParent()->GetAccessibilityId());
+        if (node->GetParent()) {
+            nodeInfo->Put("parent", node->GetParent()->GetAccessibilityId());
+        } else {
+            nodeInfo->Put("parent", -1);
+        }
     }
     nodeInfo->Put("visible", node->IsVisible());
     auto [shouldSearchSelf, shouldSearchChildren, groupFlag]
@@ -249,7 +253,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf) {
+    if (hitSelf && shouldSearchSelf && IsAccessibilityFocusable(node)) {
         hitTarget = true;
         path.push_back(node);
     }

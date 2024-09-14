@@ -2833,56 +2833,6 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
     }
 }
 
-void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
-{
-    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
-    ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
-    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
-        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
-        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
-    }
-    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
-    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
-    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
-        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
-        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
-    }
-
-    // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
-    ParseJsInt32(jsOption->GetProperty("policy"), policy);
-    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
-        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
-        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
-    }
-
-    // blurType
-    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
-    ParseJsInt32(jsOption->GetProperty("type"), blurType);
-    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
-        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
-        styleOption.blurType = static_cast<BlurType>(blurType);
-    }
-
-    // inactiveColor
-    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor)) {
-        styleOption.isValidColor = true;
-    }
-
-    // scale
-    if (jsOption->GetProperty("scale")->IsNumber()) {
-        double scale = jsOption->GetProperty("scale")->ToNumber<double>();
-        styleOption.scale = std::clamp(scale, 0.0, 1.0);
-    }
-
-    if (jsOption->GetProperty("blurOptions")->IsObject()) {
-        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
-        BlurOption blurOption;
-        ParseBlurOption(jsBlurOption, blurOption);
-        styleOption.blurOption = blurOption;
-    }
-}
-
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -2898,7 +2848,29 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-        ParseBlurStyleOption(jsOption, styleOption);
+        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+        }
+        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+        }
+        if (jsOption->GetProperty("scale")->IsNumber()) {
+            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
+            styleOption.scale = std::clamp(scale, 0.0, 1.0);
+        }
+ 
+        if (jsOption->GetProperty("blurOptions")->IsObject()) {
+            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
+            BlurOption blurOption;
+            ParseBlurOption(jsBlurOption, blurOption);
+            styleOption.blurOption = blurOption;
+        }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
@@ -2959,23 +2931,22 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
-    effectOption.radius = radius;
 
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
         saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
-    effectOption.saturation = saturation;
 
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
-    effectOption.brightness = brightness;
-
-    ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
+    Color color = Color::TRANSPARENT;
+    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
 
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
@@ -2984,35 +2955,13 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
         adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
         adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
     }
-    effectOption.adaptiveColor = adaptiveColor;
-
-    // policy
-    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
-    ParseJsInt32(jsOption->GetProperty("policy"), policy);
-    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
-        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
-        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
-    }
-
-    // blurType
-    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
-    ParseJsInt32(jsOption->GetProperty("type"), blurType);
-    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
-        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
-        effectOption.blurType = static_cast<BlurType>(blurType);
-    }
-
-    // inactiveColor
-    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
-        effectOption.isValidColor = true;
-    }
 
     BlurOption blurOption;
     if (jsOption->GetProperty("blurOptions")->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
         ParseBlurOption(jsBlurOption, blurOption);
-        effectOption.blurOption = blurOption;
     }
+    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
@@ -3427,6 +3376,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     auto backgroundBlurStyle = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_BLUR_STYLE));
+    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -3696,27 +3646,25 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, EdgeType::PADDING);
+    ParseMarginOrPadding(info, false);
 }
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, EdgeType::MARGIN);
+    ParseMarginOrPadding(info, true);
 }
 
-void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
+void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("MarginOrPadding", jsVal, checkList)) {
         auto resetDimension = CalcDimension(0.0);
-        if (type == EdgeType::MARGIN) {
+        if (isMargin) {
             ViewAbstractModel::GetInstance()->SetMargin(resetDimension);
-        } else if (type == EdgeType::PADDING) {
+        } else {
             ViewAbstractModel::GetInstance()->SetPadding(resetDimension);
-        } else if (type == EdgeType::SAFE_AREA_PADDING) {
-            ViewAbstractModel::GetInstance()->ResetSafeAreaPadding();
         }
         return;
     }
@@ -3726,15 +3674,12 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-            if (type == EdgeType::MARGIN) {
+            if (isMargin) {
                 ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
                     commonCalcDimension.left, commonCalcDimension.right);
-            } else if (type == EdgeType::PADDING) {
+            } else {
                 ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
                     commonCalcDimension.left, commonCalcDimension.right);
-            } else if (type == EdgeType::SAFE_AREA_PADDING) {
-                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
-                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
             }
             return;
         }
@@ -3745,12 +3690,10 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         // use default value.
         length.Reset();
     }
-    if (type == EdgeType::MARGIN) {
+    if (isMargin) {
         ViewAbstractModel::GetInstance()->SetMargin(length);
-    } else if (type == EdgeType::PADDING) {
+    } else {
         ViewAbstractModel::GetInstance()->SetPadding(length);
-    } else if (type == EdgeType::SAFE_AREA_PADDING) {
-        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
@@ -6904,21 +6847,32 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
     BlendApplyType blendApplyType = BlendApplyType::FAST;
     // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
     constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    constexpr int BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN = 2000;
+    constexpr int BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN = 3000;
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN = 5000;
     if (info[0]->IsNumber()) {
         auto blendModeNum = info[0]->ToNumber<int32_t>();
-        if (blendModeNum >= static_cast<int>(BlendMode::NONE) &&
-            blendModeNum <= static_cast<int>(BlendMode::LUMINOSITY)) {
+        if (blendModeNum >= 0 && blendModeNum < static_cast<int>(BlendMode::MAX)) {
             blendMode = static_cast<BlendMode>(blendModeNum);
         } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
             // backward compatibility code, will remove soon
             blendMode = BlendMode::SRC_OVER;
             blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::DST_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
+            blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
         }
     }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
-        if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
-            blendApplyTypeNum <= static_cast<int>(BlendApplyType::OFFSCREEN)) {
+        if (blendApplyTypeNum >= 0 && blendApplyTypeNum < static_cast<int>(BlendApplyType::MAX)) {
             blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
         }
     }
@@ -8439,7 +8393,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("paddingBottom", &JSViewAbstract::SetPaddingBottom, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingLeft", &JSViewAbstract::SetPaddingLeft, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
-    JSClass<JSViewAbstract>::StaticMethod("safeAreaPadding", &JSViewAbstract::SetSafeAreaPadding, opt);
 
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
@@ -8930,11 +8883,6 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
-}
-
-void JSViewAbstract::SetSafeAreaPadding(const JSCallbackInfo& info)
-{
-    ParseMarginOrPadding(info, EdgeType::SAFE_AREA_PADDING);
 }
 
 void JSViewAbstract::SetColorBlend(Color color)

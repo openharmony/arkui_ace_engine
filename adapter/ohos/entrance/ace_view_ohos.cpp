@@ -16,8 +16,8 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include <memory>
-#include "input_manager.h"
 
+#include "input_manager.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/ace_trace.h"
