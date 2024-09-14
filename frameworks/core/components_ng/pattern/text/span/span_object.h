@@ -369,7 +369,6 @@ public:
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
 };
-
 class UrlSpan : public SpanBase {
     DECLARE_ACE_TYPE(UrlSpan, SpanBase);
 
@@ -377,17 +376,17 @@ public:
     UrlSpan() = default;
     explicit UrlSpan(const std::string& urlAddress);
     UrlSpan(const std::string& urlAddress, int32_t start, int32_t end);
-    std::string GetUrlSpanAddress() const&;
+    std::string GetUrlSpanAddress() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
     std::string ToString() const override;
-    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
-
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem,
+        SpanOperation operation) const override;
 private:
     void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);
-    std::string urlAddress_ = "";
+    std::string urlAddress_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H
