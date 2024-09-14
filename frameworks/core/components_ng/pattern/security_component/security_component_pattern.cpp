@@ -22,6 +22,7 @@
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/common/layout/constants.h"
@@ -81,7 +82,7 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else if (res != 0) {
-            LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+            SC_LOG_ERROR("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
             res = 1;
         }
 #endif
@@ -140,7 +141,7 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     if (!pointerEvent->GetPointerItem(pointerId, item)) {
-        LOGW("Get pointer item failed");
+        SC_LOG_WARN("Get pointer item failed");
         return;
     }
 
@@ -153,7 +154,7 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
         return;
     }
     if (res != 0) {
-        LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+        SC_LOG_WARN("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
         res = 1;
     }
     auto jsonNode = JsonUtil::Create(true);
@@ -229,7 +230,7 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
             if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
                 res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
             } else if (res != 0) {
-                LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+                SC_LOG_WARN("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
                 res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
             }
         }
@@ -511,7 +512,7 @@ void SecurityComponentPattern::RegisterSecurityComponentRetry()
             regStatus_ = SecurityComponentRegisterStatus::REGISTERED;
             return;
         } else if (res != Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_SERVICE_NOT_EXIST) {
-            LOGW("Register security component failed, err %{public}d.", res);
+            SC_LOG_WARN("Register security component failed, err %{public}d.", res);
             regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
             return;
         }
@@ -520,7 +521,7 @@ void SecurityComponentPattern::RegisterSecurityComponentRetry()
         std::this_thread::sleep_for(std::chrono::milliseconds(REGISTER_RETRY_INTERVAL));
     }
     regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
-    LOGW("Register security component failed, retry %{public}d", MAX_RETRY_TIMES);
+    SC_LOG_WARN("Register security component failed, retry %{public}d", MAX_RETRY_TIMES);
 }
 
 void SecurityComponentPattern::RegisterSecurityComponent()
@@ -542,7 +543,7 @@ void SecurityComponentPattern::RegisterSecurityComponent()
     taskExecutor->PostTask(
         [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)] {
             if (!SecurityComponentHandler::LoadSecurityComponentService()) {
-                LOGW("load security component service failed.");
+                SC_LOG_WARN("load security component service failed.");
                 return;
             }
             auto context = weakContext.Upgrade();
@@ -570,7 +571,7 @@ void SecurityComponentPattern::UnregisterSecurityComponent()
     if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
         SecurityComponentHandler::UnregisterSecurityComponent(scId_);
     } else {
-        LOGI("security component has not registered, regStatus %{public}d.", regStatus_);
+        SC_LOG_INFO("security component has not registered, regStatus %{public}d.", regStatus_);
     }
     regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     scId_ = -1;
@@ -596,7 +597,7 @@ void SecurityComponentPattern::DoTriggerOnclick(int32_t result)
 void SecurityComponentPattern::DelayReleaseNode(RefPtr<FrameNode>& node)
 {
     if (uiEventHandler_ == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_SECURITY_COMPONENT, "UIEventHandler invalid");
+        SC_LOG_WARN("UIEventHandler invalid");
         return;
     }
     uiEventHandler_->PostTask(
@@ -643,7 +644,7 @@ std::function<int32_t(int32_t)> SecurityComponentPattern::CreateFirstUseDialogCl
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
-        LOGW("ClickEventHandler: security component has not registered.");
+        SC_LOG_WARN("ClickEventHandler: security component has not registered.");
         return -1;
     }
     auto frameNode = GetHost();
@@ -652,7 +653,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
         RegisterSecurityComponentRetry();
     }
     if (regStatus_ != SecurityComponentRegisterStatus::REGISTERED) {
-        LOGW("ClickEventHandler: security component try to register failed.");
+        SC_LOG_WARN("ClickEventHandler: security component try to register failed.");
         return -1;
     }
 
@@ -675,7 +676,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
-        LOGW("KeyEventHandler: security component has not registered.");
+        SC_LOG_WARN("KeyEventHandler: security component has not registered.");
         return -1;
     }
     auto frameNode = GetHost();
@@ -684,7 +685,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
         RegisterSecurityComponentRetry();
     }
     if (regStatus_ != SecurityComponentRegisterStatus::REGISTERED) {
-        LOGW("KeyEventHandler: security component try to register failed.");
+        SC_LOG_WARN("KeyEventHandler: security component try to register failed.");
         return -1;
     }
     auto currentContext = PipelineContext::GetCurrentContext();
