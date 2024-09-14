@@ -215,7 +215,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
     if (!imageCache) {
         return nullptr;
     }
-    return imageCache->GetCacheImgObj(imageInfo.ToString());
+    return imageCache->GetCacheImgObj(imageInfo.ToString(false));
 }
 
 RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
