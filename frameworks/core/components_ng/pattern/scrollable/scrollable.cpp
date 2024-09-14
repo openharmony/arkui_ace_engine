@@ -174,15 +174,14 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         scroll->isDragging_ = false;
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
-            DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
-        panRecognizerNG_->SetIsAllowMouse(false);
-        panRecognizerNG_->SetOnActionStart(actionStart);
-        panRecognizerNG_->SetOnActionUpdate(actionUpdate);
-        panRecognizerNG_->SetOnActionEnd(actionEnd);
-        panRecognizerNG_->SetOnActionCancel(actionCancel);
-    }
+    panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
+        DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizerNG_->SetIsAllowMouse(false);
+    panRecognizerNG_->SetOnActionStart(actionStart);
+    panRecognizerNG_->SetOnActionUpdate(actionUpdate);
+    panRecognizerNG_->SetOnActionEnd(actionEnd);
+    panRecognizerNG_->SetOnActionCancel(actionCancel);
+
     available_ = true;
 }
 
