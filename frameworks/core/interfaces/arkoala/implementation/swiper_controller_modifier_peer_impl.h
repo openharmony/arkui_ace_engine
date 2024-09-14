@@ -25,23 +25,27 @@ class SwiperControllerPeerImpl : public Referenced {
 public:
     SwiperControllerPeerImpl() = default;
 
-    void AddListener(const RefPtr<SwiperController> &listener)
+    void AddTargetController(const WeakPtr<SwiperController> &handler)
     {
-        CHECK_NULL_VOID(listener);
-        listeners_.push_back(listener);
+        CHECK_NULL_VOID(!handler.Invalid());
+        handlers_.push_back(handler);
     }
 
     void TriggerShowNext()
     {
-        for (auto &listener: listeners_) {
-            listener->ShowNext();
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->ShowNext();
+            }
         }
     }
 
     void TriggerShowPrevios()
     {
-        for (auto &listener: listeners_) {
-            listener->ShowPrevious();
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->ShowPrevious();
+            }
         }
     }
 
@@ -49,26 +53,32 @@ public:
     {
         index = index < 0 ? 0 : index;
         bool useAnim = useAnimationOpt && *useAnimationOpt;
-        for (auto &listener: listeners_) {
-            listener->ChangeIndex(index, useAnim);
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->ChangeIndex(index, useAnim);
+            }
         }
     }
 
     void SetFinishCallback(const CommonFunc &callbackFunc)
     {
-        for (auto &listener: listeners_) {
-            listener->SetFinishCallback(callbackFunc);
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->SetFinishCallback(callbackFunc);
+            }
         }
     }
 
     void TriggerFinishAnimation()
     {
-        for (auto &listener: listeners_) {
-            listener->FinishAnimation();
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->FinishAnimation();
+            }
         }
     }
 private:
-    std::vector<RefPtr<SwiperController>> listeners_;
+    std::vector<Ace::WeakPtr<SwiperController>> handlers_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SWIPER_CONTROLLER_PEER_IMPL_H

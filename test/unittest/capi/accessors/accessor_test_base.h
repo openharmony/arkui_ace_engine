@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 
 extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
 
-template <typename Accessor, auto GetAccessorFunc, typename PeerType>
+template <typename AccessorType, auto GetAccessorFunc, typename PeerType>
 class AccessorTestBase : public testing::Test {
 public:
     static void SetUpTestCase()
@@ -66,7 +66,7 @@ private:
         = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
 
 public:
-    inline static const Accessor *accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
+    inline static const AccessorType *accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
     inline static void (*finalyzer_)(PeerType *) = nullptr;
     PeerType *peer_ = nullptr;
 };

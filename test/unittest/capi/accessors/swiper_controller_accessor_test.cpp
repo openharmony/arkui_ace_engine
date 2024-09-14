@@ -56,50 +56,34 @@ public:
     MOCK_METHOD(void, ChangeIndex, (int, bool));
     MOCK_METHOD(void, FinishAnimation, ());
 };
-
-constexpr int INDEX_VALID_VALUE = 10;
-constexpr int EXPECTED_SHOW_NEXT_TIMES = 1;
-constexpr int EXPECTED_SHOW_PREVIOUS_TIMES = 1;
-constexpr int EXPECTED_CHANGE_IDX_TRUE_TIMES = 1;
-constexpr int EXPECTED_CHANGE_IDX_FALSE_TIMES = 3;
-constexpr int EXPECTED_CHANGE_IDX_INVALID_TIMES = 1;
-constexpr int EXPECTED_FLASH_ANIM_TIMES = 3;
 } // namespace
 
 class SwiperControllerAccessorTest : public AccessorTestBase<GENERATED_ArkUISwiperControllerAccessor,
     &GENERATED_ArkUIAccessors::getSwiperControllerAccessor, SwiperControllerPeer> {
 public:
-    static void SetUpTestCase()
-    {
-        AccessorTestBase::SetUpTestCase();
-
-        auto controller = new MockSwiperController();
-        mockSwiperController_ = AceType::Claim(controller);
-        EXPECT_CALL(*controller, ShowNext()).Times(EXPECTED_SHOW_NEXT_TIMES);
-        EXPECT_CALL(*controller, ShowPrevious()).Times(EXPECTED_SHOW_PREVIOUS_TIMES);
-        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, true)).Times(EXPECTED_CHANGE_IDX_TRUE_TIMES);
-        EXPECT_CALL(*controller, ChangeIndex(INDEX_VALID_VALUE, false)).Times(EXPECTED_CHANGE_IDX_FALSE_TIMES);
-        EXPECT_CALL(*controller, ChangeIndex(0, false)).Times(EXPECTED_CHANGE_IDX_INVALID_TIMES);
-        EXPECT_CALL(*controller, FinishAnimation()).Times(EXPECTED_FLASH_ANIM_TIMES);
-    }
-
-    static void TearDownTestCase()
-    {
-        mockSwiperController_ = nullptr;
-
-        AccessorTestBase::TearDownTestCase();
-    }
-
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
 
+        mockSwiperController_ = new MockSwiperController();
+        mockSwiperControllerKeeper_ = AceType::Claim(mockSwiperController_);
+        ASSERT_NE(mockSwiperControllerKeeper_, nullptr);
+
         auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperControllerPeerImpl *>(peer_);
         ASSERT_NE(peerImpl, nullptr);
-        peerImpl->AddListener(mockSwiperController_);
+        peerImpl->AddTargetController(mockSwiperControllerKeeper_);
+
+        ASSERT_NE(mockSwiperController_, nullptr);
     }
 
-    static inline RefPtr<MockSwiperController> mockSwiperController_ = nullptr;
+    void TearDown() override
+    {
+        mockSwiperControllerKeeper_ = nullptr;
+        mockSwiperController_ = nullptr;
+    }
+
+    MockSwiperController *mockSwiperController_ = nullptr;
+    RefPtr<MockSwiperController> mockSwiperControllerKeeper_ = nullptr;
 };
 
 /**
@@ -109,7 +93,11 @@ public:
  */
 HWTEST_F(SwiperControllerAccessorTest, showNextTest, TestSize.Level1)
 {
+    constexpr int EXPECTED_SHOW_NEXT_TIMES = 1;
+
     ASSERT_NE(accessor_->showNext, nullptr);
+
+    EXPECT_CALL(*mockSwiperController_, ShowNext()).Times(EXPECTED_SHOW_NEXT_TIMES);
     accessor_->showNext(peer_);
 }
 
@@ -120,7 +108,11 @@ HWTEST_F(SwiperControllerAccessorTest, showNextTest, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerAccessorTest, showPreviousTest, TestSize.Level1)
 {
+    constexpr int EXPECTED_SHOW_PREVIOUS_TIMES = 1;
+
     ASSERT_NE(accessor_->showPrevious, nullptr);
+
+    EXPECT_CALL(*mockSwiperController_, ShowPrevious()).Times(EXPECTED_SHOW_PREVIOUS_TIMES);
     accessor_->showPrevious(peer_);
 }
 
@@ -131,17 +123,28 @@ HWTEST_F(SwiperControllerAccessorTest, showPreviousTest, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
 {
+    constexpr int INDEX_VALID_VALUE = 10;
+    constexpr int EXPECTED_CHANGE_IDX_TRUE_TIMES = 1;
+    constexpr int EXPECTED_CHANGE_IDX_FALSE_TIMES = 3;
+    constexpr int EXPECTED_CHANGE_IDX_INVALID_TIMES = 1;
+
     ASSERT_NE(accessor_->changeIndex, nullptr);
+
     auto arkNumValid = ArkValue<Ark_Number>(INDEX_VALID_VALUE);
     auto arkNumInvalid = ArkValue<Ark_Number>(INT_MIN);
-    auto arkBoolTrue = ArkValue<Opt_Boolean>(true);
-    auto arkBoolFalse = ArkValue<Opt_Boolean>(false);
-    auto arkBoolUndef = ArkValue<Opt_Boolean>();
+    auto optBoolTrue = ArkValue<Opt_Boolean>(true);
+    auto optBoolFalse = ArkValue<Opt_Boolean>(false);
+    auto optBoolUndef = ArkValue<Opt_Boolean>();
 
-    accessor_->changeIndex(peer_, &arkNumValid, &arkBoolTrue);
-    accessor_->changeIndex(peer_, &arkNumValid, &arkBoolFalse);
-    accessor_->changeIndex(peer_, &arkNumValid, &arkBoolUndef);
+    EXPECT_CALL(*mockSwiperController_, ChangeIndex(INDEX_VALID_VALUE, true)).Times(EXPECTED_CHANGE_IDX_TRUE_TIMES);
+    accessor_->changeIndex(peer_, &arkNumValid, &optBoolTrue);
+
+    EXPECT_CALL(*mockSwiperController_, ChangeIndex(INDEX_VALID_VALUE, false)).Times(EXPECTED_CHANGE_IDX_FALSE_TIMES);
+    accessor_->changeIndex(peer_, &arkNumValid, &optBoolFalse);
+    accessor_->changeIndex(peer_, &arkNumValid, &optBoolUndef);
     accessor_->changeIndex(peer_, &arkNumValid, nullptr);
+
+    EXPECT_CALL(*mockSwiperController_, ChangeIndex(0, false)).Times(EXPECTED_CHANGE_IDX_INVALID_TIMES);
     accessor_->changeIndex(peer_, &arkNumInvalid, nullptr);
 }
 
@@ -152,15 +155,19 @@ HWTEST_F(SwiperControllerAccessorTest, changeIndexTest, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerAccessorTest, finishAnimationTest, TestSize.Level1)
 {
+    constexpr int EXPECTED_FLASH_ANIM_TIMES = 3;
+
     ASSERT_NE(accessor_->finishAnimation, nullptr);
 
     Opt_Function callbackValid = ArkValue<Opt_Function>(0);
     Opt_Function callbackUndef = ArkValue<Opt_Function>();
 
+    EXPECT_CALL(*mockSwiperController_, FinishAnimation()).Times(EXPECTED_FLASH_ANIM_TIMES);
+
     // check initial callback state in target controller
     EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
 
-    // test the finish animation invoking with callback setting
+    // test the finish animation invoking with valid callback setting
     accessor_->finishAnimation(peer_, &callbackValid);
     EXPECT_TRUE(mockSwiperController_->GetFinishCallback());
 
