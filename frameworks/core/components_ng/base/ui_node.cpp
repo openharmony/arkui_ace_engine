@@ -1566,30 +1566,6 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
-int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
-{
-    int32_t updateFrom = 0;
-    for (const auto& child : GetChildren()) {
-        if (child->GetAccessibilityId() == id) {
-            updateFrom += changeIdx;
-            break;
-        }
-        int32_t count = child->FrameCount();
-        updateFrom += count;
-    }
-    return updateFrom;
-}
-
-void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
-{
-    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
-    auto accessibilityId = GetAccessibilityId();
-    auto parent = GetParent();
-    if (parent) {
-        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
-    }
-}
-
 void UINode::GetInspectorValue()
 {
     for (const auto& item : GetChildren()) {
@@ -1617,6 +1593,30 @@ void UINode::GetContainerComponentText(std::string& text)
             break;
         }
         child->GetContainerComponentText(text);
+    }
+}
+
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
+{
+    int32_t updateFrom = 0;
+    for (const auto& child : GetChildren()) {
+        if (child->GetAccessibilityId() == id) {
+            updateFrom += changeIdx;
+            break;
+        }
+        int32_t count = child->FrameCount();
+        updateFrom += count;
+    }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
+    auto accessibilityId = GetAccessibilityId();
+    auto parent = GetParent();
+    if (parent) {
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG
