@@ -934,8 +934,7 @@ public:
     void SetFitContentMode(WebLayoutMode layoutMode);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
-    void ExecuteAction(int64_t accessibilityId, AceAction action,
-        const std::map<std::string, std::string>& actionArguments);
+    void ExecuteAction(int64_t accessibilityId, AceAction action);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
