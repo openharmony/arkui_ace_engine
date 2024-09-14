@@ -300,7 +300,6 @@ void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        // Must first verify that the blankWindow is still alive
         CHECK_NULL_VOID(self->blankWindow_);
         auto surfaceNode = self->session_->GetSurfaceNode();
         if (surfaceNode) {
@@ -334,7 +333,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         CHECK_NULL_VOID(self->snapshotWindow_);
         if (self->isBlankForSnapShot_) {
             self->SetOpacityAnimation(self->snapshotWindow_);
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank window snapshot, id %{public}d, name %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank animation id %{public}d, name %{public}s",
                 self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
         }
         auto host = self->GetHost();
@@ -670,8 +669,8 @@ void WindowScene::SetOpacityAnimation(RefPtr<FrameNode>& window)
     RefPtr<Curve> curve = Curves::LINEAR;
     auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(0);
     effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, ANIMATION_DURATION));
-    auto windowContext = window->GetRenderContext();
-    CHECK_NULL_VOID(windowContext);
-    windowContext->UpdateChainedTransition(effect);
+    auto context = window->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateChainedTransition(effect);
 }
 } // namespace OHOS::Ace::NG

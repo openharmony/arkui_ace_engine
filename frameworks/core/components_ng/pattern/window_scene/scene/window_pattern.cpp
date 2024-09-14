@@ -430,7 +430,7 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     snapshotWindow_->MarkModifyDone();
 }
 
-bool WindowPattern::IsSnapShotSizeChanged()
+bool WindowPattern::IsSnapshotSizeChanged()
 {
     // pc and pad use the same snapshot size
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, false);
@@ -438,9 +438,11 @@ bool WindowPattern::IsSnapShotSizeChanged()
     Rosen::WSRect lastRect = session_->GetLastLayoutRect();
     Rosen::WSRect curRect = session_->GetLayoutRect();
     if (!lastRect.IsInvalid() && lastRect != curRect && !session_->GetShowRecent()) {
-        return false;
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id %{public}d, name %{public}s",
+            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
+        return true;
     }
-    return true;
+    return false;
 }
 
 void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
@@ -451,7 +453,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     isBlankForSnapShot_ = false;
 
-    if (IsSnapShotSizeChanged()) {
+    if (IsSnapshotSizeChanged()) {
         isBlankForSnapShot_ = true;
         CreateBlankWindow(snapshotWindow_);
         return;

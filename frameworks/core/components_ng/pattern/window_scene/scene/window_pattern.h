@@ -105,7 +105,7 @@ private:
     void SetWindowSceneConsumed(int32_t action);
     void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateSnapshotWindowProperty();
-    bool IsSnapShotSizeChanged();
+    bool IsSnapshotSizeChanged();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;
