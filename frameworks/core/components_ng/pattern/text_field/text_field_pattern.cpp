@@ -2291,6 +2291,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     auto lastCaretIndex = selectController_->GetCaretIndex();
     if (mouseStatus_ != MouseStatus::MOVE) {
         selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+        UpdateCaretInfoToController();
     }
     StartTwinkling();
     SetIsSingleHandle(true);
