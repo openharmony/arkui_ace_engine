@@ -1061,6 +1061,8 @@ private:
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
     void ResetAfterTextChange() override {};
+    void AddOprationWhenAddImage(int32_t beforeCaretPos);
+    void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
