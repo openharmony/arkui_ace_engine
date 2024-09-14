@@ -176,6 +176,7 @@ const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
+const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const int32_t REQUEST_CODE = -1;
 constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
@@ -1947,6 +1948,8 @@ void UIContentImpl::Destroy()
         ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_PERFORMANCE_MONITOR_KEY, this, EnableSystemParameterPerformanceMonitorCallback);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
@@ -3382,6 +3385,14 @@ void UIContentImpl::EnableSystemParameterTraceInputEventCallback(const char* key
     }
 }
 
+void UIContentImpl::EnableSystemParameterPerformanceMonitorCallback(
+    const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetPerformanceMonitorEnabled(strcmp(value, "true") == 0);
+    }
+}
+
 void UIContentImpl::AddWatchSystemParameter()
 {
     SystemProperties::AddWatchSystemParameter(ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
@@ -3393,6 +3404,8 @@ void UIContentImpl::AddWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::AddWatchSystemParameter(
         ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_PERFORMANCE_MONITOR_KEY, this, EnableSystemParameterPerformanceMonitorCallback);
 }
 
 std::vector<Ace::RectF> UIContentImpl::GetOverlayNodePositions() const

@@ -800,6 +800,11 @@ void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
     traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
 }
 
+void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
+{
+    acePerformanceMonitorEnable_ = performanceMonitorEnable;
+}
+
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
