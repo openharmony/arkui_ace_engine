@@ -668,6 +668,13 @@ struct ArkUIdividerOptions {
     ArkUI_Float32 endMargin;
 };
 
+struct ArkUIMenuDividerOptions {
+    ArkUIDimensionType strokeWidth;
+    ArkUI_Uint32 color;
+    ArkUIDimensionType startMargin;
+    ArkUIDimensionType endMargin;
+};
+
 struct ArkUIBadgeParam {
     ArkUI_Bool isPositionXy;
     ArkUI_Bool isDefaultFontSize;
@@ -3500,6 +3507,12 @@ struct ArkUIMenuModifier {
     void (*resetRadius)(ArkUINodeHandle node);
     void (*setMenuWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMenuWidth)(ArkUINodeHandle node);
+    void (*setMenuItemDivider)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo);
+    void (*resetMenuItemDivider)(ArkUINodeHandle node);
+    void (*setMenuItemGroupDivider)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemGroupDividerInfo);
+    void (*resetMenuItemGroupDivider)(ArkUINodeHandle node);
+    void (*setSubMenuExpandingMode)(ArkUINodeHandle node, ArkUI_Int32 modeParam);
+    void (*resetSubMenuExpandingMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIWaterFlowModifier {
