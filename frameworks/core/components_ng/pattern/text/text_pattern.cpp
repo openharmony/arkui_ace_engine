@@ -162,7 +162,12 @@ void TextPattern::ResetSelection()
 
 void TextPattern::InitSelection(const Offset& pos)
 {
-    int32_t extend = pManager_->GetGlyphIndexByCoordinate(pos, true);
+    auto selectionOffset = pos;
+    if (GreatNotEqual(selectionOffset.GetY(), pManager_->GetHeight())) {
+        selectionOffset.SetX(contentRect_.Width());
+        selectionOffset.SetY(pManager_->GetHeight());
+    }
+    int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
     if (IsLineBreakOrEndOfParagraph(extend)) {
         extend--;
     }
