@@ -189,6 +189,7 @@ public:
     }
 
     void SetGestureEvent();
+    void InitMouseEvent();
 
     static float GetHandleDiameter();
     bool IsDraggingHandle(bool isFirst)
@@ -228,6 +229,7 @@ private:
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
     void HandlePanCancel();
+    void HandleMouseEvent(const MouseInfo& info);
 
     bool IsHandlesInSameLine();
     bool IsFirstHandleMoveStart(const Offset& touchOffset);
