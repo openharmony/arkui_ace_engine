@@ -93,6 +93,10 @@ public:
     MOCK_METHOD(int32_t, GetGridItemColumnSpan, (), (override));
     MOCK_METHOD(bool, GetIsAccessibilityFocus, (), (override));
     MOCK_METHOD(bool, GetIsPluralLineSupported, (), (override));
+    MOCK_METHOD(bool, GetIsAccessibilityGroup, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityLevel, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityDescription, (), (override));
+    MOCK_METHOD(std::string, GetAccessibilityText, (), (override));
 };
 
 class WebPatternTouchTestNg : public testing::Test {
