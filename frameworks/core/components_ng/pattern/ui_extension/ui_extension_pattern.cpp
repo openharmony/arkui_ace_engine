@@ -320,6 +320,16 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     NotifyForeground();
 }
 
+bool UIExtensionPattern::IsModalUec()
+{
+    return usage_ == UIExtensionUsage::MODAL;
+}
+
+bool UIExtensionPattern::IsForeground()
+{
+    return state_ == AbilityState::FOREGROUND;
+}
+
 UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
 {
     if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
