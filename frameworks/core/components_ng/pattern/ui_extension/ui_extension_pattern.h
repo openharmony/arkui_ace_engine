@@ -138,6 +138,8 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
+    bool IsModalUec();
+    bool IsForeground();
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
         return sessionWrapper_;
