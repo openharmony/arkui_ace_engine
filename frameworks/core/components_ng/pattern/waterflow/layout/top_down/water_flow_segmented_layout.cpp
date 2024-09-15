@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG {
 bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
 {
     if (info->segmentTails_.empty()) {
-        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Sections are not initialized.");
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section is empty.");
         return false;
     }
     if (childrenCnt - 1 != info->segmentTails_.back()) {
@@ -49,14 +49,17 @@ bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBas
 void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 {
     wrapper_ = wrapper;
+    info_->childrenCount_ = wrapper_->GetTotalChildCount();
+    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
+    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
+        return;
+    }
+
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     info_->axis_ = axis_ = props->GetAxis();
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
 
     Init(idealSize);
-    if (!IsDataValid(info_, info_->childrenCount_)) {
-        return;
-    }
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
@@ -80,7 +83,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (!IsDataValid(info_, info_->childrenCount_)) {
+    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
         return;
     }
 
@@ -148,13 +151,8 @@ float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
 
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
-    info_->childrenCount_ = wrapper_->GetTotalChildCount();
-    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
-        if (info_->segmentTails_.empty()) {
-            info_->InitSegments(sections, 0);
-        }
         if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();

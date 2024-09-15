@@ -778,5 +778,9 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
         OnSectionChanged(start);
     }
     sectionChangeStartPos_.clear();
+
+    if (sections_ && layoutInfo_->segmentTails_.empty()) {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
+    }
 }
 } // namespace OHOS::Ace::NG
