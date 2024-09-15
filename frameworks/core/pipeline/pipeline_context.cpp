@@ -1626,7 +1626,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
             } else {
-                 ++iter;
+                ++iter;
             }
         }
         if (lastMoveEvent.has_value()) {
