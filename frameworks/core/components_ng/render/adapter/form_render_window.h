@@ -91,10 +91,14 @@ public:
     void OnHide() override;
     void FlushTasks() override;
 
+    void Lock() override;
+    void Unlock() override;
+
 private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
 #ifdef ENABLE_ROSEN_BACKEND
+    static std::recursive_mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;
     OnVsyncCallback onVsyncCallback_;
