@@ -4429,6 +4429,7 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsBorderRadius", jsVal, checkList)) {
+        LOGW("args need a string or number or object");
         ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});
         return;
     }
@@ -6182,9 +6183,6 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
 NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
     NG::DragPreviewOption previewOption;
-    if (!info[0]->IsObject()) {
-        return previewOption;
-    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
     bool isAuto = true;
@@ -6535,7 +6533,7 @@ PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info
     }
     RefPtr<JsFunction> jsFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillDismiss = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                           node = frameNode](int32_t reason) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -7711,8 +7709,9 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
         std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
-        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
-        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback),
+        std::move(onDetentsDidChangeCallback), std::move(onWidthDidChangeCallback),
+        std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
 }
 
 void JSViewAbstract::ParseSheetStyle(
@@ -8039,7 +8038,8 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
     std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
     std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
     std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
-    std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
+    std::function<void(const float)>& onDetentsDidChange,
+    std::function<void(const float)>& onWidthDidChange,
     std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack)
 {
     auto shouldDismissFunc = paramObj->GetProperty("shouldDismiss");
@@ -8398,11 +8398,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundImageResizable", &JSViewAbstract::JsBackgroundImageResizable);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("backgroundEffect", &JSViewAbstract::JsBackgroundEffect);
-    JSClass<JSViewAbstract>::StaticMethod("backgroundImageResizable", &JSViewAbstract::JsBackgroundImageResizable);
     JSClass<JSViewAbstract>::StaticMethod("foregroundBlurStyle", &JSViewAbstract::JsForegroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
@@ -8448,7 +8448,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBrightness", &JSViewAbstract::JsBackgroundBrightness);
-    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightnessInternal", &JSViewAbstract::JsBackgroundBrightnessInternal);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightnessInternal",
+        &JSViewAbstract::JsBackgroundBrightnessInternal);
     JSClass<JSViewAbstract>::StaticMethod("foregroundBrightness", &JSViewAbstract::JsForegroundBrightness);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
@@ -8685,7 +8686,6 @@ void JSViewAbstract::JsOnPreDrag(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsOnPreDrag", jsVal, checkList)) {
         return;
     }
-
     RefPtr<JsDragFunction> jsDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(jsVal));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onPreDrag = [execCtx = info.GetExecutionContext(), func = std::move(jsDragFunc), node = frameNode](
@@ -9599,7 +9599,6 @@ void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)
                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, GestureJudgeResult::CONTINUE);
         ACE_SCORING_EVENT("onGestureJudgeBegin");
-        PipelineContext::SetCallBackNode(node);
         return func->Execute(gestureInfo, info);
     };
     ViewAbstractModel::GetInstance()->SetOnGestureJudgeBegin(std::move(onGestureJudgefunc));
@@ -9613,7 +9612,7 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
     }
 
     auto jsOnTouchInterceptFunc = AceType::MakeRefPtr<JsTouchInterceptFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTouchInterceptfunc = [execCtx = info.GetExecutionContext(), func = jsOnTouchInterceptFunc, node = frameNode](
                                     TouchEventInfo& info) -> NG::HitTestMode {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, NG::HitTestMode::HTMDEFAULT);
@@ -9811,13 +9810,15 @@ void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 {
-    Color foregroundColor = Color::TRANSPARENT;
+    Color foregroundColor;
     ForegroundColorStrategy strategy;
     if (ParseJsColorStrategy(info[0], strategy)) {
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
-    ParseJsColor(info[0], foregroundColor);
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 
@@ -10002,6 +10003,59 @@ bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
         }
     }
     return false;
+}
+
+std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
+                                                                         NG::DrawingContext& context) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+        contextObj->SetPropertyObject("size", sizeObj);
+
+        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
+        sizeInPxObj->SetProperty<float>("height", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.height);
+        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
+
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        ScopeRAII scope(env);
+
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        if (unwrapCanvas) {
+            unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
+        }
+        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+        contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+        napi_wrap(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+
+        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
+        if (unwrapCanvas) {
+            unwrapCanvas->RestoreCanvas();
+            unwrapCanvas->ResetCanvas();
+        }
+    };
+    return drawCallback;
 }
 
 bool JSViewAbstract::ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty)
@@ -10209,11 +10263,11 @@ void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::D
                                modifier = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto node = frameNode.Upgrade();
-                JSRef<JSVal> params[SECOND_INDEX];
+                JSRef<JSVal> params[PARAMETER_LENGTH_SECOND];
                 params[0] = modifier;
                 params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
                 PipelineContext::SetCallBackNode(node);
-                func->ExecuteJS(SECOND_INDEX, params);
+                func->ExecuteJS(PARAMETER_LENGTH_SECOND, params);
             };
             option.onApply = onApply;
         }
@@ -10266,59 +10320,6 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     if (ParseJsDimensionVpNG(heightValue, height, true)) {
         properties.height = height;
     }
-}
-
-std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
-    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
-{
-    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
-                                                                         NG::DrawingContext& context) -> void {
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
-        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-        objectTemplate->SetInternalFieldCount(1);
-        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-        contextObj->SetPropertyObject("size", sizeObj);
-
-        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
-        sizeInPxObj->SetProperty<float>("height", context.height);
-        sizeInPxObj->SetProperty<float>("width", context.height);
-        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
-
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-        ScopeRAII scope(env);
-
-        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
-        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
-        if (unwrapCanvas) {
-            unwrapCanvas->SaveCanvas();
-            unwrapCanvas->ClipCanvas(context.width, context.height);
-        }
-        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-        contextObj->SetPropertyObject("canvas", jsCanvasVal);
-
-        auto jsVal = JSRef<JSVal>::Cast(contextObj);
-        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
-
-        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-        if (unwrapCanvas) {
-            unwrapCanvas->RestoreCanvas();
-            unwrapCanvas->ResetCanvas();
-        }
-    };
-    return drawCallback;
 }
 
 void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
@@ -10467,36 +10468,6 @@ void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
-void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
-    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
-{
-    auto vm = info.GetVm();
-    auto globalObj = JSNApi::GetGlobalObject(vm);
-    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
-    JsiValue jsiValue(globalFunc);
-    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
-    if (globalFuncRef->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
-        if (!modifierObj->IsObject()) {
-            symbolApply = nullptr;
-        } else {
-            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                               modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto node = frameNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                JSRef<JSVal> params[2];
-                params[0] = modifierParam;
-                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
-                PipelineContext::SetCallBackNode(node);
-                func->ExecuteJS(2, params);
-            };
-            symbolApply = onApply;
-        }
-    }
-}
-
 int32_t JSViewAbstract::ParseJsPropertyId(const JSRef<JSVal>& jsValue)
 {
     int32_t resId = 0;
@@ -10545,6 +10516,7 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
+
 void JSViewAbstract::ParseOnCreateMenu(
     const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback)
 {
@@ -10562,6 +10534,7 @@ void JSViewAbstract::ParseOnCreateMenu(
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, menuParams);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, menuParams);
+
         pipelineContext->UpdateCurrentActiveNode(node);
         auto menuItem = func->ExecuteWithValue(systemMenuItems);
         if (!menuItem->IsArray()) {
@@ -10732,5 +10705,35 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetSymbolOptionApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        if (!modifierObj->IsObject()) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                               modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                JSRef<JSVal> params[2];
+                params[0] = modifierParam;
+                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+                PipelineContext::SetCallBackNode(node);
+                func->ExecuteJS(2, params);
+            };
+            symbolApply = onApply;
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework
