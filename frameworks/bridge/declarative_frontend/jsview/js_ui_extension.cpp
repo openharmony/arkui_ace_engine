@@ -357,23 +357,23 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
         for (auto [strName, type] : placeholderTypeTable) {
             JSRef<JSVal> typeContent = contentMapObj->GetProperty(strName.c_str());
             if (!typeContent->IsObject()) {
-                break;
+                continue;
             }
             auto componentContentObj = JSRef<JSObject>::Cast(typeContent);
             JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
             if (!builderNode->IsObject()) {
-                break;
+                continue;
             }
             auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
             JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
             if (nodePtr.IsEmpty()) {
-                break;
+                continue;
             }
             const auto* vm = nodePtr->GetEcmaVM();
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
             auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
             if (!frameNode) {
-                break;
+                continue;
             }
             RefPtr<NG::FrameNode> placeholderNode = AceType::Claim(frameNode);
             placeholderMap.insert({type, placeholderNode});
