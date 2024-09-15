@@ -30,6 +30,8 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
+#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -1217,6 +1219,43 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
 }
 
+void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
+    const std::vector<double> &ratioList)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
+
+Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
+{
+    Color defaultColor = Color::TRANSPARENT;
+    CHECK_NULL_RETURN(frameNode, defaultColor);
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, defaultColor);
+    return target->GetFrontColorBlendValue(defaultColor);
+}
+
+void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->ClearUserOnAreaChange();
+    pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
+}
+
+void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback();
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
 void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -1858,7 +1897,6 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     }
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
-    CHECK_NULL_VOID(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -2819,6 +2857,7 @@ void ViewAbstract::SetHeight(FrameNode* frameNode, const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    // get previously user defined ideal width
     std::optional<CalcLength> width = std::nullopt;
     auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (layoutConstraint && layoutConstraint->selfIdealSize) {
@@ -3460,11 +3499,6 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption)
-{
-    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
-}
-
 void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3472,6 +3506,11 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
     if (target) {
         target->UpdateForegroundEffect(radius);
     }
+}
+
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }
 
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
@@ -4745,43 +4784,6 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, false);
     return target->GetRenderGroupValue(false);
-}
-
-void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
-    const std::vector<double> &ratioList)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    frameNode->CleanVisibleAreaUserCallback();
-    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
-}
-
-Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
-{
-    Color defaultColor = Color::TRANSPARENT;
-    CHECK_NULL_RETURN(frameNode, defaultColor);
-    const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, defaultColor);
-    return target->GetFrontColorBlendValue(defaultColor);
-}
-
-void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    frameNode->ClearUserOnAreaChange();
-    pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
-}
-
-void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    frameNode->CleanVisibleAreaUserCallback();
-    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
 void ViewAbstract::SetLayoutRect(FrameNode* frameNode, const NG::RectF& rect)
