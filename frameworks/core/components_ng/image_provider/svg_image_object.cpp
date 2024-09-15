@@ -36,6 +36,7 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
 
 std::string SvgImageObject::GetDumpInfo()
 {
+    CHECK_NULL_RETURN(svgDomBase_, "");
     return svgDomBase_->GetDumpInfo();
 }
 
