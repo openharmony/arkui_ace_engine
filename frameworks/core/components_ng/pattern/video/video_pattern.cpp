@@ -612,8 +612,9 @@ void VideoPattern::OnResolutionChange() const
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void VideoPattern::OnStartRenderFrameCb() const
+void VideoPattern::OnStartRenderFrameCb()
 {
+    isInitialState_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto video = AceType::DynamicCast<VideoNode>(host);
