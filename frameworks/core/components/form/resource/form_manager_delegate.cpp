@@ -225,7 +225,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
     {
         std::lock_guard<std::mutex> lock(recycleMutex_);
-        recycleStatus_ == RecycleStatus::RECOVERED;
+        recycleStatus_ = RecycleStatus::RECOVERED;
     }
 
     isDynamic_ = formInfo.isDynamic;
