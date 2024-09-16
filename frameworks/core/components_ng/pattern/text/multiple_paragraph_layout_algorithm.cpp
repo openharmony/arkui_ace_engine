@@ -296,7 +296,9 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(
     }
     auto baselineOffset = layoutProperty->GetBaselineOffset();
     if (baselineOffset.has_value()) {
-        modifier->SetBaselineOffset(baselineOffset.value());
+        modifier->SetBaselineOffset(baselineOffset.value(), textStyle);
+    } else {
+        modifier->SetBaselineOffset(textStyle.GetBaselineOffset(), textStyle, true);
     }
 }
 
