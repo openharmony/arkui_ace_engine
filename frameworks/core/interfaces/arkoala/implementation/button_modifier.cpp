@@ -22,29 +22,52 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 
+namespace OHOS::Ace::NG {
+struct ButtonOptions {
+    std::optional<ButtonType> type;
+    std::optional<ButtonRole> role;
+    std::optional<bool> stateEffect;
+    std::optional<ControlSize> controlSize;
+    std::optional<ButtonStyleMode> buttonStyle;
+};
+} // OHOS::Ace::NG
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+ButtonOptions Convert(const Ark_ButtonOptions& src)
+{
+    ButtonOptions options;
+    options.type = OptConvert<ButtonType>(src.type);
+    options.role = OptConvert<ButtonRole>(src.role);
+    options.stateEffect = OptConvert<bool>(src.stateEffect);
+    options.controlSize = OptConvert<ControlSize>(src.controlSize);
+    options.buttonStyle = OptConvert<ButtonStyleMode>(src.buttonStyle);
+    return options;
+}
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ButtonInterfaceModifier {
 void SetButtonOptions0Impl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetType(frameNode, (ArkUI_Int32)ButtonType::CAPSULE);
-    ButtonModelNG::SetRole(frameNode, ButtonRole::NORMAL);
-    ButtonModelNG::SetStateEffect(frameNode, true);
-    ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);
-    ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
+    // safe it empty for save default values
 }
 void SetButtonOptions1Impl(Ark_NativePointer node,
                            const Ark_ButtonOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(options->type, ButtonType::CAPSULE));
-    ButtonModelNG::SetRole(frameNode, Converter::ConvertOrDefault(options->role, ButtonRole::NORMAL));
-    ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(options->stateEffect, true));
-    ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(options->controlSize, ControlSize::NORMAL));
-    ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(options->buttonStyle,
-                                                                         ButtonStyleMode::EMPHASIZE));
+    CHECK_NULL_VOID(options);
+    auto buttonOptions = Converter::Convert<ButtonOptions>(*options);
+    if (buttonOptions.type) {
+        ButtonModelNG::SetType(frameNode, static_cast<int>(buttonOptions.type.value()));
+    }
+    if (buttonOptions.stateEffect) {
+        ButtonModelNG::SetStateEffect(frameNode, buttonOptions.stateEffect.value());
+    }
+    ButtonModelNG::SetRole(frameNode, buttonOptions.role);
+    ButtonModelNG::SetControlSize(frameNode, buttonOptions.controlSize);
+    ButtonModelNG::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
                            const ResourceStr* label,
