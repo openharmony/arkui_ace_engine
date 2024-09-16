@@ -2410,6 +2410,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
         static_cast<uint32_t>(reason));
+    bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
@@ -2447,6 +2448,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
+        context->FireNotifyIsSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
     if (safeAreaManager) {
         DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
@@ -2984,7 +2986,8 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
 
-void UIContentImpl::OnFormSurfaceChange(float width, float height)
+void UIContentImpl::OnFormSurfaceChange(float width, float height, OHOS::Rosen::WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2997,7 +3000,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     ContainerScope scope(instanceId_);
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, formWidth, formHeight);
-    pipelineContext->OnSurfaceChanged(formWidth, formHeight);
+    pipelineContext->OnSurfaceChanged(formWidth, formHeight, static_cast<WindowSizeChangeReason>(type), rsTransaction);
 }
 
 void UIContentImpl::SetFormBackgroundColor(const std::string& color)

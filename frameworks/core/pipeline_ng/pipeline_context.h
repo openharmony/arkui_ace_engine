@@ -119,6 +119,20 @@ public:
         return focusOnNodeCallback_;
     }
 
+    void SetNotifySizeChangeReasonCallback(const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
+    {
+        notifySizeChangeReasonCallback_ = callback;
+    }
+
+    void FireNotifyIsSizeChangeByRotateCallback(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    {
+        if (notifySizeChangeReasonCallback_) {
+            notifySizeChangeReasonCallback_(isRotate, rsTransaction);
+        }
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -1126,6 +1140,8 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> notifySizeChangeReasonCallback_;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
