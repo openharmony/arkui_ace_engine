@@ -3083,11 +3083,19 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
 // returns a node's offset relative to window 
 // and consider every ancestor node's graphic transform rotate properties
 // ancestor will check boundary of window scene(exclude)
-OffsetF FrameNode::GetPositionToWindowWithTransform() const
+OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    auto rect = context->GetPaintRectWithoutTransform();
+    OffsetF offset;
+    if (fromBottom == false) {
+        offset = rect.GetOffset();
+    } else {
+        OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
+        offset = offsetBottom;
+    }
+    
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);

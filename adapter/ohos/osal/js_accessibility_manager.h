@@ -453,7 +453,7 @@ private:
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
-
+    bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext);
 

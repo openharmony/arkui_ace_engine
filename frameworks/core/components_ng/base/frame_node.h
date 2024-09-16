@@ -437,7 +437,7 @@ public:
 
     OffsetF GetPositionToScreenWithTransform();
 
-    OffsetF GetPositionToWindowWithTransform() const;
+    OffsetF GetPositionToWindowWithTransform(bool fromBottom = false) const;
 
     OffsetF GetTransformRelativeOffset() const;
 
