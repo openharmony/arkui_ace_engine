@@ -123,7 +123,7 @@ class AsyncAddComputedV2 {
       .then(AsyncAddComputedV2.run)
       .catch(error => {
         stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
-        throw error;
+        _arkUIUncaughtPromiseError(error);
       });
     }
     AsyncAddComputedV2.computedVars.push({target: target, name: name});

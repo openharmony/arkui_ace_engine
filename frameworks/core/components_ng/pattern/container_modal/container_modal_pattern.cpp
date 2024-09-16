@@ -662,6 +662,18 @@ void ContainerModalPattern::SubscribeContainerModalButtonsRectChange(
     controlButtonsRectChangeCallback_ = std::move(callback);
 }
 
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    rect.SetRect(padding.Offset().GetX(), padding.Offset().GetY() + titleHeight, rect.Width() - padding.Width(),
+        rect.Height() - padding.Height() - titleHeight);
+}
+
 void ContainerModalPattern::CallButtonsRectChange()
 {
     CHECK_NULL_VOID(controlButtonsRectChangeCallback_);

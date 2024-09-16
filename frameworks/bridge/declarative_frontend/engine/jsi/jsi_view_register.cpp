@@ -1266,6 +1266,25 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JSHandleUncaughtException(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    auto nativeEngine = engine->GetNativeEngine();
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+    CHECK_NULL_RETURN(arkNativeEngine, panda::JSValueRef::Undefined(vm));
+    NapiUncaughtExceptionCallback callback = arkNativeEngine->GetNapiUncaughtExceptionCallback();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> exception = firstArg->ToObject(vm);
+    callback(arkNativeEngine->ArkValueToNapiValue(reinterpret_cast<napi_env>(arkNativeEngine), exception));
+    return panda::JSValueRef::Undefined(vm);
+}
+
 #ifdef FORM_SUPPORTED
 void JsRegisterFormViews(
     BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload, void* nativeEngine)
@@ -1333,6 +1352,9 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm,
+        panda::StringRef::NewFromUtf8(vm, "_arkUIUncaughtPromiseError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSHandleUncaughtException));
 
     JsBindFormViews(globalObj, formModuleList, nativeEngine);
 
@@ -1512,6 +1534,9 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm,
+        panda::StringRef::NewFromUtf8(vm, "_arkUIUncaughtPromiseError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSHandleUncaughtException));
 
     BindingTarget focusControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),

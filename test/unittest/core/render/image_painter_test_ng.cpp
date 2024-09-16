@@ -61,7 +61,18 @@ NG::RectF dstRect_ { 1, 1, 1, 1 };
 NG::PointF pointF_ { 10.0, 10.0 };
 } // namespace
 
-class ImagePainterTestNg : public testing::Test {};
+class ImagePainterTestNg : public testing::Test {
+public:
+    void CallBack(Testing::MockCanvas& rSCanvas);
+};
+
+void ImagePainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
+{
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
+}
 
 /**
  * @tc.name: ImagePainterTestNg_DrawImage1
@@ -70,13 +81,12 @@ class ImagePainterTestNg : public testing::Test {};
  */
 HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
 {
+    Testing::MockCanvas* canvasPtr = new Testing::MockCanvas();
+    Testing::MockCanvas& canvas = *canvasPtr;
     /**
      * @tc.steps1: build a imagePainter and imagePaintConfig object.
      */
-    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
-    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
-    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
-    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
+    CallBack(canvas);
     RefPtr<NG::CanvasImage> canvasImage;
     NG::ImagePainter imagePainter(canvasImage);
     NG::ImagePaintConfig imagePaintConfig;
@@ -85,7 +95,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
      * @tc.steps2: callback DrawImage.
      * @tc.expected: expect imagePainter.canvasImage_ is null.
      */
-    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawImage(canvas, OFFSETF, SIZE);
     EXPECT_EQ(imagePainter.canvasImage_, nullptr);
 
     /**
@@ -98,12 +108,12 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
      * @tc.steps4: callback DrawImage.
      * @tc.expected: expect imagePainter.canvasImage_ is not null.
      */
-    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawImage(canvas, OFFSETF, SIZE);
     ASSERT_NE(imagePainter.canvasImage_, nullptr);
 
     imagePaintConfig.isSvg_ = true;
     imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>(imagePaintConfig);
-    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawImage(canvas, OFFSETF, SIZE);
 
     /**
      * @tc.steps5: Assign values to call parameters.
@@ -116,7 +126,7 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
      * @tc.steps6: callback DrawImage.
      * @tc.expected: expect contentRect.Width and contentRect.Height are 1.
      */
-    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawImage(canvas, OFFSETF, SIZE);
     EXPECT_EQ(CONTENTRECT.Width(), 1);
     EXPECT_EQ(CONTENTRECT.Height(), 1);
 
@@ -128,8 +138,9 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
     std::vector<ObscuredReasons> reasons;
     reasons.emplace_back(static_cast<ObscuredReasons>(0));
     imagePainter.canvasImage_->paintConfig_->obscuredReasons_ = reasons;
-    imagePainter.DrawImage(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawImage(canvas, OFFSETF, SIZE);
     EXPECT_NE(imagePainter.canvasImage_, nullptr);
+    testing::Mock::AllowLeak(canvasPtr);
 }
 
 /**
@@ -139,9 +150,13 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImage1, TestSize.Level1)
  */
 HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration001, TestSize.Level1)
 {
+    Testing::MockCanvas* canvasPtr = new Testing::MockCanvas();
+    Testing::MockCanvas& canvas = *canvasPtr;
+
     /**
      * @tc.steps1: create a imagePainter and imagePaintConfig object.
      */
+    CallBack(canvas);
     RefPtr<NG::CanvasImage> canvasImage;
     NG::ImagePainter imagePainter(canvasImage);
     NG::ImagePaintConfig imagePaintConfig;
@@ -156,9 +171,9 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration001, TestSize.Lev
      * @tc.steps3: call DrawObscuration.
      * @tc.expected: expect canvasImage_.borderRadiusXY_ is null
      */
-    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawObscuration(canvas, OFFSETF, SIZE);
     imagePainter.canvasImage_->paintConfig_->isSvg_ = true;
-    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawObscuration(canvas, OFFSETF, SIZE);
     EXPECT_EQ(imagePainter.canvasImage_->paintConfig_->borderRadiusXY_, nullptr);
     /**
      * @tc.steps4: set radiusXY to canvasImage_.borderRadiusXY_ and call DrawObscuration
@@ -166,8 +181,9 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration001, TestSize.Lev
      */
     NG::BorderRadiusArray radiusXY = { pointF_, pointF_, pointF_, pointF_ };
     imagePainter.canvasImage_->paintConfig_->borderRadiusXY_ = std::make_shared<NG::BorderRadiusArray>(radiusXY);
-    imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
+    imagePainter.DrawObscuration(canvas, OFFSETF, SIZE);
     EXPECT_NE(imagePainter.canvasImage_->paintConfig_->borderRadiusXY_, nullptr);
+    testing::Mock::AllowLeak(canvasPtr);
 }
 
 /**
@@ -783,5 +799,254 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize002, TestSiz
     NG::ImagePainter::CalculateBgImageSize(boxPaintSize2, srcSize2, bgImageSizeOpt2);
     auto width = boxPaintSize2.Width();
     EXPECT_EQ(width, 0);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_DrawImageWithRepeat12
+ * @tc.desc: Test cast to CirclePainterTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImageWithRepeat12, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: build a imagePainter object.
+     */
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::ImagePaintConfig imagePaintConfig;
+
+    /**
+     * @tc.steps2 build a pixelMapImage object.
+     */
+    imagePainter.canvasImage_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    imagePainter.canvasImage_->paintConfig_ = std::make_unique<NG::ImagePaintConfig>();
+    NG::RectF srcRect_(1.0f, 1.0f, 0.0001f, 0.0001f);
+
+    /**
+     * @tc.steps3callback DrawImageWithRepeat.
+     * @tc.expected: expect NearZero(singleImageHeight).
+     */
+    imagePainter.canvasImage_->paintConfig_->dstRect_ = srcRect_;
+    imagePainter.DrawImageWithRepeat(testingCanvas, CONTENTRECT);
+    EXPECT_EQ(CONTENTRECT.Width(), 1);
+    EXPECT_EQ(CONTENTRECT.Height(), 1);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_CalculateBgWidth13
+ * @tc.desc: Test cast to CalculateBgWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImageSize13, TestSize.Level1)
+{
+    srcSize = { 2, 1 };
+    BackgroundImageSize backgroundImageSize(
+        BackgroundImageSizeType::PERCENT, 100, BackgroundImageSizeType::PERCENT, 100);
+    const std::optional<BackgroundImageSize>& bgImageSizeOpt = backgroundImageSize;
+    auto sizeRet = NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt);
+    EXPECT_EQ(boxPaintSize_.Width() * bgImageSizeOpt.value().GetSizeValueX() * srcSize.Width() / srcSize.Height(),
+        sizeRet.Width() * 100);
+
+    BackgroundImageSize backgroundImageSize1(BackgroundImageSizeType::AUTO, 100, BackgroundImageSizeType::PERCENT, 100);
+    const std::optional<BackgroundImageSize>& bgImageSizeOpt1 = backgroundImageSize1;
+    auto sizeRet_ = NG::ImagePainter::CalculateBgImageSize(boxPaintSize_, srcSize, bgImageSizeOpt1);
+    EXPECT_EQ(boxPaintSize_.Width() * bgImageSizeOpt.value().GetSizeValueX() * srcSize.Width() / srcSize.Height(),
+        sizeRet_.Width() * 100);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_CalculateBgImagePosition14
+ * @tc.desc: Test cast to CalculateBgImagePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_CalculateBgImagePosition14, TestSize.Level1)
+{
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    const NG::SizeF boxPaintSize_;
+    const NG::SizeF imageRenderSize_;
+
+    BackgroundImagePosition backgroundImagePosition(
+        BackgroundImagePositionType::PX, 1, BackgroundImagePositionType::PX, 1);
+    std::optional<BackgroundImagePosition> bgImgPositionOpt = backgroundImagePosition;
+    bgImgPositionOpt.value().SetIsAlign(true);
+    auto offset = imagePainter.CalculateBgImagePosition(boxPaintSize_, imageRenderSize_, bgImgPositionOpt);
+    EXPECT_EQ(offset.GetX(), 0);
+    EXPECT_EQ(offset.GetY(), 0);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_ApplyImageAlignmentFit15
+ * @tc.desc: Test cast to CirclePainterTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageAlignmentFit15, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: build a imagePainter object.
+     */
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::RectF srcRect_;
+    NG::RectF dstRect_;
+
+    /**
+     * @tc.steps2: callback ApplyImageAlignmentFit when ImageFit::FILL
+     * @tc.expected: not find.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::FILL, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::FILL);
+    EXPECT_EQ(itImageFit, imagePainter.ALIMENT_OPERATIONS.end());
+
+    /**
+     * @tc.steps3: callback ApplyImageAlignmentFit when ImageFit::TOP_LEFT.
+     * @tc.expected: find.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::TOP_LEFT, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit_ = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::TOP_LEFT);
+    EXPECT_NE(itImageFit_, imagePainter.ALIMENT_OPERATIONS.end());
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_ApplyImageFit16
+ * @tc.desc: Test cast to ApplyImageFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit16, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: build a imagePainter object.
+     */
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::RectF srcRect_(1.0f, 1.0f, 2.0f, 2.0f);
+    NG::RectF dstRect_(1.0f, 1.0f, 1.0f, 1.0f);
+    NG::RectF dstRect(1.0f, 1.0f, 2.0f, 2.0f);
+
+    /**
+     * @tc.steps2: callback ApplyImageFit.
+     * @tc.expected: expect ImageFit is COVER_TOP_LEFT.
+     */
+    imagePainter.ApplyImageFit(ImageFit::COVER_TOP_LEFT, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::COVER_TOP_LEFT);
+    EXPECT_EQ(itImageFit, imagePainter.ALIMENT_OPERATIONS.end());
+
+    imagePainter.ApplyImageFit(ImageFit::END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit1 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::END);
+    EXPECT_NE(itImageFit1, imagePainter.ALIMENT_OPERATIONS.end());
+
+    /**
+     * @tc.steps2: callback ApplyImageFit.
+     * @tc.expected: expect ImageFit is SCALE_DOWN,srcRect_=dstRect_.
+     */
+    imagePainter.ApplyImageFit(ImageFit::SCALE_DOWN, rawpicsize, dstsize, srcRect_, dstRect);
+    EXPECT_NE(srcRect_.GetSize() > dstRect.GetSize(), true);
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_ApplyImageAlignmentFit17
+ * @tc.desc: Test cast to ApplyImageAlignmentFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageAlignmentFit17, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: build a imagePainter object.
+     */
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::RectF srcRect_;
+    NG::RectF dstRect_;
+
+    /**
+     * @tc.steps2: callback ApplyImageAlignmentFit when ImageFit::TOP_END.
+     * @tc.expected: find && isRightToLeft_ = false.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::TOP_END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit1 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::TOP_END);
+    EXPECT_NE(itImageFit1, imagePainter.ALIMENT_OPERATIONS.end());
+
+    /**
+     * @tc.steps3: callback ApplyImageAlignmentFit when ImageFit::START.
+     * @tc.expected: find && isRightToLeft_ = false.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::START, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit2 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::START);
+    EXPECT_NE(itImageFit2, imagePainter.ALIMENT_OPERATIONS.end());
+
+    /**
+     * @tc.steps4: callback ApplyImageAlignmentFit when ImageFit::END.
+     * @tc.expected: find && isRightToLeft_ = false.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit3 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::END);
+    EXPECT_NE(itImageFit3, imagePainter.ALIMENT_OPERATIONS.end());
+
+    /**
+     * @tc.steps5: callback ApplyImageAlignmentFit when ImageFit::BOTTOM_START.
+     * @tc.expected: find && isRightToLeft_ = false.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::BOTTOM_START, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit4 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::BOTTOM_START);
+    EXPECT_NE(itImageFit4, imagePainter.ALIMENT_OPERATIONS.end());
+
+    /**
+     * @tc.steps6: callback ApplyImageAlignmentFit when ImageFit::BOTTOM_END.
+     * @tc.expected: find && isRightToLeft_ = false.
+     */
+    imagePainter.ApplyImageAlignmentFit(ImageFit::BOTTOM_END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit5 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::BOTTOM_END);
+    EXPECT_NE(itImageFit5, imagePainter.ALIMENT_OPERATIONS.end());
+}
+
+/**
+ * @tc.name: ImagePainterTestNg_ApplyImageAlignmentFit18
+ * @tc.desc: Test cast to ApplyImageAlignmentFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageAlignmentFit18, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: build a imagePainter object.
+     */
+    RefPtr<NG::CanvasImage> canvasImage;
+    NG::ImagePainter imagePainter(canvasImage);
+    NG::RectF srcRect_;
+    NG::RectF dstRect_;
+
+    /**
+     * @tc.steps2: callback ApplyImageAlignmentFit when ImageFit::TOP_LEFT,ImageFit::TOP_END...
+     * @tc.expected: find && isRightToLeft_ = true.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    imagePainter.ApplyImageAlignmentFit(ImageFit::TOP_LEFT, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit_ = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::TOP_LEFT);
+    EXPECT_NE(itImageFit_, imagePainter.ALIMENT_OPERATIONS.end());
+    EXPECT_EQ(itImageFit_->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::TOP_RIGHT);
+
+    imagePainter.ApplyImageAlignmentFit(ImageFit::TOP_END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit1 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::TOP_END);
+    EXPECT_NE(itImageFit1, imagePainter.ALIMENT_OPERATIONS.end());
+    EXPECT_EQ(itImageFit1->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::TOP_LEFT);
+
+    imagePainter.ApplyImageAlignmentFit(ImageFit::START, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit2 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::START);
+    EXPECT_NE(itImageFit2, imagePainter.ALIMENT_OPERATIONS.end());
+    EXPECT_EQ(itImageFit2->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::CENTER_RIGHT);
+
+    imagePainter.ApplyImageAlignmentFit(ImageFit::END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit3 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::END);
+    EXPECT_NE(itImageFit3, imagePainter.ALIMENT_OPERATIONS.end());
+    EXPECT_EQ(itImageFit3->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::CENTER_LEFT);
+
+    imagePainter.ApplyImageAlignmentFit(ImageFit::BOTTOM_START, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit4 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::BOTTOM_START);
+    EXPECT_NE(itImageFit4, imagePainter.ALIMENT_OPERATIONS.end());
+    EXPECT_EQ(itImageFit4->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::BOTTOM_RIGHT);
+
+    imagePainter.ApplyImageAlignmentFit(ImageFit::BOTTOM_END, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto itImageFit5 = imagePainter.ALIMENT_OPERATIONS.find(ImageFit::BOTTOM_END);
+    EXPECT_NE(itImageFit5, imagePainter.ALIMENT_OPERATIONS.end());
+    EXPECT_EQ(itImageFit5->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::BOTTOM_LEFT);
 }
 } // namespace OHOS::Ace

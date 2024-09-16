@@ -303,7 +303,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 buttonsContext->OnTransformTranslateUpdate({ 0.0f,
                     beforeVisible == VisibleType::VISIBLE ? 0.0f : static_cast<float>(-titlePopupDistance), 0.0f });
             },
-            [floatingLayoutProperty, controlButtonsLayoutProperty, beforeVisible, weak = WeakClaim(this)]() {
+            [floatingLayoutProperty, controlButtonsLayoutProperty, weak = WeakClaim(this)]() {
                 auto containerModal = weak.Upgrade();
                 CHECK_NULL_VOID(containerModal);
                 floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -337,7 +337,6 @@ void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTit
     maximizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
     minimizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
     closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
-    closeBtnRenderContext_->UpdateLightIntensity(LIGHT_ON_INTENSITY);
 
     auto mouseTask = [this, weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](MouseInfo& info) {
         auto closeBtn = weakCloseBtn.Upgrade();

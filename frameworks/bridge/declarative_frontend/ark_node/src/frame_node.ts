@@ -869,6 +869,11 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkSelectComponent(node, type);
       })
     }],
+    ['Toggle', (context: UIContext, options?: object): FrameNode=> {
+      return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
+        return new ArkToggleComponent(node, type);
+      }, options)
+    }],
   ]
 )
 

@@ -389,9 +389,8 @@ ArkUINativeModuleValue RadioBridge::SetRadioOptions(ArkUIRuntimeCallInfo* runtim
         }
     }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioValue(nativeNode, value);
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioGroup(nativeNode, group);
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioIndicatorType(nativeNode, static_cast<int32_t>(indicatorType));
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioOptions(nativeNode, value, group,
+        static_cast<int32_t>(indicatorType));
     return panda::JSValueRef::Undefined(vm);
 }
 }

@@ -442,6 +442,16 @@ public:
         return hoverImageToPreviewRate_;
     }
 
+    void SetMenuParam(const MenuParam& param)
+    {
+        menuParam_ = param;
+    }
+
+    const MenuParam& GetMenuParam() const
+    {
+        return menuParam_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -498,6 +508,7 @@ private:
     bool hasCustomRadius_ = false;
     float hoverImageToPreviewRate_ = -1.0;
     float hoverImageToPreviewScale_ = -1.0;
+    MenuParam menuParam_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

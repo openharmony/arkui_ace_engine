@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1908,7 +1909,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     // unable to use the subWindow in the Previewer.
     menuParam.type = MenuType::MENU;
 #endif
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter");
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -2526,8 +2527,15 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
             auto customNode = ViewStackProcessor::GetInstance()->Finish();
             return customNode;
         };
-        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-        CHECK_NULL_VOID(overlayNode);
+        auto node = buildNodeFunc();
+        auto overlayNode = AceType::DynamicCast<FrameNode>(node);
+        if (!overlayNode && node) {
+            auto* stack = ViewStackProcessor::GetInstance();
+            auto nodeId = stack->ClaimNodeId();
+            auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+            stackNode->AddChild(node);
+            overlayNode = stackNode;
+        }
         AddOverlayToFrameNode(overlayNode, align, offsetX, offsetY);
     } else {
         AddOverlayToFrameNode(nullptr, align, offsetX, offsetY);

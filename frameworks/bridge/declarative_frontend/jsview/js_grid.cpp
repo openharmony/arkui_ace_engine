@@ -433,8 +433,11 @@ void JSGrid::SetCachedCount(const JSCallbackInfo& info)
             cachedCount = 1;
         }
     }
-
-    GridModel::GetInstance()->SetCachedCount(cachedCount);
+    bool show = false;
+    if (info.Length() > 1) {
+        show = info[1]->ToBoolean();
+    }
+    GridModel::GetInstance()->SetCachedCount(cachedCount, show);
 }
 
 void JSGrid::SetEditMode(const JSCallbackInfo& info)

@@ -32,8 +32,7 @@ void WaterFlowItemModelNG::Create()
 
 RefPtr<FrameNode> WaterFlowItemModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::FLOW_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowItemPattern>());
-    return frameNode;
+    return WaterFlowItemNode::CreateFlowItem(
+        V2::FLOW_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowItemPattern>());
 }
 } // namespace OHOS::Ace::NG

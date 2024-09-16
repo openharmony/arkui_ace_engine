@@ -16,12 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SERVICE_COLLABORATION_MENU_ACE_HELPER
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SERVICE_COLLABORATION_MENU_ACE_HELPER
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
-#include "base/geometry/ng/offset_t.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components/common/properties/popup_param.h"
-
+#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
 
 enum ServiceCollaborationCode {

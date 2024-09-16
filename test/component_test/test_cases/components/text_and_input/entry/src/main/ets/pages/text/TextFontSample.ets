@@ -27,7 +27,7 @@ struct TextFontSample {
   aboutToAppear() {
     font.registerFont({
       familyName: 'fontRawFile',
-      familySrc: $rawfile('FZSTK.TTF')
+      familySrc: $rawfile('TESTFONT.TTF')
     })
     loadComponentTestEntry(textFontTest)
   }

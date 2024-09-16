@@ -419,7 +419,7 @@ public:
     void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
-    Axis GetParentAxis();
+    void GetParentAxis();
     RefPtr<NestableScrollContainer> SearchParent() override;
     RefPtr<NestableScrollContainer> SearchParent(Axis scrollAxis);
     /**
@@ -690,7 +690,11 @@ public:
     {
         return treeId_;
     }
-
+    bool CloseImageOverlaySelection();
+    void SetImageOverlaySelectedStatus(bool isSelected)
+    {
+        imageOverlayIsSelected_ = isSelected;
+    }
 private:
     friend class WebContextSelectOverlay;
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -932,6 +936,7 @@ private:
     bool CheckSafeAreaKeyBoard();
     bool IsDialogNested();
     void SelectCancel() const;
+    bool IsSelectInfoValid();
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
@@ -967,6 +972,7 @@ private:
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
     int32_t GetBufferSizeByDeviceType();
+    void UpdateTouchpadSlidingStatus(const GestureEvent& event);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1089,6 +1095,8 @@ private:
     double preScale_ = -1.0;
     double pageScale_ = 1.0;
     double startPageScale_ = 1.0;
+    bool isResizeContentAvoid_ = false;
+    float heightAfterAvoid_ = 0.0;
     bool zoomOutSwitch_ = false;
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
@@ -1115,6 +1123,7 @@ private:
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
+    bool isTouchpadSliding_ = false;
     NestedScrollOptionsExt nestedScroll_ = {
         .scrollUp = NestedScrollMode::SELF_ONLY,
         .scrollDown = NestedScrollMode::SELF_ONLY,
@@ -1122,7 +1131,7 @@ private:
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
-
+    bool imageOverlayIsSelected_ = false;
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

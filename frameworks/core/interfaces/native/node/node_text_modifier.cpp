@@ -1122,18 +1122,15 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-    }
-    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
-        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
-    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
-        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
-    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
-        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
     } else {
-        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
 }
 
@@ -1143,7 +1140,8 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)

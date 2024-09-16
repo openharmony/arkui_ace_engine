@@ -371,8 +371,11 @@ public:
      */
     virtual void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
-    // Actually paint size of window
+    // Current paintSize of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
+
+    // Get paintSize of window by calculating
+    virtual void GetWindowPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
     /**
      * @description: Create a custom popup with UIExtensionComponent.

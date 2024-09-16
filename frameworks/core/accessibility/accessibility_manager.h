@@ -235,7 +235,7 @@ public:
         uint32_t windowId, int32_t treeId) { return false; };
 
     virtual void TransferThirdProviderHoverEvent(
-        int64_t elementId, const NG::PointF &point, SourceType source,
+        const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF &point, SourceType source,
         NG::AccessibilityHoverEventType eventType, TimeStamp time) {};
 
     virtual bool OnDumpChildInfoForThird(

@@ -593,7 +593,7 @@ struct OperateItemStruct {
   @Builder
   createTextArrow() {
     Button({ type: ButtonType.Normal }) {
-      if(this.parentDirection === FlexDirection.Column) {
+      if (this.parentDirection === FlexDirection.Column) {
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -947,6 +947,7 @@ export struct ComposeListItem {
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
+            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({

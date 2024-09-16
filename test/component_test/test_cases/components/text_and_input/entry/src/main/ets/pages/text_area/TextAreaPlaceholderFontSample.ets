@@ -30,8 +30,8 @@ struct TextAreaPlaceholderFontSample {
 
   aboutToAppear() {
     font.registerFont({
-      familyName: 'ITCBLKADRawFile',
-      familySrc: $rawfile('FZSTK.TTF')
+      familyName: 'TESTFONTRawFile',
+      familySrc: $rawfile('TESTFONT.TTF')
     })
     loadComponentTestEntry(textAreaPlaceholderFontTest)
   }
@@ -46,7 +46,7 @@ struct TextAreaPlaceholderFontSample {
           this.placeholderFontType = {
             size: 40,
             weight: FontWeight.Normal,
-            family: 'ITCBLKADRawFile',
+            family: 'TESTFONTRawFile',
             style: FontStyle.Italic
           }
         })

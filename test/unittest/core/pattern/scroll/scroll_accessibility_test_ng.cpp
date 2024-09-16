@@ -30,7 +30,7 @@ HWTEST_F(ScrollAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
@@ -75,7 +75,7 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
@@ -133,7 +133,7 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      */
     CreateScroll();
     CreateContent(SCROLL_HEIGHT);
-    CreateDone();
+    CreateScrollDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
 
@@ -172,7 +172,7 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest003, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::NONE);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 

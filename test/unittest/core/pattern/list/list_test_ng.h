@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H
 
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"

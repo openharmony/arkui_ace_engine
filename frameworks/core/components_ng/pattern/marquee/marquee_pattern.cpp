@@ -160,7 +160,7 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     FireStartEvent();
     bool needSecondPlay = repeatCount != 1;
-    auto startPosition = GetTextStart();
+    auto startPosition = GetTextOffset();
     PlayMarqueeAnimation(startPosition, repeatCount, needSecondPlay);
 }
 
@@ -179,7 +179,7 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     if (GreatNotEqual(step, textWidth)) {
         step = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     }
-    bool isFirstStart = start == GetTextStart() ? true : false;
+    bool isFirstStart = start == GetTextOffset() ? true : false;
     float calculateEnd = CalculateEnd();
     float calculateStart = CalculateStart();
     auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
@@ -210,7 +210,10 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
         host->GetId(), textNode->GetId(), textWidth, duration);
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    lastAnimationParam_.lastDirection = isRtl ? MarqueeDirection::RIGHT : MarqueeDirection::LEFT;
+    auto marqueeDirection = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    lastAnimationParam_.lastDirection = isRtl ?
+        (marqueeDirection == MarqueeDirection::RIGHT ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT)
+        : marqueeDirection;
     SetTextOffset(calculateStart);
     ActionAnimation(option, calculateEnd, playCount, needSecondPlay);
 }
@@ -244,7 +247,10 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 if (newPlayCount == 0) {
                     return;
                 }
-                auto newStart = pattern->CalculateStart();
+                auto marqueeLayoutProperty = pattern->GetLayoutProperty<MarqueeLayoutProperty>();
+                CHECK_NULL_VOID(marqueeLayoutProperty);
+                auto direction = marqueeLayoutProperty->GetNonAutoLayoutDirection();
+                auto newStart = direction == TextDirection::RTL ? pattern->CalculateEnd() : pattern->CalculateStart();
                 pattern->lastAnimationParam_.lastAnimationPosition = newStart;
                 pattern->lastAnimationParam_.lastStartMilliseconds = GetMilliseconds();
                 pattern->PlayMarqueeAnimation(newStart, newPlayCount, false);
@@ -278,7 +284,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
-    auto offset = stopAndStart ? GetTextStart() : 0.0f;
+    auto offset = stopAndStart ? GetTextOffset() : 0.0f;
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), position = offset]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -458,7 +464,8 @@ float MarqueePattern::CalculateStart()
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, start);
-    Alignment align = Alignment::CENTER_LEFT;
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    Alignment align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -502,7 +509,8 @@ float MarqueePattern::CalculateEnd()
     CHECK_NULL_RETURN(layoutProperty, end);
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    Alignment align = Alignment::CENTER_LEFT;
+    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    Alignment align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
@@ -581,27 +589,6 @@ float MarqueePattern::GetTextNodeWidth()
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_RETURN(textGeoNode, 0.0f);
     return textGeoNode->GetFrameSize().Width();
-}
-
-float MarqueePattern::GetTextStart()
-{
-    float start = GetTextOffset();
-    auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
-    bool isRtl = direction == TextDirection::RTL ? true : false;
-    if (!isRtl || !IsRunMarquee()) return start;
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, start);
-    auto geoNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geoNode, start);
-    auto marqueeSize = geoNode->GetFrameSize();
-    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_RETURN(textNode, start);
-    auto textGeoNode = textNode->GetGeometryNode();
-    CHECK_NULL_RETURN(textGeoNode, start);
-    auto textWidth = textGeoNode->GetFrameSize().Width();
-    start = marqueeSize.Width() - textWidth;
-    return start;
 }
 
 double MarqueePattern::GetScrollAmount()

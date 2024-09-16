@@ -536,7 +536,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info4.localLocation_ = Offset(1, 1);
     pattern->info_->isSingleHandle = false;
     callBackFlag = 0;
-    pattern->info_->onHandleMoveStart = [&](bool isFirst) {
+    pattern->info_->onHandleMoveStart = [&](const GestureEvent& event, bool isFirst) {
         callBackFlag = 1;
     };
     pattern->isFirstHandleTouchDown_ = true;
@@ -1511,7 +1511,9 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw004, TestSize.Level1)
     */
     contentModifier->isPaintHandleUsePoints_ = true;
     contentModifier->SetIsSingleHandle(true);
+    contentModifier->firstHandlePaintInfo_.width = 6.0f;
     contentModifier->firstHandleIsShow_->Set(true);
+    contentModifier->secondHandlePaintInfo_.width = 6.0f;
     contentModifier->secondHandleIsShow_->Set(true);
     contentModifier->PaintSingleHandle(canvas);
     EXPECT_EQ(contentModifier->isPaintHandleUsePoints_, true);
@@ -2595,7 +2597,7 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
     auto menuHeight = 100;
     auto ret1 = newNode->NewMenuAvoidStrategy(AccessibilityManager::RawPtr(layoutWrapper), menuWidth, menuHeight);
     std::cout << ret1.ToString();
-    OffsetF expectRet1(100, 0);
+    OffsetF expectRet1(100, 398);
     bool equal1 = (ret1 == expectRet1);
     EXPECT_TRUE(equal1);
 

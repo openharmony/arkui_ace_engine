@@ -43,6 +43,7 @@ public:
     int32_t UnregisterRouterChangeEventCallback() override;
     int32_t UnregisterComponentChangeEventCallback() override;
     int32_t UnregisterWebUnfocusEventCallback() override;
+    bool IsConnect() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

@@ -38,6 +38,9 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "frameworks/core/common/ace_engine.h"
+#ifdef COMPONENT_TEST_ENABLED
+#include "frameworks/component_test/test_config.h"
+#endif // COMPONENT_TEST_ENABLED
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -450,6 +453,11 @@ void AceAbility::InitializeAppInfo()
         useNewPipeline_ =
             AceNewPipeJudgement::QueryAceNewPipeEnabledFA("", compatibleVersion_, targetVersion, releaseType);
     }
+#ifdef COMPONENT_TEST_ENABLED
+    if (runArgs_.isComponentTestMode && runArgs_.componentTestConfig != "") {
+        ComponentTest::ParseComponentTestConfig(runArgs_.componentTestConfig);
+    }
+#endif // COMPONENT_TEST_ENABLED
 }
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)

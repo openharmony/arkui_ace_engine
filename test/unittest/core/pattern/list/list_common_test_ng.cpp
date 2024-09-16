@@ -962,9 +962,11 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 200.f);
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }

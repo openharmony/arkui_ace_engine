@@ -224,17 +224,18 @@ FoldStatus Container::GetCurrentFoldStatus()
 
 void Container::DestroyToastSubwindow(int32_t instanceId)
 {
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        subwindow->DestroyToastWindow();
+    auto toastWindowType = SubwindowManager::GetInstance()->GetToastWindowType(instanceId);
+    auto subwindow = SubwindowManager::GetInstance()->GetToastSubwindow(instanceId, toastWindowType);
+    if (subwindow && subwindow->IsToastSubWindow()) {
+        subwindow->DestroyWindow();
     }
     auto systemToastWindow = SubwindowManager::GetInstance()->GetSystemToastWindow();
-    if (systemToastWindow) {
-        systemToastWindow->DestroyToastWindow();
+    if (systemToastWindow && systemToastWindow->IsToastSubWindow()) {
+        systemToastWindow->DestroyWindow();
     }
 }
 
-bool Container::IsFontFileExistInPath(std::string path)
+bool Container::IsFontFileExistInPath(const std::string& path)
 {
     DIR* dir;
     struct dirent* ent;

@@ -121,27 +121,25 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         CHECK_NULL_RETURN(scrollableRect.Top() < bottomInset.start, false);
     }
 
-    auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
+    auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
-    if (isShowKeyboard) {
-        if (diffTop <= 0 &&
-            LessNotEqual(bottomInset.start, (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
-            return false;
-        }
+    if (isShowKeyboard && diffTop <= 0 && LessNotEqual(bottomInset.start,
+        (caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()))) {
+        return false;
     }
 
     // caret above scroll's content region
     if (diffTop < 0) {
+        TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffTop=%{public}f",
+            scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffTop);
         scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
         return true;
     }
 
     // caret inner scroll's content region
-    if (isShowKeyboard) {
-        if (LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
-            return false;
-        }
+    if (isShowKeyboard && LessNotEqual((caretRect.Bottom() + RESERVE_BOTTOM_HEIGHT.ConvertToPx()), bottomInset.start)) {
+        return false;
     }
 
     // caret below safeArea
@@ -156,6 +154,8 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         diffBot = scrollableRect.Bottom() - caretRect.Bottom() - RESERVE_BOTTOM_HEIGHT.ConvertToPx();
     }
     CHECK_NULL_RETURN(diffBot < 0, false);
+    TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffBot=%{public}f",
+        scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffBot);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;
 }

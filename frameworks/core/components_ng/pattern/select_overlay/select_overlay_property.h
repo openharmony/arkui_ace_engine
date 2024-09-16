@@ -277,12 +277,17 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchMove;
     std::function<void(const GestureEvent&, bool isFirst)> onClick;
     std::function<void(const GestureEvent&, bool isFirst)> afterOnClick;
+    std::function<void(const MouseInfo&)> onMouseEvent;
 
     // handle move callback.
-    std::function<void(bool isFirst)> onHandleMoveStart;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandleMoveStart;
     std::function<void(const RectF&, bool isFirst)> onHandleMove;
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
+
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanMove;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanEnd;
+    std::function<OffsetF()> getDeltaHandleOffset;
 
     // menu info.
     SelectMenuInfo menuInfo;

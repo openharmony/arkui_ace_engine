@@ -78,12 +78,13 @@ public:
     virtual void OnOverlayTouchUp(const TouchEventInfo& event) {}
     virtual void OnOverlayTouchMove(const TouchEventInfo& event) {}
     virtual void OnOverlayClick(const GestureEvent& event, bool isClickCaret) {}
+    virtual void OnHandleMouseEvent(const MouseInfo& event) {}
     virtual bool IsRegisterTouchCallback()
     {
         return false;
     }
 
-    virtual void OnHandleMoveStart(bool isFirst) {}
+    virtual void OnHandleMoveStart(const GestureEvent& event, bool isFirst) {}
     virtual void OnHandleMove(const RectF& rect, bool isFirst) {}
     virtual void OnHandleMoveDone(const RectF& rect, bool isFirst) {}
     virtual void OnHandleReverse(bool isReverse) {}

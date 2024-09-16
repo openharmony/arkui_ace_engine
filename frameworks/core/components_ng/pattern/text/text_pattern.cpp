@@ -39,6 +39,9 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/text/text_emoji_processor.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components/custom_paint/rosen_render_custom_paint.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -159,7 +162,12 @@ void TextPattern::ResetSelection()
 
 void TextPattern::InitSelection(const Offset& pos)
 {
-    int32_t extend = pManager_->GetGlyphIndexByCoordinate(pos, true);
+    auto selectionOffset = pos;
+    if (GreatNotEqual(selectionOffset.GetY(), pManager_->GetHeight())) {
+        selectionOffset.SetX(contentRect_.Width());
+        selectionOffset.SetY(pManager_->GetHeight());
+    }
+    int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
     if (IsLineBreakOrEndOfParagraph(extend)) {
         extend--;
     }
@@ -312,6 +320,12 @@ int32_t TextPattern::GetTextContentLength()
     return 0;
 }
 
+void TextPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
+}
+
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     HandleSpanLongPressEvent(info);
@@ -334,7 +348,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && GetWideText().length() != 0) {
-        VibratorUtils::StartVibraFeedback("longPress.light");
+        StartVibratorByLongPress();
     }
 
     if (IsDraggable(localOffset)) {
@@ -1133,6 +1147,83 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     clickEventInitialized_ = true;
 }
 
+void TextPattern::InitAISpanHoverEvent()
+{
+    CHECK_NULL_VOID(!aiSpanHoverEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto aiSpanHoverTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAISpanHoverEvent(info);
+    };
+    auto aiSpanHoverEvent = MakeRefPtr<InputEvent>(std::move(aiSpanHoverTask));
+    inputHub->AddOnMouseEvent(aiSpanHoverEvent);
+    aiSpanHoverEventInitialized_ = true;
+}
+
+void TextPattern::HandleAISpanHoverEvent(const MouseInfo& info)
+{
+    if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect()) {
+        return;
+    }
+    if (dataDetectorAdapter_->aiSpanRects_.empty()) {
+        for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
+            auto& aiSpan = kv.second;
+            const auto& aiRects = pManager_->GetRects(aiSpan.start, aiSpan.end);
+            dataDetectorAdapter_->aiSpanRects_.insert(
+                dataDetectorAdapter_->aiSpanRects_.end(), aiRects.begin(), aiRects.end());
+        }
+    }
+
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    PointF textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto nodeId = host->GetId();
+    for (auto&& rect : dataDetectorAdapter_->aiSpanRects_) {
+        if (!rect.IsInRegion(textOffset)) {
+            continue;
+        }
+        if (currentMouseStyle_ != MouseFormat::HAND_POINTING) {
+            pipeline->ChangeMouseStyle(nodeId, MouseFormat::HAND_POINTING);
+            currentMouseStyle_ = MouseFormat::HAND_POINTING;
+        }
+        return;
+    }
+    if (currentMouseStyle_ != MouseFormat::DEFAULT) {
+        pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
+    }
+}
+
+void TextPattern::OnHover(bool isHover)
+{
+    TAG_LOGI(AceLogTag::ACE_TEXT, "isHover=%{public}d", isHover);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto nodeId = host->GetId();
+    if (isHover) {
+        pipeline->SetMouseStyleHoldNode(nodeId);
+        pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
+    } else {
+        pipeline->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
+        currentMouseStyle_ = MouseFormat::DEFAULT;
+        pipeline->FreeMouseStyleHoldNode(nodeId);
+    }
+}
+
 void TextPattern::InitMouseEvent()
 {
     CHECK_NULL_VOID(!mouseEventInitialized_);
@@ -1150,6 +1241,16 @@ void TextPattern::InitMouseEvent()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "on hover event isHover=%{public}d", isHover);
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnHover(isHover);
+        }
+    };
+    auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
     mouseEventInitialized_ = true;
 }
 
@@ -1190,6 +1291,7 @@ void TextPattern::HandleUrlSpanMouseOutEvent(int32_t nodeId, bool isHover)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->ChangeMouseStyle(nodeId, defaultMouseStyle_);
+    currentMouseStyle_ = defaultMouseStyle_;
     pipelineContext->FreeMouseStyleHoldNode(nodeId);
     HandleUrlSpanOutEvent();
 }
@@ -1420,6 +1522,7 @@ void TextPattern::HandleLeaveUrlSpanHoverEvent(std::vector<RectF>& selectRects, 
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->ChangeMouseStyle(hostId, defaultMouseStyle_);
+        currentMouseStyle_ = defaultMouseStyle_;
         pipelineContext->FreeMouseStyleHoldNode(hostId);
         for (auto spanItem : spans) {
             if (spanItem && spanItem->urlOnHover) {
@@ -2464,6 +2567,7 @@ void TextPattern::OnModifyDone()
                 clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
             }
             InitMouseEvent();
+            InitAISpanHoverEvent();
         }
     }
     bool enabledCache = eventHub->IsEnabled();
@@ -2774,6 +2878,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
+    dataDetectorAdapter_->aiSpanRects_.clear();
 
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -3796,6 +3901,12 @@ void TextPattern::OnSelectionMenuOptionsUpdate(
     selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
+void TextPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
+}
+
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
 {
     if (textSelector_.GetStart() == start && textSelector_.GetEnd() == end) {
@@ -4241,14 +4352,8 @@ void TextPattern::UpdateFontColor(const Color& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    if (children.empty()) {
-        auto paragraphs = pManager_->GetParagraphs();
-        for (auto &&info : paragraphs) {
-            auto paragraph = info.paragraph;
-            CHECK_NULL_VOID(paragraph);
-            auto length = paragraph->GetParagraphText().length();
-            paragraph->UpdateColor(0, length, value);
-        }
+    if (children.empty() && spans_.empty() && contentMod_) {
+        contentMod_->TextColorModifier(value);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -4296,6 +4401,54 @@ void TextPattern::OnTextGenstureSelectionEnd()
     }
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay({ .animation = true });
+}
+
+void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
+{
+    auto touchOffset = event.GetLocalLocation();
+    auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
+    bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
+    if (isChangeFirstHandle) {
+        ChangeFirstHandleHeight(touchOffset, currentHandle);
+    } else {
+        ChangeSecondHandleHeight(touchOffset, currentHandle);
+    }
+}
+
+void TextPattern::ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect)
+{
+    auto height = handleRect.Height();
+    CalculateDefaultHandleHeight(height);
+    bool isTouchHandleCircle = LessNotEqual(touchOffset.GetY(), handleRect.Top());
+    if (!isTouchHandleCircle) {
+        handleRect.SetTop(static_cast<float>(touchOffset.GetY()) - height / 2.0f);
+    }
+    handleRect.SetHeight(height);
+}
+
+void TextPattern::ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect)
+{
+    auto height = handleRect.Height();
+    CalculateDefaultHandleHeight(height);
+    bool isTouchHandleCircle = GreatNotEqual(touchOffset.GetY(), handleRect.Bottom());
+    auto handleOffsetY = isTouchHandleCircle
+                            ? handleRect.Bottom() - height
+                            : static_cast<float>(touchOffset.GetY()) - height / 2.0f;
+    handleRect.SetTop(handleOffsetY);
+    handleRect.SetHeight(height);
+}
+
+void TextPattern::CalculateDefaultHandleHeight(float& height)
+{
+    CHECK_NULL_VOID(textStyle_.has_value());
+#ifdef ENABLE_ROSEN_BACKEND
+    MeasureContext content;
+    content.textContent = "a";
+    content.fontSize = textStyle_.value().GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle_.value().GetFontWeight());
+    content.fontWeight = fontweight;
+    height = std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Height()), 0.0f);
+#endif
 }
 
 void TextPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

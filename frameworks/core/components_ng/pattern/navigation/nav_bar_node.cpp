@@ -39,12 +39,12 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
-    auto contentNode = GetNavBarContentNode();
+    auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        SetNavBarContentNode(contentNode);
+        SetContentNode(contentNode);
         AddChild(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -119,10 +119,10 @@ void NavBarNode::InitSystemTransitionPop()
         { curFrameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::SystemTransitionPushAction(bool isFinish)
+void NavBarNode::SystemTransitionPushAction(bool isStart)
 {
     // initialization or finish callBack
-    if (isFinish) {
+    if (isStart) {
         SetTransitionType(PageTransitionType::EXIT_PUSH);
     } else {
         GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);

@@ -273,7 +273,7 @@ void ResetSelectedBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    Color color = indexerTheme->GetSeclectedBackgroundColor();
+    Color color = indexerTheme->GetSelectedBackgroundColor();
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, color);
 }
 

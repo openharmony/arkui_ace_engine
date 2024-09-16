@@ -472,8 +472,11 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             return rect;
         });
         auto rsConfig = window->GetKeyboardAnimationConfig();
-        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
-            rsConfig.durationOut_ };
+        KeyboardAnimationCurve curveIn = {
+            rsConfig.curveIn.curveType_, rsConfig.curveIn.curveParams_, rsConfig.curveIn.duration_};
+        KeyboardAnimationCurve curveOut = {
+            rsConfig.curveOut.curveType_, rsConfig.curveOut.curveParams_, rsConfig.curveOut.duration_};
+        KeyboardAnimationConfig config = {curveIn, curveOut};
         context->SetKeyboardAnimationConfig(config);
         context->SetMinPlatformVersion(apiCompatibleVersion);
 
@@ -600,6 +603,8 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
             parsedConfig.direction = configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi =
                 configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.appFontScale =
+                configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
         TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration");

@@ -88,7 +88,9 @@ void SwiperIndicatorPattern::OnModifyDone()
 
     swiperEventHub->SetIndicatorOnChange(
         [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
-            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            auto indicator = weak.Upgrade();
+            CHECK_NULL_VOID(indicator);
+            auto pipeline = indicator->GetContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->AddAfterLayoutTask([weak, context]() {
                 auto indicator = weak.Upgrade();
@@ -200,9 +202,14 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
 
-    auto isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto indicatorCount = swiperPattern->RealTotalCount();
+    auto isRtl = swiperPattern->IsHorizontalAndRightToLeft();
+    auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto currentIndex = swiperPattern->GetCurrentIndex();
+    auto displayCount = swiperPattern->GetDisplayCount();
+    if (swiperPattern->IsSwipeByGroup() && displayCount != 0) {
+        currentIndex /= displayCount;
+    }
+
     if (isRtl) {
         currentIndex = indicatorCount - 1 - currentIndex;
     }
@@ -774,7 +781,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_RETURN(swiperNode, 0.0f);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    int32_t itemCount = swiperPattern->RealTotalCount();
+    int32_t itemCount = swiperPattern->DisplayIndicatorTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());

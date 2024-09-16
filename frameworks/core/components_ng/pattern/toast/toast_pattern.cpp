@@ -78,14 +78,16 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
         foldCreaseBottom = foldCrease.Bottom();
     }
     bool isKeyboardShow = false;
+    auto showMode = ToastShowMode::DEFAULT;
     switch (hoverModeArea) {
         case HoverModeAreaType::TOP_SCREEN:
             wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop, wrapperRect_.Width(), foldCreaseTop - safeAreaTop);
             break;
         case HoverModeAreaType::BOTTOM_SCREEN:
             isKeyboardShow = safeAreaManager->GetKeyboardInset().IsValid();
+            showMode = toastProps->GetShowModeValue(ToastShowMode::DEFAULT);
             // if keyboard is show, wrapper rect change to the up half screen.
-            if (isKeyboardShow && IsDefaultToast()) {
+            if (isKeyboardShow && showMode != ToastShowMode::SYSTEM_TOP_MOST) {
                 wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop,
                     wrapperRect_.Width(), foldCreaseTop - safeAreaTop);
             } else {
@@ -188,6 +190,14 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     // add toast wrapper rect's offsetY.
     offsetY += Dimension(wrapperRect_.Top());
+    auto deviceHeight = context->GetRootHeight();
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto keyboardInset = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+    auto keyboardOffset = GreatNotEqual(keyboardInset, 0) ? keyboardInset : 0;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if ((showMode == ToastShowMode::TOP_MOST) && (offsetY.Value() + textHeight > deviceHeight - keyboardOffset)) {
+        offsetY = Dimension(deviceHeight - keyboardOffset - defaultBottom_.ConvertToPx() - textHeight);
+    }
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
@@ -202,7 +212,8 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
     auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(toastProp, 0.0);
-    auto toastBottom = toastProp->GetBottomValue(toastTheme->GetBottom());
+    defaultBottom_ = toastTheme->GetBottom();
+    auto toastBottom = toastProp->GetBottomValue(defaultBottom_);
     if (toastBottom.Unit() == DimensionUnit::PERCENT) {
         toastBottom = rootHeight * toastBottom.Value();
     }
@@ -297,7 +308,8 @@ void ToastPattern::OnColorConfigurationUpdate()
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
     auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(textColor);
+    auto toastInfo = GetToastInfo();
+    textLayoutProperty->UpdateTextColor(toastInfo.textColor.value_or(textColor));
     host->SetNeedCallChildrenUpdate(false);
     ToastView::UpdateToastNodeStyle(host);
 }
@@ -318,8 +330,12 @@ void ToastPattern::OnAttachToFrameNode()
         });
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
     auto halfFoldHoverCallbackId =
-        pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this), this](bool isHoverMode) {
-            this->FoldStatusChangedAnimation();
+        pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this)](bool isHoverMode) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (isHoverMode != pattern->isHoverMode_) {
+                pattern->FoldStatusChangedAnimation();
+            }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
 }

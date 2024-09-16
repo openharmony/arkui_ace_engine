@@ -43,6 +43,8 @@ struct MenuDumpInfo {
     float previewEndScale = 0.0f;
     float top = 0.0f;
     float bottom = 0.0f;
+    float left = 0.0f;
+    float right = 0.0f;
     OffsetF globalLocation;
     std::string originPlacement;
     OffsetF finalPosition;
@@ -118,7 +120,9 @@ private:
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
+    void InitializeLayoutRegionMargin(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
+    void UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
         const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
@@ -210,7 +214,7 @@ private:
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
-    bool CheckPlacement(const Rect& rect, const OffsetF& position, const SizeF& childSize);
+    bool CheckPlacement(const SizeF& childSize);
 
     void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
     BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
@@ -221,6 +225,7 @@ private:
     bool CheckChildConstraintCondition(const RefPtr<MenuPattern>& menuPattern);
     void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
         LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
+    void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -255,6 +260,14 @@ private:
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
     float optionPadding_ = 0.0f;
+
+    float top_ = 0.0;
+    float bottom_ = 0.0;
+    float left_ = 0.0;
+    float right_ = 0.0;
+    double width_ = 0.0;
+    double height_ = 0.0;
+
     OffsetF targetCenterOffset_;
     OffsetF previewOriginOffset_;
     OffsetF previewOffset_;
@@ -264,10 +277,12 @@ private:
     OffsetF preOffset_;
     Rect preRect_;
     bool flag_ = false;
-    // previewSacle_ must be greater than 0
+    bool isHalfFoldHover_ = false;
+    // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
     PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
+    MarginPropertyF layoutRegionMargin_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

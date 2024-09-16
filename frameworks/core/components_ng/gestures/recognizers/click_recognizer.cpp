@@ -285,6 +285,7 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);

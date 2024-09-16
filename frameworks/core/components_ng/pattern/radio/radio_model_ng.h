@@ -77,6 +77,8 @@ public:
     static std::string GetRadioValue(FrameNode* frameNode);
     static void SetRadioGroup(FrameNode* frameNode, const std::string& value);
     static std::string GetRadioGroup(FrameNode* frameNode);
+    static void SetRadioOptions(FrameNode* frameNode, const std::string& value,
+        const std::string& group, int32_t indicator);
 };
 } // namespace OHOS::Ace::NG
 

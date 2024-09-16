@@ -210,14 +210,9 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     auto textRect = textField->GetTextRect();
     auto contentRect = textField->GetTextContentRect();
     auto touchLocalOffset = localOffset;
-    if (textField->IsTextArea()) {
-        if (GreatNotEqual(touchLocalOffset.GetY(), textRect.Bottom())) {
-            // click at end of a paragraph.
-            touchLocalOffset.SetX(textField->IsLTRLayout() ? contentRect.Right() : textRect.Left());
-        } else if (LessNotEqual(touchLocalOffset.GetY(), textRect.Top())) {
-            // click at the beginning of a paragraph.
-            touchLocalOffset.SetX(textField->IsLTRLayout() ? textRect.Left() : contentRect.Right());
-        }
+    if (textField->IsTextArea() && GreatNotEqual(touchLocalOffset.GetY(), textRect.Bottom())) {
+        // click at end of a paragraph.
+        touchLocalOffset.SetX(textField->IsLTRLayout() ? contentRect.Right() : textRect.Left());
     }
 
     auto range = GetSelectRangeByOffset(touchLocalOffset);

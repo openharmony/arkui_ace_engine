@@ -72,11 +72,13 @@ struct ParsedConfig {
     std::string colorModeIsSetByApp;
     std::string mcc;
     std::string mnc;
+    std::string appFontScale;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
-                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
+                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() &&
+                 appFontScale.empty());
     }
 };
 
@@ -567,6 +569,14 @@ public:
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
+    bool IsSubWindow() const override;
+    bool IsDialogWindow() const override;
+    bool IsSystemWindow() const override;
+    bool IsHostMainWindow() const override;
+    bool IsHostSubWindow() const override;
+    bool IsHostDialogWindow() const override;
+    bool IsHostSystemWindow() const override;
+    bool IsHostSceneBoardWindow() const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,

@@ -850,7 +850,7 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(bool shouldHideMe
         manager->HideOptionMenu(true);
         return;
     }
-    if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging()) {
+    if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging() && !GetSelectArea().IsEmpty()) {
         manager->ShowOptionMenu();
     }
 }

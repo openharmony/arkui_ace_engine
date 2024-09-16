@@ -188,14 +188,11 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
         return;
     }
     menu->SetActive(true);
-    OffsetF menuOffset;
-    if (info_->isUsingMouse) {
-        menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
-    } else {
-        menuOffset = ComputeSelectMenuPosition(layoutWrapper);
-    }
-    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
-
+    OffsetF menuOffset = info_->isUsingMouse ? CalculateCustomMenuByMouseOffset(layoutWrapper)
+                                             : ComputeSelectMenuPosition(layoutWrapper);
+    auto menuGetGeometryNode = menu->GetGeometryNode();
+    CHECK_NULL_VOID(menuGetGeometryNode);
+    menuGetGeometryNode->SetMarginFrameOffset(menuOffset);
     // custom menu need to layout all menu and submenu
     if (info_->menuInfo.menuBuilder) {
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -369,7 +366,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - spaceBetweenViewPort - menuHeight) ||
         LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
         auto menuOffsetY = viewPort.GetY() - spaceBetweenViewPort - menuHeight;
-        if (menuOffsetY > menuSpacingBetweenText) {
+        if (GreatNotEqual(menuOffsetY, menuSpacingBetweenText)) {
             menuPosition.SetY(menuOffsetY);
         } else {
             menuPosition.SetY(menuSpacingBetweenText);
@@ -472,13 +469,13 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
         auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
-        if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
-            if (topArea > offsetY) {
+        if ((shouldAvoidKeyboard || shouldAvoidBottom) && GreatNotEqual(offsetY, 0)) {
+            if (GreatNotEqual(topArea, offsetY)) {
                 offsetY = downPaint.Bottom() - spaceBetweenText - menuRect.Height();
             }
             menuOffset.SetY(offsetY);
         } else {
-            if (topArea > menuOffset.GetY() && info_->isSingleHandle) {
+            if (GreatNotEqual(topArea, menuOffset.GetY()) && info_->isSingleHandle) {
                 menuOffset.SetY(downPaint.Bottom() + spaceBetweenText + spaceBetweenHandle);
             }
             AdjustMenuOffsetAtSingleHandleBottom(downPaint, menuRect, menuOffset, spaceBetweenText);

@@ -23,6 +23,8 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int SLIDER_MIN = 0;
+constexpr int SLIDER_MAX = 100;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsSliderChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -693,8 +695,8 @@ static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& o
         options.reverse = reverseArg->ToBoolean(vm)->Value();
     }
     if (GreatOrEqual(options.min, options.max)) {
-        options.min = 0;
-        options.max = 100;
+        options.min = SLIDER_MIN;
+        options.max = SLIDER_MAX;
     }
 
     GetStep(options);

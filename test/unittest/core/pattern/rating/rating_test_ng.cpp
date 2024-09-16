@@ -1979,4 +1979,35 @@ HWTEST_F(RatingTestNg, RatingPatternTest075, TestSize.Level1)
     pattern->InitPanEvent(gestureHub);
     EXPECT_FALSE(LessNotEqual(dragInfo.GetLocalLocation().GetX(), 0.0));
 }
+
+/**
+ * @tc.name: RatingNGTest076
+ * @tc.desc: test SetRatingOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingNGTest076, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Rating node.
+     */
+    auto frameNode = RatingModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. SetRatingOptions.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    RatingModelNG::SetRatingOptions(node, 10, true);
+
+    /**
+     * @tc.steps: step3. Get layoutProperty and assert the value.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetIndicatorValue(false), true);
+    auto paintProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetRatingScoreValue(), 10.0f);
+}
 } // namespace OHOS::Ace::NG

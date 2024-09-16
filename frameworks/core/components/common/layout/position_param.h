@@ -107,6 +107,10 @@ struct AlignRule {
         return ((this->anchor == right.anchor) && (this->vertical == right.vertical) &&
                 (this->horizontal == right.horizontal));
     }
+    bool operator!=(const AlignRule& right) const
+    {
+        return !operator==(right);
+    }
 };
 
 enum class ChainStyle {

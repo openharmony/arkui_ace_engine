@@ -258,7 +258,7 @@ public:
         auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = itemInfo.second->GetContext();
         CHECK_NULL_RETURN(context, itemInfo.second);
         auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
         context->SetPredictNode(frameNode);

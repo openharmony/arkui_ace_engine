@@ -80,6 +80,7 @@ public:
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
+    void SetEnableHapticFeedback(bool state) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

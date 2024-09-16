@@ -22,6 +22,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -49,6 +50,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr int32_t STACK_EXPAND_DISAPPEAR_DURATION = 300;
+constexpr int32_t HALF_FOLD_HOVER_DURATION = 1000;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr double MOUNT_MENU_OPACITY = 0.4f;
 
@@ -189,6 +191,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
                                               const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -196,7 +199,6 @@ void MenuPattern::OnAttachToFrameNode()
         if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
             return;
         }
-
         auto pipelineContext = PipelineContext::GetCurrentContext();
         AnimationOption option;
         option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
@@ -223,15 +225,38 @@ void MenuPattern::OnAttachToFrameNode()
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
+int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
+{
+    // register when hoverMode enabled
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
+        [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetDuration(HALF_FOLD_HOVER_DURATION);
+        optionPosition.SetCurve(motion);
+        pipelineContext->FlushUITasks();
+        pipelineContext->Animate(optionPosition, motion, [host, pipelineContext]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            pipelineContext->FlushUITasks();
+        });
+    });
+    return callbackId;
+}
+
 void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 }
 
 void MenuPattern::OnModifyDone()
@@ -1423,6 +1448,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         radius = CalcIdealBorderRadius(borderRadius, idealSize);
         UpdateBorderRadius(dirty->GetHostNode(), radius);
     }
+    auto menuWrapper = GetMenuWrapper();
+    DragAnimationHelper::ShowGatherAnimationWithMenu(menuWrapper);
     return true;
 }
 

@@ -81,11 +81,14 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     info_->EndCacheUpdate();
 
     wrapper->SetCacheCount(cacheCount);
-    wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount,
+        props->GetShowCachedItemsValue(false));
     PreloadItems(wrapper_, info_, cacheCount);
 
     if (info_->itemEnd_) {
         LayoutFooter(paddingOffset, reverse);
+    } else if (info_->footerIndex_ == 0) {
+        wrapper_->GetChildByIndex(0)->SetActive(false);
     }
 }
 
@@ -685,14 +688,14 @@ void WaterFlowLayoutSW::LayoutSection(
 
 void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
 {
-    float mainPos = info_->EndPos();
-    if (info_->footerIndex_ != 0 || GreatOrEqual(mainPos, mainLen_)) {
+    if (info_->footerIndex_ != 0) {
         return;
     }
-    auto footer = wrapper_->GetOrCreateChildByIndex(0);
+    float mainPos = info_->EndPos();
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
+    auto footer = wrapper_->GetOrCreateChildByIndex(0);
     footer->GetGeometryNode()->SetMarginFrameOffset(
         (axis_ == Axis::VERTICAL) ? OffsetF(0.0f, mainPos) + paddingOffset : OffsetF(mainPos, 0.0f) + paddingOffset);
     footer->Layout();
