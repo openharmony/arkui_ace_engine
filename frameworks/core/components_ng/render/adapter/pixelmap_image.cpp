@@ -342,7 +342,6 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     SkSamplingOptions option;
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
-    CHECK_NULL_VOID(pixelMap_);
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
 #endif

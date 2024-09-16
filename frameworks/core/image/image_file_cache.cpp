@@ -322,7 +322,8 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     }
     // remove the old file before convert
     ClearCacheFile(removeVector);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "write image astc cache: %{public}s %{private}s", url.c_str(), astcFilePath.c_str());
+    TAG_LOGI(
+        AceLogTag::ACE_IMAGE, "write image astc cache: %{private}s %{private}s", url.c_str(), astcFilePath.c_str());
 }
 
 void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)

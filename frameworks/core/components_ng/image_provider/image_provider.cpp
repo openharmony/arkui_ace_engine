@@ -155,7 +155,9 @@ void ImageProvider::SuccessCallback(
             ctx->SuccessCallback(canvasImage->Clone());
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadSuccess = [ctx, canvasImage] { ctx->SuccessCallback(canvasImage->Clone()); };
+            auto notifyLoadSuccess = [ctx, canvasImage] {
+                ctx->SuccessCallback(canvasImage->Clone());
+            };
             ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
     }
@@ -184,13 +186,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
         FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
-
-    auto cloneImageObj = imageObj->Clone();
-
-    // ImageObject cache is only for saving image size info, clear data to save memory
-    cloneImageObj->ClearData();
-
-    CacheImageObject(cloneImageObj);
+    CacheImageObject(imageObj);
 
     auto ctxs = EndTask(src.GetKey());
     // callback to LoadingContext
@@ -201,10 +197,13 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
         }
         if (sync) {
             ctx->DataReadyCallback(imageObj);
+            // ImageObject cache is only for saving image size info, clear data to save memory
+            imageObj->ClearData();
         } else {
             // NOTE: contexts may belong to different arkui pipelines
             auto notifyDataReadyTask = [ctx, imageObj, src] {
                 ctx->DataReadyCallback(imageObj);
+                imageObj->ClearData();
             };
             ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
