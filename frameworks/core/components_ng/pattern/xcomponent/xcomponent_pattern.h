@@ -302,6 +302,7 @@ public:
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
     void SetRenderFit(RenderFit renderFit);
+    void EnableSecure(bool isSecure);
 
 private:
     void OnAttachToFrameNode() override;

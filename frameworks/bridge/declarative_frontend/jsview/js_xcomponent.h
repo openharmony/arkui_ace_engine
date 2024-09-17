@@ -181,6 +181,7 @@ public:
     static void JsLinearGradientBlur(const JSCallbackInfo& args);
     static void JsEnableAnalyzer(bool enable);
     static void JsRenderFit(const JSCallbackInfo& args);
+    static void JsEnableSecure(const JSCallbackInfo& args);
 
     // For xcomponent node
     static void* Create(const XComponentParams& params);
