@@ -25,10 +25,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-using UpdateCallback = std::function<void(const RefPtr<FrameNode>&)>;
-} // namespace
-
 enum class SideBarAnimationDirection {
     LTR,
     RTL,
@@ -160,27 +156,6 @@ public:
         return showSideBar_;
     }
 
-    RefPtr<FrameNode> GetControlButtonNode() const;
-    void SetControlButtonInfoUpdateCallback(const UpdateCallback& updateCallback)
-    {
-        updateCallBack_ = updateCallback;
-    }
-
-    bool IsControlButtonCustomed() const
-    {
-        return isControlButtonPosCustomed_ || isControlButtonSizeCustomed_;
-    }
-
-    void SetControlButtonPosCustom(bool isControlButtonPosCustomed)
-    {
-        isControlButtonPosCustomed_ = isControlButtonPosCustomed;
-    }
-
-    void SetControlButtonSizeCustom(bool isControlButtonSizeCustomed)
-    {
-        isControlButtonSizeCustomed_ = isControlButtonSizeCustomed;
-    }
-
 private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -217,6 +192,7 @@ private:
     RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
     RefPtr<FrameNode> GetFirstFrameNode(const RefPtr<UINode>& host) const;
     RefPtr<FrameNode> GetSideBarNodeOrFirstChild() const;
+    RefPtr<FrameNode> GetControlButtonNode() const;
     RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;
     RefPtr<FrameNode> GetControlImageNode() const;
     RefPtr<FrameNode> GetDividerNode() const;
@@ -229,9 +205,7 @@ private:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode);
     void SetAccessibilityEvent();
-    void UpdateControlButtonInfo();
     void UpdateControlButtonImageSize();
-    void UpdateControlButtonImage(std::optional<ImageSourceInfo>& info);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -286,9 +260,6 @@ private:
     void HandleLongPressActionEnd();
     void ShowDialogWithNode();
     bool isDialogShow_ = false;
-    UpdateCallback updateCallBack_ = nullptr;
-    bool isControlButtonPosCustomed_ = false;
-    bool isControlButtonSizeCustomed_ = false;
 };
 
 } // namespace OHOS::Ace::NG

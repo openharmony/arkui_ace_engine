@@ -64,8 +64,6 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::SHARE_SVG, "share" },
     { InternalResource::ResourceId::SHOW_PASSWORD_SVG, "show_password" },
     { InternalResource::ResourceId::SIDE_BAR, "ic_public_drawer" },
-    { InternalResource::ResourceId::SIDE_BAR_OPEN, "ic_public_drawer_open" },
-    { InternalResource::ResourceId::SIDE_BAR_CLOSE, "ic_public_drawer_close" },
     { InternalResource::ResourceId::SPINNER, "ic_public_spinner" },
     { InternalResource::ResourceId::SPINNER_DISABLE, "ic_public_spinner_disable" },
     { InternalResource::ResourceId::STEPPER_BACK_ARROW, "stepper_back_arrow" },

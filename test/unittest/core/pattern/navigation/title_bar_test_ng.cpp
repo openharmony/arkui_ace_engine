@@ -191,18 +191,6 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTempTitleOffsetX001
- * @tc.desc: Test GetTempTitleOffsetX interface.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, GetTempTitleOffsetX001, TestSize.Level1)
-{
-    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
-    auto ret = titleBarPattern->GetTempTitleOffsetX();
-    EXPECT_EQ(ret, RET_VALUE);
-}
-
-/**
  * @tc.name: GetTempSubTitleOffsetY001
  * @tc.desc: Test GetTempSubTitleOffsetY interface.
  * @tc.type: FUNC
@@ -211,18 +199,6 @@ HWTEST_F(TitleBarTestNg, GetTempSubTitleOffsetY001, TestSize.Level1)
 {
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     auto ret = titleBarPattern->GetTempSubTitleOffsetY();
-    EXPECT_EQ(ret, RET_VALUE);
-}
-
-/**
- * @tc.name: GetTempSubTitleOffsetX001
- * @tc.desc: Test GetTempSubTitleOffsetX interface.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, GetTempSubTitleOffsetX001, TestSize.Level1)
-{
-    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
-    auto ret = titleBarPattern->GetTempSubTitleOffsetX();
     EXPECT_EQ(ret, RET_VALUE);
 }
 
@@ -1134,21 +1110,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
     ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
     titleBarPattern_->OnCoordScrollStart();
     ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
-}
-
-/**
- * @tc.name: GetSideBarButtonInfoTest001
- * @tc.desc: get the empty info of sideBarButton when the sideBarButton is empty.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, GetSideBarButtonInfoTest001, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    bool hasSideBar = titleBarPattern_->IsNecessaryToAvoidSideBar();
-    EXPECT_EQ(hasSideBar, false);
-    RectF buttonRect = titleBarPattern_->GetControlButtonInfo();
-    EXPECT_EQ(buttonRect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
-    DestroyTitleBarObject();
 }
 
 /**
