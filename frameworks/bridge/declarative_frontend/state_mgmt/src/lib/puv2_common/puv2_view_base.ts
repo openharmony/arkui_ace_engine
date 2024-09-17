@@ -209,7 +209,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   }
 
   protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {
-    // ViewPU overrides to unregister ViewPU from variables, 
+    // ViewPU overrides to unregister ViewPU from variables,
     // not in use in ViewV2
   }
 
@@ -266,8 +266,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     stateMgmtConsole.warn(`Printing profiler information`);
     stateMgmtProfiler.report();
   }
-
-
+  
   public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
     stateMgmtProfiler.begin('ViewPU/V2.updateStateVarsOfChildByElmtId');
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - start`);
@@ -326,7 +325,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       stateMgmtProfiler.end();
       return;
     }
-    
     for (const child of this.childrenWeakrefMap_.values()) {
       const childView: IView | undefined = child.deref();
 
@@ -335,11 +333,11 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       }
 
       if (child instanceof ViewPU) {
-        if (!child.isRecycled()) {
-          child.forceCompleteRerender(true);
-        } else {
-          child.delayCompleteRerender(deep);
-        }
+          if (!child.isRecycled()) {
+            child.forceCompleteRerender(true);
+          } else {
+            child.delayCompleteRerender(deep);
+          }
       } else {
         childView.forceCompleteRerender(true);
       }

@@ -4095,14 +4095,12 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         return this.isDeleting_;
     }
     setDeleting() {
-        
         this.isDeleting_ = true;
     }
     setDeleteStatusRecursively() {
         if (!this.childrenWeakrefMap_.size) {
             return;
         }
-        
         this.childrenWeakrefMap_.forEach((value) => {
             let child = value.deref();
             if (child) {
@@ -4120,7 +4118,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
-        // ViewPU overrides to unregister ViewPU from variables, 
+        // ViewPU overrides to unregister ViewPU from variables,
         // not in use in ViewV2
     }
     // overwritten by sub classes

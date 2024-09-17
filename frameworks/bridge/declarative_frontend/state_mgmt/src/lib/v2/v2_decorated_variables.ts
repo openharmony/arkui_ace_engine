@@ -134,18 +134,18 @@ class VariableUtilV3 {
       return undefined;
     }
 
-    /**
-    * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
-    * This function establishes a link between the consumer and provider, allowing the consumer to access and update
-    * the provider's value directly. If the provider view is garbage collected, attempts to access the provider
-    * property will throw an error.
-    *
-    * @param consumeView - The view object that consumes data from the provider.
-    * @param consumeVarName - The name of the property in the consumer view that will be linked to the provider.
-    * @param provideView - The view object that provides the data to the consumer.
-    * @param provideVarName - The name of the property in the provider view that the consumer will access.
-    *
-    */
+   /**
+   * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
+   * This function establishes a link between the consumer and provider, allowing the consumer to access and update
+   * the provider's value directly. If the provider view is garbage collected, attempts to access the provider
+   * property will throw an error.
+   *
+   * @param consumeView - The view object that consumes data from the provider.
+   * @param consumeVarName - The name of the property in the consumer view that will be linked to the provider.
+   * @param provideView - The view object that provides the data to the consumer.
+   * @param provideVarName - The name of the property in the provider view that the consumer will access.
+   *
+   */
     public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): any {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
