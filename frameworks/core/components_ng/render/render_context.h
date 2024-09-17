@@ -280,6 +280,7 @@ public:
     virtual void ClearChildren() {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
+    virtual void SetSecurityLayer(bool isSecure) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}

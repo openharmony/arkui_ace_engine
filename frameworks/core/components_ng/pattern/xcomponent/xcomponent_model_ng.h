@@ -57,6 +57,7 @@ public:
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
     void SetRenderFit(RenderFit renderFit) override;
+    void EnableSecure(bool isSecure) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
@@ -80,6 +81,7 @@ public:
     static void SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad);
     static void SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
+    static void EnableSecure(FrameNode* frameNode, bool enable);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
