@@ -33,6 +33,7 @@
 #include "frameworks/core/common/ime/text_input_action.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -288,6 +289,47 @@ namespace OHOS::Ace::NG::Converter {
 
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
+
+    inline void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
+    {
+        switch (src) {
+            case V2::StickyMode::NONE: dst = ARK_STICKY_NONE; break;
+            case V2::StickyMode::NORMAL: dst = ARK_STICKY_NORMAL; break;
+            case V2::StickyMode::OPACITY: dst = ARK_STICKY_OPACITY; break;
+            default: dst = static_cast<Ark_Sticky>(-1);
+                LOGE("Unexpected enum value in V2::StickyMode: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
+    {
+        switch (src) {
+            case V2::ListItemStyle::NONE: dst = ARK_LIST_ITEM_STYLE_NONE; break;
+            case V2::ListItemStyle::CARD: dst = ARK_LIST_ITEM_STYLE_CARD; break;
+            default: dst = static_cast<Ark_ListItemStyle>(-1);
+                LOGE("Unexpected enum value in V2::ListItemStyle: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src)
+    {
+        switch (src) {
+            case V2::ListItemGroupStyle::NONE: dst = ARK_LIST_ITEM_GROUP_STYLE_NONE; break;
+            case V2::ListItemGroupStyle::CARD: dst = ARK_LIST_ITEM_GROUP_STYLE_CARD; break;
+            default: dst = static_cast<Ark_ListItemGroupStyle>(-1);
+                LOGE("Unexpected enum value in ListItemGroupStyle: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
+    {
+        switch (src) {
+            case V2::SwipeEdgeEffect::Spring: dst = ARK_SWIPE_EDGE_EFFECT_SPRING; break;
+            case V2::SwipeEdgeEffect::None: dst = ARK_SWIPE_EDGE_EFFECT_NONE; break;
+            default: dst = static_cast<Ark_SwipeEdgeEffect>(-1);
+                LOGE("Unexpected enum value in V2::SwipeEdgeEffect: %{public}d", src);
+        }
+    }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 

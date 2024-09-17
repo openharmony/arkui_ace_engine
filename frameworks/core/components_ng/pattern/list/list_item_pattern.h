@@ -191,9 +191,14 @@ public:
         return MakeRefPtr<ListItemAccessibilityProperty>();
     }
 
-    V2::ListItemStyle GetListItemStyle()
+    V2::ListItemStyle GetListItemStyle() const
     {
         return listItemStyle_;
+    }
+
+    void SetListItemStyle(V2::ListItemStyle style)
+    {
+        listItemStyle_ = style;
     }
 
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);

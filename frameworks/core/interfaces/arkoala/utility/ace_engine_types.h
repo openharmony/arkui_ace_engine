@@ -19,6 +19,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct RadioStyle {
@@ -42,5 +43,14 @@ struct TextDecorationOptions {
     std::optional<Color> color;
     std::optional<TextDecorationStyle> textDecorationStyle;
 };
+struct ListItemOptions {
+    std::optional<V2::ListItemStyle> style;
+};
+
+struct ListItemGroupOptions {
+    std::optional<Dimension> space;
+    std::optional<V2::ListItemGroupStyle> style;
+};
+
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H

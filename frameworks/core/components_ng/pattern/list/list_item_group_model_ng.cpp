@@ -83,9 +83,13 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
     pattern->SetFooterComponentContentExist(false);
 }
 
-void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    if (divider.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, frameNode);
+    }
 }
 
 void ListItemGroupModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)
@@ -139,17 +143,21 @@ V2::ItemDivider ListItemGroupModelNG::GetDivider(FrameNode* frameNode)
     return value;
 }
 
-void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const Dimension& space)
+void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space, frameNode);
+    if (space.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, frameNode);
+    }
 }
 
-void ListItemGroupModelNG::SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style)
+void ListItemGroupModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetListItemGroupStyle(style);
+    pattern->SetListItemGroupStyle(style.value_or(V2::ListItemGroupStyle::NONE));
 }
 
 void ListItemGroupModelNG::SetFooterComponent(const RefPtr<NG::UINode>& footerComponent)
