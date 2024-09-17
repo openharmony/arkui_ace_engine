@@ -37,6 +37,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   private recycleManager_: RecycleManager = undefined;
 
+  // Internal variable to keep track is component recycled or not.
   private hasBeenRecycled_: boolean = false;
 
   private preventRecursiveRecycle_: boolean = false;
@@ -213,7 +214,6 @@ abstract class ViewPU extends PUV2ViewBase
     Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
       this.purgeDeleteElmtId(elmtId);
     })
-
     if (this.hasRecycleManager()) {
       this.getRecycleManager().purgeAllCachedRecycleNode();
     }
@@ -223,10 +223,8 @@ abstract class ViewPU extends PUV2ViewBase
 
     // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
     this.purgeDeletedElmtIds();
-
-    // un-registers its own id once its children are unregistered above
-    //FIXME: Uncomment once photos app avoids rerendering of removed elementIds
-    //UINodeRegisterProxy unregisterRemovedElmtsFromViewPUs([this id__()]);
+    // unregisters its own id once its children are unregistered above
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
 
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
@@ -348,7 +346,6 @@ abstract class ViewPU extends PUV2ViewBase
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
   }
 
-
   // abstract functions to be implemented by application defined class / transpiled code
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
@@ -404,8 +401,8 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public flushDelayCompleteRerender(): void {
-    this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
-    this.delayRecycleNodeRerender = false;
+      this.forceCompleteRerender(this.delayRecycleNodeRerenderDeep);
+      this.delayRecycleNodeRerender = false;
   }
 
   /**
@@ -416,7 +413,7 @@ abstract class ViewPU extends PUV2ViewBase
    * framework internal functions, apps must not call
    */
   public forceRerenderNode(elmtId: number): void {
-    stateMgmtProfiler.begin('ViewPU.forceRerenderNode');
+    stateMgmtProfiler.begin('ViewPU/V2.forceRerenderNode');
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
     this.purgeDeletedElmtIds();
@@ -718,7 +715,6 @@ abstract class ViewPU extends PUV2ViewBase
       if (!isFirstRender) {
         _popFunc();
       }
-
       let node = this.getNodeById(elmtId);
       if (node !== undefined) {
         (node as ArkComponent).cleanStageValue();
@@ -780,8 +776,9 @@ abstract class ViewPU extends PUV2ViewBase
     }
     this.recycleManager_ = new RecycleManager;
   }
-  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc): void {
-    const updateFunc = (elmtId, isFirstRender): void => {
+
+  rebuildUpdateFunc(elmtId: number, compilerAssignedUpdateFunc: UpdateFunc): void {
+    const updateFunc: UpdateFunc = (elmtId, isFirstRender) => {
       this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       this.currentlyRenderedElmtIdStack_.pop();
@@ -901,6 +898,10 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.resetRecycleCustomNode();
     }
+  }
+  
+  public isRecycled() : boolean {
+    return this.hasBeenRecycled_;
   }
 
   public UpdateLazyForEachElements(elmtIds: Array<number>): void {
