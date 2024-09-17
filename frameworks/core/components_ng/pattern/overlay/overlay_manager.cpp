@@ -54,6 +54,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -3046,6 +3047,13 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool is
         dragDropManager->SetIsBackPressedCleanLongPressNodes(true);
     }
     return true;
+}
+
+void OverlayManager::SetIsMenuShow(bool isMenuShow)
+{
+    isMenuShow_ = isMenuShow;
+    // notify drag manager the menu show status
+    DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(isMenuShow);
 }
 
 int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
