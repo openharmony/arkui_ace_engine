@@ -432,20 +432,7 @@ namespace Converter {
         return Color::FromString(src.chars);
     }
 
-    template<>
-    inline CalcLength Convert(const Ark_Length& src)
-    {
-        if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
-            LOGE("Convert [Ark_Length] of type Resource to [CalcLength] is not supported.");
-            return CalcLength();
-        }
-        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
-        auto value = src.value;
-        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
-            value /= 100.0f; // percent is normalized [0..1]
-        }
-        return CalcLength(value, unit);
-    }
+    template<> CalcLength Convert(const Ark_Length& src);
 
     template<>
     inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
@@ -472,6 +459,8 @@ namespace Converter {
         return { .left = value, .right = value, .top = value, .bottom = value
         };
     }
+
+    template<> PaddingProperty Convert(const Ark_Padding& src);
 
     template<>
     inline PaddingProperty Convert(const Ark_LocalizedPadding& src)

@@ -95,6 +95,15 @@ std::string LinearGradientBlurDirection(GradientDirection direction)
         json##name->Put("y", "");                                    \
     }
 
+#define ACE_OFFSET_EDGES(name)                                                                                      \
+auto json##name = JsonUtil::Create(true);                                                                           \
+if (prop##name.has_value()) {                                                                                       \
+    json##name->Put("left", prop##name->left.has_value() ? prop##name->left.value().ToString().c_str() : "");       \
+    json##name->Put("top", prop##name->top.has_value() ? prop##name->top.value().ToString().c_str() : "");          \
+    json##name->Put("right", prop##name->right.has_value() ? prop##name->right.value().ToString().c_str() : "");    \
+    json##name->Put("bottom", prop##name->bottom.has_value() ? prop##name->bottom.value().ToString().c_str() : ""); \
+}
+
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -107,8 +116,13 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     auto context = PipelineContext::GetCurrentContext();
     // add version protection, null as default start from API 10 or higher
     if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
-        ACE_OFFSET_API_TEN_TO_JSON(Offset);
-        json->PutExtAttr("offset", jsonOffset, filter);
+        if (propOffsetEdges.has_value()) {
+            ACE_OFFSET_EDGES(OffsetEdges);
+            json->PutExtAttr("offset", jsonOffsetEdges, filter);
+        } else {
+            ACE_OFFSET_API_TEN_TO_JSON(Offset);
+            json->PutExtAttr("offset", jsonOffset, filter);
+        }
 
         ACE_OFFSET_API_TEN_TO_JSON(Anchor);
         json->PutExtAttr("markAnchor", jsonAnchor, filter);
