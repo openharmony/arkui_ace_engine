@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
@@ -412,6 +413,11 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnDownloadProgress,
 };
 
+const ComponentAsyncEventHandler IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageSpanOnCompleteEvent,
+    NodeModifier::SetImageSpanOnErrorEvent,
+};
+
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetDatePickerOnDateChange,
 };
@@ -715,6 +721,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = imageNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_SPAN: {
+            if (subKind >= sizeof(IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SCROLL: {

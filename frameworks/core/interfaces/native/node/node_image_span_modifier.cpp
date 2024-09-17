@@ -25,6 +25,16 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int DEFAULT_LENGTH = 4;
+constexpr int32_t LOAD_ERROR_CODE = 401;
+constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
+constexpr int32_t IMAGE_WIDTH_INDEX = 1;
+constexpr int32_t IMAGE_HEIGHT_INDEX = 2;
+constexpr int32_t IMAGE_COMPONENT_WIDTH_INDEX = 3;
+constexpr int32_t IMAGE_COMPONENT_HEIGHT_INDEX = 4;
+constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
+constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
+constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
+constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr VerticalAlign DEFAULT_VERTICAL_ALIGN = VerticalAlign::BOTTOM;
 constexpr ImageFit DEFAULT_OBJECT_FIT = ImageFit::COVER;
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
@@ -246,6 +256,44 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
         SetImageSpanOnError, ResetImageSpanOnError };
     return &modifier;
+}
+
+void SetImageSpanOnCompleteEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const LoadImageSuccessEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_SPAN_COMPLETE;
+        event.componentAsyncEvent.data[IMAGE_LOAD_STATUS_INDEX].i32 = info.GetLoadingStatus();
+        event.componentAsyncEvent.data[IMAGE_WIDTH_INDEX].f32 = info.GetWidth();
+        event.componentAsyncEvent.data[IMAGE_HEIGHT_INDEX].f32 = info.GetHeight();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_WIDTH_INDEX].f32 = info.GetComponentWidth();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_HEIGHT_INDEX].f32 = info.GetComponentHeight();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_X_INDEX].f32 = info.GetContentOffsetX();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageSpanView::SetOnComplete(frameNode, std::move(onEvent));
+}
+
+void SetImageSpanOnErrorEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const LoadImageFailEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_SPAN_ERROR;
+        event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageSpanView::SetOnError(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
