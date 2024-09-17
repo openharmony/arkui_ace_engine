@@ -564,7 +564,9 @@ public:
 
     void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) override
     {
-        frameRateRange_[type] = rateRange;
+        if (rateRange) {
+            frameRateRange_[type] = rateRange;
+        }
     }
     void UpdateNodeRate();
     int32_t GetMaxDisplayCount() const;
@@ -916,6 +918,10 @@ private:
     {
         return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
     }
+    void UpdateTranslateForCaptureNode(const OffsetF& offset, bool cancel = false);
+    void UpdateFinalTranslateForSwiperItem(const SwiperLayoutAlgorithm::PositionMap& itemPosition);
+    void UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::PositionMap& itemPosition,
+        const OffsetF& offset, bool cancel = false);
     void UpdateTargetCapture(bool forceUpdate);
     void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
     void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);

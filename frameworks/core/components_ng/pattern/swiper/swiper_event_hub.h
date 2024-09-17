@@ -108,6 +108,9 @@ public:
         if (!changeEventsWithPreIndex_.empty()) {
             std::for_each(changeEventsWithPreIndex_.begin(), changeEventsWithPreIndex_.end(),
                 [preIndex, currentIndex](const ChangeEventWithPreIndexPtr& changeEventWithPreIndex) {
+                    if (!changeEventWithPreIndex || !(*changeEventWithPreIndex)) {
+                        return;
+                    }
                     auto event = *changeEventWithPreIndex;
                     event(preIndex, currentIndex);
                 });
@@ -145,6 +148,9 @@ public:
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
                 [index, targetIndex, info](const AnimationStartEventPtr& animationStartEvent) {
+                    if (!animationStartEvent || !(*animationStartEvent)) {
+                        return;
+                    }
                     auto event = *animationStartEvent;
                     event(index, targetIndex, info);
                 });
@@ -156,6 +162,9 @@ public:
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
                 [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    if (!animationEndEvent || !(*animationEndEvent)) {
+                        return;
+                    }
                     auto event = *animationEndEvent;
                     event(index, info);
                 });
@@ -164,17 +173,21 @@ public:
 
     void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
-        if (!animationEndEvents_.empty()) {
-            auto context = GetFrameNode()->GetContext();
-            CHECK_NULL_VOID(context);
-            context->AddBuildFinishCallBack([this, index, info]() {
-                std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
-                    [index, info](const AnimationEndEventPtr& animationEndEvent) {
-                        auto event = *animationEndEvent;
-                        event(index, info);
-                    });
-            });
+        if (animationEndEvents_.empty()) {
+            return;
         }
+        auto context = GetFrameNode()->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([this, index, info]() {
+            std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    if (!animationEndEvent || !(*animationEndEvent)) {
+                        return;
+                    }
+                    auto event = *animationEndEvent;
+                    event(index, info);
+                });
+        });
     }
 
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
@@ -194,6 +207,9 @@ private:
             return;
         }
         std::for_each(changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+            if (!changeEvent || !(*changeEvent)) {
+                return;
+            }
             auto event = *changeEvent;
             event(index);
         });

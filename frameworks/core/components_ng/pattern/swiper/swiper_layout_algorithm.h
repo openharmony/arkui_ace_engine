@@ -53,17 +53,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    void LayoutForward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
-    void LayoutBackward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
-    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        int32_t& currentIndex, float startPos, float& endPos);
-    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
-        int32_t& currentIndex, float endPos, float& startPos);
-    float GetChildMaxSize(LayoutWrapper* layoutWrapper, bool isMainAxis) const;
-    int32_t GetLoopIndex(int32_t originalIndex) const;
-
     void SetItemsPosition(const PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
@@ -308,6 +297,17 @@ public:
     }
 
 private:
+    void LayoutForward(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
+    void LayoutBackward(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
+    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t& currentIndex, float startPos, float& endPos);
+    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t& currentIndex, float endPos, float& startPos);
+    float GetChildMaxSize(LayoutWrapper* layoutWrapper, bool isMainAxis) const;
+    int32_t GetLoopIndex(int32_t originalIndex) const;
+
     void LayoutSwiperIndicator(
         LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
         const PaddingPropertyF& padding);
