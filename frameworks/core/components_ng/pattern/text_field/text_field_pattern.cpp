@@ -2818,6 +2818,7 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(textFieldTheme);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    KeyboardContentTypeToInputType();
     CheckIfNeedToResetKeyboard();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -3650,7 +3651,11 @@ uint32_t TextFieldPattern::GetSCBSystemWindowId()
 
 void TextFieldPattern::KeyboardContentTypeToInputType()
 {
-    if (keyboard_ != TextInputType::UNSPECIFIED) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::UNSPECIFIED) {
         return;
     }
     auto autoFillType = GetAutoFillType(false);
@@ -3682,7 +3687,9 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
         { AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, TextInputType::TEXT },
         { AceAutoFillType::ACE_FORMAT_ADDRESS, TextInputType::TEXT }};
     if (keyBoardMap.find(autoFillType) != keyBoardMap.end()) {
-        keyboard_ = keyBoardMap[autoFillType];
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "Set InputType to %{public}d because of contentType", keyBoardMap[autoFillType]);
+        layoutProperty->UpdateTextInputType(keyBoardMap[autoFillType]);
     }
 }
 
@@ -3700,7 +3707,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         return RequestCustomKeyboard();
     }
     bool ok = true;
-    KeyboardContentTypeToInputType();
 #if defined(ENABLE_STANDARD_INPUT)
     if (textChangeListener_ == nullptr) {
         textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
