@@ -1458,7 +1458,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
-    UpdateHalfFoldHoverStatus(width, height);
+    UpdateHalfFoldHoverProperty(width, height);
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1466,6 +1466,16 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #else
     SetRootRect(width, height, 0.0);
 #endif
+}
+
+void PipelineContext::UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight)
+{
+    isHoverModeChanged_ = false;
+    preIsHalfFoldHoverStatus_ = isHalfFoldHoverStatus_;
+    UpdateHalfFoldHoverStatus(windowWidth, windowHeight);
+    if (preIsHalfFoldHoverStatus_ != isHalfFoldHoverStatus_) {
+        isHoverModeChanged_ = true;
+    }
 }
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId)
@@ -4818,7 +4828,7 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
     foldStatusDelayTask_.Reset([weak = WeakClaim(this)]() {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
-        context->UpdateHalfFoldHoverStatus(context->GetRootWidth(), context->GetRootHeight());
+        context->UpdateHalfFoldHoverProperty(context->GetRootWidth(), context->GetRootHeight());
         context->OnHalfFoldHoverChangedCallback();
     });
     taskExecutor_->PostDelayedTask(

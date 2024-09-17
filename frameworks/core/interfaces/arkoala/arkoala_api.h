@@ -1456,6 +1456,7 @@ struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalInt barStyle;
     ArkUIOptionalDimensionType paddingStart;
     ArkUIOptionalDimensionType paddingEnd;
+    ArkUIOptionalBool enableHoverMode;
 };
 
 struct ArkUIBarItem {

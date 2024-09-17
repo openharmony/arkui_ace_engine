@@ -31,12 +31,18 @@
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
+constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 180;
+const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
+}
 bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<NavigationBarTheme> theme,
     RefPtr<TitleBarNode> titleBarNode, RefPtr<FrameNode> menuNode, std::vector<OptionParam>&& params)
 {
@@ -824,5 +830,120 @@ void NavigationTitleUtil::CreateOrUpdateDestinationSubtitle(const RefPtr<TitleBa
     titleBarPattern->SetNeedResetSubTitleProperty(true);
     titleBarNode->SetSubtitle(subTitle);
     titleBarNode->AddChild(subTitle);
+}
+
+void NavigationTitleUtil::FoldStatusChangedAnimation(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto titleBar = AceType::DynamicCast<TitleBarNode>(host);
+    CHECK_NULL_VOID(titleBar);
+    auto pattern = titleBar->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (!pipelineContext->IsHoverModeChange() || !IsNeedHoverModeAction(titleBar)) {
+        // Since only expanded to hover or hover to expanded need this animation.
+        return;
+    }
+
+    AnimationOption option;
+    option.SetCurve(TITLEBAR_OPACITY_ANIMATION_CURVE);
+    auto renderNodeContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderNodeContext);
+    option.SetDuration(TITLEBAR_OPACITY_ANIMATION_DURATION);
+    renderNodeContext->UpdateOpacity(1.0f);
+    option.SetOnFinishEvent([weakRenderNodeContext = WeakPtr<RenderContext>(renderNodeContext),
+                                weakHost = WeakPtr<FrameNode>(host)]() {
+        auto host = weakHost.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto renderContext = weakRenderNodeContext.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        AnimationOption finishOption;
+        finishOption.SetDuration(TITLEBAR_OPACITY_ANIMATION_DURATION);
+        finishOption.SetCurve(TITLEBAR_OPACITY_ANIMATION_CURVE);
+        auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_VOID(parent);
+        parent->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        AnimationUtils::Animate(
+            finishOption, [weakRenderNodeContext = WeakPtr<RenderContext>(renderContext)]() {
+                auto renderNodeContext = weakRenderNodeContext.Upgrade();
+                CHECK_NULL_VOID(renderNodeContext);
+                renderNodeContext->UpdateOpacity(1.0f);
+            });
+    });
+    AnimationUtils::Animate(
+        option,
+        [weakRenderNodeContext = WeakPtr<RenderContext>(renderNodeContext)]() {
+            auto renderContext = weakRenderNodeContext.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(0.0f);
+        },
+        option.GetOnFinishEvent());
+}
+
+bool NavigationTitleUtil::IsNeedHoverModeAction(const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_RETURN(titleBarNode, false);
+    auto pattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto options = pattern->GetTitleBarOptions();
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, false);
+    auto parentType = titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR);
+    if (parentType == TitleBarParentType::NAVBAR &&
+        titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::MINI) == NavigationTitleMode::FREE) {
+        return false;
+    }
+    if (!options.enableHoverMode || options.brOptions.barStyle == NG::BarStyle::STANDARD) {
+        return false;
+    }
+    RefPtr<NavigationGroupNode> navigationGroupNode;
+    if (parentType == TitleBarParentType::NAVBAR) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
+        CHECK_NULL_RETURN(navBarNode, false);
+        navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(navBarNode->GetParent());
+    } else {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
+        CHECK_NULL_RETURN(navDestination, false);
+        auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(navDestinationPattern, false);
+        navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
+    }
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationGroupNode->GetPattern());
+    CHECK_NULL_RETURN(navigationPattern, false);
+    auto pageNode = navigationPattern->GetNavBasePageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto foldCreaseRects = pattern->GetFoldCreaseRects();
+    auto parentNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    bool isParentFullPage = pageNode->GetGeometryNode()->GetFrameSize().Height()
+        == parentNode->GetGeometryNode()->GetFrameSize().Height();
+    return !foldCreaseRects.empty() && isParentFullPage;
+}
+
+float NavigationTitleUtil::CalculateTitlebarOffset(const RefPtr<UINode>& titleBarNode)
+{
+    CHECK_NULL_RETURN(titleBarNode, 0.0f);
+    auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
+    CHECK_NULL_RETURN(titleBar, 0.0f);
+    if (!IsNeedHoverModeAction(titleBar)) {
+        return 0.0f;
+    }
+    auto pattern = titleBar->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto foldCreaseRects = pattern->GetFoldCreaseRects();
+    auto pipelineContext = titleBar->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    if (!pipelineContext->IsHalfFoldHoverStatus()) {
+        return 0.0f;
+    }
+    auto safeArea = pipelineContext->GetSafeAreaWithoutProcess();
+    auto length = safeArea.top_.Length();
+    auto foldCrease = foldCreaseRects.front();
+    
+    // offsetY = The Y of the foldCrease + Adapt vertical displacement of hover state - the height of the status bar.
+    return foldCrease.GetOffset().GetY() + TITLEBAR_VERTICAL_PADDING.ConvertToPx() - length;
 }
 } // namespace OHOS::Ace::NG

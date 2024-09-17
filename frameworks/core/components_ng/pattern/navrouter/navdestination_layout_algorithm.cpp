@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
@@ -200,7 +201,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
+    auto offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
+    auto titleBarOffset = OffsetT<float>(0.0f, offsetY);
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     titleBarOffset.AddX(padding.left.value_or(0.0f));
     titleBarOffset.AddY(padding.top.value_or(0.0f));

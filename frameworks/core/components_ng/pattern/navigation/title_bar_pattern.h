@@ -326,6 +326,30 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
+    void UpdateHalfFoldHoverChangedCallbackId(std::optional<int32_t> id)
+    {
+        halfFoldHoverChangedCallbackId_ = id;
+    }
+
+    bool HasHalfFoldHoverChangedCallbackId()
+    {
+        return halfFoldHoverChangedCallbackId_.has_value();
+    }
+
+    void InitFoldCreaseRegion();
+
+    std::vector<Rect> GetFoldCreaseRects()
+    {
+        return currentFoldCreaseRegion_;
+    }
+
+    void OnAttachToMainTree() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        InitFoldCreaseRegion();
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -461,6 +485,8 @@ private:
     bool needToAvoidSideBar_ = false;
     RectF controlButtonRect_;
     bool isScrolling_ = false;
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
+    std::vector<Rect> currentFoldCreaseRegion_;
 };
 
 } // namespace OHOS::Ace::NG
