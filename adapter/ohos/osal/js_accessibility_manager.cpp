@@ -42,7 +42,6 @@
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
-using namespace std;
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -1940,7 +1939,7 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
     return true;
 }
 
-inline string GetSupportAction(const std::unordered_set<AceAction>& supportAceActions)
+inline std::string GetSupportAction(const std::unordered_set<AceAction>& supportAceActions)
 {
     std::string actionForDump;
     for (const auto& action : supportAceActions) {
@@ -2075,7 +2074,7 @@ static void DumpExtraElementInfoNG(const AccessibilityElementInfo& nodeInfo)
     }
 }
 
-inline string ChildrenToString(const vector<int64_t>& children, int32_t treeId)
+inline std::string ChildrenToString(const std::vector<int64_t>& children, int32_t treeId)
 {
     std::string ids;
     for (auto child : children) {
@@ -3319,7 +3318,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID, bool isDump
         CommonProperty commonProperty;
         GenerateCommonProperty(ngPipeline, commonProperty, pipeline);
         DumpTreeNG(rootNode, depth, nodeID, commonProperty, isDumpSimplify);
-        for (auto subContext : GetSubPipelineContexts()) {
+        for (const auto& subContext : GetSubPipelineContexts()) {
             auto subPipeline = subContext.Upgrade();
             ngPipeline = AceType::DynamicCast<NG::PipelineContext>(subPipeline);
             CHECK_NULL_VOID(ngPipeline);
@@ -4408,7 +4407,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
     interactionOperation->SetHandler(WeakClaim(this));
     Accessibility::RetError retReg = instance->RegisterElementOperator(windowId, interactionOperation);
     RefPtr<PipelineBase> context;
-    for (auto subContext : GetSubPipelineContexts()) {
+    for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_RETURN(context, -1);
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "RegisterSubPipeline windowId: %{public}u", context->GetWindowId());
@@ -4467,7 +4466,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     }
 
     RefPtr<PipelineBase> context;
-    for (auto subContext : GetSubPipelineContexts()) {
+    for (const auto& subContext : GetSubPipelineContexts()) {
         context = subContext.Upgrade();
         CHECK_NULL_VOID(context);
         instance->DeregisterElementOperator(context->GetWindowId());
@@ -4612,6 +4611,14 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     parentElementId_ = parentElementId;
     parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
+
+    for (const auto& subContext : GetSubPipelineContexts()) {
+        auto context = subContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        interactionOperation = std::make_shared<JsInteractionOperation>(context->GetWindowId());
+        interactionOperation->SetHandler(WeakClaim(this));
+        instance->RegisterElementOperator(context->GetWindowId(), interactionOperation);
+    }
 }
 
 void JsAccessibilityManager::SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback)
@@ -4637,6 +4644,13 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     parentTreeId_ = 0;
     parentWindowId_ = 0;
     NotifyChildTreeOnDeregister();
+
+    RefPtr<PipelineBase> context;
+    for (const auto& subContext : GetSubPipelineContexts()) {
+        context = subContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        instance->DeregisterElementOperator(context->GetWindowId());
+    }
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
