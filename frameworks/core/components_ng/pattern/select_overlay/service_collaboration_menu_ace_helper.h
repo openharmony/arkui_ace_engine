@@ -33,7 +33,8 @@ enum ServiceCollaborationCode {
 
 class FrameNode;
 struct SelectOverlayInfo;
-class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper {
+class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceType {
+    DECLARE_ACE_TYPE(ServiceCollaborationMenuAceHelper, AceType);
 public:
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin);
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
@@ -85,7 +86,8 @@ private:
     static constexpr char SUN_MENU_TAG[33] = "SelectOverlayMenuByRightClickSub";
 };
 
-class ACE_FORCE_EXPORT ServiceCollaborationAceCallback {
+class ACE_FORCE_EXPORT ServiceCollaborationAceCallback : public virtual AceType {
+    DECLARE_ACE_TYPE(ServiceCollaborationAceCallback, AceType);
 public:
     RefPtr<FrameNode> CreateCustomPopUpNode(const std::string& value, const std::string& icon);
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
