@@ -715,7 +715,8 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
     } else {
         // for ability
         auto parentContainer = Container::GetContainer(containerId);
-        if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST || parentContainer->IsScenceBoardWindow()) {
+        if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
+            (parentContainer && parentContainer->IsScenceBoardWindow())) {
             ShowToastNG(toastInfo, std::move(callback));
             return;
         }

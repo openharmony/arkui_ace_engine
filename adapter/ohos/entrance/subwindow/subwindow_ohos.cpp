@@ -120,7 +120,7 @@ Rosen::WindowType SubwindowOhos::GetToastRosenType(bool isSceneBoardEnable)
 {
     auto toastType = GetToastWindowType();
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
-        "GetToastRosenType windowType: %d, isSceneBoardEnable: %d",
+        "GetToastRosenType windowType: %{public}d, isSceneBoardEnable: %{public}d",
         toastType, isSceneBoardEnable);
     if (toastType == ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW) {
         if (!isSceneBoardEnable) {
@@ -145,6 +145,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
     windowOption->SetWindowType(toastWindowType);
     if (parentContainer->IsUIExtensionWindow()) {
         auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
         auto hostWindowId = parentPipeline->GetFocusWindowId();
         windowOption->SetExtensionTag(true);
         windowOption->SetParentId(hostWindowId);
