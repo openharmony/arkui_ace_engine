@@ -4474,15 +4474,22 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty->HasLastGradientType()) {
+        return;
+    }
     Gradient gradient;
-    if (gradientProperty->HasLinearGradient()) {
-        gradient = gradientProperty->GetLinearGradientValue();
-    }
-    if (gradientProperty->HasRadialGradient()) {
-        gradient = gradientProperty->GetRadialGradientValue();
-    }
-    if (gradientProperty->HasSweepGradient()) {
-        gradient = gradientProperty->GetSweepGradientValue();
+    switch (gradientProperty->GetLastGradientTypeValue()) {
+        case GradientType::LINEAR:
+            gradient = gradientProperty->GetLinearGradientValue();
+            break;
+        case GradientType::RADIAL:
+            gradient = gradientProperty->GetRadialGradientValue();
+            break;
+        case GradientType::SWEEP:
+            gradient = gradientProperty->GetSweepGradientValue();
+            break;
+        default:
+            return;
     }
     if (!gradientStyleModifier_) {
         gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
