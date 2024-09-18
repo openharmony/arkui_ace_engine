@@ -856,6 +856,12 @@ int32_t NavigationPattern::FireNavDestinationStateChange(NavDestinationLifecycle
     return hostNode->GetLastStandardIndex();
 }
 
+bool NavigationPattern::CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    return destinationNode->GetIndex() != -1 || destinationNode->GetNavDestinationCustomNode();
+}
+
 void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isOnShow)
 {
     CHECK_NULL_VOID(node);
@@ -949,6 +955,14 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
     NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_HIDE);
 }
 
+bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    auto destinationNodePattern = destinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(destinationNodePattern, false);
+    return !destinationNodePattern->GetIsOnShow();
+}
+
 void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle)
 {
     CHECK_NULL_VOID(node);
@@ -957,20 +971,15 @@ void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node
         auto& child = *iter;
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
         if (navigation) {
-            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
-            CHECK_NULL_VOID(navigationPattern);
-            auto standardIndex = navigationPattern->FireNavDestinationStateChange(lifecycle);
-            const auto& navDestinationNodes = navigationPattern->navigationStack_->GetAllNavDestinationNodes();
-            if (standardIndex == static_cast<int32_t>(navDestinationNodes.size())) {
-                NavigationPattern::FireNavigationLifecycleChange(child, lifecycle);
+            auto destinationNode = navigation->GetParentDestinationNode().Upgrade();
+            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode) &&
+                CheckDestinationIsPush(destinationNode)) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation parent is onhide");
                 continue;
             }
-            for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
-                 index >= 0 && index >= standardIndex; index--) {
-                const auto& curPath = navDestinationNodes[index];
-                // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
-                NavigationPattern::FireNavigationLifecycleChange(curPath.second, lifecycle);
-            }
+            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+            CHECK_NULL_VOID(navigationPattern);
+            navigationPattern->FireNavDestinationStateChange(lifecycle);
         } else {
             NavigationPattern::FireNavigationLifecycleChange(child, lifecycle);
         }
@@ -1675,11 +1684,11 @@ void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bo
     bool isShow = lifecycle == NavDestinationLifecycle::ON_SHOW || (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW);
     if (isShow) {
         for (int32_t index = start; index < end; index++) {
-            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
+            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle);
         }
     } else {
         for (int32_t index = end - 1; index >= 0 && index >= start; index--) {
-            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
+            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle);
         }
     }
 }
@@ -2231,7 +2240,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     }
     if (isPopPage || (preDestination &&
         (hostNode->GetLastStandardIndex() > preDestination->GetIndex() || preDestination->NeedRemoveInPush()))) {
-        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
+        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE);
     }
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2271,7 +2280,7 @@ void NavigationPattern::ProcessAutoSave(const RefPtr<FrameNode>& node)
 }
 
 void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
-    NavDestinationLifecycle lifecycle, bool isNavigationChanged)
+    NavDestinationLifecycle lifecycle)
 {
     auto curDestination =
         AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
@@ -2279,9 +2288,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_DISAPPEAR) {
-        if (isNavigationChanged) {
-            NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
-        }
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         eventHub->FireOnWillDisAppear();
         return;
     }
@@ -2292,20 +2299,27 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
             lifecycle == NavDestinationLifecycle::ON_WILL_HIDE))) {
         return;
     }
-    if (isNavigationChanged) {
-        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
-    }
     if (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW) {
         eventHub->FireOnWillShow();
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         return;
     }
     if (lifecycle == NavDestinationLifecycle::ON_SHOW) {
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(navigationNode);
+        auto parentDestinationNode = navigationNode->GetParentDestinationNode().Upgrade();
+        if (CheckParentDestinationIsOnhide(parentDestinationNode) && CheckDestinationIsPush(parentDestinationNode)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parentDestinationNode is onhide");
+            return;
+        }
         auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         NotifyPageShow(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(true);
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         return;
     }
+    NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_HIDE) {
         eventHub->FireOnWillHide();
         return;
@@ -2326,14 +2340,14 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
         auto lastStandardIndex = hostNode->GetLastStandardIndex();
         if (isPopPage || lastStandardIndex > preDestination->GetIndex() || preDestination->NeedRemoveInPush()) {
             // fire preTop Destination lifecycle
-            NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE, true);
+            NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE);
         }
     }
     // fire remove navDestination and invisible navDestination lifecycle for pop or clear
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
     if (isPopPage || (preDestination && preDestination->NeedRemoveInPush())) {
         // fire removed preDestination lifecycle for pop many times or clear
-        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
+        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     }
     // fire removed navDestination lifecycle
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
