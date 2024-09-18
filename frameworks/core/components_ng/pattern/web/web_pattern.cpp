@@ -2495,6 +2495,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     needUpdateWeb_= true;
     RegistVirtualKeyBoardListener(pipelineContext);
     InitConfigChangeCallback(pipelineContext);
+    InitializeAccessibility();
 }
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)
@@ -2505,7 +2506,7 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 
     auto host = GetHost();
     int32_t nodeId = host->GetId();
-
+    UninitializeAccessibility();
     context->RemoveWindowStateChangedCallback(nodeId);
     context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
@@ -6468,7 +6469,7 @@ void WebPattern::InitAiEngine()
 void WebPattern::InitializeAccessibility()
 {
     ContainerScope scope(instanceId_);
-    if (accessibilityChildTreeCallback_) {
+    if (accessibilityChildTreeCallback_[instanceId_]) {
         return;
     }
     auto frameNode = frameNode_.Upgrade();
@@ -6478,11 +6479,13 @@ void WebPattern::InitializeAccessibility()
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityChildTreeCallback_ = std::make_shared<WebAccessibilityChildTreeCallback>(
+    accessibilityChildTreeCallback_[instanceId_] = std::make_shared<WebAccessibilityChildTreeCallback>(
         WeakClaim(this), frameNode->GetAccessibilityId());
-    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId,
+        accessibilityChildTreeCallback_[instanceId_]);
     if (accessibilityManager->IsRegister()) {
-        accessibilityChildTreeCallback_->OnRegister(pipeline->GetWindowId(), accessibilityManager->GetTreeId());
+        accessibilityChildTreeCallback_[instanceId_]->OnRegister(pipeline->GetWindowId(),
+            accessibilityManager->GetTreeId());
     }
 }
 
@@ -6497,11 +6500,11 @@ void WebPattern::UninitializeAccessibility()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     if (accessibilityManager->IsRegister()) {
-        CHECK_NULL_VOID(accessibilityChildTreeCallback_);
-        accessibilityChildTreeCallback_->OnDeregister();
+        CHECK_NULL_VOID(accessibilityChildTreeCallback_[instanceId_]);
+        accessibilityChildTreeCallback_[instanceId_]->OnDeregister();
     }
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(accessibilityId);
-    accessibilityChildTreeCallback_ = nullptr;
+    accessibilityChildTreeCallback_.erase(instanceId_);
 }
 
 void WebPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
