@@ -442,6 +442,14 @@ void UINode::DoAddChild(
     }
     children_.insert(it, child);
 
+    if (IsAccessibilityVirtualNode()) {
+        auto parentVirtualNode = GetVirtualNodeParent().Upgrade();
+        if (parentVirtualNode) {
+            child->SetAccessibilityNodeVirtual();
+            child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
+
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
