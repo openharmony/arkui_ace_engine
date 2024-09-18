@@ -398,9 +398,6 @@ void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode, NavigationTitleMod
     titleLayoutProperty->UpdateFontSize(subTitleSize);
     titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     SetTextColor(textNode, color);
-
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textNode->MarkModifyDone();
 }
 } // namespace
 
@@ -426,6 +423,9 @@ void TitleBarPattern::MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         ResetSubTitleProperty(subtitleNode, titleMode, parentType == TitleBarParentType::NAV_DESTINATION);
         shouldResetSubTitleProperty_ = false;
     }
+
+    subtitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    subtitleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::InitTitleParam()
@@ -482,6 +482,9 @@ void TitleBarPattern::UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& host
         ResetMainTitleProperty(titleNode, titleBarLayoutProperty, titleMode, hostNode->GetSubtitle() != nullptr, false);
         shouldResetMainTitleProperty_ = false;
     }
+
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode)
@@ -508,6 +511,9 @@ void TitleBarPattern::UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& host
         ResetMainTitleProperty(titleNode, titleBarLayoutProperty, titleMode, hostNode->GetSubtitle() != nullptr, true);
         shouldResetMainTitleProperty_ = false;
     }
+
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
@@ -588,9 +594,6 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
             UpdateSubTitleOpacity(1.0);
         }
     }
-
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textNode->MarkModifyDone();
 }
 
 
