@@ -912,26 +912,32 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
     // spring effect special process
     if (scrollPause_) {
         scrollPause_ = false;
+        state_ = AnimationState::TRANSITION;
         HandleOverScroll(currentVelocity_);
-    } else {
-        if (isDragUpdateStop_) {
-            return;
+        if (state_ == AnimationState::TRANSITION) {
+            // didn't trigger spring animation
+            state_ = AnimationState::IDLE;
         }
-        moved_ = false;
-        HandleScrollEnd(std::nullopt);
-#ifdef OHOS_PLATFORM
-        if (FrameReport::GetInstance().GetEnable()) {
-            FrameReport::GetInstance().EndListFling();
-        }
-#endif
-        if (scrollEnd_) {
-            scrollEnd_();
-        }
-        currentVelocity_ = 0.0;
-#if !defined(PREVIEW)
-        LayoutInspector::SupportInspector();
-#endif
+        return;
     }
+
+    if (isDragUpdateStop_) {
+        return;
+    }
+    moved_ = false;
+    HandleScrollEnd(std::nullopt);
+#ifdef OHOS_PLATFORM
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndListFling();
+    }
+#endif
+    if (scrollEnd_) {
+        scrollEnd_();
+    }
+    currentVelocity_ = 0.0;
+#if !defined(PREVIEW)
+    LayoutInspector::SupportInspector();
+#endif
 }
 
 void Scrollable::ProcessSpringMotion(double position)
