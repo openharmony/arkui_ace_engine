@@ -105,6 +105,7 @@ public:
             theme->scaleSwiper_ = swiperPattern->GetAttr<double>("indicator_scale_swiper", INDICATOR_ZOOM_IN_SCALE);
             theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 0.0_vp);
             theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 1));
+            theme->focusStyleType_ = swiperPattern->GetAttr<double>("swiper_focus_style_type", 0.0);
             theme->size_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_size", 0.0_vp);
             theme->selectedSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_selected_size", 0.0_vp);
             theme->isHasMask_ = static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_mask", 0.0));
@@ -457,6 +458,11 @@ public:
         return clipToBounds_;
     }
 
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -518,6 +524,7 @@ private:
     Dimension indicatorPaddingDot_;
     Dimension indicatorFocusedPadding_;
     bool clipToBounds_ = true;
+    double focusStyleType_ = 0.0;
 };
 
 } // namespace OHOS::Ace
