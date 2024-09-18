@@ -741,6 +741,10 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
+    virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
+
     enum class NotificationType : int32_t {
         START_CHANGE_POSITION = 0,
         END_CHANGE_POSITION = 1,
@@ -755,10 +759,6 @@ public:
      * @param notificationType the type of notification.
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
-
-    virtual void GetInspectorValue();
-    virtual void NotifyWebPattern(bool isRegister);
-    void GetContainerComponentText(std::string& text);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -831,7 +831,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
-
+    
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
