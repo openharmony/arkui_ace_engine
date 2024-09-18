@@ -18,6 +18,7 @@ build_component("checkable") {
   sources = [
     "checkable_component.cpp",
     "checkable_element.cpp",
+    "checkable_theme.cpp",
     "render_checkable.cpp",
     "render_checkbox.cpp",
     "render_checkbox_creator.cpp",

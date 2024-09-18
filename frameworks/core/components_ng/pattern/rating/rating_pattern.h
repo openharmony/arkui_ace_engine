@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -97,6 +99,11 @@ public:
 
     void SetRatingScore(double value);
 
+    RatingModifier::RatingAnimationType GetRatingState() const
+    {
+        return state_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);
@@ -116,6 +123,7 @@ private:
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
+    void PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius);
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -125,10 +133,14 @@ private:
 
     // Init touch event, update render when click.
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void OnFocusEvent();
     void OnBlurEvent();
+    void SetModifierFocus(bool isFocus);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(double ratingScore);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -156,6 +168,8 @@ private:
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PipelineContext> pipelineContext_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     DataReadyNotifyTask CreateDataReadyCallback(int32_t imageFlag);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(int32_t imageFlag);

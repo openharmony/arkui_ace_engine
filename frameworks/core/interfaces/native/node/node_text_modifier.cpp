@@ -1140,6 +1140,50 @@ ArkUI_Int32 GetTextHalfLeading(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Int32>(TextModelNG::GetHalfLeading(frameNode));
 }
+
+void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(value->start);
+    marqueeOptions.UpdateTextMarqueeStep(value->step);
+    marqueeOptions.UpdateTextMarqueeLoop(value->loop);
+    marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
+    marqueeOptions.UpdateTextMarqueeDelay(value->delay);
+    marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
+    marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+}
+
+void ResetMarqueeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextMarqueeOptions marqueeOptions;
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+}
+
+void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t)>*>(callback);
+        TextModelNG::SetOnMarqueeStateChange(frameNode, std::move(*onChange));
+    } else {
+        TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnMarqueeStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1169,7 +1213,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
         ResetTextOnTextSelectionChange, SetTextMinFontScale, ResetTextMinFontScale, SetTextMaxFontScale,
         ResetTextMaxFontScale, SetTextSelectionMenuOptions, ResetTextSelectionMenuOptions, SetTextHalfLeading,
-        ResetTextHalfLeading, GetTextHalfLeading, SetOnClick, ResetOnClick, SetResponseRegion, ResetResponseRegion };
+        ResetTextHalfLeading, GetTextHalfLeading, SetOnClick, ResetOnClick, SetResponseRegion, ResetResponseRegion,
+        SetMarqueeOptions, ResetMarqueeOptions, SetOnMarqueeStateChange, ResetOnMarqueeStateChange };
 
     return &modifier;
 }

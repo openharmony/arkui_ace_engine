@@ -691,6 +691,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest009, TestSize.Level1)
     ASSERT_NE(sliderPattern, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
@@ -739,6 +741,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest010, TestSize.Level1)
      */
     RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     ASSERT_NE(frameNode, nullptr);
     sliderPattern->AttachToFrameNode(frameNode);

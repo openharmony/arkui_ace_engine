@@ -123,6 +123,14 @@ public:
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
             theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+            theme->tabBarDefaultMargin_ = pattern->GetAttr<Dimension>("tab_bar_margin_width", 0.0_vp);
+            theme->tabBarFocusedColor_ = pattern->GetAttr<Color>("tab_bar_focused_color", Color::TRANSPARENT);
+            theme->subTabTextFocusedColor_ =
+                pattern->GetAttr<Color>("subtab_text_focused_color", theme->subTabTextOffColor_);
+            theme->focusBoardPadding_ = pattern->GetAttr<Dimension>("tab_bar_board_focus_padding", 0.0_vp);
+            theme->subTabItemHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_item_Horizontal_padding", 0.0_vp);
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("tab_bar_focus_padding", 0.0_vp);
+            theme->isChangeFocusTextStyle_ = static_cast<bool>(pattern->GetAttr<int>("subtab_focused_style", 0));
             theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
             theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
@@ -395,6 +403,41 @@ public:
         return subTabBarMinWidth_;
     }
 
+    const Dimension& GetSubTabItemHorizontalPadding() const
+    {
+        return subTabItemHorizontalPadding_;
+    }
+
+    const Dimension& GetBoardFocusPadding() const
+    {
+        return focusBoardPadding_;
+    }
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
+    const Dimension& GetTabBarDefaultMargin() const
+    {
+        return tabBarDefaultMargin_;
+    }
+
+    const Color& GetTabBarFocusedColor() const
+    {
+        return tabBarFocusedColor_;
+    }
+
+    const Color& GetSubTabTextFocusedColor() const
+    {
+        return subTabTextFocusedColor_;
+    }
+
+    bool GetIsChangeFocusTextStyle() const
+    {
+        return isChangeFocusTextStyle_;
+    }
+
     const Color& GetDividerColor() const
     {
         return dividerColor_;
@@ -531,6 +574,13 @@ private:
     Dimension bottomTabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
+    Dimension tabBarDefaultMargin_;
+    Dimension focusPadding_;
+    Dimension subTabItemHorizontalPadding_;
+    Dimension focusBoardPadding_;
+    Color tabBarFocusedColor_;
+    Color subTabTextFocusedColor_;
+    bool isChangeFocusTextStyle_;
     Color dividerColor_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;

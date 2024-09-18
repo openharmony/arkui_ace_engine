@@ -33,10 +33,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float RACE_DURATION_RATIO = 85.0f;
+constexpr float RACE_MIN_GRADIENTPERCENT = 0.5f;
+constexpr float DEFAULT_FADEOUT_GRADIENTPERCENT = 0.033f;
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
-constexpr float RACE_TEMPO = 0.2f;
-constexpr uint32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
@@ -353,6 +354,16 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
 
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    auto info = GetFadeoutInfo(drawingContext);
+    if (!info.IsFadeout()) {
+        DrawContent(drawingContext);
+    } else {
+        DrawFadeout(drawingContext, info);
+    }
+}
+
+void TextContentModifier::DrawContent(DrawingContext& drawingContext)
+{
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
     auto pManager = textPattern->GetParagraphManager();
@@ -387,6 +398,9 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
                 paintOffsetY += paragraph->GetHeight();
             }
+            if (marqueeSet_) {
+                PaintImage(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
+            }
         } else {
             // Racing
             DrawTextRacing(drawingContext);
@@ -405,7 +419,9 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
-    float textRacePercent = GetTextRacePercent();
+    float textRacePercent = marqueeOption_.direction == MarqueeDirection::LEFT
+                                ? GetTextRacePercent()
+                                : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
     float paragraph1Offset =
         (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
     if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
@@ -818,30 +834,20 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-void TextContentModifier::StartTextRace()
+void TextContentModifier::StartTextRace(const MarqueeOption& option)
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::INVISIBLE);
     }
-    if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
+    if (!SetTextRace(option)) {
         return;
     }
-
-    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+    if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
+        PauseTextRace();
     }
 
-    AnimationOption option = AnimationOption();
-    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(RACE_DURATION);
-    option.SetDelay(0);
-    option.SetCurve(curve);
-    option.SetIteration(-1);
-    option.SetTempo(RACE_TEMPO);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
-    SetMarqueeState(MarqueeState::RUNNING);
+    marqueeSet_ = true;
+    ResumeTextRace(false);
 }
 
 void TextContentModifier::StopTextRace()
@@ -852,12 +858,9 @@ void TextContentModifier::StopTextRace()
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
-    if (raceAnimation_) {
-        AnimationUtils::StopAnimation(raceAnimation_);
-    }
 
-    SetMarqueeState(MarqueeState::STOPPED);
-    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+    marqueeSet_ = false;
+    PauseTextRace();
 }
 
 void TextContentModifier::ResumeAnimation()
@@ -920,5 +923,264 @@ void TextContentModifier::SetMarqueeState(MarqueeState state)
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT, "SetMarqueeState: id %{public}d, from state %{public}d to state %{public}d",
         host->GetId(), prevState, state);
+}
+
+void TextContentModifier::SetIsFocused(const bool isFocused)
+{
+    marqueeFocused_ = isFocused;
+    DetermineTextRace();
+}
+
+void TextContentModifier::SetIsHovered(const bool isHovered)
+{
+    marqueeHovered_ = isHovered;
+    DetermineTextRace();
+}
+
+bool TextContentModifier::SetTextRace(const MarqueeOption& option)
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, false);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, false);
+    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+    }
+
+    auto duration =
+        static_cast<int32_t>(std::abs(pManager->GetTextWidth() + textRaceSpaceWidth_) * RACE_DURATION_RATIO);
+    if (option.step > 0) {
+        duration = static_cast<int32_t>(duration / option.step);
+    }
+    if (duration <= 0) {
+        return false;
+    }
+    if (CheckMarqueeState(MarqueeState::RUNNING) && marqueeOption_ == option && duration == marqueeDuration_) {
+        return false;
+    }
+
+    marqueeDuration_ = duration;
+    marqueeOption_ = option;
+    marqueeGradientPercent_ = GetFadeoutPercent();
+
+    return true;
+}
+
+void TextContentModifier::ResumeTextRace(bool bounce)
+{
+    if (!AllowTextRace()) {
+        return;
+    }
+    if (!bounce) {
+        marqueeCount_ = 0;
+        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(textPattern);
+        textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
+    }
+
+    AnimationOption option = AnimationOption();
+    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
+    option.SetDuration(marqueeDuration_);
+    option.SetDelay(bounce ? marqueeOption_.delay : 0);
+    option.SetCurve(curve);
+    option.SetIteration(1);
+    SetTextRaceAnimation(option);
+}
+
+void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
+{
+    marqueeAnimationId_++;
+    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+    raceAnimation_ = AnimationUtils::StartAnimation(
+        option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
+        [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+
+            ContainerScope scope(id);
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+
+            auto onFinish = [weak, marqueeAnimationId]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+
+                if (marqueeAnimationId != modifier->marqueeAnimationId_) {
+                    return;
+                }
+                auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
+                CHECK_NULL_VOID(textPattern);
+
+                if (NearEqual(modifier->GetTextRacePercent(), RACE_MOVE_PERCENT_MAX)) {
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
+                    modifier->marqueeCount_++;
+                }
+                if (!modifier->AllowTextRace()) {
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
+                } else {
+                    auto frameNode = textPattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    modifier->ResumeTextRace(true);
+                }
+            };
+
+            if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                onFinish();
+            } else {
+                taskExecutor->PostTask(
+                    [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUITextStartTextRace");
+            }
+        });
+    SetMarqueeState(MarqueeState::RUNNING);
+}
+
+void TextContentModifier::PauseTextRace()
+{
+    if (CheckMarqueeState(MarqueeState::IDLE) || CheckMarqueeState(MarqueeState::STOPPED)) {
+        return;
+    }
+    if (raceAnimation_) {
+        AnimationUtils::StopAnimation(raceAnimation_);
+    }
+
+    SetMarqueeState(MarqueeState::STOPPED);
+    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+}
+
+bool TextContentModifier::AllowTextRace()
+{
+    if (!marqueeSet_ || !marqueeOption_.start) {
+        return false;
+    }
+    if (marqueeOption_.loop > 0 && marqueeCount_ >= marqueeOption_.loop) {
+        return false;
+    }
+    if (marqueeOption_.startPolicy == MarqueeStartPolicy::ON_FOCUS && !(marqueeFocused_ || marqueeHovered_)) {
+        return false;
+    }
+
+    return true;
+}
+
+void TextContentModifier::DetermineTextRace()
+{
+    if (!marqueeSet_ || !marqueeOption_.start || marqueeOption_.startPolicy != MarqueeStartPolicy::ON_FOCUS) {
+        return;
+    }
+
+    auto textRaceing = CheckMarqueeState(MarqueeState::RUNNING);
+    if (textRaceing && !marqueeFocused_ && !marqueeHovered_) {
+        PauseTextRace();
+        return;
+    }
+    if (!textRaceing && (marqueeFocused_ || marqueeHovered_)) {
+        ResumeTextRace(false);
+    }
+}
+
+float TextContentModifier::GetFadeoutPercent()
+{
+    marqueeGradientPercent_ = DEFAULT_FADEOUT_GRADIENTPERCENT;
+
+    auto contentWidth = contentSize_->Get().Width();
+    if (contentWidth > 0) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, marqueeGradientPercent_);
+        auto theme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_RETURN(theme, marqueeGradientPercent_);
+        auto fadeoutWidth = theme->GetFadeoutWidth();
+        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
+    }
+    return marqueeGradientPercent_;
+}
+
+FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
+{
+    FadeoutInfo info;
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, info);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, info);
+    marqueeGradientPercent_ = GetFadeoutPercent();
+
+    if (!marqueeSet_ || !marqueeOption_.fadeout) {
+        return info;
+    }
+    if (marqueeGradientPercent_ > RACE_MIN_GRADIENTPERCENT) {
+        marqueeGradientPercent_ = RACE_MIN_GRADIENTPERCENT;
+    }
+
+    auto contentSize = contentSize_->Get();
+    bool isOverlength = pManager->GetTextWidth() > contentSize.Width();
+    if (!marqueeOption_.start) {
+        info.isLeftFadeout = false;
+        info.isRightFadeout = isOverlength;
+        info.fadeoutPercent = isOverlength ? marqueeGradientPercent_ : 0;
+        return info;
+    }
+
+    float raceLength = pManager->GetTextWidth() + textRaceSpaceWidth_;
+    float spacePercent = 0;
+    float textPercent = 0;
+    float drawPercent = 0;
+    if (raceLength > 0) {
+        spacePercent = textRaceSpaceWidth_ / raceLength * RACE_MOVE_PERCENT_MAX;
+        textPercent = pManager->GetTextWidth() / raceLength * RACE_MOVE_PERCENT_MAX;
+        drawPercent = contentSize.Width() / raceLength * RACE_MOVE_PERCENT_MAX;
+    }
+
+    float racePercent = GetTextRacePercent();
+    info.fadeoutPercent = marqueeGradientPercent_;
+    if (!CheckMarqueeState(MarqueeState::RUNNING)) {
+        info.isLeftFadeout = false;
+        info.isRightFadeout = isOverlength;
+    } else {
+        if (marqueeOption_.direction == MarqueeDirection::RIGHT) {
+            info.isLeftFadeout = (racePercent > spacePercent) && !NearEqual(racePercent, RACE_MOVE_PERCENT_MAX);
+            info.isRightFadeout = !((racePercent > (drawPercent - spacePercent)) && (racePercent < drawPercent));
+        } else {
+            info.isLeftFadeout = !NearEqual(racePercent, 0.0) && (racePercent < (RACE_MOVE_PERCENT_MAX - spacePercent));
+            info.isRightFadeout =
+                !((racePercent > (textPercent - drawPercent)) && (racePercent < (RACE_MOVE_PERCENT_MAX - drawPercent)));
+        }
+    }
+
+    return info;
+}
+
+void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info)
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+
+    RSCanvas& canvas = drawingContext.canvas;
+    auto contentRect = textPattern->GetTextContentRect();
+    auto contentSize = contentSize_->Get();
+    RSRect clipInnerRect = RSRect(0, 0, drawingContext.width, drawingContext.height);
+
+    RSSaveLayerOps slo(&clipInnerRect, nullptr);
+    canvas.SaveLayer(slo);
+
+    DrawContent(drawingContext);
+
+    RSBrush brush;
+    auto contentOffset = contentOffset_->Get();
+    std::vector<RSPoint> points = { RSPoint(contentRect.Left(), contentRect.Top()),
+        RSPoint(contentSize.Width() + contentOffset.GetX(), contentRect.Top()) };
+    std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
+        Color::TRANSPARENT.GetValue() };
+    std::vector<RSScalar> pos = { 0.0f, info.isLeftFadeout ? info.fadeoutPercent : 0.0f,
+        info.isRightFadeout ? (1 - info.fadeoutPercent) : 1.0f, 1.0f };
+    brush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    brush.SetBlendMode(RSBlendMode::DST_IN);
+    canvas.AttachBrush(brush);
+    canvas.DrawRect(clipInnerRect);
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 } // namespace OHOS::Ace::NG

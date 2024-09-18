@@ -69,6 +69,7 @@ public:
             ParsePatternSubFirstPart(pattern, theme);
             ParsePatternSubSecondPart(pattern, theme);
             ParsePatternSubThirdPart(pattern, theme);
+            ParsePatternSubFourthPart(pattern, theme);
         }
 
         void ParsePatternSubFirstPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
@@ -215,6 +216,22 @@ public:
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
             
+        }
+
+        void ParsePatternSubFourthPart(const RefPtr<ThemeStyle>& pattern, const RefPtr<TextFieldTheme>& theme) const
+        {
+            std::string isTextFadeout = pattern->GetAttr<std::string>("text_fadeout_enable", "");
+            theme->textFadeoutEnabled_ = isTextFadeout == "true";
+            theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
+            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
+            theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
+            theme->textInputAndErrTipsSpacing_ =
+                pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
+            theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
+            theme->hoverAndPressBgColorEnabled_ =
+                static_cast<uint32_t>(pattern->GetAttr<int>("textfield_hover_press_bg_color_enabled", 0));
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("text_input_need_focus_box", 0.0));
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("text_input_focus_padding", 0.0_vp);
         }
     };
 
@@ -637,6 +654,52 @@ public:
     {
         return aiWriteAbilityName_;
     }
+
+    bool TextFadeoutEnabled() const
+    {
+        return textFadeoutEnabled_;
+    }
+
+    const Dimension& GetTextInputWidth() const
+    {
+        return textInputBorderWidth_;
+    }
+
+    const Color& GetTextInputColor() const
+    {
+        return textInputBorderColor_;
+    }
+
+    const Dimension& GetTextInputAndErrTipsSpacing() const
+    {
+        return textInputAndErrTipsSpacing_;
+    }
+
+    bool IsShowPasswordIcon() const
+    {
+        return showPasswordIcon_;
+    }
+
+    bool GetHoverAndPressBgColorEnabled() const
+    {
+        return hoverAndPressBgColorEnabled_;
+    }
+
+    const Dimension& GetErrorTextInputBorderWidth() const
+    {
+        return errorTextInputBorderWidth_;
+    }
+
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -736,6 +799,14 @@ private:
     Color previewUnderlineColor_;
     Color previewBoardColor_;
 
+    bool textFadeoutEnabled_ = false;
+    Dimension textInputBorderWidth_ = 0.0_vp;
+    Dimension textInputAndErrTipsSpacing_ = 8.0_vp;
+    Dimension errorTextInputBorderWidth_ = 1.0_vp;
+    Color textInputBorderColor_;
+    bool showPasswordIcon_ = true;
+    bool hoverAndPressBgColorEnabled_ = false;
+
     std::string cancelButton_;
 
     Dimension inlinePaddingRight_ = 12.0_vp;
@@ -745,6 +816,8 @@ private:
     std::string hiddenPasswordPromptInformation_;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
+    bool needFocusBox_ = false;
+    Dimension focusPadding_;
 };
 
 } // namespace OHOS::Ace

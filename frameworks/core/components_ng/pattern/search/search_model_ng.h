@@ -159,6 +159,7 @@ public:
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
+    static void UpdateSearchNodeBorderProps(const RefPtr<SearchNode> frameNode);
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);

@@ -1044,6 +1044,147 @@ void TextPattern::InitMouseEvent()
     mouseEventInitialized_ = true;
 }
 
+void TextPattern::InitFocusEvent()
+{
+    CHECK_NULL_VOID(!focusInitialized_);
+    auto host = GetHost();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetContentModifier()->SetIsFocused(true);
+        pattern->AddIsFocusActiveUpdateEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetContentModifier()->SetIsFocused(false);
+        pattern->RemoveIsFocusActiveUpdateEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    focusInitialized_ = true;
+}
+
+void TextPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void TextPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void TextPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetContentModifier()->SetIsFocused(isFocusAcitve);
+}
+
+void TextPattern::InitHoverEvent()
+{
+    CHECK_NULL_VOID(!hoverInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetContentModifier()->SetIsHovered(isHover);
+    };
+    auto mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(mouseEvent_);
+
+    hoverInitialized_ = true;
+}
+
+void TextPattern::RecoverCopyOption()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    copyOption_ =
+        isMarqueeRunning_ ? CopyOptions::None : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+
+    if (childNodes_.empty()) {
+        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        if (ifHaveObscured && !isSpanStringMode_) {
+            CloseSelectOverlay();
+            ResetSelection();
+            copyOption_ = CopyOptions::None;
+        }
+    }
+
+    InitCopyOption();
+}
+
+void TextPattern::InitCopyOption()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    if (copyOption_ != CopyOptions::None) {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        if (!clipboard_ && context) {
+            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+        }
+        InitLongPressEvent(gestureEventHub);
+        if (host->IsDraggable()) {
+            InitDragEvent();
+        }
+        InitKeyEvent();
+        InitMouseEvent();
+        InitTouchEvent();
+        SetAccessibilityAction();
+    } else {
+        if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
+            gestureEventHub->SetTextDraggable(false);
+        }
+    }
+    if (onClick_ || copyOption_ != CopyOptions::None) {
+        InitClickEvent(gestureEventHub);
+    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    bool enabledCache = eventHub->IsEnabled();
+    if (textDetectEnable_ && enabledCache != enabled_) {
+        enabled_ = enabledCache;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
@@ -2070,6 +2211,7 @@ void TextPattern::OnModifyDone()
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_LAYOUT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
     DumpRecord(std::to_string(nowTime));
+    UpdateMarqueeInfo();
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -2080,6 +2222,11 @@ void TextPattern::OnModifyDone()
         if (!renderContext->GetClipEdge().has_value()) {
             renderContext->UpdateClipEdge(true);
             renderContext->SetClipToFrame(true);
+        }
+        if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
+            MarqueeStartPolicy::ON_FOCUS) {
+            InitFocusEvent();
+            InitHoverEvent();
         }
         CloseSelectOverlay();
         ResetSelection();
@@ -2167,6 +2314,23 @@ void TextPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     SetActionExecSubComponent();
+    RecoverCopyOption();
+}
+
+void TextPattern::UpdateMarqueeInfo()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->HasTextMarqueeFadeout()) {
+        textLayoutProperty->UpdateTextMarqueeFadeout(theme->GetIsTextFadeout());
+    }
+    if (!textLayoutProperty->HasTextMarqueeStartPolicy()) {
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(theme->GetMarqueeStartPolicy());
+    }
 }
 
 bool TextPattern::SetActionExecSubComponent()
@@ -3445,6 +3609,25 @@ void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnSelectionChange(start, end);
+}
+
+void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
+
+    if (TextMarqueeState::START == state) {
+        CloseSelectOverlay();
+        ResetSelection();
+        isMarqueeRunning_ = true;
+    } else if (TextMarqueeState::FINISH == state) {
+        isMarqueeRunning_ = false;
+    }
+
+    RecoverCopyOption();
 }
 
 void TextPattern::OnSelectionMenuOptionsUpdate(

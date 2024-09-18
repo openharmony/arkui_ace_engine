@@ -82,8 +82,12 @@ FocusPattern QRCodePattern::GetFocusPattern() const
     auto qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_RETURN(qrCodeTheme, FocusPattern());
     auto focusedColor = qrCodeTheme->GetFocusedColor();
+    auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(qrCodeTheme->GetFocusStyleType()));
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(focusedColor);
-    return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+    focusPattern.SetFocusPaintParams(focusPaintParam);
+    focusPattern.SetStyleType(focusStyleType);
+    return focusPattern;
 }
 } // namespace OHOS::Ace::NG

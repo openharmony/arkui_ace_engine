@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,9 +93,10 @@ public:
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
         CHECK_NULL_RETURN(switchTheme, FocusPattern());
-        auto focusPaintcolor = switchTheme->GetActiveColor();
+
+        auto focusPaintcolor = switchTheme->GetFocusLineColor();
         focusPaintParams.SetPaintColor(focusPaintcolor);
-        focusPaintParams.SetFocusPadding(Dimension(2.0_vp));
+        focusPaintParams.SetFocusPadding(switchTheme->GetSwitchFocuPadding());
 
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
@@ -157,6 +159,9 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void UpdateColorWhenIsOn(bool isOn);
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -165,6 +170,12 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitFocusEvent();
+
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
+    void UpdateSwitchStyle();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -183,6 +194,7 @@ private:
     void FireBuilder();
 
     RefPtr<FrameNode> BuildContentModifierNode();
+    RefPtr<PipelineContext> pipeline_;
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
 
@@ -197,9 +209,11 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isFocus_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
+    bool isBgColorUnselectFocus_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;
@@ -215,6 +229,7 @@ private:
     RefPtr<SwitchPaintMethod> paintMethod_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     bool isTouchPreventDefault_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -179,7 +179,6 @@ public:
     {
         focusPadding = padding;
     }
-
 private:
     std::optional<RoundRect> paintRect;
     std::optional<Color> paintColor;

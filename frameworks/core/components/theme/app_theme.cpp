@@ -16,6 +16,10 @@
 #include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr Dimension FOCUS_WIDTH = 2.0_vp;
+constexpr Dimension FOCUS_PADDING = 2.0_vp;
+} // namespace
 
 RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
@@ -38,6 +42,14 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     if (hoverColor != Color(0xff000000)) {
         theme->hoverHighlightEnd_ = hoverColor;
     }
+    RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_APP);
+    if (!pattern) {
+        LOGW("find pattern of app_theme fail");
+        return theme;
+    }
+    theme->focusWidthVp_ = pattern->GetAttr<Dimension>("app_theme_focus_width", FOCUS_WIDTH);
+    theme->focusOutPaddingVp_ = pattern->GetAttr<Dimension>("app_theme_focus_padding", FOCUS_PADDING);
+    theme->focusBoxGlow_ = static_cast<bool>(pattern->GetAttr<double>("app_theme_focus_box_glow", 0.0));
     return theme;
 }
 } // namespace OHOS::Ace

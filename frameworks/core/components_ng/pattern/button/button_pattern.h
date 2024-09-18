@@ -42,6 +42,11 @@ public:
 
     ~ButtonPattern() override = default;
 
+    void SetApplyShadow(bool shadow)
+    {
+        isApplyShadow_ = shadow;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -368,6 +373,52 @@ public:
         return hasCustomPadding_;
     }
 
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
+
+    bool IsDynamicSwitchButtonStyle(const BorderColorProperty& color)
+    {
+        Color normalColor = buttonTheme_->GetBorderColor();
+        Color smallColor = buttonTheme_->GetBorderColorSmall();
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(Color());
+        BorderColorProperty normalColorProperty;
+        normalColorProperty.SetColor(normalColor);
+        BorderColorProperty smallColorProperty;
+        smallColorProperty.SetColor(smallColor);
+        if (color == normalColorProperty || color == smallColorProperty || color == borderColorProperty) {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsDynamicSwitchButtonStyle(const BorderWidthProperty& width)
+    {
+        Dimension normalWidth = buttonTheme_->GetBorderWidth();
+        Dimension smallWidth = buttonTheme_->GetBorderWidthSmall();
+        BorderWidthProperty borderWidthProperty;
+        borderWidthProperty.SetBorderWidth(Dimension());
+        BorderWidthProperty normalWidthProperty;
+        normalWidthProperty.SetBorderWidth(normalWidth);
+        BorderWidthProperty smallWidthProperty;
+        smallWidthProperty.SetBorderWidth(smallWidth);
+        if (width == normalWidthProperty || width == smallWidthProperty || width == borderWidthProperty) {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsDynamicSwitchButtonStyle(const Shadow& shadow)
+    {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal());
+        if (shadow == Shadow::CreateShadow(ShadowStyle::None) || shadow == Shadow::CreateShadow(shadowStyle)) {
+            return true;
+        }
+        return false;
+    }
+
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -383,6 +434,7 @@ protected:
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
+    void UpdateTexOverflow(bool isMarqueeStart);
     void HandleEnabled();
     void InitButtonLabel();
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
@@ -401,6 +453,7 @@ private:
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
+    Color borderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
     void FireBuilder();
@@ -412,20 +465,45 @@ private:
     int32_t nodeId_ = -1;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
+    RefPtr<ButtonLayoutProperty> layoutProperty_;
+    RefPtr<RenderContext> renderContext_;
+    RefPtr<ButtonTheme> buttonTheme_;
+    RefPtr<PipelineContext> pipeline_;
     bool isHover_ = false;
+    bool isFocus_ = false;
     bool isPress_ = false;
+    bool isApplyShadow_ = true;
+    bool isLayoutUpdate_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;
     Dimension focusBorderWidth_;
+    Dimension borderWidth_;
 
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
 
+    bool isTextFadeOut_ = false;
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     bool hasCustomPadding_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
+    bool focusEventInitialized_ = false;
+    bool focusTextColorModify_ = false;
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+
+    void HandleBorderAndShadow();
+    void HandleFocusStatusStyle();
+    void HandleFocusStyleTask();
+    void HandleBlurStyleTask();
+    void UpdateButtonStyle();
+    void SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
+    void SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 };
 } // namespace OHOS::Ace::NG
 

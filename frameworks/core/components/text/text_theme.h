@@ -75,6 +75,10 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
+            theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
+            theme->marqueeStartPolicy_ = static_cast<MarqueeStartPolicy>(static_cast<int32_t>(
+                pattern->GetAttr<double>("text_marquee_start_policy", 0.0)));
         }
     };
 
@@ -100,6 +104,16 @@ public:
         return linearSplitChildMinSize_;
     }
 
+    bool GetIsTextFadeout() const
+    {
+        return isTextFadeout_;
+    }
+
+    const Dimension& GetFadeoutWidth() const
+    {
+        return fadeoutWidth_;
+    }
+
     bool IsShowHandle() const
     {
         return isShowHandle_;
@@ -108,6 +122,11 @@ public:
     const Color& GetDragBackgroundColor() const
     {
         return dragBackgroundColor_;
+    }
+
+    MarqueeStartPolicy GetMarqueeStartPolicy() const
+    {
+        return marqueeStartPolicy_;
     }
 
 protected:
@@ -119,7 +138,10 @@ private:
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
+    bool isTextFadeout_ = false;
+    Dimension fadeoutWidth_;
     bool isShowHandle_ = false;
+    MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
 };
 
 } // namespace OHOS::Ace

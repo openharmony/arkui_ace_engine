@@ -132,23 +132,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        FocusPattern focusPattern{ FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, focusPattern);
-        auto theme = pipeline->GetTheme<AppTheme>();
-        CHECK_NULL_RETURN(theme, focusPattern);
-        if (!theme->IsFocusBoxGlow()) {
-            return focusPattern;
-        }
-
-        auto selectTheme_ = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_RETURN(selectTheme_, focusPattern);
-        FocusPaintParam focusPaintParam;
-        focusPaintParam.SetPaintColor(theme->GetFocusColor());
-        focusPaintParam.SetPaintWidth(theme->GetFocusWidthVp());
-        focusPaintParam.SetFocusPadding(selectTheme_->GetOptionFocusedBoxPadding());
-        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam};
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(selectTheme, focusPattern);
+        auto focusStyleType =
+            static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetOptionFocusStyleType_()));
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     void UpdateNextNodeDivider(bool needDivider);

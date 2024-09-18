@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_paint_method.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
+#include "core/components/theme/app_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -80,6 +81,7 @@ void QRCodeTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_QRCODE);
     auto qrcodeTheme = QrcodeTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(qrcodeTheme));
+    EXPECT_CALL(*themeManager, GetTheme(AppTheme::TypeId())).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
 }
 
 void QRCodeTestNg::TearDownTestSuite()

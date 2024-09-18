@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -299,6 +300,20 @@ void ImageAnimatorPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Pattern::OnModifyDone();
+
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto imageTheme = context->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBorderRadius()) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCardRadius()));
+    }
+    if (!renderContext->HasClipEdge()) {
+        renderContext->UpdateClipEdge(imageTheme->GetClipEdge());
+    }
+
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");

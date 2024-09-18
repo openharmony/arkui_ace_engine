@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
+#include "core/components/theme/app_theme.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -358,6 +359,13 @@ public:
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
         focusPattern.SetIsFocusActiveWhenFocused(true);
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+        if (theme->NeedFocusBox()) {
+            focusPattern.SetStyleType(FocusStyleType::OUTER_BORDER);
+        }
         return focusPattern;
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
@@ -532,6 +540,11 @@ public:
     void SetTextRect(const RectF& textRect)
     {
         textRect_ = textRect;
+    }
+
+    float GetTextParagraphIndent() const
+    {
+        return textParagraphIndent_;
     }
 
     const RectF& GetFrameRect() const
@@ -882,6 +895,11 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void ProcessFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();
@@ -1025,6 +1043,7 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
+        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1425,6 +1444,20 @@ public:
         adaptFontSize_ = adaptFontSize;
     }
 
+    void SetTextFadeoutCapacity(bool enabled)
+    {
+        haveTextFadeoutCapacity_ = enabled;
+    }
+    bool GetTextFadeoutCapacity()
+    {
+        return haveTextFadeoutCapacity_;
+    }
+
+    void SetHoverPressBgColorEnabled(bool enabled)
+    {
+        hoverAndPressBgColorEnabled_ = enabled;
+    }
+
     void ShowCaretAndStopTwinkling();
 
     bool IsTextEditableForStylus() override;
@@ -1487,6 +1520,11 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void UpdateHoverStyle(bool isHover);
+    void UpdatePressStyle(bool isPressed);
+    void PlayAnimationHoverAndPress(const Color& color);
+    void UpdateTextFieldBgColor(const Color& color);
+    void InitTextFieldThemeColors(const RefPtr<TextFieldTheme>& theme);
     void ChangeMouseState(
         const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
@@ -1588,6 +1626,7 @@ private:
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetTextInputFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1675,6 +1714,7 @@ private:
 
     RectF frameRect_;
     RectF textRect_;
+    float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> dragParagraph_;
@@ -1840,6 +1880,17 @@ private:
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
+
+    bool haveTextFadeoutCapacity_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    Color defaultThemeBgColor_ = Color::TRANSPARENT;
+    Color focusThemeBgColor_ = Color::TRANSPARENT;
+    Color hoverThemeBgColor_ = Color::TRANSPARENT;
+    Color pressThemeBgColor_ = Color::TRANSPARENT;
+    bool hoverAndPressBgColorEnabled_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;

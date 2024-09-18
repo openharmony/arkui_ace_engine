@@ -16,7 +16,6 @@
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import measure from '@ohos.measure';
 import mediaquery from '@ohos.mediaquery';
-import resourceManager from '@ohos.resourceManager';
 import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
@@ -26,6 +25,11 @@ import hilog from '@ohos.hilog';
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
+}
+
+enum IconType {
+  PREFIX_ICON = "PREFIXICON",
+  SUFFIX_ICON = "SUFFIXICON",
 }
 
 enum BreakPointsType {
@@ -73,9 +77,12 @@ export interface LabelOptions {
 }
 
 interface IconTheme {
-  size: SizeOptions;
+  normalSize: SizeOptions;
+  smallSize: SizeOptions;
   fillColor: ResourceColor;
   activatedFillColor: ResourceColor;
+  focusFillColor: ResourceColor;
+  focusActivatedColor: ResourceColor;
 }
 
 interface PrefixIconTheme extends IconTheme {}
@@ -88,13 +95,16 @@ interface SuffixIconTheme extends IconTheme {
 interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
-  fontSize: Length;
+  smallFontSize: Length;
+  normalFontSize: Length;
   defaultEffect: number;
 }
 
 interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
+  focusFontColor: ResourceColor;
+  focusActiveFontColor: ResourceColor;
   fontColor: ResourceColor;
   activatedFontColor: ResourceColor;
   fontFamily: string;
@@ -129,14 +139,23 @@ interface ChipNodeTheme {
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
   focusOutlineColor: ResourceColor;
+  borderColor: ResourceColor,
+  defaultBorderWidth: Dimension;
+  activatedBorderColor: ResourceColor,
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
+  focusBtnScaleX: Resource;
+  focusBtnScaleY: Resource;
   localizedNormalPadding: LocalizedPadding;
   localizedSmallPadding: LocalizedPadding;
   hoverBlendColor: ResourceColor;
   pressedBlendColor: ResourceColor;
+  focusBgColor: ResourceColor;
+  focusActivatedBgColor: ResourceColor;
   opacity: ChipNodeOpacity;
+  normalShadowStyle: Resource;
+  smallShadowStyle: Resource;
   breakPointConstraintWidth: ChipNodeConstraintWidth;
 }
 
@@ -150,73 +169,103 @@ interface ChipTheme {
 
 export const defaultTheme: ChipTheme = {
   prefixIcon: {
-    size: { width: 16, height: 16 },
-    fillColor: $r('sys.color.ohos_id_color_secondary'),
-    activatedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+    normalSize: {
+      width: $r('sys.float.chip_normal_icon_size'),
+      height: $r('sys.float.chip_normal_icon_size')
+    },
+    smallSize: {
+      width: $r('sys.float.chip_small_icon_size'),
+      height: $r('sys.float.chip_small_icon_size')
+    },
+    fillColor: $r('sys.color.chip_usually_icon_color'),
+    activatedFillColor: $r('sys.color.chip_active_icon_color'),
+    focusFillColor: $r('sys.color.chip_icon_focus_fill'),
+    focusActivatedColor: $r('sys.color.chip_icon_focus_activated'),
   },
   label: {
-    normalFontSize: $r('sys.float.ohos_id_text_size_button2'),
-    smallFontSize: $r('sys.float.ohos_id_text_size_button2'),
-    fontColor: $r('sys.color.ohos_id_color_text_primary'),
-    activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+    normalFontSize: $r('sys.float.chip_normal_font_size'),
+    smallFontSize: $r('sys.float.chip_small_font_size'),
+    focusFontColor: $r('sys.color.chip_focus_text'),
+    focusActiveFontColor: $r('sys.color.chip_focus_activated_fontcolor'),
+    fontColor: $r('sys.color.chip_font_color'),
+    activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
     fontFamily: "HarmonyOS Sans",
     normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
     defaultFontSize: 14,
     localizedNormalMargin: {
-      start: LengthMetrics.vp(6),
-      end: LengthMetrics.vp(6),
+      start: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
+      end: LengthMetrics.resource($r('sys.float.chip_normal_text_margin')),
       top: LengthMetrics.vp(0),
       bottom: LengthMetrics.vp(0)
     },
     localizedSmallMargin: {
-      start: LengthMetrics.vp(4),
-      end: LengthMetrics.vp(4),
+      start: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
+      end: LengthMetrics.resource($r('sys.float.chip_small_text_margin')),
       top: LengthMetrics.vp(0),
       bottom: LengthMetrics.vp(0),
     }
   },
   suffixIcon: {
-    size: { width: 16, height: 16 },
-    fillColor: $r('sys.color.ohos_id_color_secondary'),
-    activatedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
+    normalSize: {
+      width: $r('sys.float.chip_normal_icon_size'),
+      height: $r('sys.float.chip_normal_icon_size')
+    },
+    smallSize: {
+      width: $r('sys.float.chip_small_icon_size'),
+      height: $r('sys.float.chip_small_icon_size')
+    },
+    fillColor: $r('sys.color.chip_usually_icon_color'),
+    activatedFillColor: $r('sys.color.chip_active_icon_color'),
+    focusFillColor: $r('sys.color.chip_icon_focus_fill'),
+    focusActivatedColor: $r('sys.color.chip_icon_focus_activated'),
     defaultDeleteIcon: $r('sys.media.ohos_ic_public_cancel', 16, 16),
     focusable: false,
   },
   defaultSymbol: {
     normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
     activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
-    fontSize: 16,
+    normalFontSize: $r('sys.float.chip_normal_icon_size'),
+    smallFontSize: $r('sys.float.chip_small_icon_size'),
     defaultEffect: -1,
   },
   chipNode: {
     suitAgeScale: 1.75,
     minLabelWidth: 12,
-    normalHeight: 36,
-    smallHeight: 28,
+    normalHeight: $r('sys.float.chip_normal_height'),
+    smallHeight: $r('sys.float.chip_small_height'),
     enabled: true,
     activated: false,
-    backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
-    activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
+    backgroundColor: $r('sys.color.chip_background_color'),
+    activatedBackgroundColor: $r('sys.color.chip_activated_background_color'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
-    normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
-    smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
+    borderColor: $r('sys.color.chip_border_color'),
+    defaultBorderWidth: $r('sys.float.chip_border_width'),
+    activatedBorderColor: $r('sys.color.chip_activated_border_color'),
+    normalBorderRadius: $r('sys.float.chip_normal_radius'),
+    smallBorderRadius: $r('sys.float.chip_small_radius'),
     borderWidth: 2,
+    focusBtnScaleX: $r('sys.float.chip_focused_btn_scale'),
+    focusBtnScaleY: $r('sys.float.chip_focused_btn_scale'),
     localizedNormalPadding: {
-      start: LengthMetrics.vp(16),
-      end: LengthMetrics.vp(16),
+      start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
+      end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding')),
       top: LengthMetrics.vp(4),
       bottom: LengthMetrics.vp(4)
     },
     localizedSmallPadding: {
-      start: LengthMetrics.vp(12),
-      end: LengthMetrics.vp(12),
+      start: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
+      end: LengthMetrics.resource($r('sys.float.chip_small_text_padding')),
       top: LengthMetrics.vp(4),
       bottom: LengthMetrics.vp(4)
     },
-    hoverBlendColor: $r('sys.color.ohos_id_color_hover'),
-    pressedBlendColor: $r('sys.color.ohos_id_color_click_effect'),
+    hoverBlendColor: $r('sys.color.chip_hover_fg'),
+    pressedBlendColor: $r('sys.color.chip_press_color'),
+    focusBgColor: $r('sys.color.chip_focus_bg'),
+    focusActivatedBgColor: $r('sys.color.chip_focus_activated_bg'),
     opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
+    normalShadowStyle: $r('sys.float.chip_normal_shadow_style'),
+    smallShadowStyle: $r('sys.float.chip_small_shadow_style'),
     breakPointConstraintWidth: {
       breakPointMinWidth: 128,
       breakPointSmMaxWidth: 156,
@@ -279,12 +328,15 @@ export struct ChipComponent {
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
   @Prop suffixSymbol: ChipSymbolGlyphOptions
-  @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
-  @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
+  @Prop chipNodeBackgroundColor: ResourceColor;
+  @State isSetBg: boolean = false;
+  @Prop chipNodeActivatedBackgroundColor: ResourceColor;
+  @State isSetActiveBg: boolean = false;
   @Prop chipNodeRadius: Dimension | undefined = void (0)
   @Prop chipEnabled: boolean = true
   @Prop chipActivated: boolean = false
   @State isHover: boolean = false
+  @State isHovering: boolean = false;
   @State chipScale: ScaleOptions = { x: 1, y: 1 }
   @State chipOpacity: number = 1
   @State chipBlendColor: ResourceColor = Color.Transparent
@@ -321,33 +373,63 @@ export struct ChipComponent {
 
   private getLabelFontSize(): Dimension {
     if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
-      return this.label.fontSize
+      return this.label.fontSize;
+    }
+    let size = this.theme.label.smallFontSize as Resource;
+    if (this.isChipSizeEnum() && this.chipSize !== ChipSize.SMALL) {
+      size = this.theme.label.normalFontSize as Resource;
+    }
+    return this.sizeToVp(size);
+  }
+
+  private getIconSize(): Resource{
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      return this.theme.prefixIcon.smallSize.width as Resource;
     } else {
-      if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
-        try {
-          resourceManager.getSystemResourceManager()
-            .getNumberByName((((this.theme.label.smallFontSize as Resource).params as string[])[0]).split('.')[2])
-          return this.theme.label.smallFontSize
-        } catch (error) {
-          return this.theme.label.defaultFontSize
-        }
-      } else {
-        try {
-          resourceManager.getSystemResourceManager()
-            .getNumberByName((((this.theme.label.normalFontSize as Resource).params as string[])[0]).split('.')[2])
-          return this.theme.label.normalFontSize
-        } catch (error) {
-          return this.theme.label.defaultFontSize
-        }
+      return this.theme.prefixIcon.normalSize.width as Resource;
+    }
+  }
+
+  private defaultSymbolFontsize(): Resource{
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      return this.theme.defaultSymbol.smallFontSize as Resource;
+    } else {
+      return this.theme.defaultSymbol.normalFontSize as Resource;
+    }
+  }
+
+  private sizeToVp(sizeResource: Resource): number{
+    let metrics = LengthMetrics.resource(sizeResource);
+    return this.lengthMetricsToVp(metrics)
+  }
+
+  private verifyResource(resourceValue: Resource, defaultValue: Dimension): Dimension{
+    if (resourceValue && resourceValue.params && Array.isArray(resourceValue.params as string[]) &&
+      (resourceValue.params as string[])[0] && (resourceValue.params as string[])[0].includes('.') &&
+      (resourceValue.params as string[])[0].split('.').length > 2) {
+      try {
+        let getNum = getContext(this).resourceManager.getNumberByName(((resourceValue.params as string[])[0]).split('.')[2]);
+        return getNum;
+      } catch (error) {
+        return defaultValue;
       }
     }
+    return defaultValue;
+  }
+
+  private getActiveFontColor(){
+    return this.chipNodeOnFocus ? this.theme.label.focusActiveFontColor : this.theme.label.activatedFontColor;
+  }
+
+  private getFontColor(): ResourceColor{
+    return this.chipNodeOnFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
   }
 
   private getLabelFontColor(): ResourceColor {
     if (this.getChipActive()) {
-      return this.label?.activatedFontColor ?? this.theme.label.activatedFontColor
+      return this.label?.activatedFontColor ?? this.getActiveFontColor();
     }
-    return this.label?.fontColor ?? this.theme.label.fontColor
+    return this.label?.fontColor ?? this.getFontColor();
   }
 
   private getLabelFontFamily(): string {
@@ -370,8 +452,7 @@ export struct ChipComponent {
         case LengthUnit.VP:
           return lengthMetrics.value
         case LengthUnit.FP:
-          px2vp(fp2px(lengthMetrics.value))
-          break
+          return px2vp(fp2px(lengthMetrics.value));
         case LengthUnit.PERCENT:
           return Number.NEGATIVE_INFINITY
         case LengthUnit.LPX:
@@ -423,6 +504,23 @@ export struct ChipComponent {
         return length
       default:
         return Number.NEGATIVE_INFINITY
+    }
+  }
+
+  private getChipNodeBorderWidth(): Dimension{
+    if (!this.isSetBackgroundColor()) {
+      return this.sizeToVp(this.theme.chipNode.defaultBorderWidth as Resource);
+    } else {
+      return 0;
+    }
+  }
+
+  private getChipNodeBorderColor(): ResourceColor{
+    let themeChipNode = this.theme.chipNode;
+    if (this.getChipActive()) {
+      return themeChipNode.activatedBorderColor;
+    } else {
+      return themeChipNode.borderColor;
     }
   }
 
@@ -507,20 +605,14 @@ export struct ChipComponent {
     if (this.suffixIcon?.size?.width !== void (0) && this.toVp(this.suffixIcon?.size?.width) >= 0) {
       suffixIconSize.width = this.suffixIcon?.size?.width
     } else {
-      if (this.getSuffixIconSrc()) {
-        suffixIconSize.width = this.theme.suffixIcon.size.width
-      } else {
-        suffixIconSize.width = 0
-      }
+      suffixIconSize.width = this.getSuffixIconSrc() ?
+      this.sizeToVp(this.getIconSize()) : 0;
     }
     if (this.suffixIcon?.size?.height !== void (0) && this.toVp(this.suffixIcon?.size?.height) >= 0) {
       suffixIconSize.height = this.suffixIcon?.size?.height
     } else {
-      if (this.getSuffixIconSrc()) {
-        suffixIconSize.height = this.theme.suffixIcon.size.height
-      } else {
-        suffixIconSize.height = 0
-      }
+      suffixIconSize.height = this.getSuffixIconSrc() ?
+      this.sizeToVp(this.getIconSize()) : 0;
     }
     return suffixIconSize
   }
@@ -531,7 +623,7 @@ export struct ChipComponent {
       prefixIconSize.width = this.prefixIcon?.size?.width
     } else {
       if (this.prefixIcon?.src) {
-        prefixIconSize.width = this.theme.prefixIcon.size.width
+        prefixIconSize.width = this.sizeToVp(this.getIconSize());
       } else {
         prefixIconSize.width = 0
       }
@@ -540,7 +632,7 @@ export struct ChipComponent {
       prefixIconSize.height = this.prefixIcon?.size?.height
     } else {
       if (this.prefixIcon?.src) {
-        prefixIconSize.height = this.theme.prefixIcon.size.height
+        prefixIconSize.height = this.getIconSize();
       } else {
         prefixIconSize.height = 0
       }
@@ -548,25 +640,72 @@ export struct ChipComponent {
     return prefixIconSize
   }
 
+  private getActiveIconColor(): ResourceColor{
+    return this.chipNodeOnFocus ? this.theme.prefixIcon.focusActivatedColor :
+    this.theme.prefixIcon.activatedFillColor;
+  }
+
+  private getFillIconColor(iconType: string): ResourceColor{
+    if (iconType === IconType.PREFIX_ICON) {
+      if (this.prefixIcon?.fillColor) {
+        return this.prefixIcon.fillColor;
+      }
+      return this.chipNodeOnFocus ? this.theme.prefixIcon.focusFillColor : this.theme.prefixIcon.fillColor;
+    } else {
+      if (this.suffixIcon?.fillColor) {
+        return this.suffixIcon.fillColor;
+      }
+      return this.chipNodeOnFocus ? this.theme.suffixIcon.focusFillColor : this.theme.suffixIcon.fillColor;
+    }
+  }
+
+  private getActiveIconColorArray(iconType: string): ResourceColor[]{
+    if (iconType === IconType.PREFIX_ICON) {
+      return this.getColorArray(this.prefixIcon?.activatedFillColor,
+        this.theme.prefixIcon.focusActivatedColor, this.theme.prefixIcon.activatedFillColor);
+    } else {
+      return this.getColorArray(this.suffixIcon?.activatedFillColor,
+        this.theme.suffixIcon.focusActivatedColor, this.theme.suffixIcon.activatedFillColor);
+    }
+  }
+
+  private getColorArray(userDefined: ResourceColor | undefined, focusColor: ResourceColor,
+                        normalColor: ResourceColor): ResourceColor[]{
+    if (userDefined) {
+      return [userDefined];
+    }
+    return this.chipNodeOnFocus ? [focusColor] : [normalColor];
+  }
+
+  private getFillIconColorArray(iconType: string): ResourceColor[]{
+    if (iconType === IconType.PREFIX_ICON) {
+      return this.getColorArray(this.prefixIcon?.fillColor,
+        this.theme.prefixIcon.focusFillColor, this.theme.prefixIcon.fillColor);
+    } else {
+      return this.getColorArray(this.suffixIcon?.fillColor,
+        this.theme.suffixIcon.focusFillColor, this.theme.suffixIcon.fillColor);
+    }
+  }
+
   private getPrefixIconFilledColor(): ResourceColor {
     if (this.getChipActive()) {
-      return this.prefixIcon?.activatedFillColor ?? this.theme.prefixIcon.activatedFillColor
+      return this.prefixIcon?.activatedFillColor ?? this.getActiveIconColor();
     }
-    return this.prefixIcon?.fillColor ?? this.theme.prefixIcon.fillColor
+    return this.prefixIcon?.fillColor ?? this.getFillIconColor(IconType.PREFIX_ICON);
   }
 
   private getSuffixIconFilledColor(): ResourceColor {
     if (this.getChipActive()) {
-      return this.suffixIcon?.activatedFillColor ?? this.theme.suffixIcon.activatedFillColor
+      return this.suffixIcon?.activatedFillColor ?? this.getActiveIconColor();
     }
-    return this.suffixIcon?.fillColor ?? this.theme.suffixIcon.fillColor
+    return this.suffixIcon?.fillColor ?? this.getFillIconColor(IconType.SUFFIX_ICON);
   }
 
-  private getDefaultSymbolColor(): Array<ResourceColor> {
+  private getDefaultSymbolColor(iconType: string): Array<ResourceColor> {
     if (this.getChipActive()) {
-      return this.theme.defaultSymbol.activatedFontColor
+      return this.getActiveIconColorArray(iconType);
     }
-    return this.theme.defaultSymbol.normalFontColor
+    return this.getFillIconColorArray(iconType);
   }
 
   private getPrefixSymbolModifier(): SymbolGlyphModifier | undefined {
@@ -596,34 +735,47 @@ export struct ChipComponent {
       return this.chipNodeRadius as Dimension
     } else {
       return ((this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ?
-      this.theme.chipNode.smallBorderRadius : this.theme.chipNode.normalBorderRadius)
+      this.sizeToVp(this.theme.chipNode.smallBorderRadius as Resource) :
+      this.sizeToVp(this.theme.chipNode.normalBorderRadius as Resource));
     }
   }
 
   private getChipNodeBackGroundColor(): ResourceColor {
+    let themeChipNode = this.theme.chipNode;
     let currentColor: ResourceColor;
 
-    if (this.getChipActive()) {
-      currentColor = this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
-    } else {
-      currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
+    if (this.chipNodeOnFocus && !this.isSetBackgroundColor()) {
+      currentColor = this.getChipActive() ? themeChipNode.focusActivatedBgColor :
+        themeChipNode.focusBgColor;
+      return currentColor;
     }
-
+    if (this.getChipActive()) {
+      currentColor = this.chipNodeActivatedBackgroundColor ?? themeChipNode.activatedBackgroundColor;
+    } else {
+      currentColor = this.chipNodeBackgroundColor ?? themeChipNode.backgroundColor;
+    }
     let sourceColor: ColorMetrics;
-
     try {
       sourceColor = ColorMetrics.resourceColor(currentColor);
     } catch (err) {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
       sourceColor = ColorMetrics.resourceColor(Color.Transparent);
     }
-    if (!this.isShowPressedBackGroundColor) {
-      return sourceColor.color
+    if (this.isShowPressedBackGroundColor) {
+      this.isHovering = false;
+      return sourceColor
+        .blendColor(ColorMetrics.resourceColor(this.isSetBackgroundColor() ?
+          Color.Transparent : themeChipNode.pressedBlendColor))
+        .color;
     }
+    if (this.isHovering) {
+      return sourceColor
+        .blendColor(ColorMetrics.resourceColor(this.isSetBackgroundColor() ?
+          Color.Transparent : themeChipNode.hoverBlendColor))
+        .color;
+    }
+    return currentColor;
 
-    return sourceColor
-      .blendColor(ColorMetrics.resourceColor("#19000000"))
-      .color
   }
 
   private getChipNodeHeight(): Length {
@@ -651,7 +803,8 @@ export struct ChipComponent {
   private getCalculateChipNodeWidth(): number {
     let calWidth: number = 0
     let startEndVp: LocalizedMargin = this.getLabelStartEndVp()
-    calWidth += this.getChipNodePadding().start?.value ?? 0
+    calWidth += (this.getChipNodeBorderWidth() as number) * 2;
+    calWidth += this.getChipNodePadding().start?.value ?? 0;
     calWidth += this.toVp(this.getPrefixChipWidth())
     calWidth += this.toVp(startEndVp.start?.value ?? 0)
     calWidth += this.getLabelWidth()
@@ -697,6 +850,10 @@ export struct ChipComponent {
 
   private getChipNodeOpacity(): number {
     return this.getChipEnable() ? this.chipOpacity : this.theme.chipNode.opacity.disabled
+  }
+
+  private getfocusBox(): FocusBoxStyle{
+    return this.chipNodeOnFocus ? { strokeWidth: LengthMetrics.vp(2) } : { strokeWidth: LengthMetrics.vp(0) };
   }
 
   private handleTouch(event: TouchEvent) {
@@ -747,6 +904,20 @@ export struct ChipComponent {
       () => {
         this.chipScale = { x: 0.85, y: 0.85 }
       })
+  }
+
+  private focusBtnChipNodeAnimate(){
+    this.chipScale = {
+      x: this.verifyResource(this.theme.chipNode.focusBtnScaleX as Resource, 1) as number,
+      y: this.verifyResource(this.theme.chipNode.focusBtnScaleY as Resource, 1) as number,
+    };
+  }
+
+  private blurBtnChipNodeAnimate(){
+    this.chipScale = {
+      x: 1,
+      y: 1,
+    };
   }
 
   private getSuffixIconSrc(): ResourceStr | undefined {
@@ -848,6 +1019,18 @@ export struct ChipComponent {
   }
 
   aboutToAppear() {
+    if (this.chipNodeBackgroundColor) {
+      this.isSetBg = true;
+    } else {
+      this.isSetBg = false;
+      this.chipNodeBackgroundColor = this.theme.chipNode.backgroundColor;
+    }
+    if (this.chipNodeActivatedBackgroundColor) {
+      this.isSetActiveBg = true;
+    } else {
+      this.isSetActiveBg = false;
+      this.chipNodeActivatedBackgroundColor = this.theme.chipNode.activatedBackgroundColor;
+    }
     this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
       if (mediaQueryResult.matches) {
         this.chipBreakPoints = BreakPointsType.SM
@@ -877,6 +1060,22 @@ export struct ChipComponent {
     }
   }
 
+  private isSetBackgroundColor(): boolean{
+    return this.isSetBg || (this.isSetActiveBg && this.chipActivated);
+  }
+
+  private getShadowStyles(): ShadowStyle | undefined{
+    if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
+      let smallShadow = this.theme.chipNode.smallShadowStyle as Resource;
+      let smallShadowType = this.verifyResource(smallShadow, -1) as number;
+      return smallShadowType as ShadowStyle;
+    } else {
+      let normalShadow = this.theme.chipNode.normalShadowStyle as Resource;
+      let normalShadowType = this.verifyResource(normalShadow, -1) as number;
+      return normalShadowType as ShadowStyle;
+    }
+  }
+
   aboutToDisappear() {
     this.smListener.off("change")
     this.mdListener.off("change")
@@ -896,8 +1095,8 @@ export struct ChipComponent {
       Row() {
         if (this.prefixSymbol?.normal || this.prefixSymbol?.activated) {
           SymbolGlyph()
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
+            .fontSize(this.defaultSymbolFontsize())
+            .fontColor(this.getDefaultSymbolColor(IconType.PREFIX_ICON))
             .attributeModifier(this.getPrefixSymbolModifier())
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(this.symbolEffect, false)
@@ -939,14 +1138,14 @@ export struct ChipComponent {
 
         if (this.suffixSymbol?.normal || this.suffixSymbol?.activated) {
           SymbolGlyph()
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
+            .fontSize(this.defaultSymbolFontsize())
+            .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON))
             .attributeModifier(this.getSuffixSymbolModifier())
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(this.symbolEffect, false)
             .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
-              this.suffixSymbolWidth = newValue?.width
+              this.suffixSymbolWidth = newValue?.width;
             })
             .key('SuffixSymbolGlyph')
         } else if (this.suffixIcon?.src !== "") {
@@ -984,8 +1183,8 @@ export struct ChipComponent {
             })
         } else if (this.allowClose ?? true) {
           SymbolGlyph($r('sys.symbol.xmark'))
-            .fontSize(this.theme.defaultSymbol.fontSize)
-            .fontColor(this.getDefaultSymbolColor())
+            .fontSize(this.defaultSymbolFontsize())
+            .fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_ICON))
             .onSizeChange((oldValue, newValue) => {
               this.allowCloseSymbolWidth = newValue?.width
             })
@@ -998,7 +1197,6 @@ export struct ChipComponent {
               this.deleteChipNodeAnimate()
             })
         }
-
       }
       .direction(this.chipDirection)
       .alignItems(VerticalAlign.Center)
@@ -1011,34 +1209,39 @@ export struct ChipComponent {
     .type(ButtonType.Normal)
     .clip(false)
     .backgroundColor(this.getChipNodeBackGroundColor())
+    .borderWidth(this.getChipNodeBorderWidth())
+    .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipNodeRadius())
     .enabled(this.getChipEnable())
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
+    .focusBox(this.getfocusBox())
+    .shadow(this.chipNodeOnFocus ? this.getShadowStyles() : undefined)
     .onFocus(() => {
+      this.focusBtnChipNodeAnimate();
       this.chipNodeOnFocus = true
     })
     .onBlur(() => {
       this.chipNodeOnFocus = false
+      this.blurBtnChipNodeAnimate();
     })
     .onTouch((event) => {
       this.handleTouch(event)
     })
     .onHover((isHover: boolean) => {
-      if (isHover) {
-        this.isShowPressedBackGroundColor = true
-      } else {
-        if (!this.isShowPressedBackGroundColor && isHover) {
-          this.isShowPressedBackGroundColor = true
-        } else {
-          this.isShowPressedBackGroundColor = false
-        }
-      }
+      this.isHovering = isHover;
     })
     .onKeyEvent((event) => {
-      if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
-        this.deleteChipNodeAnimate()
+      if (!event && event.type !== KeyType.Down) {
+        return;
+      }
+      let forwardDelChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
+        !this.suffixIconOnFocus;
+      let enterChip = event.keyCode === KeyCode.KEYCODE_ENTER &&
+      this.allowClose && !this.suffixIcon?.src;
+      if (forwardDelChip || enterChip) {
+        this.deleteChipNodeAnimate();
       }
     })
     .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))

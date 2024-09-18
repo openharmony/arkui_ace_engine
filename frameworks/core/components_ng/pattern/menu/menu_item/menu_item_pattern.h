@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +46,14 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, focusPattern);
+        auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(menuTheme->GetFocusStyleType()));
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -247,7 +255,11 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTextMarquee(bool isMarqueeStart);
     void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    void InitTextFadeOut();
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void SetThemeProps(const RefPtr<FrameNode>& host);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
@@ -268,6 +280,11 @@ private:
     void RecordChangeEvent() const;
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
+
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 
     void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
@@ -317,6 +334,12 @@ private:
     bool expandingModeSet_ = false;
 
     Color bgBlendColor_ = Color::TRANSPARENT;
+
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isTextFadeOut_ = false;
+    Dimension focusPadding_ = 0.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };

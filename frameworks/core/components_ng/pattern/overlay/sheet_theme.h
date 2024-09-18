@@ -101,6 +101,12 @@ public:
             theme->sheetMaxAgingScale_ = sheetPattern->GetAttr<double>("sheet_max_aging_scale", 1.75f);
             theme->closeIconSource_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->closeIconSymbolColor_ = sheetPattern->GetAttr<Color>("close_icon_symbol_color", Color(0xff182431));
+            theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
+            theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
+            theme->operationAreaHeight_ = sheetPattern->GetAttr<Dimension>("sheet_operation_height", 56.0_vp);
+            theme->height_apply_full_screen_ =
+                static_cast<bool>(sheetPattern->GetAttr<int>("sheet_height_apply_full_screen", 0));
+            theme->showCloseIcon_ = static_cast<bool>(sheetPattern->GetAttr<int>("sheet_show_close_icon", 1));
         }
     };
     ~SheetTheme() override = default;
@@ -200,6 +206,31 @@ public:
         return closeIconSource_;
     }
 
+    const Dimension& GetOperationAreaHeight() const
+    {
+        return operationAreaHeight_;
+    }
+
+    double GetLargePercent() const
+    {
+        return largePercent_;
+    }
+
+    double GetMediumPercent() const
+    {
+        return mediumPercent_;
+    }
+
+    bool GetHeightApplyFullScreen() const
+    {
+        return height_apply_full_screen_;
+    }
+
+    bool GetShowCloseIcon() const
+    {
+        return showCloseIcon_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -223,6 +254,11 @@ private:
     double sheetNormalScale_;
     double sheetMaxAgingScale_;
     uint32_t closeIconSource_ = 0;
+    Dimension operationAreaHeight_;
+    double largePercent_ = 0.0f;
+    double mediumPercent_ = 0.0f;
+    bool height_apply_full_screen_ = false;
+    bool showCloseIcon_ = true;
 };
 } // namespace OHOS::Ace::NG
 
