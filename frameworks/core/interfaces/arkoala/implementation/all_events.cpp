@@ -235,7 +235,7 @@ void onPreDragImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Boolean isVisible,
+                             const Ark_Boolean isExpanding,
                              const Ark_Number currentRatio)
 {
     // GENERATED EMPTY IMPLEMENTATION

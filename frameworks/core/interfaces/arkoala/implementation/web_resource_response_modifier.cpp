@@ -28,6 +28,9 @@ Ark_NativePointer GetFinalizerImpl()
 void GetResponseDataImpl(WebResourceResponsePeer* peer)
 {
 }
+void GetResponseDataExImpl(WebResourceResponsePeer* peer)
+{
+}
 void GetResponseEncodingImpl(WebResourceResponsePeer* peer)
 {
 }
@@ -73,6 +76,10 @@ void SetResponseIsReadyImpl(WebResourceResponsePeer* peer,
                             Ark_Boolean IsReady)
 {
 }
+Ark_Boolean GetResponseIsReadyImpl(WebResourceResponsePeer* peer)
+{
+    return 0;
+}
 } // WebResourceResponseModifier
 const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor()
 {
@@ -80,6 +87,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
         WebResourceResponseModifier::CtorImpl,
         WebResourceResponseModifier::GetFinalizerImpl,
         WebResourceResponseModifier::GetResponseDataImpl,
+        WebResourceResponseModifier::GetResponseDataExImpl,
         WebResourceResponseModifier::GetResponseEncodingImpl,
         WebResourceResponseModifier::GetResponseMimeTypeImpl,
         WebResourceResponseModifier::GetReasonMessageImpl,
@@ -92,6 +100,7 @@ const GENERATED_ArkUIWebResourceResponseAccessor* GetWebResourceResponseAccessor
         WebResourceResponseModifier::SetResponseHeaderImpl,
         WebResourceResponseModifier::SetResponseCodeImpl,
         WebResourceResponseModifier::SetResponseIsReadyImpl,
+        WebResourceResponseModifier::GetResponseIsReadyImpl,
     };
     return &WebResourceResponseAccessorImpl;
 }

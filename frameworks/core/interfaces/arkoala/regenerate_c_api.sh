@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ OHOS_DIR=${OHOS_DIR_ARG:=../../../../../../..}
 
 if [[ ! -d $IDLIZE_PATH && "x$IDLIZE_VER" == "x" ]]; then
     echo "Please define IDLIZE_PATH environment that points to idlize source directory."
-    echo "Or define IDLIZE_VER environment that points to version in repository. Latest version is: "
-    npm view @azanat/idlize version
+    echo "Or define IDLIZE_VER environment that points to version in repository."
+    lv=`npm view @azanat/idlize dist-tags.latest`
+    nv=`npm view @azanat/idlize dist-tags.next`
+    echo "Latest version: ${lv} Next version: ${nv}"
     exit 1
 fi
 
