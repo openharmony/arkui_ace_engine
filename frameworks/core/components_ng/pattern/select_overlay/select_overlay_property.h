@@ -281,6 +281,10 @@ struct SelectOverlayInfo {
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
 
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanMove;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanEnd;
+    std::function<OffsetF()> getDeltaHandleOffset;
+
     // menu info.
     SelectMenuInfo menuInfo;
     SelectMenuCallback menuCallback;

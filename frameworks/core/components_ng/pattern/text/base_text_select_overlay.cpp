@@ -822,7 +822,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasUnsupportedTransform());
     if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
         HideMenu(true);
-    } else if (IsAncestorNodeEndScroll(flag)) {
+    } else if (IsAncestorNodeEndScroll(flag) && !GetSelectArea().IsEmpty()) {
         ShowMenu();
     }
     auto pipeline = PipelineContext::GetCurrentContextSafely();
