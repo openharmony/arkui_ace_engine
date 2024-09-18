@@ -208,7 +208,7 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
     bool needHandleCachedClick =
         want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, false);
-    bool isRecover = recycleStatus_ == RecycleStatus::RECYCLED || needHandleCachedClick;
+    bool isRecover = recycleStatus_ != RecycleStatus::RECOVERED || needHandleCachedClick;
     AAFwk::Want newWant;
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, formInfo.isDynamic);
     newWant.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, isRecover);
@@ -221,6 +221,11 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(recycleMutex_);
+        recycleStatus_ = RecycleStatus::RECOVERED;
     }
 
     isDynamic_ = formInfo.isDynamic;
@@ -243,7 +248,6 @@ void FormManagerDelegate::HandleCachedClickEvents()
         std::lock_guard<std::mutex> lock(recycleMutex_);
         TAG_LOGI(AceLogTag::ACE_FORM, "process click event after recover form, pointerEventCache_.size: %{public}s",
             std::to_string(pointerEventCache_.size()).c_str());
-        recycleStatus_ = RecycleStatus::RECOVERED;
         for (const auto& pointerEvent : pointerEventCache_) {
             SerializedGesture serializedGesture;
             formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
@@ -826,10 +830,6 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
 
 void FormManagerDelegate::ReAddForm()
 {
-    {
-        std::lock_guard<std::mutex> lock(recycleMutex_);
-        recycleStatus_ = RecycleStatus::RECOVERED;
-    }
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");
