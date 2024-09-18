@@ -856,6 +856,14 @@ int32_t NavigationPattern::FireNavDestinationStateChange(NavDestinationLifecycle
     return hostNode->GetLastStandardIndex();
 }
 
+bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    auto destinationNodePattern = destinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(destinationNodePattern, false);
+    return !destinationNodePattern->GetIsOnShow();
+}
+
 bool NavigationPattern::CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode)
 {
     CHECK_NULL_RETURN(destinationNode, false);
@@ -953,14 +961,6 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
         return;
     }
     NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_HIDE);
-}
-
-bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode)
-{
-    CHECK_NULL_RETURN(destinationNode, false);
-    auto destinationNodePattern = destinationNode->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_RETURN(destinationNodePattern, false);
-    return !destinationNodePattern->GetIsOnShow();
 }
 
 void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle)
