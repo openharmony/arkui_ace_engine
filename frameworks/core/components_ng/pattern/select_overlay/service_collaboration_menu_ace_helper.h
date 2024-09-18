@@ -99,7 +99,7 @@ public:
     int32_t OnDataCallback(uint32_t code, uint32_t collaborationId,
         uint32_t dataLength, std::unique_ptr<char[]>& data);
     RefPtr<PixelMap> CreatePixelMap(void *buffer, uint32_t code, uint32_t dataLength);
-    void SetMenuHelper(std::shared_ptr<ServiceCollaborationMenuAceHelper> menuHelper)
+    void SetMenuHelper(RefPtr<ServiceCollaborationMenuAceHelper> menuHelper)
     {
         menuHelper_ = menuHelper;
     }
@@ -117,7 +117,7 @@ public:
     OffsetF position_;
     RefPtr<FrameNode> row_;
     bool isTransmit_;
-    std::shared_ptr<ServiceCollaborationMenuAceHelper> menuHelper_;
+    RefPtr<ServiceCollaborationMenuAceHelper> menuHelper_;
     std::shared_ptr<SelectOverlayInfo> info_;
     std::string ability_;
 private:
