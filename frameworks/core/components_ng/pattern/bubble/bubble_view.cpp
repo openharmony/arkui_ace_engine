@@ -250,8 +250,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    childLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
+        childLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -588,7 +590,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
     if (custom) {
         childLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
-    } else {
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     }
@@ -717,7 +719,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         popupMaxWidth = GetMaxWith().Value();
         childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(popupMaxWidth), std::nullopt));
-    } else {
+    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
         childLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     }
