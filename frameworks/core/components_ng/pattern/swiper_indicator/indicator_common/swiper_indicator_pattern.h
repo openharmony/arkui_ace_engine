@@ -221,6 +221,25 @@ public:
     void DumpAdvanceInfo() override;
     void SetIndicatorInteractive(bool isInteractive);
 
+    virtual bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+    {
+        return false;
+    }
+
+    virtual PointF GetCenterPointF()
+    {
+        return PointF(0.0, 0.0);
+    }
+
+    virtual float GetAngleWithPoint(const PointF& conter, const PointF& point)
+    {
+        return 0.0;
+    }
+
+protected:
+    OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
+    OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -249,16 +268,9 @@ private:
     bool CheckIsTouchBottom(const GestureEvent& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleLongPress(GestureEvent& info);
-    PointF GetCenterPointF();
-    float ConvertAngleWithArcDirection(SwiperArcDirection arcDirection, const float& angle);
-    float GetAngleWithPoint(const PointF& conter, const PointF& point);
     void HandleLongDragUpdate(const TouchLocationInfo& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
-    bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
-    bool CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset);
-    OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
-    OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
     int32_t GetCurrentIndex() const;
     void InitFocusEvent();
     void HandleFocusEvent();
