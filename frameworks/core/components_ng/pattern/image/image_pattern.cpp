@@ -1025,7 +1025,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (GetIsAnimation() && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped() && animator_->HasScheduler()) {
         if (visible) {
             animator_->Forward();
         } else {
