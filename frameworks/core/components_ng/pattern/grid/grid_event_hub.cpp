@@ -187,7 +187,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
                 CHECK_NULL_VOID(eventHub);
                 auto manager = pipeline->GetDragDropManager();
                 CHECK_NULL_VOID(manager);
-                eventHub->dragDropProxy_ = manager->CreateAndShowDragWindow(pixelMap, info);
+                eventHub->dragDropProxy_ = manager->CreateAndShowItemDragOverlay(pixelMap, info, eventHub);
                 CHECK_NULL_VOID(eventHub->dragDropProxy_);
                 eventHub->dragDropProxy_->OnItemDragStart(info, host);
                 gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
@@ -204,7 +204,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
+    dragDropProxy_ = manager->CreateAndShowItemDragOverlay(customNode, info, AceType::Claim(this));
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, host);
     gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
