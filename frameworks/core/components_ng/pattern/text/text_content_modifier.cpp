@@ -765,16 +765,16 @@ void TextContentModifier::SetTextDecorationColor(const Color& color)
     textDecorationColor_ = color;
 }
 
-void TextContentModifier::SetBaselineOffset(const Dimension& value)
+void TextContentModifier::SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset)
 {
-    float baselineOffsetValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        baselineOffsetValue = pipelineContext->NormalizeToPx(value);
+    float baselineOffsetValue = 0.0f;
+    if (!isReset) {
+        baselineOffsetValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        baselineOffset_ = Dimension(baselineOffsetValue);
     } else {
-        baselineOffsetValue = value.Value();
+        baselineOffset_ = std::nullopt;
     }
-    baselineOffset_ = Dimension(baselineOffsetValue);
+ 
     CHECK_NULL_VOID(baselineOffsetFloat_);
     baselineOffsetFloat_->Set(baselineOffsetValue);
 }
