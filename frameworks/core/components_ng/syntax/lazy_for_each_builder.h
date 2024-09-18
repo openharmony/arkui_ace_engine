@@ -526,6 +526,7 @@ public:
         OnItemDeleted(node, key);
     }
 
+    void GetAllItems(std::vector<UINode*>& items);
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -553,8 +554,6 @@ protected:
 
     virtual void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) = 0;
-
-    void GetAllItems(std::vector<UINode*>& items);
 
 private:
     void RecycleItemsOutOfBoundary();
