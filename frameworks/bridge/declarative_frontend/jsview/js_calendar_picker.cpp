@@ -306,31 +306,13 @@ void JSCalendarPicker::JsPadding(const JSCallbackInfo& info)
 {
     NG::PaddingProperty padding;
     if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
+        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVpNG(paddingObj->GetProperty("left"), leftDimen) && leftDimen.IsNonNegative()) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVpNG(paddingObj->GetProperty("right"), rightDimen) && rightDimen.IsNonNegative()) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVpNG(paddingObj->GetProperty("top"), topDimen) && topDimen.IsNonNegative()) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVpNG(paddingObj->GetProperty("bottom"), bottomDimen) &&
-            bottomDimen.IsNonNegative()) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            padding = SetPaddings(top, bottom, left, right);
+        JSViewAbstract::ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            padding = SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+                commonCalcDimension.right);
             CalendarPickerModel::GetInstance()->SetPadding(padding);
             return;
         }
