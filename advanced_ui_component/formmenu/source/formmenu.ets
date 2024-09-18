@@ -54,11 +54,13 @@ const querySnapshot = (want: Want, componentId: string): boolean => {
 
 @Builder
 AddFormMenuItem(want: Want, componentId: string, options?: AddFormOptions): void {
-  if (querySnapshot(want, componentId)) {
-  }
   FormMenuItem(options?.style?.options ? options.style.options : {
     startIcon: $r('sys.media.ic_form_menu_add'),
     content: $r('sys.string.ohos_add_form_to_desktop')
   })
-  .onRegClick(want, componentId, options?.formBindingData?.data, options?.callback)
+  .onClick(async () => {
+      let uiContext = this.getUIContext();
+      await querySnapshot(want, componentId, uiContext);
+      FormMenuItem.onRequestPublishFormWithSnapshot(want, options?.formBindingData?.data, options?.callback);
+    })
 }
