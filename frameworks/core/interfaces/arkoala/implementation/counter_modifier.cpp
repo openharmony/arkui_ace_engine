@@ -13,30 +13,52 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CounterInterfaceModifier {
 void SetCounterOptionsImpl(Ark_NativePointer node)
 {
+    // keep it empty because Counter don`t have any options
 }
 } // CounterInterfaceModifier
 namespace CounterAttributeModifier {
 void OnIncImpl(Ark_NativePointer node,
                Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode]() {
+        GetFullAPI()->getEventsAPI()->getCounterEventsReceiver()->onInc(frameNode->GetId());
+    };
+    CounterModelNG::SetOnInc(frameNode, onEvent);
 }
 void OnDecImpl(Ark_NativePointer node,
                Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode]() {
+        GetFullAPI()->getEventsAPI()->getCounterEventsReceiver()->onDec(frameNode->GetId());
+    };
+    CounterModelNG::SetOnDec(frameNode, onEvent);
 }
 void EnableDecImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetEnableDec(frameNode, value);
 }
 void EnableIncImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetEnableInc(frameNode, value);
 }
 } // CounterAttributeModifier
 const GENERATED_ArkUICounterModifier* GetCounterModifier()

@@ -31,15 +31,22 @@ void CounterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    auto counterNode = CounterModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_VOID(counterNode);
+    stack->Push(counterNode);
+}
+
+RefPtr<FrameNode> CounterModelNG::CreateFrameNode(int32_t nodeId)
+{
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COUNTER_ETS_TAG, nodeId);
     auto counterNode = CounterNode::GetOrCreateCounterNode(
         V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();
-    CHECK_NULL_VOID(counterPattern);
+    CHECK_NULL_RETURN(counterPattern, counterNode);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, counterNode);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    CHECK_NULL_VOID(counterTheme);
+    CHECK_NULL_RETURN(counterTheme, counterNode);
     counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
     counterNode->GetRenderContext()->SetClipToFrame(true);
@@ -63,7 +70,7 @@ void CounterModelNG::Create()
         auto addNode = CreateButtonChild(addId, add, counterTheme);
         addNode->MountToParent(counterNode);
     }
-    stack->Push(counterNode);
+    return counterNode;
 }
 
 RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
@@ -331,5 +338,39 @@ void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
 void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, value, frameNode);
+}
+
+void CounterModelNG::SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc)
+{
+    CHECK_NULL_VOID(onInc);
+    CHECK_NULL_VOID(frameNode);
+    auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    CHECK_NULL_VOID(addNode);
+    auto gestureHub = addNode->GetOrCreateGestureEventHub();
+    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
+                        clickEvent();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onInc");
+#endif
+                    };
+    gestureHub->SetUserOnClick(std::move(gestureEventFunc));
+}
+
+void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
+{
+    CHECK_NULL_VOID(onDec);
+    CHECK_NULL_VOID(frameNode);
+    auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    CHECK_NULL_VOID(subNode);
+    auto gestureHub = subNode->GetOrCreateGestureEventHub();
+    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
+                        clickEvent();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+                        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDec");
+#endif
+                    };
+    gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
 } // namespace OHOS::Ace::NG

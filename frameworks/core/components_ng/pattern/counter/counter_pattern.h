@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -75,6 +76,43 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        LinearLayoutPattern::ToJsonValue(json, filter);
+
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+
+        // put enableDec attr value
+        if (subId_.has_value()) {
+            auto subId = subId_.value();
+            auto subNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(subId)));
+            CHECK_NULL_VOID(subNode);
+            auto eventHub = subNode->GetEventHub<ButtonEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            json->PutExtAttr("enableDec", eventHub->IsEnabled() ? "true" : "false", filter);
+        } else {
+            json->PutExtAttr("enableDec", "false", filter);
+        }
+
+        // put enableInc attr value
+        if (addId_.has_value()) {
+            auto addId = addId_.value();
+            auto addNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(addId)));
+            CHECK_NULL_VOID(addNode);
+            auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            json->PutExtAttr("enableInc", eventHub->IsEnabled() ? "true" : "false", filter);
+        } else {
+            json->PutExtAttr("enableInc", "false", filter);
+        }
     }
 
 private:
