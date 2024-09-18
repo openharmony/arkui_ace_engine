@@ -111,7 +111,11 @@ public:
 
     void SetOnActionId(const GestureEventFunc& onActionId)
     {
-        onActionId_ = std::make_unique<GestureEventFunc>(onActionId);
+        onActionId_ = std::make_shared<GestureEventFunc>(onActionId);
+    }
+    std::shared_ptr<GestureEventFunc> GetOnActionId()
+    {
+        return onActionId_;
     }
     void SetOnActionStartId(const GestureEventFunc& onActionStartId)
     {
@@ -215,7 +219,7 @@ protected:
     int32_t fingers_ = 1;
     GesturePriority priority_ = GesturePriority::Low;
     GestureMask gestureMask_ = GestureMask::Normal;
-    std::unique_ptr<GestureEventFunc> onActionId_;
+    std::shared_ptr<GestureEventFunc> onActionId_;
     std::unique_ptr<GestureEventFunc> onActionStartId_;
     std::unique_ptr<GestureEventFunc> onActionUpdateId_;
     std::unique_ptr<GestureEventFunc> onActionEndId_;
