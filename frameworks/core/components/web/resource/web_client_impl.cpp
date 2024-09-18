@@ -744,6 +744,14 @@ void WebClientImpl::HideHandleAndQuickMenuIfNecessary(bool hide)
     delegate->HideHandleAndQuickMenuIfNecessary(hide);
 }
 
+void WebClientImpl::ChangeVisibilityOfQuickMenu()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ChangeVisibilityOfQuickMenu();
+}
+
 void WebClientImpl::OnQuickMenuDismissed()
 {
     auto delegate = webDelegate_.Upgrade();

@@ -4564,6 +4564,7 @@ void WebPattern::UpdateTouchHandleForOverlay(bool fromOverlay)
         }
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
+        selectMenuInfo_.menuIsShow = selectOverlayProxy_->IsMenuShow();
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         selectOverlayProxy_->SetHandleReverse(false);
     }
