@@ -789,6 +789,16 @@ public:
 
     void SetActive(bool active = true, bool needRebuildRenderContext = false) override;
 
+    bool GetAccessibilityVisible() const
+    {
+        return accessibilityVisible_;
+    }
+
+    void SetAccessibilityVisible(const bool accessibilityVisible)
+    {
+        accessibilityVisible_ = accessibilityVisible;
+    }
+
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
@@ -1268,6 +1278,7 @@ private:
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
+    bool accessibilityVisible_ = true;
     bool isResponseRegion_ = false;
     bool isLayoutComplete_ = false;
     bool isFirstBuilding_ = true;

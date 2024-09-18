@@ -468,6 +468,9 @@ private:
     void UpdateAccessibilityElementInfo(
         const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
 
+    void UpdateAccessibilityVisible(
+        const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
+
     void UpdateVirtualNodeInfo(std::list<Accessibility::AccessibilityElementInfo>& infos,
         Accessibility::AccessibilityElementInfo& nodeInfo,
         const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
