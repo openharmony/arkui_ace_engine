@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
@@ -727,7 +728,10 @@ void* createNavRouterNode(ArkUI_Int32 nodeId)
 
 void* createNavigatorNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = NavigatorModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNodeContainerNode(ArkUI_Int32 nodeId)

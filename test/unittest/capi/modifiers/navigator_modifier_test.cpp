@@ -20,23 +20,38 @@
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-    const auto ATTRIBUTE_OPTIONS_NAME = "options";
-    const auto ATTRIBUTE_OPTIONS_DEFAULT_VALUE = "!NOT-DEFINED!";
     const auto ATTRIBUTE_ACTIVE_NAME = "active";
-    const auto ATTRIBUTE_ACTIVE_DEFAULT_VALUE = "!NOT-DEFINED!";
+    const auto ATTRIBUTE_ACTIVE_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_TYPE_NAME = "type";
-    const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "!NOT-DEFINED!";
+    const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "NavigationType.Push";
     const auto ATTRIBUTE_TARGET_NAME = "target";
-    const auto ATTRIBUTE_TARGET_DEFAULT_VALUE = "!NOT-DEFINED!";
+    const auto ATTRIBUTE_TARGET_DEFAULT_VALUE = "";
 } // namespace
+
 
 class NavigatorModifierTest : public ModifierTestBase<GENERATED_ArkUINavigatorModifier,
     &GENERATED_ArkUINodeModifiers::getNavigatorModifier, GENERATED_ARKUI_NAVIGATOR> {
+public:
+    static void SetUpTestCase()
+    {
+        MockPipelineContext::SetUp();
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
+    }
+
+    static void TearDownTestCase()
+    {
+        MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
+        MockPipelineContext::TearDown();
+    }
 };
 
 /*
@@ -46,47 +61,97 @@ class NavigatorModifierTest : public ModifierTestBase<GENERATED_ArkUINavigatorMo
  */
 HWTEST_F(NavigatorModifierTest, setNavigatorOptionsTestDefaultValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
 
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OPTIONS_DEFAULT_VALUE);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
 }
 
 /*
- * @tc.name: setNavigatorOptionsTestValidValues
+ * @tc.name: setNavigatorOptions0TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setNavigatorOptionsTestValidValues, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    // Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0 realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    // Type_NavigatorInterface_setNavigatorOptions_Arg0& inputValueOptions = realInputValue.value;
 
-    Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {};
-    auto realInputValue = Converter::ArkValue<Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0>(inputValueOptions);
+    ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
     // Inital setup
-    // TODO: Valid values are not defined for attribute 'options' of type 'Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0'
+    Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
+        .target = {"abc"},
+        .type = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE)
+    };
+    auto realInputValue = Converter::ArkValue<Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0>(inputValueOptions);
 
     // Test
     modifier_->setNavigatorOptions0(node_, &realInputValue);
 
     // Initial verification
     jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, "!NOT-DEFINED!");
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
+    EXPECT_EQ(resultStr, "abc");
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+    EXPECT_EQ(resultStr, "NavigationType.Replace");
 }
 
 /*
- * @tc.name: setNavigatorOptionsTestInvalidValues
+ * @tc.name: setNavigatorOptions0TestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavigatorModifierTest, setNavigatorOptionsTestInvalidValues, TestSize.Level1)
+HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.Level1)
 {
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
+
+    // Inital setup
+    Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
+        .target = { .chars = nullptr },
+        .type = { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_NavigationType>(INT_MIN) }
+    };
+    auto realInputValue = Converter::ArkValue<Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0>(inputValueOptions);
+
+    // Test
+    modifier_->setNavigatorOptions0(node_, &realInputValue);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setNavigatorOptions1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigatorModifierTest, setNavigatorOptions1, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    ASSERT_NE(modifier_->setNavigatorOptions1, nullptr);
+
+    // Test
+    modifier_->setNavigatorOptions1(node_);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TARGET_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TARGET_DEFAULT_VALUE);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
 }
 
 /*
@@ -96,10 +161,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptionsTestInvalidValues, TestSize.L
  */
 HWTEST_F(NavigatorModifierTest, setActiveTestDefaultValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVE_NAME);
+    auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ACTIVE_DEFAULT_VALUE);
 }
 
@@ -110,9 +172,10 @@ HWTEST_F(NavigatorModifierTest, setActiveTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     Ark_Boolean inputValueActive;
+
+    ASSERT_NE(modifier_->setActive, nullptr);
 
     // Inital setup
     inputValueActive = Converter::ArkValue<Ark_Boolean>(true);
@@ -121,15 +184,13 @@ HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
     modifier_->setActive(node_, inputValueActive);
 
     // Initial verification
-    jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVE_NAME);
+    resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
     EXPECT_EQ(resultStr, "true");
 
     // Verifying attribute's other values
     inputValueActive = Converter::ArkValue<Ark_Boolean>(false);
     modifier_->setActive(node_, inputValueActive);
-    jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ACTIVE_NAME);
+    resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ACTIVE_NAME);
     EXPECT_EQ(resultStr, "false");
 }
 
@@ -140,10 +201,7 @@ HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
  */
 HWTEST_F(NavigatorModifierTest, setTypeTestDefaultValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+    auto resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_TYPE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
 }
 
@@ -158,6 +216,8 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
     std::string resultStr;
     Ark_NavigationType inputValueType;
 
+    ASSERT_NE(modifier_->setType, nullptr);
+
     // Inital setup
     inputValueType = ARK_NAVIGATION_TYPE_PUSH;
 
@@ -167,21 +227,20 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "Push");
+    EXPECT_EQ(resultStr, "NavigationType.Push");
 
     // Verifying attribute's other values
     inputValueType = ARK_NAVIGATION_TYPE_BACK;
     modifier_->setType(node_, inputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "Back");
+    EXPECT_EQ(resultStr, "NavigationType.Back");
 
     inputValueType = ARK_NAVIGATION_TYPE_REPLACE;
     modifier_->setType(node_, inputValueType);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, "Replace");
-
+    EXPECT_EQ(resultStr, "NavigationType.Replace");
 }
 
 /*
@@ -191,6 +250,22 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
  */
 HWTEST_F(NavigatorModifierTest, setTypeTestInvalidValues, TestSize.Level1)
 {
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Ark_NavigationType inputValueType;
+
+    ASSERT_NE(modifier_->setType, nullptr);
+
+    // Inital setup
+    inputValueType = static_cast<Ark_NavigationType>(INT_MIN);
+
+    // Test
+    modifier_->setType(node_, inputValueType);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
 }
 
 /*
@@ -218,6 +293,8 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
     std::string resultStr;
     Ark_String inputValueTarget;
 
+    ASSERT_NE(modifier_->setTarget, nullptr);
+
     // Inital setup
     inputValueTarget = Converter::ArkValue<Ark_String>("");
 
@@ -244,6 +321,7 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
  */
 HWTEST_F(NavigatorModifierTest, DISABLED_setParamsTest, TestSize.Level1)
 {
-    // TODO: CustomObjects is not implemented yet!
+    ASSERT_NE(modifier_->setParams, nullptr);
+    // CustomObjects is not implemented yet!
 }
 } // namespace OHOS::Ace::NG

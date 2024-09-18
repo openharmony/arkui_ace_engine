@@ -24,7 +24,7 @@ struct NavigatorOptions {
     std::string target;
     std::optional<NavigatorType> type;
 };
-}
+} // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -43,10 +43,13 @@ void AssignCast(std::optional<NavigatorType>& dst, const Ark_NavigationType& src
         case ARK_NAVIGATION_TYPE_PUSH: dst = NavigatorType::PUSH; break;
         case ARK_NAVIGATION_TYPE_BACK: dst = NavigatorType::BACK; break;
         case ARK_NAVIGATION_TYPE_REPLACE: dst = NavigatorType::REPLACE; break;
-        default: LOGE("Unexpected enum value in Ark_NavigationType: %{public}d", src);
+        default: {
+            dst = NavigatorType::PUSH;
+            LOGE("Unexpected enum value in Ark_NavigationType: %{public}d", src);
+        }
     }
 }
-} // namespace OHOS::Ace::NG::Converter
+} // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigatorInterfaceModifier {
@@ -68,7 +71,7 @@ void SetNavigatorOptions1Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetType(frameNode, NavigatorType::BACK);
+    NavigatorModelNG::SetType(frameNode, NavigatorType::PUSH);
 }
 } // NavigatorInterfaceModifier
 namespace NavigatorAttributeModifier {
@@ -115,5 +118,4 @@ const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier()
     };
     return &ArkUINavigatorModifierImpl;
 }
-
-}
+} // OHOS::Ace::NG::GeneratedModifier
