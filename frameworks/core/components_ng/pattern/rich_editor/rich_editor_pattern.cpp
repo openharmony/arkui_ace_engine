@@ -10433,13 +10433,24 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
 bool RichEditorPattern::IsShowAIWrite()
 {
     CHECK_NULL_RETURN(!textSelector_.SelectNothing(), false);
-    auto textFieldTheme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, false);
-    auto bundleName = textFieldTheme->GetAIWriteBundleName();
-    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    auto theme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto bundleName = theme->GetAIWriteBundleName();
+    auto abilityName = theme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        return false;
+    }
     aiWriteAdapter_->SetBundleName(bundleName);
     aiWriteAdapter_->SetAbilityName(abilityName);
-    return aiWriteAdapter_->GetAISupportFromMetadata(bundleName, abilityName);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "BundleName: %{public}s, abilityName: %{public}s", bundleName.c_str(), abilityName.c_str());
+
+    auto isAISupport = false;
+    if (theme->GetAIWriteIsSupport() == "true") {
+        isAISupport = true;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isAISupport: %{public}d", isAISupport);
+    return isAISupport;
 }
 
 void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
