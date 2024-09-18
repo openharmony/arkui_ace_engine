@@ -53,7 +53,7 @@ public:
     virtual void SetAllowUpdate(bool allowUpdate) = 0;
 
     virtual void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth = 0.0) = 0; 
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth = 0.0) = 0;
     virtual void SetObscured(bool isObscured) = 0;
 
     virtual void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) = 0;
