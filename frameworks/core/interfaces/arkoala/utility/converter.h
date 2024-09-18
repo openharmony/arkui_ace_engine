@@ -214,24 +214,6 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    inline ButtonType Convert(const Ark_ButtonType& src)
-    {
-        return static_cast<ButtonType>(src);
-    }
-
-    template<>
-    inline ButtonStyleMode Convert(const Ark_ButtonStyleMode& src)
-    {
-        return static_cast<ButtonStyleMode>(src);
-    }
-
-    template<>
-    inline ControlSize Convert(const Ark_ControlSize& src)
-    {
-        return static_cast<ControlSize>(src);
-    }
-
-    template<>
     inline ImageInterpolation Convert(const Ark_ImageInterpolation& src)
     {
         return static_cast<ImageInterpolation>(src);
@@ -408,6 +390,9 @@ namespace OHOS::Ace::NG::Converter {
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
+    template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
+    template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
+    template<> void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src);
     template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);

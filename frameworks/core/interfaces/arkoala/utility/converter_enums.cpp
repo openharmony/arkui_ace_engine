@@ -40,6 +40,7 @@ void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
     }
 }
 
+// Convert Ark_ButtonRole
 template<>
 void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 {
@@ -47,6 +48,42 @@ void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
         case ARK_BUTTON_ROLE_NORMAL: dst = ButtonRole::NORMAL; break;
         case ARK_BUTTON_ROLE_ERROR: dst = ButtonRole::ERROR; break;
         default: LOGE("Unexpected enum value in Ark_ButtonRole: %{public}d", src);
+    }
+}
+
+// Convert Ark_ButtonType
+template<>
+void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src)
+{
+    switch (src) {
+        case ARK_BUTTON_TYPE_CAPSULE: dst = ButtonType::CAPSULE; break;
+        case ARK_BUTTON_TYPE_CIRCLE: dst = ButtonType::CIRCLE; break;
+        case ARK_BUTTON_TYPE_NORMAL: dst = ButtonType::NORMAL; break;
+        case ARK_BUTTON_TYPE_ROUNDED_RECTANGLE: dst = ButtonType::ROUNDED_RECTANGLE; break;
+        default: LOGE("Unexpected enum value in Ark_ButtonType: %{public}d", src);
+    }
+}
+
+// Convert Ark_ControlSize
+template<>
+void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src)
+{
+    switch (src) {
+        case ARK_CONTROL_SIZE_SMALL: dst = ControlSize::SMALL; break;
+        case ARK_CONTROL_SIZE_NORMAL: dst = ControlSize::NORMAL; break;
+        default: LOGE("Unexpected enum value in Ark_ControlSize: %{public}d", src);
+    }
+}
+
+// Convert Ark_ButtonStyleMode
+template<>
+void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src)
+{
+    switch (src) {
+        case ARK_BUTTON_STYLE_MODE_NORMAL: dst = ButtonStyleMode::NORMAL; break;
+        case ARK_BUTTON_STYLE_MODE_EMPHASIZED: dst = ButtonStyleMode::EMPHASIZE; break;
+        case ARK_BUTTON_STYLE_MODE_TEXTUAL: dst = ButtonStyleMode::TEXT; break;
+        default: LOGE("Unexpected enum value in Ark_ButtonStyleMode: %{public}d", src);
     }
 }
 
