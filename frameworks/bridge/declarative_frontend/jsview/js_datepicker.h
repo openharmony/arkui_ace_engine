@@ -64,7 +64,7 @@ public:
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions);
-    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson);
+    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker = true);
 
 private:
     static std::function<void(const std::string&)> GetDateChangeEvent(const JSRef<JSObject>& paramObject,
