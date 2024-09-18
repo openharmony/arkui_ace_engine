@@ -899,7 +899,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.resetRecycleCustomNode();
     }
   }
-  
+
   public isRecycled() : boolean {
     return this.hasBeenRecycled_;
   }
