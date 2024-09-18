@@ -2794,6 +2794,7 @@ void TextFieldPattern::ProcessSelection()
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
         SetIsSingleHandle(!IsSelected());
+        selectOverlay_->UpdateHandleColor();
         if (isTextChangedAtCreation_ && textWidth == 0) {
             CloseSelectOverlay();
             StartTwinkling();
