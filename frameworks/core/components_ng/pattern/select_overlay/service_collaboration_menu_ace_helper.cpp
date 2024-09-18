@@ -736,9 +736,9 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     CHECK_NULL_RETURN(context, -1);
     CancelableCallback<void()> caretTwinklingTask;
     caretTwinklingTask.Reset([weakCallback = WeakClaim(this), code, imagePix,
-        instanceId = Container::CurrentIdSafely(), weakHelper = std::weak_ptr(menuHelper_)] {
+        instanceId = Container::CurrentIdSafely(), weakHelper = WeakClaim(RawPtr(menuHelper_))] {
         auto callback = weakCallback.Upgrade();
-        auto helper = weakHelper.lock();
+        auto helper = weakHelper.Upgrade();
         CHECK_NULL_VOID(callback && imagePix && callback->info_);
         auto richEditorPattern = DynamicCast<RichEditorPattern>(callback->info_->pattern.Upgrade());
         CHECK_NULL_VOID(richEditorPattern);
