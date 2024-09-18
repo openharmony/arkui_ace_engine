@@ -120,6 +120,9 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
             static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
     }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
 

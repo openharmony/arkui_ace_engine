@@ -89,6 +89,11 @@ void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSVa
         options.paddingEnd.dimension.value = paddingEnd.Value();
         options.paddingEnd.dimension.units = static_cast<int32_t>(paddingEnd.Unit());
     }
+    auto enableHoverModeProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableHoverMode"));
+    if (enableHoverModeProperty->IsBoolean()) {
+        options.enableHoverMode.isSet = 1;
+        options.enableHoverMode.value = enableHoverModeProperty->ToBoolean(vm)->Value();
+    }
 }
 
 void NativeNavigationUtils::ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runtimeCallInfo,

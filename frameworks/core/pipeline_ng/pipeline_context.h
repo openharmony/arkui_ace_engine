@@ -904,6 +904,13 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
 
+    bool IsHoverModeChange() const
+    {
+        return isHoverModeChanged_;
+    }
+
+    void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1070,6 +1077,9 @@ private:
     RefPtr<FrameNode> rootNode_;
 
     int32_t curFocusNodeId_ = -1;
+
+    bool preIsHalfFoldHoverStatus_ = false;
+    bool isHoverModeChanged_ = false;
 
     std::set<WeakPtr<FrameNode>> needRenderNode_;
 
