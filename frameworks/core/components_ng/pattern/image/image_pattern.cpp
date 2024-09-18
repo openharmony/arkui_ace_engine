@@ -1004,7 +1004,8 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     // when image component is [onShow], do not clean image data
     TAG_LOGW(AceLogTag::ACE_IMAGE, "OnNotifyMemoryLevel level = %{public}d. nodeId = %{public}d isShown = %{public}d",
         level, imageDfxConfig_.nodeId_, isShow_);
-    if (isShow_) {
+    if (isShow_ || level == static_cast<int32_t>(MEMORY_LEVEL_MODERATE)
+    || level == static_cast<int32_t>(MEMORY_LEVEL_LOW)) {
         return;
     }
 
