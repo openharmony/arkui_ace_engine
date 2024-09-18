@@ -59,6 +59,9 @@
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
 #include "core/text/text_emoji_processor.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components/custom_paint/rosen_render_custom_paint.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -3723,5 +3726,53 @@ void TextPattern::OnTextGenstureSelectionEnd()
     }
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay({ .animation = true });
+}
+
+void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
+{
+    auto touchOffset = event.GetLocalLocation();
+    auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
+    bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
+    if (isChangeFirstHandle) {
+        ChangeFirstHandleHeight(touchOffset, currentHandle);
+    } else {
+        ChangeSecondHandleHeight(touchOffset, currentHandle);
+    }
+}
+
+void TextPattern::ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect)
+{
+    auto height = handleRect.Height();
+    CalculateDefaultHandleHeight(height);
+    bool isTouchHandleCircle = LessNotEqual(touchOffset.GetY(), handleRect.Top());
+    if (!isTouchHandleCircle) {
+        handleRect.SetTop(static_cast<float>(touchOffset.GetY()) - height / 2.0f);
+    }
+    handleRect.SetHeight(height);
+}
+
+void TextPattern::ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect)
+{
+    auto height = handleRect.Height();
+    CalculateDefaultHandleHeight(height);
+    bool isTouchHandleCircle = GreatNotEqual(touchOffset.GetY(), handleRect.Bottom());
+    auto handleOffsetY = isTouchHandleCircle
+                            ? handleRect.Bottom() - height
+                            : static_cast<float>(touchOffset.GetY()) - height / 2.0f;
+    handleRect.SetTop(handleOffsetY);
+    handleRect.SetHeight(height);
+}
+
+void TextPattern::CalculateDefaultHandleHeight(float& height)
+{
+    CHECK_NULL_VOID(textStyle_.has_value());
+#ifdef ENABLE_ROSEN_BACKEND
+    MeasureContext content;
+    content.textContent = "a";
+    content.fontSize = textStyle_.value().GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle_.value().GetFontWeight());
+    content.fontWeight = fontweight;
+    height = std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Height()), 0.0f);
+#endif
 }
 } // namespace OHOS::Ace::NG

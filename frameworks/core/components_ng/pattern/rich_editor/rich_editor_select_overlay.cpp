@@ -188,7 +188,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     pattern->SetCaretPosition(currentHandleIndex);
     if (isFirst) {
-        pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
+        pattern->HandleSelectionChange(currentHandleIndex, initSelector_.second);
     } else {
         pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
@@ -196,7 +196,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
         } else {
-            pattern->HandleSelectionChange(textSelector.baseOffset, currentHandleIndex);
+            pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
     }
 }
@@ -466,15 +466,18 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
 }
 
-void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
+void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
     isHandleMoving_ = true;
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
+    pattern->ChangeHandleHeight(event, isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
-        auto pattern = GetPattern<RichEditorPattern>();
-        CHECK_NULL_VOID(pattern);
         pattern->ShowCaretWithoutTwinkling();
         manager->SetIsHandleLineShow(false);
     }

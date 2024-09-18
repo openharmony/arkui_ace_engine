@@ -51,10 +51,10 @@ void SelectOverlayClient::InitSelectOverlay()
         CHECK_NULL_VOID(client);
         client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::CAMERA_INPUT);
     };
-    selectOverlayInfo_.onHandleMoveStart = [weak = WeakClaim(this)](bool isFirst) {
+    selectOverlayInfo_.onHandleMoveStart = [weak = WeakClaim(this)](const GestureEvent& event, bool isFirst) {
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);
-        client->OnHandleMoveStart(isFirst);
+        client->OnHandleMoveStart(event, isFirst);
     };
     selectOverlayInfo_.onHandleMove = [weak = WeakClaim(this)](const RectF& rect, bool isFirst) {
         auto client = weak.Upgrade();
