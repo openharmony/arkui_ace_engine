@@ -629,6 +629,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LastGradientType, NG::GradientType);
 
     // Overlay
     ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
@@ -786,6 +787,7 @@ protected:
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
 
     virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
     virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}
