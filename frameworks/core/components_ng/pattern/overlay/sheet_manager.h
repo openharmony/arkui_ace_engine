@@ -70,7 +70,7 @@ private:
         }
     };
 
-    int32_t sheetDismissId_ = 0;
+    int32_t sheetDismissId_ = -1;
     std::map<SheetContentKey, RefPtr<OverlayManager>> overlayManagerMap_;
     // Value:  The uniqueId of the FrameNode to which BindSheet is attached
     std::map<SheetContentKey, int32_t> targetIdMap_;
