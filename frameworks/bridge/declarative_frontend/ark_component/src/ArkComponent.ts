@@ -3056,7 +3056,7 @@ class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
     if (reset) {
       getUINativeModule().common.resetFocusScopeId(node);
     } else {
-      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup, this.value.arrowKeyStepOut);
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup, this.value.arrowStepOut);
     }
   }
 }
@@ -4451,7 +4451,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  focusScopeId(id: string, isGroup?: boolean, arrowKeyStepOut?: boolean): this {
+  focusScopeId(id: string, isGroup?: boolean, arrowStepOut?: boolean): this {
     let arkFocusScopeId = new ArkFocusScopeId();
     if (isString(id)) {
       arkFocusScopeId.id = id;
@@ -4459,8 +4459,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof isGroup === 'boolean') {
       arkFocusScopeId.isGroup = isGroup;
     }
-    if (typeof arrowKeyStepOut === 'boolean') {
-      arkFocusScopeId.arrowKeyStepOut = arrowKeyStepOut;
+    if (typeof arrowStepOut === 'boolean') {
+      arkFocusScopeId.arrowStepOut = arrowStepOut;
     }
     modifierWithKey(
       this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
