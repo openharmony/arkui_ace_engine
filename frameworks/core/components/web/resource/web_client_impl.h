@@ -198,7 +198,6 @@ public:
                       std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
     void OnQuickMenuDismissed() override;
     void HideHandleAndQuickMenuIfNecessary(bool hide) override;
-    void ChangeVisibilityOfQuickMenu() override;
     void OnTouchSelectionChanged(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -257,6 +256,7 @@ public:
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
+
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)

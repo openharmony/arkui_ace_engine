@@ -551,10 +551,10 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
             pressedCodes.push_back(static_cast<int32_t>(pCode));
         }
         auto localLocation = event.GetLocalLocation();
-        delegate_->WebHandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
-                                               event.GetVelocity().GetVelocityX(),
-                                               event.GetVelocity().GetVelocityY(),
-                                               pressedCodes);
+        delegate_->HandleTouchpadFlingEvent(
+            localLocation.GetX(), localLocation.GetY(),
+            event.GetVelocity().GetVelocityX(),
+            event.GetVelocity().GetVelocityY());
     }
 }
 
@@ -563,14 +563,8 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
     if (event.GetInputEventType() == InputEventType::AXIS) {
         CHECK_NULL_VOID(delegate_);
         auto localLocation = event.GetLocalLocation();
-        std::vector<int32_t> pressedCodes;
-        auto gesturePressedCodes = event.GetPressedKeyCodes();
-        for (auto pCode : gesturePressedCodes) {
-            pressedCodes.push_back(static_cast<int32_t>(pCode));
-        }
-        delegate_->WebHandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
-            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO,
-            pressedCodes);
+        delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
     }
 }
 
@@ -4564,7 +4558,6 @@ void WebPattern::UpdateTouchHandleForOverlay(bool fromOverlay)
         }
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(firstHandleInfo);
         selectOverlayProxy_->UpdateSecondSelectHandleInfo(secondHandleInfo);
-        selectMenuInfo_.menuIsShow = selectOverlayProxy_->IsMenuShow();
         selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         selectOverlayProxy_->SetHandleReverse(false);
     }

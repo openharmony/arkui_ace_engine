@@ -731,8 +731,8 @@ public:
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void UpdateTextAutosizing(bool isTextAutosizing);
-    void UpdateMetaViewport(bool isMetaViewportEnabled);
     void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
+    void UpdateMetaViewport(bool isMetaViewportEnabled);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -746,11 +746,7 @@ public:
                          bool fromOverlay = false);
     void HandleTouchCancel();
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
-    void WebHandleTouchpadFlingEvent(const double& x, const double& y,
-        const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
-    void WebHandleAxisEvent(const double& x, const double& y,
-        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
@@ -764,7 +760,6 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide);
-    void ChangeVisibilityOfQuickMenu();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
@@ -933,12 +928,12 @@ public:
     }
 #endif
     void SetToken();
+    void ScrollBy(float deltaX, float deltaY);
+    void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
     void SetRenderMode(RenderMode renderMode);
     void SetFitContentMode(WebLayoutMode layoutMode);
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
-    void ScrollBy(float deltaX, float deltaY);
-    void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
     void ExecuteAction(int64_t accessibilityId, AceAction action);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
@@ -951,29 +946,29 @@ public:
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
-    void ScaleGestureChange(double scale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
-    // Backward
-    void Backward();
-    bool AccessBackward();
-    bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
     void OnRenderProcessNotResponding(
         const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
     void OnRenderProcessResponding();
-    std::string GetSelectInfo() const;
     Offset GetPosition(const std::string& embedId);
 
     void OnOnlineRenderToForeground();
     void NotifyForNextTouchEvent();
+    
+    bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
+    // Backward
+    void Backward();
+    bool AccessBackward();
+
+    void ScaleGestureChange(double scale, double centerX, double centerY);
+    std::string GetSelectInfo() const;
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
-    void OnInterceptKeyboardAttach(
-        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
-        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
 
     void OnCustomKeyboardAttach();
 
@@ -987,16 +982,12 @@ public:
     void OnTextSelected();
     void OnDestroyImageAnalyzerOverlay();
 
-    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
-    void OnDetachContext();
-
-    int32_t GetInstanceId() const
-    {
-        return instanceId_;
-    }
+    void SetSurfaceId(const std::string& surfaceId);
 
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked);
-    void SetSurfaceId(const std::string& surfaceId);
+    void OnInterceptKeyboardAttach(
+        const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
+        const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 
@@ -1007,6 +998,14 @@ public:
         if (keyboardHandler_) {
             keyboardHandler_->Close();
         }
+    }
+
+    void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
+    void OnDetachContext();
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
     }
 
 private:
@@ -1023,8 +1022,8 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
+    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void TextBlurReportByBlurEvent(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1061,6 +1060,7 @@ private:
     void UnRegisterConfigObserver();
 
     // forward
+
     void Forward();
     void ClearHistory();
     void ClearSslCache();
@@ -1146,8 +1146,8 @@ private:
     EventCallbackV2 OnLargestContentfulPaintV2_;
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
-    EventCallbackV2 onNavigationEntryCommittedV2_;
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
+    EventCallbackV2 onNavigationEntryCommittedV2_;
     EventCallbackV2 OnNativeEmbedAllDestoryV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedVisibilityChangeV2_;
@@ -1156,8 +1156,8 @@ private:
     EventCallbackV2 onRenderProcessNotRespondingV2_;
     EventCallbackV2 onRenderProcessRespondingV2_;
     EventCallbackV2 onViewportFitChangedV2_;
-    std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
+    std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
@@ -1196,9 +1196,9 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
-    bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
+    bool accessibilityState_ = false;
     bool isEmbedModeEnabled_ = false;
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
@@ -1212,14 +1212,13 @@ private:
     NG::SafeAreaInsets cutoutSafeArea_;
     NG::SafeAreaInsets navigationIndicatorSafeArea_;
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
-    int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    int32_t instanceId_;
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
 #endif
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEB_DELEGATE_H

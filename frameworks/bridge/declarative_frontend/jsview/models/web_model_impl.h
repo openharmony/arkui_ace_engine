@@ -113,10 +113,10 @@ public:
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
-    void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
-    void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
+    void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
-    void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
+    void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
 };
 } // namespace OHOS::Ace::Framework
