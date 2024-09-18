@@ -577,8 +577,8 @@ void TextSelectController::MoveCaretToContentRect(
     } else {
         AdjustHandleAtEdge(caretRect);
     }
-    UpdateCaretOriginalRect(CaretMetrics.offset);
     caretInfo_.rect = caretRect;
+    UpdateCaretOriginalRect(CaretMetrics.offset);
 }
 
 void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
@@ -603,8 +603,8 @@ void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)
     // Adjusts one character width.
     float boundaryAdjustment = 0.0f;
     MoveHandleToContentRect(caretRect, boundaryAdjustment);
-    UpdateCaretOriginalRect(CaretMetrics.offset);
     caretInfo_.rect = caretRect;
+    UpdateCaretOriginalRect(CaretMetrics.offset);
     auto index = ConvertTouchOffsetToPosition(touchOffset);
     AdjustCursorPosition(index, touchOffset);
     UpdateCaretIndex(index);
