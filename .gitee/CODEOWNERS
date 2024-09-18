@@ -2867,8 +2867,8 @@ interfaces/native/node/node_transition_imp.cpp @arkuiframework
 interfaces/native/node/node_utils.cpp @arkuiframework
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
-interfaces/native/node/style_modifier.cpp @huawei_g_five
-interfaces/native/node/style_modifier.h @huawei_g_five
+interfaces/native/node/style_modifier.cpp @arkuiframework
+interfaces/native/node/style_modifier.h @arkuiframework
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
