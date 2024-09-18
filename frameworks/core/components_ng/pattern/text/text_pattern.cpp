@@ -393,7 +393,8 @@ bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
             auto inter = GetStartAndEnd(start);
             auto rects = pManager_->GetRects(inter.first, inter.second);
             overlayMod_->SetSelectedForegroundColorAndRects(rects, color.GetValue());
-            MarkDirtySelf();           return true;
+            MarkDirtySelf();
+            return true;
         }
         start = item->position;
     }

@@ -121,7 +121,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
     SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
-    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor,SpanType::Url };
+    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor, SpanType::Url };
 
 const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
     { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
