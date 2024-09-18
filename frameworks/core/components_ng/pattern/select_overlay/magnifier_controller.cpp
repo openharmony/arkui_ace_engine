@@ -15,9 +15,10 @@
 
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
-#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -136,6 +137,11 @@ void MagnifierController::OpenMagnifier()
     }
     CHECK_NULL_VOID(UpdateMagnifierOffset());
     ChangeMagnifierVisibility(true);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textBase = DynamicCast<TextBase>(pattern);
+    CHECK_NULL_VOID(textBase);
+    textBase->SetIsTextDraggable(false);
 }
 
 RefPtr<FrameNode> MagnifierController::GetRootNode()
@@ -289,13 +295,13 @@ void MagnifierController::CreateMagnifierChildNode()
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
     auto childNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+        V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
     CHECK_NULL_VOID(childNode);
     InitMagnifierParams();
     ViewAbstract::SetWidth(AceType::RawPtr(childNode), CalcLength(magnifierNodeWidth_));
     ViewAbstract::SetHeight(AceType::RawPtr(childNode), CalcLength(magnifierNodeHeight_));
     ViewAbstract::SetOpacity(AceType::RawPtr(childNode), 0.0);
-    auto layoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(childNode->GetLayoutProperty());
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(childNode->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     childNode->ForceSyncGeometryNode();

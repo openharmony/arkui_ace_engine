@@ -206,11 +206,10 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = swiperPattern->GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
-    auto isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (mainClickOffset < lengthBeforeCurrentIndex) {
-        isRtl ? swiperPattern->ShowNext() : swiperPattern->ShowPrevious();
+        swiperPattern->ShowPrevious();
     } else if (mainClickOffset > lengthWithCurrentIndex) {
-        isRtl ? swiperPattern->ShowPrevious() : swiperPattern->ShowNext();
+        swiperPattern->ShowNext();
     }
 }
 

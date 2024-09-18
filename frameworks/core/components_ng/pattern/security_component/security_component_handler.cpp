@@ -90,7 +90,7 @@ bool SecurityComponentHandler::CheckBrightness(const RefPtr<FrameNode>& node,
     const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetFrontBrightness().has_value() &&
-        !NearEqual(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f)) {
+        !NearEqual(renderContext->GetFrontBrightness().value().Value(), 1.0f)) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s brightness is set, security component is invalid",
             node->GetTag().c_str());
         return true;

@@ -19,7 +19,7 @@
 #include "core/gestures/gesture_info.h"
 
 #include "interaction_manager.h"
-#include "start_drag_listener_impl.h"
+#include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
 
@@ -133,14 +133,14 @@ int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
     return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
-int32_t InteractionImpl::EnterTextEditorArea(bool enable)
-{
-    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
-}
-
 int32_t InteractionImpl::AddPrivilege()
 {
     return InteractionManager::GetInstance()->AddPrivilege();
+}
+
+int32_t InteractionImpl::EnterTextEditorArea(bool enable)
+{
+    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
 }
 
 int32_t InteractionImpl::RegisterCoordinationListener(std::function<void()> dragOutCallback)

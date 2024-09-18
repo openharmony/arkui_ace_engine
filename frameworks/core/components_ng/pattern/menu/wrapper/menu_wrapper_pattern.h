@@ -400,6 +400,11 @@ public:
         lastTouchItem_ = lastTouchItem;
     }
 
+    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
+    RefPtr<FrameNode> GetShowedSubMenu();
+    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool HasStackSubMenu();
+
     int IncreaseEmbeddedSubMenuCount()
     {
         return ++embeddedSubMenuCount_;
@@ -410,12 +415,8 @@ public:
         return --embeddedSubMenuCount_;
     }
 
-    RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
-    RefPtr<FrameNode> GetShowedSubMenu();
-    bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
     bool HasEmbeddedSubMenu();
     void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
-    bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
     void StopHoverImageToPreviewAnimation();

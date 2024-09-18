@@ -96,7 +96,7 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         contentOffset.GetX(), contentOffset.GetY(),
         width, height,
         scale, widthScale, heightScale,
-        config.contentSizeChange, modelAdapter_->GetSurfaceType()
+        config.contentSizeChange, modelAdapter_->GetSurfaceType(), rotation_,
     };
     modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     host->MarkNeedSyncRenderTree();
@@ -109,10 +109,36 @@ void ModelPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(modelAdapter_);
+    // hint
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+    uint32_t rotation = pipeline->GetTransformHint();
+    if (rotation_ != rotation) {
+        rotation_ = rotation;
+    }
+    auto callbackId = pipeline->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t rotation) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->rotation_ = rotation;
+        }
+    });
+    UpdateTransformHintChangedCallbackId(callbackId);
     modelAdapter_->OnAttachToFrameNode(host->GetRenderContext());
 }
 
-void ModelPattern::OnDetachFromFrameNode(FrameNode* node) {}
+void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    CHECK_NULL_VOID(node);
+    auto id = node->GetId();
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
+
+    if (HasTransformHintChangedCallbackId()) {
+        pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
+    }
+}
 
 void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
 {

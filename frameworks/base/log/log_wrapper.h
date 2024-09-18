@@ -37,11 +37,16 @@
 #include "hilog/log.h"
 constexpr uint32_t ACE_DOMAIN = 0xD003900;
 constexpr uint32_t APP_DOMAIN = 0xC0D0;
+#ifdef IS_RELEASE_VERSION
+#define PRINT_LOG(level, tag, fmt, ...) \
+    HILOG_IMPL(LOG_CORE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
+            "[(%{public}s)] " fmt, OHOS::Ace::LogWrapper::GetIdWithReason().c_str(), ##__VA_ARGS__)
+#else
 #define PRINT_LOG(level, tag, fmt, ...) \
     HILOG_IMPL(LOG_CORE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
             ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
             __LINE__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
-
+#endif
 #define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
@@ -172,7 +177,7 @@ enum AceLogTag : uint8_t {
     ACE_WINDOW_SCENE,         // C0393B
     ACE_NODE_CONTAINER,       // C0393C
     ACE_NATIVE_NODE,          // C0393D
-    ACE_ISOLATED_COMPONENT,   // C0393E
+    ACE_ISOLATED_COMPONENT,    // C0393E
     ACE_MARQUEE,              // C0393F
     ACE_OBSERVER,             // C03940
     ACE_EMBEDDED_COMPONENT,   // C03941
@@ -194,8 +199,10 @@ enum AceLogTag : uint8_t {
     ACE_INPUTKEYFLOW,         // C03951
     ACE_APPBAR,               // C03952
     ACE_SELECT_OVERLAY,       // C03953
-    ACE_CLIPBOARD,            // C03954
     ACE_SECURITY_COMPONENT,   // C03956
+    ACE_LAYOUT_INSPECTOR,     // C03957
+    ACE_MEDIA_QUERY,          // C03958
+    ACE_LAYOUT,               // C03959
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };

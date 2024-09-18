@@ -21,6 +21,7 @@
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
 
+#include "base/utils/utils.h"
 #include "bridge/common/media_query/media_queryer.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
@@ -29,6 +30,7 @@
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
+constexpr int32_t TWO_ARGS = 2;
 }
 
 using namespace OHOS::Ace::Framework;
@@ -66,6 +68,7 @@ public:
     {
         {
             std::lock_guard<std::mutex> lock(mutex_);
+            TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "clean:%{public}s", media_.c_str());
             CleanListenerSet();
         }
 
@@ -84,20 +87,54 @@ public:
 
     static void OnNapiCallback(JsEngine* jsEngine)
     {
-        MediaQueryer queryer;
         std::set<std::unique_ptr<MediaQueryListener>> delayDeleteListenerSets;
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::set<napi_ref> delayDeleteCallbacks;
+        std::vector<MediaQueryListener*> copyListeners;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            auto& currentListeners = listenerSets_[AceType::WeakClaim(jsEngine)];
+            copyListeners.insert(copyListeners.end(), currentListeners.begin(), currentListeners.end());
+        }
         struct Leave {
             ~Leave()
             {
+                if (delayDeleteEnv_) {
+                    for (auto& cbRef : *delayDeleteCallbacks_) {
+                        napi_delete_reference(delayDeleteEnv_, cbRef);
+                    }
+                }
+                delayDeleteEnv_ = nullptr;
+                delayDeleteCallbacks_ = nullptr;
                 delayDeleteListenerSets_ = nullptr;
             }
         } leave;
+
+        delayDeleteCallbacks_ = &delayDeleteCallbacks;
         delayDeleteListenerSets_ = &delayDeleteListenerSets;
-        for (auto listener : listenerSets_[AceType::WeakClaim(jsEngine)]) {
+
+        TriggerAllCallbacks(copyListeners);
+    }
+
+    static void TriggerAllCallbacks(std::vector<MediaQueryListener*>& copyListeners)
+    {
+        MediaQueryer queryer;
+        for (auto& listener : copyListeners) {
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
             listener->matches_ = queryer.MatchCondition(listener->media_, json);
-            for (auto& cbRef : listener->cbList_) {
+            std::set<napi_ref> delayDeleteCallbacks;
+            std::vector<napi_ref> copyCallbacks;
+            {
+                std::lock_guard<std::mutex> lock(mutex_);
+                auto& currentCallbacks = listener->cbList_;
+                copyCallbacks.insert(copyCallbacks.end(), currentCallbacks.begin(), currentCallbacks.end());
+            }
+
+            for (const auto& cbRef : copyCallbacks) {
+                if (delayDeleteCallbacks_->find(cbRef) != delayDeleteCallbacks_->end()) {
+                    continue;
+                }
+                TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "trigger:%{public}s matches:%{public}d",
+                    listener->media_.c_str(), listener->matches_);
                 napi_handle_scope scope = nullptr;
                 napi_open_handle_scope(listener->env_, &scope);
                 if (scope == nullptr) {
@@ -133,8 +170,10 @@ public:
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == 2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
-
+        if (!(argc == TWO_ARGS && thisVar != nullptr && cb != nullptr)) {
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
             napi_close_handle_scope(env, scope);
@@ -148,6 +187,8 @@ public:
         napi_ref ref = nullptr;
         napi_create_reference(env, cb, 1, &ref);
         listener->cbList_.emplace_back(ref);
+        TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "on:%{public}s num=%{public}d", listener->media_.c_str(),
+            static_cast<int>(listener->cbList_.size()));
         napi_close_handle_scope(env, scope);
 
 #if defined(PREVIEW)
@@ -167,18 +208,32 @@ public:
             return nullptr;
         }
         if (argc == 1) {
-            for (auto& item : listener->cbList_) {
-                napi_delete_reference(listener->env_, item);
+            if (delayDeleteCallbacks_) {
+                delayDeleteEnv_ = env;
+                for (auto& item : listener->cbList_) {
+                    (*delayDeleteCallbacks_).emplace(item);
+                }
+            } else {
+                for (auto& item : listener->cbList_) {
+                    napi_delete_reference(listener->env_, item);
+                }
             }
             listener->cbList_.clear();
         } else {
             NAPI_ASSERT(env, (argc == 2 && listener != nullptr && cb != nullptr), "Invalid arguments");
             auto iter = listener->FindCbList(cb);
             if (iter != listener->cbList_.end()) {
-                napi_delete_reference(listener->env_, *iter);
+                if (delayDeleteCallbacks_) {
+                    delayDeleteEnv_ = env;
+                    (*delayDeleteCallbacks_).emplace(*iter);
+                } else {
+                    napi_delete_reference(listener->env_, *iter);
+                }
                 listener->cbList_.erase(iter);
             }
         }
+        TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "off:%{public}s num=%{public}d", listener->media_.c_str(),
+            static_cast<int>(listener->cbList_.size()));
         return nullptr;
     }
 
@@ -263,6 +318,7 @@ private:
     {
         MediaQueryListener* listener = nullptr;
         napi_unwrap(env, thisVar, (void**)&listener);
+        CHECK_NULL_RETURN(listener, nullptr);
         listener->Initialize(env, thisVar);
         return listener;
     }
@@ -298,10 +354,14 @@ private:
     napi_env env_ = nullptr;
     std::list<napi_ref> cbList_;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
+    static napi_env delayDeleteEnv_;
+    static std::set<napi_ref>* delayDeleteCallbacks_;
     static std::map<WeakPtr<JsEngine>, std::set<MediaQueryListener*>> listenerSets_;
     static std::mutex mutex_;
 };
 std::set<std::unique_ptr<MediaQueryListener>>* MediaQueryListener::delayDeleteListenerSets_;
+napi_env MediaQueryListener::delayDeleteEnv_ = nullptr;
+std::set<napi_ref>* MediaQueryListener::delayDeleteCallbacks_;
 std::map<WeakPtr<JsEngine>, std::set<MediaQueryListener*>> MediaQueryListener::listenerSets_;
 std::mutex MediaQueryListener::mutex_;
 

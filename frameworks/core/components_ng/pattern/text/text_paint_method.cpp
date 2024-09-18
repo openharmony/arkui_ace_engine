@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -62,7 +61,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
-        if (pManager->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
+        if (pManager->GetLongestLine() > paintWrapper->GetContentSize().Width()) {
             textContentModifier_->StartTextRace();
         } else {
             textContentModifier_->StopTextRace();
@@ -70,8 +69,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else {
         textContentModifier_->StopTextRace();
     }
-
-    // Privacy masking.
     auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
     textContentModifier_->SetObscured(reasons);
     auto spanItemChildren = pattern->GetSpanItemChildren();

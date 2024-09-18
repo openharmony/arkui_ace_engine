@@ -191,7 +191,7 @@ public:
     {
         return navDestinationId_;
     }
-
+    
     void SetNavigationNode(const RefPtr<UINode>& navigationNode)
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
@@ -226,7 +226,7 @@ public:
 
     void SetNavigationId(const std::string& id)
     {
-        inspectorId_ = id;
+        inspectorId_= id;
     }
 
     std::string GetNavigationId() const
@@ -299,7 +299,6 @@ private:
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H

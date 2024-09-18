@@ -14,10 +14,10 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include <memory>
 #include <optional>
-
 #include "menu_item_model.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -39,6 +39,8 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -55,9 +57,6 @@ constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
-const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
-// id of system resource start from 0x07800000
-constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07800000;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -167,6 +166,7 @@ void MenuItemPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -340,12 +340,6 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
-    auto accessibilityProperty = menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityIsShow(true);
-    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
@@ -531,7 +525,6 @@ void MenuItemPattern::CloseMenu()
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
-    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu.");
     menuWrapperPattern->HideMenu();
 }
 
@@ -916,11 +909,12 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
 }
 
 OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
-{ // show menu at left top point of targetNode
+{    // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
     OffsetF position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
+
 
 void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF& bottomRightPoint)
 {
@@ -1041,6 +1035,7 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
             selectTheme->GetMenuIconColor(), userIcon.empty());
     }
 }
+
 
 void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
 {
@@ -1176,8 +1171,8 @@ void MenuItemPattern::AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode)
     MenuItemProperties menuItemProps;
     menuItemProps.content = content;
     menuItemProps.endIcon = imageSourceInfo;
-    auto model = new NG::MenuItemModelNG();
-    model->Create(menuItemProps);
+    MenuItemModelNG menuItemModel;
+    menuItemModel.Create(menuItemProps);
     auto stack = ViewStackProcessor::GetInstance();
 
     auto titleItem = AceType::DynamicCast<FrameNode>(stack->Finish());
@@ -1271,21 +1266,8 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
         auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateImageSourceInfo(imageSourceInfo);
-        bool useDefaultThemeIcon = UseDefaultThemeIcon(imageSourceInfo);
-        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), useDefaultThemeIcon);
+        UpdateIconSrc(iconNode, iconWidth, iconHeight, selectTheme->GetMenuIconColor(), false);
     }
-}
-
-bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
-{
-    if (imageSourceInfo.IsSvg()) {
-        auto src = imageSourceInfo.GetSrc();
-        auto srcId = src.substr(
-            SYSTEM_RESOURCE_PREFIX.size(), src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        return (srcId.find("ohos_") != std::string::npos) ||
-               ((std::all_of(srcId.begin(), srcId.end(), ::isdigit)) && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID));
-    }
-    return false;
 }
 
 void MenuItemPattern::UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
@@ -1345,13 +1327,12 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
-    UpdateTextOverflow(textProperty);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {
             textAlign = TextAlign::RIGHT;
-        } else if (textAlign == TextAlign::RIGHT) {
+        } else if (textAlign ==TextAlign::RIGHT) {
             textAlign = TextAlign::LEFT;
         } else if (textAlign == TextAlign::START) {
             textAlign = TextAlign::END;
@@ -1359,7 +1340,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
             textAlign = TextAlign::START;
         }
     }
-    textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
+    UpdateTextOverflow(textProperty);
 
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());

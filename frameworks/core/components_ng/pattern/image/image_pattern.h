@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        return { FocusType::NODE, false };
     }
 
     const RefPtr<CanvasImage>& GetCanvasImage()
@@ -222,6 +222,11 @@ public:
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 
+    void SetImageAnimator(bool isImageAnimator)
+    {
+        isImageAnimator_ = isImageAnimator;
+    }
+
     //animation
     struct CacheImageStruct {
         CacheImageStruct() = default;
@@ -307,10 +312,8 @@ public:
     void OnActive() override
     {
         if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             if (!animator_->HasScheduler()) {
-                auto context = host->GetContextRefPtr();
+                auto context = PipelineContext::GetCurrentContext();
                 if (context) {
                     animator_->AttachScheduler(context);
                 } else {
@@ -327,11 +330,6 @@ public:
     void SetSrcUndefined(bool isUndefined)
     {
         isSrcUndefined_ = isUndefined;
-    }
-
-    void SetImageAnimator(bool isImageAnimator)
-    {
-        isImageAnimator_ = isImageAnimator;
     }
 
     bool GetLoadInVipChannel()
@@ -375,12 +373,6 @@ public:
     {
         InitDefaultValue();
         return interpolationDefault_;
-    }
-    void InitOnKeyEvent();
-
-    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
-    {
-        isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
 protected:
     void RegisterWindowStateChangedCallback();
@@ -502,7 +494,6 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
-    void OnKeyEvent();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
@@ -541,6 +532,8 @@ private:
     bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
+    bool isImageAnimator_ = false;
+    bool hasSizeChanged = false;
 
     //animation
     ImageType imageType_ = ImageType::BASE;
@@ -558,11 +551,8 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
-    bool isImageAnimator_ = false;
-    bool hasSizeChanged = false;
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
-    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

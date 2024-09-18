@@ -206,9 +206,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f), .top = CalcLength(0.0f) });
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty border;
-    border.SetRadius(menuTheme->GetInnerBorderRadius());
-    renderContext->UpdateBorderRadius(border);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);
@@ -227,7 +225,8 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     rowContext->UpdateBorderColor(borderColorProperty);
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH)), CalcLength(static_cast<float>(MENUITEM_HEIGHT))));
-    rowProperty->UpdatePadding({.right = CalcLength(0.0f)});
+    PaddingProperty rowpadding {.right = CalcLength(static_cast<float>(PANDDING_ZERO))};
+    rowProperty->UpdatePadding(rowpadding);
     MarginProperty margin;
     margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
     rowProperty->UpdateMargin(margin);
@@ -272,9 +271,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty border;
-    border.SetRadius(menuTheme->GetInnerBorderRadius());
-    renderContext->UpdateBorderRadius(border);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);
@@ -616,7 +613,7 @@ void ServiceCollaborationAceCallback::RemovePopupNode()
     CHECK_NULL_VOID(info_->pattern.Upgrade()->GetHost());
     auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
     CHECK_NULL_VOID(pattern);
-    pattern->RegisterCaretChangeListener(nullptr);
+    pattern->RegisiterCaretChangeListener(nullptr);
     auto targetId = info_->pattern.Upgrade()->GetHost()->GetId();
     auto popupInfo = overlay->GetPopupInfo(targetId);
     popupInfo.markNeedUpdate = true;
@@ -664,7 +661,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
                 info_ = nullptr;
             }
         };
-        pattern->RegisterCaretChangeListener(std::move(func));
+        pattern->RegisiterCaretChangeListener(std::move(func));
         auto row = CreateCustomPopUpNode(category, "");
         CHECK_NULL_RETURN(row, -1);
         ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
@@ -692,7 +689,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
-    overlay->ShowToast({ category, 2000, "", true }, nullptr);
+    overlay->ShowToast({ .message = category, .duration = 2000, .alignment = -1 });
     info_ = nullptr;
     return 0;
 }

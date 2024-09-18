@@ -339,7 +339,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitWrapperRect(props, menuPattern);
     InitializeParam(menuPattern);
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
-    if (menuPattern->IsSubMenu() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSubMenu()) &&
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_RIGHT);
     }
     dumpInfo_.originPlacement = PlacementUtils::ConvertPlacementToString(placement_);
@@ -524,6 +525,7 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
     }
 }
 
+
 void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position)
 {
     auto menu = layoutWrapper->GetHostNode();
@@ -566,28 +568,9 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     }
 }
 
-bool IsNodeOnRootTree(const RefPtr<FrameNode>& frameNode)
-{
-    auto parent = frameNode->GetParent();
-    while (parent) {
-        if (parent->GetTag() == V2::ROOT_ETS_TAG) {
-            return true;
-        }
-        parent = parent->GetParent();
-    }
-    TAG_LOGW(AceLogTag::ACE_MENU, "node %{public}d not no root tree", frameNode->GetId());
-    return false;
-}
-
 // Called to perform layout render node and child.
 void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    // if targetNode == nullptr, it means the menu is subMenu or multiMenu
-    if (targetNode && !IsNodeOnRootTree(targetNode)) {
-        TAG_LOGW(AceLogTag::ACE_MENU, "measure return because targetNode %{public}d not no root tree", targetNodeId_);
-        return;
-    }
     // initialize screen size and menu position
     CHECK_NULL_VOID(layoutWrapper);
     MenuDumpInfo dumpInfo;
@@ -1286,12 +1269,6 @@ OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, flo
 
 void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    // if targetNode == nullptr, it means the menu is subMenu or multiMenu
-    if (targetNode && !IsNodeOnRootTree(targetNode)) {
-        TAG_LOGW(AceLogTag::ACE_MENU, "layout return because targetNode %{public}d not no root tree", targetNodeId_);
-        return;
-    }
     CHECK_NULL_VOID(layoutWrapper);
     auto menuProp = DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuProp);

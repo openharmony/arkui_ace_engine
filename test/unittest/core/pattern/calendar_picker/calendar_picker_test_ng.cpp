@@ -3743,12 +3743,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerUpdateButtonStyles001, TestSize.Lev
  */
 HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
-    ASSERT_NE(calendarTheme, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(calendarTheme));
+    CalendarPickerTestNg::SetUpTestCase();
+
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -3758,9 +3754,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
     auto selectedDate = PickerDate(2000, 1, 1);
     settingData.selectedDate = selectedDate;
     settingData.dayRadius = TEST_SETTING_RADIUS;
-    auto entryColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<CalendarDialogPattern>());
-    settingData.entryNode = AceType::WeakClaim(AceType::RawPtr(entryColumn));
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
 
@@ -3770,81 +3763,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
     buttonInfos.push_back(info1);
 
     auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<CalendarDialogPattern>());
-    calendarDialogView.OperationsToPattern(contentColumn, settingData, properties, buttonInfos);
-    auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
-    ASSERT_NE(pattern->entryNode_.Upgrade(), nullptr);
-}
-
-/**
- * @tc.name: CalendarDialogViewUpdateButtonDefaultFocus001
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPickerTestNg, CalendarDialogViewUpdateButtonDefaultFocus001, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    info1.isAcceptButton = true;
-    buttonInfos.push_back(info1);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    CalendarDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: CalendarDialogViewUpdateButtonDefaultFocus002
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPickerTestNg, CalendarDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    buttonInfos.push_back(info1);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    CalendarDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: CalendarDialogViewUpdateButtonDefaultFocus003
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPickerTestNg, CalendarDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    info1.isAcceptButton = true;
-    buttonInfos.push_back(info1);
-
-    ButtonInfo info2;
-    buttonInfos.push_back(info2);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    CalendarDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+    ASSERT_NE(dialogNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

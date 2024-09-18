@@ -17,6 +17,8 @@
 
 #include "include/pathops/SkPathOps.h"
 
+#include "frameworks/core/components/declaration/svg/svg_declaration.h"
+
 namespace OHOS::Ace::NG {
 
 SvgG::SvgG() : SvgGroup() {}

@@ -378,8 +378,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg007, TestSize.Level1)
     ASSERT_NE(contentNode, nullptr);
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
-    ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
@@ -391,8 +389,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg007, TestSize.Level1)
     ASSERT_NE(labelNode, nullptr);
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
-    ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
     ASSERT_TRUE(labelProperty->GetFontSize().has_value());
     EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
@@ -506,8 +502,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg009, TestSize.Level1)
     ASSERT_NE(contentNode, nullptr);
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
-    ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
     ASSERT_TRUE(textProperty->GetFontSize().has_value());
     EXPECT_EQ(textProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(textProperty->GetFontWeight().has_value());
@@ -519,8 +513,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg009, TestSize.Level1)
     ASSERT_NE(labelNode, nullptr);
     auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(labelProperty, nullptr);
-    ASSERT_TRUE(labelProperty->GetContent().has_value());
-    EXPECT_EQ(labelProperty->GetContent().value(), "label");
     ASSERT_TRUE(labelProperty->GetFontSize().has_value());
     EXPECT_EQ(labelProperty->GetFontSize().value(), Dimension(25.0));
     ASSERT_TRUE(labelProperty->GetFontWeight().has_value());
@@ -578,12 +570,6 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg010, TestSize.Level1)
     ASSERT_NE(contentNode, nullptr);
     auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProperty, nullptr);
-    ASSERT_TRUE(textProperty->GetContent().has_value());
-    EXPECT_EQ(textProperty->GetContent().value(), "content");
-    ASSERT_TRUE(textProperty->GetFontSize().has_value());
-    ASSERT_TRUE(textProperty->GetFontWeight().has_value());
-    EXPECT_EQ(textProperty->GetFontWeight().value(), FontWeight::REGULAR);
-    ASSERT_TRUE(textProperty->GetTextColor().has_value());
 
     auto labelNode = itemPattern->GetLabelNode();
     ASSERT_EQ(labelNode, nullptr);

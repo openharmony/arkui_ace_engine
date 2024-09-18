@@ -673,7 +673,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate009, TestSize.Level1)
      * OnColorConfigurationUpdate.
      */
     pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(pattern->cancelButtonNode_.Upgrade());
+    EXPECT_TRUE(pattern->cancelButtonNode_);
 }
 
 /**
@@ -700,7 +700,7 @@ HWTEST_F(SearchTestNg, PatternOnColorConfigurationUpdate010, TestSize.Level1)
     pattern->SetTextFieldNode(nullptr);
     pattern->SetCancelButtonNode(nullptr);
     pattern->OnColorConfigurationUpdate();
-    EXPECT_EQ(pattern->cancelButtonNode_.Upgrade(), nullptr);
+    EXPECT_EQ(pattern->cancelButtonNode_, nullptr);
 }
 
 /**
@@ -760,8 +760,6 @@ HWTEST_F(SearchTestNg, SetCaretWidth001, TestSize.Level1)
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(textPaintProperty, nullptr);
-    NG::DragPreviewOption option { false };
-    searchModelInstance.SetDragPreviewOptions(option);
     searchModelInstance.SetCaretWidth(14.0_vp);
     searchModelInstance.SetCaretColor(Color::RED);
     EXPECT_EQ(textPaintProperty->GetCursorWidth()->Value(), 14);
@@ -1212,7 +1210,6 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
-    searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::START);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
@@ -1522,40 +1519,14 @@ HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pattern->OnColorConfigurationUpdate();
-    auto cancelButtonNode = pattern->cancelButtonNode_.Upgrade();
-    ASSERT_NE(cancelButtonNode, nullptr);
-    auto textField = pattern->textField_.Upgrade();
-    ASSERT_NE(textField, nullptr);
-    auto textFieldLayoutProperty =
-        textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(pattern->cancelButtonNode_, nullptr);
+    auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor(), Color::RED);
-    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(
-        cancelButtonNode->GetChildren().front());
+    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(pattern->cancelButtonNode_->GetChildren().front());
     ASSERT_NE(cancelButtonTextNode, nullptr);
     auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(cancelButtonTextLayout, nullptr);
     EXPECT_EQ(cancelButtonTextLayout->GetTextColor(), Color::RED);
-}
-
-/**
- * @tc.name: Pattern015
- * @tc.desc: test NeedSoftKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, Pattern015, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Get frameNode and pattern.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Test whether search need soft keyboard.
-     */
-    EXPECT_TRUE(pattern->NeedSoftKeyboard());
 }
 
 /**
@@ -1972,89 +1943,5 @@ HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
             EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), textAlign);
         }
     }
-}
-/**
- * @tc.name: SetSearchEnterKeyType001
- * @tc.desc: SetSearchEnterKeyType
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SetSearchEnterKeyType001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    searchModelInstance.SetSearchEnterKeyType(TextInputAction::UNSPECIFIED);
-}
-/**
- * @tc.name: SetSearchEnterKeyType002
- * @tc.desc: SetSearchEnterKeyType
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
-    searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
-}
-/**
- * @tc.name: SetEnablePreviewText
- * @tc.desc: Test SetEnablePreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SetEnablePreviewText, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    searchModelInstance.SetEnablePreviewText(true);
-    EXPECT_TRUE(textFieldPattern->GetSupportPreviewText());
-}
-/**
- * @tc.name: ConvertTextFontScaleValue001
- * @tc.desc: Test ConvertTextFontScaleValue
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, ConvertTextFontScaleValue001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetFontScale(0.0f);
-    const Dimension fontsizevalue = Dimension(20.1, DimensionUnit::PX);
-    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), fontsizevalue);
-}
-/**
- * @tc.name: ConvertTextFontScaleValue002
- * @tc.desc: Test ConvertTextFontScaleValue
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, ConvertTextFontScaleValue002, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    frameNode->MarkModifyDone();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetFontScale(3.0f);
-    const Dimension fontsizevalue = Dimension(6.0, DimensionUnit::PX);
-    EXPECT_EQ(searchModelInstance.ConvertTextFontScaleValue(fontsizevalue), Dimension(4.0, DimensionUnit::PX));
 }
 } // namespace OHOS::Ace::NG

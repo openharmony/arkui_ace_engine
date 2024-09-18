@@ -476,6 +476,8 @@ public:
         return dumpFrameCount_;
     }
 
+    static bool GetTitleStyleEnabled();
+
     static bool GetIsUseMemoryMonitor();
 
     static bool IsFormAnimationLimited();
@@ -484,46 +486,45 @@ public:
 
     static int32_t GetJankFrameThreshold();
 
-    static bool GetTitleStyleEnabled();
-
-    static std::string GetCustomTitleFilePath();
-
     static bool Is24HourClock();
 
-    static std::optional<bool> GetRtlEnabled();
+    static std::string GetCustomTitleFilePath();
 
     static bool GetEnableScrollableItemPool()
     {
         return enableScrollableItemPool_;
     }
 
+    static std::optional<bool> GetRtlEnabled();
+
     static bool GetDisplaySyncSkipEnabled();
 
     static bool GetNavigationBlurEnabled();
 
-    static bool GetGridCacheEnabled();
+    static bool WaterFlowUseSegmentedLayout();
 
     static bool GetGridIrregularLayoutEnabled();
 
-    static bool WaterFlowUseSegmentedLayout();
-
     static bool GetSideBarContainerBlurEnable();
+
+    static bool GetGridCacheEnabled();
 
     using EnableSystemParameterCallback = void (*)(const char* key, const char* value, void* context);
 
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
 
-    static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
-
     static void SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTraceEnable);
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
+
+    static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
+
+    static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
 
     static bool GetAcePerformanceMonitorEnabled()
     {
@@ -605,8 +606,8 @@ private:
     static bool resourceDecoupling_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
-    static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
+    static bool gridCacheEnabled_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
     static bool aceCommercialLogEnable_;

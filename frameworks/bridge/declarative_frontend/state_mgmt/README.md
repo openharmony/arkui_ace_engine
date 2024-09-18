@@ -35,16 +35,16 @@ The difference between debug build and release build is the removal
 of all `stateMgmtConsole.log`/`.debug`/`.info` statements from the
 release version JS output code.
 
-NOTE: After compiling with npm run X command. You need to copy stateMgmt.js from output folder to ../engine/. Then build the device SW again. Output folder is on of following (dist, distRelease or distProfile).
+NOTE: After compiling with npm run X command. You need to copy stateMgmt.js from output folder to ../engine/. Then build the device SW again. Output folder is one of following (dist, distRelease or distProfile).
 
 ## File Organising into Directories
 
 - `./src/lib/*.ts` - implementation
-    * `./src/lib/sdk/*.ts` - all files that include SDK definitons
-    * `./src/lib/common/*.ts` - common files that do not include any SDK functionality
-    * `./src/lib/full_update/*.ts` - files specific to the older version of state mgmt for full Component to Element update
-    * `./src/lib/partial_update/*.ts` - files specfic to the newer version of state mgmt for NG UINode minimal scope updates
--`./src/index.ts` - implementation 'main' creates singletons.
+  * `./src/lib/sdk/*.ts` - all files that include SDK definitons
+  * `./src/lib/common/*.ts` - common files that do not include any SDK functionality
+  * `./src/lib/full_update/*.ts` - files specific to the older version of state mgmt for full Component to Element update
+  * `./src/lib/partial_update/*.ts` - files specfic to the newer version of state mgmt for NG UINode minimal scope updates
+    -`./src/index.ts` - implementation 'main' creates singletons.
 
 ## StateMgmt Profiler
 
@@ -119,7 +119,7 @@ hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -profiler'"
 ```
 
 The output will be like this:
-Total include childrens.
+Total include children.
 
 ```bash
 ============================================================================================================
@@ -141,25 +141,25 @@ DFX Debug Log is built to work on top of `hidumper`, which is OHOS info dump too
 ### Commands
 
 - `-jsdump`
-    * Requests JS debug logging from the `hidumper` service. It is followed by additional commands and arguments to format the output. See below.
+  * Requests JS debug logging from the `hidumper` service. It is followed by additional commands and arguments to format the output. See below.
 
 Two output modifiers are defined in order to facilitate the usage of the commands:
 
 - `-viewId`
-    * Specifies the view for which information is obtaineed. It acts as an aditional argument to the command providing the view ID in the following format `viewId=##`. where `##` is the numerical ID of the target view.
+  * Specifies the view for which information is obtaineed. It acts as an aditional argument to the command providing the view ID in the following format `viewId=##`. where `##` is the numerical ID of the target view.
 - `-r`
-    * Specifies whether the output of the command should be recursive or not. Non-recursive prints the information for the target view ommiting the same information about it's decendants.
+  * Specifies whether the output of the command should be recursive or not. Non-recursive prints the information for the target view ommiting the same information about it's decendants.
 
 For the purpose of logging the following commands are accepted as input:
 
 - `-dumpAll`
-    * Prints all information about the view. This combines the output of all other commands for the specified view. Default print is for root view if no view is specified.
+  * Prints all information about the view. This combines the output of all other commands for the specified view. Default print is for root view if no view is specified.
 - `-viewHierarchy`
     * Prints the view hierarchy of a particular view, namely the custom component children. Accepts `-viewId` argument and `-r` flag. Depending on the flags provided it can be either recursive, from a specific view downwards, or just the immediate children of the view. Default print is for root view non-recursive if no flags are provided. It also indicates the freeze state of the component if it is configured to be frozen while inactive.
 - `-stateVariables`
-    * Prints the variables dependencies of the view, and their respective owners and sync peers. Accepts `-viewId` argument. Default print is for root view if no view is specified.
+  * Prints the variables dependencies of the view, and their respective owners and sync peers. Accepts `-viewId` argument. Default print is for root view if no view is specified.
 - `-registeredElementIds`
-    * Prints a list of components, namely JS classes such as `Column`, `TapGesture` etc. and their ID-s owned by the view. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
+  * Prints a list of components, namely JS classes such as `Column`, `TapGesture` etc. and their ID-s owned by the view. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
 - `-dirtyElementIds`
     * Prints a list of dependent elmtIds that need partial update in next re-render. Accepts `-viewId` argument. Default print is for root view if not specified otherwise.
 - `-inactiveComponents`
@@ -179,9 +179,10 @@ hdc shell "hidumper -s WindowManagerService -a '-w 11 -jsdump -viewHierarchy -in
 ```
 
 ### Important for Profiler and JSDump
+
 PartialUpdateMode MUST be configured for your application. This can be made for example by changing following.
 For API10...\OpenHarmony\Sdk\10\ets\build-tools\ets-loader\main.js and change const partialUpdateConfig = {
-  partialUpdateMode: true, // from false
+partialUpdateMode: true, // from false
 
 RK3568 /etc/acenewpipe.config must have application name under EANBLED to use newpipeline.
 Example content of acenewpipe.config
@@ -190,9 +191,10 @@ Example content of acenewpipe.config
 ENABLED
 com.example.myapplication
 ```
+
 ### Usefull examples
 
-All the following commands concern a hypothetical window with ID 11 and view with ID 42. Note that -viewId is optional.
+All the following commands concern a hypothetical window with ID 11 and custom component viewId with ID 8. Note that -viewId is optional and you should not use @Entry main page id. It is only for custom components
 
 | Info | Shell command |
 |-------|----------|

@@ -96,8 +96,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg001, TestSize.Level1)
 
     auto nodePtr3 = Inspector::GetFrameNodeByKey("");
     ASSERT_NE(nodePtr3, nullptr);
-
-    context1->rootNode_ = nullptr;
 }
 
 /**
@@ -138,8 +136,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg002, TestSize.Level1)
      * @tc.expected: expect nodePtr2 not null
      */
     auto test3 = Inspector::GetInspectorNodeByKey("");
-
-    context1->rootNode_ = nullptr;
 }
 
 /**
@@ -187,7 +183,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     MockPipelineContext::pipeline_ = pipeline_bak;
 
     InspectorFilter filter;
-    filter.SetFilterID("test");
+    std::string testId = "test";
+    filter.SetFilterID(testId);
     bool needThrow = false;
     auto test6 = Inspector::GetInspector(false, filter, needThrow);
     auto rootNode = context1->GetStageManager()->GetLastPage();
@@ -220,8 +217,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg004, TestSize.Level1)
     EXPECT_EQ(test3, true);
     test3 = Inspector::SendEventByKey("", 31, "params");
     EXPECT_EQ(test3, true);
-
-    context->rootNode_ = nullptr;
 }
 
 /**
@@ -358,7 +353,6 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
     auto test = Inspector::GetInspector(false);
     auto str = "{\"$type\":\"root\",\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}";
     EXPECT_EQ(test, str);
-
     context1->stageManager_ = nullptr;
 }
 
@@ -501,7 +495,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg013, TestSize.Level1)
     InspectorFilter testFilter;
     EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
     testFilter.SetFilterDepth(1);
-    testFilter.SetFilterID("id");
+    std::string id = "id";
+    testFilter.SetFilterID(id);
     testFilter.filterExt.emplace_back("abc");
     testFilter.AddFilterAttr("focusable");
     testFilter.AddFilterAttr("abc");

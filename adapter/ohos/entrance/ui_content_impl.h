@@ -38,6 +38,7 @@
 #include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
 #include "core/components/common/properties/popup_param.h"
+#include "iremote_object.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -121,6 +122,9 @@ public:
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
+    // Set UIContent callback after latest layout finish
+    void SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
+
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
 
@@ -170,42 +174,34 @@ public:
 
     SerializeableObjectArray DumpUITree() override
     {
-        CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());
         return uiManager_->DumpUITree();
     }
     void SubscribeUpdate(const std::function<void(int32_t, SerializeableObjectArray&)>& onUpdate) override
     {
-        CHECK_NULL_VOID(uiManager_);
         return uiManager_->SubscribeUpdate(onUpdate);
     }
     void UnSubscribeUpdate() override
     {
-        CHECK_NULL_VOID(uiManager_);
         uiManager_->UnSubscribeUpdate();
     }
     void ProcessSerializeableInputEvent(const SerializeableObjectArray& array) override
     {
-        CHECK_NULL_VOID(uiManager_);
         uiManager_->ProcessSerializeableInputEvent(array);
     }
     void RestoreUITree(const SerializeableObjectArray& array) override
     {
-        CHECK_NULL_VOID(uiManager_);
         uiManager_->RestoreUITree(array);
     }
     void UpdateUITree(const SerializeableObjectArray& array) override
     {
-        CHECK_NULL_VOID(uiManager_);
         uiManager_->UpdateUITree(array);
     }
     void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent) override
     {
-        CHECK_NULL_VOID(uiManager_);
         uiManager_->SubscribeInputEventProcess(onEvent);
     }
     void UnSubscribeInputEventProcess() override
     {
-        CHECK_NULL_VOID(uiManager_);
         uiManager_->UnSubscribeInputEventProcess();
     }
     void GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
@@ -312,24 +308,24 @@ public:
     void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
-    void SetFormRenderingMode(int8_t renderMode) override;
-
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void SetFormRenderingMode(int8_t renderMode) override;
+
     void PreLayout() override;
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
+    void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
+
+    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;
     }
-    
-    void SetStatusBarItemColor(uint32_t color) override;
-
-    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
-
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
-
-    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     UIContentErrorCode InitializeInner(
@@ -353,10 +349,11 @@ private:
 
     void RenderLayoutBoundary(bool isDebugBoundary);
     static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;

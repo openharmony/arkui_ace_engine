@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
 #include <cmath>
+
 #include <optional>
 
 #include "base/geometry/ng/offset_t.h"
@@ -31,6 +32,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
+constexpr float ROUND_EPSILON = 0.5f;
 }
 
 void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -171,6 +173,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetMode() != SelectOverlayMode::HANDLE_ONLY) {
+        CheckHandleIsInClipViewPort();
         LayoutChild(layoutWrapper);
     }
 }
@@ -201,6 +204,7 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
         }
         return;
     }
+
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
@@ -271,7 +275,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     // with the end of the original menu.
     auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
-
     auto backButton = layoutWrapper->GetOrCreateChildByIndex(1);
     bool isBackButtonVisible = false;
     if (backButton) {
@@ -636,5 +639,29 @@ bool SelectOverlayLayoutAlgorithm::IsReverseLayout(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+}
+
+void SelectOverlayLayoutAlgorithm::CheckHandleIsInClipViewPort()
+{
+    if (!info_->clipHandleDrawRect || info_->secondHandle.isPaintHandleWithPoints ||
+        info_->handleLevelMode == HandleLevelMode::EMBED) {
+        return;
+    }
+    if (!info_->isSingleHandle) {
+        RectF viewPort;
+        info_->GetCallerNodeAncestorViewPort(viewPort);
+        auto isInRegion = [](const RectF& viewPort, float left, float right, float verticalY) {
+            return LessOrEqual(left, viewPort.Right()) &&
+                   GreatOrEqual(right, viewPort.Left()) &&
+                   GreatOrEqual(verticalY, viewPort.Top() - ROUND_EPSILON) &&
+                   LessOrEqual(verticalY, viewPort.Bottom() + ROUND_EPSILON);
+        };
+        auto& handleOnTop = !info_->handleReverse ? info_->firstHandle : info_->secondHandle;
+        handleOnTop.isShow = isInRegion(
+            viewPort, handleOnTop.paintRect.Left(), handleOnTop.paintRect.Right(), handleOnTop.paintRect.Top());
+        auto& handleOnBottom = !info_->handleReverse ? info_->secondHandle : info_->firstHandle;
+        handleOnBottom.isShow = isInRegion(viewPort, handleOnBottom.paintRect.Left(), handleOnBottom.paintRect.Right(),
+            handleOnBottom.paintRect.Bottom());
+    }
 }
 } // namespace OHOS::Ace::NG

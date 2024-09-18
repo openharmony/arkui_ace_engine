@@ -84,7 +84,7 @@ class ArkThemeScopeManager {
             return;
         }
 
-    
+
         let scope: ArkThemeScope = undefined;
 
         // we need to keep component to the theme scope before first render
@@ -365,7 +365,7 @@ class ArkThemeScopeManager {
      */
     private notifyScopeThemeChanged(item: ArkThemeScopeItem, scope: ArkThemeScope) {
         this.listeners.forEach((listener) => {
-            const listenerId = listener.id__()
+            const listenerId = listener.id__();
             if (listenerId === item.owner) {
                 if (scope.isColorModeChanged()) {
                     // we need to redraw all nodes if developer set new local colorMode

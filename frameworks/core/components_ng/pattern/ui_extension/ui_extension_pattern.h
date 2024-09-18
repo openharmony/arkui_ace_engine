@@ -251,6 +251,7 @@ private:
     RectF displayArea_;
     bool isKeyAsync_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

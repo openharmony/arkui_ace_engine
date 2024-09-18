@@ -217,28 +217,6 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
-    void ResetSafeAreaPadding() override
-    {
-        ViewAbstract::ResetSafeAreaPadding();
-    }
-
-    void SetSafeAreaPadding(const CalcDimension& value) override
-    {
-        if (value.Unit() == DimensionUnit::CALC) {
-            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.CalcValue()));
-        } else {
-            // padding must great or equal zero.
-            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
-        }
-    }
-
-    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
-        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
-    {
-        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-        ViewAbstract::SetSafeAreaPadding(paddings);
-    }
-
     void SetMargin(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -1253,7 +1231,8 @@ public:
         std::function<void(const float)>&& onHeightDidChange,
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override;
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack) override;
     RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
     void DismissContentCover() override;

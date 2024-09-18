@@ -610,12 +610,12 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+    JSKeyboardAvoid::JSBind(globalObj);
     JSDumpLog::JSBind(globalObj);
     JSDumpRegister::JSBind(globalObj);
-    JSKeyboardAvoid::JSBind(globalObj);
+    JSContainerSpan::JSBind(globalObj);
     JSSymbol::JSBind(globalObj);
     JSSymbolSpan::JSBind(globalObj);
-    JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");

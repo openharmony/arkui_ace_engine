@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const EMPTY_STRING = '';
 const MAX_PROGRESS = 100;
@@ -32,26 +32,26 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 export class ProgressButton extends ViewPU {
   constructor(k1, l1, m1, n1 = -1, o1 = undefined, p1) {
     super(k1, m1, n1, p1);
-    if (typeof o1 === "function") {
+    if (typeof o1 === 'function') {
       this.paramsGenerator_ = o1;
     }
-    this.__progress = new SynchedPropertySimpleOneWayPU(l1.progress, this, "progress");
-    this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, "textProgress");
-    this.__content = new SynchedPropertySimpleOneWayPU(l1.content, this, "content");
-    this.__isLoading = new ObservedPropertySimplePU(false, this, "isLoading");
+    this.__progress = new SynchedPropertySimpleOneWayPU(l1.progress, this, 'progress');
+    this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, 'textProgress');
+    this.__content = new SynchedPropertySimpleOneWayPU(l1.content, this, 'content');
+    this.__isLoading = new ObservedPropertySimplePU(false, this, 'isLoading');
     this.progressButtonWidth = BUTTON_NORMARL_WIDTH;
     this.clickCallback = () => { };
-    this.__enable = new SynchedPropertySimpleOneWayPU(l1.enable, this, "enable");
-    this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, "progressColor");
-    this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, "containerBorderColor");
-    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001,
+    this.__enable = new SynchedPropertySimpleOneWayPU(l1.enable, this, 'enable');
+    this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, 'progressColor');
+    this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, 'containerBorderColor');
+    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001,
       params: ['sys.color.ohos_id_color_foreground_contrary'],
-      "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
-    this.__textHeight = new ObservedPropertyObjectPU(BUTTON_NORMARL_HEIGHT, this, "textHeight");
-    this.__buttonBorderRadius = new ObservedPropertySimplePU(BUTTON_BORDER_RADIUS, this, "buttonBorderRadius");
+      'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'containerBackgroundColor');
+    this.__textHeight = new ObservedPropertyObjectPU(BUTTON_NORMARL_HEIGHT, this, 'textHeight');
+    this.__buttonBorderRadius = new ObservedPropertySimplePU(BUTTON_BORDER_RADIUS, this, 'buttonBorderRadius');
     this.setInitiallyProvidedValue(l1);
-    this.declareWatch("progress", this.getProgressContext);
-    this.declareWatch("isLoading", this.getLoadingProgress);
+    this.declareWatch('progress', this.getProgressContext);
+    this.declareWatch('isLoading', this.getLoadingProgress);
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(j1) {
@@ -266,8 +266,8 @@ export class ProgressButton extends ViewPU {
     }, Row);
     this.observeComponentCreation2((i, j) => {
       Text.create(this.isLoading ? this.textProgress : this.content);
-      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'],
-        "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
       Text.maxLines(1);

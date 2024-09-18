@@ -43,7 +43,7 @@ void ResetXComponentEnableAnalyzer(ArkUINodeHandle node)
 
 void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
@@ -54,7 +54,7 @@ void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color)
 
 void ResetXComponentBackgroundColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {

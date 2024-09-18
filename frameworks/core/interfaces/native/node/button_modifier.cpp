@@ -404,9 +404,7 @@ void SetButtonLabelStyle(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters, 
 }
 
 void ResetButtonLabelStyle(ArkUINodeHandle node)
-{
-    return;
-}
+{}
 
 void SetButtonBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {

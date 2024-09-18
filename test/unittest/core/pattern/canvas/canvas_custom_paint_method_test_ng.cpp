@@ -147,51 +147,6 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
 }
 
 /**
- * @tc.name: CanvasCustomPaintMethodTest002
- * @tc.desc: Test the function 'CheckFilterProperty' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-    /**
-     * @tc.steps2: When FilterType is BLUR, call the function CheckFilterProperty.
-     * @tc.expected: return value are as expected.
-     */
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10px"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5px"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10rem"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5rem"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%px"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%rem"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5%px"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5%rem"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, " "));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
-    /**
-     * @tc.steps3: When FilterType is HUE_ROTATE, call the function CheckFilterProperty.
-     * @tc.expected: return value are as expected.
-     */
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10deg"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5deg"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10rad"));
-    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5rad"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10%deg"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10%rad"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5%deg"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5%rad"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, " "));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5"));
-}
-
-/**
  * @tc.name: CanvasCustomPaintMethodTest003
  * @tc.desc: Test the function 'ParseFilter' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
@@ -369,33 +324,6 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest008, TestSize
     EXPECT_EQ(paintMethod->PxStrToDouble(str1), 0);
     str1 = "10px";
     EXPECT_EQ(paintMethod->PxStrToDouble(str1), 10);
-}
-
-/**
- * @tc.name: CanvasCustomPaintMethodTest009
- * @tc.desc: Test the function 'BlurStrToDouble' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest009, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-    /**
-     * @tc.steps2: Call the function BlurStrToDouble.
-     * @tc.expected: return value are as expected.
-     */
-    std::string str1 = "10.0";
-    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 0.0);
-    str1 = "aaa";
-    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 0.0);
-    str1 = "10.0px";
-    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
-    str1 = "20.0rem";
-    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 300.0);
 }
 
 /**

@@ -24,10 +24,10 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -89,11 +89,11 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
     isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
-    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging() &&
+    isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() || dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
                             GreatOrEqual(pipeline->GetFontScale(), 1.75f);
     auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
-    if (isPickekDiaglog) {
+    if (isPickekDiaglog || customSize_) {
         isSuitableForElderly_ = false;
     }
     if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
@@ -281,6 +281,7 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
     auto defaultMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
     width = defaultMaxWidth < width ? defaultMaxWidth : width;
+    
     if (dialogProp->GetWidth().has_value()) {
         auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
         auto widthVal = dialogWidth.Unit() == DimensionUnit::PERCENT ? maxSize.Width() : dialogWidth.ConvertToPx();
@@ -389,8 +390,8 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_HEIGHT_RATIO);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && expandDisplay_) {
-        auto maxHeight = SystemProperties::GetDevicePhysicalHeight() * EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO *
-                         EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
+        auto maxHeight = SystemProperties::GetDevicePhysicalHeight() *
+            EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO * EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
         innerLayout.minSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), 0.0);
         innerLayout.maxSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), maxHeight);
     }
@@ -816,16 +817,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard)
 {
-    auto container = Container::Current();
-    auto currentId = Container::CurrentId();
-    if (isShowInSubWindow_ && !container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetSubContainerId(Container::CurrentId());
-        container = AceEngine::Get().GetContainer(currentId);
-    }
-    CHECK_NULL_RETURN(container, topLeftPoint + dialogOffset);
-    auto context = container->GetPipelineContext();
-    CHECK_NULL_RETURN(context, topLeftPoint + dialogOffset);
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(context);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
     if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);

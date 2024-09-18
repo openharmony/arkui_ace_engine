@@ -50,11 +50,6 @@ public:
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
-    void SetSafeAreaPadding(const CalcDimension& value) override {}
-    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
-        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
-    {}
-    void ResetSafeAreaPadding() override {}
     void SetMargin(const CalcDimension& value) override;
     void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
@@ -275,7 +270,8 @@ public:
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack) override
     {}
     void DismissSheet() override {}
     void DismissContentCover() override {}

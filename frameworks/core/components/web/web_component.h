@@ -659,11 +659,6 @@ public:
         tag_type_ = type;
     }
 
-    void SetSmoothDragResizeEnabled(bool isEnabled)
-    {
-        isSmoothDragResizeEnabled_ = isEnabled;
-    }
-
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -1059,6 +1054,17 @@ public:
         return declaration_->GetNativeEmbedLifecycleChangeId();
     }
 
+    void SetNativeEmbedVisibilityChangeId(const EventMarker& embedVisibilityChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedVisibilityChangeId(embedVisibilityChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedVisibilityChangeId() const
+    {
+        return declaration_->GetNativeEmbedVisibilityChangeId();
+    }
+
     void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1174,7 +1180,6 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
-    bool isSmoothDragResizeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;

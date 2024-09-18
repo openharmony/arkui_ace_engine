@@ -14,7 +14,6 @@
  */
 
 #include "text_base.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1132,11 +1131,6 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
 
-    auto customSpanNode = CustomSpanNode::GetOrCreateSpanNode(V2::CUSTOM_SPAN_NODE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId());
-    host->AddChild(customSpanNode);
-    customSpanNode->SetParent(host);
-
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     /**
      * @tc.steps: step3. textFrameNode Measure will call InitSpanItem/CollectSpanNodes.
@@ -1145,7 +1139,7 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     LayoutConstraintF layoutConstraintF;
     frameNode->Measure(layoutConstraintF);
     auto textPattern = frameNode->GetPattern<TextPattern>();
-    EXPECT_EQ(textPattern->spans_.size(), 6);
+    EXPECT_EQ(textPattern->spans_.size(), 5);
     auto gesture = childFrameNode->GetOrCreateGestureEventHub();
     EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
 }
@@ -1490,49 +1484,6 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);
     pattern->dataDetectorAdapter_->InitTextDetect(0, "orange");
-}
-
-/**
- * @tc.name: CreateNodePaintMethod001
- * @tc.desc: test text_pattern.h CreateNodePaintMethod function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    Shadow textShadow;
-    textShadow.SetBlurRadius(3.f); // 3.f means BlurRadius.
-    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
-    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textModelNG.SetTextShadow({ textShadow });
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    frameNode->GetRenderContext()->UpdateClipEdge(false);
-    LayoutConstraintF layoutConstraintF { .selfIdealSize = OptionalSizeF(240.f, 60.f) };
-    frameNode->Measure(layoutConstraintF);
-    frameNode->Layout();
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
-    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
-    pattern->pManager_->Reset();
-    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
-
-    /**
-     * @tc.steps: step2. test CreateNodePaintMethod.
-     * @tc.expect: expect overlayModifier BoundsRect width std::max(frameWith, paragraph->GetLongestLine),
-     *     GestureHub ResponseRegion list not empty.
-     */
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
-    pattern->CreateNodePaintMethod();
-    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
-    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Height(), 92.f);
-    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
-    pattern->pManager_->Reset();
 }
 
 /**

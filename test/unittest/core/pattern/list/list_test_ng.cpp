@@ -48,7 +48,6 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     listItemTheme->defaultPadding_ = Edge(0.0_vp);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
 
 void ListTestNg::TearDownTestSuite()

@@ -465,6 +465,11 @@ public:
         nestedScrolling_ = nestedScrolling;
     }
 
+    bool GetNestedScrolling() const
+    {
+        return nestedScrolling_;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);

@@ -293,8 +293,6 @@ public:
 
     ACE_DEFINE_COMPONENT_PROP(CopyOption, CopyOptions, CopyOptions::Distributed);
 
-    ACE_DEFINE_COMPONENT_PROP(ScrollBar, DisplayMode, DisplayMode::OFF);
-
 private:
     RefPtr<TextFieldDeclaration> declaration_;
     std::function<void(const std::string&)> OnError_;

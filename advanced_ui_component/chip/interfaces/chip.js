@@ -761,6 +761,14 @@ export class ChipComponent extends ViewPU {
         this.__symbolEffect.set(f4);
     }
 
+    get symbolEffect() {
+        return this.__symbolEffect.get();
+    }
+
+    set symbolEffect(a6) {
+        this.__symbolEffect.set(a6);
+    }
+
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }

@@ -35,7 +35,7 @@ class ACE_EXPORT Subwindow : public AceType {
 public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);
 
-    virtual bool InitContainer() = 0;
+    virtual void InitContainer() = 0;
     virtual void ResizeWindow() = 0;
     virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
@@ -49,10 +49,10 @@ public:
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
     virtual void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f),
         float meunuScale = 1.0f, bool isRedragStart = false) = 0;
-    virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
-        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
     virtual void UpdatePreviewPosition() = 0;
     virtual bool GetMenuPreviewCenter(NG::OffsetF& offset) = 0;
+    virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f)) = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) = 0;
@@ -85,6 +85,7 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual bool CheckHostWindowStatus() const = 0;
 
     int32_t GetSubwindowId() const
     {
@@ -126,9 +127,18 @@ public:
         return isSystemTopMost_;
     }
 
+    void SetIsRosenWindowCreate(bool isRosenWindowCreate)
+    {
+        isRosenWindowCreate_ = isRosenWindowCreate;
+    }
+
+    bool GetIsRosenWindowCreate() const
+    {
+        return isRosenWindowCreate_;
+    }
+
     virtual void ClearToast() = 0;
-    virtual void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) = 0;
-    virtual void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) = 0;
+    virtual void ShowToast(const NG::ToastInfo& toastInfo) = 0;
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;
@@ -146,11 +156,13 @@ public:
     virtual void ResizeWindowForFoldStatus() = 0;
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
     virtual bool Close() = 0;
+
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    bool isRosenWindowCreate_ = false;
 };
 
 } // namespace OHOS::Ace

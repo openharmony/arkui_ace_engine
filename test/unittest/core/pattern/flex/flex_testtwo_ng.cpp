@@ -1380,88 +1380,6 @@ HWTEST_F(FlexTestTwoNg, FlexRowLayoutTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: FlexDirectionWrapTest001
- * @tc.desc: Test layout of different flex which direction is RTL and FlexWrap is Wrap.
- * @tc.type: FUNC
- */
-HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest001, TestSize.Level1)
-{
-    /* corresponding ets code:
-        Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start, alignItems:
-       ItemAlign.Start, alignContent: FlexAlign.Start }) { Text('1').width('50%').height(40).backgroundColor(0xFFFFFF)
-            Text('2').width('50%').height(40).backgroundColor(0xCCCCCC)
-            Text('3').width('50%').height(40).backgroundColor(0x000000)
-        }
-        .size({ width: '100%', height: 100})
-        .backgroundColor(0xAFEEEE)
-        .direction(Direction.Rtl)
-    */
-    RefPtr<LayoutWrapperNode> layoutWrapper = CreateRTLWrapper();
-
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
-
-    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
-    auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
-    EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(firstChildOffset, OffsetF(HALF_PERCENT_WIDTH, 0.0f));
-
-    auto secondChildWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
-    auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
-    auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
-    EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(secondChildOffset, OffsetF(0.0f, 0.0f));
-
-    auto thirdChildWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
-    auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
-    auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
-    EXPECT_EQ(thirdChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-}
-
-/**
- * @tc.name: FlexDirectionWrapTest002
- * @tc.desc: Test layout of different flex which direction is RTL and FlexWrap is WrapReverse.
- * @tc.type: FUNC
- */
-HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest002, TestSize.Level1)
-{
-    /* corresponding ets code:
-        Flex({ direction: FlexDirection.Row, wrap: FlexWrap.WrapReverse, justifyContent: FlexAlign.Center, alignItems:
-       ItemAlign.Center, alignContent: FlexAlign.Center }) { Text('1').width('50%').height(40).backgroundColor(0xFFFFFF)
-            Text('2').width('50%').height(40).backgroundColor(0xCCCCCC)
-            Text('3').width('50%').height(40).backgroundColor(0x000000)
-        }
-        .size({ width: '100%', height: 100})
-        .backgroundColor(0xAFEEEE)
-        .direction(Direction.Rtl)
-    */
-    RefPtr<LayoutWrapperNode> layoutWrapper = CreateRTLReverseWrapper();
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
-
-    auto verticalRemaining = COLUMN_HEIGHT - 2 * SMALL_ITEM_HEIGHT;
-    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
-    auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
-    EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(firstChildOffset, OffsetF(0.0f, verticalRemaining / 2));
-
-    auto secondChildWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
-    auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
-    auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
-    EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(secondChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 2));
-
-    auto thirdChildWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
-    auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
-    auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
-    EXPECT_EQ(thirdChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
-    EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH / 2, verticalRemaining / 2 + SMALL_ITEM_HEIGHT));
-}
-
-/**
  * @tc.name: FlexLayoutTest001
  * @tc.desc: Set Flex Row Layout Test direction_ is HORIZONTAL
  * @tc.type: FUNC
@@ -1831,5 +1749,87 @@ HWTEST_F(FlexTestTwoNg, FlexLayoutTest008, TestSize.Level1)
     wrapLayoutProperty->UpdateCrossAlignment(WrapAlignment::SPACE_AROUND);
     wrapLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     wrapLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: FlexDirectionWrapTest001
+ * @tc.desc: Test layout of different flex which direction is RTL and FlexWrap is Wrap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest001, TestSize.Level1)
+{
+    /* corresponding ets code:
+        Flex({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start, alignItems:
+       ItemAlign.Start, alignContent: FlexAlign.Start }) { Text('1').width('50%').height(40).backgroundColor(0xFFFFFF)
+            Text('2').width('50%').height(40).backgroundColor(0xCCCCCC)
+            Text('3').width('50%').height(40).backgroundColor(0x000000)
+        }
+        .size({ width: '100%', height: 100})
+        .backgroundColor(0xAFEEEE)
+        .direction(Direction.Rtl)
+    */
+    RefPtr<LayoutWrapperNode> layoutWrapper = CreateRTLWrapper();
+
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
+    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(firstChildOffset, OffsetF(HALF_PERCENT_WIDTH, 0.0f));
+
+    auto secondChildWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
+    auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(secondChildOffset, OffsetF(0.0f, 0.0f));
+
+    auto thirdChildWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
+    auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(thirdChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+}
+
+/**
+ * @tc.name: FlexDirectionWrapTest002
+ * @tc.desc: Test layout of different flex which direction is RTL and FlexWrap is WrapReverse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexTestTwoNg, FlexDirectionWrapTest002, TestSize.Level1)
+{
+    /* corresponding ets code:
+        Flex({ direction: FlexDirection.Row, wrap: FlexWrap.WrapReverse, justifyContent: FlexAlign.Center, alignItems:
+       ItemAlign.Center, alignContent: FlexAlign.Center }) { Text('1').width('50%').height(40).backgroundColor(0xFFFFFF)
+            Text('2').width('50%').height(40).backgroundColor(0xCCCCCC)
+            Text('3').width('50%').height(40).backgroundColor(0x000000)
+        }
+        .size({ width: '100%', height: 100})
+        .backgroundColor(0xAFEEEE)
+        .direction(Direction.Rtl)
+    */
+    RefPtr<LayoutWrapperNode> layoutWrapper = CreateRTLReverseWrapper();
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
+    auto verticalRemaining = COLUMN_HEIGHT - 2 * SMALL_ITEM_HEIGHT;
+    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto firstChildSize = firstChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto firstChildOffset = firstChildWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(firstChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(firstChildOffset, OffsetF(0.0f, verticalRemaining / 2));
+
+    auto secondChildWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
+    auto secondChildSize = secondChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto secondChildOffset = secondChildWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(secondChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(secondChildOffset, OffsetF(HALF_PERCENT_WIDTH, verticalRemaining / 2));
+
+    auto thirdChildWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
+    auto thirdChildSize = thirdChildWrapper->GetGeometryNode()->GetFrameSize();
+    auto thirdChildOffset = thirdChildWrapper->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(thirdChildSize, SizeF(HALF_PERCENT_WIDTH, SMALL_ITEM_HEIGHT));
+    EXPECT_EQ(thirdChildOffset, OffsetF(HALF_PERCENT_WIDTH / 2, verticalRemaining / 2 + SMALL_ITEM_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

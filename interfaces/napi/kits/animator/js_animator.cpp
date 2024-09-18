@@ -22,11 +22,9 @@
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
 
-#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/thread/frame_trace_adapter.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve.h"
@@ -327,10 +325,6 @@ static napi_value JSUpdate(napi_env env, napi_callback_info info)
 
 static napi_value JSPlay(napi_env env, napi_callback_info info)
 {
-    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr) {
-        ft->SetFrameTraceLimit();
-    }
     auto animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION, "ohos.animator: cannot find animator result when call play");

@@ -22,7 +22,6 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -131,6 +130,9 @@ bool TextSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleCont
     PointF topPoint = { paintLeft, paintRect.Top() + BOX_EPSILON };
     bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
     bool topInRegion = visibleContentRect.IsInRegion(topPoint);
+    if (IsClipHandleWithViewPort()) {
+        return bottomInRegion || topInRegion;
+    }
     if (!bottomInRegion && topInRegion) {
         paintRect.SetHeight(visibleContentRect.Bottom() - paintRect.Top());
     } else if (bottomInRegion && !topInRegion) {
@@ -180,15 +182,18 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(renderContext);
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = contentRect.GetOffset();
+    auto localHandleOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
         contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
+        localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
+    localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
+    textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     auto handleOffset = handleRect.GetOffset();
     if (!selectTextUseTopHandle) {
         bool isUseHandleTop = (isFirst != IsHandleReverse());
         handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
     }
-
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -226,6 +231,9 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     BaseTextSelectOverlay::OnHandleMoveDone(rect, isFirst);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    if (textPattern->GetMagnifierController()) {
+        textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
+    }
     textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
@@ -239,6 +247,7 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         ProcessOverlay({ .animation = true });
     }
     overlayManager->ShowOptionMenu();
+    overlayManager->SetHandleCircleIsShow(isFirst, true);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -317,6 +326,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
 
 void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
@@ -384,5 +394,44 @@ void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
         UpdateAllHandlesOffset();
     }
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+}
+
+void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->SetHandleCircleIsShow(isFirst, false);
+}
+
+void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
+{
+    if (!IsSingleHandle()) {
+        ToggleMenu();
+    }
+}
+
+void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().value_or(false)) {
+        return;
+    }
+    auto clipNode = host->GetAncestorNodeOfFrame(true);
+    while (clipNode) {
+        renderContext = clipNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (renderContext->GetClipEdge().value_or(false)) {
+            break;
+        }
+        clipNode = clipNode->GetAncestorNodeOfFrame(true);
+    }
+    CHECK_NULL_VOID(clipNode);
+    RectF visibleRect;
+    RectF frameRect;
+    clipNode->GetVisibleRect(visibleRect, frameRect);
+    rect.SetHeight(visibleRect.Bottom() - rect.Top());
 }
 } // namespace OHOS::Ace::NG

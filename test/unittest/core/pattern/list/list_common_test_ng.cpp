@@ -126,6 +126,8 @@ void ListCommonTestNg::CreateForEachList(
         newIds.emplace_back(std::to_string(index));
     }
     forEachModelNG.SetNewIds(std::move(newIds));
+    std::list<int32_t> removedElmtId;
+    forEachModelNG.SetRemovedElmtIds(removedElmtId);
     forEachModelNG.OnMove(std::move(onMove));
     for (int32_t index = 0; index < itemNumber; index++) {
         // key is 0,1,2,3...
@@ -930,41 +932,6 @@ HWTEST_F(ListCommonTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(listItemPattern->IsSelected());
     listItemAccessibilityProperty->ActActionClearSelection();
     EXPECT_FALSE(listItemPattern->IsSelected());
-}
-
-/**
- * @tc.name: PerformActionTest002
- * @tc.desc: List Accessibility PerformAction test ScrollForward and ScrollBackward.
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. When list is not Scrollable
-     * @tc.expected: can not scrollpage
-     */
-    CreateList();
-    CreateListItems(VIEW_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
-
-    /**
-     * @tc.steps: step2. When list is Scrollable
-     * @tc.expected: can scrollpage
-     */
-    ClearOldNodes();
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 200.f);
-    accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 /**

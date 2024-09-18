@@ -84,6 +84,11 @@ class FontManager;
 class ManagerInterface;
 class NavigationController;
 enum class FrontendType;
+enum class KeyboardAction {
+    NONE,
+    CLOSING,
+    OPENING,
+};
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
@@ -145,7 +150,15 @@ public:
 
     void PrepareOpenImplicitAnimation();
 
+    virtual bool CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+    {
+        return false;
+    }
+
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallback = nullptr);
+
+    void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallback = nullptr);
 
     void PrepareCloseImplicitAnimation();
@@ -356,7 +369,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -1054,8 +1067,6 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    virtual void SetupSubRootElement() = 0;
-
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
     void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
@@ -1185,22 +1196,6 @@ public:
         return onFocus_;
     }
 
-    void SetSurfaceChangeMsg(int32_t width, int32_t height,
-                                WindowSizeChangeReason type,
-                                const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
-    {
-        width_ = width;
-        height_ = height;
-        type_ = type;
-        rsTransaction_ = rsTransaction;
-        delaySurfaceChange_ = true;
-    }
-
-    void ResetSurfaceChangeMsg()
-    {
-        delaySurfaceChange_ = false;
-    }
-
     uint64_t GetVsyncTime() const
     {
         return vsyncTime_;
@@ -1253,8 +1248,6 @@ public:
         return false;
     }
 
-    virtual void CheckVirtualKeyboardHeight() {}
-
     virtual void StartWindowAnimation() {}
 
     virtual void StopWindowAnimation() {}
@@ -1275,6 +1268,15 @@ public:
         return frameCount_;
     }
 
+    KeyboardAction GetKeyboardAction()
+    {
+        return keyboardAction_;
+    }
+
+    void SetKeyboardAction(KeyboardAction action)
+    {
+        keyboardAction_ = action;
+    }
     virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
 
     virtual void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type) {}
@@ -1489,13 +1491,10 @@ private:
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
-    bool delaySurfaceChange_ = false;
     bool destroyed_ = false;
-    int32_t width_ = -1;
-    int32_t height_ = -1;
-    WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
+
     uint32_t frameCount_ = 0;
+    KeyboardAction keyboardAction_ = KeyboardAction::NONE;
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;

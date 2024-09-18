@@ -47,12 +47,9 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
-#include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
-#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -96,6 +93,7 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
@@ -2634,6 +2632,9 @@ void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == "Custom") {
+        ViewAbstract::SetFocusType(frameNode, focusable ? FocusType::SCOPE : FocusType::DISABLE);
+    }
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
@@ -3190,6 +3191,8 @@ void SetAlignRules(ArkUINodeHandle node, char** anchors, const ArkUI_Int32* dire
         rulesMap[static_cast<AlignDirection>(index)] = alignRule;
     }
     ViewAbstract::SetAlignRules(frameNode, rulesMap);
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    ViewAbstract::SetBias(frameNode, biasPair);
 }
 
 void SetAlignRulesWidthType(ArkUINodeHandle node, const ArkUIAlignRulesType* alignRulesType)
@@ -3471,10 +3474,10 @@ void ResetBackgroundBrightness(ArkUINodeHandle node)
     ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 
-void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
-    const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize , ArkUI_Float32 fraction)
+    const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     std::vector<float> posRGB;
@@ -3504,8 +3507,8 @@ void ResetBackgroundBrightnessInternal(ArkUINodeHandle node)
     ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
 }
  
-void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
 {
@@ -3521,7 +3524,7 @@ void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Flo
 }
 
 void ResetForegroundBrightness(ArkUINodeHandle node)
- {
+{
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     float rate = 1.0f;
@@ -5639,6 +5642,115 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
 
+void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string idStr = id;
+    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup);
+}
+
+void ResetFocusScopeId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string id = "";
+    bool isGroup = false;
+    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup);
+}
+
+void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string scopeIdStr = scopeId;
+    ViewAbstract::SetFocusScopePriority(frameNode, scopeIdStr, priority);
+}
+
+void ResetFocusScopePriority(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string scopeId = "";
+    int32_t priority = 0;
+    ViewAbstract::SetFocusScopePriority(frameNode, scopeId, priority);
+}
+
+PixelRoundPolicy ConvertCeilPixelRoundPolicy(ArkUI_Int32 index)
+{
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    switch (index) {
+        case 0:
+            ret = PixelRoundPolicy::FORCE_CEIL_START;
+            break;
+        case 1:
+            ret = PixelRoundPolicy::FORCE_CEIL_TOP;
+            break;
+        case 2: // 2:index of end
+            ret = PixelRoundPolicy::FORCE_CEIL_END;
+            break;
+        case 3: // 3:index of bottom
+            ret = PixelRoundPolicy::FORCE_CEIL_BOTTOM;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
+{
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    switch (index) {
+        case 0:
+            ret = PixelRoundPolicy::FORCE_FLOOR_START;
+            break;
+        case 1:
+            ret = PixelRoundPolicy::FORCE_FLOOR_TOP;
+            break;
+        case 2: // 2:index of end
+            ret = PixelRoundPolicy::FORCE_FLOOR_END;
+            break;
+        case 3: // 3:index of bottom
+            ret = PixelRoundPolicy::FORCE_FLOOR_BOTTOM;
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
+uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
+{
+    auto tmp = static_cast<PixelRoundCalcPolicy>(value);
+    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
+    if (tmp == PixelRoundCalcPolicy::FORCE_CEIL) {
+        ret = ConvertCeilPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
+        ret = ConvertFloorPixelRoundPolicy(index);
+    }
+    return static_cast<uint8_t>(ret);
+}
+
+void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    uint8_t value = 0;
+    for (ArkUI_Int32 index = 0; index < length; index++) {
+        value |= ConvertPixelRoundPolicy(values[index], index);
+    }
+    ViewAbstract::SetPixelRound(frameNode, value);
+}
+
+void ResetPixelRound(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
+}
+
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5688,7 +5800,7 @@ void ResetAccessibilityState(ArkUINodeHandle node)
         accessibilityProperty->SetUserDisabled(false);
     }
     if (accessibilityProperty->HasUserSelected()) {
-        accessibilityProperty->SetUserSelected(false); 
+        accessibilityProperty->SetUserSelected(false);
     }
     if (accessibilityProperty->HasUserCheckedType()) {
         accessibilityProperty->SetUserCheckedType(0);
@@ -5799,115 +5911,6 @@ ArkUI_CharPtr GetAccessibilityRole(ArkUINodeHandle node)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     g_strValue = accessibilityProperty->GetAccessibilityRole();
     return g_strValue.c_str();
-}
-
-void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string idStr = id;
-    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup);
-}
-
-void ResetFocusScopeId(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string id = "";
-    bool isGroup = false;
-    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup);
-}
-
-void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string scopeIdStr = scopeId;
-    ViewAbstract::SetFocusScopePriority(frameNode, scopeIdStr, priority);
-}
-
-void ResetFocusScopePriority(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string scopeId = "";
-    int32_t priority = 0;
-    ViewAbstract::SetFocusScopePriority(frameNode, scopeId, priority);
-}
-
-PixelRoundPolicy ConvertCeilPixelRoundPolicy(ArkUI_Int32 index)
-{
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    switch (index) {
-        case 0:
-            ret = PixelRoundPolicy::FORCE_CEIL_START;
-            break;
-        case 1:
-            ret = PixelRoundPolicy::FORCE_CEIL_TOP;
-            break;
-        case 2: // 2:index of end
-            ret = PixelRoundPolicy::FORCE_CEIL_END;
-            break;
-        case 3: // 3:index of bottom
-            ret = PixelRoundPolicy::FORCE_CEIL_BOTTOM;
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
-PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
-{
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    switch (index) {
-        case 0:
-            ret = PixelRoundPolicy::FORCE_FLOOR_START;
-            break;
-        case 1:
-            ret = PixelRoundPolicy::FORCE_FLOOR_TOP;
-            break;
-        case 2: // 2:index of end
-            ret = PixelRoundPolicy::FORCE_FLOOR_END;
-            break;
-        case 3: // 3:index of bottom
-            ret = PixelRoundPolicy::FORCE_FLOOR_BOTTOM;
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
-uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
-{
-    auto tmp = static_cast<PixelRoundCalcPolicy>(value);
-    PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
-    if (tmp == PixelRoundCalcPolicy::FORCE_CEIL) {
-        ret = ConvertCeilPixelRoundPolicy(index);
-    } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
-        ret = ConvertFloorPixelRoundPolicy(index);
-    }
-    return static_cast<uint8_t>(ret);
-}
-
-void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    uint8_t value = 0;
-    for (ArkUI_Int32 index = 0; index < length; index++) {
-        value |= ConvertPixelRoundPolicy(values[index], index);
-    }
-    ViewAbstract::SetPixelRound(frameNode, value);
-}
-
-void ResetPixelRound(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
@@ -6036,14 +6039,6 @@ void ResetDragPreview(ArkUINodeHandle node)
     ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
 }
 
-void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    (*values)[NUM_0] = ViewAbstract::GetSafeAreaExpandType(frameNode);
-    (*values)[NUM_1] = ViewAbstract::GetSafeAreaExpandEdges(frameNode);
-}
-
 void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6076,11 +6071,12 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
     }
 }
 
-ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
+void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, -1);
-    return frameNode->GetId();
+    CHECK_NULL_VOID(frameNode);
+    (*values)[NUM_0] = ViewAbstract::GetSafeAreaExpandType(frameNode);
+    (*values)[NUM_1] = ViewAbstract::GetSafeAreaExpandEdges(frameNode);
 }
 
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
@@ -6120,6 +6116,13 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::FocusBoxStyle style;
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
+}
+
+ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    return frameNode->GetId();
 }
 } // namespace
 
@@ -6196,7 +6199,7 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+        ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop };
 
     return &modifier;
 }
@@ -6428,21 +6431,14 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_CLICK;
-
         auto target = info.GetTarget();
-        event.touchEvent.target.id = target.id.c_str();
-        event.touchEvent.target.type = target.type.c_str();
-        event.touchEvent.target.area = {
-            static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
-            static_cast<ArkUI_Int32>(target.area.GetHeight().Value())
-        };
-        event.touchEvent.target.origin = {
-            static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
-            static_cast<ArkUI_Int32>(target.origin.GetY().Value())
-        };
-
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
         Offset globalOffset = info.GetGlobalLocation();
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
@@ -6471,11 +6467,12 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
         SendArkUIAsyncEvent(&event);
     };
-    if (uiNode->GetTag() == "Span") {
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
-    } else {
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
+    }  else {
+        ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
     }
 }
 
@@ -6808,8 +6805,11 @@ void ResetOnClick(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    if (uiNode->GetTag() == "Span") {
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::ClearOnClick(uiNode);
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        TextModelNG::ClearOnClick(frameNode);
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         ViewAbstract::DisableOnClick(frameNode);

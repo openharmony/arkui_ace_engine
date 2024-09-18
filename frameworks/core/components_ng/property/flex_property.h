@@ -39,7 +39,7 @@ std::string HorizontalAlignToString(HorizontalAlign align)
         case HorizontalAlign::CENTER:
             return "HorizontalAlign::Center";
         case HorizontalAlign::START:
-            return "HorizontalAlign::Left";
+            return "HorizontalAlign::Start";
         case HorizontalAlign::END:
             return "HorizontalAlign::End";
         default:

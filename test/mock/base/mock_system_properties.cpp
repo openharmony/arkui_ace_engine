@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "base/log/ace_checker.h"
+#include "base/log/ace_performance_check.h"
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
@@ -59,8 +61,8 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
-bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
+bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
 bool SystemProperties::aceCommercialLogEnable_ = false;
@@ -69,7 +71,6 @@ bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
 bool SystemProperties::imageFrameworkEnable_ = true;
-bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
@@ -150,9 +151,9 @@ bool SystemProperties::GetNavigationBlurEnabled()
     return navigationBlurEnabled_;
 }
 
-bool SystemProperties::GetGridCacheEnabled()
+bool SystemProperties::GetSideBarContainerBlurEnable()
 {
-    return gridCacheEnabled_;
+    return sideBarContainerBlurEnable_;
 }
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
@@ -165,9 +166,9 @@ bool SystemProperties::WaterFlowUseSegmentedLayout()
     return g_segmentedWaterflow;
 }
 
-bool SystemProperties::GetSideBarContainerBlurEnable()
+bool SystemProperties::GetGridCacheEnabled()
 {
-    return sideBarContainerBlurEnable_;
+    return gridCacheEnabled_;
 }
 
 float SystemProperties::GetDefaultResolution()

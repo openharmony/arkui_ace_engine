@@ -34,9 +34,9 @@ void TabContentNode::OnAttachToMainTree(bool recursive)
     FrameNode::OnOffscreenProcess(recursive);
 }
 
-void TabContentNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+void TabContentNode::OnDetachFromMainTree(bool recursive)
 {
-    FrameNode::OnDetachFromMainTree(recursive, context);
+    FrameNode::OnDetachFromMainTree(recursive);
     auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
     CHECK_NULL_VOID(tabs);
 

@@ -34,6 +34,7 @@ public:
     static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
     static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
         int32_t duration, int32_t iterations);
+    static bool GetIsCard();
     static void HandleLoadImageSuccess(const BaseEventInfo& param);
     static void HandleLoadImageFail(const BaseEventInfo& param);
     static void SetAlt(const JSCallbackInfo& args);
@@ -80,6 +81,7 @@ protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
     static void UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult);
+    static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
 };
 
 class JSColorFilter : public AceType {

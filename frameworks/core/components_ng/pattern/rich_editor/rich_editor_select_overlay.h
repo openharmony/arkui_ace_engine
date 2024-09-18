@@ -44,6 +44,7 @@ public:
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnOverlayTouchDown(const TouchEventInfo& event) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void GetLocalPointWithTransform(OffsetF& localPoint);
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
@@ -56,9 +57,17 @@ public:
     bool IsBothHandlesShow();
     bool IsHandleShow();
     void OnHandleMoveStart(bool isFirst) override;
-    void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
+    void UpdateHandleOffset();
     void ToggleMenu();
+    void OnHandleIsHidden() override;
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void OnHandleMouseEvent(const MouseInfo& event) override;
+    void OnAfterSelectOverlayShow(bool isCreate) override;
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
     bool GetIsHandleMoving()
     {
         return isHandleMoving_;
@@ -69,9 +78,11 @@ private:
     void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
+    void SwitchCaretState();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
+    bool handleIsHidden_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

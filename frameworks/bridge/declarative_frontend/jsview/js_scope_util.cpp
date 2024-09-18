@@ -19,7 +19,7 @@
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
-int32_t JSScopeUtil::restoreInstanceId_ = -1;
+static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 JSScopeUtil::JSScopeUtil() {}
 
@@ -41,14 +41,18 @@ void JSScopeUtil::SyncInstanceId(const JSCallbackInfo& info)
         return;
     }
 
+    restoreInstanceIds_.emplace_back(Container::CurrentId());
     int32_t instanceId = info[0]->ToNumber<int32_t>();
-
-    restoreInstanceId_ = Container::CurrentId();
     ContainerScope::UpdateCurrent(instanceId);
 }
 
 void JSScopeUtil::RestoreInstanceId(const JSCallbackInfo& info)
 {
-    ContainerScope::UpdateCurrent(restoreInstanceId_);
+    if (restoreInstanceIds_.empty()) {
+        ContainerScope::UpdateCurrent(INSTANCE_ID_UNDEFINED);
+        return;
+    }
+    ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
+    restoreInstanceIds_.pop_back();
 }
 } // namespace OHOS::Ace::Framework

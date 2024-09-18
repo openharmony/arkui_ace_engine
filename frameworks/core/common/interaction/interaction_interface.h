@@ -48,15 +48,15 @@ public:
 
     virtual int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) = 0;
 
-    virtual int32_t GetDragState(DragState& dragState) const = 0;
-
     virtual int32_t GetDragSummary(std::map<std::string, int64_t>& summary) = 0;
 
     virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 
-    virtual int32_t EnterTextEditorArea(bool enable) = 0;
+    virtual int32_t GetDragState(DragState& dragState) const = 0;
 
     virtual int32_t AddPrivilege() = 0;
+
+    virtual int32_t EnterTextEditorArea(bool enable) = 0;
 
     virtual int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) = 0;
 

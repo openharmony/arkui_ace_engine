@@ -156,6 +156,10 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawObscuration001, TestSize.Lev
      * @tc.steps3: call DrawObscuration.
      * @tc.expected: expect canvasImage_.borderRadiusXY_ is null
      */
+    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
     imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
     imagePainter.canvasImage_->paintConfig_->isSvg_ = true;
     imagePainter.DrawObscuration(testingCanvas, OFFSETF, SIZE);
@@ -188,6 +192,10 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawSVGImage2, TestSize.Level1)
      * @tc.steps2: callback DrawImage.
      * @tc.expected: expect imagePainter.canvasImage_ is null.
      */
+    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
     imagePainter.DrawSVGImage(testingCanvas, OFFSETF, SIZE);
     EXPECT_EQ(imagePainter.canvasImage_, nullptr);
 
@@ -230,6 +238,10 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawStaticImage3, TestSize.Level
      * @tc.steps2: callback DrawImage.
      * @tc.expected: expect imagePainter.canvasImage_ is null.
      */
+    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
     imagePainter.DrawStaticImage(testingCanvas, OFFSETF, SIZE);
     EXPECT_EQ(imagePainter.canvasImage_, nullptr);
 
@@ -284,6 +296,10 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_FlipHorizontal4, TestSize.Level1
     /**
      * @tc.steps2: callback DrawImage.
      */
+    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
     imagePainter.FlipHorizontal(testingCanvas, SIZE);
 }
 
@@ -311,6 +327,10 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawImageWithRepeat5, TestSize.L
      * @tc.steps3callback DrawImageWithRepeat.
      * @tc.expected: expect CONTENTRECT.Width() and CONTENTRECT.Height() is 0.
      */
+    EXPECT_CALL(testingCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachBrush()).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(testingCanvas));
+    EXPECT_CALL(testingCanvas, DetachPen()).WillRepeatedly(ReturnRef(testingCanvas));
     imagePainter.DrawImageWithRepeat(testingCanvas, CONTENTRECT);
     EXPECT_EQ(CONTENTRECT.Width(), 1);
     EXPECT_EQ(CONTENTRECT.Height(), 1);

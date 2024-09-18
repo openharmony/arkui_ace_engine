@@ -574,11 +574,7 @@ void TabsModelNG::Pop()
     auto tabBarFocusNode = tabBarNode->GetFocusHub();
     CHECK_NULL_VOID(tabBarFocusNode);
     if (tabBarPosition == BarPosition::START) {
-        if (tabsFocusNode->IsCurrentFocus()) {
-            tabBarFocusNode->RequestFocusImmediately();
-        } else {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
+        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
     }
 
     auto tabContentNum = swiperNode->TotalChildCount();

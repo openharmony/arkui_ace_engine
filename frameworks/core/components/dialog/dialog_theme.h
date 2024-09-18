@@ -442,31 +442,6 @@ public:
         return columnMeasureType_;
     }
 
-    int32_t GetDialogDoubleBorderEnable() const
-    {
-        return dialogDoubleBorderEnable_;
-    }
-
-    double GetDialogOuterBorderWidth() const
-    {
-        return dialogOuterBorderWidth_;
-    }
-
-    Color GetDialogOuterBorderColor() const
-    {
-        return dialogOuterBorderColor_;
-    }
-
-    double GetDialogInnerBorderWidth() const
-    {
-        return dialogInnerBorderWidth_;
-    }
-
-    Color GetDialogInnerBorderColor() const
-    {
-        return dialogInnerBorderColor_;
-    }
-
     double GetMinFontScaleForElderly() const
     {
         return minFontScaleForElderly_;
@@ -595,11 +570,6 @@ private:
     double maxSizeScalePortrait_ = 0.8;
     FlexAlign scrollFlexAlign_ = FlexAlign::FLEX_START;
     NG::MeasureType columnMeasureType_ = NG::MeasureType::MATCH_CONTENT;
-    int32_t dialogDoubleBorderEnable_ = 0;
-    double dialogOuterBorderWidth_ = 0.0f;
-    Color dialogOuterBorderColor_;
-    double dialogInnerBorderWidth_ = 0.0f;
-    Color dialogInnerBorderColor_;
 };
 
 } // namespace OHOS::Ace

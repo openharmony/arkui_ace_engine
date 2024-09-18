@@ -17,7 +17,6 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
@@ -362,7 +361,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
-        [](const auto& reason) {return reason == ObscuredReasons::PLACEHOLDER; });
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     if (pManager->GetParagraphs().empty()) {
@@ -372,7 +371,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
-
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
@@ -391,7 +389,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             auto paintOffsetY = paintOffset_.GetY();
             textPattern->DumpRecord(",Paint id:" + std::to_string(host->GetId()));
             auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
+            for (auto && info : paragraphs) {
                 auto paragraph = info.paragraph;
                 CHECK_NULL_VOID(paragraph);
                 paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
@@ -415,7 +413,8 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
     auto pManager = pattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
-    float textRacePercent = GetTextRacePercent();
+    float textRacePercent = GetTextRaceDirection() == TextDirection::LTR ? GetTextRacePercent()
+                                                                         : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
     float paragraph1Offset =
         (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
     if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
@@ -456,7 +455,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     for (auto i = 0U; i < drawObscuredRects_.size(); i++) {
         if (!NearEqual(drawObscuredRects_[i].Width(), 0.0f) && !NearEqual(drawObscuredRects_[i].Height(), 0.0f)) {
             currentLineWidth += drawObscuredRects_[i].Width();
-            if (i == (drawObscuredRects_.size() ? drawObscuredRects_.size() - 1 : 0)) {
+            if (i == drawObscuredRects_.size() - 1) {
                 textLineWidth.push_back(currentLineWidth);
                 maxLineCount += LessOrEqual(drawObscuredRects_[i].Bottom(), contentSize_->Get().Height()) ? 1 : 0;
             } else if (!NearEqual(drawObscuredRects_[i].Bottom(), drawObscuredRects_[i + 1].Bottom())) {
@@ -799,7 +798,7 @@ void TextContentModifier::StartTextRace()
     }
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        UpdateImageNodeVisible(VisibleType::VISIBLE);
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
     }
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -861,6 +860,17 @@ float TextContentModifier::GetTextRacePercent()
         percent = racePercentFloat_->Get();
     }
     return percent;
+}
+
+TextDirection TextContentModifier::GetTextRaceDirection() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, TextDirection::LTR);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    return layoutProperty->GetNonAutoLayoutDirection();
 }
 
 void TextContentModifier::ContentChange()

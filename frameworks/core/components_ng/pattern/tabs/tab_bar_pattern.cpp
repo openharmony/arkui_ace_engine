@@ -45,7 +45,6 @@
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -73,9 +72,14 @@ constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 constexpr int8_t HALF_OF_WIDTH = 2;
-
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
+
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+constexpr double TAB_BAR_MARGIN_LEFTANDRIGHT = 12.0;
+constexpr double RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT = 0.0;
+constexpr double TAB_BAR_HEIGHTANDWIDTH_MIDDLEFONT = 72.0;
+constexpr double TAB_BAR_HEIGHTANDWIDTH_BIGESTFONT = 104.0;
+
 const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
@@ -104,7 +108,7 @@ void TabBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
-        SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
     swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -653,7 +657,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
         tabBarLayoutProperty->UpdateIndicator(index);
-        PaintFocusState();
+        PaintFocusState(false);
     } else {
         UpdateAnimationDuration();
         if (GetAnimationDuration().has_value()
@@ -928,9 +932,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-    auto pipelineContext = GetHost()->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    lastFontScale_ = pipelineContext->GetFontScale();
+
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
@@ -1954,8 +1956,11 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
     auto selectedColumnId = columnNode->GetId();
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto fontscale = pipelineContext->GetFontScale();
+    SetMarginVP(marginLeftOrRight_, marginTopOrBottom_);
+    TabBarSuitAging();
     for (auto& iter : visibleItemPosition_) {
-        if (iter.first < 0 || iter.first >= tabBarStyles_.size()) {
+        if (iter.first < 0 || iter.first >= static_cast<int32_t>(tabBarStyles_.size())) {
             break;
         }
         auto columnFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(iter.first));
@@ -1963,6 +1968,17 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
         auto renderContext = columnFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (tabBarStyles_[iter.first] == TabBarStyle::SUBTABBATSTYLE) {
+            auto textNode = AceType::DynamicCast<FrameNode>(columnFrameNode->GetChildren().back());
+            CHECK_NULL_VOID(textNode);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
+                textLayoutProperty->UpdateMargin(marginLeftOrRight_);
+            } else if (GreatOrEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
+                textLayoutProperty->UpdateMargin(marginLeftOrRight_);
+            } else {
+                textLayoutProperty->UpdateMargin(marginTopOrBottom_);
+            }
             if (selectedModes_[index] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
                 axis == Axis::HORIZONTAL) {
                 renderContext->UpdateBackgroundColor(indicatorStyles_[index].color);
@@ -2847,6 +2863,9 @@ void TabBarPattern::DumpAdvanceInfo()
     changeByClick_ ? DumpLog::GetInstance().AddDesc("changeByClick:true")
                    : DumpLog::GetInstance().AddDesc("changeByClick:false");
     DumpLog::GetInstance().AddDesc("indicator:" + std::to_string(indicator_));
+    DumpLog::GetInstance().AddDesc("focusIndicator:" + std::to_string(focusIndicator_));
+    DumpLog::GetInstance().AddDesc("currentIndicatorOffset:" + std::to_string(currentIndicatorOffset_));
+    DumpLog::GetInstance().AddDesc("turnPageRate:" + std::to_string(turnPageRate_));
     DumpLog::GetInstance().AddDesc("swiperStartIndex:" + std::to_string(swiperStartIndex_));
     DumpLog::GetInstance().AddDesc("scrollMargin:" + std::to_string(scrollMargin_));
     std::string regionString = std::string("region:");
@@ -2904,6 +2923,53 @@ bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
         return ret.has_value() ? ret.value() : true;
     }
     return true;
+}
+
+void TabBarPattern::TabBarSuitAging()
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabbarproperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabbarproperty);
+    auto pipelineContext = GetHost()->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto fontscale = pipelineContext->GetFontScale();
+    auto MiddleFontWidthAndHeight = Dimension(TAB_BAR_HEIGHTANDWIDTH_MIDDLEFONT, DimensionUnit::VP);
+    auto BigFontWidthAndHeight = Dimension(TAB_BAR_HEIGHTANDWIDTH_BIGESTFONT, DimensionUnit::VP);
+    auto calcMiddleFont = NG::CalcLength(MiddleFontWidthAndHeight);
+    auto calcBigFont = NG::CalcLength(BigFontWidthAndHeight);
+    if (tabBarStyles_[indicator_] != TabBarStyle::SUBTABBATSTYLE) {
+        return;
+    }
+    if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
+        if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
+            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcMiddleFont, std::nullopt));
+            tabbarproperty->UpdateTabBarWidth(MiddleFontWidthAndHeight);
+        } else {
+            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, calcMiddleFont));
+            tabbarproperty->UpdateTabBarHeight(MiddleFontWidthAndHeight);
+        }
+    }
+    if (GreatNotEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
+        if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
+            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcBigFont, std::nullopt));
+            tabbarproperty->UpdateTabBarWidth(BigFontWidthAndHeight);
+        } else {
+            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, calcBigFont));
+            tabbarproperty->UpdateTabBarHeight(BigFontWidthAndHeight);
+        }
+    }
+}
+void TabBarPattern::SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom)
+{
+    marginLeftOrRight.left = CalcLength(Dimension(TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginLeftOrRight.right = CalcLength(Dimension(TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginLeftOrRight.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginLeftOrRight.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginTopOrBottom.left = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginTopOrBottom.right = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginTopOrBottom.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+    marginTopOrBottom.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
 }
 
 bool TabBarPattern::ParseTabsIsRtl()

@@ -606,6 +606,7 @@ public:
 
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
@@ -664,9 +665,9 @@ public:
 
     void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
 
-    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
-
     bool IsTextCategoryComponent(const std::string& frameTag);
+
+    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
 
     DragDropInfo GetDragDropInfo(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
@@ -690,7 +691,20 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
+ 
 #endif
+
+    void SetMenuPreviewScale(float menuPreviewScale)
+    {
+        menuPreviewScale_ = menuPreviewScale;
+    }
+
+    float GetMenuPreviewScale() const
+    {
+        return menuPreviewScale_;
+    }
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -778,6 +792,7 @@ private:
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
+    float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
 };
 
 } // namespace OHOS::Ace::NG

@@ -18,14 +18,13 @@
 #include "include/core/SkColorFilter.h"
 #include "include/effects/SkColorMatrix.h"
 #include "include/effects/SkImageFilters.h"
-#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> FE_ATTRS[] = {
-    { SVG_FE_COLOR_INTERPOLATION_FILTERS,
+    { DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             static const LinearMapNode<SvgColorInterpolationType> COLOR_INTERPOLATION_TYPE_TABLE[] = {
                 { "auto", SvgColorInterpolationType::AUTO },
@@ -38,11 +37,11 @@ static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> 
                 attr.colorInterpolationType = COLOR_INTERPOLATION_TYPE_TABLE[inIndex].value;
             }
         } },
-    { SVG_HEIGHT,
+    { DOM_SVG_HEIGHT,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.height = SvgAttributesParser::ParseDimension(val);
         } },
-    { SVG_FE_IN,
+    { DOM_SVG_FE_IN,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             static const LinearMapNode<SvgFeInType> IN_TABLE[] = {
                 { "BackgroundAlpha", SvgFeInType::BACKGROUND_ALPHA },
@@ -59,19 +58,19 @@ static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> 
                 attr.in.id = val;
             }
         } },
-    { SVG_FE_RESULT,
+    { DOM_SVG_FE_RESULT,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.result = val;
         } },
-    { SVG_WIDTH,
+    { DOM_SVG_WIDTH,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.width = SvgAttributesParser::ParseDimension(val);
         } },
-    { SVG_X,
+    { DOM_SVG_X,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.x = SvgAttributesParser::ParseDimension(val);
         } },
-    { SVG_Y,
+    { DOM_SVG_Y,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.y = SvgAttributesParser::ParseDimension(val);
         } },

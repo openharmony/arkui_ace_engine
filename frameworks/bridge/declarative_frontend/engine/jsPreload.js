@@ -13,20 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/bubble/bubble_accessibility_property.h"
-
-#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-#include "accessibility_element_info.h"
-#endif
-
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-
-namespace OHOS::Ace::NG {
-void BubbleAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
-{
-#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
-    extraElementInfo.SetExtraElementInfo("SideBarContainerStates", showedState_);
-#endif
+if (globalThis.requireNapi === undefined) {
+    const UIContext = globalThis.requireNapiPreview('arkui.uicontext');
+} else {
+    const UIContext = globalThis.requireNapi('arkui.uicontext');
 }
-} // namespace OHOS::Ace::NG

@@ -72,9 +72,6 @@ int64_t FfiOHOSAceFrameworkNativeViewCtor(int64_t remoteId)
 {
     auto remoteView = RemoteData::Create<RemoteView>(remoteId);
     auto view = FFIData::Create<NativeView>(remoteView);
-    if (view == nullptr) {
-        return FFI_ERROR_CODE;
-    }
     return view->GetID();
 }
 

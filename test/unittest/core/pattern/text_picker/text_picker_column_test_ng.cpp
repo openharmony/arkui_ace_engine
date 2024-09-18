@@ -80,10 +80,10 @@ const std::string TEXT_PICKER_CONTENT = "text";
 const double OFFSET_X = 6.0;
 const double OFFSET_Y = 8.0;
 constexpr double TOSS_DELTA = 20.0;
-constexpr double DISTANCE = 20.0;
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
+constexpr double DISTANCE = 20.0;
 const std::vector<std::string> DEFAULT_VALUE = { "1", "2", "3" };
 const std::vector<std::string> CUSTOM_VALUE = { "appCustomFont" };
 } // namespace

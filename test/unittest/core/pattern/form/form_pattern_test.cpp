@@ -262,7 +262,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     int64_t currentTime = GetCurrentTimestamp();
     auto form = weak.Upgrade();
     int64_t diff = currentTime - form->snapshotTimestamp_;
-    EXPECT_EQ(diff, 0);
     delayTime = 1;
     EXPECT_LT(diff, delayTime);
     taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);

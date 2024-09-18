@@ -82,11 +82,11 @@ const float CHILD_OFFSET_HEIGHT = 0.0f;
 const float FORCE = 3.0f;
 TestProperty testProperty;
 bool isFocus = false;
-int g_surfaceShowNum = 1;
 const float SURFACE_WIDTH = 250.0f;
 const float SURFACE_HEIGHT = 150.0f;
 const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
+int g_surfaceShowNum = 1;
 bool isAxis = false;
 bool isLock = true;
 
@@ -589,6 +589,135 @@ HWTEST_F(XComponentTestNg, XComponentTextureTypeTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: XComponentControllerTest
+ * @tc.desc: Test XComponentController's interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE_VALUE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    EXPECT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->hasXComponentInit_ = true;
+    EXPECT_EQ(pattern->type_, XCOMPONENT_SURFACE_TYPE_VALUE);
+    EXPECT_TRUE(pattern->IsAtomicNode());
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    pattern->handlingSurfaceRenderContext_ = renderContext;
+ 
+    /**
+     * @tc.steps: step2. call XcomponentController's interface releative to SetSurfaceRect
+     * @tc.expected: handlingSurfaceRenderContext_->SetBounds(SURFACE_OFFSETX, SURFACE_OFFSETY,
+     *               SURFACE_WIDTH, SURFACE_HEIGHT) is called
+     */
+    auto xcomponentController = pattern->xcomponentController_;
+    EXPECT_TRUE(xcomponentController);
+    pattern->drawSize_ = MAX_SIZE;
+    xcomponentController->SetIdealSurfaceWidth(SURFACE_WIDTH);
+    xcomponentController->SetIdealSurfaceHeight(SURFACE_HEIGHT);
+    xcomponentController->SetIdealSurfaceOffsetX(SURFACE_OFFSETX);
+    xcomponentController->SetIdealSurfaceOffsetY(SURFACE_OFFSETY);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetBounds(SURFACE_OFFSETX, SURFACE_OFFSETY, SURFACE_WIDTH, SURFACE_HEIGHT))
+        .WillOnce(Return());
+    xcomponentController->UpdateSurfaceBounds();
+ 
+    /**
+     * @tc.steps: step3. call XcomponentController's interface releative to GetSurfaceRect
+     * @tc.expected: the rect get from GetSurfaceRect equals the rect set by SetSurfaceRect
+     */
+    auto surfaceWidth = 0.0f;
+    auto surfaceHeight = 0.0f;
+    auto surfaceOffsetX = 0.0f;
+    auto surfaceOffsetY = 0.0f;
+    xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
+    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
+    EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
+    EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
+    EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
+    EXPECT_EQ(surfaceHeight, SURFACE_HEIGHT);
+ 
+    /**
+     * @tc.steps: step4. call XcomponentController's ClearIdealSurfaceOffset
+     * @tc.expected: handlingSurfaceRenderContext_->SetBounds(newSurfaceOffsetX, newSurfaceOffsetY,
+     *               SURFACE_WIDTH, SURFACE_HEIGHT) is called
+     */
+    auto newSurfaceOffsetX = (MAX_WIDTH - SURFACE_WIDTH) / 2.0f;
+    auto newSurfaceOffsetY = (MAX_HEIGHT - SURFACE_HEIGHT) / 2.0f;
+    xcomponentController->ClearIdealSurfaceOffset(true);
+    xcomponentController->ClearIdealSurfaceOffset(false);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetBounds(newSurfaceOffsetX, newSurfaceOffsetY, SURFACE_WIDTH, SURFACE_HEIGHT))
+        .WillOnce(Return());
+    xcomponentController->UpdateSurfaceBounds();
+
+    /**
+     * @tc.steps: step5. call XcomponentController's interface relative to SetSurfaceRotation
+     * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(isLock) is called
+     */
+    EXPECT_CALL(
+        *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(isLock))
+        .WillOnce(Return());
+    xcomponentController->SetSurfaceRotation(isLock);
+ 
+    /**
+     * @tc.steps: step6. call XcomponentController's interface relative to GetSurfaceRotation
+     * @tc.expected: the lock status get from GetSurfaceRotation equals the lock status set by SetSurfaceRotation
+     */
+    auto lock = xcomponentController->GetSurfaceRotation();
+    EXPECT_EQ(lock, isLock);
+}
+
+/**
+ * @tc.name: XComponentAxisEventTest012
+ * @tc.desc: Test AxisEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. create nativeXComponent instance
+     * @tc.expected: focusHub & nativeXComponent instance create successfully
+     */
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+
+    /**
+     * @tc.steps: step3. register axis event for nativeXComponent instance
+     */
+    auto callback = [](OH_NativeXComponent* /* nativeXComponent */, ArkUI_UIInputEvent* event,
+                        ArkUI_UIInputEvent_Type type) { isAxis = true; };
+    nativeXComponent->RegisterUIAxisEventCallback(callback);
+
+    /**
+     * @tc.steps: step4. call HandleAxisEvent
+     */
+    AxisInfo event;
+    pattern->HandleAxisEvent(event);
+    EXPECT_TRUE(isAxis);
+}
+
+/**
  * @tc.name: XComponentOnAreaChangedInnerTest019
  * @tc.desc: Test XComponent OnAreaChangedInner.
  * @tc.type: FUNC
@@ -871,7 +1000,6 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
 
-
     onDetachKey.clear();
     XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_COMPONENT_TYPE_VALUE);
     xComponent.SetDetachCallback(std::move(onDetach));
@@ -1046,7 +1174,6 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
     ASSERT_TRUE(nativeXComponentImpl);
     pattern->hasXComponentInit_ = true;
 
-
     /**
      * @tc.steps: step3. call surfaceHide and surfaceShow event without register callbacks
      * @tc.expected: no error happens and g_surfaceShowNum remains the same
@@ -1096,135 +1223,6 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentControllerTest
- * @tc.desc: Test XComponentController's interface
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE_VALUE and call CreateXComponentNode
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
-    EXPECT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-    pattern->hasXComponentInit_ = true;
-    EXPECT_EQ(pattern->type_, XCOMPONENT_SURFACE_TYPE_VALUE);
-    EXPECT_TRUE(pattern->IsAtomicNode());
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    pattern->handlingSurfaceRenderContext_ = renderContext;
-
-    /**
-     * @tc.steps: step2. call XcomponentController's interface releative to SetSurfaceRect
-     * @tc.expected: handlingSurfaceRenderContext_->SetBounds(SURFACE_OFFSETX, SURFACE_OFFSETY,
-     *               SURFACE_WIDTH, SURFACE_HEIGHT) is called
-     */
-    auto xcomponentController = pattern->xcomponentController_;
-    EXPECT_TRUE(xcomponentController);
-    pattern->drawSize_ = MAX_SIZE;
-    xcomponentController->SetIdealSurfaceWidth(SURFACE_WIDTH);
-    xcomponentController->SetIdealSurfaceHeight(SURFACE_HEIGHT);
-    xcomponentController->SetIdealSurfaceOffsetX(SURFACE_OFFSETX);
-    xcomponentController->SetIdealSurfaceOffsetY(SURFACE_OFFSETY);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
-        SetBounds(SURFACE_OFFSETX, SURFACE_OFFSETY, SURFACE_WIDTH, SURFACE_HEIGHT))
-        .WillOnce(Return());
-    xcomponentController->UpdateSurfaceBounds();
-
-    /**
-     * @tc.steps: step3. call XcomponentController's interface releative to GetSurfaceRect
-     * @tc.expected: the rect get from GetSurfaceRect equals the rect set by SetSurfaceRect
-     */
-    auto surfaceWidth = 0.0f;
-    auto surfaceHeight = 0.0f;
-    auto surfaceOffsetX = 0.0f;
-    auto surfaceOffsetY = 0.0f;
-    xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
-    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
-    EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
-    EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
-    EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
-    EXPECT_EQ(surfaceHeight, SURFACE_HEIGHT);
-
-    /**
-     * @tc.steps: step4. call XcomponentController's ClearIdealSurfaceOffset
-     * @tc.expected: handlingSurfaceRenderContext_->SetBounds(newSurfaceOffsetX, newSurfaceOffsetY,
-     *               SURFACE_WIDTH, SURFACE_HEIGHT) is called
-     */
-    auto newSurfaceOffsetX = (MAX_WIDTH - SURFACE_WIDTH) / 2.0f;
-    auto newSurfaceOffsetY = (MAX_HEIGHT - SURFACE_HEIGHT) / 2.0f;
-    xcomponentController->ClearIdealSurfaceOffset(true);
-    xcomponentController->ClearIdealSurfaceOffset(false);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
-        SetBounds(newSurfaceOffsetX, newSurfaceOffsetY, SURFACE_WIDTH, SURFACE_HEIGHT))
-        .WillOnce(Return());
-    xcomponentController->UpdateSurfaceBounds();
-
-    /**
-     * @tc.steps: step5. call XcomponentController's interface relative to SetSurfaceRotation
-     * @tc.expected: handlingSurfaceRenderContext_->SetSurfaceRotation(isLock) is called
-     */
-    EXPECT_CALL(
-        *AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetSurfaceRotation(isLock))
-        .WillOnce(Return());
-    xcomponentController->SetSurfaceRotation(isLock);
-
-    /**
-     * @tc.steps: step6. call XcomponentController's interface relative to GetSurfaceRotation
-     * @tc.expected: the lock status get from GetSurfaceRotation equals the lock status set by SetSurfaceRotation
-     */
-    auto lock = xcomponentController->GetSurfaceRotation();
-    EXPECT_EQ(lock, isLock);
-}
-
-/**
- * @tc.name: XComponentAxisEventTest012
- * @tc.desc: Test AxisEvent
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestNg, XComponentAxisEventTest012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. create nativeXComponent instance
-     * @tc.expected: focusHub & nativeXComponent instance create successfully
-     */
-    auto pair = pattern->GetNativeXComponent();
-    auto weakNativeXComponent = pair.second;
-    auto nativeXComponent = weakNativeXComponent.lock();
-    auto nativeXComponentImpl = pair.first;
-    ASSERT_TRUE(nativeXComponent);
-    ASSERT_TRUE(nativeXComponentImpl);
-
-    /**
-     * @tc.steps: step3. register axis event for nativeXComponent instance
-     */
-    auto callback = [](OH_NativeXComponent* /* nativeXComponent */, ArkUI_UIInputEvent* event,
-                        ArkUI_UIInputEvent_Type type) { isAxis = true; };
-    nativeXComponent->RegisterUIAxisEventCallback(callback);
-
-    /**
-     * @tc.steps: step4. call HandleAxisEvent
-     */
-    AxisInfo event;
-    pattern->HandleAxisEvent(event);
-    EXPECT_TRUE(isAxis);
-}
-
-/**
  * @tc.name: XComponentSourceTypeTest
  * @tc.desc: Test SourceType
  * @tc.type: FUNC
@@ -1259,40 +1257,6 @@ HWTEST_F(XComponentTestNg, XComponentSourceTypeTest, TestSize.Level1)
         EXPECT_EQ(static_cast<int>(pattern->nativeXComponentImpl_->curSourceType_.second),
             static_cast<int>(ConvertNativeXComponentEventSourceType(sourceType)));
     }
-}
-
-/**
- * @tc.name: XComponentImageAnalyzerTest
- * @tc.desc: Test Enable Image Analyzer
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-
-    /**
-     * @tc.steps: step2. call EnableImageAnalyzer
-     * @tc.expected: IsSupportImageAnalyzerFeature() return right value
-     */
-    pattern->EnableAnalyzer(true);
-    EXPECT_TRUE(pattern->isEnableAnalyzer_);
-
-    if (ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()) {
-        EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
-    } else {
-        EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
-    }
-
-    pattern->imageAnalyzerManager_ = nullptr;
-    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
 }
 
 /**
@@ -1361,5 +1325,40 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
     EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
+}
+
+/**
+ * @tc.name: XComponentImageAnalyzerTest
+ * @tc.desc: Test Enable Image Analyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_SURFACE_TYPE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->surfaceId_ = SURFACE_ID;
+
+    /**
+     * @tc.steps: step2. call EnableImageAnalyzer
+     * @tc.expected: IsSupportImageAnalyzerFeature() return right value
+     */
+    pattern->EnableAnalyzer(true);
+    EXPECT_TRUE(pattern->isEnableAnalyzer_);
+
+    if (ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()) {
+        EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
+    } else {
+        EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+    }
+
+    pattern->imageAnalyzerManager_ = nullptr;
+    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
 }
 } // namespace OHOS::Ace::NG
