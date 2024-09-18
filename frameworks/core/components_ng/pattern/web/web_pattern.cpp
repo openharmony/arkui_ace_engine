@@ -3351,7 +3351,7 @@ void WebPattern::ChangeVisibilityOfQuickMenu()
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
-    if (overlayType == SELECTION_OVERLAY && !selectTemporarilyHidden_ && !selectTemporarilyHiddenByScroll_) {
+    if (overlayType == SELECTION_OVERLAY && !selectTemporarilyHidden_) {
         bool isMenuShow = selectOverlayProxy_->IsMenuShow();
         selectOverlayProxy_->ShowOrHiddenMenu(isMenuShow);
         TAG_LOGI(AceLogTag::ACE_WEB, "Current menu display status is %{public}d.", isMenuShow);
