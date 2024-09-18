@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -62,8 +63,10 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
-    ScrollablePattern();
-    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled);
+    ScrollablePattern() = default;
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+    {}
 
     ~ScrollablePattern()
     {
@@ -421,13 +424,12 @@ public:
 
     static ScrollSource ConvertScrollSource(int32_t source);
 
-    static float CalculateFriction(float gamma)
+    float CalculateFriction(float gamma)
     {
-        constexpr float RATIO = 1.848f;
         if (GreatOrEqual(gamma, 1.0)) {
             gamma = 1.0f;
         }
-        return exp(-RATIO * gamma);
+        return exp(-ratio_.value_or(1.848f) * gamma);
     }
     virtual float GetMainContentSize() const;
 
@@ -881,7 +883,8 @@ private:
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
-    double friction_ = 0.0;
+    std::optional<float> ratio_;
+    double friction_ = -1.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;

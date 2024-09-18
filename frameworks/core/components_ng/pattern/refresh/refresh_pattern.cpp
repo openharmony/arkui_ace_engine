@@ -486,7 +486,21 @@ float RefreshPattern::CalculatePullDownRatio()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 1.0f);
     auto contentHeight = geometryNode->GetPaddingSize().Height();
-    return NearZero(contentHeight) ? 1.0f : ScrollablePattern::CalculateFriction(scrollOffset_ / contentHeight);
+    if (NearZero(contentHeight)) {
+        return 1.0f;
+    }
+    if (!ratio_.has_value()) {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, 1.0f);
+        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+        CHECK_NULL_RETURN(scrollableTheme, 1.0f);
+        ratio_ = scrollableTheme->GetRatio();
+    }
+    auto gamma = scrollOffset_ / contentHeight;
+    if (GreatOrEqual(gamma, 1.0)) {
+        gamma = 1.0f;
+    }
+    return exp(-ratio_.value() * gamma);
 }
 
 float RefreshPattern::GetFollowRatio()

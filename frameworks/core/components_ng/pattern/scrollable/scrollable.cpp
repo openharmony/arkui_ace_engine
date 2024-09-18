@@ -17,6 +17,7 @@
 
 #include "base/log/jank_frame_report.h"
 #include "core/common/layout_inspector.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -81,30 +82,6 @@ void Scrollable::SetFriction(double sFriction)
         return;
     }
     sFriction_ = sFriction;
-}
-
-Scrollable::Scrollable()
-{
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
-    velocityScale_ =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
-}
-
-Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis)
-{
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
-    velocityScale_ =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
-}
-
-Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis)
-{
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
-    velocityScale_ =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 Scrollable::~Scrollable()
@@ -183,6 +160,23 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     panRecognizerNG_->SetOnActionCancel(actionCancel);
 
     available_ = true;
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto scrollableTheme = pipeline->GetTheme<ScrollableTheme>();
+    CHECK_NULL_VOID(scrollableTheme);
+    flingVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
+                              ? scrollableTheme->GetFlingVelocityScale()
+                              : VELOCITY_SCALE;
+    springVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
+                               ? scrollableTheme->GetSpringVelocityScale()
+                               : VELOCITY_SCALE;
+    ratio_ = scrollableTheme->GetRatio();
+    springResponse_ = scrollableTheme->GetSpringResponse();
+    touchPadVelocityScaleRate_ = scrollableTheme->GetTouchPadVelocityScaleRate();
+    if (friction_ == -1) {
+        InitFriction(scrollableTheme->GetFriction());
+    }
 }
 
 void Scrollable::SetAxis(Axis axis)
@@ -402,13 +396,16 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
 
-void Scrollable::LayoutDirectionEst(double& correctVelocity)
+void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale, bool isScrollFromTouchPad)
 {
+    sVelocityScale_ = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     if (isReverseCallback_ && isReverseCallback_()) {
-        correctVelocity = -correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+        currentVelocity_ = -gestureVelocity * sVelocityScale_.value_or(velocityScale) * GetGain(GetDragOffset());
     } else {
-        correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+        currentVelocity_ = gestureVelocity * sVelocityScale_.value_or(velocityScale) * GetGain(GetDragOffset());
     }
+    // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
+    currentVelocity_ = std::clamp(currentVelocity_, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
@@ -421,24 +418,20 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
     }
+    bool isScrollFromTouchPad = info.GetSourceTool() == SourceTool::TOUCHPAD;
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
     lastVelocity_ = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
     double gestureVelocity = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    LayoutDirectionEst(gestureVelocity);
-    // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
-    currentVelocity_ = std::clamp(gestureVelocity, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
 
     lastPos_ = GetDragOffset();
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     mainPosition = Round(mainPosition);
-    ACE_SCOPED_TRACE("HandleDragEnd, mainPosition:%f, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
-                     "canOverScroll_:%u, id:%d, tag:%s",
-        mainPosition, gestureVelocity, currentVelocity_, moved_, canOverScroll_, nodeId_, nodeTag_.c_str());
     if (!moved_ || IsMouseWheelScroll(info)) {
+        LayoutDirectionEst(gestureVelocity, flingVelocityScale_, isScrollFromTouchPad);
         if (calcPredictSnapOffsetCallback_) {
             std::optional<float> predictSnapOffset = calcPredictSnapOffsetCallback_(0.0f, 0.0f, 0.0f);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -457,14 +450,23 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 #endif
     } else if (!Container::IsCurrentUseNewPipeline() && outBoundaryCallback_ && outBoundaryCallback_() &&
                scrollOverCallback_) {
+        LayoutDirectionEst(gestureVelocity, flingVelocityScale_, isScrollFromTouchPad);
         ResetContinueDragCount();
         ProcessScrollOverCallback(currentVelocity_);
     } else if (canOverScroll_) {
+        LayoutDirectionEst(gestureVelocity, springVelocityScale_, isScrollFromTouchPad);
+        auto gamma = overScrollOffsetCallback_() / continuousSlidingCallback_();
+        gamma = GreatOrEqual(gamma, 1.0) ? 1.0f : gamma;
+        currentVelocity_ = currentVelocity_ * exp(-ratio_ * gamma);
         ResetContinueDragCount();
         HandleOverScroll(currentVelocity_);
     } else {
-        StartScrollAnimation(mainPosition, currentVelocity_);
+        LayoutDirectionEst(gestureVelocity, flingVelocityScale_, isScrollFromTouchPad);
+        StartScrollAnimation(mainPosition, currentVelocity_, isScrollFromTouchPad);
     }
+    ACE_SCOPED_TRACE("HandleDragEnd, mainPosition:%f, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
+                     "canOverScroll_:%u, id:%d, tag:%s",
+        mainPosition, gestureVelocity, currentVelocity_, moved_, canOverScroll_, nodeId_, nodeTag_.c_str());
     SetDelayedTask();
     if (dragEndCallback_) {
         dragEndCallback_();
@@ -472,7 +474,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     isTouching_ = false;
 }
 
-void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
+void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity, bool isScrollFromTouchPad)
 {
     if (!isSpringAnimationStop_) {
         StopSpringAnimation();
@@ -501,7 +503,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         currentVelocity_ = 0.0;
         return;
     }
-    if (NearZero(correctVelocity, FRICTION_VELOCITY_THRESHOLD)) {
+    auto frictionVelocityTh = isScrollFromTouchPad ? FRICTION_VELOCITY_THRESHOLD * touchPadVelocityScaleRate_
+                                                    : FRICTION_VELOCITY_THRESHOLD;
+    if (NearZero(correctVelocity, frictionVelocityTh)) {
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
@@ -636,6 +640,13 @@ float Scrollable::GetFrictionVelocityByFinalPosition(float final, float position
     float signum, float threshold)
 {
     return DEFAULT_THRESHOLD * threshold * signum - (final - position) * friction;
+}
+
+void Scrollable::InitFriction(double friction)
+{
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) ? friction : friction_;
 }
 
 void Scrollable::FixScrollMotion(float position, float initVelocity)
@@ -815,7 +826,7 @@ void Scrollable::StartSpringMotion(
     springAnimationCount_++;
     springOffsetProperty_->Set(mainPosition);
     AnimationOption option;
-    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(springResponse_, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);

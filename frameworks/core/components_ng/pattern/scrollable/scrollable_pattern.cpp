@@ -57,19 +57,6 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-ScrollablePattern::ScrollablePattern()
-{
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
-}
-
-ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-{
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
-}
-
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
@@ -513,6 +500,14 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetNodeId(host->GetAccessibilityId());
     scrollable->SetNodeTag(host->GetTag());
     scrollable->Initialize(host->GetContextRefPtr());
+    if (!ratio_.has_value()) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+        CHECK_NULL_VOID(scrollableTheme);
+        ratio_ = scrollableTheme->GetRatio();
+    }
+
     AttachAnimatableProperty(scrollable);
 
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
@@ -579,7 +574,6 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetDragEndCallback(std::move(dragEnd));
 
-    scrollable->SetUnstaticFriction(friction_);
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
 
     auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
@@ -1088,6 +1082,12 @@ void ScrollablePattern::SetFriction(double friction)
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
         friction =
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+            auto context = GetContext();
+            CHECK_NULL_VOID(context);
+            auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+            friction = scrollableTheme->GetFriction();
+        }
     }
     friction_ = friction;
     CHECK_NULL_VOID(scrollableEvent_);

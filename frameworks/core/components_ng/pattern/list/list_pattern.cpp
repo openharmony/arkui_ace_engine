@@ -846,7 +846,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         // over scroll in drag update from normal to over scroll.
         float overScroll = std::max(res.start, res.end);
         // adjust offset.
-        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
 

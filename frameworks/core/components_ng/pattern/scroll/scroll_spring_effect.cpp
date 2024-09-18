@@ -27,6 +27,16 @@ void ScrollSpringEffect::RegisterSpringCallback()
         effect->ProcessScrollOver(velocity);
     });
     scrollable_->SetCurrentPositionCallback(currentPositionCallback_);
+    scrollable_->SetOverScrollOffsetCallback([weakEffect = AceType::WeakClaim(this)]() {
+        auto effect = weakEffect.Upgrade();
+        if (effect) {
+            double position = effect->currentPositionCallback_();
+            double minExtent = effect->leadingCallback_();
+            double maxExtent = effect->trailingCallback_();
+            return std::max(minExtent - position, position - maxExtent);
+        }
+        return 0.0;
+    });
 }
 
 void ScrollSpringEffect::InitialEdgeEffect()

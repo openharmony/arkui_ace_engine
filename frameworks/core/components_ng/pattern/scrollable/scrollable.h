@@ -74,9 +74,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable();
-    Scrollable(ScrollPositionCallback&& callback, Axis axis);
-    Scrollable(const ScrollPositionCallback& callback, Axis axis);
+    Scrollable() = default;
+    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
+    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
@@ -160,7 +160,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    void LayoutDirectionEst(double& correctVelocity);
+    void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
 
     void SetMoved(bool value)
     {
@@ -337,7 +337,7 @@ public:
     {
         overScrollCallback_ = std::move(func);
     }
-    void StartScrollAnimation(float mainPosition, float velocity);
+    void StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
         onScrollStartRec_ = std::move(func);
@@ -470,6 +470,11 @@ public:
         return nestedScrolling_;
     }
 
+    void SetOverScrollOffsetCallback(std::function<double()> overScrollOffsetCallback)
+    {
+        overScrollOffsetCallback_ = overScrollOffsetCallback;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -483,6 +488,7 @@ private:
     void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
+    void InitFriction(double friction);
 
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
@@ -540,7 +546,6 @@ private:
     double dragEndPosition_ = 0.0;
     double lastVelocity_ = 0.0;
     double friction_ = -1.0;
-    double velocityScale_ = 0.0;
     double preGain_ = 1.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
@@ -581,6 +586,12 @@ private:
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation
     uint32_t updateSnapAnimationCount_ = 0;
     uint32_t springAnimationCount_ = 0;
+    double flingVelocityScale_ = 1.5;
+    double springVelocityScale_ = 1.5;
+    float ratio_ = 1.848f;
+    float springResponse_ = 0.416f;
+    float touchPadVelocityScaleRate_ = 1.0f;
+    std::function<double()> overScrollOffsetCallback_;
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
     bool isSnapAnimationStop_ = true;
