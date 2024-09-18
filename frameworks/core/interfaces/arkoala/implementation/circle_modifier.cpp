@@ -13,13 +13,43 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG::Converter {
+struct CircleOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+};
+
+template<>
+inline CircleOptions Convert(const Ark_CircleOptions& src)
+{
+    CircleOptions circleOptions;
+    circleOptions.width = Converter::OptConvert<Dimension>(src.width);
+    circleOptions.height = Converter::OptConvert<Dimension>(src.height);
+    return circleOptions;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CircleInterfaceModifier {
 void SetCircleOptionsImpl(Ark_NativePointer node,
                           const Opt_CircleOptions* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto circleOptions = Converter::OptConvert<Converter::CircleOptions>(*value);
+    if (circleOptions && circleOptions.value().width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, circleOptions.value().width.value());
+    }
+    if (circleOptions && circleOptions.value().height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, circleOptions.value().height.value());
+    }
 }
 } // CircleInterfaceModifier
 const GENERATED_ArkUICircleModifier* GetCircleModifier()
