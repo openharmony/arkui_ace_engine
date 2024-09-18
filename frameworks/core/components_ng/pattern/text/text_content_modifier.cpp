@@ -774,6 +774,7 @@ void TextContentModifier::SetBaselineOffset(const Dimension& value, const TextSt
     } else {
         baselineOffset_ = std::nullopt;
     }
+ 
     CHECK_NULL_VOID(baselineOffsetFloat_);
     baselineOffsetFloat_->Set(baselineOffsetValue);
 }
