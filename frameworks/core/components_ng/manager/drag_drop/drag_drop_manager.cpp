@@ -17,6 +17,7 @@
 #include "drag_drop_manager.h"
 
 #include "base/geometry/point.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
@@ -395,6 +396,7 @@ void DragDropManager::UpdateDragAllowDrop(
 void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle, int32_t eventId)
 {
     if (dragStyle != dragCursorStyleCore_) {
+        ACE_SCOPED_TRACE("drag: update drag style %d", dragStyle);
         TAG_LOGI(
             AceLogTag::ACE_DRAG, "Update DragStyle to %{public}d, pointerEventId: %{public}d.", dragStyle, eventId);
         auto ret = InteractionInterface::GetInstance()->UpdateDragStyle(dragStyle, eventId);
@@ -577,6 +579,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
+    ACE_SCOPED_TRACE("drag: set drag window visible by transfer");
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     isDragFwkShow_ = true;
     auto overlayManager = GetDragAnimationOverlayManager(windowContainerId);
@@ -715,6 +718,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
 
 void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId)
 {
+    ACE_SCOPED_TRACE("drag: reset drag %d, %d", dragDropRet.result, dragDropRet.hasCustomAnimation);
     if (dragDropRet.result != DragRet::DRAG_FAIL || !isMouseDragged_) {
         InteractionInterface::GetInstance()->SetDragWindowVisible(!dragDropRet.hasCustomAnimation);
     }
@@ -1529,6 +1533,7 @@ void DragDropManager::ClearExtraInfo()
 
 bool DragDropManager::IsMSDPDragging() const
 {
+    ACE_SCOPED_TRACE("drag: get drag state from msdp");
     DragState dragState;
     InteractionInterface::GetInstance()->GetDragState(dragState);
     return dragState == DragState::START;

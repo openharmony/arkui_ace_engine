@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/drag_event.h"
 
+#include "base/log/ace_trace.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
@@ -219,6 +220,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action start.");
+        ACE_SCOPED_TRACE("drag: pan successed, start handling");
         auto actuator = weak.Upgrade();
         if (!actuator) {
             DragEventActuator::ResetDragStatus();
