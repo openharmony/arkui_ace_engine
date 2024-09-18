@@ -208,7 +208,7 @@ void Scrollable::HandleTouchDown()
     // If animation still runs, first stop it.
     ACE_SCOPED_TRACE("HandleTouchDown, panDirection:%u, id:%d, tag:%s", GetPanDirection(), nodeId_, nodeTag_.c_str());
     StopSpringAnimation();
-    if (state_ != AnimationState::FRICTION) {
+    if (state_ == AnimationState::FRICTION) {
         StopFrictionAnimation();
     } else if (state_ == AnimationState::SNAP) {
         StopSnapAnimation();
@@ -732,7 +732,7 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
     UpdateScrollSnapEndWithOffset(offset);
 }
 
-void Scrollable::ProcessScrollSnapMotion(double position)
+void Scrollable::ProcessListSnapMotion(double position)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f", currentPos_, position);
     currentVelocity_ = snapVelocity_;
@@ -1187,15 +1187,15 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         scroll->lastVsyncTime_ = currentVsync;
 
         if (NearEqual(scroll->endPos_, position, SPRING_ACCURACY)) {
-            if (scroll->useScrollSnap_) {
-                scroll->ProcessScrollSnapMotion(scroll->endPos_);
+            if (scroll->useListSnap_) {
+                scroll->ProcessListSnapMotion(scroll->endPos_);
             } else {
                 scroll->ProcessScrollMotion(scroll->endPos_);
             }
             scroll->StopSnapAnimation();
         } else {
-            if (scroll->useScrollSnap_) {
-                scroll->ProcessScrollSnapMotion(position);
+            if (scroll->useListSnap_) {
+                scroll->ProcessListSnapMotion(position);
             } else {
                 scroll->ProcessScrollMotion(position);
             }

@@ -135,11 +135,11 @@ public:
     }
 
     /**
-     * @param useScrollSnap true if runnning SnapAnimation for ScrollPattern, false if for ListPattern
+     * @param useListSnap true if runnning SnapAnimation for ListPattern, false if for ScrollPattern
      */
-    void SetSnapMode(bool useScrollSnap)
+    void SetSnapMode(bool useListSnap)
     {
-        useScrollSnap_ = useScrollSnap;
+        useListSnap_ = useListSnap;
     }
 
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
@@ -490,7 +490,7 @@ private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
-    void ProcessScrollSnapMotion(double position);
+    void ProcessListSnapMotion(double position);
     void FixScrollMotion(float position, float initVelocity);
     void ExecuteScrollBegin(double& mainDelta);
     double ComputeCap(int dragCount);
@@ -541,7 +541,7 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
-    bool useScrollSnap_ = true; // set to true if pattern is ScrollPattern, false if ListPattern
+    bool useListSnap_ = false; // set to true to use Snap animation of ListPattern
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode

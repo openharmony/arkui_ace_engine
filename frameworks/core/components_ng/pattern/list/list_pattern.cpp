@@ -63,7 +63,7 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
-        scrollable_->SetSnapMode(false);
+        scrollable_->SetSnapMode(true);
     }
 
     SetEdgeEffect();
