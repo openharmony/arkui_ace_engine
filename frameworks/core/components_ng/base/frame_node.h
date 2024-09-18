@@ -499,19 +499,10 @@ public:
     bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
-    void PushDestroyCallback(std::function<void()>&& callback)
-    {
-        destroyCallbacks_.emplace_back(callback);
-    }
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
     {
         destroyCallbacksMap_[tag] = callback;
-    }
-
-    std::list<std::function<void()>> GetDestroyCallback() const
-    {
-        return destroyCallbacks_;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -1089,7 +1080,6 @@ public:
 
 protected:
     void DumpInfo() override;
-    std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;

@@ -443,9 +443,6 @@ FrameNode::FrameNode(
 FrameNode::~FrameNode()
 {
     ResetPredictNodes();
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -3409,9 +3406,6 @@ void FrameNode::OnAccessibilityEvent(
 
 void FrameNode::OnRecycle()
 {
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
