@@ -3183,15 +3183,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
-<<<<<<< HEAD
-        webPattern->UpdateTouchHandleForOverlay(true);
-        webPattern->SetSelectOverlayDragging(false);
-        if (!webPattern->IsQuickMenuShow()) {
-            webPattern->ChangeVisibilityOfQuickMenu();
-        }
-=======
         webPattern->OnSelectHandleDone(rectF, isFirst);
->>>>>>> 9e9d7bf666d68f5fdb9a6d215c69e65c6cf7d204
     };
     selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
     selectInfo.onTouchUp = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
@@ -3199,23 +3191,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onHandleMove = [weak = AceType::WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
-<<<<<<< HEAD
-        webPattern->SetSelectOverlayDragging(true);
-        webPattern->HandleTouchDown(info, true);
-    };
-    selectInfo.onTouchUp = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
-        auto webPattern = weak.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->SetSelectOverlayDragging(false);
-        webPattern->HandleTouchUp(info, true);
-    };
-    selectInfo.onTouchMove = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {
-        auto webPattern = weak.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->HandleTouchMove(info, true);
-=======
         webPattern->OnSelectHandleMove(handleRect, isFirst);
->>>>>>> 9e9d7bf666d68f5fdb9a6d215c69e65c6cf7d204
     };
     selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
         auto webPattern = weak.Upgrade();
@@ -3375,11 +3351,7 @@ void WebPattern::ChangeVisibilityOfQuickMenu()
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
-<<<<<<< HEAD
     if (overlayType == SELECTION_OVERLAY && !selectTemporarilyHidden_ && !selectTemporarilyHiddenByScroll_) {
-=======
-    if (overlayType == SELECTION_OVERLAY && !selectTemporarilyHidden_) {
->>>>>>> 9e9d7bf666d68f5fdb9a6d215c69e65c6cf7d204
         bool isMenuShow = selectOverlayProxy_->IsMenuShow();
         selectOverlayProxy_->ShowOrHiddenMenu(isMenuShow);
         TAG_LOGI(AceLogTag::ACE_WEB, "Current menu display status is %{public}d.", isMenuShow);
