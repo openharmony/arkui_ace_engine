@@ -74,6 +74,21 @@ void ValueImpl(Ark_NativePointer node,
 void FontImpl(Ark_NativePointer node,
               const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto font = Converter::OptConvert<Font>(*value);
+    if (font) {
+        SelectModelNG::SetFontSize(frameNode, font->fontSize);
+        SelectModelNG::SetFontWeight(frameNode, font->fontWeight);
+        SelectModelNG::SetFontFamily(frameNode, font->fontFamilies);
+        SelectModelNG::SetItalicFontStyle(frameNode, font->fontStyle);
+    } else {
+        SelectModelNG::SetFontSize(frameNode, std::nullopt);
+        SelectModelNG::SetFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetFontFamily(frameNode, {});
+        SelectModelNG::SetItalicFontStyle(frameNode, std::nullopt);
+    }
 }
 void FontColorImpl(Ark_NativePointer node,
                    const ResourceColor* value)
@@ -94,6 +109,21 @@ void SelectedOptionBgColorImpl(Ark_NativePointer node,
 void SelectedOptionFontImpl(Ark_NativePointer node,
                             const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto font = Converter::OptConvert<Font>(*value);
+    if (font) {
+        SelectModelNG::SetSelectedOptionFontSize(frameNode, font->fontSize);
+        SelectModelNG::SetSelectedOptionFontWeight(frameNode, font->fontWeight);
+        SelectModelNG::SetSelectedOptionFontFamily(frameNode, font->fontFamilies);
+        SelectModelNG::SetSelectedOptionItalicFontStyle(frameNode, font->fontStyle);
+    } else {
+        SelectModelNG::SetSelectedOptionFontSize(frameNode, std::nullopt);
+        SelectModelNG::SetSelectedOptionFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetSelectedOptionFontFamily(frameNode, {});
+        SelectModelNG::SetSelectedOptionItalicFontStyle(frameNode, std::nullopt);
+    }
 }
 void SelectedOptionFontColorImpl(Ark_NativePointer node,
                                  const ResourceColor* value)
@@ -114,6 +144,21 @@ void OptionBgColorImpl(Ark_NativePointer node,
 void OptionFontImpl(Ark_NativePointer node,
                     const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto font = Converter::OptConvert<Font>(*value);
+    if (font) {
+        SelectModelNG::SetOptionFontSize(frameNode, font->fontSize);
+        SelectModelNG::SetOptionFontWeight(frameNode, font->fontWeight);
+        SelectModelNG::SetOptionFontFamily(frameNode, font->fontFamilies);
+        SelectModelNG::SetOptionItalicFontStyle(frameNode, font->fontStyle);
+    } else {
+        SelectModelNG::SetOptionFontSize(frameNode, std::nullopt);
+        SelectModelNG::SetOptionFontWeight(frameNode, std::nullopt);
+        SelectModelNG::SetOptionFontFamily(frameNode, {});
+        SelectModelNG::SetOptionItalicFontStyle(frameNode, std::nullopt);
+    }
 }
 void OptionFontColorImpl(Ark_NativePointer node,
                          const ResourceColor* value)

@@ -581,28 +581,40 @@ void SelectPattern::SetValue(const std::string& value)
     selectValue_ = value;
 }
 
-void SelectPattern::SetFontSize(const Dimension& value)
+void SelectPattern::SetFontSize(const std::optional<Dimension>& value)
 {
-    if (value.IsNegative()) {
-        return;
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (value) {
+        if (value->IsNegative()) {
+            return;
+        }
+        props->UpdateFontSize(value.value());
+    } else {
+        props->ResetFontSize();
     }
-    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    props->UpdateFontSize(value);
 }
 
-void SelectPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+void SelectPattern::SetItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateItalicFontStyle(value);
+    if (value) {
+        props->UpdateItalicFontStyle(value.value());
+    } else {
+        props->ResetItalicFontStyle();
+    }
 }
 
-void SelectPattern::SetFontWeight(const FontWeight& value)
+void SelectPattern::SetFontWeight(const std::optional<FontWeight>& value)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateFontWeight(value);
+    if (value) {
+        props->UpdateFontWeight(value.value());
+    } else {
+        props->ResetFontWeight();
+    }
 }
 
 void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
@@ -636,7 +648,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
     }
 }
 
-void SelectPattern::SetOptionFontSize(const Dimension& value)
+void SelectPattern::SetOptionFontSize(const std::optional<Dimension>& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -649,7 +661,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
     }
 }
 
-void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
+void SelectPattern::SetOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -662,7 +674,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
     }
 }
 
-void SelectPattern::SetOptionFontWeight(const FontWeight& value)
+void SelectPattern::SetOptionFontWeight(const std::optional<FontWeight>& value)
 {
     optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -712,7 +724,7 @@ void SelectPattern::SetSelectedOptionBgColor(const Color& color)
     }
 }
 
-void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
+void SelectPattern::SetSelectedOptionFontSize(const std::optional<Dimension>& value)
 {
     selectedFont_.FontSize = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -722,7 +734,7 @@ void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
     }
 }
 
-void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value)
+void SelectPattern::SetSelectedOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     selectedFont_.FontStyle = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -732,7 +744,7 @@ void SelectPattern::SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value
     }
 }
 
-void SelectPattern::SetSelectedOptionFontWeight(const FontWeight& value)
+void SelectPattern::SetSelectedOptionFontWeight(const std::optional<FontWeight>& value)
 {
     selectedFont_.FontWeight = value;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {

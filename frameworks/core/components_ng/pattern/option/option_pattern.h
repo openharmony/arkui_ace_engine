@@ -91,9 +91,9 @@ public:
 
     void SetBgColor(const Color& color);
     // set font props
-    void SetFontSize(const Dimension& value);
-    void SetItalicFontStyle(const Ace::FontStyle& value);
-    void SetFontWeight(const FontWeight& value);
+    void SetFontSize(const std::optional<Dimension>& value);
+    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
+    void SetFontWeight(const std::optional<FontWeight>& value);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
 

@@ -114,25 +114,25 @@ public:
 
     // set properties of text node
     void SetValue(const std::string& value);
-    void SetFontSize(const Dimension& value);
-    void SetItalicFontStyle(const Ace::FontStyle& value);
-    void SetFontWeight(const FontWeight& value);
+    void SetFontSize(const std::optional<Dimension>& value);
+    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
+    void SetFontWeight(const std::optional<FontWeight>& value);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
 
     // set props of option nodes
     void SetOptionBgColor(const Color& color);
-    void SetOptionFontSize(const Dimension& value);
-    void SetOptionItalicFontStyle(const Ace::FontStyle& value);
-    void SetOptionFontWeight(const FontWeight& value);
+    void SetOptionFontSize(const std::optional<Dimension>& value);
+    void SetOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value);
+    void SetOptionFontWeight(const std::optional<FontWeight>& value);
     void SetOptionFontFamily(const std::vector<std::string>& value);
     void SetOptionFontColor(const Color& color);
 
     // set props of option node when selected
     void SetSelectedOptionBgColor(const Color& color);
-    void SetSelectedOptionFontSize(const Dimension& value);
-    void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value);
-    void SetSelectedOptionFontWeight(const FontWeight& value);
+    void SetSelectedOptionFontSize(const std::optional<Dimension>& value);
+    void SetSelectedOptionItalicFontStyle(const std::optional<Ace::FontStyle>& value);
+    void SetSelectedOptionFontWeight(const std::optional<FontWeight>& value);
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     void SetSelectedOptionFontColor(const Color& color);
 

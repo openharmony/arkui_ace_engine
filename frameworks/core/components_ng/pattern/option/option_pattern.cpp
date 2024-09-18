@@ -325,32 +325,45 @@ void OptionPattern::SetBgColor(const Color& color)
     bgColor_ = color;
 }
 
-void OptionPattern::SetFontSize(const Dimension& value)
+void OptionPattern::SetFontSize(const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     CHECK_NULL_VOID(selectTheme_);
-    props->UpdateFontSize(value.IsNegative() ? selectTheme_->GetMenuFontSize() : value);
+    if (value) {
+        Dimension fontSize = value.value();
+        props->UpdateFontSize(fontSize.IsNegative() ? selectTheme_->GetMenuFontSize() : fontSize);
+    } else {
+        props->ResetFontSize();
+    }
 }
 
-void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+void OptionPattern::SetItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateItalicFontStyle(value);
+    if (value) {
+        props->UpdateItalicFontStyle(value.value());
+    } else {
+        props->ResetItalicFontStyle();
+    }
 }
 
-void OptionPattern::SetFontWeight(const FontWeight& value)
+void OptionPattern::SetFontWeight(const std::optional<FontWeight>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateFontWeight(value);
+    if (value) {
+        props->UpdateFontWeight(value.value());
+    } else {
+        props->ResetFontWeight();
+    }
 }
 
 void OptionPattern::SetFontFamily(const std::vector<std::string>& value)

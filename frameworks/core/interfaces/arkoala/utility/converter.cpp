@@ -17,6 +17,7 @@
 #include "reverse_converter.h"
 
 #include "core/interfaces/native/node/node_api.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
@@ -184,6 +185,29 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
     return std::nullopt;
 }
 
+std::optional<StringArray> ResourceConverter::ToFontFamilies()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::STRING) {
+        std::optional<std::string> str;
+        if (id_ != -1) {
+            str = themeConstants_->GetString(id_);
+        } else if (!params_.empty()) {
+            str = themeConstants_->GetStringByName(params_.front());
+        } else {
+            LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
+        }
+        if (str.has_value()) {
+            return Framework::ConvertStrToFontFamilies(str.value());
+        }
+    } else if (type_ == NodeModifier::ResourceType::STRARRAY) {
+        LOGE("ResourceConverter::ToFontFamilies Support of ResourceType::STRARRAY type is not implemented");
+    } else {
+        LOGE("ResourceConverter::ToFontFamilies Resource type is not supported");
+    }
+    return std::nullopt;
+}
+
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
@@ -219,8 +243,8 @@ std::optional<int32_t> ResourceConverter::ToInt()
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
+    CHECK_NULL_RETURN(themeConstants_, result);
     if (id_ == -1 && params_.size() > 0) {
-        CHECK_NULL_RETURN(themeConstants_, result);
         result = themeConstants_->GetColorByName(params_[0]);
     }
 
@@ -299,22 +323,18 @@ Font Convert(const Ark_Font& src)
         // cannot be moved to the ace_engine_types
         using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
         auto familiesResStr = OptConvert<UnionStringResource>(src.family);
-        std::string familiesStr;
         if (familiesResStr) {
-            if (auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value());
-                srcArkStr != nullptr) {
-                familiesStr = Converter::Convert<std::string>(*srcArkStr);
-            } else {
-                LOGE("ARKOALA SearchAttributeModifier.FonFamilyResource not implemented.");
+            if (auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value()); srcArkStr) {
+                auto familiesStr = Converter::Convert<std::string>(*srcArkStr);
+                font.fontFamilies = Framework::ConvertStrToFontFamilies(familiesStr);
+            } else if (auto srcArkRes = std::get_if<Ark_Resource>(&familiesResStr.value()); srcArkRes) {
+                ResourceConverter resConverter(*srcArkRes);
+                auto optValue = resConverter.ToFontFamilies();
+                if (optValue) {
+                    font.fontFamilies = optValue.value();
+                }
             }
         }
-        std::istringstream families(familiesStr);
-        std::vector<std::string> fontFamilies;
-        for (std::string family; std::getline(families, family, ',');) {
-            StringUtils::TrimStr(family);
-            fontFamilies.push_back(family);
-        }
-        font.fontFamilies = fontFamilies;
         auto fontSize = OptConvert<Dimension>(src.size);
         if (fontSize) {
             if (fontSize->IsNegative()) fontSize.reset();

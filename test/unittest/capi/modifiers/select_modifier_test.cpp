@@ -38,6 +38,25 @@ const Color THEME_BACKGROUND_COLOR(0xFFAABBC1);
 const Color THEME_FONT_COLOR(0xFFAABBC3);
 const Color THEME_SELECTED_OPTION_FONT_COLOR(0xFFAABBC4);
 
+const auto DEFAULT_FONT_SIZE = "14.00px";
+const auto DEFAULT_FONT_WEIGHT = "FontWeight.Normal";
+const auto DEFAULT_FONT_FAMILY = "";
+const auto DEFAULT_FONT_STYLE = "FontStyle.Normal";
+
+const Ark_Font TEST_ARK_FONT = {
+    .size = ArkValue<Opt_Length>(12),
+    .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
+    .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),
+    .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC),
+};
+const auto EXPECTED_FONT_SIZE = "12.00px";
+const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
+const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
+const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
+
+const auto SELECTED_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(1);
+const auto INVALID_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(-1);
+
 const std::vector<SelectParam> SELECT_PARAMS = {
     { .text = "Option A" },
     { .text = "Option B" },
@@ -53,6 +72,10 @@ const auto ALEN_PX_POS = ArkValue<Ark_Length>(AINT32_POS);
 const auto ALEN_PX_NEG = ArkValue<Ark_Length>(AINT32_NEG);
 const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
 const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
+static const auto OPT_LEN_PX_POS = ArkValue<Opt_Length>(AINT32_POS);
+static const auto OPT_LEN_PX_NEG = ArkValue<Opt_Length>(AINT32_NEG);
+static const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
+static const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
 
 // check length
 const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
@@ -60,6 +83,19 @@ const std::string CHECK_NEGATIVE_VALUE_INT("-2147483648.00px");
 const std::string CHECK_POSITIVE_VALUE_FLOAT("1.23vp");
 const std::string CHECK_POSITIVE_VALUE_FLOAT_PX("1.23px");
 const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
+
+const auto FONT_ATTR("font");
+const auto SELECTED_OPTION_FONT_ATTR("selectedOptionFont");
+const auto OPTION_FONT_ATTR("optionFont");
+const auto FONT_SIZE("size");
+const auto FONT_FAMILY("family");
+const auto FONT_WEIGHT("weight");
+const auto FONT_STYLE("style");
+
+const auto RES_NAME = "Family resource name";
+const auto RES_VALUE = "FontFamilyA,FontFamilyB,FontFamilyC";
+
+using FontTestStep = std::tuple<Ark_Font, std::string>;
 
 struct MenuAlignTest {
     Ark_MenuAlignType menuAlignType;
@@ -81,6 +117,84 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
         .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
     };
 }
+
+std::vector<FontTestStep> getFontSizeTestPlan(const std::string& defaultValue)
+{
+    const std::vector<FontTestStep> testPlan = {
+        {{ .size = OPT_LEN_VP_POS }, CHECK_POSITIVE_VALUE_FLOAT },
+        {{ .size = OPT_LEN_PX_POS }, CHECK_POSITIVE_VALUE_INT },
+        {{ .size = OPT_LEN_VP_NEG }, defaultValue },
+        {{ .size = OPT_LEN_PX_NEG }, defaultValue },
+        {{ .size = ArkValue<Opt_Dimension>(Ark_Empty()) }, defaultValue },
+    };
+    return testPlan;
+}
+
+std::vector<FontTestStep> getFontWeightTestPlan(const std::string& defaultValue)
+{
+    using FontWeightT = Opt_Union_FontWeight_Number_String;
+    const std::vector<FontTestStep> testPlan = {
+        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD)}, "FontWeight.Bold" },
+        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR)}, "FontWeight.Regular" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(100)}, "100" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(-111)}, defaultValue },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(300.00f)}, "300" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(-123.456f)}, defaultValue },
+        { {.weight = ArkUnion<FontWeightT, Ark_String>("700")}, "700" },
+        { {.weight = ArkUnion<FontWeightT, Ark_String>("bold")}, "FontWeight.Bold" },
+        { {.weight = ArkUnion<FontWeightT, Ark_String>("InvalidData!")}, defaultValue },
+        { {.weight = ArkValue<FontWeightT>(Ark_Empty())}, defaultValue },
+    };
+    return testPlan;
+}
+
+std::vector<FontTestStep> getFontStyleTestPlan()
+{
+    const std::vector<FontTestStep> testPlan = {
+        { { .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL) }, "FontStyle.Normal" },
+        { { .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC) }, "FontStyle.Italic" },
+        { { .style = ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(INT_MIN)) }, DEFAULT_FONT_STYLE },
+        { { .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC) }, "FontStyle.Italic" },
+        { { .style = ArkValue<Opt_FontStyle>(Ark_Empty()) }, DEFAULT_FONT_STYLE },
+    };
+    return testPlan;
+}
+
+std::vector<FontTestStep> getFontFamilyTestPlan()
+{
+    const auto familyStr1 = "Family string value";
+
+    // static keyword is reqired because a pointer to this variable is stored in testPlan
+    static auto arkResName = ArkValue<Ark_String>(RES_NAME);
+
+    Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
+
+    const std::vector<FontTestStep> testPlan = {
+        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_String>(familyStr1) }, familyStr1 },
+        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(familyResource) }, RES_VALUE },
+        { { .family = ArkValue<Opt_Union_String_Resource>(Ark_Empty()) }, DEFAULT_FONT_FAMILY },
+    };
+    return testPlan;
+}
+
+struct TestFont {
+    std::string size;
+    std::string weight;
+    std::string family;
+    std::string style;
+
+    TestFont(ArkUINodeHandle node, std::string propName)
+    {
+        auto fontStr = GetStringAttribute(node, propName);
+        auto fontJson = JsonUtil::ParseJsonString(fontStr);
+        if (fontJson) {
+            size = fontJson->GetString(FONT_SIZE);
+            weight = fontJson->GetString(FONT_WEIGHT);
+            family = fontJson->GetString(FONT_FAMILY);
+            style = fontJson->GetString(FONT_STYLE);
+        }
+    }
+};
 
 int g_eventOnSelectIndex;
 std::string g_eventOnSelectValue;
@@ -122,6 +236,8 @@ public:
         SetupTheme<SelectTheme>();
         SetupTheme<TextTheme>();
         SetupTheme<IconTheme>();
+
+        AddResource(RES_NAME, RES_VALUE);
 
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
@@ -451,13 +567,17 @@ HWTEST_F(SelectModifierTest, setControlSizeTest, TestSize.Level1)
     const auto propName("controlSize");
     ASSERT_NE(modifier_->setControlSize, nullptr);
 
-    modifier_->setControlSize(node_, ARK_CONTROL_SIZE_NORMAL);
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, "ControlSize.NORMAL");
+    // check default value
+    auto checkVal0 = GetStringAttribute(node_, propName);
+    EXPECT_EQ(checkVal0, "ControlSize.NORMAL");
 
     modifier_->setControlSize(node_, ARK_CONTROL_SIZE_SMALL);
+    auto checkVal1 = GetStringAttribute(node_, propName);
+    EXPECT_EQ(checkVal1, "ControlSize.SMALL");
+
+    modifier_->setControlSize(node_, ARK_CONTROL_SIZE_NORMAL);
     auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "ControlSize.SMALL");
+    EXPECT_EQ(checkVal2, "ControlSize.NORMAL");
 }
 
 /**
@@ -683,6 +803,332 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
     EXPECT_EQ(g_eventOnSelectValue, value);
 
     ASSERT_NE(&recv, nullptr);
+}
+
+/**
+ * @tc.name: setFontTest
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    modifier_->setFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setFontTestSize
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+
+    modifier_->setControlSize(node_, ARK_CONTROL_SIZE_SMALL);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+}
+
+/**
+ * @tc.name: setFontTestWeight
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.weight, expected);
+    }
+}
+
+/**
+ * @tc.name: setFontTestFamily
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    for (const auto &[font, expected]: getFontFamilyTestPlan()) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.family, expected);
+    }
+}
+
+/**
+ * @tc.name: setFontTestStyle
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    for (const auto &[font, expected]: getFontStyleTestPlan()) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.style, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTest
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    modifier_->setSelectedOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, SELECTED_OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestNothingSelected
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestNothingSelected, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &INVALID_INDEX);
+
+    modifier_->setSelectedOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, SELECTED_OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestSize
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestWeight
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.weight, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestFamily
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontFamilyTestPlan()) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.family, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestStyle
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontStyleTestPlan()) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.style, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTest
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    modifier_->setOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setOptionFontTestNothingSelected
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestNothingSelected, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &INVALID_INDEX);
+
+    modifier_->setOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setOptionFontTestSize
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTestWeight
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.weight, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTestFamily
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontFamilyTestPlan()) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.family, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTestStyle
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontStyleTestPlan()) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.style, expected);
+    }
 }
 
 } // namespace OHOS::Ace::NG
