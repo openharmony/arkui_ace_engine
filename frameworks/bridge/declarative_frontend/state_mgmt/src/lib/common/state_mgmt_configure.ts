@@ -14,12 +14,12 @@
  */
 
 /**
- * ConfigureStateMgmt keeps track if V2 @Observed and @Track are used. 
+ * ConfigureStateMgmt keeps track if V2 @ObservedV2 and @Trace are used. 
  * If yes, it enables object deep observation mechanisms need with ObservedV2.
  */
 class ConfigureStateMgmt {
 
-    private static readonly HOW_TO_SAY = `Your application uses state management V2 features! - It is strongly recommended not to mix V1 and V2. Consult the rules how state management V1 and V2 can be mixed in the same app.`;
+    private static readonly HOW_TO_SAY = `Your application uses both state management V1 and V2 features! - It is strongly recommended not to mix V1 and V2. Consult the rules how state management V1 and V2 can be mixed in the same app.`;
 
     private static instance__?: ConfigureStateMgmt;
 
@@ -33,7 +33,7 @@ class ConfigureStateMgmt {
     }
 
     /**
-     * framework code call this function when it sees use of a stateMgmt V2 @Observed @Track
+     * framework code call this function when it sees use of a stateMgmt V2 @ObservedV2 @Trace
      * 
      * @param feature specify feature separately from context of use, so that in future decision can be made 
      *                for individual features, not use permit either use of V1 or V2.
@@ -60,7 +60,7 @@ class ConfigureStateMgmt {
 
     /**
       * Return true if object deep observation mechanisms need to be enabled 
-      * that is when seen V2 @observe, @track, or @monitor decorator used in at least one class
+      * that is when seen V2 @ObservedV2, @Trace, or @Monitor decorator used in at least one class
       * (we could but we do not check for class object instance creation for performance reasons)
       * @returns 
       */

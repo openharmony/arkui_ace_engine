@@ -94,7 +94,7 @@ class ObserveV2 {
   // Map bindId to WeakRef<ViewPU> | MonitorV2
   private id2cmp_: { number: WeakRef<Object> } = {} as { number: WeakRef<Object> };
 
-  // Map bindId -> Set of @observed class objects
+  // Map bindId -> Set of @Observed class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
   private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
@@ -126,7 +126,7 @@ class ObserveV2 {
     return this.obsInstance_;
   }
 
-  // return true given value is @observed object
+  // return true given value is @Observed object
   public static IsObservedObjectV2(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
@@ -366,7 +366,7 @@ class ObserveV2 {
   public setUnmonitored<Z>(target: object, attrName: string, newValue: Z): void {
     const storeProp = ObserveV2.OB_PREFIX + attrName;
     if (storeProp in target) {
-      // @track attrName
+      // @Track attrName
       stateMgmtConsole.propertyAccess(`setUnmonitored '${attrName}' - tracked but unchanged. Doing nothing.`);
       target[storeProp] = newValue;
     } else {
@@ -722,7 +722,7 @@ class ObserveV2 {
    * Helper function to add meta data about decorator to ViewPU or ViewV2
    * @param proto prototype object of application class derived from  ViewPU or ViewV2
    * @param varName decorated variable
-   * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+   * @param deco '@Local', '@Event', etc 
    */
   public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
     // add decorator meta data
@@ -733,7 +733,7 @@ class ObserveV2 {
     // FIXME
     // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V2 event handles this function to return false
+    // any @Local, @Trace, etc V2 event handles this function to return false
     Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
@@ -756,7 +756,7 @@ class ObserveV2 {
     // FIXME
     // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V2 event handles this function to return false
+    // any @Local, @Trace, etc V2 event handles this function to return false
     Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
@@ -797,7 +797,7 @@ const trackInternal = (
     },
     enumerable: true
   });
-  // this marks the proto as having at least one @track property inside
+  // this marks the proto as having at least one @Trace property inside
   // used by IsObservedObjectV2
   target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal

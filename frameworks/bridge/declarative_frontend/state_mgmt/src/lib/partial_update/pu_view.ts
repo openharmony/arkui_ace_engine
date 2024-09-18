@@ -123,7 +123,7 @@ abstract class ViewPU extends PUV2ViewBase
   // V1 by default, changed to V2 by the first V2 decorated variable
   // when splitting ViewPU and ViewV2
   // use instanceOf. Until then, this is a workaround.
-  // @state, @track, etc V2 decorator functions modify isViewV2 to return true
+  // @Local, @Param, @Trace, etc V2 decorator functions modify isViewV2 to return true
   // (decorator can modify functions in prototype)
   // FIXME
   private get isViewV2(): boolean {
@@ -854,7 +854,7 @@ abstract class ViewPU extends PUV2ViewBase
           }
         } else {
           // FIXME fix for mixed V1 - V2 Hierarchies
-          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV1, yet');
+          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
         }
       } // if child
     });
@@ -883,7 +883,7 @@ abstract class ViewPU extends PUV2ViewBase
           }
         } else {
           // FIXME fix for mixed V1 - V2 Hierarchies
-          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV1');
+          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
         }
       } // if child
     });

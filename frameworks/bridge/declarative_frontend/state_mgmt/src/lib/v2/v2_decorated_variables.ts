@@ -60,7 +60,7 @@ class VariableUtilV2 {
       }
 
       const storeProp = ObserveV2.OB_PREFIX + attrName;
-      // @observed class and @track attrName
+      // @Observed class and @Track attrName
       if (newValue === target[storeProp]) {
         stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' unchanged. Doing nothing.`);
         return;
@@ -93,7 +93,7 @@ class VariableUtilV2 {
      * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
-     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+     * @param deco '@Local', '@Event', etc
      */
     public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@Provider' | '@Consumer'): void {
       // add decorator meta data to prototype
@@ -229,23 +229,23 @@ function ObservedV2_Internal<T extends ConstructorV2>(BaseClass: T): T {
 */
 function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
 
-  // prevent @Track inside @observed class
+  // prevent @Track inside @ObservedV2 class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V2 @observed class. Need to fix class definition to use @track.`;
+    const error = `'@Observed class ${BaseClass?.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
   }
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
     // not an error, suspicious of developer oversight
-    stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is this intended? Check our application.`);
+    stateMgmtConsole.warn(`'@Observed class ${BaseClass?.name}': no @Track property inside. Is this intended? Check our application.`);
   }
 
   // Use ID_REFS only if number of observed attrs is significant
   const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
   const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
   if (count > 5) {
-    stateMgmtConsole.log(`'@observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
+    stateMgmtConsole.log(`'@Observed class ${BaseClass?.name}' configured to use ID_REFS optimization`);
     BaseClass.prototype[ObserveV2.ID_REFS] = {};
   }
   const observedClass =  class extends BaseClass {

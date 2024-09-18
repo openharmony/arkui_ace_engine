@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /**
- * ConfigureStateMgmt keeps track if V2 @Observed and @Track are used.
+ * ConfigureStateMgmt keeps track if V2 @ObservedV2 and @Trace are used.
  * If yes, it enables object deep observation mechanisms need with ObservedV2.
  */
 class ConfigureStateMgmt {
@@ -27,7 +27,7 @@ class ConfigureStateMgmt {
             : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
     }
     /**
-     * framework code call this function when it sees use of a stateMgmt V2 @Observed @Track
+     * framework code call this function when it sees use of a stateMgmt V2 @ObservedV2 @Trace
      *
      * @param feature specify feature separately from context of use, so that in future decision can be made
      *                for individual features, not use permit either use of V1 or V2.
@@ -52,7 +52,7 @@ class ConfigureStateMgmt {
     }
     /**
       * Return true if object deep observation mechanisms need to be enabled
-      * that is when seen V2 @observe, @track, or @monitor decorator used in at least one class
+      * that is when seen V2 @ObservedV2, @Trace, or @Monitor decorator used in at least one class
       * (we could but we do not check for class object instance creation for performance reasons)
       * @returns
       */
@@ -60,7 +60,7 @@ class ConfigureStateMgmt {
         return this.v2ObservedTrackInUse_;
     }
 } // ConfigureStateMgmt
-ConfigureStateMgmt.HOW_TO_SAY = `Your application uses state management V2 features! - It is strongly recommended not to mix V1 and V2. Consult the rules how state management V1 and V2 can be mixed in the same app.`;
+ConfigureStateMgmt.HOW_TO_SAY = `Your application uses both state management V1 and V2 features! - It is strongly recommended not to mix V1 and V2. Consult the rules how state management V1 and V2 can be mixed in the same app.`;
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -180,15 +180,6 @@ stateMgmtProfiler.instance = undefined;
  * @since 9
  */
 class LocalStorage extends NativeLocalStorage {
-    /*
-      get access to provded LocalStorage instance thru Stake model
-      @StageModelOnly
-      @form
-      @since 10
-    */
-    static getShared() {
-        return LocalStorage.GetShared();
-    }
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -213,6 +204,15 @@ class LocalStorage extends NativeLocalStorage {
         if (Object.keys(initializingProperties).length) {
             this.initializeProps(initializingProperties);
         }
+    }
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
     }
     /**
      * clear storage and init with given properties
@@ -646,6 +646,13 @@ class LocalStorage extends NativeLocalStorage {
  * @since 7
  */
 class AppStorage extends LocalStorage {
+    /** singleton class, app can not create instances
+    *
+    * not a public / sdk function
+    */
+    constructor(initializingProperties) {
+        super(initializingProperties);
+    }
     /**
     * create and initialize singleton
     * initialzie with all properties and their values that Object.keys(params) returns
@@ -1073,13 +1080,6 @@ class AppStorage extends LocalStorage {
         }
         return AppStorage.instance_;
     }
-    /** singleton class, app can not create instances
-    *
-    * not a public / sdk function
-    */
-    constructor(initializingProperties) {
-        super(initializingProperties);
-    }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
@@ -1103,6 +1103,16 @@ AppStorage.instance_ = undefined;
  * public API to manage IPropertySubscriber
  */
 class SubscriberManager {
+    /**
+     * SubscriberManager is a singleton created by the framework
+     * do not use
+     *
+     * internal method
+     */
+    constructor() {
+        this.subscriberById_ = new Map();
+        
+    }
     /**
       * check subscriber is known
       * same as ES6 Map.prototype.has()
@@ -1289,16 +1299,6 @@ class SubscriberManager {
      */
     makeId() {
         return ViewStackProcessor.MakeUniqueId();
-    }
-    /**
-     * SubscriberManager is a singleton created by the framework
-     * do not use
-     *
-     * internal method
-     */
-    constructor() {
-        this.subscriberById_ = new Map();
-        
     }
 }
 SubscriberManager.nextId_ = 0;
@@ -1636,6 +1636,14 @@ DateInfo.replacerCompatible = "ace_engine_state_mgmt_date_replacer";
  */
 class PersistentStorage {
     /**
+     * all following methods are framework internal
+     */
+    constructor() {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.MakeId();
+        SubscriberManager.Add(this);
+    }
+    /**
      *
      * @param storage method to be used by the framework to set the backend
      * this is to be done during startup
@@ -1773,14 +1781,6 @@ class PersistentStorage {
     static NotifyHasChanged(propName) {
         
         PersistentStorage.getOrCreate().writeToPersistentStorage(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
-    }
-    /**
-     * all following methods are framework internal
-     */
-    constructor() {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
     }
     keys() {
         return this.links_.keys();
@@ -1932,6 +1932,10 @@ PersistentStorage.instance_ = undefined;
  *
  */
 class Environment {
+    constructor() {
+        this.props_ = new Map();
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
+    }
     static getOrCreate() {
         if (Environment.instance_) {
             // already initialized
@@ -1993,10 +1997,6 @@ class Environment {
      */
     static Keys() {
         return Environment.getOrCreate().keys();
-    }
-    constructor() {
-        this.props_ = new Map();
-        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
     envProp(key, value) {
         let prop = AppStorage.prop(key);
@@ -2238,9 +2238,9 @@ class errorReport {
 const __IS_OBSERVED_PROXIED = Symbol('_____is_observed_proxied__');
 function Observed(BaseClass) {
     
-    // prevent use of V2 @track inside V2 @Observed class
+    // prevent use of V1 @Track inside V2 @ObservedV2 class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV2.SYMBOL_REFS)) {
-        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
+        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
         stateMgmtConsole.error(error);
         throw new Error(error);
     }
@@ -2568,6 +2568,23 @@ class ExtendableProxy {
 }
 class ObservedObject extends ExtendableProxy {
     /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
+        }
+        if (objectOwningProperty) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
+    /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
      *
@@ -2725,23 +2742,6 @@ class ObservedObject extends ExtendableProxy {
             ? Object.getPrototypeOf(proto.constructor.prototype)
             : proto;
     }
-    /**
-     * To create a new ObservableObject use CreateNew function
-     *
-     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * notifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
-     */
-    constructor(obj, handler, objectOwningProperty) {
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
-        }
-        if (objectOwningProperty) {
-            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
-        }
-    } // end of constructor
 }
 ObservedObject.__IS_OBSERVED_OBJECT = Symbol('_____is_observed_object__');
 ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol('_____raw_object__');
@@ -3711,23 +3711,6 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class View extends NativeViewFullUpdate {
-    get localStorage_() {
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
-    }
     /**
      * Create a View
      *
@@ -3770,6 +3753,23 @@ class View extends NativeViewFullUpdate {
         }
         SubscriberManager.Add(this);
         
+    }
+    get localStorage_() {
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -3986,7 +3986,6 @@ class UpdateFuncsByElmtId {
  * limitations under the License.
  *
 */
-/// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
 // NativeView
 // implemented in C++  for release
 class PUV2ViewBase extends NativeViewPartialUpdate {
@@ -4922,7 +4921,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 customComponent: this.debugInfoOwningView(),
                 variableDeco: this.debugInfoDecorator(),
                 variableName: this.info(),
-                expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V2 @observed/@track object`,
+                expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V1 @Observed/@Track object`,
                 value: value
             });
         }
@@ -6125,7 +6124,6 @@ class UINodeRegisterProxy {
             else {
                 
             }
-            // FIXME: only do this if app uses V2
             ObserveV2.getObserve().clearBinding(elmtId);
         });
         this.removeElementsInfo_.length = 0;
@@ -6158,76 +6156,6 @@ UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 * all definitions in this file are framework internal
 */
 class ViewPU extends PUV2ViewBase {
-    get ownObservedPropertiesStore_() {
-        if (!this.ownObservedPropertiesStore__) {
-            // lazy init
-            this.ownObservedPropertiesStore__ = new Set();
-            this.obtainOwnObservedProperties();
-        }
-        return this.ownObservedPropertiesStore__;
-    }
-    obtainOwnObservedProperties() {
-        let usesStateMgmtVersion = 0;
-        Object.getOwnPropertyNames(this)
-            .filter((propName) => {
-            // do not include backing store, and ObserveV2/MonitorV2/ComputedV2 meta data objects
-            return (propName.startsWith('__') &&
-                !propName.startsWith(ObserveV2.OB_PREFIX) &&
-                !propName.startsWith(MonitorV2.WATCH_PREFIX) &&
-                !propName.startsWith(ComputedV2.COMPUTED_PREFIX));
-        })
-            .forEach((propName) => {
-            const stateVar = Reflect.get(this, propName);
-            if (stateVar && typeof stateVar === 'object' && 'notifyPropertyHasChangedPU' in stateVar) {
-                
-                this.ownObservedPropertiesStore_.add(stateVar);
-                usesStateMgmtVersion = 2;
-            }
-            else {
-                
-            }
-        });
-        if (this.isViewV2 === true) {
-            if (usesStateMgmtVersion === 2) {
-                const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
-                stateMgmtConsole.applicationError(error);
-                throw new Error(error);
-            }
-        }
-        
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_ && this.getParent()) {
-            
-            this.localStoragebackStore_ = this.getParent().localStorage_;
-        }
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.applicationError(`${this.debugInfo__()}: constructor: is setting LocalStorage instance twice. Application error.`);
-        }
-        this.localStoragebackStore_ = instance;
-    }
-    // FIXME
-    // indicate if this is  V1 or a V2 component
-    // V1 by default, changed to V2 by the first V2 decorated variable
-    // when splitting ViewPU and ViewV2
-    // use instanceOf. Until then, this is a workaround.
-    // @state, @track, etc V2 decorator functions modify isViewV2 to return true
-    // (decorator can modify functions in prototype)
-    // FIXME
-    get isViewV2() {
-        return false;
-    }
     /**
      * Create a View
      *
@@ -6294,6 +6222,76 @@ class ViewPU extends PUV2ViewBase {
         }
         SubscriberManager.Add(this);
         
+    }
+    get ownObservedPropertiesStore_() {
+        if (!this.ownObservedPropertiesStore__) {
+            // lazy init
+            this.ownObservedPropertiesStore__ = new Set();
+            this.obtainOwnObservedProperties();
+        }
+        return this.ownObservedPropertiesStore__;
+    }
+    obtainOwnObservedProperties() {
+        let usesStateMgmtVersion = 0;
+        Object.getOwnPropertyNames(this)
+            .filter((propName) => {
+            // do not include backing store, and ObserveV2/MonitorV2/ComputedV2 meta data objects
+            return (propName.startsWith('__') &&
+                !propName.startsWith(ObserveV2.OB_PREFIX) &&
+                !propName.startsWith(MonitorV2.WATCH_PREFIX) &&
+                !propName.startsWith(ComputedV2.COMPUTED_PREFIX));
+        })
+            .forEach((propName) => {
+            const stateVar = Reflect.get(this, propName);
+            if (stateVar && typeof stateVar === 'object' && 'notifyPropertyHasChangedPU' in stateVar) {
+                
+                this.ownObservedPropertiesStore_.add(stateVar);
+                usesStateMgmtVersion = 2;
+            }
+            else {
+                
+            }
+        });
+        if (this.isViewV2 === true) {
+            if (usesStateMgmtVersion === 2) {
+                const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
+                stateMgmtConsole.applicationError(error);
+                throw new Error(error);
+            }
+        }
+        
+    }
+    get localStorage_() {
+        if (!this.localStoragebackStore_ && this.getParent()) {
+            
+            this.localStoragebackStore_ = this.getParent().localStorage_;
+        }
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.applicationError(`${this.debugInfo__()}: constructor: is setting LocalStorage instance twice. Application error.`);
+        }
+        this.localStoragebackStore_ = instance;
+    }
+    // FIXME
+    // indicate if this is  V1 or a V2 component
+    // V1 by default, changed to V2 by the first V2 decorated variable
+    // when splitting ViewPU and ViewV2
+    // use instanceOf. Until then, this is a workaround.
+    // @Local, @Param, @Trace, etc V2 decorator functions modify isViewV2 to return true
+    // (decorator can modify functions in prototype)
+    // FIXME
+    get isViewV2() {
+        return false;
     }
     onGlobalThemeChanged() {
         this.onWillApplyThemeInternally();
@@ -6902,7 +6900,7 @@ class ViewPU extends PUV2ViewBase {
                 }
                 else {
                     // FIXME fix for mixed V1 - V2 Hierarchies
-                    throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV1, yet');
+                    throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
                 }
             } // if child
         });
@@ -6930,7 +6928,7 @@ class ViewPU extends PUV2ViewBase {
                 }
                 else {
                     // FIXME fix for mixed V1 - V2 Hierarchies
-                    throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV1');
+                    throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
                 }
             } // if child
         });
@@ -7747,7 +7745,7 @@ class ObserveV2 {
         this.stackOfRenderedComponents_ = new StackOfRenderedComponents();
         // Map bindId to WeakRef<ViewPU> | MonitorV2
         this.id2cmp_ = {};
-        // Map bindId -> Set of @observed class objects
+        // Map bindId -> Set of @Observed class objects
         // reverse dependency map for quickly removing all dependencies of a bindId
         this.id2targets_ = {};
         // queued up Set of bindId
@@ -7773,7 +7771,7 @@ class ObserveV2 {
         }
         return this.obsInstance_;
     }
-    // return true given value is @observed object
+    // return true given value is @Observed object
     static IsObservedObjectV2(value) {
         return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
     }
@@ -7996,7 +7994,7 @@ class ObserveV2 {
     setUnmonitored(target, attrName, newValue) {
         const storeProp = ObserveV2.OB_PREFIX + attrName;
         if (storeProp in target) {
-            // @track attrName
+            // @Track attrName
             
             target[storeProp] = newValue;
         }
@@ -8332,7 +8330,7 @@ class ObserveV2 {
      * Helper function to add meta data about decorator to ViewPU or ViewV2
      * @param proto prototype object of application class derived from  ViewPU or ViewV2
      * @param varName decorated variable
-     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+     * @param deco '@Local', '@Event', etc
      */
     static addVariableDecoMeta(proto, varName, deco) {
         var _a;
@@ -8344,7 +8342,7 @@ class ObserveV2 {
         // FIXME
         // when splitting ViewPU and ViewV2
         // use instanceOf. Until then, this is a workaround.
-        // any @state, @track, etc V2 event handles this function to return false
+        // any @Local, @Trace, etc V2 event handles this function to return false
         Reflect.defineProperty(proto, 'isViewV2', {
             get() { return true; },
             enumerable: false
@@ -8365,7 +8363,7 @@ class ObserveV2 {
         // FIXME
         // when splitting ViewPU and ViewV2
         // use instanceOf. Until then, this is a workaround.
-        // any @state, @track, etc V2 event handles this function to return false
+        // any @Local, @Trace, etc V2 event handles this function to return false
         Reflect.defineProperty(proto, 'isViewV2', {
             get() { return true; },
             enumerable: false
@@ -8417,7 +8415,7 @@ const trackInternal = (target, propertyKey) => {
         },
         enumerable: true
     });
-    // this marks the proto as having at least one @track property inside
+    // this marks the proto as having at least one @Trace property inside
     // used by IsObservedObjectV2
     (_a = target[_b = ObserveV2.V2_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // trackInternal
@@ -8482,7 +8480,7 @@ class VariableUtilV2 {
             throw new Error(error);
         }
         const storeProp = ObserveV2.OB_PREFIX + attrName;
-        // @observed class and @track attrName
+        // @Observed class and @Track attrName
         if (newValue === target[storeProp]) {
             
             return;
@@ -8512,7 +8510,7 @@ class ProviderConsumerUtilV2 {
      * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
-     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+     * @param deco '@Local', '@Event', etc
      */
     static addProvideConsumeVariableDecoMeta(proto, varName, aliasName, deco) {
         var _a;
@@ -8642,15 +8640,15 @@ function ObservedV2_Internal(BaseClass) {
   @ObservedV2 decorator function uses this in v2_decorators.ts
 */
 function observedV2Internal(BaseClass) {
-    // prevent @Track inside @observed class
+    // prevent @Track inside @ObservedV2 class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-        const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V2 @observed class. Need to fix class definition to use @track.`;
+        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
     }
     if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
         // not an error, suspicious of developer oversight
-        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is this intended? Check our application.`);
+        stateMgmtConsole.warn(`'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @Track property inside. Is this intended? Check our application.`);
     }
     // Use ID_REFS only if number of observed attrs is significant
     const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
@@ -8726,7 +8724,7 @@ class MonitorValueV2 {
 }
 /**
  * MonitorV2
- * one MonitorV2 object per @monitor function
+ * one MonitorV2 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV2 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
  * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
@@ -9515,7 +9513,7 @@ class ViewV2 extends PUV2ViewBase {
  * limitations under the License.
  */
 function ObservedV2(BaseClass) {
-    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@ObservedV2`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
     return observedV2Internal(BaseClass);
 }
 /**
@@ -9528,7 +9526,7 @@ function ObservedV2(BaseClass) {
  * @from 12
  */
 const Trace = (target, propertyKey) => {
-    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Trace`, propertyKey);
     return trackInternal(target, propertyKey);
 };
 /**
@@ -9545,7 +9543,7 @@ const Trace = (target, propertyKey) => {
  *
  */
 const Local = (target, propertyKey) => {
-    ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
+    ObserveV2.addVariableDecoMeta(target, propertyKey, '@Local');
     return trackInternal(target, propertyKey);
 };
 /**
@@ -10972,7 +10970,7 @@ class PersistenceV2Impl extends StorageHelper {
         }
         catch (err) {
             if (this.cb_ && typeof this.cb_ === 'function') {
-                this.cb_('', "unknown" /* PersistError.Unknown */, `fail to get all persisted keys`);
+                this.cb_('', "unknown" /* Unknown */, `fail to get all persisted keys`);
                 return;
             }
             throw new Error(err);
@@ -11009,7 +11007,7 @@ class PersistenceV2Impl extends StorageHelper {
             PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(this.map_.get(key)));
         }
         catch (err) {
-            this.errorHelper(key, "serialization" /* PersistError.Serialization */, err);
+            this.errorHelper(key, "serialization" /* Serialization */, err);
         }
     }
     notifyOnError(cb) {
@@ -11040,14 +11038,14 @@ class PersistenceV2Impl extends StorageHelper {
             throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
         }
         if (key === PersistenceV2Impl.KEYS_ARR_) {
-            this.errorHelper(key, "quota" /* PersistError.Quota */, `The key '${key}' cannot be used`);
+            this.errorHelper(key, "quota" /* Quota */, `The key '${key}' cannot be used`);
             return undefined;
         }
         return key;
     }
     getConnectDefaultValue(key, type, defaultCreator) {
         if (!PersistenceV2Impl.storage_) {
-            this.errorHelper(key, "unknown" /* PersistError.Unknown */, `The storage is null`);
+            this.errorHelper(key, "unknown" /* Unknown */, `The storage is null`);
             return undefined;
         }
         if (typeof defaultCreator !== 'function') {
@@ -11070,7 +11068,7 @@ class PersistenceV2Impl extends StorageHelper {
             ObserveV2.getObserve().stopRecordDependencies();
         }
         catch (err) {
-            this.errorHelper(key, "serialization" /* PersistError.Serialization */, err);
+            this.errorHelper(key, "serialization" /* Serialization */, err);
         }
         this.checkTypeByInstanceOf(key, type, newObservedValue);
         this.connectNewValue(key, newObservedValue, this.getTypeName(type));
@@ -11109,7 +11107,7 @@ class PersistenceV2Impl extends StorageHelper {
             }
             catch (err) {
                 if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, "serialization" /* PersistError.Serialization */, err);
+                    this.cb_(key, "serialization" /* Serialization */, err);
                     continue;
                 }
                 stateMgmtConsole.applicationError(`For '${key}' key: ` + err);
@@ -11147,7 +11145,7 @@ class PersistenceV2Impl extends StorageHelper {
             this.storeKeysArrToStorage(this.keysArr_);
         }
         catch (err) {
-            this.errorHelper(key, "unknown" /* PersistError.Unknown */, `fail to store the key '${key}'`);
+            this.errorHelper(key, "unknown" /* Unknown */, `fail to store the key '${key}'`);
         }
     }
     removeFromPersistenceV2(key) {
@@ -11165,7 +11163,7 @@ class PersistenceV2Impl extends StorageHelper {
             this.storeKeysArrToStorage(this.keysArr_);
         }
         catch (err) {
-            this.errorHelper(key, "unknown" /* PersistError.Unknown */, `fail to remove the key '${key}'`);
+            this.errorHelper(key, "unknown" /* Unknown */, `fail to remove the key '${key}'`);
         }
     }
     getKeysArrFromStorage() {

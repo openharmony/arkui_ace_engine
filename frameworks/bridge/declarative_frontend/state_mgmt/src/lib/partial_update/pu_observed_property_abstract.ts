@@ -386,7 +386,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           customComponent: this.debugInfoOwningView(),
           variableDeco: this.debugInfoDecorator(),
           variableName: this.info(),
-          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V2 @observed/@track object`,
+          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V1 @Observed/@Track object`,
           value: value
         });
     }
