@@ -505,11 +505,12 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
 void ViewAbstractModelNG::DismissSheet()
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, overlayManager->GetDismissSheet());
+    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    if (sheetId == -1) {
+        LOGE("Sheet Dismiss Id Invalid");
+        return;
+    }
+    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
     auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -527,11 +528,16 @@ void ViewAbstractModelNG::DismissContentCover()
 
 void ViewAbstractModelNG::SheetSpringBack()
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->SheetSpringBack();
+    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    if (sheetId == -1) {
+        LOGE("Sheet SpringBack Id Invalid");
+        return;
+    }
+    auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
+    CHECK_NULL_VOID(sheet);
+    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->OverlaySheetSpringBack();
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
