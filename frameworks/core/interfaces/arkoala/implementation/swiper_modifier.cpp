@@ -340,8 +340,13 @@ void DisplayArrowImpl(Ark_NativePointer node,
         return;
     }
 
-    auto arrowStylePtr = std::get_if<SwiperArrowParameters>(&(*optArrow));
-    SwiperModelNG::SetArrowStyle(frameNode, arrowStylePtr ? *arrowStylePtr : SwiperArrowParameters());
+    if (auto arrowStylePtr = std::get_if<SwiperArrowParameters>(&(*optArrow)); arrowStylePtr) {
+        ResetIfInvalid(arrowStylePtr->backgroundSize);
+        ResetIfInvalid(arrowStylePtr->arrowSize);
+        SwiperModelNG::SetArrowStyle(frameNode, *arrowStylePtr);
+    } else {
+        SwiperModelNG::SetArrowStyle(frameNode, SwiperArrowParameters());
+    }
     SwiperModelNG::SetDisplayArrow(frameNode, true);
 }
 void LoopImpl(Ark_NativePointer node,

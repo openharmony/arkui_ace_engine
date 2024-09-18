@@ -681,8 +681,8 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_ArrowStyle, std::string> OneTestStep;
     static const std::string PROP_NAME("arrowSize");
-    static const std::string DEFAULT_VALUE_S = SWIPER_ARROW_SMALL_ARROW_SIZE.ToString();
-    static const std::string DEFAULT_VALUE_B = SWIPER_ARROW_BIG_ARROW_SIZE.ToString();
+    static const std::string &DEFAULT_VALUE_S(EXPECTED_VP_ZERO);
+    static const std::string &DEFAULT_VALUE_B(EXPECTED_VP_ZERO);
     static const std::vector<OneTestStep> testPlan = {
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
@@ -728,8 +728,8 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleBgSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_ArrowStyle, std::string> OneTestStep;
     static const std::string PROP_NAME("arrowBackgroundSize");
-    static const std::string DEFAULT_VALUE_S = SWIPER_ARROW_SMALL_ARROW_BACKGROUND_SIZE.ToString();
-    static const std::string DEFAULT_VALUE_B = SWIPER_ARROW_BIG_ARROW_BACKGROUND_SIZE.ToString();
+    static const std::string &DEFAULT_VALUE_S(EXPECTED_VP_ZERO);
+    static const std::string &DEFAULT_VALUE_B(EXPECTED_VP_ZERO);
     static const std::vector<OneTestStep> testPlan = {
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
@@ -770,7 +770,7 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleBgSize, TestSize.Level1)
  */
 HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColorDefault, TestSize.Level1)
 {
-    static const std::string DEFAULT_VALUE = THEME_SWIPER_ARROW_COLOR.ToString();
+    static const std::string DEFAULT_VALUE = Color::TRANSPARENT.ToString();
     {
         auto initArrowColor = GetAttrValue<std::string>(node_, "arrowColor");
         EXPECT_EQ(initArrowColor, Color::TRANSPARENT.ToString());
