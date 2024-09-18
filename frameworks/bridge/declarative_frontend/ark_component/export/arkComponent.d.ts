@@ -1713,6 +1713,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     onLoad(callback: (event?: object) => void): this;
     onDestroy(event: () => void): this;
+    enableSecure(value: boolean): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
