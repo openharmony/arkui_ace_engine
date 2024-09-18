@@ -40,7 +40,7 @@ interface IView {
     forceCompleteRerender(deep: boolean): void;
     forceRerenderNode(elmtId: number): void;
     
-    uiNodeNeedUpdateV3(elmtId: number) : void;
+    uiNodeNeedUpdateV2(elmtId: number) : void;
     
     // FIXME replace updateStateVarsOfChildByElmtId by new solution
     updateStateVarsOfChildByElmtId(elmtId, params: Object): void;

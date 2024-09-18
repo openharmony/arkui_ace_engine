@@ -68,7 +68,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
 
-    private get isViewV3(): boolean {
+    private get isViewV2(): boolean {
         return true;
     }
 
@@ -206,7 +206,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    */
     protected initParam<Z>(paramVariableName: string, newValue: Z): void {
         this.checkIsV1Proxy(paramVariableName, newValue);
-        VariableUtilV3.initParam<Z>(this, paramVariableName, newValue);
+        VariableUtilV2.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
    *
@@ -219,7 +219,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    */
     protected updateParam<Z>(paramVariableName: string, newValue: Z): void {
         this.checkIsV1Proxy(paramVariableName, newValue);
-        VariableUtilV3.updateParam<Z>(this, paramVariableName, newValue);
+        VariableUtilV2.updateParam<Z>(this, paramVariableName, newValue);
       }
 
     private checkIsV1Proxy<Z>(paramVariableName: string, value: Z): void {
@@ -231,11 +231,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     /**
    *  inform that UINode with given elmtId needs rerender
    *  does NOT exec @Watch function.
-   *  only used on V3 code path from ObserveV2.fireChange.
+   *  only used on V2 code path from ObserveV2.fireChange.
    *
    * FIXME will still use in the future?
    */
-    public uiNodeNeedUpdateV3(elmtId: number): void {
+    public uiNodeNeedUpdateV2(elmtId: number): void {
         if (this.isFirstRender()) {
             return;
         }

@@ -21,7 +21,7 @@
  *
  * Helper class for handling V2 decorated variables
  */
-class VariableUtilV3 {
+class VariableUtilV2 {
     /**
        * setReadOnlyAttr - helper function used to update @param
        * from parent @Component. Not allowed for @param @once .
@@ -231,7 +231,7 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
 
   // prevent @Track inside @observed class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
+    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V2 @observed class. Need to fix class definition to use @track.`;
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
   }

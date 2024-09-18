@@ -323,8 +323,8 @@ class ObserveV2 {
     if (!bound) {
       return;
     }
-    if (bound[0] === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-      const error = `${attrName}: ObserveV2.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
+    if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+      const error = `${attrName}: ObserveV2.addRef: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
@@ -639,7 +639,7 @@ class ObserveV2 {
       if (viewWeak && 'deref' in viewWeak && (view = viewWeak.deref()) &&
         ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
-          view.uiNodeNeedUpdateV3(elmtId);
+          view.uiNodeNeedUpdateV2(elmtId);
         } else if (view instanceof ViewV2) {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
@@ -731,10 +731,10 @@ class ObserveV2 {
     meta[varName].deco = deco;
 
     // FIXME
-    // when splitting ViewPU and ViewV3
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V3 event handles this function to return false
-    Reflect.defineProperty(proto, 'isViewV3', {
+    // any @state, @track, etc V2 event handles this function to return false
+    Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
     }
@@ -754,10 +754,10 @@ class ObserveV2 {
     }
 
     // FIXME
-    // when splitting ViewPU and ViewV3
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V3 event handles this function to return false
-    Reflect.defineProperty(proto, 'isViewV3', {
+    // any @state, @track, etc V2 event handles this function to return false
+    Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
     }
@@ -765,7 +765,7 @@ class ObserveV2 {
   }
 
 
-  public static usesV3Variables(proto: Object): boolean {
+  public static usesV2Variables(proto: Object): boolean {
     return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
   }
 } // class ObserveV2

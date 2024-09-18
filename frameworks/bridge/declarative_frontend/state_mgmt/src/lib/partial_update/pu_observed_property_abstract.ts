@@ -386,7 +386,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           customComponent: this.debugInfoOwningView(),
           variableDeco: this.debugInfoDecorator(),
           variableName: this.info(),
-          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
+          expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V2 @observed/@track object`,
           value: value
         });
     }
@@ -470,8 +470,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       // not access recording 
       return;
     }
-    if (elmtId === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V2 state to init/update child V3 @Component. Application error`;
+    if (elmtId === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V1 state to init/update child V2 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }

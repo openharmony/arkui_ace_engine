@@ -84,14 +84,14 @@ abstract class ViewPU extends PUV2ViewBase
         }
       });
 
-    if (this.isViewV3 === true) {
+    if (this.isViewV2 === true) {
       if (usesStateMgmtVersion === 2) {
-        const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
+        const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
       }
     }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV3 === true ? 3 : 2}`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
   }
 
   public get localStorage_(): LocalStorage {
@@ -119,14 +119,14 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   // FIXME
-  // indicate if this is  V2 or a V3 component
-  // V2 by default, changed to V3 by the first V3 decorated variable
-  // when splitting ViewPU and ViewV3
+  // indicate if this is  V1 or a V2 component
+  // V1 by default, changed to V2 by the first V2 decorated variable
+  // when splitting ViewPU and ViewV2
   // use instanceOf. Until then, this is a workaround.
-  // @state, @track, etc V3 decorator functions modify isViewV3 to return true
+  // @state, @track, etc V2 decorator functions modify isViewV2 to return true
   // (decorator can modify functions in prototype)
   // FIXME
-  private get isViewV3(): boolean {
+  private get isViewV2(): boolean {
     return false;
   }
 
@@ -471,11 +471,11 @@ abstract class ViewPU extends PUV2ViewBase
   /**
  *  inform that UINode with given elmtId needs rerender
  *  does NOT exec @Watch function.
- *  only used on V3 code path from ObserveV2.fireChange.
+ *  only used on V2 code path from ObserveV2.fireChange.
  *
  * FIXME will still use in the future?
  */
-  public uiNodeNeedUpdateV3(elmtId: number): void {
+  public uiNodeNeedUpdateV2(elmtId: number): void {
     if (this.isFirstRender()) {
       return;
     }
@@ -692,13 +692,13 @@ abstract class ViewPU extends PUV2ViewBase
     const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       this.syncInstanceId();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
       PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
-      if (!this.isViewV3) {
+      if (!this.isViewV2) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
         stateMgmtDFX.inRenderingElementId.push(elmtId);
@@ -707,7 +707,7 @@ abstract class ViewPU extends PUV2ViewBase
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-      if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
+      if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId);
@@ -723,10 +723,10 @@ abstract class ViewPU extends PUV2ViewBase
         (node as ArkComponent).cleanStageValue();
       }
 
-      if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
+      if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
         ObserveV2.getObserve().stopRecordDependencies();
       }
-      if (!this.isViewV3) {
+      if (!this.isViewV2) {
         this.currentlyRenderedElmtIdStack_.pop();
         stateMgmtDFX.inRenderingElementId.pop();
       }
@@ -853,8 +853,8 @@ abstract class ViewPU extends PUV2ViewBase
             child.aboutToReuseInternal();
           }
         } else {
-          // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+          // FIXME fix for mixed V1 - V2 Hierarchies
+          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV1, yet');
         }
       } // if child
     });
@@ -882,8 +882,8 @@ abstract class ViewPU extends PUV2ViewBase
             child.aboutToRecycleInternal();
           }
         } else {
-          // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+          // FIXME fix for mixed V1 - V2 Hierarchies
+          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV1');
         }
       } // if child
     });
