@@ -1219,12 +1219,12 @@ void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisi
     pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
 }
 
-void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
+void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
     const std::vector<double> &ratioList)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(frameNode);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
 }
@@ -1241,7 +1241,7 @@ Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     frameNode->ClearUserOnAreaChange();
     pipeline->RemoveOnAreaChangeNode(frameNode->GetId());
@@ -1250,7 +1250,7 @@ void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2666,15 +2666,9 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->GetForegroundColorStrategy().has_value()) {
-        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
-        renderContext->ResetForegroundColorStrategy();
-    }
-    renderContext->UpdateForegroundColor(color);
-    renderContext->UpdateForegroundColorFlag(true);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
@@ -3062,13 +3056,9 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
-    auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->GetForegroundColorStrategy().has_value()) {
-        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
-        renderContext->ResetForegroundColorStrategy();
-    }
-    renderContext->UpdateForegroundColor(color);
-    renderContext->UpdateForegroundColorFlag(true);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
@@ -3508,7 +3498,7 @@ void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
     }
 }
 
-void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption)
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }

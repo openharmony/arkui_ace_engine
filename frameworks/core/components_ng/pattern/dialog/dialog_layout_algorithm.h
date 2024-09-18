@@ -92,6 +92,7 @@ private:
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
+    void ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

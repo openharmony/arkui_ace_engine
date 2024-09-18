@@ -1393,22 +1393,22 @@ bool ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonCol
 void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
     CalcDimension left;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(LEFT_PROPERTY), left)) {
         CheckDimensionUnit(left, true, notNegative);
         commonCalcDimension.left = left;
     }
     CalcDimension right;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(RIGHT_PROPERTY), right)) {
         CheckDimensionUnit(right, true, notNegative);
         commonCalcDimension.right = right;
     }
     CalcDimension top;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(TOP_PROPERTY), top)) {
         CheckDimensionUnit(top, true, notNegative);
         commonCalcDimension.top = top;
     }
     CalcDimension bottom;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(BOTTOM_PROPERTY), bottom)) {
         CheckDimensionUnit(bottom, true, notNegative);
         commonCalcDimension.bottom = bottom;
     }
@@ -1958,9 +1958,11 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(cons
     }
     auto obj = JSRef<JSObject>::Cast(arg);
     auto transitionVal = obj->GetProperty("transition");
+
     if (!transitionVal->IsObject()) {
         return nullptr;
     }
+
     auto transitionObj = JSRef<JSObject>::Cast(transitionVal);
     auto chainedEffect = ParseChainedTransition(transitionObj, info.GetExecutionContext());
     return chainedEffect;
@@ -2492,7 +2494,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
             CHECK_NULL_VOID(builderFunc);
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                                 node = targetNode]() {
+                              node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("Overlay");
                 PipelineContext::SetCallBackNode(node);
@@ -2864,7 +2866,7 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
             double scale = jsOption->GetProperty("scale")->ToNumber<double>();
             styleOption.scale = std::clamp(scale, 0.0, 1.0);
         }
- 
+
         if (jsOption->GetProperty("blurOptions")->IsObject()) {
             JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
             BlurOption blurOption;
@@ -2931,13 +2933,11 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
-
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
         saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
-
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
@@ -2947,7 +2947,6 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
         color.SetValue(Color::TRANSPARENT.GetValue());
     }
-
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
     ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
@@ -3620,6 +3619,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             }
         }
     }
+
     if (info[builderIndex]->IsArray()) {
         std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
@@ -3915,7 +3915,6 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
-
     ParseBorderWidth(jsVal);
 }
 
@@ -5029,10 +5028,6 @@ bool JSViewAbstract::ParseJsDimensionNG(
             return true;
         }
 
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        if (type->IsNull() || !type->IsNumber()) {
-            return false;
-        }
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
@@ -7685,7 +7680,6 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     NG::SheetStyle sheetStyle;
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
-    sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
     std::function<void()> onDisappearCallback;
@@ -9040,13 +9034,12 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
 
 void JSViewAbstract::ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow)
 {
-    auto jsOffsetX = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_X));
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (ParseJsResource(jsOffsetX, offsetX)) {
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
         double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
         shadow.SetOffsetX(xValue);
     } else {
-        if (ParseJsDimensionVp(jsOffsetX, offsetX)) {
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
             double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
             shadow.SetOffsetX(xValue);
         }
@@ -10019,11 +10012,6 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
         sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
         contextObj->SetPropertyObject("size", sizeObj);
-
-        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
-        sizeInPxObj->SetProperty<float>("height", context.height);
-        sizeInPxObj->SetProperty<float>("width", context.height);
-        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
 
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);

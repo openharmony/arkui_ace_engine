@@ -77,7 +77,6 @@ group("linux_core_unittest") {
     "pattern/flex:flex_test_ng",
     "pattern/gauge:gauge_test_ng",
     "pattern/grid:grid_test_ng",
-    "pattern/grid:grid_test_regular",
     "pattern/grid_col:grid_col_test_ng",
     "pattern/grid_container:grid_container_test_ng",
     "pattern/grid_row:grid_row_test_ng",

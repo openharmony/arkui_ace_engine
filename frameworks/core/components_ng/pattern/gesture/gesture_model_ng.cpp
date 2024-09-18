@@ -32,7 +32,7 @@ bool IsTapClick(const RefPtr<NG::Gesture>& gesture)
     auto tap = AceType::DynamicCast<NG::TapGesture>(gesture);
     return tap && (tap->GetTapCount() == 1) && (tap->GetFingers() == 1);
 }
-
+ 
 GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture)
 {
     if (IsTapClick(gesture)) {

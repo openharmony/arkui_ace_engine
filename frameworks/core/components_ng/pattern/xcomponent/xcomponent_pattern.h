@@ -302,6 +302,15 @@ public:
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
     void SetRenderFit(RenderFit renderFit);
+    void HandleSurfaceCreated();
+    void HandleSurfaceDestroyed();
+    void ChangeSurfaceCallbackMode(SurfaceCallbackMode mode)
+    {
+        if (surfaceCallbackModeChangeEvent_) {
+            surfaceCallbackModeChangeEvent_(mode);
+        }
+    }
+    void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
 
 private:
     void OnAttachToFrameNode() override;
@@ -367,6 +376,7 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
+    void RegisterSurfaceCallbackModeEvent();
 #ifdef OHOS_PLATFORM
     float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
     int GetFlingDuration(float velocity);
@@ -436,6 +446,8 @@ private:
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
+    SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
+    std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
 };
 } // namespace OHOS::Ace::NG
 
