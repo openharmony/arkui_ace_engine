@@ -601,47 +601,6 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     UpdateNavBarTitleProperty(hostNode);
 }
 
-void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange)
-{
-    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
-        TitleBarParentType::NAV_DESTINATION) {
-        return;
-    }
-    if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        hostNode->RemoveChild(hostNode->GetPrevMenu());
-        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-    if (hostNode->GetPrevMenuIsCustomValue(false)) {
-        if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
-            return;
-        }
-        hostNode->SetPrevMenu(hostNode->GetMenu());
-        hostNode->AddChild(hostNode->GetMenu());
-        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    } else {
-        auto titleBarMenuItems = GetTitleBarMenuItems();
-        if (HasMenuNodeId()) {
-            if (hostNode->GetChildIndexById(GetMenuNodeId()) > -1 && !isWindowSizeChange) {
-                return;
-            }
-            auto navDesNode = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetParent());
-            CHECK_NULL_VOID(navDesNode);
-            auto hub = navDesNode->GetEventHub<EventHub>();
-            CHECK_NULL_VOID(hub);
-            auto isButtonEnabled = hub->IsEnabled();
-            auto menuNode =
-                NavigationTitleUtil::CreateMenuItems(GetMenuNodeId(), titleBarMenuItems, hostNode, isButtonEnabled);
-            CHECK_NULL_VOID(menuNode);
-            hostNode->SetMenu(menuNode);
-            hostNode->SetPrevMenu(menuNode);
-            hostNode->AddChild(hostNode->GetMenu());
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
-}
-
 void TitleBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -654,7 +613,6 @@ void TitleBarPattern::OnModifyDone()
     MountTitle(hostNode);
     MountSubTitle(hostNode);
     ApplyTitleModifierIfNeeded(hostNode);
-    MountMenu(hostNode);
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
@@ -1144,7 +1102,6 @@ void TitleBarPattern::OnAttachToFrameNode()
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 
     auto halfFoldHoverCallbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
         [weakHost = WeakPtr<FrameNode>(host)](bool isHalfFoldHover) {
@@ -1442,37 +1399,10 @@ void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
 
     if (HasHalfFoldHoverChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value());
     }
-}
-
-void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
-        TitleBarParentType::NAV_DESTINATION) {
-        return;
-    }
-    // change menu num in landscape and orientation
-    do {
-        if (titleBarNode->GetPrevMenuIsCustomValue(false)) {
-            break;
-        }
-        auto targetNum = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
-                                                                                                  : MAX_MENU_NUM_SMALL;
-        if (targetNum == maxMenuNums_) {
-            break;
-        }
-        maxMenuNums_ = targetNum;
-        MountMenu(titleBarNode, true);
-        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    } while (0);
 }
 
 void TitleBarPattern::DumpInfo()

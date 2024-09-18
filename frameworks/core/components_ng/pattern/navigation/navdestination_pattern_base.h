@@ -87,6 +87,74 @@ public:
         return false;
     }
 
+    void SetTitleBarMenuItems(const std::vector<BarItem>& menuItems)
+    {
+        titleBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<BarItem>& GetTitleBarMenuItems() const
+    {
+        return titleBarMenuItems_;
+    }
+
+    void SetToolBarMenuItems(const std::vector<BarItem>& menuItems)
+    {
+        toolBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<BarItem>& GetToolBarMenuItems() const
+    {
+        return toolBarMenuItems_;
+    }
+
+    int32_t GetMenuNodeId() const
+    {
+        return menuNodeId_.value();
+    }
+
+    int32_t GetLandscapeMenuNodeId()
+    {
+        if (!landscapeMenuNodeId_.has_value()) {
+            landscapeMenuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return landscapeMenuNodeId_.value();
+    }
+
+    void SetMenuNodeId(const int32_t menuNodeId)
+    {
+        menuNodeId_ = menuNodeId;
+    }
+
+    void SetLandscapeMenuNodeId(const int32_t landscapeMenuNodeId)
+    {
+        landscapeMenuNodeId_ = landscapeMenuNodeId;
+    }
+
+    bool HasMenuNodeId() const
+    {
+        return menuNodeId_.has_value();
+    }
+
+    bool HasLandscapeMenuNodeId() const
+    {
+        return landscapeMenuNodeId_.has_value();
+    }
+
+    bool GetToolbarHideStatus()
+    {
+        return isHideToolbar_;
+    }
+
+    int32_t GetMaxMenuNum() const
+    {
+        return maxMenuNums_;
+    }
+
+    void SetMaxMenuNum(int32_t maxMenu)
+    {
+        maxMenuNums_ = maxMenu;
+    }
+
 protected:
     bool UpdateBarSafeAreaPadding();
 
@@ -96,6 +164,11 @@ protected:
     std::optional<BarStyle> toolBarStyle_;
     bool safeAreaPaddingChanged_ = false;
     float avoidKeyboardOffset_ = 0.0f;
+    std::vector<BarItem> titleBarMenuItems_;
+    std::vector<BarItem> toolBarMenuItems_;
+    std::optional<int32_t> menuNodeId_;
+    std::optional<int32_t> landscapeMenuNodeId_;
+    int32_t maxMenuNums_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
