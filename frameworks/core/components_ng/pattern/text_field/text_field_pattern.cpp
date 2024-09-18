@@ -8365,9 +8365,19 @@ bool TextFieldPattern::IsShowAIWrite()
     CHECK_NULL_RETURN(textFieldTheme, false);
     auto bundleName = textFieldTheme->GetAIWriteBundleName();
     auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        return false;
+    }
     aiWriteAdapter_->SetBundleName(bundleName);
     aiWriteAdapter_->SetAbilityName(abilityName);
-    auto isAISupport = aiWriteAdapter_->GetAISupportFromMetadata(bundleName, abilityName);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "BundleName: %{public}s, abilityName: %{public}s", bundleName.c_str(), abilityName.c_str());
+
+    auto isAISupport = false;
+    if (textFieldTheme->GetAIWriteIsSupport() == "true") {
+        isAISupport = true;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "isAISupport: %{public}d", isAISupport);
     return IsUnspecifiedOrTextType() && isAISupport;
 }
 
