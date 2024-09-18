@@ -1074,8 +1074,8 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage043, TestSi
     ASSERT_NE(frameNode, nullptr);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     auto manager = pipeline->GetOverlayManager();
-    OffsetF Offset = { 0.0, 0.0 };
-    dragDropManager->UpdateGatherNodeAttr(manager, Offset, 2.0f, 1.0f, 1.0f);
+    GatherAnimationInfo gatherAnimationInfo = { 2.0f, 1.0f, 1.0f, { 0.0, 0.0 } };
+    dragDropManager->UpdateGatherNodeAttr(manager, gatherAnimationInfo);
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1112,8 +1112,8 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage044, TestSi
     manager->gatherNodeChildrenInfo_.push_back(gatherNodeChildInfo2);
     manager->gatherNodeChildrenInfo_.push_back(gatherNodeChildInfo3);
     manager->gatherNodeChildrenInfo_.push_back(gatherNodeChildInfo4);
-    OffsetF Offset = { 0.0, 0.0 };
-    dragDropManager->UpdateGatherNodeAttr(manager, Offset, 2.0f, 1.0f, 1.0f);
+    GatherAnimationInfo gatherAnimationInfo = { 2.0f, 1.0f, 1.0f, { 0.0, 0.0 } };
+    dragDropManager->UpdateGatherNodeAttr(manager, gatherAnimationInfo);
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1207,7 +1207,6 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage048, TestSi
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     pointerEvent.x = 3.0f;
     pointerEvent.y = 4.0f;
-    dragDropManager->prePointerOffset_ = { 0.0f, 0.0f };
     dragDropManager->info_.scale = 0.5f;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_NE(frameNode, nullptr);

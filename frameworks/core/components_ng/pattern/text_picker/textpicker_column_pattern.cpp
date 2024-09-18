@@ -1475,6 +1475,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
     auto isOverScroll = useRebound && overscroller_.IsOverScroll();
+    if (NearEqual(std::abs(dragDelta), std::abs(shiftDistance)) && !NearZero(dragDelta)) {
+        dragDelta = std::abs(dragDelta) / dragDelta * std::abs(shiftDistance);
+    }
     if ((std::abs(dragDelta) >= std::abs(shiftDistance)) && !isOverScroll) {
         int32_t shiftDistanceCount = static_cast<int>(std::abs(dragDelta) / std::abs(shiftDistance));
         double additionalShift = dragDelta - shiftDistanceCount * shiftDistance;

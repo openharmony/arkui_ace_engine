@@ -241,8 +241,8 @@ export class SegmentButtonOptions {
   public backgroundColor: ResourceColor
   public selectedBackgroundColor: ResourceColor
   public imageSize: SizeOptions
-  public buttonPadding: Padding | Dimension
-  public textPadding: Padding | Dimension
+  public buttonPadding: Padding | Dimension | undefined
+  public textPadding: Padding | Dimension | undefined
   public componentPadding: Padding | Dimension
   public localizedTextPadding?: LocalizedPadding
   public localizedButtonPadding?: LocalizedPadding
@@ -887,6 +887,7 @@ class ItemProperty {
 export struct SegmentButton {
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
+  public onItemClicked?: Callback<number>
   @Provide componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
@@ -1161,6 +1162,9 @@ export struct SegmentButton {
                   this.buttonItemsSize.length) ? false : true
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
+              if (this.onItemClicked) {
+                this.onItemClicked(realClickIndex)
+              }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                 let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
                 if (selectedIndex === -1) {
@@ -1187,13 +1191,13 @@ export struct SegmentButton {
             if (this.isCurrentPositionSelected) {
               return
             }
-            if (event.angle > 0 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
+            if (Math.abs(event.angle) < 90 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
               this.buttonItemsSize.length) - 1) {
               // Move to next
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] + 1
               this.doSelectedChangeAnimate = false
-            } else if (event.angle < 0 && this.selectedIndexes[0] !== 0) {
+            } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
               // Move to previous
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] - 1

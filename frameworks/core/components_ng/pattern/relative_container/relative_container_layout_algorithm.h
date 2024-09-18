@@ -71,6 +71,8 @@ public:
     };
 
 private:
+    void Initialize(LayoutWrapper* layoutWrapper);
+    bool TopologicalResultHit(LayoutWrapper* layoutWrapper);
     void DetermineTopologicalOrder(LayoutWrapper* layoutWrapper);
     void MeasureSelf(LayoutWrapper* layoutWrapper);
     void CollectNodesById(LayoutWrapper* layoutWrapper);

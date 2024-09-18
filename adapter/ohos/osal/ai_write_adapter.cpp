@@ -150,6 +150,17 @@ bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
     return false;
 }
 
+uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::wstring& content)
+{
+    uint32_t length = 0;
+    for (uint32_t i = 0; i < content.length(); i++) {
+        if (content[i] != L' ' && content[i] != L'\n') {
+            length++;
+        }
+    }
+    return length;
+}
+
 void AIWriteAdapter::CloseModalUIExtension()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CloseModalUIExtension.");

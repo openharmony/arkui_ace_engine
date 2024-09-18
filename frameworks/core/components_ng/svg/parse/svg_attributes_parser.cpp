@@ -49,7 +49,7 @@ LineJoinStyle SvgAttributesParser::GetLineJoinStyle(const std::string& val)
     }
 }
 
-Color SvgAttributesParser::GetColor(const std::string& value)
+std::optional<Color> SvgAttributesParser::GetSpecialColor(const std::string& value)
 {
     static const LinearMapNode<Color> COLOR_TABLE[] = {
         { "aliceblue", Color(0xfff0f8ff) },
@@ -204,6 +204,29 @@ Color SvgAttributesParser::GetColor(const std::string& value)
     int64_t colorIndex = BinarySearchFindIndex(COLOR_TABLE, ArraySize(COLOR_TABLE), value.c_str());
     if (colorIndex != -1) {
         return COLOR_TABLE[colorIndex].value;
+    }
+    return std::nullopt;
+}
+
+bool SvgAttributesParser::ParseColor(const std::string& value, Color& color)
+{
+    auto colorOpt = GetSpecialColor(value);
+    if (colorOpt.has_value()) {
+        color = colorOpt.value();
+        return true;
+    }
+    if (Color::MatchColorHexString(value)) {
+        color = Color::FromString(value);
+        return true;
+    }
+    return false;
+}
+
+Color SvgAttributesParser::GetColor(const std::string& value)
+{
+    auto colorOpt = GetSpecialColor(value);
+    if (colorOpt.has_value()) {
+        return colorOpt.value();
     }
     return Color::FromString(value);
 }

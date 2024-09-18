@@ -116,10 +116,10 @@ bool SelectContentOverlayPattern::IsHandleInSameLine(const RectF& first, const R
     float lowerHandleTop = 0.0f;
     RectF heigherHandleRect;
     if (GreatNotEqual(first.Top(), second.Top())) {
-        lowerHandleTop = first.Top() + 0.5f;
+        lowerHandleTop = first.Top() + 0.5f; // 0.5f : for round
         heigherHandleRect = second;
     } else {
-        lowerHandleTop = second.Top() + 0.5f;
+        lowerHandleTop = second.Top() + 0.5f; // 0.5f : for round
         heigherHandleRect = first;
     }
     return GreatNotEqual(lowerHandleTop, heigherHandleRect.Top()) &&

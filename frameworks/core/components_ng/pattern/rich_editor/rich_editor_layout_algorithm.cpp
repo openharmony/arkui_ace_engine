@@ -76,10 +76,6 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
     }
 
-    if (source->textLineStyle->HasTextAlign()) {
-        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
-    }
-
     if (source->textLineStyle->HasLineHeight()) {
         target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
     }
@@ -88,14 +84,14 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureEmptyContentSize(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, {});
     auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
     auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, {});
     auto pattern = host->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
     auto presetParagraph = pattern->GetPresetParagraph();

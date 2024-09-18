@@ -297,6 +297,8 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
+    float GetStartPositionWithChainOffset() const;
+
     void SetChainOffsetCallback(std::function<float(int32_t)> func)
     {
         chainOffsetFunc_ = std::move(func);
@@ -580,6 +582,7 @@ private:
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float laneGutter_ = 0.0f;
+    float groupItemAverageHeight_ = 0.0f;
     OffsetF paddingOffset_;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;

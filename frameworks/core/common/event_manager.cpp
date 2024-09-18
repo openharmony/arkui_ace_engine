@@ -199,11 +199,13 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
     int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
     if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
+#ifndef IS_RELEASE_VERSION
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
+#endif
         eventTree_.eventTreeList.clear();
         FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
@@ -350,6 +352,7 @@ bool EventManager::PostEventTouchTest(
         }
     }
     auto result = !hitTestResult.empty();
+    LogTouchTestResultRecognizers(hitTestResult, touchPoint.touchEventId);
     postEventTouchTestResults_[touchPoint.id] = std::move(hitTestResult);
     return result;
 }
@@ -1145,9 +1148,7 @@ void EventManager::AccessibilityHoverTest(
 void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
-    if (SystemProperties::GetDebugEnabled()) {
-        ACE_FUNCTION_TRACE();
-    }
+    ACE_FUNCTION_TRACE();
     TAG_LOGD(AceLogTag::ACE_MOUSE,
         "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,
         event.button, event.action);
@@ -1468,14 +1469,17 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
     if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
-        event.isRotationEvent == false) {
+        !event.isRotationEvent) {
+        axisTestResults_.clear();
         return false;
     }
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
+            axisTestResults_.clear();
             return true;
         }
     }
+    axisTestResults_.clear();
     return true;
 }
 

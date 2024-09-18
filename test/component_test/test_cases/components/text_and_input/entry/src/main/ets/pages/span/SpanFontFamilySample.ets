@@ -24,8 +24,8 @@ struct SpanFontFamilySample {
 
   aboutToAppear() {
     font.registerFont({
-      familyName: 'ITCBLKADRawFile',
-      familySrc: $rawfile('FZSTK.TTF')
+      familyName: 'TESTFONTRawFile',
+      familySrc: $rawfile('TESTFONT.TTF')
     })
     loadComponentTestEntry(spanFontFamilyTest)
   }
@@ -41,7 +41,7 @@ struct SpanFontFamilySample {
 
       Button('SpanFontFamily')
         .onClick(() => {
-          this.fontFamilyType = 'ITCBLKADRawFile'
+          this.fontFamilyType = 'TESTFONTRawFile'
         })
     }
   }

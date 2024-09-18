@@ -117,8 +117,11 @@ public:
 
     void SetOnWindowFocused(const std::function<void()>& callback) override;
 
-    // Actually paint size of window
+    // Current paintSize of window
     void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) override;
+
+    // Get paintSize of window by calculating
+    void GetWindowPaintSize(OHOS::Rosen::Rect& paintrect) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 

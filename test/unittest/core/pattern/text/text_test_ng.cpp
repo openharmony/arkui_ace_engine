@@ -2386,7 +2386,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
@@ -2446,7 +2446,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
     // set textDecorationAnimatable_ true
     textContentModifier.textDecorationAnimatable_ = true;

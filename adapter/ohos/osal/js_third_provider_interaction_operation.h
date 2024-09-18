@@ -133,6 +133,13 @@ private:
     bool ClearFocusFromProvider();
     bool ClearDrawBound();
 
+    bool HandleNativeFocusUpdate(
+        int64_t elementId,
+        Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+    bool HandleEventByFramework(
+        const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
+        Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+
     WeakPtr<AccessibilityProvider> accessibilityProvider_;
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;
     WeakPtr<NG::FrameNode> host_;

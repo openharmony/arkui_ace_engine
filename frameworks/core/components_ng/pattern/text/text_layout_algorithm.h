@@ -117,7 +117,6 @@ private:
     bool GetSuitableSize(TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double& suitableSize);
 
-    std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };

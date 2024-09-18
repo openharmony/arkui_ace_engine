@@ -166,4 +166,16 @@ void UiReportProxy::SendBaseInfo(const std::string& data)
         LOGW("SendBaseInfo send request failed");
     }
 }
+
+void UiReportProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    LOGI("uiproxy death notice");
+    if (remote == nullptr) {
+        LOGW("weak remote is null");
+        return;
+    }
+    if (handler_) {
+        handler_();
+    }
+}
 } // namespace OHOS::Ace

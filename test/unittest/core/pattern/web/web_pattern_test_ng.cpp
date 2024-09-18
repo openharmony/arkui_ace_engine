@@ -16,15 +16,17 @@
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
+
 #define private public
+#include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
+#undef private
+
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
-#include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
@@ -2525,20 +2527,48 @@ public:
 
 class NWebQuickMenuParamsDummy : public OHOS::NWeb::NWebQuickMenuParams {
 public:
-    int32_t GetXCoord() override { return 0; };
-    int32_t GetYCoord() override { return 0; };
-    int32_t GetWidth() override { return 0; };
-    int32_t GetHeight() override { return 0; };
-    int32_t GetEditStateFlags() override { return 0; };
-    int32_t GetSelectX() override { return selectX; };
-    int32_t GetSelectY() override { return selectY; };
-    int32_t GetSelectWidth() override { return width; };
-    int32_t GetSelectXHeight() override { return height; };
+    int32_t GetXCoord() override
+    {
+        return 0;
+    };
+    int32_t GetYCoord() override
+    {
+        return 0;
+    };
+    int32_t GetWidth() override
+    {
+        return 0;
+    };
+    int32_t GetHeight() override
+    {
+        return 0;
+    };
+    int32_t GetEditStateFlags() override
+    {
+        return 0;
+    };
+    int32_t GetSelectX() override
+    {
+        return selectX;
+    };
+    int32_t GetSelectY() override
+    {
+        return selectY;
+    };
+    int32_t GetSelectWidth() override
+    {
+        return width;
+    };
+    int32_t GetSelectXHeight() override
+    {
+        return height;
+    };
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> GetTouchHandleState(
         OHOS::NWeb::NWebTouchHandleState::TouchHandleType type) override
     {
         return nullptr;
     }
+
 private:
     int32_t selectX = 100;
     int32_t selectY = 200;
@@ -2563,29 +2593,84 @@ public:
 class NWebTouchHandleStateDummy : public OHOS::NWeb::NWebTouchHandleState {
 public:
     NWebTouchHandleStateDummy() = default;
-    int32_t GetTouchHandleId() override  { return -1; };
-    int32_t GetX() override { return 0; };
-    int32_t GetY() override { return 0; };
-    int32_t GetViewPortX() override { return 0; };
-    int32_t GetViewPortY() override { return 0; };
-    TouchHandleType GetTouchHandleType() override  { return TouchHandleType::SELECTION_BEGIN_HANDLE; };
-    bool IsEnable() override { return false; };
-    float GetAlpha() override { return 0.0; };
-    float GetEdgeHeight() override { return 0.0; };
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_BEGIN_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return false;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return 0.0;
+    };
 };
 
 class NWebTouchHandleStateEndDummy : public OHOS::NWeb::NWebTouchHandleState {
 public:
     NWebTouchHandleStateEndDummy() = default;
-    int32_t GetTouchHandleId() override  { return -1; };
-    int32_t GetX() override { return 0; };
-    int32_t GetY() override { return 0; };
-    int32_t GetViewPortX() override { return 0; };
-    int32_t GetViewPortY() override { return 0; };
-    TouchHandleType GetTouchHandleType() override  { return TouchHandleType::SELECTION_END_HANDLE; };
-    bool IsEnable() override { return false; };
-    float GetAlpha() override { return 0.0; };
-    float GetEdgeHeight() override { return edgeHeight; };
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_END_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return false;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return edgeHeight;
+    };
+
 private:
     float edgeHeight = 10.0;
 };
@@ -2593,15 +2678,43 @@ private:
 class NWebTouchHandleStateBeginDummy : public OHOS::NWeb::NWebTouchHandleState {
 public:
     NWebTouchHandleStateBeginDummy() = default;
-    int32_t GetTouchHandleId() override  { return -1; };
-    int32_t GetX() override { return 0; };
-    int32_t GetY() override { return 0; };
-    int32_t GetViewPortX() override { return 0; };
-    int32_t GetViewPortY() override { return 0; };
-    TouchHandleType GetTouchHandleType() override  { return TouchHandleType::SELECTION_BEGIN_HANDLE; };
-    bool IsEnable() override { return false; };
-    float GetAlpha() override { return 0.0; };
-    float GetEdgeHeight() override { return edgeHeight; };
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_BEGIN_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return false;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return edgeHeight;
+    };
+
 private:
     float edgeHeight = 10.0;
 };
@@ -2904,8 +3017,7 @@ HWTEST_F(WebPatternTestNg, NotifyFillRequestSuccess003, TestSize.Level1)
     std::string metadata = "metadata";
     std::string value = "value";
     EXPECT_CALL(*viewDataWrap, GetPageNodeInfoWraps()).WillOnce(ReturnRef(nodeInfoWraps));
-    EXPECT_CALL(*nodeWrap, GetAutoFillType())
-        .WillOnce(Return(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET));
+    EXPECT_CALL(*nodeWrap, GetAutoFillType()).WillOnce(Return(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET));
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(metadata));
     EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(ReturnRef(value));

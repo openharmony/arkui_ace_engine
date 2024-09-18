@@ -1055,7 +1055,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG001, TestSize.Level1)
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 
     navBarNode->titleBarNode_ = titleBarNode;
-    navBarNode->navBarContentNode_ = navBarContentNode;
+    navBarNode->contentNode_ = navBarContentNode;
     navBarNode->toolBarNode_ = toolBarNode;
 
     stack->reservedNodeId_ = navigationUniqueId;

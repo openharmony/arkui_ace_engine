@@ -20,8 +20,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr uint8_t ENABLED_ALPHA = 255;
-constexpr uint8_t DISABLED_ALPHA = 102;
 const Color TMP_INACTIVE_COLOR = Color(0x337F7F7F);
 } // namespace
 
@@ -41,7 +39,6 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(offset);
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(size);
-    enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
     animateTrackRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
@@ -55,7 +52,6 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     AttachProperty(isHover_);
     AttachProperty(offset_);
     AttachProperty(size_);
-    AttachProperty(enabled_);
     AttachProperty(animatePointRadius_);
     AttachProperty(animateTrackRadius_);
 }
@@ -133,12 +129,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     RSRoundRect roundRect(rect, trackRadius, trackRadius);
 
     RSBrush brush;
-    if (!enabled_->Get()) {
-        brush.SetColor(
-            ToRSColor(animatableBoardColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
-    } else {
-        brush.SetColor(ToRSColor(animatableBoardColor_->Get()));
-    }
+    brush.SetColor(ToRSColor(animatableBoardColor_->Get()));
     brush.SetBlendMode(RSBlendMode::SRC_OVER);
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
@@ -149,12 +140,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
 
-    if (!enabled_->Get()) {
-        brush.SetColor(
-            ToRSColor(animatePointColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
-    } else {
-        brush.SetColor(ToRSColor(animatePointColor_->Get()));
-    }
+    brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     RSPoint point;

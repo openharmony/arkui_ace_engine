@@ -592,13 +592,14 @@ HWTEST_F(NavigationModelTestNg, ParseCommonTitle003, TestSize.Level1)
     ASSERT_NE(titleBarNode, nullptr);
 
     bool hasSubTitle = true, hasMainTitle = true, ignoreMainTitle = false;
+    NG::NavigationTitleInfo titleInfo = { hasSubTitle, hasMainTitle, "", "" };
     navBarNode->propPrevTitleIsCustom_ = false;
-    EXPECT_TRUE(hasSubTitle && hasMainTitle);
+    EXPECT_TRUE(titleInfo.hasSubTitle && titleInfo.hasMainTitle);
     EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(false));
     EXPECT_FALSE(ignoreMainTitle);
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
-    NavigationModelNG::ParseCommonTitle(&(*frameNode), hasSubTitle, hasMainTitle, "", "", ignoreMainTitle);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 
     // Make mainTitle true
     titleBarNode->title_ = FrameNode::CreateFrameNode("title", 101, AceType::MakeRefPtr<TextPattern>());
@@ -606,20 +607,20 @@ HWTEST_F(NavigationModelTestNg, ParseCommonTitle003, TestSize.Level1)
     titleBarNode->subtitle_ = FrameNode::CreateFrameNode("subTitle", 102, AceType::MakeRefPtr<TextPattern>());
     EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
     EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
-    NavigationModelNG::ParseCommonTitle(&(*frameNode), hasSubTitle, hasMainTitle, "", "", ignoreMainTitle);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 
     // Make !hasMainTitle true
-    hasMainTitle = false;
-    EXPECT_TRUE(hasSubTitle && !hasMainTitle);
-    NavigationModelNG::ParseCommonTitle(&(*frameNode), hasSubTitle, hasMainTitle, "", "", ignoreMainTitle);
+    titleInfo.hasMainTitle = false;
+    EXPECT_TRUE(titleInfo.hasSubTitle && !titleInfo.hasMainTitle);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 
-    hasMainTitle = true;
+    titleInfo.hasMainTitle = true;
     ignoreMainTitle = true;
     // Make !hasSubTitle true
-    hasSubTitle = false;
-    EXPECT_TRUE(!hasSubTitle && hasMainTitle);
+    titleInfo.hasSubTitle = false;
+    EXPECT_TRUE(!titleInfo.hasSubTitle && titleInfo.hasMainTitle);
     EXPECT_TRUE(ignoreMainTitle);
-    NavigationModelNG::ParseCommonTitle(&(*frameNode), hasSubTitle, hasMainTitle, "", "", ignoreMainTitle);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 }
 
 /**

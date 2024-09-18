@@ -1098,6 +1098,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest011, TestSize.Leve
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     ASSERT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     dragEventActuator->isNotInPreviewState_ = true;

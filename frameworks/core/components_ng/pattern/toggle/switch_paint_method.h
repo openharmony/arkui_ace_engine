@@ -121,7 +121,6 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         switchModifier_->SetSize(size);
         switchModifier_->SetOffset(offset);
-        switchModifier_->SetEnabled(enabled_);
         switchModifier_->SetIsSelect(isSelect_);
         switchModifier_->SetDirection(direction_);
         switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
@@ -154,11 +153,6 @@ public:
     void SetHoverPercent(float hoverPercent)
     {
         hoverPercent_ = hoverPercent;
-    }
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
     }
 
     void SetDragOffsetX(float dragOffsetX)
@@ -210,7 +204,6 @@ private:
     float dragOffsetX_ = 0.0f;
     float hoverPercent_ = 0.0f;
     const Dimension radiusGap_ = 2.0_vp;
-    bool enabled_ = true;
     bool isSelect_ = true;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;

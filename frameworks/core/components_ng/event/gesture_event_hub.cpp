@@ -236,9 +236,9 @@ RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
     return current;
 }
 
-void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
-    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host)
+void GestureEventHub::ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, RefPtr<NGGestureRecognizer>& current,
+    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex)
 {
     if (current) {
         recognizers.push_front(current);
@@ -264,9 +264,9 @@ void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>
     }
 }
 
-void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
-    std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority)
+void GestureEventHub::ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
+    RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex)
 {
     if (current) {
         if (priority == GesturePriority::Low) {
@@ -338,10 +338,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         auto priority = recognizer->GetPriority();
         std::list<RefPtr<NGGestureRecognizer>> recognizers { 1, recognizer };
         if (priority == GesturePriority::Parallel) {
-            ProcessParallelPriorityGesture(current, recognizers, parallelIndex, offset, touchId, targetComponent, host);
+            ProcessParallelPriorityGesture(offset, touchId, targetComponent, host, current, recognizers, parallelIndex);
         } else {
             ProcessExternalExclusiveRecognizer(
-                current, recognizers, exclusiveIndex, offset, touchId, targetComponent, host, priority);
+                offset, touchId, targetComponent, host, priority, current, recognizers, exclusiveIndex);
         }
     }
 
@@ -1068,7 +1068,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
+        static_cast<int32_t>(info.GetSourceTool()), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     std::string summarys;
     for (const auto& [udkey, recordSize] : summary) {

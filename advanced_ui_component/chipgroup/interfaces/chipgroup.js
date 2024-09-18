@@ -569,11 +569,10 @@ export class ChipGroup extends ViewPU {
             Row.create();
             Row.align(Alignment.End);
             Row.width("100%");
-            Row.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.height(this.getChipGroupHeight());
+            Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);

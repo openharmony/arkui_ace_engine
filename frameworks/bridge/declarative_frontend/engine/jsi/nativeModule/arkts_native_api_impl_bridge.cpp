@@ -371,7 +371,7 @@ ArkUINativeModuleValue ArkUINativeModule::SetMarqueeFrameRateRange(ArkUIRuntimeC
 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2: parameter index
     auto marqueeNode = firstArg;
     auto obj = secondArg->ToObject(vm);
     auto minValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "min"))->Int32Value(vm);
@@ -1809,6 +1809,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEditMenuOptions));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditMenuOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEditMenuOptions));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetBarState));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetBarState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
@@ -2511,6 +2515,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetMenus));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenus"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetMenus));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRecoverable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetRecoverable));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRecoverable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetRecoverable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
@@ -3206,6 +3214,8 @@ void ArkUINativeModule::RegisterToggleAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::ResetSwitchStyle));
     toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetContentModifierBuilder));
+    toggle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setToggleOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ToggleBridge::SetToggleOptions));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "toggle"), toggle);
 }
 
@@ -3392,6 +3402,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetMenus));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenus"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetMenus));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRecoverable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetRecoverable));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRecoverable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetRecoverable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 
@@ -3918,6 +3932,18 @@ void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetWidth));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetWidth));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemGroupDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemGroupDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemGroupDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubMenuExpandingMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandingMode));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandingMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandingMode));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menu"), menu);
 }
 

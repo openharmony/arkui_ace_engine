@@ -19,8 +19,24 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   toggleNode: BuilderNode<[ToggleConfiguration]> | null = null;
   modifier: ContentModifier<ToggleConfiguration>;
   needRebuild: boolean = false;
+  toggleType: ToggleType = ToggleType.Switch;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  allowChildCount(): number {
+    if (this.toggleType === ToggleType.Button) {
+      return 1;
+    }
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (isObject(value[0])) {
+      this.toggleType = value[0].type;
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, undefined);
+    }
+    return this;
   }
   onChange(callback: (isOn: boolean) => void): this {
     throw new Error('Method not implemented.');
@@ -302,6 +318,23 @@ class ToggleContentModifier extends ModifierWithKey<ContentModifier<ToggleConfig
     let toggleComponent = component as ArkToggleComponent;
     toggleComponent.setNodePtr(node);
     toggleComponent.setContentModifier(this.value);
+  }
+}
+class ToggleOptionsModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('toggleOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.setToggleOptions(node, undefined);
+    } else {
+      getUINativeModule().toggle.setToggleOptions(node, this.value?.isOn);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.isOn, this.value.isOn);
   }
 }
 // @ts-ignore

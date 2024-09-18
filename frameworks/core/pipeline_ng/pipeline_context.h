@@ -722,6 +722,8 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
 
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
+
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
@@ -1179,6 +1181,8 @@ private:
     std::list<WeakPtr<FrameNode>> changedNodes_;
     bool isHalfFoldHoverStatus_ = false;
     CancelableCallback<void()> foldStatusDelayTask_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
 };
 } // namespace OHOS::Ace::NG
 

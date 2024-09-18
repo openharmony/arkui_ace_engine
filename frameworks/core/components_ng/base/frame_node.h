@@ -47,6 +47,7 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -769,7 +770,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;

@@ -530,6 +530,8 @@ public:
 
     virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
 
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
+
     void HandleSelectionChange(int32_t start, int32_t end);
 
     CopyOptions GetCopyOptions() const
@@ -653,6 +655,17 @@ public:
 
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    
+    void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
+    {
+        selectOverlay_->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
+    }
+
+    void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    {
+        selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+    }
+    
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     void UpdateParentGlobalOffset()
@@ -691,15 +704,28 @@ public:
                 .count());
     }
 
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
+
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
+    virtual void InitAISpanHoverEvent();
+    virtual void HandleAISpanHoverEvent(const MouseInfo& info);
+    void OnHover(bool isHover);
     void InitMouseEvent();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
+    void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
@@ -783,6 +809,7 @@ protected:
     bool contChange_ = false;
     int32_t recoverStart_ = 0;
     int32_t recoverEnd_ = 0;
+    bool aiSpanHoverEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
@@ -833,6 +860,8 @@ protected:
     }
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     void InitUrlHoverEvent();
+    MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
 
 private:
     MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
@@ -908,6 +937,7 @@ private:
     bool isLongPress_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
+    bool isEnableHapticFeedback_ = true;
 
     RefPtr<ParagraphManager> pManager_;
     std::vector<int32_t> placeholderIndex_;
@@ -936,7 +966,6 @@ private:
     bool isUserSetResponseRegion_ = false;
     bool isInArea_ = false;
     std::vector<RectF> selectRects_;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     WeakPtr<PipelineContext> pipeline_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };

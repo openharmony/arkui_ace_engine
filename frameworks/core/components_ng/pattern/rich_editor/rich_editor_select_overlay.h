@@ -56,7 +56,7 @@ public:
     void UpdateMenuOffset();
     bool IsBothHandlesShow();
     bool IsHandleShow();
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
@@ -66,6 +66,7 @@ public:
     }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void OnHandleMouseEvent(const MouseInfo& event) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
     bool IsRegisterTouchCallback() override
     {

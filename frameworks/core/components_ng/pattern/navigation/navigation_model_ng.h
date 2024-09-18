@@ -69,6 +69,8 @@ public:
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
+    void SetRecoverable(bool recoverable) override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
@@ -85,12 +87,13 @@ public:
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
-    
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
-    static void ParseCommonTitle(FrameNode* frameNode, bool hasSubTitle, bool hasMainTitle,
-        const std::string& subtitle, const std::string& title, bool ignoreMainTitle = false);
+    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
+        bool ignoreMainTitle = false);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
     static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);

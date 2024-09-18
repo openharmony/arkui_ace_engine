@@ -320,6 +320,16 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     NotifyForeground();
 }
 
+bool UIExtensionPattern::IsModalUec()
+{
+    return usage_ == UIExtensionUsage::MODAL;
+}
+
+bool UIExtensionPattern::IsForeground()
+{
+    return state_ == AbilityState::FOREGROUND;
+}
+
 UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
 {
     if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
@@ -957,8 +967,10 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
             host->RemoveChildAtIndex(0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        sessionWrapper_->NotifyDestroy();
-        sessionWrapper_->DestroySession();
+        if (name.compare("extension_node_transparent") != 0) {
+            sessionWrapper_->NotifyDestroy();
+            sessionWrapper_->DestroySession();
+        }
     }
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);

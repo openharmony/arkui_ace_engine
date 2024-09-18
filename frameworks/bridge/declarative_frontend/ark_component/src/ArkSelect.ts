@@ -141,7 +141,7 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
     return this;
   }
-  setContentModifier(modifier: ContentModifier<MenuItemConfiguration>): this {
+  menuItemContentModifier(modifier: ContentModifier<MenuItemConfiguration>): this {
     if (modifier === undefined || modifier === null) {
       getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
       return;
@@ -640,5 +640,5 @@ globalThis.Select.menuItemContentModifier = function (modifier): void {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSelectComponent(nativeNode);
   });
-  component.setContentModifier(modifier);
+  component.menuItemContentModifier(modifier);
 };

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -28,17 +29,12 @@
 
 namespace OHOS::Ace::NG {
 
-class NavBarPattern : public Pattern, public FocusView {
-    DECLARE_ACE_TYPE(NavBarPattern, Pattern, FocusView);
+class NavBarPattern : public NavDestinationPatternBase {
+    DECLARE_ACE_TYPE(NavBarPattern, NavDestinationPatternBase);
 
 public:
     NavBarPattern() = default;
     ~NavBarPattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -48,11 +44,6 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
-    }
-    
-    bool CheckCustomAvoidKeyboard() const override
-    {
-        return !NearZero(avoidKeyboardOffset_);
     }
 
     void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
@@ -129,21 +120,6 @@ public:
         WindowFocus(false);
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
-
-    std::list<int32_t> GetRouteOfFirstScope() override
-    {
-        return {};
-    }
-
-    bool IsEntryFocusView() override
-    {
-        return false;
-    }
-
     int32_t GetMaxMenuNum() const
     {
         return maxMenuNums_;
@@ -160,14 +136,7 @@ public:
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
-    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
-    {
-        avoidKeyboardOffset_ = avoidKeyboardOffset;
-    }
-    float GetAvoidKeyboardOffset()
-    {
-        return avoidKeyboardOffset_;
-    }
+    Dimension GetTitleBarHeightBeforeMeasure() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -176,16 +145,11 @@ private:
     void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
-    void HandleOnDragStart(float offset);
-    void HandleOnDragUpdate(float offset);
-    void HandleOnDragEnd();
     void OnColorConfigurationUpdate() override;
     void SetNavBarMask(bool isWindowFocus);
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
-    bool isHideToolbar_ = false;
-    bool isHideTitlebar_ = false;
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::vector<NG::BarItem> toolBarMenuItems_;
     std::optional<int32_t> menuNodeId_;
@@ -194,7 +158,6 @@ private:
     RefPtr<Animator> controller_;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
-    float avoidKeyboardOffset_ = 0.0f;
     bool isWindowFocus_ = true;
 };
 

@@ -137,10 +137,10 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     onHoverEvent(true);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
+    EXPECT_EQ(pipeline->mouseStyleNodeId_.value(), frameNode->GetId());
 
     onHoverEvent(false);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
 
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -149,7 +149,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 
     MouseInfo mouseInfo;
     onMouseEvent(mouseInfo);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**

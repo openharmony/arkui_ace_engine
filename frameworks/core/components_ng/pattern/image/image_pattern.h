@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
@@ -112,6 +113,7 @@ public:
         return GetHost();
     }
 
+    void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -218,7 +220,7 @@ public:
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
-
+    void DumpSvgInfo();
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {
         return WeakClaim(AceType::RawPtr(loadingCtx_));
@@ -387,6 +389,7 @@ protected:
     bool isShow_ = true;
     bool gifAnimation_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
+    RefPtr<ImageContentModifier> contentMod_;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -429,6 +432,7 @@ private:
     void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
+    void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -539,6 +543,7 @@ private:
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     Color selectedColor_;
+    float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 

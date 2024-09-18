@@ -64,11 +64,7 @@ public:
     virtual void Destroy() const = 0;
     virtual void DrawPixelMap(const RefPtr<PixelMap>& pixelmap) = 0;
     virtual void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) = 0;
-#ifndef USE_ROSEN_DRAWING
-    virtual void DrawImage(void* skImage) = 0;
-#else
     virtual void DrawImage(void* drawingImage) = 0;
-#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
     virtual void DrawText(
         std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText) = 0;

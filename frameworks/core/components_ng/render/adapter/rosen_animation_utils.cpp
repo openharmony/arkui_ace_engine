@@ -102,6 +102,11 @@ bool AnimationUtils::CloseImplicitAnimation()
     return !animations.empty();
 }
 
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+    return Rosen::RSNode::CloseImplicitCancelAnimation();
+}
+
 bool AnimationUtils::IsImplicitAnimationOpen()
 {
     return Rosen::RSNode::IsImplicitAnimationOpen();

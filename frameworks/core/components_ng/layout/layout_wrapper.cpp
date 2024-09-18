@@ -39,6 +39,8 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
+    ACE_SCOPED_TRACE(
+        "ApplySafeArea: SafeAreaInsets: %s to constraint %s", insets.ToString().c_str(), constraint.ToString().c_str());
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
@@ -212,6 +214,11 @@ void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->CustomizeExpandSafeArea()) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();

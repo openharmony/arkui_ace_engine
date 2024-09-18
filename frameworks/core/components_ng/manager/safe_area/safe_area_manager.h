@@ -232,8 +232,24 @@ public:
     }
     void SetkeyboardHeightConsideringUIExtension(uint32_t height)
     {
-        keyboardHeightConsideringUIExtension_ = height;
+        if (keyboardHeightConsideringUIExtension_ != height) {
+            for (const auto& [nodeId, callback] : keyboardChangeCbsConsideringUIExt_) {
+                if (callback) {
+                    callback();
+                }
+            }
+            keyboardHeightConsideringUIExtension_ = height;
+        }
     }
+    void AddKeyboardChangeCallbackConsideringUIExt(int32_t nodeId, const std::function<void()>& callback)
+    {
+        keyboardChangeCbsConsideringUIExt_[nodeId] = callback;
+    }
+    void RemoveKeyboardChangeCallbackConsideringUIExt(int32_t nodeId)
+    {
+        keyboardChangeCbsConsideringUIExt_.erase(nodeId);
+    }
+
 private:
     bool isAtomicService_ = false;
 
@@ -301,6 +317,7 @@ private:
         SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
 
     uint32_t keyboardHeightConsideringUIExtension_ = 0;
+    std::unordered_map<int32_t, std::function<void()>> keyboardChangeCbsConsideringUIExt_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

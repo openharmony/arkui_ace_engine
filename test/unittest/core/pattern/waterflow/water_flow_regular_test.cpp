@@ -384,4 +384,27 @@ HWTEST_F(WaterFlowTestNg, Remeasure001, TestSize.Level1)
         EXPECT_EQ(AceType::DynamicCast<WaterFlowLayoutAlgorithm>(algo)->itemsCrossSize_.size(), 2);
     }
 }
+
+/**
+ * @tc.name: ShowCachedItems001
+ * @tc.desc: Test show cached items
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCachedItems001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetCachedCount(3, true);
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 12));
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 12), 800.0f);
+}
 } // namespace OHOS::Ace::NG

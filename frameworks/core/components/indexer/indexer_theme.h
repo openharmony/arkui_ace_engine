@@ -76,7 +76,7 @@ public:
     {
         return popupSeparateColor_;
     }
-    const Color& GetSeclectedBackgroundColor() const
+    const Color& GetSelectedBackgroundColor() const
     {
         return selectedBackgroundColor_;
     }

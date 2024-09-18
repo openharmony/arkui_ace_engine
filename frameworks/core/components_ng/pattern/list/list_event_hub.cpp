@@ -75,7 +75,9 @@ void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo&
 
 void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
@@ -86,11 +88,9 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
         return;
     }
 
-    auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_AI_WRITE_H
 
 #include <functional>
+#include <string>
 
 #include "base/memory/ace_type.h"
 #include "core/common/ace_application_info.h"
@@ -63,6 +64,7 @@ public:
     std::vector<uint8_t> GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams);
     bool GetBoolParam(const std::string& key, const AAFwk::WantParams& wantParams);
     bool GetAISupportFromMetadata(const std::string& bundleName, const std::string& abilityName);
+    uint32_t GetSelectLengthOnlyText(const std::wstring& content);
     void SetPipelineContext(const WeakPtr<NG::PipelineContext>& pipelineContext)
     {
         pipelineContext_ = pipelineContext;

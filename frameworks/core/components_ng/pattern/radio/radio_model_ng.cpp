@@ -295,4 +295,15 @@ std::string RadioModelNG::GetRadioGroup(FrameNode* frameNode)
     CHECK_NULL_RETURN(eventHub, nullptr);
     return eventHub->GetGroup();
 }
+
+void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& value,
+    const std::string& group, int32_t indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(value);
+    eventHub->SetGroup(group);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator, frameNode);
+}
 } // namespace OHOS::Ace::NG

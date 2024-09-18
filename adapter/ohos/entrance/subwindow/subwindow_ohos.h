@@ -154,7 +154,8 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
-    void DestroyToastWindow() override;
+    bool IsToastSubWindow() override;
+    void DestroyWindow() override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -188,13 +189,14 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    
+    void SetAppFontScale() const;
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
     void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
+    Rosen::WindowType GetToastRosenType(bool isSceneBoardEnable);
 
     static int32_t id_;
     int32_t windowId_ = 0;

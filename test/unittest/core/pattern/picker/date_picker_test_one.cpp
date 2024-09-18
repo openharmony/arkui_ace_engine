@@ -872,7 +872,9 @@ HWTEST_F(DatePickerTestOne, CreateLunarswitchNode001, TestSize.Level1)
     ASSERT_NE(contentColumn, nullptr);
     bool ret = false;
     auto changeEvent = [&ret](const bool check) { ret = check; };
-    DatePickerDialogView::CreateLunarswitchNode(contentColumn, dateNode, changeEvent, true);
+    CheckboxSettingData checkboxData;
+    DatePickerDialogView::CreateLunarswitchNode(
+        contentColumn, dateNode, changeEvent, true, checkboxData);
     EXPECT_FALSE(ret);
 }
 
@@ -922,7 +924,9 @@ HWTEST_F(DatePickerTestOne, CreateLunarswitchNode002, TestSize.Level1)
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-    DatePickerDialogView::CreateLunarswitchNode(contentColumn, dateNode, changeEvent, true);
+    CheckboxSettingData checkboxData;
+    DatePickerDialogView::CreateLunarswitchNode(
+        contentColumn, dateNode, changeEvent, true, checkboxData);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
     EXPECT_FALSE(ret);
 }

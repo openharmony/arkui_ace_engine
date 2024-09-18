@@ -66,5 +66,18 @@ public:
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;
 };
+
+class ACE_FORCE_EXPORT UiReportProxyRecipient : public IRemoteObject::DeathRecipient {
+public:
+    using RemoteDiedHandler = std::function<void()>;
+    explicit UiReportProxyRecipient(RemoteDiedHandler handler) : handler_(std::move(handler)) {}
+
+    ~UiReportProxyRecipient() override = default;
+
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+
+private:
+    RemoteDiedHandler handler_;
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H

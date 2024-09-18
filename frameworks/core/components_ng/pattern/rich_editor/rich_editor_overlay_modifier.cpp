@@ -201,6 +201,8 @@ void RichEditorOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
+    auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(!pattern || pattern->GetBarDisplayMode() != DisplayMode::OFF);
     scrollBarOverlayModifier->onDraw(context);
 }
 

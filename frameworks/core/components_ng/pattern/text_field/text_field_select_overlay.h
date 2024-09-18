@@ -64,7 +64,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleIsHidden() override;
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
 
     void HandleOnShowMenu();
 
@@ -98,7 +98,6 @@ private:
     void UpdatePattern(const OverlayRequest& request);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst);
-    void StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex);
     void CloseMagnifier();
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };

@@ -18,6 +18,7 @@
 
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,6 +51,8 @@ public:
         const RefPtr<PipelineBase>& context, int32_t badgeLength);
     static void UpdateBadgeLayoutAndRenderContext(
         const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize);
+    static void UpdateGatherNodeToTop();
+    static void ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode);
 };
 }
 #endif
