@@ -322,7 +322,7 @@ private:
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
-    bool isResponseRegionFull = false;
+    bool isResponseRegionFull_ = false;
     OptionsAfterApplied optionsAfterApplied_;
 
     PanDirection direction_;

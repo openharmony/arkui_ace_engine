@@ -2360,7 +2360,7 @@ void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>&
 
 void DragEventActuator::SetResponseRegionFull()
 {
-    if (!IsNeedGather() || isResponseRegionFull) {
+    if (!IsNeedGather() || isResponseRegionFull_) {
         return;
     }
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -2387,16 +2387,16 @@ void DragEventActuator::SetResponseRegionFull()
     auto height = geometryNode->GetFrameSize().Height();
     hotZoneRegion.SetSize(DimensionSize(Dimension(width), Dimension(height)));
     gestureHub->SetResponseRegion(std::vector<DimensionRect>({ hotZoneRegion }));
-    isResponseRegionFull = true;
+    isResponseRegionFull_ = true;
 }
 
 void DragEventActuator::ResetResponseRegion()
 {
-    if (isResponseRegionFull) {
+    if (isResponseRegionFull_) {
         auto gestureHub = gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetResponseRegion(responseRegion_);
-        isResponseRegionFull = false;
+        isResponseRegionFull_ = false;
     }
 }
 

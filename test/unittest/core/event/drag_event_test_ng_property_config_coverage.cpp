@@ -491,7 +491,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest040, TestSize.Le
     dragEventActuator->HandleTouchUpEvent();
     dragEventActuator->SetResponseRegionFull();
     dragEventActuator->ResetResponseRegion();
-    dragEventActuator->isResponseRegionFull = false;
+    dragEventActuator->isResponseRegionFull_ = false;
     dragEventActuator->ResetResponseRegion();
     SUCCEED();
 }
