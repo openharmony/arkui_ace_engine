@@ -44,7 +44,8 @@ public:
         return isDeclarative_;
     }
 
-    virtual void SetTaskExecutor(const RefPtr<TaskExecutor> &taskExecutor) {
+    virtual void SetTaskExecutor(const RefPtr<TaskExecutor> &taskExecutor)
+    {
         PipelineBase::taskExecutor_ = taskExecutor;
     };
 
