@@ -768,6 +768,7 @@ private:
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
     void OnSpringAnimationFinish();
+    float EstimateSpringOffset(float realOffset);
     void OnSpringAndFadeAnimationFinish();
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
@@ -998,6 +999,7 @@ private:
 
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
+    float springOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
     float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;

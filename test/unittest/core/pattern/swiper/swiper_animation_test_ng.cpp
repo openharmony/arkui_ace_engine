@@ -95,11 +95,16 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     });
     SimulateSwipe(200.0f, 2000.0f);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 144.0f);
+    auto visibleSize = pattern_->CalculateVisibleSize();
+    auto realOffset = 0.0f;
+    if (visibleSize > 0.0f) {
+        realOffset = 200.0f * SwiperHelper::CalculateFriction(200.0f / visibleSize);
+    }
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset));
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 72.0f);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset / 2));
 
     // change attribute during animation
     layoutProperty_->UpdateLoop(true);
@@ -145,17 +150,23 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
         model.SetLoop(false);
     });
     SimulateSwipe(100.0f, 1000.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 72.0f);
+    auto visibleSize = pattern_->CalculateVisibleSize();
+    auto realOffset = 0.0f;
+    if (visibleSize > 0.0f) {
+        realOffset = 100.0f * SwiperHelper::CalculateFriction(100.0f / visibleSize);
+    }
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset));
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimation();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(NearZero(GetChildX(frameNode_, 0)));
 
+    pattern_->springOffset_ = 0.0f;
     SimulateSwipe(100.0f, 1000.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimationImmediately();
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 72.0f);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset));
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
