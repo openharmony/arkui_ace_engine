@@ -303,25 +303,8 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
     subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
-    if (!parentPipeline->IsFollowSystem()) {
-        subPipelineContext->SetFontScale(1.0f);
-    }
-    SetAppFontScale();
+    subPipelineContext->SetFontScale(parentPipeline->GetFontScale());
     return true;
-}
-
-void SubwindowOhos::SetAppFontScale() const
-{
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
-    auto parentPipeline = parentContainer->GetPipelineContext();
-    CHECK_NULL_VOID(parentPipeline);
-    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext();
-    CHECK_NULL_VOID(subPipelineContext);
-    subPipelineContext->SetUseAppFontScale(parentPipeline->UseAppFontScale());
-    if (parentPipeline->UseAppFontScale()) {
-        subPipelineContext->SetAppFontScale(parentPipeline->GetAppFontScale());
-    }
 }
 
 RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
