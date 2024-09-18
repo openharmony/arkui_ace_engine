@@ -985,7 +985,7 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
         frameNode->SetAccessibilityVisible(nodeAccessibilityVisible);
     }
-    nodeInfo.SetAccessibilityVisible(frameNode->SetAccessibilityVisible());
+    nodeInfo.SetAccessibilityVisible(frameNode->GetAccessibilityVisible());
 }
 
 int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
@@ -1534,6 +1534,8 @@ void JsAccessibilityManager::UpdateAccessibilityVisible(
         }
     } else {
         if (node->GetTag() == V2::PAGE_ETS_TAG) {
+            nodeInfo.SetAccessibilityVisible(node->IsActive() && node->IsVisible() && node->GetAccessibilityVisible() &&
+                                             parentNode->GetAccessibilityVisible());
             return;
         }
         auto nodeAccessibilityVisible = node->IsActive() && node->IsVisible() && parentNode->GetAccessibilityVisible();
@@ -1546,7 +1548,7 @@ void JsAccessibilityManager::UpdateAccessibilityVisible(
                 parentNode->GetAccessibilityVisible(), parentNode->GetAccessibilityId());
         }
     }
-    
+    nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
 }
 
 namespace {
@@ -1567,7 +1569,6 @@ namespace {
             };
     }
 }
-
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
@@ -1634,8 +1635,8 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
     nodeInfo.SetEnabled(node->GetIsEnabled());
     nodeInfo.SetFocused(node->GetIsFocused());
     nodeInfo.SetAccessibilityFocus(node->GetIsAccessibilityFocus());
+
     nodeInfo.SetVisible(node->GetIsVisible());
-    
     if (node->GetIsVisible()) {
         CHECK_NULL_VOID(webPattern);
         auto webNode = webPattern->GetHost();
@@ -2211,6 +2212,7 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("content description: ", nodeInfo.GetDescriptionInfo());
     DumpLog::GetInstance().AddDesc("content invalid: ", BoolToString(nodeInfo.GetContentInvalid()));
     DumpLog::GetInstance().AddDesc("accessibility label: ", nodeInfo.GetLabeledAccessibilityId());
+    DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
     DumpExtraElementInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc(
         "trigger action: ", static_cast<int32_t>(ConvertAccessibilityAction(nodeInfo.GetTriggerAction())));
