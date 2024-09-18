@@ -582,6 +582,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto hapModuleInfo = context->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    StoreConfiguration(context->GetConfiguration());
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -607,6 +608,9 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
+    auto context = context_.lock();
+    CHECK_NULL_VOID(context);
+    StoreConfiguration(context->GetConfiguration());
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1253,16 +1257,8 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         return;
     }
 
-    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    if (!colorMode.empty()) {
-        if (colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
-    }
 
     if (!deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -1277,6 +1273,39 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         if (!language.empty() || !script.empty() || !region.empty()) {
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
+    }
+    StoreConfiguration(config);
+}
+
+void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (config == nullptr) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
+    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorMode.empty()) {
+        if (colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    auto string2float = [](const std::string& str) {
+        try {
+            return std::stof(str);
+        } catch (...) {
+            return (float)1.0;
+        }
+    };
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        SystemProperties::SetFontScale(string2float(fontScale));
+    }
+    auto fontWeightScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    if (!fontWeightScale.empty()) {
+        SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
 }
 
@@ -2144,6 +2173,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         return;
     }
 
+    StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();

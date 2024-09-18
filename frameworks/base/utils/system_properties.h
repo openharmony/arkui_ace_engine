@@ -156,10 +156,24 @@ public:
      */
     static float GetFontWeightScale();
 
+    static void SetFontWeightScale(const float fontWeightScale)
+    {
+        if (fontWeightScale_ != fontWeightScale) {
+            fontWeightScale_ = fontWeightScale;
+        }
+    }
+
     /*
      * Get size scale of device.
      */
     static float GetFontScale();
+
+    static void SetFontScale(const float fontScale)
+    {
+        if (fontScale != fontScale_) {
+            fontScale_ = fontScale;
+        }
+    }
 
     /*
      * Get density of default display.
@@ -616,6 +630,8 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static float fontScale_;
+    static float fontWeightScale_;
 };
 
 } // namespace OHOS::Ace
