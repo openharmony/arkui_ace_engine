@@ -257,7 +257,7 @@ void JSCanvasRenderer::SetAntiAlias()
 
 void JSCanvasRenderer::SetDensity()
 {
-    double density = GetDensity();
+    double density = GetDensity(true);
     renderingContext2DModel_->SetDensity(density);
 }
 
@@ -1542,7 +1542,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * GetDensity());
+        return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
 }
