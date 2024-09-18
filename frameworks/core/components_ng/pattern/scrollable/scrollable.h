@@ -79,6 +79,14 @@ public:
     Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
 
+    enum class AnimationState {
+        SPRING,
+        SNAP,
+        FRICTION,
+        TRANSITION, // in between two animations, i.e. from friction to spring
+        IDLE,
+    };
+
     static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
     static void SetFriction(double sFriction);
@@ -89,17 +97,17 @@ public:
 
     bool IsMotionStop() const
     {
-        return isSpringAnimationStop_ && isFrictionAnimationStop_ && !moved_;
+        return state_ != AnimationState::SPRING && state_ != AnimationState::FRICTION && !moved_;
     }
 
     bool IsSpringMotionRunning() const
     {
-        return !isSpringAnimationStop_;
+        return state_ == AnimationState::SPRING;
     }
 
     bool IsDragging() const
     {
-        return isTouching_ && !isFrictionAnimationStop_;
+        return isTouching_ && state_ == AnimationState::FRICTION;
     }
 
     void SetAxis(Axis axis);
@@ -124,6 +132,14 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetCoordinateOffset(offset);
         }
+    }
+
+    /**
+     * @param useScrollSnap true if runnning SnapAnimation for ScrollPattern, false if for ListPattern
+     */
+    void SetSnapMode(bool useScrollSnap)
+    {
+        useScrollSnap_ = useScrollSnap;
     }
 
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
@@ -395,7 +411,7 @@ public:
 
     void StopSnapController()
     {
-        if (!isSnapAnimationStop_) {
+        if (state_ == AnimationState::SNAP) {
             StopSnapAnimation();
         }
     }
@@ -525,6 +541,7 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    bool useScrollSnap_ = true; // set to true if pattern is ScrollPattern, false if ListPattern
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode
@@ -569,25 +586,21 @@ private:
     DragFRCSceneCallback dragFRCSceneCallback_;
 
     uint64_t lastVsyncTime_ = 0;
+    AnimationState state_ = AnimationState::IDLE;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;
     float lastPosition_ = 0.0f;
     float initVelocity_ = 0.0f;
     float frictionVelocity_ = 0.0f;
-    bool isFrictionAnimationStop_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
-    bool isSpringAnimationStop_ = true;
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation
     uint32_t updateSnapAnimationCount_ = 0;
     uint32_t springAnimationCount_ = 0;
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
-    bool isSnapAnimationStop_ = true;
-    bool isSnapScrollAnimationStop_ = true;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
-    bool isSnapAnimation_ = false;
     bool nestedScrolling_ = false;
 };
 

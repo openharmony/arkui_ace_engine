@@ -972,7 +972,7 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushLayoutTask(frameNode_);
@@ -1028,22 +1028,20 @@ HWTEST_F(GridOptionLayoutTestNg, OnScrollStart001, TestSize.Level1)
     EXPECT_EQ(count, 1);
     EXPECT_EQ(stopCount, 0);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
-    EXPECT_FALSE(scrollable->isFrictionAnimationStop_);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
 
-    std::cout << "tick again\n";
     MockAnimationManager::GetInstance().TickByVelocity(100.f);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(count, 2);
-    EXPECT_EQ(stopCount, 1);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 0);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 100.0f);
-    EXPECT_TRUE(scrollable->isFrictionAnimationStop_);
-    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
 
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(scrollable->IsSpringMotionRunning());
-    EXPECT_EQ(count, 2);
-    EXPECT_EQ(stopCount, 2);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 1);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
 }
 } // namespace OHOS::Ace::NG
