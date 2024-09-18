@@ -38,7 +38,7 @@ group("core_unittest") {
 group("linux_core_unittest") {
   testonly = true
   deps = [
-    "accessibility:core_accessibility_unittest",
+    "accessibility:core_accessibility_unittest_linux",
     "animation:core_animation_unittest",
     "base:core_base_unittest",
     "common:common_test",
