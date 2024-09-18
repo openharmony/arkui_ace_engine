@@ -809,6 +809,10 @@ public:
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
+        CHECK_NULL_VOID(!textSelector_.SelectNothing());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
     Color GetSelectedBackgroundColor();
