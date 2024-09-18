@@ -413,7 +413,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     if (focusNode->IsCurrentFocus()) {
         FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         // Try to goto next focus, otherwise goto previous focus.
-        if (!SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
+        if (!focusNode->SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
             !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
             lastWeakFocusNode_ = nullptr;
             auto focusView = FocusView::GetCurrentFocusView();
