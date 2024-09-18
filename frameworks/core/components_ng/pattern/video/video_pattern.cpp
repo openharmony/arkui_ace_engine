@@ -438,7 +438,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 return;
             }
             video->OnTextureRefresh(nativeWindow);
-        }, "ArkUIVideoTextureRefresh");
+            }, "ArkUIVideoTextureRefresh");
     };
     mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
 #endif
