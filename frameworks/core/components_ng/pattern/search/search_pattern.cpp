@@ -382,7 +382,6 @@ void SearchPattern::HandleEnabled()
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
     textFieldLayoutProperty->UpdateLayoutDirection(searchLayoutProperty->GetLayoutDirection());
-    textFieldFrameNode->MarkModifyDone();
 }
 
 void SearchPattern::HandleTouchableAndHitTestMode()
