@@ -100,13 +100,15 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
+#include "interfaces/native/node/resource.h"
+
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
-#include "interfaces/native/node/resource.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1245,6 +1247,13 @@ std::string GetBundleNameFromContainer()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, "");
     return container->GetBundleName();
+}
+
+std::string GetModuleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
 }
 
 void CompleteResourceObjectFromParams(
@@ -4908,6 +4917,21 @@ bool JSViewAbstract::ConvertResourceType(const std::string& typeName, ResourceTy
 
 void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
 {
+    std::string bundleName;
+    std::string moduleName;
+    int32_t resId = -1;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+}
+
+void JSViewAbstract::CompleteResourceObjectWithBundleName(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
+{
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+}
+
+void JSViewAbstract::CompleteResourceObjectInner(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue)
+{
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
@@ -4926,49 +4950,20 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         }
         CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
-        int32_t resIdValue = resId->ToNumber<int32_t>();
+        resIdValue = resId->ToNumber<int32_t>();
         if (resIdValue == -1) {
             CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
         }
     }
 
-    std::string bundleName;
-    std::string moduleName;
     JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-    if (bundleName.empty() && !moduleName.empty()) {
+    if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
         bundleName = GetBundleNameFromContainer();
         jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::BUNDLE_NAME), bundleName);
     }
-}
-
-void JSViewAbstract::CompleteResourceObjectWithBundleName(
-    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
-{
-    JSRef<JSVal> tmp = jsObj->GetProperty("id");
-    ResourceType resType;
-
-    std::string targetModule;
-    std::string resName;
-    if (tmp->IsString()) {
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        int32_t typeNum = -1;
-        if (type->IsNumber()) {
-            typeNum = type->ToNumber<int32_t>();
-        }
-        if (!ParseDollarResource(tmp, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
-            return;
-        }
-        CompleteResourceObjectFromId(type, jsObj, resType, resName);
-    } else if (!tmp->IsNull() && tmp->IsNumber()) {
-        resId = tmp->ToNumber<int32_t>();
-        if (resId == -1) {
-            CompleteResourceObjectFromParams(resId, jsObj, targetModule, resType, resName);
-        }
-    }
-    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-    if (bundleName.empty() && !moduleName.empty()) {
-        bundleName = GetBundleNameFromContainer();
-        jsObj->SetProperty<std::string>("bundleName", bundleName);
+    if (moduleName == DEFAULT_HAR_MODULE_NAME) {
+        moduleName = GetModuleNameFromContainer();
+        jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), moduleName);
     }
 }
 
