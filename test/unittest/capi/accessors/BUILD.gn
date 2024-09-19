@@ -11,11 +11,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("linux_capi_unittest") {
-  testonly = true
-  deps = [
-    "accessors:capi_accessors_unittest",
-    "modifiers:capi_modifiers_unittest",
-    "utils:capi_utils_unittest",
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("capi_all_accessors_test") {
+  type = "new"
+  module_output = "capi"
+  sources = [
+    # place here your UT source code
+    "swiper_controller_accessor_test.cpp",
   ]
+  extra_deps = []
+  extra_deps += [
+    "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
+    "../stubs:capi-ut-stubs",
+  ]
+}
+
+group("capi_accessors_unittest") {
+  testonly = true
+  deps = [ ":capi_all_accessors_test" ]
 }
