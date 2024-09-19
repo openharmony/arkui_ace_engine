@@ -365,7 +365,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
-    if (magnifierController_) {
+    if (magnifierController_ && HasContent()) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
@@ -4302,6 +4302,9 @@ int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
 
 void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
+    if (!HasContent()) {
+        return;
+    }
     auto localOffset = info.GetTouches().front().GetLocalLocation();
     if (magnifierController_) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
@@ -4317,8 +4320,10 @@ void TextPattern::OnTextGenstureSelectionEnd()
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
-    CalculateHandleOffsetAndShowOverlay();
-    ShowSelectOverlay({ .animation = true });
+    if (HasContent()) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay({ .animation = true });
+    }
 }
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
@@ -4455,5 +4460,18 @@ void TextPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     if (SystemProperties::GetDebugEnabled()) {
         DumpAdvanceInfo(json);
     }
+}
+
+bool TextPattern::HasContent()
+{
+    if (GetTextForDisplay().empty()) {
+        for (const auto& span : spans_) {
+            if (span->spanItemType != SpanItemType::NORMAL) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
