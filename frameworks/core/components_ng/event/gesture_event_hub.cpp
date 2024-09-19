@@ -1142,10 +1142,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             dragEventActuator_, gatherNodeChildrenInfo);
         DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, gatherNodeChildrenInfo);
         DragEventActuator::UpdatePreviewPositionAndScale(
-            imageNode, imageNode->GetOffsetInSubwindow(subWindow->GetRect().GetOffset()));
+            imageNode, imageNode->GetOffsetInSubwindow(subWindow->GetWindowRect().GetOffset()));
         if (textNode) {
             DragEventActuator::UpdatePreviewPositionAndScale(
-                textNode, textNode->GetOffsetInSubwindow(subWindow->GetRect().GetOffset()));
+                textNode, textNode->GetOffsetInSubwindow(subWindow->GetWindowRect().GetOffset()));
         }
         DragEventActuator::MountPixelMap(
             subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode, true);

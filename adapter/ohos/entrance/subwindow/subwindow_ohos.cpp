@@ -1686,6 +1686,15 @@ Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
     return Rect(hostWindowRect.posX_, hostWindowRect.posY_, hostWindowRect.width_, hostWindowRect.height_);
 }
 
+NG::RectF SubwindowOhos::GetWindowRect() const
+{
+    NG::RectF rect;
+    CHECK_NULL_RETURN(window_, rect);
+    rect.SetRect(window_->GetRect().posX_, window_->GetRect().posY_,
+        window_->GetRect().width_, window_->GetRect().height_);
+    return rect;
+}
+
 void SubwindowOhos::RequestFocus()
 {
     CHECK_NULL_VOID(window_);
