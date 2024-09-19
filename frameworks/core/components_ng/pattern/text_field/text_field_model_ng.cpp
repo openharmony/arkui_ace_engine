@@ -155,6 +155,33 @@ void TextFieldModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFeature, value, frameNode);
 }
 
+void TextFieldModelNG::SetAutoWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, true, frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
+void TextFieldModelNG::SetWidth(FrameNode* frameNode, const std::string& value)
+{
+    if (value == "auto") {
+        SetAutoWidth(frameNode);
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, false, frameNode);
+    CalcDimension result;
+    StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(result));
+}
+
+void TextFieldModelNG::ClearWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, false, frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
 void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
