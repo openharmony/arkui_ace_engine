@@ -1395,10 +1395,11 @@ void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJud
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
 }
 
-void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent, double distanceThreshold)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
+    clickEventActuator_->AddDistanceThreshold(distanceThreshold);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
