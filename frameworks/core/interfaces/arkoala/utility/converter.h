@@ -65,7 +65,7 @@ namespace OHOS::Ace::NG::Converter {
     template<typename T, typename P>
     void AssignUnionTo(std::optional<T>& dst, const P& src)
     {
-        AssignLiteralTo(dst, src);
+        AssignCast(dst, src);
     }
 
     template<typename T, typename P>
