@@ -519,6 +519,22 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 }
 
+bool PanRecognizer::JudgeVerticalDistance() const
+{
+    if (direction_.type == PanDirection::VERTICAL) {
+        return true;
+    }
+    for (const auto& element : touchPointsDistance_) {
+        auto each_point_move = element.second.GetY();
+        if ((((direction_.type & PanDirection::DOWN) == 0) && GreatOrEqual(each_point_move, 0.0)) ||
+            ((((direction_.type & PanDirection::UP) == 0) && LessOrEqual(each_point_move, 0.0)))) {
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
 bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 {
     float totalDistance = 0.0f;
@@ -534,7 +550,7 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
     if (deviceType_ == SourceType::MOUSE) {
         judgeDistance = mouseDistance_;
     }
-    return GreatNotEqual(totalDistance, judgeDistance) && static_cast<int32_t>(touchPointsDistance_.size()) >= fingers_;
+    return GreatOrEqual(totalDistance, judgeDistance) && static_cast<int32_t>(touchPointsDistance_.size()) >= fingers_;
 }
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInAllDirection(double judgeDistance) const
@@ -579,6 +595,9 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInVerticalDi
                 return GestureAcceptResult::REJECT;
             }
         } else {
+            if (!JudgeVerticalDistance()) {
+                return GestureAcceptResult::REJECT;
+            }
             if ((direction_.type & PanDirection::UP) == 0) {
                 return CalculateTruthFingers(true) ? GestureAcceptResult::ACCEPT : GestureAcceptResult::REJECT;
             }
