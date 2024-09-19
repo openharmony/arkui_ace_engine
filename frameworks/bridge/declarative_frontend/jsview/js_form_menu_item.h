@@ -28,6 +28,7 @@ public:
 private:
     static void RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
         const std::string& formBindingDataStr, RefPtr<JsFunction> jsCBFunc);
+    static inline RefPtr<JsFunction> jsCBFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_FORM_MENU_ITEM_H
