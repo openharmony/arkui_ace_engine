@@ -607,7 +607,7 @@ float MarqueePattern::GetTextStart()
     float start = GetTextOffset();
     auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
     bool isRtl = direction == TextDirection::RTL ? true : false;
-    if (!isRtl) return start;
+    if (!isRtl || !IsRunMarquee()) return start;
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, start);
