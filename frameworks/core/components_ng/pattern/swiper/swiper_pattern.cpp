@@ -181,7 +181,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return algo;
 }
 
-void SwiperPattern::OnIndexChange()
+void SwiperPattern::OnIndexChange(bool isInLayout)
 {
     auto totalCount = TotalCount();
     if (NonPositive(totalCount)) {
@@ -196,7 +196,7 @@ void SwiperPattern::OnIndexChange()
 
     auto targetIndex = GetLoopIndex(CurrentIndex());
     if (oldIndex != targetIndex) {
-        FireChangeEvent(oldIndex, targetIndex);
+        FireChangeEvent(oldIndex, targetIndex, isInLayout);
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
@@ -909,7 +909,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         SetLazyLoadFeature(true);
     }
     if (!isInit_) {
-        OnIndexChange();
+        OnIndexChange(true);
         oldIndex_ = currentIndex_;
     }
 
@@ -1001,7 +1001,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         currentIndexOffset_ = 0.0f;
         if (!isInit) {
-            OnIndexChange();
+            OnIndexChange(true);
         }
         jumpIndex_.reset();
         pauseTargetIndex_.reset();
@@ -1211,11 +1211,11 @@ void SwiperPattern::OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPla
     }
 }
 
-void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex) const
+void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout) const
 {
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    swiperEventHub->FireChangeEvent(preIndex, currentIndex);
+    swiperEventHub->FireChangeEvent(preIndex, currentIndex, isInLayout);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
 

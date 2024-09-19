@@ -94,17 +94,22 @@ public:
         }
     }
 
-    void FireChangeEvent(int32_t preIndex, int32_t currentIndex)
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout)
     {
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto pipeline = frameNode->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireJSChangeEvent(currentIndex);
-        });
+        if (isInLayout) {
+            auto frameNode = GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireJSChangeEvent(currentIndex);
+            });
+        } else {
+            FireJSChangeEvent(currentIndex);
+        }
+
         if (!changeEventsWithPreIndex_.empty()) {
             std::for_each(changeEventsWithPreIndex_.begin(), changeEventsWithPreIndex_.end(),
                 [preIndex, currentIndex](const ChangeEventWithPreIndexPtr& changeEventWithPreIndex) {

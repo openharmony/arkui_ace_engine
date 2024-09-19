@@ -693,7 +693,7 @@ private:
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
-    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout = false) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
@@ -733,7 +733,7 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
-    void OnIndexChange();
+    void OnIndexChange(bool isInLayout = false);
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
