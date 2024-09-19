@@ -259,7 +259,9 @@ void SelectPattern::RegisterOnClick()
 
 void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -291,12 +293,12 @@ void SelectPattern::RegisterOnHover()
     CHECK_NULL_VOID(host);
     auto inputHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
+    auto mouseCallback = [weak = WeakClaim(this), host](bool isHover) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select mouse hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsHover(isHover);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto* pipeline = host->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
@@ -423,7 +425,9 @@ bool SelectPattern::OnKeyEvent(const KeyEvent& event)
 
 void SelectPattern::SetDisabledStyle()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -457,8 +461,6 @@ void SelectPattern::SetDisabledStyle()
     spinner_->MarkModifyDone();
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(renderContext->GetBackgroundColor()
@@ -490,12 +492,14 @@ void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
 
 void SelectPattern::BuildChild()
 {
+    
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
     // get theme from SelectThemeManager
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
-
-    auto select = GetHost();
+    CHECK_NULL_VOID(theme);
 
     bool hasRowNode = HasRowNode();
     bool hasTextNode = HasTextNode();
@@ -766,7 +770,9 @@ const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
 
 void SelectPattern::ResetOptionProps()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     auto textTheme = pipeline->GetTheme<TextTheme>();
@@ -1191,7 +1197,8 @@ void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
 void SelectPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
@@ -1262,7 +1269,9 @@ Dimension SelectPattern::GetFontSize()
     Dimension defaultRet = Dimension();
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, defaultRet);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = props->GetHost();
+    CHECK_NULL_RETURN(host, defaultRet);
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, defaultRet);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, defaultRet);
@@ -1271,16 +1280,16 @@ Dimension SelectPattern::GetFontSize()
 
 void SelectPattern::SetSelectDefaultTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
+    auto pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
 
-    auto select = GetHost();
-    CHECK_NULL_VOID(select);
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    
+
     if (selectDefaultBgColor_ == Color::TRANSPARENT) {
         renderContext->UpdateBackgroundColor(selectTheme->GetSelectDefaultBgColor());
     } else {
@@ -1383,10 +1392,12 @@ void SelectPattern::ResetParams()
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
+    auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    auto select = GetHost();
+    CHECK_NULL_VOID(selectTheme);
     auto layoutProperty = select->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(selectTheme->GetSelectMinWidth(controlSize_)),
