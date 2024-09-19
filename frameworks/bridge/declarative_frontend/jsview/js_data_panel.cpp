@@ -55,53 +55,6 @@ DataPanelModel* DataPanelModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr uint32_t TYPE_CYCLE = 0;
-
-bool CheckJSCallbackInfo(
-    const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
-{
-    bool typeVerified = false;
-    std::string unrecognizedType;
-    auto tmpInfo = info[0];
-    for (const auto& infoType : infoTypes) {
-        switch (infoType) {
-            case JSCallbackInfoType::STRING:
-                if (tmpInfo->IsString()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "string|";
-                }
-                break;
-            case JSCallbackInfoType::NUMBER:
-                if (tmpInfo->IsNumber()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "number|";
-                }
-                break;
-            case JSCallbackInfoType::OBJECT:
-                if (tmpInfo->IsObject()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "object|";
-                }
-                break;
-            case JSCallbackInfoType::FUNCTION:
-                if (tmpInfo->IsFunction()) {
-                    typeVerified = true;
-                } else {
-                    unrecognizedType += "Function|";
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    if (!typeVerified) {
-        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
-            unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
-    }
-    return typeVerified || infoTypes.size() == 0;
-}
 }
 
 constexpr size_t MAX_COUNT = 9;
@@ -380,7 +333,7 @@ void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
     } else {
         std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
             JSCallbackInfoType::OBJECT };
-        if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
+        if (!CheckJSCallbackInfo("JsBorderRadius", info[0], checkList)) {
             if (dataPanelType_ != TYPE_CYCLE) {
                 RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
                 CHECK_NULL_VOID(theme);

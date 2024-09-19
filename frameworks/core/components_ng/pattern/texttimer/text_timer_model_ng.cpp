@@ -17,7 +17,6 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
@@ -100,6 +99,42 @@ void TextTimerModelNG::SetOnTimer(std::function<void(int64_t, int64_t)> && onCha
     eventHub->SetOnTimer(std::move(onChange));
 }
 
+RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto textTimerNode =
+        FrameNode::CreateFrameNode(V2::TEXTTIMER_ETS_TAG, nodeId, AceType::MakeRefPtr<TextTimerPattern>());
+    CHECK_NULL_RETURN(textTimerNode, nullptr);
+    auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_RETURN(textTimerPattern, nullptr);
+    if (textTimerNode->GetChildren().empty()) {
+        auto textId = textTimerPattern->GetTextId();
+        auto textNode = FrameNode::GetOrCreateFrameNode(
+            V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(textNode, nullptr);
+        textNode->MarkModifyDone();
+        textNode->MountToParent(textTimerNode);
+    }
+    return textTimerNode;
+}
+
+RefPtr<TextTimerController> TextTimerModelNG::InitTextController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPatternPtr<TextTimerPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetTextTimerController();
+}
+
+void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, bool isCountDown)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown, frameNode);
+}
+
+void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count, frameNode);
+}
+
 void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value, frameNode);
@@ -144,5 +179,21 @@ void TextTimerModelNG::SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallbac
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void TextTimerModelNG::SetJSTextTimerController(FrameNode* frameNode, const RefPtr<Referenced>& controller)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetJSTextTimerController(controller);
+}
+
+RefPtr<Referenced> TextTimerModelNG::GetJSTextTimerController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetJSTextTimerController();
 }
 } // namespace OHOS::Ace::NG

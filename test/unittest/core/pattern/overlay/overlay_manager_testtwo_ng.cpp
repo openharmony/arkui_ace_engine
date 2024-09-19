@@ -22,6 +22,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_rosen_render_context.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -33,11 +34,15 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 using namespace testing;
@@ -328,7 +333,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ResetRootNode001, TestSize.Level1)
     pipeline->SetInstallationFree(true);
     overlayManager->curSessionIds_.insert(2);
     overlayManager->ResetRootNode(2);
-    EXPECT_EQ(modalUiextensionCount, rootNode->modalUiextensionCount_);
+    EXPECT_NE(modalUiextensionCount, rootNode->modalUiextensionCount_);
 }
 
 /**
@@ -363,9 +368,9 @@ HWTEST_F(OverlayManagerTwoTestNg, HandleUIExtNodeAngle001, TestSize.Level1)
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
 
-    overlayManager->HandleUIExtNodeAngle(90, targetNode);
-    overlayManager->HandleUIExtNodeAngle(180, targetNode);
-    overlayManager->HandleUIExtNodeAngle(270, targetNode);
+    EXPECT_TRUE(overlayManager->HandleUIExtNodeAngle(90, targetNode));
+    EXPECT_TRUE(overlayManager->HandleUIExtNodeAngle(180, targetNode));
+    EXPECT_TRUE(overlayManager->HandleUIExtNodeAngle(270, targetNode));
 
     EXPECT_TRUE(overlayManager->HandleUIExtNodeAngle(0, targetNode));
 }
@@ -380,9 +385,9 @@ HWTEST_F(OverlayManagerTwoTestNg, UIExtNodeAngleValid001, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
 
-    overlayManager->UIExtNodeAngleValid(0);
-    overlayManager->UIExtNodeAngleValid(90);
-    overlayManager->UIExtNodeAngleValid(180);
+    EXPECT_FALSE(overlayManager->UIExtNodeAngleValid(0));
+    EXPECT_TRUE(overlayManager->UIExtNodeAngleValid(90));
+    EXPECT_TRUE(overlayManager->UIExtNodeAngleValid(180));
     EXPECT_TRUE(overlayManager->UIExtNodeAngleValid(270));
 }
 
@@ -871,15 +876,16 @@ HWTEST_F(OverlayManagerTwoTestNg, FindWebNode001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
 
     RefPtr<NG::FrameNode> webNode;
-    overlayManager->FindWebNode(nullptr, webNode);
-    overlayManager->FindWebNode(rootNode, rootNode);
-    overlayManager->FindWebNode(rootNode, webNode);
+    bool isNavDestination = false;
+    overlayManager->FindWebNode(nullptr, webNode, isNavDestination);
+    overlayManager->FindWebNode(rootNode, rootNode, isNavDestination);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
 
     rootNode->isInternal_ = true;
-    overlayManager->FindWebNode(rootNode, webNode);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
 
     rootNode->isInternal_ = false;
-    overlayManager->FindWebNode(rootNode, webNode);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
     EXPECT_FALSE(webNode);
 }
 
@@ -981,14 +987,15 @@ HWTEST_F(OverlayManagerTwoTestNg, FindWebNode002, TestSize.Level1)
     auto framenode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
 
     RefPtr<NG::FrameNode> webNode;
-    overlayManager->FindWebNode(TestNode::CreateTestNode(3), webNode);
+    bool isNavDestination = false;
+    overlayManager->FindWebNode(TestNode::CreateTestNode(3), webNode, isNavDestination);
     framenode->isInternal_ = false;
-    overlayManager->FindWebNode(framenode, webNode);
+    overlayManager->FindWebNode(framenode, webNode, isNavDestination);
 
     webNode = nullptr;
     rootNode->AddChild(framenode);
     framenode->isInternal_ = false;
-    overlayManager->FindWebNode(rootNode, webNode);
+    overlayManager->FindWebNode(rootNode, webNode, isNavDestination);
 
     EXPECT_EQ(webNode, framenode);
 }
@@ -1034,6 +1041,263 @@ HWTEST_F(OverlayManagerTwoTestNg, OnRemoveAllModalInOverlayByList001, TestSize.L
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->modalList_.push_back(rootNode);
     EXPECT_FALSE(overlayManager->OnRemoveAllModalInOverlayByList());
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_OpenDialogAnimation
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    overlayManager->OpenDialogAnimation(dialogNode_);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_SetDialogTransitionEffect
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. create dialog node
+     */
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto contentNode_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(contentNode_, nullptr);
+    auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
+    EXPECT_NE(dialogNode_, nullptr);
+    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    overlayManager->SetDialogTransitionEffect(dialogNode_);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: ShowMenuAnimation
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, ShowMenuAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    EXPECT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    EXPECT_EQ(menuPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+    mainMenu->MountToParent(menuNode);
+    menuNode->MountToParent(rootNode_);
+    rootNode_->MarkDirtyNode();
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    EXPECT_NE(wrapperPattern, nullptr);
+    EXPECT_NE(wrapperPattern->HasTransitionEffect(), true);
+    auto renderContext = menuNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    EXPECT_EQ(wrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+    auto previewChild = wrapperPattern->GetPreview();
+    EXPECT_EQ(previewChild, nullptr);
+    overlayManager->ShowMenuAnimation(menuNode);
+    auto firstMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    firstMenu->MountToParent(menuNode);
+    menuNode->MarkDirtyNode();
+    rootNode_->MarkDirtyNode();
+    previewChild = wrapperPattern->GetPreview();
+    EXPECT_NE(previewChild, nullptr);
+    auto previewPattern = AceType::DynamicCast<MenuPreviewPattern>(previewChild->GetPattern());
+    EXPECT_EQ(previewPattern, nullptr);
+    overlayManager->ShowMenuAnimation(menuNode);
+    rootNode_->children_.pop_back();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_OnPopMenuAnimationFinished
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(menuNode);
+    menuNode->MountToParent(rootNode_);
+    rootNode_->MarkDirtyNode();
+    const WeakPtr<FrameNode> menuWK(menuNode);
+    EXPECT_NE(menuWK.Upgrade(), nullptr);
+    const WeakPtr<UINode> rootWeak = overlayManager->GetRootNode();
+    EXPECT_NE(rootWeak.Upgrade(), nullptr);
+    const WeakPtr<OverlayManager> weakManager_(overlayManager);
+    EXPECT_NE(weakManager_.Upgrade(), nullptr);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
+    std::function<void()> onDisappear = []() {};
+    menuWrapperPattern->RegisterMenuDisappearCallback(onDisappear);
+    auto pipelineMenuContext = menuNode->GetContext();
+    pipelineMenuContext->instanceId_ = MIN_SUBCONTAINER_ID;
+    auto containerId = pipelineMenuContext->GetInstanceId();
+    EXPECT_EQ(containerId, MIN_SUBCONTAINER_ID);
+    overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
+    rootNode_->children_.pop_back();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_PopMenuAnimation
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, PopMenuAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(menuNode);
+    menuNode->MountToParent(rootNode_);
+    rootNode_->MarkDirtyNode();
+    overlayManager->PopMenuAnimation(menuNode, true, true);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    menuWrapperPattern->SetHasTransitionEffect(true);
+    EXPECT_EQ(menuWrapperPattern->HasTransitionEffect(), true);
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    EXPECT_EQ(menuPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+    EXPECT_EQ(menuWrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+    menuNode->renderContext_ = AceType::MakeRefPtr<RosenRenderContext>();
+    auto deformRenderContext = menuNode->GetRenderContext();
+    EXPECT_NE(deformRenderContext, nullptr);
+    auto renderContext = AceType::DynamicCast<RosenRenderContext>(deformRenderContext);
+    EXPECT_NE(renderContext, nullptr);
+    EXPECT_FALSE(renderContext->HasDisappearTransition());
+    overlayManager->PopMenuAnimation(menuNode, true, true);
+    rootNode_->children_.pop_back();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OverlayManagerTwoTestNg_ShowMenuClearAnimation
+ * @tc.desc: Test SheetView::CreateTitleColumn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTwoTestNg, ShowMenuClearAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    auto rootNode_ = overlayManager->GetRootNode().Upgrade();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(menuNode);
+    menuNode->MountToParent(rootNode_);
+    rootNode_->MarkDirtyNode();
+    auto dragEventHub = AceType::MakeRefPtr<EventHub>();
+    auto dragFrameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    dragEventHub->host_ = AceType::WeakClaim(AceType::RawPtr(dragFrameNode));
+    dragFrameNode->eventHub_ = dragEventHub;
+    dragFrameNode->SetDraggable(true);
+    dragFrameNode->GetOrCreateFocusHub();
+    AnimationOption option;
+    overlayManager->ShowMenuClearAnimation(menuNode, option, false, true);
+    auto overlayContainer = Container::Current();
+    overlayContainer->SetApiTargetVersion(12);
+    EXPECT_EQ(overlayContainer->GetApiTargetVersion(), 12);
+    EXPECT_EQ(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE), true);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    EXPECT_NE(mainPipeline, false);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    EXPECT_NE(dragDropManager, false);
+    dragDropManager->SetPrepareDragFrameNode(dragFrameNode);
+    auto draggingNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    EXPECT_NE(draggingNode, false);
+    auto eventHub = draggingNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, false);
+    auto frameNode = eventHub->GetFrameNode();
+    EXPECT_NE(frameNode, false);
+    auto focusHub = frameNode->GetFocusHub();
+    EXPECT_NE(focusHub, false);
+    std::function<bool(const KeyEvent&)> onKeyEvenCallback = [](const KeyEvent& event) -> bool { return true; };
+    focusHub->onKeyEventsInternal_.emplace(OnKeyEventType::CONTEXT_MENU, onKeyEvenCallback);
+    auto isBindOrigNode = overlayManager->IsContextMenuBindedOnOrigNode();
+    EXPECT_EQ(isBindOrigNode, true);
+    overlayManager->ShowMenuClearAnimation(menuNode, option, true, true);
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    overlayManager->ShowMenuClearAnimation(menuNode, option, true, true);
+    rootNode_->children_.pop_back();
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
 } // namespace OHOS::Ace::NG

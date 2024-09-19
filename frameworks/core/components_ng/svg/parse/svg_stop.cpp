@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -31,10 +32,13 @@ RefPtr<SvgNode> SvgStop::Create()
 {
     auto svgNode = AceType::MakeRefPtr<SvgStop>();
     svgNode->stopAttr_.gradientColor.SetDimension(0.0);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        svgNode->stopAttr_.gradientColor.SetColor(Color::BLACK);
+    }
     return svgNode;
 }
 
-const GradientColor& SvgStop::GetGradientColor() const
+const Ace::GradientColor& SvgStop::GetGradientColor() const
 {
     return stopAttr_.gradientColor;
 }
@@ -48,8 +52,15 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { DOM_SVG_SRC_STOP_COLOR,
             [](const std::string& val, SvgStopAttribute& attribute) {
-                Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                attribute.gradientColor.SetColor(color);
+                Color color;
+                if (val == VALUE_NONE || SvgAttributesParser::ParseColor(val, color)) {
+                    attribute.gradientColor.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
+                }
+                
+                if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+                    SvgAttributesParser::CheckColorAlpha(val, color);
+                    attribute.gradientColor.SetColor(color);
+                }
             } },
         { DOM_SVG_SRC_STOP_OPACITY,
             [](const std::string& val, SvgStopAttribute& attribute) {
@@ -57,8 +68,11 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_STOP_COLOR,
             [](const std::string& val, SvgStopAttribute& attribute) {
-                Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
-                attribute.gradientColor.SetColor(color);
+                Color color;
+                if (val != VALUE_NONE && !SvgAttributesParser::ParseColor(val, color)) {
+                    return;
+                }
+                attribute.gradientColor.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
             } },
         { SVG_STOP_OPACITY,
             [](const std::string& val, SvgStopAttribute& attribute) {

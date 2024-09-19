@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 
-#include <cstring>
-
 #include "securec.h"
-
-#include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -535,6 +530,13 @@ void CanvasRenderingContext2DModelNG::Reset()
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->Reset();
+}
+
+void CanvasRenderingContext2DModelNG::SetTransform(
+    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetTransform(pattern, transform);
 }
 
 // All interfaces that only the 'CanvasRenderingContext2D' has.

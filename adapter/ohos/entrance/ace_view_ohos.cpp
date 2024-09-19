@@ -15,26 +15,9 @@
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
-#include <memory>
-
-#include "input_manager.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/event/axis_event.h"
-#include "core/event/key_event.h"
-#include "core/event/mouse_event.h"
-#include "core/event/pointer_event.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -88,7 +71,6 @@ void AceViewOhos::SurfaceChanged(const RefPtr<AceViewOhos>& view, int32_t width,
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->HideOverlays();
-        pipelineContext->CheckVirtualKeyboardHeight();
     }
 }
 
@@ -140,11 +122,17 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     container->SetCurPointerEvent(pointerEvent);
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        int32_t toolType = MMI::PointerEvent::TOOL_TYPE_MOUSE;
+        if (!GetPointerEventToolType(pointerEvent, toolType)) {
+            return;
+        }
         // mouse event
         if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
+                pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
             (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
-            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
+                pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+            (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
+                pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
             view->ProcessAxisEvent(pointerEvent, node, isInjected);
         } else {
             view->ProcessDragEvent(pointerEvent, node);

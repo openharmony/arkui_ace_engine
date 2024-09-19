@@ -15,13 +15,8 @@
 #include "core/interfaces/native/node/text_timer_modifier.h"
 
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
@@ -170,6 +165,16 @@ void ResetTextShadow(ArkUINodeHandle node)
     shadow.SetOffsetY(0.0);
     TextTimerModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
 }
+
+void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Float64 count)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextTimerModelNG::SetIsCountDown(frameNode, isCountDown);
+    if (isCountDown) {
+        TextTimerModelNG::SetInputCount(frameNode, count);
+    }
+}
 } // namespace TextTimerModifier
 
 namespace NodeModifier {
@@ -189,7 +194,8 @@ const ArkUITextTimerModifier* GetTextTimerModifier()
         TextTimerModifier::SetFormat,
         TextTimerModifier::ResetFormat,
         TextTimerModifier::SetTextShadow,
-        TextTimerModifier::ResetTextShadow
+        TextTimerModifier::ResetTextShadow,
+        TextTimerModifier::setTextTimerOptions
     };
 
     return &modifier;

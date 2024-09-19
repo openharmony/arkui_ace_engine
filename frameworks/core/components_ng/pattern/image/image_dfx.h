@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
         int32_t nodeId_ = -1;
         int64_t accessibilityId_ = -1;
         std::string imageSrc_;
+        std::string borderRadiusValue_;
     };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_DFX_H

@@ -19,13 +19,17 @@
 #include <mutex>
 #include <string>
 #include <map>
+#include <vector>
+#include <algorithm>
 
 #include "base/utils/macros.h"
+#include "core/common/window_animation_config.h"
 
 namespace OHOS::Ace {
 constexpr int32_t US_TO_MS = 1000;
 constexpr int32_t NS_TO_MS = 1000000;
 constexpr int32_t NS_TO_S = 1000000000;
+constexpr char DEFAULT_SCENE_ID[] = "NONE_ANIMATION";
 
 enum PerfActionType {
     UNKNOWN_ACTION = -1,
@@ -85,11 +89,14 @@ struct DataBase {
 struct JankInfo {
     int64_t skippedFrameTime {0};
     std::string windowName {""};
+    std::string sceneId {""};
+    int32_t filterType {0};
     BaseInfo baseInfo;
 };
 
 void ConvertRealtimeToSystime(int64_t realTime, int64_t& sysTime);
 std::string GetSourceTypeName(PerfSourceType sourceType);
+std::string ParsePageUrl(const std::string& pagePath);
 
 class SceneRecord {
 public:
@@ -141,6 +148,8 @@ public:
     static PerfMonitor* pMonitor;
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);
+    void RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason,
+                           const std::string& bundleName);
 
 private:
     SceneRecord* GetRecord(const std::string& sceneId);
@@ -151,6 +160,7 @@ private:
     void ReportPerfEvent(PerfEventType type, DataBase& data);
     void RecordBaseInfo(SceneRecord* record);
     bool IsExceptResponseTime(int64_t time, const std::string& sceneId);
+    int32_t GetFilterType() const;
 private:
     std::map<PerfActionType, int64_t> mInputTime;
     int64_t mVsyncTime {0};
@@ -165,6 +175,7 @@ private:
     bool isBackgroundApp {false};
     bool isExclusionWindow {false};
     int64_t startAppTime {0};
+    std::string currentSceneId {""};
     // filter common discarded frames in white list
     bool isExceptAnimator {false};
     bool IsSceneIdInSceneWhiteList(const std::string& sceneId);

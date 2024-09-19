@@ -28,8 +28,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_MAXLINES = 1;
-constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
-constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
 } // namespace
 
 class ACE_EXPORT ButtonLayoutProperty : public LayoutProperty {
@@ -105,12 +103,12 @@ enum class ModuleDialogType {
     DATEPICKER_DIALOG,
 };
 
-class ModuleDialogTypeRtl {
+class DialogTypeMargin {
 public:
-    static void MarginIsRtl(bool isRtl, MarginProperty& margin,
-        const RefPtr<DialogTheme>& dialogTheme, bool lesstwleve)
+    static void BothSidesMargin(bool isRtl, MarginProperty& margin,
+        const RefPtr<DialogTheme>& dialogTheme, bool lessTwelve)
     {
-        if (lesstwleve) {
+        if (lessTwelve) {
             if (isRtl) {
                 margin.right = CalcLength(0.0_vp);
                 margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
@@ -129,13 +127,13 @@ public:
         }
     }
     
-    static void UpdateMarginIsRtl(bool isRtl, MarginProperty& margin,
-        const RefPtr<DialogTheme>& dialogTheme, bool isLessThanTwleve, ModuleDialogType type)
+    static void UpdateDialogMargin(bool isRtl, MarginProperty& margin,
+        const RefPtr<DialogTheme>& dialogTheme, bool isLessThanTwelve, ModuleDialogType type)
     {
-        ModuleDialogTypeRtl::MarginIsRtl(isRtl, margin, dialogTheme, isLessThanTwleve);
+        DialogTypeMargin::BothSidesMargin(isRtl, margin, dialogTheme, isLessThanTwelve);
         switch (type) {
             case ModuleDialogType::TIMEPICKER_DIALOG:
-                if (isLessThanTwleve) {
+                if (isLessThanTwelve) {
                     margin.top = CalcLength(dialogTheme->GetDividerHeight());
                     margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
                 } else {
@@ -144,12 +142,12 @@ public:
                 }
                 break;
             case ModuleDialogType::DATEPICKER_DIALOG:
-                if (isLessThanTwleve) {
-                    margin.top = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
-                    margin.bottom = CalcLength(BUTTON_BOTTOM_TOP_MARGIN);
+                if (isLessThanTwelve) {
+                    margin.top = CalcLength(dialogTheme->GetButtonBottomTopMargin());
+                    margin.bottom = CalcLength(dialogTheme->GetButtonBottomTopMargin());
                 } else {
-                    margin.top = CalcLength(TITLE_PADDING_HORIZONTAL);
-                    margin.bottom = CalcLength(TITLE_PADDING_HORIZONTAL);
+                    margin.top = CalcLength(dialogTheme->GetTitlePaddingHorizontal());
+                    margin.bottom = CalcLength(dialogTheme->GetTitlePaddingHorizontal());
                 }
                 break;
             default:

@@ -153,7 +153,6 @@ private:
     double mouseDistance_ = 0.0;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;
-    Offset averageScreenDistance_;
     std::map<int32_t, Offset> touchPointsDistance_;
     Offset delta_;
     double mainDelta_ = 0.0;

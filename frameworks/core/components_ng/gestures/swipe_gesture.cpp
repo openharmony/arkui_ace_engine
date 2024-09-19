@@ -15,7 +15,6 @@
 
 #include "core/components_ng/gestures/swipe_gesture.h"
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

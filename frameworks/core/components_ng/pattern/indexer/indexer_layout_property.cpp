@@ -14,13 +14,9 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include <memory>
-#include <vector>
-#include "base/json/json_util.h"
+
 #include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

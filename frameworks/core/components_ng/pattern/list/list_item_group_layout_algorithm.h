@@ -138,9 +138,10 @@ public:
         needAdjustRefPos_ = needAdjust;
     }
 
-    void SetNeedCheckOffset(bool needCheckOffset)
+    void SetNeedCheckOffset(bool needCheckOffset, float averageHeight)
     {
         isNeedCheckOffset_ = needCheckOffset;
+        groupItemAverageHeight_ = averageHeight;
     }
 
     float GetRefPos() const
@@ -286,7 +287,17 @@ public:
         return cacheParam_;
     }
 
+    void SetNeedMeasureFormLastItem(bool needMeasureFormLastItem)
+    {
+        isNeedMeasureFormLastItem_ = needMeasureFormLastItem;
+    }
+
     ListItemGroupLayoutInfo GetLayoutInfo() const;
+
+    float GetAdjustReferenceDelta() const
+    {
+        return adjustReferenceDelta_;
+    }
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
@@ -314,8 +325,8 @@ private:
         int32_t currentIndex);
     int32_t MeasureALineAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t currentIndex);
-    void CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos);
-    void CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos);
+    bool CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos);
+    bool CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos);
     void MeasureForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -374,14 +385,17 @@ private:
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
+    float adjustReferenceDelta_ = 0.0f;
     float refPos_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float groupItemAverageHeight_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
     bool needAdjustRefPos_ = false;
     bool isNeedCheckOffset_ = false;
+    bool isNeedMeasureFormLastItem_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;

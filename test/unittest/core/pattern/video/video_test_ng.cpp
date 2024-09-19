@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,7 +176,7 @@ RefPtr<FrameNode> VideoTestNg::CreateVideoNode(TestProperty& testProperty)
         .WillRepeatedly(Return(true));
 
     if (testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(testProperty.src.value());
+        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
     }
     if (testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(testProperty.progressRate.value());
@@ -321,7 +321,9 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step4. IsMediaPlayerValid will be called 5 times
      */
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    videoLayoutProperty->UpdateVideoSource(VIDEO_SRC);
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo.src = VIDEO_SRC;
+    videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillRepeatedly(Return(true));
@@ -330,7 +332,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
-     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set src_
+     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src
      * @tc.expected: step5. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -345,7 +347,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillOnce(Return(false))
@@ -383,11 +385,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
@@ -398,7 +400,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillOnce(Return(false));
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src.clear();
     pattern->UpdateMediaPlayerOnBg();
 }
 
@@ -917,7 +919,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest001, TestSize.Level1)
     ASSERT_NE(videoAccessibilitProperty, nullptr);
     EXPECT_EQ(videoAccessibilitProperty->GetText(), "");
 
-    video.SetSrc(VIDEO_SRC);
+    video.SetSrc(VIDEO_SRC, "", "");
     EXPECT_EQ(videoAccessibilitProperty->GetText(), VIDEO_SRC);
 }
 

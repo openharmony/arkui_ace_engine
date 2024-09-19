@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/indexer/indexer_theme.h"
 
@@ -276,7 +273,7 @@ void ResetSelectedBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    Color color = indexerTheme->GetSeclectedBackgroundColor();
+    Color color = indexerTheme->GetSelectedBackgroundColor();
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, color);
 }
 

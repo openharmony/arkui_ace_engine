@@ -22,9 +22,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/components/theme/theme_attributes.h"
 namespace OHOS::Ace {
 namespace {
 
@@ -671,6 +668,18 @@ bool ResourceAdapterImpl::GetRawFileDescription(
     rawfileDescription.fd = descriptor.fd;
     rawfileDescription.offset = descriptor.offset;
     rawfileDescription.length = descriptor.length;
+    return true;
+}
+
+bool ResourceAdapterImpl::CloseRawFileDescription(const std::string &rawfileName) const
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto state = manager->CloseRawFileDescriptor(rawfileName);
+    if (state != Global::Resource::SUCCESS) {
+        LOGE("Close RawFile Description error, rawfileName=%{public}s, error:%{public}u", rawfileName.c_str(), state);
+        return false;
+    }
     return true;
 }
 

@@ -191,6 +191,16 @@ public:
         enableArrow_ = enableArrow;
     }
 
+    bool EnableHoverMode() const
+    {
+        return enableHoverMode_;
+    }
+
+    void SetEnableHoverMode(bool enableHoverMode)
+    {
+        enableHoverMode_ = enableHoverMode;
+    }
+
     bool IsBlockEvent() const
     {
         return blockEvent_;
@@ -480,6 +490,16 @@ public:
         return isCaretMode_;
     }
 
+    StateChangeFunc GetDoubleBindCallback()
+    {
+        return doubleBindCallback_;
+    }
+
+    void SetDoubleBindCallback(StateChangeFunc&& callback)
+    {
+        doubleBindCallback_ = callback;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -495,6 +515,7 @@ private:
     bool focusable_ = false;
     bool interactiveDismiss_ = true;
     bool isCaretMode_ = true;
+    bool enableHoverMode_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
@@ -527,6 +548,7 @@ private:
     OnWillDismiss onWillDismiss_;
     bool hasTransition_ = false;
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
+    StateChangeFunc doubleBindCallback_;
 };
 
 } // namespace OHOS::Ace

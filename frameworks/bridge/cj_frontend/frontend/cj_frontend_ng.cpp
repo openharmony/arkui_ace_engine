@@ -15,9 +15,6 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_ng.h"
 
-#include "core/components/page/page_target.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-
 namespace OHOS::Ace::Framework {
 void CJFrontendNG::InternalInitialize()
 {

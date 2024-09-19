@@ -25,9 +25,6 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -113,8 +110,8 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    wrapper_->SetActiveChildRange(
-        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
+        cacheCount, props->GetShowCachedItemsValue(false));
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
@@ -179,10 +176,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 
     if (!wrapper_->IsConstraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
-    }
-
-    if (info_->extraOffset_) {
-        postJumpOffset_ += *info_->extraOffset_;
     }
 }
 
@@ -326,6 +319,9 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
+    if (info_->extraOffset_) {
+        postJumpOffset_ += *info_->extraOffset_;
+    }
     if (jumpIdx >= info_->childrenCount_) {
         return;
     }

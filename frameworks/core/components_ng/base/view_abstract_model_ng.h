@@ -1258,6 +1258,8 @@ public:
 
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
 
+    void BindDragWithContextMenuParams(FrameNode* targetNode, const NG::MenuParam& menuParam) override;
+
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,

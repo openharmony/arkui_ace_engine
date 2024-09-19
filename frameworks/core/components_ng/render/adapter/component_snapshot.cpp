@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr std::chrono::duration<int, std::milli> SNAPSHOT_TIMEOUT_DURATION(3000);
+constexpr std::chrono::duration<int, std::milli> CREATE_SNAPSHOT_TIMEOUT_DURATION(80);
 
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -100,11 +101,11 @@ public:
         cv_.notify_all();
     }
 
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetPixelMap()
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetPixelMap(std::chrono::duration<int, std::milli> timeout)
     {
         std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
         std::unique_lock<std::mutex> lock(mutex_);
-        auto status = cv_.wait_for(lock, SNAPSHOT_TIMEOUT_DURATION);
+        auto status = cv_.wait_for(lock, timeout);
         if (status == std::cv_status::timeout) {
             return { ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT, nullptr };
         }
@@ -151,7 +152,8 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
         auto imageStateManger = imageLoadContext->GetStateManger();
         CHECK_NULL_RETURN(imageStateManger, false);
 
-        auto result = imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS;
+        auto result =
+            imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS || !imageNode->IsVisible();
         if (!result) {
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
                 "Image loading failed! ImageId=%{public}d ImageState=%{public}d ImageKey=%{public}s",
@@ -170,17 +172,23 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
     return true;
 }
 
-bool GetTaskExecutor(const RefPtr<UINode>& uiNode, RefPtr<PipelineContext>& pipeline, RefPtr<TaskExecutor>& executor)
+bool GetTaskExecutor(const RefPtr<AceType>& customNode, RefPtr<PipelineContext>& pipeline,
+    RefPtr<TaskExecutor>& executor)
 {
+    auto uiNode = AceType::DynamicCast<UINode>(customNode);
     if (!uiNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! uiNode is nullptr, "
+        "because customNode is type of %{public}s", AceType::TypeName(customNode));
         return false;
     }
     pipeline = uiNode->GetContextRefPtr();
     if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! can't get pipeline");
         return false;
     }
     executor = pipeline->GetTaskExecutor();
     if (!executor) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! can't get executor");
         return false;
     }
 
@@ -246,23 +254,28 @@ void ComponentSnapshot::Create(
     const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
     bool flag)
 {
+    if (!customNode) {
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! customNode is nullptr");
+        return;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
-    auto uiNode = AceType::DynamicCast<UINode>(customNode);
     RefPtr<PipelineContext> pipeline = nullptr;
     RefPtr<TaskExecutor> executor = nullptr;
-    if (!GetTaskExecutor(uiNode, pipeline, executor)) {
+    if (!GetTaskExecutor(customNode, pipeline, executor)) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
         return;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
+        RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(customNode);
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
     FrameNode::ProcessOffscreenNode(node);
+    node->SetActive();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s "
         "enableInspector=%{public}d",
@@ -325,8 +338,10 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Begin to take surfaceCapture for ui, rootId=%{public}d param=%{public}s imageCount=%{public}d",
-        node->GetId(), param.ToString().c_str(), imageCount);
+        "Begin to take surfaceCapture for ui, rootId=%{public}d param=%{public}s imageCount=%{public}d "
+        "size=%{public}s",
+        node->GetId(), param.ToString().c_str(), imageCount,
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str());
     rsInterface.TakeSurfaceCaptureForUI(
         rsNode,
         std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
@@ -380,6 +395,60 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
         options.scale, options.scale, options.waitUntilRenderFinished);
-    return syncCallback->GetPixelMap();
+    return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
+}
+
+// Note: do not use this method, it's only called in drag procedure process.
+std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
+    const RefPtr<AceType>& customNode, const SnapshotParam& param)
+{
+    if (!customNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "CreateSync Internal error! customNode is nullptr");
+        return nullptr;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+    RefPtr<PipelineContext> pipeline = nullptr;
+    RefPtr<TaskExecutor> executor = nullptr;
+    if (!GetTaskExecutor(customNode, pipeline, executor)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
+        return nullptr;
+    }
+    auto node = AceType::DynamicCast<FrameNode>(customNode);
+    if (!node) {
+        RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(customNode);
+        stackNode->AddChild(uiNode);
+        node = stackNode;
+    }
+    FrameNode::ProcessOffscreenNode(node);
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s",
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
+        node->GetInspectorId().value_or("").c_str());
+
+    ProcessImageNode(node);
+    pipeline->FlushUITasks();
+    pipeline->FlushMessages();
+    int32_t imageCount = 0;
+    bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
+    if (!checkImage) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Image loading failed! rootId=%{public}d rootNode=%{public}s InspectorId=%{public}s",
+            node->GetId(), node->GetTag().c_str(), node->GetInspectorId().value_or("").c_str());
+        return nullptr;
+    }
+    auto rsNode = GetRsNode(node);
+    if (!rsNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get RsNode! rootId=%{public}d rootNode=%{public}s InspectorId=%{public}s",
+            node->GetId(), node->GetTag().c_str(), node->GetInspectorId().value_or("").c_str());
+        return nullptr;
+    }
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto syncCallback = std::make_shared<SyncCustomizedCallback>();
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
+        1.f, 1.f, true);
+    return syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION).second;
 }
 } // namespace OHOS::Ace::NG

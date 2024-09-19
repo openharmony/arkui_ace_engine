@@ -28,7 +28,7 @@ class ScrollPaintMethod : public ScrollablePaintMethod {
 
 public:
     ScrollPaintMethod() = default;
-    ScrollPaintMethod(bool vertical) : ScrollablePaintMethod(vertical) {}
+    ScrollPaintMethod(bool vertical, bool isReverse) : ScrollablePaintMethod(vertical, isReverse) {}
     ~ScrollPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;

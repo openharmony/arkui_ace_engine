@@ -33,6 +33,15 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
+namespace {
+void RunNavigationStackSync(const RefPtr<NavigationPattern>& navigationPattern)
+{
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+}
+} // namespace
+
 class NavigationSyncStackTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -85,13 +94,11 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg001, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 10;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->Push(destNameBase + std::to_string(index));
-        ASSERT_EQ(mockNavPathStack->GetNavPathId(index), "undefined");
+        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+        ASSERT_EQ(mockNavPathStack->GetNavDestinationId(index), "undefined");
     }
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
-    navigationPattern->OnModifyDone();
-    navigationPattern->MarkNeedSyncWithJsStack();
-    navigationPattern->SyncWithJsStackIfNeeded();
+    RunNavigationStackSync(navigationPattern);
     auto navigationContent = navigationNode->GetContentNode();
     ASSERT_NE(navigationContent, nullptr);
     ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
@@ -100,13 +107,13 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg001, TestSize.Level
         ASSERT_NE(navDestination, nullptr);
         auto pattern = navDestination->GetPattern<NavDestinationPattern>();
         ASSERT_NE(pattern, nullptr);
-        ASSERT_EQ(std::to_string(pattern->GetNavDestinationId()), mockNavPathStack->GetNavPathId(index));
+        ASSERT_EQ(std::to_string(pattern->GetNavDestinationId()), mockNavPathStack->GetNavDestinationId(index));
     }
 }
 
 /**
  * @tc.name: NavigationSyncStackTestNg002
- * @tc.desc: NOT_IMPL_YET
+ * @tc.desc: Test whether the destinations were deleted correctly while doing animation
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg002, TestSize.Level1)
@@ -127,15 +134,13 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg002, TestSize.Level
     std::string destNameBase = "dest";
     const int32_t testNumber = 10;
     for (int32_t index = 0; index < testNumber; ++ index) {
-        mockNavPathStack->Push(destNameBase + std::to_string(index));
+        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
     }
     MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
     /**
      * @tc.steps: step2. sync stack.
      */
-    navigationPattern->OnModifyDone();
-    navigationPattern->MarkNeedSyncWithJsStack();
-    navigationPattern->SyncWithJsStackIfNeeded();
+    RunNavigationStackSync(navigationPattern);
     auto navigationContent = navigationNode->GetContentNode();
     ASSERT_NE(navigationContent, nullptr);
     ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
@@ -149,7 +154,6 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg002, TestSize.Level
      * @tc.steps: step4. mock property of animation. There are 5 types animation in total,
      *  Respectively are ENTER_POP, EXIT_POP, ENTER_PUSH, EXIT_PUSH, EXIT_PUSH_TO_REMOVE.
      */
-    const int32_t removedImmediatelyNumber = 3;
     const int32_t animationTypes = 5;
     // make sure all animation-taged navdestination are not top of pre stack
     const std::vector<PageTransitionType> transitionTypes = {
@@ -181,9 +185,191 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg002, TestSize.Level
      * @tc.steps: step5. sync stack again. And after sync the number of navDestinations in
      *  mainTree should be last number (which is testNumber) minus removedImmediatelyNumber.
      */
-    navigationPattern->OnModifyDone();
-    navigationPattern->MarkNeedSyncWithJsStack();
-    navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber - removedImmediatelyNumber);
+    RunNavigationStackSync(navigationPattern);
+}
+
+/**
+ * @tc.name: NavigationSyncStackTestNg003
+ * @tc.desc: Test whether the destination was force created when NOT marked NEW_INSTANCE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string destNameBase = "dest";
+    const int32_t testNumber = 3;
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    /**
+     * @tc.steps: step2. sync stack.
+     */
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
+    std::vector<std::string> navDestinationIds(testNumber);
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        navDestinationIds[index] = mockNavPathStack->GetNavDestinationId(index);
+    }
+    /**
+     * @tc.steps: step3. mock stack operation pop and push destination with the same name
+     */
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->Pop();
+    }
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+    }
+    // run sync again
+    RunNavigationStackSync(navigationPattern);
+    /**
+     * @tc.steps: step4. check whether the destinations were reused. should be reused.
+     */
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        ASSERT_EQ(navDestinationIds[index], mockNavPathStack->GetNavDestinationId(index));
+    }
+}
+
+/**
+ * @tc.name: NavigationSyncStackTestNg004
+ * @tc.desc: Test whether the destination was force created when marked NEW_INSTANCE
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string destNameBase = "dest";
+    const int32_t testNumber = 3;
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    /**
+     * @tc.steps: step2. sync stack.
+     */
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
+    std::vector<std::string> navDestinationIds(testNumber);
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        navDestinationIds[index] = mockNavPathStack->GetNavDestinationId(index);
+    }
+    /**
+     * @tc.steps: step3. mock stack operation pop and push destination with the same name and NEW_INSTANCE flag
+     */
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->Pop();
+    }
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->MockPushPath(
+            MockNavPathInfo(destNameBase + std::to_string(index)), true, LaunchMode::NEW_INSTANCE);
+    }
+    ASSERT_EQ(static_cast<int32_t>(mockNavPathStack->Size()), testNumber);
+    // run sync again
+    RunNavigationStackSync(navigationPattern);
+    /**
+     * @tc.steps: step4. check whether the destinations were reused. should NOT be reused.
+     */
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        ASSERT_NE(navDestinationIds[index], mockNavPathStack->GetNavDestinationId(index));
+    }
+    /**
+     * @tc.steps: step5. check whether the property "NeedRemoveInPush" was set correctly.
+     */
+    // the animating node is still remained
+    int32_t navDestinationsNumber = static_cast<int32_t>(navigationContent->GetChildren().size());
+    for (int32_t index = 0; index < navDestinationsNumber; ++ index) {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            navigationContent->GetChildAtIndex(index));
+        ASSERT_NE(navDestination, nullptr);
+    }
+}
+
+/**
+ * @tc.name: NavigationSyncStackTestNg005
+ * @tc.desc: Test whether the order of navDestinations is correct when doing consecutive animation
+ *           with NEW_INSTANCE marked. In detail, mock operation 'pop + push with new_instance' twice
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string destNameBase = "dest";
+    const int32_t testNumber = 3;
+    for (int32_t index = 0; index < testNumber; ++ index) {
+        mockNavPathStack->MockPushPath(MockNavPathInfo(destNameBase + std::to_string(index)));
+    }
+    RunNavigationStackSync(navigationPattern);
+    /**
+     * after run stack sync, the order of navDestination belike:
+     *  | dest1 | dest2 | dest3 | <- child of navigationContent with max index
+     */
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
+    /**
+     * @tc.steps: step2. mark the top - 1 destination needRemoveInPush and 'onAnimation'
+     *  to mock the first 'pop + push with new_instance' operation
+     */
+    auto needRemovedDest =
+        AceType::DynamicCast<NavDestinationGroupNode>(navigationContent->GetChildAtIndex(testNumber - 2));
+    needRemovedDest->SetNeedRemoveInPush(true);
+    needRemovedDest->SetIsOnAnimation(true);
+    /**
+     * @tc.steps: step3. operation stack to mock the second 'pop + push with new_instance' operation
+     */
+    // front stack(NavPathStack) should contains only two page, so pop twice
+    mockNavPathStack->Pop();
+    mockNavPathStack->Pop();
+    mockNavPathStack->MockPushPath(
+        MockNavPathInfo(destNameBase + std::to_string(testNumber)), true, LaunchMode::NEW_INSTANCE);
+    RunNavigationStackSync(navigationPattern);
+    /**
+     * @tc.steps: step3. check the order of total 4(= testNumber + 1) navDestinations, it should belike:
+     *  | dest1 | dest2 | dest3 | dest4 | <- child of navigationContent with max index
+     *              ^       ^       ^
+     *              |       |       |
+     *   needRemoveInPush   |   new top of stack
+     *              needRemoveInPush
+     */
 }
 } // namespace OHOS::Ace::NG

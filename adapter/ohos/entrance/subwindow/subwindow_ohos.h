@@ -57,12 +57,13 @@ public:
     bool InitContainer() override;
     void ResizeWindow() override;
     NG::RectF GetRect() override;
+    void SetRect(const NG::RectF& rect) override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
-    bool ShowPreviewNG() override;
+    bool ShowPreviewNG(bool isStartDraggingFromSubWindow = false) override;
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
@@ -137,6 +138,10 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    bool IsFreeMultiWindow() const override;
+    void OnFreeMultiWindowSwitch(bool enable) override;
+    int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
+    void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -149,6 +154,9 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
+    bool IsToastSubWindow() override;
+    void DestroyWindow() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -181,13 +189,13 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
     void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
+    Rosen::WindowType GetToastRosenType(bool isSceneBoardEnable);
 
     static int32_t id_;
     int32_t windowId_ = 0;
@@ -207,6 +215,10 @@ private:
     bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
+    int32_t callbackId_ = 0;
+    sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+    std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
+    NG::RectF windowRect_;
 };
 
 } // namespace OHOS::Ace

@@ -15,7 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/linear_split_model_impl.h"
 
-#include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/split_container/column_split_component.h"
 #include "core/components/split_container/row_split_component.h"

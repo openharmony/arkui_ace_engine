@@ -121,7 +121,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
     SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
-    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor };
+    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor, SpanType::Url };
 
 const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
     { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
@@ -133,6 +133,7 @@ const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<Sp
     { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
     { SpanType::Image, JSSpanString::CreateJsImageSpan },
     { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
+    { SpanType::Url, JSSpanString::CreateJsUrlSpan },
 };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
@@ -311,6 +312,16 @@ JSRef<JSObject> JSSpanString::CreateJsParagraphStyleSpan(const RefPtr<SpanBase>&
     return obj;
 }
 
+JSRef<JSObject> JSSpanString::CreateJsUrlSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<UrlSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSUrlSpan>::NewInstance();
+    auto urlSpan = Referenced::Claim(obj->Unwrap<JSUrlSpan>());
+    urlSpan->SetUrlSpan(span);
+    return obj;
+}
+
 JSRef<JSObject> JSSpanString::CreateJsFontSpan(const RefPtr<SpanBase>& spanObject)
 {
     auto span = AceType::DynamicCast<FontSpan>(spanObject);
@@ -435,6 +446,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsExtSpan(start, length, obj);
         case SpanType::BackgroundColor:
             return ParseJSBackgroundColorSpan(start, length, obj);
+        case SpanType::Url:
+            return ParseJsUrlSpan(start, length, obj);
         default:
             break;
     }
@@ -591,6 +604,17 @@ RefPtr<SpanBase> JSSpanString::ParseJsExtSpan(int32_t start, int32_t length, con
     }
     auto spanBase = AceType::MakeRefPtr<JSExtSpan>(obj, start, start + length);
     return spanBase;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsUrlSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto* base = obj->Unwrap<AceType>();
+    auto* urlSpan = AceType::DynamicCast<JSUrlSpan>(base);
+    if (urlSpan && urlSpan->GetUrlSpan()) {
+        return AceType::MakeRefPtr<UrlSpan>(
+            urlSpan->GetUrlSpan()->GetUrlSpanAddress(), start, start + length);
+    }
+    return nullptr;
 }
 
 bool JSSpanString::CheckSpanType(int32_t spanType)

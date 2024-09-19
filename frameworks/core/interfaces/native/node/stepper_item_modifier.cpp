@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/stepper_item_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void SetNextLabel(ArkUINodeHandle node, ArkUI_CharPtr value)

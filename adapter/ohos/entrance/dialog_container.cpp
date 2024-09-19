@@ -277,6 +277,7 @@ void DialogContainer::Destroy()
                 TaskExecutor::TaskType::JS, "ArkUIDialogFrontendDestroy");
         }
     }
+    DestroyToastSubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -340,6 +341,7 @@ void DialogContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<Ac
 
     InitPipelineContext(std::move(window), instanceId, density, width, height, windowId);
     InitializeCallback();
+    CheckAndSetFontFamily();
 
     taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); },
         TaskExecutor::TaskType::UI, "ArkUIDialogFrameReportInit");
@@ -653,5 +655,30 @@ void DialogContainer::UpdateConfiguration(const ParsedConfig& parsedConfig)
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+}
+
+void DialogContainer::CheckAndSetFontFamily()
+{
+    CHECK_NULL_VOID(pipelineContext_);
+    auto fontManager = pipelineContext_->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (fontManager->IsUseAppCustomFont()) {
+        return;
+    }
+    std::string familyName = "";
+    std::string path = "/data/themes/a/app";
+    if (!IsFontFileExistInPath(path)) {
+        path = "/data/themes/b/app";
+        if (!IsFontFileExistInPath(path)) {
+            return;
+        }
+    }
+    path = path.append("/fonts/");
+    familyName = GetFontFamilyName(path);
+    if (familyName.empty()) {
+        return;
+    }
+    path = path.append(familyName);
+    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
 }
 } // namespace OHOS::Ace::Platform

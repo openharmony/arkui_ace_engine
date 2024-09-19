@@ -93,4 +93,17 @@ void ImageAnalyzerManager::ReleaseImageAnalyzer()
 void ImageAnalyzerManager::UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType)
 {
 }
+
+void ImageAnalyzerManager::UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY,
+    int rectWidth, int rectHeight, int pointX, int pointY, OnTextSelectedCallback callback)
+{
+}
+
+void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight)
+{
+}
+
+void ImageAnalyzerManager::SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback)
+{
+}
 } // namespace OHOS::Ace

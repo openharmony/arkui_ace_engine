@@ -15,15 +15,7 @@
 
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 
-#include <sstream>
-
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

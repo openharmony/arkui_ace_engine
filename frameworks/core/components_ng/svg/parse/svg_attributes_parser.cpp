@@ -15,15 +15,16 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 
-#include "base/utils/utils.h"
-#include "base/utils/string_utils.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const char LINECAP_ROUND[] = "round";
 const char LINECAP_SQUARE[] = "square";
 const char LINEJOIN_BEVEL[] = "bevel";
 const char LINEJOIN_ROUND[] = "round";
+const std::regex COLOR_WITH_ALPHA(
+    R"(rgba?\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\,(\d+\.?\d*)\))", std::regex::icase);
+constexpr uint32_t RGBA_SUB_MATCH_SIZE = 5;
+constexpr double MAX_ALPHA = 1.0;
 }
 
 LineCapStyle SvgAttributesParser::GetLineCapStyle(const std::string& val)
@@ -48,7 +49,7 @@ LineJoinStyle SvgAttributesParser::GetLineJoinStyle(const std::string& val)
     }
 }
 
-Color SvgAttributesParser::GetColor(const std::string& value)
+std::optional<Color> SvgAttributesParser::GetSpecialColor(const std::string& value)
 {
     static const LinearMapNode<Color> COLOR_TABLE[] = {
         { "aliceblue", Color(0xfff0f8ff) },
@@ -204,6 +205,29 @@ Color SvgAttributesParser::GetColor(const std::string& value)
     if (colorIndex != -1) {
         return COLOR_TABLE[colorIndex].value;
     }
+    return std::nullopt;
+}
+
+bool SvgAttributesParser::ParseColor(const std::string& value, Color& color)
+{
+    auto colorOpt = GetSpecialColor(value);
+    if (colorOpt.has_value()) {
+        color = colorOpt.value();
+        return true;
+    }
+    if (Color::MatchColorHexString(value)) {
+        color = Color::FromString(value);
+        return true;
+    }
+    return false;
+}
+
+Color SvgAttributesParser::GetColor(const std::string& value)
+{
+    auto colorOpt = GetSpecialColor(value);
+    if (colorOpt.has_value()) {
+        return colorOpt.value();
+    }
     return Color::FromString(value);
 }
 
@@ -217,4 +241,20 @@ double SvgAttributesParser::ParseDouble(const std::string& value)
     return StringUtils::StringToDouble(value);
 }
 
+bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& result)
+{
+    std::smatch matches;
+    if (std::regex_match(colorStr, matches, COLOR_WITH_ALPHA)) {
+        if (matches.size() == RGBA_SUB_MATCH_SIZE) {
+            auto red = static_cast<uint8_t>(std::stoi(matches[1]));
+            auto green = static_cast<uint8_t>(std::stoi(matches[2]));
+            auto blue = static_cast<uint8_t>(std::stoi(matches[3]));
+            auto alpha = static_cast<double>(std::stod(matches[4]));
+            // Scale up from 0~1.0 to 255
+            result = Color::FromARGB(static_cast<uint8_t>(std::min(MAX_ALPHA, alpha)) * 0xff, red, green, blue);
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

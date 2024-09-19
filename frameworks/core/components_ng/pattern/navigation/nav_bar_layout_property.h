@@ -21,13 +21,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/navigation/navdestination_layout_property_base.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT NavBarLayoutProperty : public LayoutProperty {
-    DECLARE_ACE_TYPE(NavBarLayoutProperty, LayoutProperty);
+class ACE_EXPORT NavBarLayoutProperty : public NavDestinationLayoutPropertyBase {
+    DECLARE_ACE_TYPE(NavBarLayoutProperty, NavDestinationLayoutPropertyBase);
 
 public:
     NavBarLayoutProperty() = default;
@@ -37,20 +38,17 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto copy = MakeRefPtr<NavBarLayoutProperty>();
-        copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        copy->NavDestinationLayoutPropertyBase::UpdateBaseLayoutProperty(
+            DynamicCast<NavDestinationLayoutPropertyBase>(this));
         copy->propTitleMode_ = CloneTitleMode();
-        copy->propHideTitleBar_ = CloneHideTitleBar();
-        copy->propHideToolBar_ = CloneHideToolBar();
         copy->propHideBackButton_ = CloneHideBackButton();
         return copy;
     }
 
     void Reset() override
     {
-        LayoutProperty::Reset();
+        NavDestinationLayoutPropertyBase::Reset();
         ResetTitleMode();
-        ResetHideTitleBar();
-        ResetHideToolBar();
         ResetHideBackButton();
     }
 
@@ -67,39 +65,8 @@ public:
                 return "NavigationTitleMode.Free";
         }
     }
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("titleMode", GetTitleModeString().c_str(), filter);
-        json->PutExtAttr("hideBackButton", GetHideBackButtonValue(false), filter);
-        json->PutExtAttr("hideTitleBar", GetHideTitleBarValue(false), filter);
-        json->PutExtAttr("hideToolBar", GetHideToolBarValue(false), filter);
-        json->PutExtAttr("navBarVisibility",
-            VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
-    }
-
-    std::string VisibleTypeToString(VisibleType type) const
-    {
-        static const LinearEnumMapNode<VisibleType, std::string> visibilityMap[] = {
-            { VisibleType::VISIBLE, "Visibility.Visible" },
-            { VisibleType::INVISIBLE, "Visibility.Hidden" },
-            { VisibleType::GONE, "Visibility.None" },
-        };
-        auto idx = BinarySearchFindIndex(visibilityMap, ArraySize(visibilityMap), type);
-        if (idx >= 0) {
-            return visibilityMap[idx].value;
-        }
-        return "Visibility.Visible";
-    }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

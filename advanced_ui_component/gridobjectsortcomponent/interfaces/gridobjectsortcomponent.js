@@ -1639,6 +1639,15 @@ export class GridObjectSortComponent extends ViewPU {
         Flex.pop();
         Stack.pop();
     }
+    onAddTagLongPressEnd() {
+        this.addAreaLongPressGesture = false;
+        Context.animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: LONG_TOUCH_SCALE
+        }, () => {
+            this.longScaleOnePointTwo = 1;
+        });
+    }
     AddTagBuilder(o3 = null) {
         this.observeComponentCreation2((i5, j5) => {
             Grid.create();
@@ -1693,6 +1702,10 @@ export class GridObjectSortComponent extends ViewPU {
                                 if (u4.type === TouchType.Down) {
                                     this.content = z3;
                                     this.isTouchDown = true;
+                                }
+                                if (u4.type === TouchType.Cancel) {
+                                    this.isTouchDown = false;
+                                    return;
                                 }
                                 if (u4.type === TouchType.Up) {
                                     this.isTouchDown = false;
@@ -1768,13 +1781,10 @@ export class GridObjectSortComponent extends ViewPU {
                                 this.calcGridHeight();
                             });
                             LongPressGesture.onActionEnd(() => {
-                                this.addAreaLongPressGesture = false;
-                                Context.animateTo({
-                                    duration: ENTER_EXIT_ICON_DURATION,
-                                    curve: LONG_TOUCH_SCALE
-                                }, () => {
-                                    this.longScaleOnePointTwo = 1;
-                                });
+                                this.onAddTagLongPressEnd();
+                            });
+                            LongPressGesture.onActionCancel(() => {
+                                this.onAddTagLongPressEnd();
                             });
                             LongPressGesture.pop();
                             Gesture.pop();
@@ -1852,6 +1862,11 @@ export class GridObjectSortComponent extends ViewPU {
                 }
                 this.calcGridHeight();
             });
+            LongPressGesture.onActionCancel(() => {
+                if (this.isStartDrag) {
+                    this.insertItem(this.itemIndex, this.itemIndex);
+                }
+            });
             LongPressGesture.pop();
             Gesture.pop();
             Grid.clip(false);
@@ -1922,7 +1937,7 @@ export class GridObjectSortComponent extends ViewPU {
                                     this.content = y1;
                                     this.isTouchDown = true;
                                 }
-                                if (n2.type === TouchType.Up) {
+                                if (n2.type === TouchType.Up || n2.type === TouchType.Cancel) {
                                     this.isTouchDown = false;
                                     Context.animateTo({
                                         duration: ENTER_EXIT_ICON_DURATION,

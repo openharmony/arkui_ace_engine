@@ -15,12 +15,6 @@
 
 #include "core/components_ng/base/geometry_node.h"
 
-#include <string>
-#include <utility>
-
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-
 namespace OHOS::Ace::NG {
 
 void GeometryNode::Reset()

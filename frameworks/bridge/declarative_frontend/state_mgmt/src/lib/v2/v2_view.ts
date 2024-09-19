@@ -27,6 +27,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
+    public isJSBuilderNode : boolean = false;
 
     // Set of elements for delayed update
     private elmtIdsDelayedUpdate: Set<number> = new Set();
@@ -36,9 +37,32 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
+
+        // Set the isJSBuilderNode flag to true if the parent of ViewV2 is a BuilderNode
+        // This applies to components invoked by Builder functions
+        if (!this.parent_ && this.checkIfBuilderNode(parent)) {
+            stateMgmtConsole.debug(`ViewV2 constructor: @Component's '${this.constructor.name}' parent '${parent?.constructor.name}' is not of type 'IView'`);
+            this.isJSBuilderNode = true;
+        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
+    /**
+     * Helper function to check if a view is of type JSBuilderNode
+     * This helps in reporting errors when Components with @Provider/@Consumer
+     * are called from BuilderNodes.
+     * Periodical track of BuilderNode elements from jsXNode.js might be needed to 
+     * cross-check for changes in variables/classNames if any.
+     */
+    private checkIfBuilderNode(view: IView | undefined): boolean {
+        return (
+            view &&
+            view.constructor.name === 'JSBuilderNode' &&
+            typeof view['childrenWeakrefMap_'] === 'object' &&
+            typeof view['uiContext_'] === 'object' &&
+            view.hasOwnProperty('_supportNestingBuilder')
+        );
+    }
 
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
@@ -71,6 +95,33 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     private get isViewV3(): boolean {
         return true;
     }
+
+    /**
+     * Virtual function implemented in ViewPU and ViewV2
+     * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
+     *
+     * @param rmElmtId - The Element ID to be purged and deleted
+     * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
+    */
+    public purgeDeleteElmtId(rmElmtId: number): boolean {
+        stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (V2) is purging the rmElmtId:${rmElmtId}`);
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
+            if (childOpt) {
+                childOpt.setDeleting();
+                childOpt.setDeleteStatusRecursively();
+            }
+
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+
+        // Needed only for V2
+        ObserveV2.getObserve().clearBinding(rmElmtId);
+        return result;
+    }
+
 
     // super class will call this function from
     // its aboutToBeDeleted implementation
@@ -269,13 +320,18 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
 
     public UpdateElement(elmtId: number): void {
+
+        if(this.isDeleting_) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement(${elmtId}) (V2) returns with NO UPDATE, this @ComponentV2 is under deletion!`);
+            return;
+        }
+
         stateMgmtProfiler.begin('ViewV2.UpdateElement');
         if (elmtId === this.id__()) {
             // do not attempt to update itself
             stateMgmtProfiler.end();
             return;
         }
-
         // do not process an Element that has been marked to be deleted
         const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
         const updateFunc = entry ? entry.getUpdateFunc() : undefined;
@@ -407,7 +463,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         if(this.monitorIdsDelayedUpdate.size) {
           // exec monitor functions
-          ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+          ObserveV2.getObserve().runDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active

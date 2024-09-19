@@ -29,6 +29,8 @@
 #include "core/accessibility/accessibility_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
+#include "js_third_accessibility_hover_ng.h"
+
 namespace OHOS::NWeb {
 class NWebAccessibilityNodeInfo;
 } // namespace OHOS::NWeb::NWebAccessibilityNodeInfo
@@ -50,7 +52,41 @@ struct CommonProperty {
     std::string pagePath;
 };
 
-class JsAccessibilityManager : public AccessibilityNodeManager {
+struct ActionTable {
+    AceAction aceAction;
+    ActionType action;
+};
+
+struct ActionStrTable {
+    ActionType action;
+    std::string actionStr;
+};
+
+struct FillEventInfoParam {
+    int64_t elementId = 0;
+    int64_t stackNodeId = 0;
+    uint32_t windowId = 0;
+};
+
+struct AccessibilityActionParam {
+    RefPtr<NG::AccessibilityProperty> accessibilityProperty;
+    std::string setTextArgument = "";
+    int32_t setSelectionStart = -1;
+    int32_t setSelectionEnd = -1;
+    bool setSelectionDir = false;
+    int32_t setCursorIndex = -1;
+    TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
+    AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+    int32_t spanId = -1;
+};
+
+struct ActionParam {
+    Accessibility::ActionType action;
+    std::map<std::string, std::string> actionArguments;
+};
+
+class JsAccessibilityManager : public AccessibilityNodeManager,
+    public AccessibilityHoverManagerForThirdNG {
     DECLARE_ACE_TYPE(JsAccessibilityManager, AccessibilityNodeManager);
 
 public:
@@ -65,6 +101,8 @@ public:
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;
     void SetPipelineContext(const RefPtr<PipelineBase>& context) override;
+    void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos);
+    void UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info);
 
     void UpdateViewScale();
 
@@ -94,6 +132,15 @@ public:
         lastFrameNode_ = node;
     }
 
+    void SaveCurrentFocusNodeSize(const RefPtr<NG::FrameNode>& currentFocusNode)
+    {
+        if (currentFocusNode->IsAccessibilityVirtualNode()) {
+            auto oldGeometryNode = currentFocusNode->GetGeometryNode();
+            CHECK_NULL_VOID(oldGeometryNode);
+            oldGeometrySize_ = oldGeometryNode->GetFrameSize();
+        }
+    }
+
     bool SubscribeToastObserver();
     bool UnsubscribeToastObserver();
     bool SubscribeStateObserver(int eventType);
@@ -116,10 +163,7 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void FocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
-    struct ActionParam {
-        Accessibility::ActionType action;
-        std::map<std::string, std::string> actionArguments;
-    };
+
     void ExecuteAction(const int64_t accessibilityId, const ActionParam& param, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     bool ClearCurrentFocus();
@@ -186,9 +230,25 @@ public:
     void RegisterInteractionOperationAsChildTree(uint32_t parentWindowId, int32_t parentTreeId,
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
+    void SetAccessibilityGetParentRectHandler(
+        std::function<void(AccessibilityParentRectInfo &)> &&callback) override;
     void DeregisterInteractionOperationAsChildTree() override;
     void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) override;
+
+    bool RegisterInteractionOperationAsChildTree(const Registration& registration) override;
+    bool DeregisterInteractionOperationAsChildTree(uint32_t windowId, int32_t treeId) override;
+
+    void TransferThirdProviderHoverEvent(
+        const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF& point, SourceType source,
+        NG::AccessibilityHoverEventType eventType, TimeStamp time) override;
+
+    void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo);
+    void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo, int32_t treeId);
+    bool OnDumpChildInfoForThird(
+        int64_t hostElementId,
+        const std::vector<std::string>& params,
+        std::vector<std::string>& info) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -369,6 +429,7 @@ private:
         const std::map<std::string, std::string>& actionArguments,
         Accessibility::ActionType& action, int64_t uiExtensionOffset);
     RefPtr<NG::FrameNode> FindNodeFromRootByExtensionId(const RefPtr<NG::FrameNode>& root, const int64_t uiExtensionId);
+    bool RegisterThirdProviderInteractionOperationAsChildTree(const Registration& registration);
 
     void DumpProperty(const RefPtr<AccessibilityNode>& node);
     void DumpPropertyNG(int64_t nodeID);
@@ -446,14 +507,12 @@ private:
 
     void NotifyChildTreeOnDeregister();
 
+    void SendUecOnTreeEvent(int64_t splitElementId);
+
     void NotifySetChildTreeIdAndWinId(int64_t elementId, const int32_t treeId, const int32_t childWindowId);
 
     bool CheckIsChildElement(
         int64_t &elementId, const std::vector<std::string>& params, std::vector<std::string>& info);
-
-    void UpdateElementInfoTreeId(Accessibility::AccessibilityElementInfo& info);
-
-    void UpdateElementInfosTreeId(std::list<Accessibility::AccessibilityElementInfo>& infos);
 
     bool NeedRegisterChildTree(uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId);
 
@@ -466,8 +525,8 @@ private:
     void NotifyAccessibilitySAStateChange(bool state);
     void DumpTreeNodeInfoInJson(
         const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
-    void CreateNodeInfoJson(
-        const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, std::unique_ptr<JsonValue>& json);
+    void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+        std::unique_ptr<JsonValue>& json, int32_t childSize);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -479,6 +538,7 @@ private:
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;
+    NG::SizeF oldGeometrySize_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     mutable std::mutex componentSACallbackMutex_;
@@ -487,6 +547,7 @@ private:
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
+    std::function<void(AccessibilityParentRectInfo&)> getParentRectHandlerNew_;
     bool isUseJson_ = false;
 };
 

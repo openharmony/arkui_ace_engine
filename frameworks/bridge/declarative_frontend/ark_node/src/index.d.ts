@@ -63,13 +63,13 @@ declare interface Size {
 declare enum XComponentType {
   SURFACE = 0,
   COMPONENT,
-  TEXTURE,
-  PLATFORM_VIEW = 999
+  TEXTURE
 }
 
 declare interface XComponentController { }
 declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
+  lazyBuildSupported?: boolean;
 }
 declare abstract class ViewPU {
   id__(): number;
@@ -196,6 +196,28 @@ declare class ArkBadgeComponent extends ArkComponent {}
 declare class ArkGridComponent extends ArkComponent {}
 
 declare class ArkGridItemComponent extends ArkComponent {}
+
+declare class ArkTextClockComponent extends ArkComponent {}
+
+declare class ArkTextTimerComponent extends ArkComponent {}
+
+declare class ArkMarqueeComponent extends ArkComponent {}
+
+declare class ArkTextAreaComponent extends ArkComponent {}
+
+declare class ArkCheckboxComponent extends ArkComponent {}
+
+declare class ArkCheckboxGroupComponent extends ArkComponent {}
+
+declare class ArkRadioComponent extends ArkComponent {}
+
+declare class ArkRatingComponent extends ArkComponent {}
+
+declare class ArkSliderComponent extends ArkComponent {}
+
+declare class ArkSelectComponent extends ArkComponent {}
+
+declare class ArkToggleComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

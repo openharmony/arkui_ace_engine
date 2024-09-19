@@ -21,6 +21,7 @@ base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 abcuicontext_obj_path = base_output_path + "/abc_uicontext.o"
+abcpreload_obj_path = base_output_path + "/abc_preload.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 arkTheme_obj_path = base_output_path + "/abc_ark_theme.o"
 arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
@@ -63,6 +64,16 @@ es2abc_gen_abc("gen_jsUIContext_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsUIContext.js" ]
   out_puts = [ base_output_path + "/jsUIContext.abc" ]
+}
+
+es2abc_gen_abc("gen_jsPreload_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsPreload.js")
+  dst_file = rebase_path(base_output_path + "/jsPreload.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsPreload.js" ]
+  out_puts = [ base_output_path + "/jsPreload.abc" ]
 }
 
 es2abc_gen_abc("gen_arkComponent_abc") {
@@ -124,6 +135,15 @@ gen_obj("abc_uicontext") {
   }
   output = abcuicontext_obj_path
   snapshot_dep = [ ":gen_jsUIContext_abc" ]
+}
+
+gen_obj("abc_preload") {
+  input = base_output_path + "/jsPreload.abc"
+  if (use_mac || use_mingw_win || use_linux || use_ios) {
+    abcpreload_obj_path = base_output_path + "/jsPreload.c"
+  }
+  output = abcpreload_obj_path
+  snapshot_dep = [ ":gen_jsPreload_abc" ]
 }
 
 gen_obj("abc_ark_component") {
@@ -238,6 +258,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_nav_destination_bridge.cpp",
       "nativeModule/arkts_native_nav_router_bridge.cpp",
       "nativeModule/arkts_native_navigation_bridge.cpp",
+      "nativeModule/arkts_native_navigation_utils.cpp",
       "nativeModule/arkts_native_navigator_bridge.cpp",
       "nativeModule/arkts_native_node_adapter_bridge.cpp",
       "nativeModule/arkts_native_node_container_bridge.cpp",
@@ -260,6 +281,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",
       "nativeModule/arkts_native_scroll_bridge.cpp",
+      "nativeModule/arkts_native_scrollbar_bridge.cpp",
       "nativeModule/arkts_native_search_bridge.cpp",
       "nativeModule/arkts_native_select_bridge.cpp",
       "nativeModule/arkts_native_shape_bridge.cpp",
@@ -426,8 +448,13 @@ template("declarative_js_engine_ark") {
       ":gen_obj_src_abc_ark_theme",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
-      ":gen_obj_src_abc_uicontext",
     ]
+
+    if (is_arkui_x) {
+      deps += [ ":gen_obj_src_abc_uicontext" ]
+    } else {
+      deps += [ ":gen_obj_src_abc_preload" ]
+    }
 
     foreach(item, abc_sources) {
       deps += [ ":copy_" + item + "_abc" ]

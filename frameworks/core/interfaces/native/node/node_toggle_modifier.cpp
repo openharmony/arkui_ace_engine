@@ -15,12 +15,7 @@
 #include "node_toggle_modifier.h"
 
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -338,6 +333,13 @@ ArkUI_Uint32 GetToggleUnselectedColor(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return ToggleModelNG::GetUnselectedColor(frameNode).GetValue();
 }
+
+void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetToggleState(frameNode, static_cast<bool>(isOn));
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
@@ -369,6 +371,7 @@ const ArkUIToggleModifier* GetToggleModifier()
         SetToggleTrackBorderRadius,
         ResetToggleTrackBorderRadius,
         GetToggleUnselectedColor,
+        SetToggleState,
     };
 
     return &modifier;

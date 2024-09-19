@@ -14,13 +14,7 @@
  */
 #include "core/interfaces/native/node/navigation_modifier.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NAV_BAR_POSITION_RANGE_MODIFIER = 1;
@@ -266,6 +260,111 @@ void ResetNavIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
+void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string mainTitleString = std::string(titleInfo.mainTitle);
+    std::string subTitleString = std::string(titleInfo.subTitle);
+    NG::NavigationTitleInfo ngTitleInfo = { titleInfo.hasSubTitle, titleInfo.hasMainTitle,
+        subTitleString, mainTitleString };
+    NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (options.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(options.colorValue.value);
+    }
+    if (options.blurStyle.isSet) {
+        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+    }
+    if (options.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
+    }
+    if (options.paddingStart.isSet) {
+        finalOptions.brOptions.paddingStart = CalcDimension(static_cast<double>(options.paddingStart.dimension.value),
+            static_cast<DimensionUnit>(options.paddingStart.dimension.units));
+    }
+    if (options.paddingEnd.isSet) {
+        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
+            static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
+    }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void ResetNavTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitleInfo ngTitleInfo = { false, false, "", "" };
+    NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
+    NavigationTitlebarOptions options;
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(options));
+}
+
+void SetNavMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(items);
+    std::vector<NG::BarItem> menuItems;
+    for (uint32_t i = 0; i < length; i++) {
+        NG::BarItem menuItem;
+        if (items[i].text.isSet) {
+            menuItem.text = items[i].text.value;
+        }
+        if (items[i].icon.isSet) {
+            menuItem.icon = items[i].icon.value;
+        }
+        if (items[i].isEnable.isSet) {
+            menuItem.isEnabled = items[i].isEnable.value;
+        }
+        menuItems.push_back(menuItem);
+    }
+    NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+}
+
+void ResetNavMenus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<NG::BarItem> menuItems;
+    NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+}
+
+void SetNavMenuItemAction(ArkUINodeHandle node, void* action, ArkUI_Uint32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto actionFunc = reinterpret_cast<std::function<void()>*>(action);
+    NavigationModelNG::SetMenuItemAction(frameNode, std::move(*actionFunc), index);
+}
+
+void SetNavMenuItemSymbol(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto iconFunc = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbol);
+    NavigationModelNG::SetMenuItemSymbol(frameNode, std::move(*iconFunc), index);
+}
+
+void SetNavigationRecoverable(ArkUINodeHandle node, ArkUI_Bool recoverable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetRecoverable(frameNode, recoverable);
+}
+
+void ResetNavigationRecoverable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's recoverable is false
+    NavigationModelNG::SetRecoverable(frameNode, false);
+}
+
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -295,7 +394,15 @@ const ArkUINavigationModifier* GetNavigationModifier()
         SetNavBarWidth,
         ResetNavBarWidth,
         SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea
+        ResetNavIgnoreLayoutSafeArea,
+        SetNavTitle,
+        ResetNavTitle,
+        SetNavMenus,
+        ResetNavMenus,
+        SetNavMenuItemAction,
+        SetNavMenuItemSymbol,
+        SetNavigationRecoverable,
+        ResetNavigationRecoverable,
     };
 
     return &modifier;

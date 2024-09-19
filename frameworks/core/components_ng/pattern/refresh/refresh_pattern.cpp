@@ -157,6 +157,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -169,6 +170,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag End And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -176,6 +178,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Cancel And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragCancel();
@@ -271,13 +274,13 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
     loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-    
+
     PaddingProperty textpadding;
     textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
@@ -294,11 +297,9 @@ void RefreshPattern::OnColorConfigurationUpdate()
         return;
     }
     CHECK_NULL_VOID(progressChild_);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<RefreshTheme>();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -442,11 +443,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         }
         auto pullDownRatio = CalculatePullDownRatio();
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        UpdateFirstChildPlacement();
+        FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
-            FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
-                UpdateFirstChildPlacement();
                 return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
@@ -456,7 +457,6 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
         }
-        UpdateFirstChildPlacement();
     } else {
         HandleDragUpdateLowVersion(delta);
     }
@@ -559,6 +559,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
             customBuilder_ = nullptr;
             isRemoveCustomBuilder_ = true;
         }
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Doesn't Exist");
         return;
     }
 
@@ -585,6 +586,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
+    TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Exists");
 }
 
 void RefreshPattern::SetAccessibilityAction()
@@ -618,12 +620,14 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
     auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
     auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
+        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -647,12 +651,12 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
-    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
+    TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh Status Changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()
 {
-    if (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE) {
+    if (isSourceFromAnimation_ || (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE)) {
         UpdateRefreshStatus(RefreshStatus::INACTIVE);
     } else {
         UpdateRefreshStatus(RefreshStatus::DONE);
@@ -835,7 +839,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
             }
         });
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
 }
@@ -1153,6 +1157,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
     if (NearZero(offset)) {
         return result;
     }
+    isSourceFromAnimation_ = (source == SCROLL_FROM_ANIMATION);
     auto parent = GetNestedScrollParent();
     if (state == NestedState::CHILD_SCROLL) {
         if (Negative(offset) && Positive(scrollOffset_)) {
@@ -1243,5 +1248,10 @@ void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
+}
+
+void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
 }
 } // namespace OHOS::Ace::NG

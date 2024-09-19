@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rating/rating_layout_property.h"
 #include "core/components_ng/pattern/rating/rating_pattern.h"
-#include "core/components_ng/pattern/rating/rating_render_property.h"
 
 namespace OHOS::Ace::NG {
 AccessibilityValue RatingAccessibilityProperty::GetAccessibilityValue() const
@@ -44,5 +40,15 @@ std::string RatingAccessibilityProperty::GetText() const
     auto ratingRenderProperty = frameNode->GetPaintProperty<NG::RatingRenderProperty>();
     CHECK_NULL_RETURN(ratingRenderProperty, "");
     return std::to_string(ratingRenderProperty->GetRatingScore().value_or(0));
+}
+
+bool RatingAccessibilityProperty::IsEditable() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<NG::RatingLayoutProperty>();
+    CHECK_NULL_RETURN(ratingLayoutProperty, false);
+    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
+    return !indicator;
 }
 } // namespace OHOS::Ace::NG

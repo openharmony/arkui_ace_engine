@@ -15,16 +15,10 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -70,7 +64,8 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutChildren(info.currentOffset_, props->GetCachedCountValue(1));
 
     const int32_t cacheCnt = props->GetCachedCountValue(1) * info.crossCount_;
-    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt);
+    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt,
+        props->GetShowCachedItemsValue(false));
     wrapper_->SetCacheCount(cacheCnt);
     PreloadItems(cacheCnt);
 }
@@ -629,7 +624,7 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             item->GetGeometryNode()->SetParentLayoutConstraint(constraint);
             item->Layout();
             item->SetActive(false);
-            return false;
+            return true;
         });
 }
 } // namespace OHOS::Ace::NG

@@ -20,10 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -123,7 +120,7 @@ void GridModelImpl::SetScrollBarWidth(const std::string& value)
     grid->SetScrollBarWidth(value);
 }
 
-void GridModelImpl::SetCachedCount(int32_t value)
+void GridModelImpl::SetCachedCount(int32_t value, bool show)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);

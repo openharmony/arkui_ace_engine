@@ -39,6 +39,14 @@ enum class DragDropMgrState : int32_t {
     DRAGGING
 };
 
+struct GatherAnimationInfo {
+    float scale = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    OffsetF gatherNodeCenter;
+    std::optional<BorderRadiusProperty> borderRadius;
+};
+
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
 
@@ -143,6 +151,7 @@ public:
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
+    void NotifyEnterTextEditorArea(bool enable);
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
     void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEven,
         const std::string& extraInfo);
@@ -340,8 +349,8 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
-    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-        const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
+    static RectF GetMenuPreviewRect();
+    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -399,11 +408,6 @@ public:
     {
         return badgeNumber_;
     }
-    
-    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
-    {
-        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
-    }
 
     bool IsDragWithContextMenu() const
     {
@@ -413,6 +417,16 @@ public:
     void SetIsDragWithContextMenu(bool isDragWithContextMenu)
     {
         isDragWithContextMenu_ = isDragWithContextMenu;
+    }
+
+    bool IsBackPressedCleanLongPressNodes() const
+    {
+        return isBackPressedCleanLongPressNodes_;
+    }
+
+    void SetIsBackPressedCleanLongPressNodes(bool isBackPressedCleanLongPressNodes)
+    {
+        isBackPressedCleanLongPressNodes_ = isBackPressedCleanLongPressNodes;
     }
 
     void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
@@ -441,7 +455,7 @@ public:
 
     uint32_t GetDampingOverflowCount() const
     {
-        return dampingOverflowCount_ ;
+        return dampingOverflowCount_;
     }
 
     void SetDampingOverflowCount()
@@ -544,19 +558,18 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     PointerEvent dragDropPointerEvent_;
-    bool isDragFwkShow_ { false };
+    bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
-    OffsetF prePointerOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
-    bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
+    bool isBackPressedCleanLongPressNodes_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);

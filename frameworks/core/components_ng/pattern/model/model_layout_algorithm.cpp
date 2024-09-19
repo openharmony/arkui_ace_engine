@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/model/model_layout_algorithm.h"
 
-#include "core/components_ng/base/frame_node.h"
-
 namespace OHOS::Ace::NG {
 
 ModelLayoutAlgorithm::ModelLayoutAlgorithm(const WeakPtr<ModelAdapterWrapper>& adapter) : modelAdapter_(adapter) {}

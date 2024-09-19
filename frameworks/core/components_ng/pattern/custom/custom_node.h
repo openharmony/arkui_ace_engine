@@ -128,7 +128,7 @@ public:
 
     std::unique_ptr<JsonValue> GetStateInspectorInfo();
 
-    void DetachFromMainTree(bool recursive) override;
+    void FireCustomDisappear() override;
 
 private:
     std::string viewKey_;

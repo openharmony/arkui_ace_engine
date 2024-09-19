@@ -28,6 +28,9 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
@@ -502,7 +505,10 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     modifierWithKey(this._modifiersWithKeys, XComponentEnableAnalyzerModifier.identity, XComponentEnableAnalyzerModifier, value);
     return this;
   }
-
+  enableSecure(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
+    return this;
+  }
 }
 
 // @ts-ignore
@@ -883,6 +889,24 @@ class XComponentEnableAnalyzerModifier extends ModifierWithKey<boolean> {
     }
   }
   
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentEnableSecureModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentEnableSecure');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableSecure(node);
+    } else {
+      getUINativeModule().xComponent.setEnableSecure(node, this.value);
+    }
+  }
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }

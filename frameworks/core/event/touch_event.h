@@ -52,6 +52,8 @@ enum class TouchType : size_t {
     HOVER_MOVE,
     HOVER_EXIT,
     HOVER_CANCEL,
+    PROXIMITY_IN,
+    PROXIMITY_OUT,
     UNKNOWN,
 };
 
@@ -451,6 +453,12 @@ struct TouchEvent final : public UIInputEvent {
         event.pointers.emplace_back(std::move(point));
         return event;
     }
+
+    bool IsPenHoverEvent() const
+    {
+        return sourceTool == SourceTool::PEN && (type == TouchType::PROXIMITY_IN ||
+        type == TouchType::PROXIMITY_OUT || (type == TouchType::MOVE && NearZero(force)));
+    }
 };
 
 namespace Platform {
@@ -744,33 +752,35 @@ public:
         }
     }
 
-    int32_t Dump(std::unique_ptr<JsonValue>& json) const
+    std::tuple<std::string, std::string> GetIds() const
     {
-        json->Put("frameNodeId", nodeId);
-        json->Put("type", type.c_str());
-        json->Put("depth", this->depth);
-
         std::stringstream oss;
         oss << "0x" << std::hex << id;
         std::string idStr = oss.str();
         oss.str("");
         oss << "0x" << std::hex << parentId;
         std::string parentIdStr = oss.str();
-        json->Put("id", idStr.c_str());
-        json->Put("parentId", parentIdStr.c_str());
+        return std::make_tuple(idStr, parentIdStr);
+    }
+
+    void Dump(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("frameNodeId", nodeId);
+        json->Put("type", type.c_str());
+        auto result = GetIds();
+        json->Put("id", std::get<0>(result).c_str());
+        json->Put("parentId", std::get<1>(result).c_str());
+        json->Put("depth", this->depth);
         if (!customInfo.empty()) {
             json->Put("customInfo", customInfo.c_str());
         }
-        std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
-        int32_t stateIndex = 0;
+        std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
         for (const auto& state : stateHistory) {
             std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
             state.Dump(child);
-            stateIndex++;
-            children->Put(("stateHistory_" + std::to_string(stateIndex)).c_str(), child);
+            children->Put(child);
         }
         json->Put("stateHistory", children);
-        return this->depth;
     }
 
     int32_t nodeId = -1;

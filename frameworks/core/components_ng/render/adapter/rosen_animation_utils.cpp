@@ -48,7 +48,6 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
     }
-    timingProtocol.SetInstanceId(Container::CurrentIdSafelyWithCheck());
     return timingProtocol;
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
@@ -56,7 +55,7 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     if (!callback) {
         return nullptr;
     }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -100,6 +99,11 @@ bool AnimationUtils::CloseImplicitAnimation()
         pipeline->FlushMessages();
     }
     return !animations.empty();
+}
+
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+    return Rosen::RSNode::CloseImplicitCancelAnimation();
 }
 
 bool AnimationUtils::IsImplicitAnimationOpen()
@@ -229,13 +233,14 @@ std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInte
         std::make_shared<AnimationUtils::InteractiveAnimation>();
     CHECK_NULL_RETURN(interactiveAnimation, nullptr);
     auto wrappedOnFinish = GetWrappedCallback(callback);
-    auto wrappedStart = GetWrappedCallback(addCallback);
     Rosen::RSAnimationTimingProtocol timingProtocol;
     Rosen::RSAnimationTimingCurve curve;
     interactiveAnimation->interactiveAnimation_ =
         Rosen::RSInteractiveImplictAnimator::Create(timingProtocol, curve);
     CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, nullptr);
-    interactiveAnimation->interactiveAnimation_->AddAnimation(wrappedStart);
+    if (addCallback) {
+        interactiveAnimation->interactiveAnimation_->AddAnimation(addCallback);
+    }
     interactiveAnimation->interactiveAnimation_->SetFinishCallBack(wrappedOnFinish);
     return interactiveAnimation;
 }
@@ -271,5 +276,14 @@ void AnimationUtils::UpdateInteractiveAnimation(
     CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
     interactiveAnimation->interactiveAnimation_->PauseAnimation();
     interactiveAnimation->interactiveAnimation_->SetFraction(progress);
+}
+
+void AnimationUtils::AddInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+    const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->AddAnimation(callback);
 }
 } // namespace OHOS::Ace

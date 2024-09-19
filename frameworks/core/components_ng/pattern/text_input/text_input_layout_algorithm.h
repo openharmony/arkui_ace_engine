@@ -62,6 +62,7 @@ private:
     void UpdateContentPosition(const UpdateContentPositionParams& params,
         const std::unique_ptr<GeometryProperty>& content);
     void UpdateTextRect(const UpdateTextRectParams& params);
+    bool IsFontSizeNonPositive(const TextStyle& textStyle) const;
 };
 } // namespace OHOS::Ace::NG
 

@@ -150,7 +150,7 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -159,6 +159,7 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
     Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
+    Color paragraphTextColor = { Color::BLACK };
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -237,6 +238,11 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    std::function<void()> urlOnRelease;
+    void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
+    {
+        urlOnRelease = std::move(onRelease);
+    }
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -300,12 +306,22 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
+    void SetSymbolId(uint32_t symbolId)
+    {
+        symbolId_ = symbolId;
+    }
+
+    uint32_t GetSymbolId()
+    {
+        return symbolId_;
+    }
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
     bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
+    uint32_t symbolId_ = 0;
 };
 
 enum class PropertyInfo {
@@ -380,8 +396,14 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
-    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId)
+    {
+        SetPropertyInfoContainer();
+    }
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId)
+    {
+        SetPropertyInfoContainer();
+    }
     ~SpanNode() override = default;
 
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
@@ -399,6 +421,7 @@ public:
 
     void UpdateContent(const uint32_t& unicode)
     {
+        spanItem_->spanItemType = SpanItemType::SYMBOL;
         if (spanItem_->unicode == unicode) {
             return;
         }
@@ -447,13 +470,13 @@ public:
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
@@ -503,21 +526,27 @@ public:
 
     void AddPropertyInfo(PropertyInfo value)
     {
-        propertyInfo_.insert(value);
+        propertyInfoContainer_.erase(value);
+    }
+
+    void ResetPropertyInfo(PropertyInfo value)
+    {
+        propertyInfoContainer_.insert(value);
     }
 
     void CleanPropertyInfo()
     {
-        propertyInfo_.clear();
+        propertyInfoContainer_.clear();
     }
+
+    void SetPropertyInfoContainer();
 
     void MarkTextDirty() override
     {
         RequestTextFlushDirty();
     }
 
-    std::set<PropertyInfo> CalculateInheritPropertyInfo();
-
+    std::set<PropertyInfo> GetInheritPropertyInfo();
 
     void UpdateSpanTextColor(Color color)
     {
@@ -528,6 +557,8 @@ public:
             return;
         }
         spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
         if (!spanItem_->UpdateSpanTextColor(color)) {
             RequestTextFlushDirty();
         }
@@ -535,10 +566,12 @@ public:
 
 protected:
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
-    std::set<PropertyInfo> propertyInfo_;
+    std::set<PropertyInfo> propertyInfoContainer_;
     bool hasUserFontWeight_ = false;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 
@@ -552,7 +585,10 @@ public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
     PlaceholderRun run_;
-    PlaceholderSpanItem() = default;
+    PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::PLACEHOLDER;
+    }
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
@@ -577,6 +613,18 @@ public:
         dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
     }
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
+
+    void SetCustomNode(const RefPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_;
+    }
+private:
+    RefPtr<UINode> customNode_;
 };
 
 class PlaceholderSpanPattern : public Pattern {

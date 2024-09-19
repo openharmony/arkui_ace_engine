@@ -15,8 +15,6 @@
 
 #include "bridge/cj_frontend/cppview/data_change_listener.h"
 
-#include "core/common/container_scope.h"
-
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 

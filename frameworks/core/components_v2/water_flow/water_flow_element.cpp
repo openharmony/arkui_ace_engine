@@ -15,10 +15,7 @@
 
 #include "core/components_v2/water_flow/water_flow_element.h"
 
-#include "base/utils/utils.h"
-#include "core/components/proxy/render_item_proxy.h"
 #include "core/components_v2/water_flow/render_water_flow.h"
-#include "core/components_v2/water_flow/water_flow_component.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
 
 namespace OHOS::Ace::V2 {

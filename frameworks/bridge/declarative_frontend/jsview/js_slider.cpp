@@ -391,8 +391,15 @@ void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsNull() && info[0]->IsNumber()) {
-        auto mode = static_cast<SliderModel::SliderInteraction>(info[0]->ToNumber<int32_t>());
-        SliderModel::GetInstance()->SetSliderInteractionMode(mode);
+        int32_t num = info[0]->ToNumber<int32_t>();
+        int32_t lowRange = static_cast<int32_t>(SliderModel::SliderInteraction::SLIDE_AND_CLICK);
+        int32_t upRange = static_cast<int32_t>(SliderModel::SliderInteraction::SLIDE_AND_CLICK_UP);
+        if (lowRange <= num && num <= upRange) {
+            auto mode = static_cast<SliderModel::SliderInteraction>(num);
+            SliderModel::GetInstance()->SetSliderInteractionMode(mode);
+        } else {
+            SliderModel::GetInstance()->ResetSliderInteractionMode();
+        }
     } else {
         SliderModel::GetInstance()->ResetSliderInteractionMode();
     }

@@ -15,10 +15,7 @@
 
 #include "core/components_ng/syntax/for_each_node.h"
 
-#include "base/log/ace_trace.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -69,6 +66,26 @@ void ForEachNode::CreateTempItems()
     }
 }
 
+void ForEachNode::CollectRemovingIds(std::list<int32_t>& removedElmtId)
+{
+    tempOldIdsSet_.insert(tempIds_.begin(), tempIds_.end());
+    MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap_);
+
+    for (const auto& newId : ids_) {
+        auto oldIdIt = tempOldIdsSet_.find(newId);
+        if (oldIdIt != tempOldIdsSet_.end()) {
+            tempOldIdsSet_.erase(oldIdIt);
+        }
+    }
+
+    for (const auto& oldId : tempOldIdsSet_) {
+        auto iter = oldNodeByIdMap_.find(oldId);
+        if (iter != oldNodeByIdMap_.end()) {
+            CollectRemovedChildren({ iter->second }, removedElmtId, false);
+        }
+    }
+}
+
 // same as foundation/arkui/ace_engine/frameworks/core/components_part_upd/foreach/foreach_element.cpp.
 void ForEachNode::CompareAndUpdateChildren()
 {
@@ -83,7 +100,6 @@ void ForEachNode::CompareAndUpdateChildren()
     // result of id gen function of previous render/re-render
     // create a map for quicker find/search
     std::unordered_set<std::string> oldIdsSet(tempIds_.begin(), tempIds_.end());
-    std::unordered_set<std::string> tempOldIdsSet(tempIds_.begin(), tempIds_.end());
 
     // ForEachNode only includes children for newly created_ array items
     // it does not include children of array items that were rendered on a previous
@@ -91,23 +107,12 @@ void ForEachNode::CompareAndUpdateChildren()
     std::list<RefPtr<UINode>> additionalChildComps;
     auto& children = ModifyChildren();
 
-    // create map id -> Node
-    // old children
-    std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
-    MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
     // swap new children to tempChildren, old children back to children
     std::swap(children, tempChildren_);
 
-    for (const auto& newId : ids_) {
-        auto oldIdIt = tempOldIdsSet.find(newId);
-        if (oldIdIt != tempOldIdsSet.end()) {
-            tempOldIdsSet.erase(oldIdIt);
-        }
-    }
-
-    for (const auto& oldId : tempOldIdsSet) {
-        auto iter = oldNodeByIdMap.find(oldId);
-        if (iter != oldNodeByIdMap.end()) {
+    for (const auto& oldId : tempOldIdsSet_) {
+        auto iter = oldNodeByIdMap_.find(oldId);
+        if (iter != oldNodeByIdMap_.end()) {
             // Remove and trigger all Detach callback.
             RemoveChild(iter->second, true);
         }
@@ -116,10 +121,10 @@ void ForEachNode::CompareAndUpdateChildren()
     std::swap(additionalChildComps, tempChildren_);
     std::swap(children, tempChildren_);
 
-    MappingChildWithId(oldIdsSet, additionalChildComps, oldNodeByIdMap);
+    MappingChildWithId(oldIdsSet, additionalChildComps, oldNodeByIdMap_);
 
     ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] tempOldIdsSet[%zu] additionalChildComps[%zu]",
-        GetId(), tempIds_.size(), ids_.size(), tempOldIdsSet.size(), additionalChildComps.size());
+        GetId(), tempIds_.size(), ids_.size(), tempOldIdsSet_.size(), additionalChildComps.size());
 
     if (IsOnMainTree()) {
         for (const auto& newChild : additionalChildComps) {
@@ -128,6 +133,8 @@ void ForEachNode::CompareAndUpdateChildren()
     }
 
     tempChildren_.clear();
+    tempOldIdsSet_.clear();
+    oldNodeByIdMap_.clear();
 
     if (auto frameNode = GetParentFrameNode()) {
         frameNode->ChildrenUpdatedFrom(0);
@@ -235,7 +242,7 @@ void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
         if (parentNode) {
             InitAllChildrenDragManager(true);
         } else {
-            auto piplineContext = PipelineContext::GetCurrentContext();
+            auto piplineContext = GetContext();
             CHECK_NULL_VOID(piplineContext);
             auto taskExecutor = piplineContext->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);

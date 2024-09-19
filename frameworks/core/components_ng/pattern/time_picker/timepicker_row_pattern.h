@@ -87,6 +87,17 @@ public:
     {
         return isShowInDialog_;
     }
+
+    void SetShowLunarSwitch(bool value)
+    {
+        showLunarSwitch_ = value;
+    }
+
+    bool GetShowLunarSwitch() const
+    {
+        return showLunarSwitch_;
+    }
+    
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
@@ -547,6 +558,11 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -575,6 +591,10 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
+    bool CheckFocusID(int32_t childSize);
+    bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
+                          int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -585,7 +605,7 @@ private:
     uint32_t showCount_ = 0;
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
-    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    bool hour24_ = SystemProperties::Is24HourClock();
     ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
@@ -610,6 +630,8 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
 
+    double curOpacity_ = 1.0;
+
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 
     WeakPtr<FrameNode> buttonTitleNode_;
@@ -626,6 +648,7 @@ private:
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
     bool isShowInDialog_ = false;
+    bool showLunarSwitch_ = false;
     bool isUserSetDividerSpacingFont_ = false;
     bool isUserSetGradientFont_ = false;
     Dimension gradientHeight_;

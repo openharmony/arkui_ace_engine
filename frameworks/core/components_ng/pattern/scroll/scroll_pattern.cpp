@@ -15,21 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -107,19 +93,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
     auto onReachStart = eventHub->GetOnReachStart();
-    if (onReachStart) {
-        if (ReachStart()) {
-            onReachStart();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
-        }
-    }
+    FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    if (onReachEnd) {
-        if (ReachEnd()) {
-            onReachEnd();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
-        }
-    }
+    FireOnReachEnd(onReachEnd);
     OnScrollStop(eventHub->GetOnScrollStop());
     ScrollSnapTrigger();
     CheckScrollable();
@@ -253,6 +229,9 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
+    if (LessNotEqual(scrollableDistance_, 0.0f)) {
+        return LessOrEqual(currentOffset_, 0.0f);
+    }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 
@@ -447,6 +426,28 @@ void ScrollPattern::FireOnDidScroll(float scroll)
     }
 }
 
+void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachStart);
+    if (ReachStart()) {
+        ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachStart();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+    }
+}
+
+void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host && onReachEnd);
+    if (ReachEnd()) {
+        ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachEnd();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    }
+}
+
 bool ScrollPattern::IsCrashTop() const
 {
     bool scrollUpToReachTop = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
@@ -564,8 +565,10 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("Scroll ScrollToEdge scrollEdgeType:%zu, offset:%f, id:%d", scrollEdgeType, distance,
         static_cast<int32_t>(host->GetAccessibilityId()));
-    ScrollBy(distance, distance, smooth);
-    scrollEdgeType_ = scrollEdgeType;
+    if (!NearZero(distance)) {
+        ScrollBy(distance, distance, smooth);
+        scrollEdgeType_ = scrollEdgeType;
+    }
 }
 
 void ScrollPattern::CheckScrollToEdge()

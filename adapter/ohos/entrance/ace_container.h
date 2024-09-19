@@ -41,6 +41,7 @@
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/common/render_boundary_manager.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
@@ -314,7 +315,7 @@ public:
 
     bool ParseThemeConfig(const std::string& themeConfig);
 
-    void CheckAndSetFontFamily();
+    void CheckAndSetFontFamily() override;
 
     void OnFinish()
     {
@@ -566,6 +567,14 @@ public:
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
+    bool IsSubWindow() const override;
+    bool IsDialogWindow() const override;
+    bool IsSystemWindow() const override;
+    bool IsHostMainWindow() const override;
+    bool IsHostSubWindow() const override;
+    bool IsHostDialogWindow() const override;
+    bool IsHostSystemWindow() const override;
+    bool IsHostSceneBoardWindow() const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
@@ -665,6 +674,14 @@ public:
     {
         return registerComponents_;
     }
+    void RenderLayoutBoundary(bool isDebugBoundary);
+    void AddWatchSystemParameter();
+    void RemoveWatchSystemParameter();
+
+    const std::vector<std::string>& GetUieParams() const
+    {
+        return paramUie_;
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -672,9 +689,6 @@ private:
     void InitializeCallback();
     void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
     void InitWindowCallback();
-    bool IsFontFileExistInPath(std::string path);
-    std::string GetFontFamilyName(std::string path);
-    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);
@@ -759,6 +773,10 @@ private:
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+    RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
+
+    // for Ui Extension dump param get
+    std::vector<std::string> paramUie_;
 };
 
 } // namespace OHOS::Ace::Platform

@@ -91,6 +91,9 @@ public:
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
+
     /**
      * those items with index in cachedItems are marked active
      * those items with index in cachedItems are marked inactive
@@ -154,6 +157,12 @@ public:
         }
     }
 
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze) override;
 private:
     void PostIdleTask();
 
@@ -162,11 +171,6 @@ private:
     {
         return caches_.GetCachedNode4Index(forIndex);
     }
-
-    // index is not in L1 or L2 cache, need to make it
-    // either by TS rendering new children or by TS updating
-    // a L2 cache item from old to new index
-    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, const std::string& forKey);
 
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
@@ -181,6 +185,9 @@ private:
 
     // size of data source when all data items loaded
     uint32_t totalCount_ = 0;
+
+    // loop property of the parent container
+    bool isLoop_ = false;
 
     // caches:
     mutable RepeatVirtualScrollCaches caches_;

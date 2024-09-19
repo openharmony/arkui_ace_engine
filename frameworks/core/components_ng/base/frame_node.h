@@ -47,6 +47,7 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -171,8 +172,9 @@ public:
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    void ProcessFreezeNode();
+
+    void onFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -440,6 +442,8 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
+    VectorF GetTransformScaleRelativeToWindow() const;
+
     RectF GetTransformRectRelativeToWindow() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
@@ -496,19 +500,10 @@ public:
     bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
-    void PushDestroyCallback(std::function<void()>&& callback)
-    {
-        destroyCallbacks_.emplace_back(callback);
-    }
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
     {
         destroyCallbacksMap_[tag] = callback;
-    }
-
-    std::list<std::function<void()>> GetDestroyCallback() const
-    {
-        return destroyCallbacks_;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -770,7 +765,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
@@ -894,6 +890,11 @@ public:
     bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool GetMonopolizeEvents() const;
@@ -977,6 +978,8 @@ public:
 
     void ProcessAccessibilityVirtualNode();
 
+    void UpdateAccessibilityNodeRect();
+
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
         auto parentUinode = GetVirtualNodeParent().Upgrade();
@@ -999,7 +1002,7 @@ public:
     {
         return isUseTransitionAnimator_;
     }
-    
+
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -1030,6 +1033,8 @@ public:
         return changeInfoFlag_;
     }
 
+    void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
+
     void ClearChangeInfoFlag()
     {
         changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
@@ -1049,6 +1054,11 @@ public:
         layoutAlgorithm_.Reset();
     }
 
+    bool HasLayoutAlgorithm()
+    {
+        return layoutAlgorithm_ != nullptr;
+    }
+
     bool GetDragHitTestBlock() const
     {
         return dragHitTestBlock_;
@@ -1059,14 +1069,25 @@ public:
         dragHitTestBlock_ = dragHitTestBlock;
     }
 
-    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
+
+    void OnForegroundColorUpdate(const Color& value);
 
 protected:
     void DumpInfo() override;
-    std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
@@ -1108,10 +1129,27 @@ private:
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
+    void DumpCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
+    void DumpPadding(const std::unique_ptr<NG::PaddingProperty>& border, std::string label,
+        std::unique_ptr<JsonValue>& json);
+    void DumpOverlayInfo(std::unique_ptr<JsonValue>& json);
+    void DumpDragInfo(std::unique_ptr<JsonValue>& json);
+    void DumpAlignRulesInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSafeAreaInfo(std::unique_ptr<JsonValue>& json);
+    void DumpExtensionHandlerInfo(std::unique_ptr<JsonValue>& json);
+    void DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json);
+    void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
+
     void DumpSafeAreaInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
@@ -1178,6 +1216,11 @@ private:
     void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
 
     bool AllowVisibleAreaCheck() const;
+
+    bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
+    void ResetPredictNodes();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1294,6 +1337,8 @@ private:
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
     FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
     std::optional<RectF> syncedFramePaintRect_;
+
+    int32_t childrenUpdatedFrom_ = -1;
 
     friend class RosenRenderContext;
     friend class RenderContext;

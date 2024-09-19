@@ -15,21 +15,6 @@
 
 #include "core/components_ng/layout/layout_property.h"
 
-#include <optional>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -270,6 +255,7 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
 
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
+    CHECK_NULL_VOID(layoutProperty);
     layoutConstraint_ = layoutProperty->layoutConstraint_;
     if (layoutProperty->gridProperty_) {
         gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);
@@ -1211,6 +1197,19 @@ void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
     }
     if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        const auto& children = parent->GetChildren();
+        CHECK_EQUAL_VOID(children.empty(), true);
+        for (const auto& child : children) {
+            auto childFrameNode = AceType::DynamicCast<NG::FrameNode>(child);
+            CHECK_NULL_CONTINUE(childFrameNode);
+            auto layoutProperty = childFrameNode->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 }
 
@@ -1697,7 +1696,7 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         borderColors.topColor = colorProperty.topColor;
     }
     if (colorProperty.bottomColor.has_value()) {
-        borderColors.topColor = colorProperty.bottomColor;
+        borderColors.bottomColor = colorProperty.bottomColor;
     }
     borderColors.multiValued = true;
     target->UpdateBorderColor(borderColors);

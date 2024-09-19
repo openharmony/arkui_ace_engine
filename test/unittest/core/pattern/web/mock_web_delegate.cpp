@@ -1465,9 +1465,12 @@ void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth,
 void WebDelegate::OnTextSelected()
 {
 }
-NG::WebInfoType WebDelegate::GetWebInfoType()
+void WebDelegate::OnDestroyImageAnalyzerOverlay()
 {
-return NG::WebInfoType::TYPE_UNKNOWN;
+}
+std::string WebDelegate::GetWebInfoType()
+{
+return "";
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId)
 {
@@ -1479,5 +1482,8 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
 {
 return "";
 }
-
+bool WebDelegate::CloseImageOverlaySelection()
+{
+    return false;
+}
 } // namespace OHOS::Ace

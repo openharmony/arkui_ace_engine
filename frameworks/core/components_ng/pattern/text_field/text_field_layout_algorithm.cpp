@@ -25,12 +25,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -305,9 +300,13 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
         CounterNodeMeasure(contentWidth, layoutWrapper);
     }
 
-    auto height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
-                      ? paragraph_->GetHeight()
-                      : std::max(preferredHeight_, paragraph_->GetHeight());
+    float height = 0.0f;
+    if (isFontSizeNonPositive_) {
+        height = paragraph_->GetHeight();
+    } else {
+        height = GreatNotEqual(paragraph_->GetLongestLine(), 0.0) ? paragraph_->GetHeight()
+                                                                  : std::max(preferredHeight_, paragraph_->GetHeight());
+    }
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
@@ -419,27 +418,11 @@ TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layou
     RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, TextAlign::END);
     TextDirection layoutDirection = property->GetLayoutDirection();
-    TextAlign textAlign = TextAlign::END;
-    switch (layoutDirection) {
-        case TextDirection::LTR:
-        case TextDirection::AUTO:
-            if (isRTL) {
-                textAlign = TextAlign::START;
-            } else {
-                textAlign = TextAlign::END;
-            }
-            break;
-        case TextDirection::RTL:
-            if (isRTL) {
-                textAlign = TextAlign::END;
-            } else {
-                textAlign = TextAlign::START;
-            }
-            break;
-        default:
-            break;
+    if ((layoutDirection == TextDirection::RTL && !isRTL) ||
+        (layoutDirection == TextDirection::LTR && isRTL)) {
+        return TextAlign::START;
     }
-    return textAlign;
+    return TextAlign::END;
 }
 
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
@@ -763,7 +746,6 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextFieldPattern>();
             CHECK_NULL_VOID(pattern);
@@ -878,7 +860,8 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
         return direction;
     }
 
-    TextDirection textDirection = TextDirection::LTR;
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {

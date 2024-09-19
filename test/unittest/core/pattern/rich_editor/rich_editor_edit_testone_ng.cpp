@@ -598,6 +598,113 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnPaste001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test GetAIWriteInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(options);
+
+    richEditorPattern->textSelector_.Update(0, 5);
+    AIWriteInfo info;
+    richEditorPattern->GetAIWriteInfo(info);
+    EXPECT_EQ(info.selectStart, 0);
+    EXPECT_EQ(info.selectEnd, 5);
+    EXPECT_EQ(info.selectLength, 5);
+    EXPECT_EQ(info.firstHandle, richEditorPattern->textSelector_.firstHandle.ToString());
+    EXPECT_EQ(info.secondHandle, richEditorPattern->textSelector_.secondHandle.ToString());
+    RefPtr<SpanString> spanString = SpanString::DecodeTlv(info.selectBuffer);
+    ASSERT_NE(spanString, nullptr);
+    auto textContent = spanString->GetString();
+    EXPECT_EQ(textContent.empty(), false);
+}
+
+/**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test HandleOnAIWrite
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(options);
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->HandleOnAIWrite();
+    auto start = richEditorPattern->operationRecords_.size();
+
+    std::vector<uint8_t> buff;
+    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    spanStr->EncodeTlv(buff);
+    richEditorPattern->HandleAIWriteResult(0, 5, buff);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+}
+
+/**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test AddSpansAndReplacePlaceholder&SetSubSpansWithAIWrite
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, HandleAIWrite003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add span
+     */
+    SymbolSpanOptions options1;
+    options1.symbolId = SYMBOL_ID;
+    TextSpanOptions options2;
+    options2.value = INIT_VALUE_1;
+    ImageSpanOptions options3;
+    options3.image = IMAGE_VALUE;
+    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    richEditorController->AddTextSpan(options2);
+    richEditorController->AddSymbolSpan(options1);
+    richEditorController->AddTextSpan(options2);
+    richEditorController->AddImageSpan(options3);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 5);
+
+    /**
+     * @tc.steps: step3. replace and recover placeholder for non-text.
+     */
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>("");
+    ASSERT_NE(spanString, nullptr);
+    richEditorPattern->SetSubSpansWithAIWrite(spanString, 0, 12);
+    auto spanStr = AceType::MakeRefPtr<SpanString>("test![id1]占位符![id2]");
+    richEditorPattern->textSelector_.Update(0, 10);
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpansAndReplacePlaceholder(spanStr);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 4);
+}
+
+/**
  * @tc.name: GetTextBoxes001
  * @tc.desc: test GetTextBoxes
  * @tc.type: FUNC

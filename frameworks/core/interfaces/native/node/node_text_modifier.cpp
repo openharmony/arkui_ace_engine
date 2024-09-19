@@ -129,8 +129,10 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
     GestureEventFunc* click = nullptr;
     if (callback) {
         click = reinterpret_cast<GestureEventFunc*>(callback);
+        TextModelNG::SetOnClick(frameNode, std::move(*click));
+    } else {
+        TextModelNG::SetOnClick(frameNode, nullptr);
     }
-    TextModelNG::SetOnClick(frameNode, std::move(*click));
 }
 
 void ResetOnClick(ArkUINodeHandle node)
@@ -421,14 +423,14 @@ void SetTextDraggable(ArkUINodeHandle node, ArkUI_Uint32 draggable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, static_cast<bool>(draggable));
+    ViewAbstract::SetDraggable(frameNode, static_cast<bool>(draggable));
 }
 
 void ResetTextDraggable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
+    ViewAbstract::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
 }
 
 void SetTextPrivacySensitve(ArkUINodeHandle node, ArkUI_Uint32 sensitive)
@@ -1120,11 +1122,16 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+    } else {
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -1133,7 +1140,8 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1214,7 +1222,10 @@ const CJUITextModifier* GetCJUITextModifier()
         SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
         SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange };
+        ResetTextOnTextSelectionChange, SetFontWeightWithOption, SetTextMinFontScale, ResetTextMinFontScale,
+        SetTextMaxFontScale, ResetTextMaxFontScale, SetTextSelectionMenuOptions, ResetTextSelectionMenuOptions,
+        SetTextHalfLeading, ResetTextHalfLeading, GetTextHalfLeading, SetOnClick, ResetOnClick, SetResponseRegion,
+        ResetResponseRegion };
 
     return &modifier;
 }

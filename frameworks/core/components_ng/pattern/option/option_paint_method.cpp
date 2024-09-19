@@ -15,14 +15,9 @@
 
 #include "core/components_ng/pattern/option/option_paint_method.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/shape/rect_paint_property.h"
-#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

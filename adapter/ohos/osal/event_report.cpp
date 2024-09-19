@@ -15,15 +15,10 @@
 
 #include "base/log/event_report.h"
 
-#include <ctime>
-#include <string>
 #include <unistd.h>
 
 #include "hisysevent.h"
 
-#include "base/log/ace_trace.h"
-#include "base/json/json_util.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
@@ -86,7 +81,11 @@ constexpr char EVENT_KEY_HOVER_TIME[] = "HOVER_TIME";
 constexpr char EVENT_KEY_IS_HOVER_MODE[] = "IS_HOVER_MODE";
 constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
+constexpr char EVENT_KEY_NON_MANUAL_POSTCARD_ACTION[] = "NON_MANUAL_POSTCARD_ACTION";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
+constexpr char EVENT_KEY_FILTER_TYPE[] = "FILTER_TYPE";
+constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
+constexpr char EVENT_KEY_DIMENSION[] = "DIMENSION";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -520,6 +519,36 @@ void EventReport::ReportJankFrameFiltered(JankInfo& info)
         static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
 }
 
+void EventReport::ReportJankFrameUnFiltered(JankInfo& info)
+{
+    std::string eventName = "JANK_FRAME_UNFILTERED";
+    const auto& bundleName = info.baseInfo.bundleName;
+    const auto& processName = info.baseInfo.processName;
+    const auto& abilityName = info.baseInfo.abilityName;
+    const auto& pageUrl = info.baseInfo.pageUrl;
+    const auto& versionCode = info.baseInfo.versionCode;
+    const auto& versionName = info.baseInfo.versionName;
+    const auto& pageName = info.baseInfo.pageName;
+    const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& windowName = info.windowName;
+    const auto& filterType = info.filterType;
+    const auto& sceneId = info.sceneId;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_PAGE_NAME, pageName,
+        EVENT_KEY_FILTER_TYPE, filterType,
+        EVENT_KEY_SCENE_ID, sceneId,
+        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
+    ACE_SCOPED_TRACE("JANK_FRAME_UNFILTERED: skipppedFrameTime=%lld(ms), windowName=%s, filterType=%d",
+        static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str(), filterType);
+}
+
 void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName)
 {
@@ -600,5 +629,17 @@ void EventReport::ReportHoverStatusChange(
         EVENT_KEY_IS_HOVER_MODE, isHoverMode,
         EVENT_KEY_WINDOW_MODE, windowMode,
         EVENT_KEY_APP_ROTATION, appRotation);
+}
+
+void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
+    const std::string& abilityName, const std::string& moduleName, int32_t dimension)
+{
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_NON_MANUAL_POSTCARD_ACTION,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_FORM_NAME, formName,
+        EVENT_KEY_BUNDLE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_MODULE_NAME, moduleName,
+        EVENT_KEY_DIMENSION, dimension);
 }
 } // namespace OHOS::Ace

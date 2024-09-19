@@ -190,6 +190,8 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node)
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto textPattern = textNode->GetPattern<TextPattern>();
             if (textPattern) {
+                ACE_TEXT_SCOPED_TRACE("RequestTextFlushDirty [Parent:%d,Tag:%s][Span:%d]", textNode->GetId(),
+                    textNode->GetTag().c_str(), node->GetId());
                 textPattern->OnModifyDone();
                 return;
             }
@@ -226,6 +228,10 @@ void SpanNode::DumpInfo()
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
     dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
+    if (spanItem_ && spanItem_->fontStyle) {
+        dumpLog.AddDesc(std::string("SpanTextColor: ")
+                            .append(spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString()));
+    }
     dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
     dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
@@ -249,8 +255,10 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, -1);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
     auto fontManager = pipelineContext->GetFontManager();
@@ -263,6 +271,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
+    CHECK_NULL_RETURN(frameNode, -1);
     auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProp && textLayoutProp->HasHalfLeading()) {
         textStyle.SetHalfLeading(textLayoutProp->GetHalfLeadingValue(false));
@@ -274,7 +283,15 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
-    if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
+    if (!fontStyle->HasTextColor() && urlOnRelease) {
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        if (eventHub && !eventHub->IsEnabled()) {
+            textStyle.SetTextColor(theme->GetUrlDisabledColor());
+        } else {
+            textStyle.SetTextColor(theme->GetUrlDefaultColor());
+        }
+        UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
+    } else if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         TextStyle aiSpanStyle = textStyle;
         pattern->ModifyAISpanStyle(aiSpanStyle);
         UpdateTextStyleForAISpan(spanContent, builder, textStyle, aiSpanStyle);
@@ -649,11 +666,11 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
         sameSpan->backgroundStyle = backgroundStyle;
     }
 
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
-
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -936,6 +953,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
+    textStyle.SetTextColor(placeholderStyle.paragraphTextColor);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
@@ -965,8 +983,12 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
     sameSpan->SetImageSpanOptions(options);
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
     return sameSpan;
 }
 
@@ -1063,8 +1085,12 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    if (backgroundStyle.has_value()) {
+        sameSpan->backgroundStyle = backgroundStyle;
+    }
     return sameSpan;
 }
 
@@ -1081,10 +1107,14 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle(), filter);
 }
 
-std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
+std::set<PropertyInfo> SpanNode::GetInheritPropertyInfo()
 {
-    std::set<PropertyInfo> inheritPropertyInfo;
-    static const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+    return propertyInfoContainer_;
+}
+
+void SpanNode::SetPropertyInfoContainer()
+{
+    std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
         PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
@@ -1092,8 +1122,44 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING,
         PropertyInfo::SYMBOL_EFFECT_OPTIONS, PropertyInfo::HALFLEADING, PropertyInfo::MIN_FONT_SCALE,
         PropertyInfo::MAX_FONT_SCALE, PropertyInfo::VARIABLE_FONT_WEIGHT, PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT };
-    set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
-        propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
-    return inheritPropertyInfo;
+    propertyInfoContainer_ = propertyInfoContainer;
+}
+
+void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("Content", std::string(spanItem_->content).c_str());
+    auto textStyle = spanItem_->GetTextStyle();
+    if (!textStyle) {
+        return;
+    }
+    json->Put("FontSize", textStyle->GetFontSize().ToString().c_str());
+    json->Put("LineHeight", textStyle->GetLineHeight().ToString().c_str());
+    json->Put("LineSpacing", textStyle->GetLineSpacing().ToString().c_str());
+    json->Put("BaselineOffset", textStyle->GetBaselineOffset().ToString().c_str());
+    json->Put("WordSpacing", textStyle->GetWordSpacing().ToString().c_str());
+    json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());
+    json->Put("LetterSpacing", textStyle->GetLetterSpacing().ToString().c_str());
+    json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
+    if (spanItem_ && spanItem_->fontStyle) {
+        json->Put(
+            "SpanTextColor", spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString().c_str());
+    }
+    json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
+    json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
+    json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());
+    json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
+    json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());
+    json->Put("TextAlign", StringUtils::ToString(textStyle->GetTextAlign()).c_str());
+    json->Put("WordBreak", StringUtils::ToString(textStyle->GetWordBreak()).c_str());
+    json->Put("TextCase", StringUtils::ToString(textStyle->GetTextCase()).c_str());
+    json->Put("EllipsisMode", StringUtils::ToString(textStyle->GetEllipsisMode()).c_str());
+    json->Put("HalfLeading", std::to_string(textStyle->GetHalfLeading()).c_str());
+    if (GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        json->Put("SymbolColor", spanItem_->SymbolColorToString().c_str());
+        json->Put("RenderStrategy", std::to_string(textStyle->GetRenderStrategy()).c_str());
+        json->Put("EffectStrategy", std::to_string(textStyle->GetEffectStrategy()).c_str());
+        json->Put("SymbolEffect",
+            spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
+    }
 }
 } // namespace OHOS::Ace::NG

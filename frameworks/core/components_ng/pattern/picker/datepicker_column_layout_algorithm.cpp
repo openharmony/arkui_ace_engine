@@ -32,6 +32,8 @@ const int32_t BUFFER_NODE_NUMBER = 2;
 const int32_t HIDENODE = 3;
 constexpr double PERCENT_100 = 100.0;
 constexpr double PERCENT_120 = 1.2f;
+constexpr double SPACE_CALC_TIME = 2.0;
+constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
     NG::GradientColor gredient = GradientColor(color);
@@ -47,6 +49,8 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pickerTheme);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
     uint32_t showCount_ = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
@@ -85,14 +89,14 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto pickerMaxHeight = layoutConstraint->maxSize.Height();
     if (datePickerPattern->GetIsShowInDialog()) {
-        float dialogTitleHeight =
-        static_cast<float>((pickerTheme->GetTitleStyle().GetFontSize() + dialogTheme->GetDividerHeight() +
-                             pickerTheme->GetContentMarginVertical() * 2).ConvertToPx());
-        float dialogButtonHeight =
-            static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
-                                dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
-                                   .ConvertToPx());
+        float dialogTitleHeight = static_cast<float>(
+            (buttonTheme->GetHeight() + dialogTheme->GetButtonSpacingVertical() * SPACE_CALC_TIME).ConvertToPx());
+        float dialogButtonHeight = static_cast<float>(
+            (buttonTheme->GetHeight() + dialogTheme->GetButtonPaddingBottom() * SPACE_CALC_TIME).ConvertToPx());
         pickerMaxHeight -= (dialogTitleHeight + dialogButtonHeight);
+        if (datePickerPattern->GetShowLunarSwitch()) {
+            pickerMaxHeight -= static_cast<float>(LUNARSWITCH_HEIGHT.ConvertToPx());
+        }
         auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_;
         auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_;
         datePickerPattern->SetPaintDividerSpacing(dividerSpacingFontScale_);
@@ -243,24 +247,25 @@ float DatePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
     auto themePadding = pickerTheme->GetPickerDialogFontPadding();
     auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
-    double adjustedScale = std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(),
-        pickerTheme->GetMaxTwoFontScale());
-    if (!NearZero(adjustedScale)) {
-        userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 +
-            (themePadding.ConvertToPx() * DIVIDER_SIZE);
-    } else {
+    double adjustedScale =
+        std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
+    if (NearZero(adjustedScale)) {
         return fontScale;
     }
-
-    auto themeHeightLimit = isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() :
-        pickerTheme->GetGradientHeightLimit();
-    auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() :
-        pickerTheme->GetGradientHeight();
+    userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
+    auto themeHeightLimit =
+        isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() : pickerTheme->GetGradientHeightLimit();
+    auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() : pickerTheme->GetGradientHeight();
     if (GreatOrEqualCustomPrecision(userSetHeightValue, themeHeightLimit.ConvertToPx())) {
         userSetHeightValue = themeHeightLimit.ConvertToPx();
     } else {
         userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
     }
+
+    if (NearZero(themeHeight.ConvertToPx())) {
+        return fontScale;
+    }
+
     fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
 }

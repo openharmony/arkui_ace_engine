@@ -15,7 +15,6 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_proxy.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
@@ -165,6 +164,18 @@ void UiReportProxy::SendBaseInfo(const std::string& data)
     }
     if (Remote()->SendRequest(SEND_BASE_INFO, messageData, reply, option) != ERR_NONE) {
         LOGW("SendBaseInfo send request failed");
+    }
+}
+
+void UiReportProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    LOGI("uiproxy death notice");
+    if (remote == nullptr) {
+        LOGW("weak remote is null");
+        return;
+    }
+    if (handler_) {
+        handler_();
     }
 }
 } // namespace OHOS::Ace

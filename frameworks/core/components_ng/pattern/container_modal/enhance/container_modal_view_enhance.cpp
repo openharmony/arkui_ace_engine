@@ -20,13 +20,9 @@
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -39,7 +35,6 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -101,8 +96,6 @@ const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
 const int32_t MAX_MENU_ITEM_MAXIMIZE = 3;
 
 const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
-
-const float SMOOTH_EDGE_SIZE = 0.35;
 } // namespace
 bool ContainerModalViewEnhance::sIsForbidMenuEvent_ = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
@@ -163,6 +156,11 @@ void ContainerModalViewEnhance::SetTapGestureEvent(
         CHECK_NULL_VOID(windowManager);
         auto containerNode = weakContainerNode.Upgrade();
         CHECK_NULL_VOID(containerNode);
+        bool isMoving = windowManager->GetWindowStartMoveFlag();
+        if (isMoving) {
+            LOGI("window is moving, double-click is not supported.");
+            return;
+        }
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
@@ -196,6 +194,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             auto windowManager = wk.Upgrade();
             CHECK_NULL_VOID(windowManager);
             ResetHoverTimer();
+            bool isMoving = windowManager->GetWindowStartMoveFlag();
+            if (isMoving) {
+                LOGI("window is moving, maximization is not supported.");
+                return;
+            }
             auto mode = windowManager->GetWindowMode();
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
@@ -220,6 +223,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
                 LOGE("create minBtn callback func failed,windowManager is null!");
                 return;
             }
+            bool isMoving = windowManager->GetWindowStartMoveFlag();
+            if (isMoving) {
+                LOGI("window is moving, minimization is not supported.");
+                return;
+            }
             LOGI("minimize button clicked");
             windowManager->WindowMinimize();
         });
@@ -233,6 +241,11 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             auto windowManager = weak.Upgrade();
             if (!windowManager) {
                 LOGE("create closeBtn callback func failed,windowManager is null!");
+                return;
+            }
+            bool isMoving = windowManager->GetWindowStartMoveFlag();
+            if (isMoving) {
+                LOGI("window is moving, closing is not supported");
                 return;
             }
             LOGI("close button clicked");
@@ -491,12 +504,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     iconLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     iconLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
-    FrameNode* frameNode = RawPtr(icon);
-    ImageModelNG::SetSmoothEdge(frameNode, SMOOTH_EDGE_SIZE);
-    auto render = icon->GetRenderContext();
-    if (render) {
-        render->UpdateRenderGroup(true);
-    }
     icon->MarkModifyDone();
     return icon;
 }

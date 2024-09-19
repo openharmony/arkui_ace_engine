@@ -15,9 +15,6 @@
 
 #include "core/components_ng/gestures/pinch_gesture.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

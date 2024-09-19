@@ -49,6 +49,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<PaintProperty>();
@@ -87,6 +92,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     bool GetNeedCallBack()
     {
         return needCallBack_;

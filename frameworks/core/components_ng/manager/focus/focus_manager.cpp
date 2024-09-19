@@ -16,11 +16,6 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -415,7 +410,7 @@ void FocusManager::WindowFocus(bool isFocus)
         return;
     }
     WindowFocusMoveStart();
-    FocusSwitchingStart(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
+    FocusManager::FocusGuard guard(GetCurrentFocus(), SwitchingStartReason::WINDOW_FOCUS);
     auto curFocusView = GetLastFocusView().Upgrade();
     auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
     if (!curFocusViewHub) {
@@ -423,10 +418,14 @@ void FocusManager::WindowFocus(bool isFocus)
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-        curFocusViewHub->RequestFocusImmediately();
+        curFocusViewHub->RequestFocusImmediatelyInner();
     } else {
         auto container = Container::Current();
         if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS,
+                "Request default focus on current focus view: %{public}s/%{public}d",
+                curFocusView->GetFrameName().c_str(),
+                curFocusView->GetFrameId());
             curFocusView->SetIsViewRootScopeFocused(false);
             curFocusView->RequestDefaultFocus();
         }
@@ -439,7 +438,14 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
-        rootFocusHub->RequestFocusImmediately();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request focus on rootFocusHub: %{public}s/%{public}d",
+            rootFocusHub->GetFrameName().c_str(),
+            rootFocusHub->GetFrameId());
+        auto focusDepend = rootFocusHub->GetFocusDependence();
+        rootFocusHub->SetFocusDependence(FocusDependence::SELF);
+        rootFocusHub->RequestFocusImmediatelyInner();
+        rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
 }

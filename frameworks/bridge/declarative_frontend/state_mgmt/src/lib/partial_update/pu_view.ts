@@ -224,9 +224,8 @@ abstract class ViewPU extends PUV2ViewBase
     // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
     this.purgeDeletedElmtIds();
 
-    // un-registers its own id once its children are unregistered above
-    //FIXME: Uncomment once photos app avoids rerendering of removed elementIds
-    //UINodeRegisterProxy unregisterRemovedElmtsFromViewPUs([this id__()]);
+    // un-registers its own id once all its children are unregistered
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
 
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
@@ -247,6 +246,17 @@ abstract class ViewPU extends PUV2ViewBase
     }
     PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
+  }
+
+  public purgeDeleteElmtId(rmElmtId: number): boolean {
+    stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (PU) is purging the rmElmtId:${rmElmtId}`);
+    const result = this.updateFuncByElmtId.delete(rmElmtId);
+    if (result) {
+      this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+      // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+    }
+    return result;
   }
 
   protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {

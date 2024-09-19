@@ -34,15 +34,12 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_provider.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_paint_method.h"
 #include "core/components_ng/property/property.h"
-#ifdef PLATFORM_VIEW_SUPPORTED
-#include "core/common/platformview/platform_view_interface.h"
-#include "core/common/platformview/platform_view_proxy.h"
-#endif
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
@@ -69,12 +66,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-#ifdef PLATFORM_VIEW_SUPPORTED
-        return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE ||
-               type_ == XComponentType::NODE || type_ == XComponentType::PLATFORM_VIEW;
-#else
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
-#endif
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -138,7 +130,9 @@ public:
     void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
     void NativeXComponentInit()
     {
-        OnSurfaceCreated();
+        if (!isTypedNode_) {
+            OnSurfaceCreated();
+        }
     }
 
     std::string GetId() const
@@ -293,6 +287,17 @@ public:
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
+    // accessibility
+    void InitializeAccessibility();
+    void UninitializeAccessibility();
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
+    bool OnAccessibilityChildTreeDeregister();
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    void SetAccessibilityState(bool state) {}
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
+    void InitializeAccessibilityCallback();
+    void HandleRegisterAccessibilityEvent(bool isRegister);
+
     void SetIdealSurfaceWidth(float surfaceWidth);
     void SetIdealSurfaceHeight(float surfaceHeight);
     void SetIdealSurfaceOffsetX(float offsetX);
@@ -308,6 +313,17 @@ public:
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
+    void SetRenderFit(RenderFit renderFit);
+    void HandleSurfaceCreated();
+    void HandleSurfaceDestroyed();
+    void ChangeSurfaceCallbackMode(SurfaceCallbackMode mode)
+    {
+        if (surfaceCallbackModeChangeEvent_) {
+            surfaceCallbackModeChangeEvent_(mode);
+        }
+    }
+    void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
+    void EnableSecure(bool isSecure);
 
 private:
     void OnAttachToFrameNode() override;
@@ -319,7 +335,10 @@ private:
     void OnWindowShow() override;
     void OnModifyDone() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
 
@@ -330,7 +349,7 @@ private:
     void OnNativeUnload(FrameNode* frameNode);
 
     void OnSurfaceCreated();
-    void OnSurfaceChanged(const RectF& surfaceRect);
+    void OnSurfaceChanged(const RectF& surfaceRect, bool needResizeNativeWindow);
 
     void NativeSurfaceShow();
     void NativeSurfaceHide();
@@ -372,21 +391,14 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void UpdateTransformHint();
     void SetRotation(uint32_t rotation);
+    void RegisterSurfaceCallbackModeEvent();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
     void RegisterRenderContextCallBack();
     void RequestFocus();
-#ifdef PLATFORM_VIEW_SUPPORTED
-    void PlatformViewInitialize();
-    void* GetNativeWindow(int32_t instanceId, int64_t textureId);
-    void OnTextureRefresh(void* surface);
-    void PrepareSurface();
-    void RegisterPlatformViewEvent();
-    void PlatformViewDispatchTouchEvent(const TouchLocationInfo& changedPoint);
-    void UpdatePlatformViewLayoutIfNeeded();
-#endif
 #endif
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
@@ -400,14 +412,6 @@ private:
     RefPtr<RenderContext> renderContextForSurface_;
     RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
-#if defined(RENDER_EXTRACT_SUPPORTED) && defined(PLATFORM_VIEW_SUPPORTED)
-    WeakPtr<RenderSurface> renderSurfaceWeakPtr_;
-    RefPtr<RenderContext> renderContextForPlatformView_;
-    WeakPtr<RenderContext> renderContextForPlatformViewWeakPtr_;
-    RefPtr<PlatformViewInterface> platformView_;
-    SizeF lastDrawSize_;
-    OffsetF lastOffset_;
-#endif
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
@@ -436,6 +440,11 @@ private:
     void* nativeWindow_ = nullptr;
 
     bool isSurfaceLock_ = false;
+    uint32_t windowId_ = 0;
+    int32_t treeId_ = 0;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    RefPtr<XComponentAccessibilityProvider> accessibilityProvider_;
+    RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
@@ -448,6 +457,8 @@ private:
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
+    SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
+    std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
 };
 } // namespace OHOS::Ace::NG
 

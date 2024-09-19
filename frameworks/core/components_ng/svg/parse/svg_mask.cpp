@@ -15,8 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
+#include "frameworks/core/common/container.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
@@ -31,7 +30,15 @@ RefPtr<SvgNode> SvgMask::Create()
 
 void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-    auto nodeBounds = isDefaultMaskUnits_ ? AsBounds(viewPort) : GetRootViewBox();
+    RectF nodeBounds;
+    if (isDefaultMaskUnits_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (boundingBoxRectOpt_.has_value()) {
+            nodeBounds = boundingBoxRectOpt_.value();
+        }
+    } else {
+        auto boundsRect = isDefaultMaskUnits_ ? AsBounds(viewPort) : GetRootViewBox();
+        nodeBounds = { boundsRect.Left(), boundsRect.Top(), boundsRect.Width(), boundsRect.Height() };
+    }
 #ifndef USE_ROSEN_DRAWING
     maskBounds_ = SkRect::MakeXYWH(SkDoubleToScalar(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width())),
         SkDoubleToScalar(nodeBounds.Top() + ParseUnitsAttr(y_, nodeBounds.Height())),

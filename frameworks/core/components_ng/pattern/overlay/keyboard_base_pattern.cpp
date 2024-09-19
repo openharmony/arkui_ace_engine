@@ -16,9 +16,7 @@
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void KeyboardPattern::BeforeCreateLayoutWrapper()

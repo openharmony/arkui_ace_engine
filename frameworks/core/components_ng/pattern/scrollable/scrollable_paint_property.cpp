@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

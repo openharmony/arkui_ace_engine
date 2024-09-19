@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,9 @@
 
 #include "core/components_ng/pattern/video/video_model_ng.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/video/video_node.h"
-#include "core/components_ng/pattern/video/video_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -68,9 +64,13 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     AddDragFrameNodeToManager();
 }
 
-void VideoModelNG::SetSrc(const std::string& src)
+void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, src);
+    VideoSourceInfo videoSrcInfo;
+    videoSrcInfo.src = src;
+    videoSrcInfo.bundleName = bundleName;
+    videoSrcInfo.moduleName = moduleName;
+    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
 }
 
 void VideoModelNG::SetProgressRate(double progressRate)

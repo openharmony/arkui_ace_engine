@@ -15,9 +15,6 @@
 
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 
-#include <optional>
-#include <utility>
-
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -59,7 +56,7 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
 const RefPtr<SelectContentOverlayManager> SelectContentOverlayManager::GetOverlayManager(
     const RefPtr<SelectOverlayHolder>& holder)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto overlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(overlayManager, nullptr);
@@ -187,11 +184,12 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
     if (!callback->IsRegisterHandleCallback()) {
         return;
     }
-    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isFirst) {
-        auto overlayCallback = weakCallback.Upgrade();
-        CHECK_NULL_VOID(overlayCallback);
-        overlayCallback->OnHandleMoveStart(isFirst);
-    };
+    info.onHandleMoveStart =
+        [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isFirst) {
+            auto overlayCallback = weakCallback.Upgrade();
+            CHECK_NULL_VOID(overlayCallback);
+            overlayCallback->OnHandleMoveStart(event, isFirst);
+        };
     info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
@@ -241,6 +239,11 @@ void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
         auto callback = weakCallback.Upgrade();
         CHECK_NULL_VOID(callback);
         callback->OnOverlayClick(event, isClickCaret);
+    };
+    info.onMouseEvent = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const MouseInfo& event) {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
+        callback->OnHandleMouseEvent(event);
     };
 }
 
@@ -446,7 +449,7 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
     menuNode_ = menuNode;
     auto handleNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
     handleNode_ = handleNode;
-    auto taskExecutor = Container::CurrentTaskExecutor();
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [animation, weak = WeakClaim(this), menuNode, handleNode, mode] {
@@ -479,7 +482,7 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
     for (auto it = slotIt; it != children.end(); ++it) {
         // get keyboard index to put selet_overlay before keyboard node
         if ((*it)->GetTag() == V2::KEYBOARD_ETS_TAG) {
-            slot = index;
+            slot = std::min(slot, index);
             break;
         }
         // keep handle node before menu node
@@ -489,7 +492,7 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
         }
         // keep handle and menu node before magnifier
         if ((*it)->GetTag() == V2::TEXTINPUT_ETS_TAG) {
-            slot = index;
+            slot = std::min(slot, index);
             break;
         }
         index++;
@@ -1030,5 +1033,14 @@ void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->SetIsHandleLineShow(isShow);
+}
+
+void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
 }
 } // namespace OHOS::Ace::NG

@@ -50,6 +50,10 @@ public:
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<TextTimerController> InitTextController(FrameNode* frameNode);
+    static void SetIsCountDown(FrameNode* frameNode, bool isCountDown);
+    static void SetInputCount(FrameNode* frameNode, double count);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
@@ -58,6 +62,8 @@ public:
     static void SetFormat(FrameNode* frameNode, const std::string& format);
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& jsMake);
+    static void SetJSTextTimerController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
+    static RefPtr<Referenced> GetJSTextTimerController(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

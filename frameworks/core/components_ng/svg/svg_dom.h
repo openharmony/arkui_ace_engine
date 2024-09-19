@@ -56,8 +56,8 @@ public:
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
-
     void PushAnimatorOnFinishCallback(const RefPtr<SvgNode>& root, std::function<void()> onFinishCallback);
+    std::string GetDumpInfo() override;
 
 protected:
     void FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout);
@@ -72,7 +72,7 @@ private:
     void ParseClassAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void ParseStyleAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);
     void SyncRSNode(const RefPtr<RenderNode>& renderNode);
-
+    void InitStyles();
     RefPtr<SvgContext> svgContext_;
     RefPtr<SvgNode> root_;
     Rect viewBox_;
@@ -81,7 +81,8 @@ private:
     std::string path_;
     float smoothEdge_ = 0.0f;
     std::optional<ImageColorFilter> colorFilter_;
-    std::function<void()> onFinishCallback_;
+    std::atomic<bool> isStatic_{ true };
+    bool isStyleInited_ = false;
 };
 } // namespace OHOS::Ace::NG
 

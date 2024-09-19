@@ -103,6 +103,10 @@ public:
 
     bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 
+    bool HandleUnfocusedModalUecBackPressed();
+
+    bool IsLastModalUec(const RefPtr<FrameNode>& frameNode);
+
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
 
@@ -129,6 +133,7 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;
     WeakPtr<SessionWrapper> sessionWrapper_;
+    std::mutex aliveUIExtensionMutex_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::map<int32_t, OHOS::Ace::WeakPtr<SecurityUIExtensionPattern>> aliveSecurityUIExtensions_;
     std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();

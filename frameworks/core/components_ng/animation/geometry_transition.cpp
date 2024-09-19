@@ -355,7 +355,8 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
             renderContext->SetSandBox(parentPos);
         }
     };
-    auto finishCallback = [nodeWeak = WeakClaim(RawPtr(self))]() {
+    auto follow = followWithoutTransition_;
+    auto finishCallback = [follow, nodeWeak = WeakClaim(RawPtr(self))]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();

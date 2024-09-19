@@ -60,6 +60,14 @@ bool AnimationUtils::CloseImplicitAnimation()
     return false;
 }
 
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+#ifdef ENHANCED_ANIMATION
+    AnimManager::GetInstance().CloseAnimation();
+#endif
+    return true;
+}
+
 bool AnimationUtils::IsImplicitAnimationOpen()
 {
     return false;
@@ -69,7 +77,7 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
 #ifdef ENHANCED_ANIMATION
-    AnimManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, repeatCallback });
+    AnimManager::GetInstance().SetParams(option, { finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
 #endif
     if (callback) {
@@ -116,7 +124,7 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
 #ifdef ENHANCED_ANIMATION
-    AnimManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, repeatCallback });
+    AnimManager::GetInstance().SetParams(option, { finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
     if (callback) {
         callback();
@@ -188,7 +196,9 @@ void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
 std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInteractiveAnimation(
     const InteractiveAnimationCallback& addCallback, const FinishCallback& callback)
 {
-    addCallback();
+    if (addCallback) {
+        addCallback();
+    }
     std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation =
         std::make_shared<AnimationUtils::InteractiveAnimation>();
     CHECK_NULL_RETURN(interactiveAnimation, nullptr);
@@ -220,5 +230,15 @@ void AnimationUtils::ReverseInteractiveAnimation(
     CHECK_NULL_VOID(interactiveAnimation);
     CHECK_NULL_VOID(interactiveAnimation->finishCallback_);
     interactiveAnimation->finishCallback_();
+}
+
+void AnimationUtils::AddInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+    const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    if (callback) {
+        callback();
+    }
 }
 } // namespace OHOS::Ace

@@ -29,7 +29,6 @@ class DOMSvgBase : public DOMNode {
 public:
     DOMSvgBase(NodeId nodeId, const std::string& nodeName);
     ~DOMSvgBase() override = default;
-
 protected:
     void InheritAttrs(const RefPtr<DOMNode>& parentNode);
 };

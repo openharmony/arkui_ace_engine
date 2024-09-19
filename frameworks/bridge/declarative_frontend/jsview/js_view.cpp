@@ -41,18 +41,13 @@
 #include "core/components_ng/base/view_partial_update_model.h"
 #include "core/components_ng/base/view_partial_update_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewFullUpdateModel> ViewFullUpdateModel::instance_ = nullptr;
 std::mutex ViewFullUpdateModel::mutex_;
-std::unique_ptr<ViewPartialUpdateModel> ViewPartialUpdateModel::instance_ = nullptr;
-std::mutex ViewPartialUpdateModel::mutex_;
 
 ViewFullUpdateModel* ViewFullUpdateModel::GetInstance()
 {
@@ -75,23 +70,19 @@ ViewFullUpdateModel* ViewFullUpdateModel::GetInstance()
 
 ViewPartialUpdateModel* ViewPartialUpdateModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ViewPartialUpdateModelNG());
+    static NG::ViewPartialUpdateModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ViewPartialUpdateModelNG());
-            } else {
-                instance_.reset(new Framework::ViewPartialUpdateModelImpl());
-            }
+  if (Container::IsCurrentUseNewPipeline()) {
+      static NG::ViewPartialUpdateModelNG instance;
+      return &instance;
+  } else {
+      static Framework::ViewPartialUpdateModelImpl instance;
+      return &instance;
+  }
 #endif
-        }
-    }
-    return instance_.get();
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -978,7 +969,9 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
     ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
     CHECK_NULL_VOID(navigationMgr);
@@ -1025,7 +1018,9 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     return;
 #else
     ContainerScope scope(GetInstanceId());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (!LayoutInspector::GetStateProfilerStatus()) {
         return;

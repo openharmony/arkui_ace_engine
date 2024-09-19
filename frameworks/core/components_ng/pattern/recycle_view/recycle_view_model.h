@@ -29,6 +29,7 @@ public:
     virtual void Create() = 0;
 private:
     static std::unique_ptr<RecycleViewModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

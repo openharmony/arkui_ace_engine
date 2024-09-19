@@ -1568,4 +1568,54 @@ HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 59);
     EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
 }
+
+/**
+ * @tc.name: ItemLayoutConstraint001
+ * @tc.desc: test WaterFlow itemLayoutConstraint minWidth with multiple sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, ItemLayoutConstraint001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(200.f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetItemMinWidth(AceType::RawPtr(frameNode_), Dimension(300.f));
+    model.SetItemMaxWidth(AceType::RawPtr(frameNode_), Dimension(400.f));
+    model.SetItemMinHeight(AceType::RawPtr(frameNode_), Dimension(50.f));
+    model.SetItemMaxHeight(AceType::RawPtr(frameNode_), Dimension(400.f));
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    CreateDone();
+    EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
+    EXPECT_TRUE(secObj->GetSectionInfo()[0].onGetItemMainSizeByIndex);
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    EXPECT_EQ(info->endIndex_, 6);
+    for (int i = 0; i < info->endIndex_; ++i) {
+        EXPECT_EQ(GetChildHeight(frameNode_, i), 100.0f);
+    }
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 200.f);
+}
+
+/**
+ * @tc.name: ItemLayoutConstraint002
+ * @tc.desc: test WaterFlow itemLayoutConstraint maxWidth with multiple sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, ItemLayoutConstraint002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(150.f));
+    model.SetItemMinWidth(AceType::RawPtr(frameNode_), Dimension(50.f));
+    model.SetItemMaxWidth(AceType::RawPtr(frameNode_), Dimension(100.f));
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    CreateDone();
+   
+    EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
+    EXPECT_TRUE(secObj->GetSectionInfo()[0].onGetItemMainSizeByIndex);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 150.f);
+}
 } // namespace OHOS::Ace::NG

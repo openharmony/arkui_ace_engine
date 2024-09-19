@@ -86,11 +86,6 @@ public:
         color_ = color;
     }
 
-    void ResetColor()
-    {
-        color_ = std::nullopt;
-    }
-
     bool operator==(const IconOptions& info) const
     {
         return color_ == info.color_ && size_ == info.size_ && src_ == info.src_ && bundleName_ == info.bundleName_ &&
@@ -156,6 +151,11 @@ public:
         return buttonId_.has_value();
     }
 
+    bool HasDividerNode() const
+    {
+        return dividerId_.has_value();
+    }
+
     bool HasCancelIconNodeCreated() const
     {
         return cancelIconNodeCreated_;
@@ -188,6 +188,14 @@ public:
             cancelButtonId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return cancelButtonId_.value();
+    }
+
+    int32_t GetDividerId()
+    {
+        if (!dividerId_.has_value()) {
+            dividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return dividerId_.value();
     }
 
     Dimension& GetSearchImageIconSize()
@@ -304,6 +312,7 @@ private:
     std::optional<int32_t> textFieldId_;
     std::optional<int32_t> buttonId_;
     std::optional<int32_t> cancelButtonId_;
+    std::optional<int32_t> dividerId_;
 
     std::set<int32_t> searchChildren_;
 

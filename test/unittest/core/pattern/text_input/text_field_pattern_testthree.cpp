@@ -80,121 +80,6 @@ HWTEST_F(TextFieldPatternTestThree, UpdateFocusBackward001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleCursorOnDragMoved001
- * @tc.desc: test testInput text HandleCursorOnDragMoved001
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    frameNode_->MarkModifyDone();
-    pattern_->OnModifyDone();
-    auto focusHub = pattern_->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = false;
-    pattern_->HandleCursorOnDragMoved(nullptr);
-    EXPECT_TRUE(pattern_->IsNormalInlineState());
-}
-
-/**
- * @tc.name: HandleCursorOnDragMoved002
- * @tc.desc: test testInput text HandleCursorOnDragMoved002
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved002, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    frameNode_->MarkModifyDone();
-    pattern_->OnModifyDone();
-    auto focusHub = pattern_->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-    SystemProperties::debugEnabled_ = true;
-    pattern_->HandleCursorOnDragMoved(nullptr);
-    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: HandleCursorOnDragMoved003
- * @tc.desc: test testInput text HandleCursorOnDragMoved003
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved003, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    frameNode_->MarkModifyDone();
-    pattern_->OnModifyDone();
-    auto focusHub = pattern_->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = false;
-    auto host = pattern_->GetHost();
-    host->SetDisallowDropForcedly(true);
-    pattern_->HandleCursorOnDragMoved(nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto dragManager = pipeline->GetDragDropManager();
-    ASSERT_NE(dragManager, nullptr);
-    EXPECT_FALSE(dragManager->IsDropAllowed(host));
-}
-
-/**
- * @tc.name: HandleCursorOnDragMoved004
- * @tc.desc: test testInput text HandleCursorOnDragMoved004
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragMoved004, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    frameNode_->MarkModifyDone();
-    pattern_->OnModifyDone();
-    auto focusHub = pattern_->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = false;
-    focusHub->SetParentFocusable(false);
-    auto host = pattern_->GetHost();
-    host->SetDisallowDropForcedly(false);
-    pattern_->HandleCursorOnDragMoved(nullptr);
-    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: HandleCursorOnDragEnded001
- * @tc.desc: test testInput text HandleCursorOnDragEnded001
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestThree, HandleCursorOnDragEnded001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
-    paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    frameNode_->MarkModifyDone();
-    pattern_->OnModifyDone();
-    auto focusHub = pattern_->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    pattern_->isCursorAlwaysDisplayed_ = true;
-    pattern_->HandleCursorOnDragEnded(nullptr);
-    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
-}
-
-/**
  * @tc.name: RequestKeyboardAfterLongPress001
  * @tc.desc: test testInput text RequestKeyboardAfterLongPress001
  * @tc.type: FUNC
@@ -606,5 +491,64 @@ HWTEST_F(TextFieldPatternTestThree, OnTextGestureSelectionUpdate001, TestSize.Le
     pattern_->magnifierController_ = nullptr;
     pattern_->OnTextGestureSelectionUpdate(start, end, info);
     EXPECT_FALSE(pattern_->magnifierController_);
+}
+
+/**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test GetAIWriteInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. test GetAIWriteInfo
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    auto selectController = pattern_->GetTextSelectController();
+    AIWriteInfo info;
+    pattern_->GetAIWriteInfo(info);
+    EXPECT_EQ(info.selectStart, 5);
+    EXPECT_EQ(info.selectEnd, 10);
+    EXPECT_EQ(info.selectLength, 5);
+    EXPECT_EQ(info.firstHandle, selectController->GetFirstHandleRect().ToString());
+    EXPECT_EQ(info.secondHandle, selectController->GetSecondHandleRect().ToString());
+    RefPtr<SpanString> spanString = SpanString::DecodeTlv(info.selectBuffer);
+    ASSERT_NE(spanString, nullptr);
+    auto textContent = spanString->GetString();
+    EXPECT_EQ(textContent.empty(), false);
+}
+
+/**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test HandleOnAIWrite
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. test HandleOnAIWrite
+     */
+    pattern_->HandleSetSelection(0, 5, false);
+    pattern_->HandleOnAIWrite();
+
+    std::vector<uint8_t> buff;
+    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    spanStr->EncodeTlv(buff);
+    pattern_->HandleAIWriteResult(0, 5, buff);
+    auto contentController = pattern_->GetTextContentController();
+    auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
+    ASSERT_EQ(sentenceContent, spanStr->GetString());
 }
 } // namespace OHOS::Ace::NG

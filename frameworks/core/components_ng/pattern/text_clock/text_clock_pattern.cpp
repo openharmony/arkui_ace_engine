@@ -22,15 +22,13 @@
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/time/time_event_proxy.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t STRING_NEXT_POS = 1;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
@@ -47,6 +45,7 @@ constexpr int32_t LOG_INTERVAL_TIME = 60 * 1000;
 constexpr bool ON_TIME_CHANGE = true;
 const char CHAR_0 = '0';
 const char CHAR_9 = '9';
+const char CHAR_SPACE = ' ';
 const std::string STR_0 = "0";
 const std::string STR_PREFIX_24H = " 0";
 const std::string STR_PREFIX_12H = " ";
@@ -372,6 +371,10 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = is24H_ ? "" : GetAmPm(hour);
     std::vector<std::string> curDateTime = ParseDateTimeValue(tempdateTimeValue);
+    auto spacePos = tempdateTimeValue.find(CHAR_SPACE);
+    if (spacePos != std::string::npos) {
+        tempdateTimeValue.insert(spacePos + STRING_NEXT_POS, strAmPm);
+    }
     curDateTime[(int32_t)(TextClockElementIndex::CUR_AMPM_INDEX)] = strAmPm;
 
     // parse week
@@ -404,7 +407,7 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
             formatElementMap_[2] = tempFormatElement;
             outputDateTime = SpliceDateTime(curDateTime);
         } else {
-            outputDateTime = dateTimeValue;
+            outputDateTime = tempdateTimeValue;
         }
     }
     return outputDateTime;

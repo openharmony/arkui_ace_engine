@@ -206,26 +206,26 @@ const Consumer = (aliasName?: string) => {
     const providerName = (aliasName === undefined || aliasName === null ||
       (typeof aliasName === 'string' && aliasName.trim() === '')
     ) ? varName : aliasName;
-
+    const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
+    proto[storeProp] = providerName;
+    let retVal = this[varName];
     let providerInfo;
 
     Reflect.defineProperty(proto, varName, {
       get() {
-        if (!providerInfo) {
-          providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
-          if (providerInfo && providerInfo[0] && providerInfo[1]) {
-            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-          }
+        providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
+        if (providerInfo && providerInfo[0] && providerInfo[1]) {
+          retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
         }
-        return this[providerName ?? varName];
+        return retVal;
       },
       set(val) {
         if (!providerInfo) {
           providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
           if (providerInfo && providerInfo[0] && providerInfo[1]) {
-            ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
+            retVal = ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
           } else {
-            ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
+            retVal = ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
           }
         }
       },

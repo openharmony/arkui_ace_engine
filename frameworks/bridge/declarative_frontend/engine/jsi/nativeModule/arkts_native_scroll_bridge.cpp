@@ -21,7 +21,6 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/core/components/scroll_bar/scroll_proxy.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;

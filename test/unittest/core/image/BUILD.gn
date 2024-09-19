@@ -1,0 +1,133 @@
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ohos_unittest("image_provider_test_ng") {
+  module_out_path = image_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components_ng/image_provider/animated_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_data.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_provider.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_state_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/pixel_map_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/static_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/svg_image_object.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_source.cpp",
+    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
+    "$ace_root/test/mock/base/mock_localization.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
+    "$ace_root/test/mock/base/mock_subwindow.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
+    "$ace_root/test/mock/core/common/mock_clipboard.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_frame_report.cpp",
+    "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_interaction.cpp",
+    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
+    "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
+    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_decoder.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_loader.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_skia_image_data.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_animated_image.cpp",
+    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
+    "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
+    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
+    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
+    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
+    "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
+    "$ace_root/test/mock/core/render/mock_skia_image.cpp",
+    "$ace_root/test/mock/core/render/mock_svg_canvas_image.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
+    "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
+    "image_provider_test_ng.cpp",
+  ]
+
+  deps = [
+    "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "$graphic_2d_path/rosen/modules/render_service_base:librender_service_base",
+    "//third_party/googletest:gmock_main",
+  ]
+  external_deps = [ "cJSON:cjson" ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}
+
+ohos_unittest("image_file_cache_test_ng") {
+  module_out_path = image_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/image/image_file_cache.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_packer.cpp",
+    "$ace_root/test/mock/base/mock_image_source.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_skia_image_data.cpp",
+    "image_file_cache_test_ng.cpp",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [ "skia:skia_canvaskit" ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}

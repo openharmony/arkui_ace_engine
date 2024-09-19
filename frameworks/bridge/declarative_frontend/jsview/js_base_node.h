@@ -42,7 +42,7 @@ public:
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void Create(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
-    void ProccessNode(bool isSupportExportTexture);
+    void ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild);
     void PostTouchEvent(const JSCallbackInfo& info);
     void UpdateStart(const JSCallbackInfo& info);
     void UpdateEnd(const JSCallbackInfo& info);
@@ -52,6 +52,7 @@ public:
     }
 
 private:
+    TouchEvent InitTouchEvent(const JSCallbackInfo& info);
     RefPtr<NG::FrameNode> viewNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;

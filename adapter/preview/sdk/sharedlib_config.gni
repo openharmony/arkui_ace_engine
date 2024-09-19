@@ -94,11 +94,6 @@ common_bin = [
     part_name = "graphic_2d"
   },
   {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
-  },
-  {
     label = "//third_party/glfw:glfw"
     subsystem_name = "thirdparty"
     part_name = "glfw"
@@ -110,6 +105,11 @@ common_bin = [
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
+    subsystem_name = "graphic"
+    part_name = "graphic_2d"
+  },
+  {
+    label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
     subsystem_name = "graphic"
     part_name = "graphic_2d"
   },
@@ -226,17 +226,34 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ]
 }
 
+_arkui_shared_libs = [
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/napi/kits/drawabledescriptor:drawabledescriptor"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "drawabledescriptor" ]
+  },
+]
+
+if (defined(current_platform.config)) {
+  platform_config = current_platform.config
+  if (defined(platform_config.enable_component_test) &&
+      platform_config.enable_component_test && use_mingw_win) {
+    _arkui_shared_libs += [
+      {
+        label = "//foundation/arkui/ace_engine/interfaces/napi/kits/component_test:componenttest"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "componenttest" ]
+      },
+    ]
+  }
+}
+
 napi_modules = [
   {
     prefix = "arkui"
-    shard_libs = [
-      {
-        label = "//foundation/arkui/ace_engine/interfaces/napi/kits/drawabledescriptor:drawabledescriptor"
-        subsystem_name = "arkui"
-        part_name = "ace_engine"
-        lib_names = [ "drawabledescriptor" ]
-      },
-    ]
+    shard_libs = _arkui_shared_libs
   },
   {
     prefix = "multimedia"
@@ -459,16 +476,16 @@ napi_modules = [
         lib_names = [ "innerfullscreenlaunchcomponent" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/foldsplitcontainer/interfaces:foldsplitcontainer"
-        subsystem_name = "arkui"
-        part_name = "ace_engine"
-        lib_names = [ "foldsplitcontainer" ]
-      },
-      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/formmenu/interfaces:formmenu"
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "formmenu" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/foldsplitcontainer/interfaces:foldsplitcontainer"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "foldsplitcontainer" ]
       },
     ]
   },
@@ -513,6 +530,12 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
           subsystem_name = "graphic"
           part_name = "graphic_2d"
           lib_names = [ "drawing_napi" ]
+        },
+        {
+          label = "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/ui_effect:uieffect_napi"
+          subsystem_name = "graphic"
+          part_name = "graphic_2d"
+          lib_names = [ "uieffect_napi" ]
         },
       ]
     },

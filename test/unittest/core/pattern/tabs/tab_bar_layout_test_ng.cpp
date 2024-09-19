@@ -302,54 +302,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplyBarGridAlign001, TestSize
 }
 
 /**
- * @tc.name: TabBarLayoutAlgorithmMeasureMaxHeight001
- * @tc.desc: Test the MeasureMaxHeight function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureMaxHeight001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarNode_->GetPattern<TabBarPattern>()->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty());
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-    tabbarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-
-    /**
-     * @tc.steps: steps2. Set visibleItemLength_ Clear and reassign and
-     *                    Create two children named columnLayoutWrapper using a loop for layoutWrapper.
-     */
-    tabbarLayoutAlgorithm->visibleItemLength_.clear();
-    tabbarLayoutAlgorithm->visibleItemLength_[0] = 10.0f;
-    for (int32_t i = 0; i < 2; i++) {
-        auto columnNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-        RefPtr<LayoutWrapperNode> columnLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
-        columnLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-        columnLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
-        layoutWrapper.AppendChild(columnLayoutWrapper);
-    }
-
-    /**
-     * @tc.steps: steps3.MeasureMaxHeight.
-     * @tc.expected: steps3. Test itemWidths under MeasureMaxHeight Value of.
-     */
-    tabbarLayoutAlgorithm->visibleItemLength_[1] = 2.0f;
-    tabbarLayoutAlgorithm->MeasureMaxHeight(&layoutWrapper, childLayoutConstraint);
-    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[0], 10.0f);
-}
-
-/**
  * @tc.name: TabBarLayoutAlgorithmApplyLayoutMode001
  * @tc.desc: Test the ApplyLayoutMode function in the TabBarLayoutAlgorithm class.
  * @tc.type: FUNC

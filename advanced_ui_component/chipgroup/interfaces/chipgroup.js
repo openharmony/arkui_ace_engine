@@ -569,11 +569,10 @@ export class ChipGroup extends ViewPU {
             Row.create();
             Row.align(Alignment.End);
             Row.width("100%");
-            Row.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.height(this.getChipGroupHeight());
+            Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
@@ -592,9 +591,7 @@ export class ChipGroup extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: this.getChipGroupItemSpace() });
             Row.padding({ left: this.getChipGroupStartSpace(),
-                right: this.getChipGroupEndSpace(),
-                top: this.getPaddingTop(),
-                bottom: this.getPaddingBottom()
+                right: this.getChipGroupEndSpace()
             });
             Row.constraintSize({ minWidth: '100%' });
         }, Row);
@@ -662,7 +659,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
+                        Stack.height(this.getChipGroupHeight());
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);
@@ -684,9 +681,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.padding({ left: iconGroupSuffixTheme.marginLeft,
-                            right: iconGroupSuffixTheme.marginRight,
-                            top: this.getPaddingTop(),
-                            bottom: this.getPaddingBottom()
+                            right: iconGroupSuffixTheme.marginRight
                         });
                     }, Row);
                     this.suffix.bind(this)();

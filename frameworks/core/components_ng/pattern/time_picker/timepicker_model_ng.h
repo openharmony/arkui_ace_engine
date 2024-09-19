@@ -41,6 +41,7 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
+    void HasUserDefinedOpacity() override;
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 

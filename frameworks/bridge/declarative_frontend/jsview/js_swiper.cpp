@@ -860,7 +860,10 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
 {
     RefPtr<Curve> curve = DEFAULT_CURVE;
     if (info[0]->IsString()) {
-        curve = CreateCurve(info[0]->ToString());
+        curve = CreateCurve(info[0]->ToString(), false);
+        if (!curve) {
+            curve = DEFAULT_CURVE;
+        }
     } else if (info[0]->IsObject()) {
         auto object = JSRef<JSObject>::Cast(info[0]);
         std::function<float(float)> customCallBack = nullptr;
@@ -1032,6 +1035,10 @@ void JSSwiper::SetOnClick(const JSCallbackInfo& info)
                        const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        if (!clickInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onClick callback execute failed.");
+            return;
+        }
         auto newInfo = *clickInfo;
         if (impl) {
             impl->UpdateEventInfo(newInfo);

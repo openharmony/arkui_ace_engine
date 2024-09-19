@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
-#include "base/geometry/axis.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -105,7 +99,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
-    int32_t updateIdx = layoutWrapper->GetHostNode()->GetChildrenUpdated();
+    int32_t updateIdx = GetUpdateIdx(layoutWrapper, layoutInfo_->footerIndex_);
     if (updateIdx != -1) {
         layoutInfo_->Reset(updateIdx);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
@@ -267,7 +261,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     layoutInfo_->firstIndex_ = firstIndex;
     layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
-        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
+        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount,
+        layoutProperty->GetShowCachedItemsValue(false));
     PreloadItems(layoutWrapper, layoutInfo_, cachedCount);
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
@@ -275,7 +270,10 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
 {
-    if (layoutInfo_->itemEnd_ && layoutInfo_->footerIndex_ >= 0) {
+    if (layoutInfo_->footerIndex_ < 0) {
+        return;
+    }
+    if (layoutInfo_->itemEnd_) {
         auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_->footerIndex_);
         CHECK_NULL_VOID(footer);
         auto footerOffset = childFrameOffset;
@@ -286,6 +284,10 @@ void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const 
         footerOffset += (axis_ == Axis::VERTICAL) ? OffsetF(0, mainOffset) : OffsetF(mainOffset, 0);
         footer->GetGeometryNode()->SetMarginFrameOffset(footerOffset);
         footer->Layout();
+    } else {
+        auto footer = layoutWrapper->GetChildByIndex(layoutInfo_->footerIndex_);
+        CHECK_NULL_VOID(footer);
+        footer->SetActive(false);
     }
 }
 
@@ -393,7 +395,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         return;
     }
 
-    if (layoutInfo_->currentOffset_ + maxItemHeight <= mainSize) {
+    if (LessOrEqual(layoutInfo_->currentOffset_ + maxItemHeight, mainSize)) {
         layoutInfo_->offsetEnd_ = true;
         if (!canOverScroll_) {
             layoutInfo_->currentOffset_ = mainSize - maxItemHeight;

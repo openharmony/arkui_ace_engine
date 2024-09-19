@@ -165,7 +165,7 @@ void SessionWrapperImpl::NotifyForeground()
 void SessionWrapperImpl::NotifyBackground()
 {
 }
-void SessionWrapperImpl::NotifyDestroy()
+void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
 }
 
@@ -231,7 +231,8 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
 {
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
     return true;
 }
@@ -247,5 +248,19 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 
 void SessionWrapperImpl::UpdateSessionViewportConfig()
 {
+}
+
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return 1;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+}
+
+WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+{
+    return static_cast<WindowSizeChangeReason>(0);
 }
 } // namespace OHOS::Ace::NG

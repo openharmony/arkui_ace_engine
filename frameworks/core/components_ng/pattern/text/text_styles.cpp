@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_styles.h"
 
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/symbol/constants.h"
-
 namespace {
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
@@ -199,5 +195,23 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
+}
+
+void FontStyle::UpdateColorByResourceId()
+{
+    if (propTextColor) {
+        propTextColor->UpdateColorByResourceId();
+    }
+    if (propTextDecorationColor) {
+        propTextDecorationColor->UpdateColorByResourceId();
+    }
+    if (propTextShadow) {
+        auto& shadows = propTextShadow.value();
+        std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+    }
+    if (propSymbolColorList) {
+        auto& colors = propSymbolColorList.value();
+        std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+    }
 }
 } // namespace OHOS::Ace::NG

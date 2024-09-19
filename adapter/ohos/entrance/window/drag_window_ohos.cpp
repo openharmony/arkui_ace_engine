@@ -33,47 +33,18 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/render/adapter/skia_image.h"
-#else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/components_ng/render/drawing.h"
-#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
-#ifdef USE_ROSEN_DRAWING
 using namespace OHOS::Rosen;
-#endif
 
 namespace OHOS::Ace {
 #ifdef ENABLE_ROSEN_BACKEND
 namespace {
 // Adapt text dragging background shadows to expand the width of dargwindow
 const Dimension Window_EXTERN = 10.0_vp;
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
-{
-    return SkColorSpace::MakeSRGB(); // Media::PixelMap has not support wide gamut yet.
-}
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap)
-{
-    switch (pixmap->GetAlphaType()) {
-        case AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
-            return SkAlphaType::kUnknown_SkAlphaType;
-        case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
-            return SkAlphaType::kOpaque_SkAlphaType;
-        case AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
-            return SkAlphaType::kPremul_SkAlphaType;
-        case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
-            return SkAlphaType::kUnpremul_SkAlphaType;
-        default:
-            return SkAlphaType::kUnknown_SkAlphaType;
-    }
-}
-#else
 RSAlphaType AlphaTypeToAlphaType(const RefPtr<PixelMap>& pixmap)
 {
     switch (pixmap->GetAlphaType()) {
@@ -89,33 +60,7 @@ RSAlphaType AlphaTypeToAlphaType(const RefPtr<PixelMap>& pixmap)
             return RSAlphaType::ALPHATYPE_UNKNOWN;
     }
 }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap)
-{
-    switch (pixmap->GetPixelFormat()) {
-        case PixelFormat::RGB_565:
-            return SkColorType::kRGB_565_SkColorType;
-        case PixelFormat::RGBA_8888:
-            return SkColorType::kRGBA_8888_SkColorType;
-        case PixelFormat::BGRA_8888:
-            return SkColorType::kBGRA_8888_SkColorType;
-        case PixelFormat::ALPHA_8:
-            return SkColorType::kAlpha_8_SkColorType;
-        case PixelFormat::RGBA_F16:
-            return SkColorType::kRGBA_F16_SkColorType;
-        case PixelFormat::UNKNOWN:
-        case PixelFormat::ARGB_8888:
-        case PixelFormat::RGB_888:
-        case PixelFormat::NV21:
-        case PixelFormat::NV12:
-        case PixelFormat::CMYK:
-        default:
-            return SkColorType::kUnknown_SkColorType;
-    }
-}
-#else
 RSColorType PixelFormatToColorType(const RefPtr<PixelMap>& pixmap)
 {
     switch (pixmap->GetPixelFormat()) {
@@ -139,17 +84,7 @@ RSColorType PixelFormatToColorType(const RefPtr<PixelMap>& pixmap)
             return RSColorType::COLORTYPE_UNKNOWN;
     }
 }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
-{
-    SkColorType colorType = PixelFormatToSkColorType(pixmap);
-    SkAlphaType alphaType = AlphaTypeToSkAlphaType(pixmap);
-    sk_sp<SkColorSpace> colorSpace = ColorSpaceToSkColorSpace(pixmap);
-    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
-}
-#else
 RSBitmapFormat MakeBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap)
 {
     RSBitmapFormat format;
@@ -157,21 +92,7 @@ RSBitmapFormat MakeBitmapFormatFromPixelMap(const RefPtr<PixelMap>& pixmap)
     format.alphaType = AlphaTypeToAlphaType(pixmap);
     return format;
 }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width, int32_t height)
-{
-    CHECK_NULL_VOID(skImage);
-    SkPaint paint;
-    sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
-    paint.setColor(paint.getColor4f(), colorSpace.get());
-    auto skSrcRect = SkRect::MakeXYWH(0, 0, skImage->width(), skImage->height());
-    auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
-    canvas->drawImageRect(
-        skImage, skSrcRect, skDstRect, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
-}
-#else
 void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingImage, int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(drawingImage);
@@ -186,21 +107,7 @@ void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingI
         *drawingImage, srcRect, dstRect, sampling, Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
     canvas->DetachBrush();
 }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-void DrawPixelMapInner(SkCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
-{
-    // Step1: Create SkPixmap
-    auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
-    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
-
-    // Step2: Create SkImage and draw it
-    sk_sp<SkImage> skImage =
-        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
-    DrawSkImage(canvas, skImage, width, height);
-}
-#else
 void DrawPixelMapInner(RSCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t width, int32_t height)
 {
     // Step1: Create Bitmap
@@ -214,7 +121,6 @@ void DrawPixelMapInner(RSCanvas* canvas, const RefPtr<PixelMap>& pixmap, int32_t
     image->BuildFromBitmap(*bitmap);
     DrawDrawingImage(canvas, image, width, height);
 }
-#endif
 } // namespace
 #endif
 
@@ -243,7 +149,13 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(const DragWindowParams& params)
     OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(params.windowName, option);
     CHECK_NULL_RETURN(dragWindow, nullptr);
 
-    OHOS::Rosen::WMError ret = dragWindow->Show();
+    OHOS::Rosen::WMError ret = dragWindow->MoveTo(params.x - halfWidth, params.y - halfHeight, true);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow MoveTo, drag window move failed, ret: %d", ret);
+        return nullptr;
+    }
+
+    ret = dragWindow->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
         return nullptr;
@@ -370,35 +282,6 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
 #endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-void DragWindowOhos::DrawImage(void* skImage)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    CHECK_NULL_VOID(skImage);
-    auto* canvasImagePtr = reinterpret_cast<RefPtr<NG::CanvasImage>*>(skImage);
-    CHECK_NULL_VOID(canvasImagePtr);
-    RefPtr<NG::SkiaImage> canvasImage = AceType::DynamicCast<NG::SkiaImage>(*canvasImagePtr);
-    CHECK_NULL_VOID(canvasImage);
-    auto surfaceNode = dragWindow_->GetSurfaceNode();
-    rsUiDirector_ = Rosen::RSUIDirector::Create();
-    rsUiDirector_->Init();
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        transactionProxy->FlushImplicitTransaction();
-    }
-    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
-    rootNode_ = Rosen::RSRootNode::Create();
-    rootNode_->SetBounds(0, 0, static_cast<float>(width_), static_cast<float>(height_));
-    rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
-    rsUiDirector_->SetRoot(rootNode_->GetId());
-    auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
-    auto skia = canvasNode->BeginRecording(width_, height_);
-    DrawSkImage(skia, canvasImage->GetImage(), width_, height_);
-    canvasNode->FinishRecording();
-    rsUiDirector_->SendMessages();
-#endif
-}
-#else
 void DragWindowOhos::DrawImage(void* drawingImage)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -427,7 +310,6 @@ void DragWindowOhos::DrawImage(void* drawingImage)
     rsUiDirector_->SendMessages();
 #endif
 }
-#endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 void DragWindowOhos::DrawText(
@@ -453,40 +335,6 @@ void DragWindowOhos::DrawText(
     rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
-#ifndef USE_ROSEN_DRAWING
-    SkPath path;
-    if (renderText->GetStartOffset().GetY() == renderText->GetEndOffset().GetY()) {
-        path.moveTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetEndOffset().GetY() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
-    } else {
-        path.moveTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetPaintRect().Width(),
-            renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetPaintRect().Width(),
-            renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetEndOffset().GetY() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetPaintRect().Left() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetEndOffset().GetY() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetPaintRect().Left() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
-        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
-            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
-    }
-#else
     RSRecordingPath path;
     if (renderText->GetStartOffset().GetY() == renderText->GetEndOffset().GetY()) {
         path.MoveTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
@@ -519,7 +367,6 @@ void DragWindowOhos::DrawText(
         path.LineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
             renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
     }
-#endif
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
     auto recordingCanvas = canvasNode->BeginRecording(width_, height_);
@@ -555,46 +402,6 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
     CHECK_NULL_VOID(canvasNode);
     Offset globalOffset;
     textPattern->GetGlobalOffset(globalOffset);
-#ifndef USE_ROSEN_DRAWING
-    SkPath path;
-    if (textPattern->GetStartOffset().GetY() == textPattern->GetEndOffset().GetY()) {
-        path.moveTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetEndOffset().GetY() - globalOffset.GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
-    } else {
-        path.moveTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
-        path.lineTo(
-            textPattern->GetTextContentRect().Width(), textPattern->GetStartOffset().GetY() - globalOffset.GetY());
-        path.lineTo(
-            textPattern->GetTextContentRect().Width(), textPattern->GetEndOffset().GetY() - globalOffset.GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetEndOffset().GetY() - globalOffset.GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
-        path.lineTo(textPattern->GetTextContentRect().GetX(),
-            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
-        path.lineTo(textPattern->GetTextContentRect().GetX(),
-            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
-            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
-    }
-    rootNode_->SetClipToBounds(true);
-    rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-
-    auto skia = canvasNode->BeginRecording(width_, height_);
-    paragraph->Paint(skia, textPattern->GetTextContentRect().GetX(),
-        textPattern->GetTextContentRect().GetY() - std::min(textPattern->GetBaselineOffset(), 0.0f));
-#else
     RSRecordingPath path;
     if (textPattern->GetStartOffset().GetY() == textPattern->GetEndOffset().GetY()) {
         path.MoveTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
@@ -632,7 +439,6 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
     auto recordingCanvas = canvasNode->BeginRecording(width_, height_);
     paragraph->Paint(*recordingCanvas, textPattern->GetTextContentRect().GetX(),
         textPattern->GetTextContentRect().GetY() - std::min(textPattern->GetBaselineOffset(), 0.0f));
-#endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 

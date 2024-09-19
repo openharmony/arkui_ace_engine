@@ -41,6 +41,7 @@ public:
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
+    static bool CloseImplicitCancelAnimation();
     static bool IsImplicitAnimationOpen();
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
         const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
@@ -78,6 +79,10 @@ public:
 
     static void ReverseInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
+    static void AddInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+        const std::function<void()>& callback);
 };
 } // namespace OHOS::Ace
 

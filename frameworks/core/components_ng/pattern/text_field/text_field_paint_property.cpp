@@ -14,7 +14,6 @@
  */
 
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 
 namespace OHOS::Ace::NG {

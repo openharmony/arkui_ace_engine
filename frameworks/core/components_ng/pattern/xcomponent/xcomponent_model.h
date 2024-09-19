@@ -38,9 +38,6 @@ public:
     static bool IsBackGroundColorAvailable(const XComponentType& type)
     {
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
-#ifdef PLATFORM_VIEW_SUPPORTED
-                type == XComponentType::PLATFORM_VIEW ||
-#endif
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
     static bool IsCommonEventAvailable(const XComponentType& type, std::optional<std::string>& libraryName)
@@ -82,6 +79,8 @@ public:
     virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
     virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
+    virtual void SetRenderFit(RenderFit renderFit) {}
+    virtual void EnableSecure(bool isSecure) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

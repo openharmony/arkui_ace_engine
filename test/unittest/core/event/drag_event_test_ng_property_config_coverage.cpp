@@ -132,6 +132,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest033, TestSize.Le
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     GestureEvent info = GestureEvent();
     info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() {});
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
@@ -489,7 +491,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest040, TestSize.Le
     dragEventActuator->HandleTouchUpEvent();
     dragEventActuator->SetResponseRegionFull();
     dragEventActuator->ResetResponseRegion();
-    dragEventActuator->isResponseRegionFull = false;
+    dragEventActuator->isResponseRegionFull_ = false;
     dragEventActuator->ResetResponseRegion();
     SUCCEED();
 }

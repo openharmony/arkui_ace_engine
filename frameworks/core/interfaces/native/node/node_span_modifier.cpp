@@ -14,15 +14,7 @@
  */
 #include "core/interfaces/native/node/node_span_modifier.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/dimension_size.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "draw/canvas.h"
@@ -33,13 +25,7 @@ constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE_VALUE = Ace::FontStyle::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
-constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
-constexpr Dimension DEFAULT_LETTER_SPACING_VALUE { 0.0, DimensionUnit::FP };
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
-constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
-constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 std::string g_strValue;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -89,7 +75,7 @@ void ResetSpanTextCase(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetTextCase(uiNode, DEFAULT_TEXT_CASE);
+    SpanModelNG::ResetTextCase(uiNode);
 }
 
 void SetSpanFontWeightStr(ArkUINodeHandle node, const char* value)
@@ -118,7 +104,7 @@ void ResetSpanFontWeight(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetFontWeight(uiNode, DEFAULT_FONT_WEIGHT);
+    SpanModelNG::ResetFontWeight(uiNode);
 }
 
 void SetSpanLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -139,8 +125,7 @@ void ResetSpanLineHeight(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    Dimension value(0.0f);
-    SpanModelNG::SetLineHeight(uiNode, value);
+    SpanModelNG::ResetLineHeight(uiNode);
 }
 
 void SetSpanFontStyle(ArkUINodeHandle node, int32_t value)
@@ -162,7 +147,7 @@ void ResetSpanFontStyle(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetItalicFontStyle(uiNode, DEFAULT_FONT_STYLE_VALUE);
+    SpanModelNG::ResetItalicFontStyle(uiNode);
 }
 
 void SetSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -183,7 +168,7 @@ void ResetSpanFontSize(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetFontSize(uiNode, DEFAULT_FONT_SIZE);
+    SpanModelNG::ResetFontSize(uiNode);
 }
 
 void SetSpanFontFamily(ArkUINodeHandle node, const char** fontFamilies, uint32_t length)
@@ -208,9 +193,7 @@ void ResetSpanFontFamily(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    std::vector<std::string> families;
-    families.emplace_back(DEFAULT_FONT_FAMILY);
-    SpanModelNG::SetFontFamily(uiNode, families);
+    SpanModelNG::ResetFontFamily(uiNode);
 }
 
 void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
@@ -236,9 +219,9 @@ void ResetSpanDecoration(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetTextDecoration(uiNode, DEFAULT_TEXT_DECORATION);
-    SpanModelNG::SetTextDecorationStyle(uiNode, DEFAULT_DECORATION_STYLE);
-    SpanModelNG::SetTextDecorationColor(uiNode, DEFAULT_DECORATION_COLOR);
+    SpanModelNG::ResetTextDecoration(uiNode);
+    SpanModelNG::ResetTextDecorationStyle(uiNode);
+    SpanModelNG::ResetTextDecorationColor(uiNode);
 }
 
 void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor)
@@ -259,12 +242,7 @@ void ResetSpanFontColor(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    uint32_t textColor = theme->GetTextStyle().GetTextColor().GetValue();
-    SpanModelNG::SetTextColor(uiNode, Color(textColor));
+    SpanModelNG::ResetTextColor(uiNode);
 }
 
 void SetSpanLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue)
@@ -291,7 +269,7 @@ void ResetSpanLetterSpacing(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetLetterSpacing(uiNode, DEFAULT_LETTER_SPACING_VALUE);
+    SpanModelNG::ResetLetterSpacing(uiNode);
 }
 
 void SetSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -339,14 +317,7 @@ void ResetSpanFont(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    Font font;
-    font.fontSize = DEFAULT_FONT_SIZE;
-    font.fontWeight = DEFAULT_FONT_WEIGHT;
-    font.fontStyle = DEFAULT_FONT_STYLE;
-    std::vector<std::string> families;
-    families.emplace_back(DEFAULT_FONT_FAMILY);
-    font.fontFamilies = families;
-    SpanModelNG::SetFont(uiNode, font);
+    SpanModelNG::ResetFont(uiNode);
 }
 
 void SetSpanTextBackgroundStyle(
@@ -440,10 +411,7 @@ void ResetTextTextShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Shadow shadow;
-    shadow.SetOffsetX(0.0);
-    shadow.SetOffsetY(0.0);
-    SpanModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
+    SpanModelNG::ResetTextShadow(frameNode);
 }
 
 void SetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr value)

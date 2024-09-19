@@ -341,6 +341,7 @@ public:
     RefPtr<FrameNode> GetFirstInnerMenu() const;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void SetFirstShow()
     {
         isFirstShow_ = true;
@@ -479,6 +480,16 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
+    void SetHoverMode(bool enableFold)
+    {
+        enableFold_ = enableFold;
+    }
+
+    bool GetHoverMode() const
+    {
+        return enableFold_.value_or(false);
+    }
+
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     RefPtr<FrameNode> GetLastSelectedItem()
@@ -528,6 +539,9 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -577,6 +591,7 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
+    std::optional<int32_t> halfFoldHoverCallbackId_;
 
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
@@ -594,6 +609,8 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+    OffsetF statusOriginOffset_;
+    std::optional<bool> enableFold_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
@@ -619,6 +636,7 @@ public:
     ~InnerMenuPattern() override = default;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
+    bool isHalfFoldStatus_ = false;
 
     const std::list<WeakPtr<UINode>>& GetItemsAndGroups() const
     {

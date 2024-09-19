@@ -581,4 +581,6 @@ const char STOP[] = "stop";
 const char RESUME[] = "resume";
 const char CANCEL[] = "cancel";
 
+const char DEFAULT_HAR_BUNDLE_NAME[] = "__harDefaultBundleName__";
+const char DEFAULT_HAR_MODULE_NAME[] = "__harDefaultModuleName__";
 } // namespace OHOS::Ace

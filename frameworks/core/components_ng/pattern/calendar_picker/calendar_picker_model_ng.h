@@ -29,11 +29,22 @@ public:
     void SetOnChange(SelectedChangeEvent&& onChange) override;
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
     void SetPadding(const PaddingProperty& padding) override;
+    void ClearBorderColor() override;
+    void ClearBorderRadius() override;
+    void ClearHeight() override;
+    void ClearBorder() override;
+    void ClearBorderWidth() override;
+    void ClearPadding() override;
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
     static void SetEdgeAlign(FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset);
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
+    static void ClearPadding(FrameNode* frameNode);
+    static void ClearHeight(FrameNode* frameNode);
+    static void ClearBorderColor(FrameNode* frameNode);
+    static void ClearBorderRadius(FrameNode* frameNode);
+    static void ClearBorderWidth(FrameNode* frameNode);
     static void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
         const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
     static RefPtr<FrameNode> CreateButtonChild(

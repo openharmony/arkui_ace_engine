@@ -15,20 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
-#include <cmath>
-#include <cstdint>
-
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve.h"
-#include "core/animation/curves.h"
-#include "core/common/container.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
-#include "core/components_ng/pattern/toggle/switch_paint_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +24,15 @@ constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double NUMBER_TWO = 2.0;
 } // namespace
+
+void SwitchPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
+}
 
 bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
@@ -76,13 +72,6 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
-    auto enabled = hub->IsEnabled();
-    if (enabled_ != enabled) {
-        enabled_ = enabled;
-        auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
-    }
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
@@ -93,6 +82,28 @@ void SwitchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
     FireBuilder();
+    HandleEnabled();
+}
+
+void SwitchPattern::HandleEnabled()
+{
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ToggleTheme>();
+    CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetDisabledAlpha();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void SwitchPattern::UpdateSwitchPaintProperty()

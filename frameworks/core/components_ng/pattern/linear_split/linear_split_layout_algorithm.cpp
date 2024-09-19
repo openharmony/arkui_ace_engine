@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
 
-#include <algorithm>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

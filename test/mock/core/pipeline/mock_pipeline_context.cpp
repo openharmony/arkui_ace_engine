@@ -215,6 +215,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
+void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
+void PipelineContext::HandlePenHoverOut(const TouchEvent& point) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
 
 void PipelineContext::FlushTouchEvents() {}
@@ -264,6 +268,8 @@ void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
 void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
+
+void PipelineContext::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor) {};
 
 void PipelineContext::ChangeDarkModeBrightness() {}
 
@@ -341,8 +347,6 @@ void PipelineContext::OriginalAvoidanceLogic(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
-void PipelineContext::CheckVirtualKeyboardHeight() {}
-
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
@@ -366,7 +370,7 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
@@ -444,6 +448,8 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
@@ -584,6 +590,13 @@ bool PipelineContext::CheckNeedAvoidInSubWindow()
 {
     return false;
 }
+
+std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
+{
+    return "";
+}
+
+void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
@@ -789,6 +802,11 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
     return NG::MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    return NG::MockPipelineContext::GetCurrent();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = NG::MockPipelineContext::GetCurrentContext();
@@ -896,6 +914,16 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
+bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    return false;
+}
+
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+
+bool NG::PipelineContext::CheckThreadSafe()
+{
+    return false;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

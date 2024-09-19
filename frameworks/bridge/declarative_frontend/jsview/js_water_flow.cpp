@@ -461,8 +461,11 @@ void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
             cachedCount = 1;
         }
     }
-
-    WaterFlowModel::GetInstance()->SetCachedCount(cachedCount);
+    bool show = false;
+    if (info.Length() > 1) {
+        show = info[1]->ToBoolean();
+    }
+    WaterFlowModel::GetInstance()->SetCachedCount(cachedCount, show);
 }
 
 void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)

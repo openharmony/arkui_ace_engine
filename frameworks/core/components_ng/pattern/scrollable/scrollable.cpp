@@ -15,17 +15,9 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
-#include <chrono>
-
-#include "base/log/ace_trace.h"
-#include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
-#include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -183,15 +175,14 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         scroll->isDragging_ = false;
     };
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
-            DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
-        panRecognizerNG_->SetIsAllowMouse(false);
-        panRecognizerNG_->SetOnActionStart(actionStart);
-        panRecognizerNG_->SetOnActionUpdate(actionUpdate);
-        panRecognizerNG_->SetOnActionEnd(actionEnd);
-        panRecognizerNG_->SetOnActionCancel(actionCancel);
-    }
+    panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
+        DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizerNG_->SetIsAllowMouse(false);
+    panRecognizerNG_->SetOnActionStart(actionStart);
+    panRecognizerNG_->SetOnActionUpdate(actionUpdate);
+    panRecognizerNG_->SetOnActionEnd(actionEnd);
+    panRecognizerNG_->SetOnActionCancel(actionCancel);
+
     available_ = true;
 }
 
@@ -443,9 +434,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 
     lastPos_ = GetDragOffset();
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
-    if (dragEndCallback_) {
-        dragEndCallback_();
-    }
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     mainPosition = Round(mainPosition);
     ACE_SCOPED_TRACE("HandleDragEnd, mainPosition:%f, gestureVelocity:%f, currentVelocity:%f, moved_:%u "
@@ -479,6 +467,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         StartScrollAnimation(mainPosition, currentVelocity_);
     }
     SetDelayedTask();
+    if (dragEndCallback_) {
+        dragEndCallback_();
+    }
     isTouching_ = false;
 }
 
@@ -974,10 +965,10 @@ void Scrollable::ProcessSpringMotion(double position)
         ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
                             "nextDistance:%f, nodeId:%d, tag:%s",
             distance, nextDistance, nodeId_, nodeTag_.c_str());
-        if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
-            // pass the velocity to the child component to avoid dealing with additional offsets
-            delta = finalPosition_ - currentPos_;
-        } else {
+        // only handle offsets that are out of bounds
+        delta = finalPosition_ - currentPos_;
+        // remainVelocityCallback_ will pass the velocity to the child component
+        if (!remainVelocityCallback_ || !remainVelocityCallback_(currentVelocity)) {
             StartScrollAnimation(position, currentVelocity);
         }
     }
@@ -1134,6 +1125,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             if (NearZero(scroll->frictionVelocity_, FRICTION_VELOCITY_THRESHOLD)) {
                 scroll->StopFrictionAnimation();
+                ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
             }
         }
         scroll->lastVsyncTime_ = currentVsync;

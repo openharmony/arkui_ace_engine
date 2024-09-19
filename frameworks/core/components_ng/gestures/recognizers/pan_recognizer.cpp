@@ -15,16 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/base_gesture_event.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/event/axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -278,11 +269,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    if (currentFingers_ < fingers_) {
-        return;
-    }
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+    }
+    if (currentFingers_ < fingers_) {
+        return;
     }
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
@@ -296,9 +287,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if ((currentFingers_ <= fingers_) &&
         (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
         return;
     }
 
@@ -318,11 +306,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
     }
 
-    if (refereeState_ == RefereeState::FAIL) {
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
-    }
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();
@@ -339,6 +322,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
+
+    if (event.sourceTool == SourceTool::MOUSE) {
+        delta_ = event.ConvertToOffset();
+        mainDelta_ = GetMainAxisDelta();
+        averageDistance_ += delta_;
+    }
+
     globalPoint_ = Point(event.x, event.y);
 
     touchPoints_[event.id] = TouchEvent();
@@ -509,6 +499,9 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         // AxisEvent is single one.
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "PanRecognizer touchPoints size not equal fingers_, not send cancel callback.");
     }
 }
 
@@ -547,9 +540,7 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInAllDirection(double judgeDistance) const
 {
     double offset = averageDistance_.GetDistance();
-    double screenOffset = averageScreenDistance_.GetDistance();
-    if (fabs(offset) < judgeDistance ||
-        (fabs(screenOffset) < judgeDistance / 2 && inputEventType_ != InputEventType::AXIS)) {
+    if (fabs(offset) < judgeDistance) {
         return GestureAcceptResult::DETECTING;
     }
     return GestureAcceptResult::ACCEPT;
@@ -559,9 +550,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInHorizontal
 {
     if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
         double offset = averageDistance_.GetX();
-        double screenOffset = averageScreenDistance_.GetDistance();
-        if (fabs(offset) < judgeDistance ||
-            (fabs(screenOffset) < judgeDistance / 2 && inputEventType_ != InputEventType::AXIS)) {
+        if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
         if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
@@ -579,9 +568,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInVerticalDi
 {
     if ((direction_.type & PanDirection::VERTICAL) != 0) {
         double offset = averageDistance_.GetY();
-        double screenOffset = averageScreenDistance_.GetDistance();
-        if (fabs(offset) < judgeDistance ||
-            (fabs(screenOffset) < judgeDistance / 2 && inputEventType_ != InputEventType::AXIS)) {
+        if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
         if (inputEventType_ == InputEventType::AXIS) {
@@ -775,6 +762,9 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     }
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
+            SendCancelMsg();
+        }
         ResetStatus();
         return false;
     }
@@ -963,14 +953,12 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
         windowTouchPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
-    auto screenDelta = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
 
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());
     }
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
-    averageScreenDistance_ += screenDelta / static_cast<double>(touchPoints_.size());
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;

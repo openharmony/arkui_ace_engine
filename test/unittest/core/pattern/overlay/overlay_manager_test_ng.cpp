@@ -2311,7 +2311,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
     ASSERT_NE(sheetLayoutProperty, nullptr);
     sheetStyle.interactive = true;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    overlayManager->InitSheetMask(maskNode, topSheetNode, sheetStyle);
+    topSheetPattern->UpdateMaskBackgroundColor();
+    overlayManager->PlaySheetMaskTransition(maskNode, true);
     EXPECT_EQ(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 
     /**
@@ -2320,7 +2321,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
      */
     sheetStyle.interactive = false;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    overlayManager->InitSheetMask(maskNode, topSheetNode, sheetStyle);
+    topSheetPattern->UpdateMaskBackgroundColor();
+    overlayManager->PlaySheetMaskTransition(maskNode, true);
     EXPECT_NE(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 }
 
@@ -3123,6 +3125,49 @@ HWTEST_F(OverlayManagerTestNg, IsShowCloseIcon001, TestSize.Level1)
     layoutProperty->UpdateSheetStyle(sheetStyle);
     showCloseIcon = sheetPattern->IsShowCloseIcon();
     EXPECT_EQ(showCloseIcon, false);
+}
+
+/**
+ * @tc.name: GetTitleNode001
+ * @tc.desc: Test SheetPresentationPattern::GetTitleNode001
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, GetTitleNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step3. create sheet node and get sheet node, get pattern.
+     * @tc.expected: related function is called.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.isTitleBuilder = true;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto sheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    auto titleNode = sheetPattern->GetTitleNode();
+    EXPECT_NE(titleNode, nullptr);
 }
 
 /**

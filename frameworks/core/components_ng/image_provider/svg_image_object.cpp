@@ -17,9 +17,7 @@
 
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
-#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
@@ -34,6 +32,12 @@ RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const 
 RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
 {
     return svgDomBase_;
+}
+
+std::string SvgImageObject::GetDumpInfo()
+{
+    CHECK_NULL_RETURN(svgDomBase_, "");
+    return svgDomBase_->GetDumpInfo();
 }
 
 void SvgImageObject::MakeCanvasImage(

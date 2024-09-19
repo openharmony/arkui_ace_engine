@@ -15,14 +15,6 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/network/download_manager.h"
-#include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components_ng/image_provider/image_provider.h"
-#include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -30,7 +22,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
@@ -405,8 +397,10 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
     CHECK_NULL_VOID(measureFinish_);
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(),
-        errorMsg.c_str());
+    TAG_LOGW(AceLogTag::ACE_IMAGE,
+        "Image LoadFail, src = %{private}s, reason: %{public}s, [%{public}d]-[%{public}lld]",
+        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.nodeId_,
+        static_cast<long long>(imageDfxConfig_.accessibilityId_));
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());
     }

@@ -30,7 +30,10 @@ class ImageAnalyzerManager : public AceType {
     DECLARE_ACE_TYPE(ImageAnalyzerManager, AceType);
 public:
     ImageAnalyzerManager(const RefPtr<NG::FrameNode>& frameNode, ImageAnalyzerHolder holder);
-    ~ImageAnalyzerManager() = default;
+    ~ImageAnalyzerManager()
+    {
+        ReleaseImageAnalyzer();
+    }
     
     bool IsSupportImageAnalyzerFeature();
     void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
@@ -49,9 +52,11 @@ public:
     void UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight);
     void UpdateAIButtonConfig(AIButtonConfig config);
     void UpdateOverlayActiveStatus(bool status);
+    void SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback);
 
 private:
     bool UpdateVideoConfig(const PixelMapInfo& info);
+    bool NeedUpdateOverlayOffset();
 
     WeakPtr<NG::FrameNode> frameNode_;
     ImageAnalyzerHolder holder_;

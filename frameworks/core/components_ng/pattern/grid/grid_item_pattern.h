@@ -90,7 +90,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto theme = pipeline->GetTheme<GridItemTheme>();
         CHECK_NULL_RETURN(theme, FocusPattern());
@@ -134,6 +136,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void ResetGridItemInfo()
     {

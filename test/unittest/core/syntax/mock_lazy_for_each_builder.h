@@ -37,9 +37,9 @@ protected:
     {
         return static_cast<int32_t>(cachedItems_.size());
     }
-    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
+    bool DeleteExpiringItemImmediately() override
     {
-        return {};
+        return false;
     }
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override

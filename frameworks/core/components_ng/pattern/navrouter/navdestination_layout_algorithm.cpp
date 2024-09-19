@@ -16,10 +16,9 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_util.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -53,12 +52,9 @@ bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinat
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
         auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
 
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-        CHECK_NULL_RETURN(titleBarNode, false);
-        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-        CHECK_NULL_RETURN(titlePattern, false);
-        auto options = titlePattern->GetTitleBarOptions();
-        auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
+        auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(navDestinationPattern, false);
+        auto barStyle = navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
         if ((navDestinationLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK) &&
             safeAreaPos.top_.IsOverlapped(frame.Top())) {
             return true;
@@ -206,7 +202,8 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
+    auto offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
+    auto titleBarOffset = OffsetT<float>(0.0f, offsetY);
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     titleBarOffset.AddX(padding.left.value_or(0.0f));
     titleBarOffset.AddY(padding.top.value_or(0.0f));
@@ -281,21 +278,36 @@ void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
     sheetWrapper->Layout();
 }
 
+void UpdateTitleBarMenuNode(const RefPtr<NavDestinationGroupNode>& hostNode, const SizeF& navigationSize)
+{
+    if (hostNode->GetPrevMenuIsCustomValue(false)) {
+        return;
+    }
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(hostNode->GetPattern());
+    auto isHideToolbar = navDestinationPattern->GetToolbarHideStatus();
+    auto preMenuNode = titleBarNode->GetMenu();
+
+    bool isNeedLandscapeMenu =
+        NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(hostNode, navigationSize) && !isHideToolbar;
+    RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? hostNode->GetLandscapeMenu() : hostNode->GetMenu();
+    if (preMenuNode == newMenuNode) {
+        return;
+    }
+    titleBarNode->RemoveChild(preMenuNode);
+    titleBarNode->SetMenu(newMenuNode);
+    newMenuNode->MountToParent(titleBarNode);
+}
+
 float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float titleBarHeight)
 {
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleBarNode, 0.0f);
-    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, 0.0f);
-    auto options = titlePattern->GetTitleBarOptions();
-    auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
-    float resetTitleBarHeight = 0.0f;
-    if (barStyle == BarStyle::STACK) {
-        resetTitleBarHeight = 0.0f;
-    } else {
-        resetTitleBarHeight = titleBarHeight;
-    }
-    return resetTitleBarHeight;
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, 0.0f);
+    return navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD) == BarStyle::STANDARD ?
+        titleBarHeight : 0.0f;
 }
 
 } // namespace
@@ -314,6 +326,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+    UpdateTitleBarMenuNode(hostNode, size);
 
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
     auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titleBarHeight);

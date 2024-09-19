@@ -15,23 +15,13 @@
 
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 
-#include "base/memory/ace_type.h"
-#include "core/common/container.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+constexpr float CONTENT_OFFSET_PERCENT  = 0.2f;
+constexpr float TITLE_OFFSET_PERCENT  = 0.02f;
 
 RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
@@ -49,12 +39,12 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
-    auto contentNode = GetNavBarContentNode();
+    auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        SetNavBarContentNode(contentNode);
+        SetContentNode(contentNode);
         AddChild(contentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -67,73 +57,53 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     contentNode->AddChild(child);
 }
 
-std::string NavBarNode::GetBarItemsString(bool isMenu) const
+void NavBarNode::InitSystemTransitionPop()
 {
-    auto jsonValue = JsonUtil::Create(true);
-    auto parentNodeOfBarItems = isMenu ? DynamicCast<FrameNode>(GetMenu()) : DynamicCast<FrameNode>(GetToolBarNode());
-    CHECK_NULL_RETURN(parentNodeOfBarItems, "");
-    if (!parentNodeOfBarItems->GetChildren().empty()) {
-        auto jsonOptions = JsonUtil::CreateArray(true);
-        int32_t i = 0;
-        for (auto iter = parentNodeOfBarItems->GetChildren().begin(); iter != parentNodeOfBarItems->GetChildren().end();
-             ++iter, i++) {
-            auto jsonToolBarItem = JsonUtil::CreateArray(true);
-            auto barItemNode = DynamicCast<BarItemNode>(*iter);
-            if (!barItemNode) {
-                jsonToolBarItem->Put("value", "");
-                jsonToolBarItem->Put("icon", "");
-                continue;
-            }
-            auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
-            if (iconNode) {
-                auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-                if (!imageLayoutProperty || !imageLayoutProperty->HasImageSourceInfo()) {
-                    jsonToolBarItem->Put("icon", "");
-                } else {
-                    jsonToolBarItem->Put("icon", imageLayoutProperty->GetImageSourceInfoValue().GetSrc().c_str());
-                }
-            } else {
-                jsonToolBarItem->Put("icon", "");
-            }
-            auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
-            if (textNode) {
-                auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-                if (!textLayoutProperty) {
-                    jsonToolBarItem->Put("value", "");
-                } else {
-                    jsonToolBarItem->Put("value", textLayoutProperty->GetContentValue("").c_str());
-                }
-            } else {
-                jsonToolBarItem->Put("value", "");
-            }
-            auto index_ = std::to_string(i);
-            jsonOptions->Put(index_.c_str(), jsonToolBarItem);
-        }
-        jsonValue->Put("items", jsonOptions);
-        return jsonValue->ToString();
-    }
-    return "";
+    // navabr do enter pop initialization
+    float isRTL = GetLanguageDirection();
+    SetTransitionType(PageTransitionType::ENTER_POP);
+    auto curFrameSize = GetGeometryNode()->GetFrameSize();
+    GetRenderContext()->RemoveClipWithRRect();
+    GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    auto curTitleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(curTitleBarNode);
+    curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
+        { curFrameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+void NavBarNode::SystemTransitionPushAction(bool isStart)
 {
-    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ToJsonValue(json, filter);
-    
-    /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
-        return;
+    // initialization or finish callBack
+    if (isStart) {
+        SetTransitionType(PageTransitionType::EXIT_PUSH);
+    } else {
+        GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     }
-    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
-    if (titleBarNode) {
-        std::string title = NavigationTitleUtil::GetTitleString(titleBarNode, GetPrevTitleIsCustomValue(false));
-        std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
-        json->PutExtAttr("title", title.c_str(), filter);
-        json->PutExtAttr("subtitle", subtitle.c_str(), filter);
-    }
-    json->PutExtAttr("menus", GetBarItemsString(true).c_str(), filter);
-    json->PutExtAttr("toolBar", GetBarItemsString(false).c_str(), filter);
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
 
+void NavBarNode::StartSystemTransitionPush()
+{
+    // start EXIT_PUSH transition animation
+    float isRTL = GetLanguageDirection();
+    auto frameSize = GetGeometryNode()->GetFrameSize();
+    GetRenderContext()->UpdateTranslateInXY(
+        { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY(
+        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+}
+
+void NavBarNode::StartSystemTransitionPop()
+{
+    // navabr start to do ENTER_POP animation
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
 } // namespace OHOS::Ace::NG

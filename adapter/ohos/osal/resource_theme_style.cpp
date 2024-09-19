@@ -17,7 +17,6 @@
 
 #include <regex>
 #include <set>
-#include <string>
 
 namespace OHOS::Ace {
 namespace {
@@ -64,6 +63,9 @@ static const std::set<std::string> stringAttrs = {
     "description_receive",
     "description_continue_to_receive",
     "description_save_to_gallery",
+    "description_export_to_gallery",
+    "description_quick_save_to_gallery",
+    "description_quick_resave_to_gallery",
     "draggable",
     "divider_shadow_enable",
     "camera_input",
@@ -91,6 +93,10 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
     "text_show_handle",
+    "textfield_show_password_button",
+    "textfield_hide_password_button",
+    "textfield_has_showed_password",
+    "textfield_has_hidden_password",
     "calendar_picker_mon",
     "calendar_picker_tue",
     "calendar_picker_wed",
@@ -105,7 +111,11 @@ static const std::set<std::string> stringAttrs = {
     "textfield_writting_bundle_name",
     "textfield_writting_ability_name",
     "rich_editor_writting_bundle_name",
-    "rich_editor_writting_ability_name"
+    "rich_editor_writting_ability_name",
+    "textfield_writting_is_support",
+    "rich_editor_writting_is_support",
+    "ai_write_menu_name",
+    "textfield_accessibility_clear"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
@@ -218,8 +228,7 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
 
 void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
 {
-    auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
-    if (it == checkThemeStyleVector.end()) {
+    if (!CheckThemeStyle(patternName)) {
         return;
     }
     if (future_.valid()) {

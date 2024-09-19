@@ -98,7 +98,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg002, TestSize.Level1)
     auto borderWidth = Dimension(1.0f);
     borderWidthProperty.SetBorderWidth(borderWidth);
     auto ret = borderWidthProperty.ToString();
-    EXPECT_EQ(ret, "leftDimen: [1.00px]rightDimen: [1.00px]topDimen: [1.00px]bottomDimen: [1.00px]");
+    EXPECT_EQ(ret, "[1.00px,1.00px,1.00px,1.00px]");
 }
 
 /**

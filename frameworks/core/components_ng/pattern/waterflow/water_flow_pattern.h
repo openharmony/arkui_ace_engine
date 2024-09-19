@@ -35,6 +35,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsReverse() const override;
+    bool IsVerticalReverse() const;
     bool hasFooter()
     {
         return footer_.Upgrade() != nullptr;
@@ -214,6 +215,10 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
+    void FireOnReachStart(const OnReachEvent& onReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
+    void DumpInfoAddSections();
 
     /**
      * @param step FocusStep

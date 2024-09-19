@@ -1032,6 +1032,16 @@ export struct GridObjectSortComponent {
     .height(this.textItemEditHeight)
   }
 
+  onAddTagLongPressEnd() {
+    this.addAreaLongPressGesture = false;
+    animateTo({
+      duration: ENTER_EXIT_ICON_DURATION,
+      curve: LONG_TOUCH_SCALE
+    }, () => {
+      this.longScaleOnePointTwo = 1;
+    });
+  }
+
   @Builder
   AddTagBuilder() {
     Grid() {
@@ -1062,6 +1072,10 @@ export struct GridObjectSortComponent {
             if (event.type === TouchType.Down) {
               this.content = item;
               this.isTouchDown = true;
+            }
+            if (event.type === TouchType.Cancel) {
+              this.isTouchDown = false;
+              return;
             }
             if (event.type === TouchType.Up) {
               this.isTouchDown = false;
@@ -1135,13 +1149,10 @@ export struct GridObjectSortComponent {
                 this.calcGridHeight();
               })
               .onActionEnd(() => {
-                this.addAreaLongPressGesture = false;
-                animateTo({
-                  duration: ENTER_EXIT_ICON_DURATION,
-                  curve: LONG_TOUCH_SCALE
-                }, () => {
-                  this.longScaleOnePointTwo = 1;
-                });
+                this.onAddTagLongPressEnd();
+              })
+              .onActionCancel(() => {
+                this.onAddTagLongPressEnd();
               })
           )
         }
@@ -1200,7 +1211,7 @@ export struct GridObjectSortComponent {
                 this.isTouchDown = true;
               }
 
-              if (event.type === TouchType.Up) {
+              if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
                 this.isTouchDown = false;
                 animateTo({
                   duration: ENTER_EXIT_ICON_DURATION,
@@ -1255,6 +1266,11 @@ export struct GridObjectSortComponent {
               }
             }
             this.calcGridHeight();
+          })
+          .onActionCancel(() => {
+            if (this.isStartDrag) {
+              this.insertItem(this.itemIndex, this.itemIndex);
+            }
           })
       )
       .clip(false)
