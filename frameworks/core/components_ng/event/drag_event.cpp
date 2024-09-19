@@ -1610,7 +1610,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (!gestureHub->IsPixelMapNeedScale()) {
+        auto dragDropManager = pipeline->GetDragDropManager();
+        if (!gestureHub->IsPixelMapNeedScale() && dragDropManager && dragDropManager->IsDragging()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         gestureHub->SetPixelMap(nullptr);

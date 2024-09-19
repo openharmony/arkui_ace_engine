@@ -5626,7 +5626,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
-        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isSubwindowOverlay) {
+        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isSubwindowOverlay && dragDropManager->IsDragging()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         auto overlayManager = weak.Upgrade();
