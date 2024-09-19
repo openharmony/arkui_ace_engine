@@ -43,10 +43,7 @@ void AssignCast(std::optional<NavigatorType>& dst, const Ark_NavigationType& src
         case ARK_NAVIGATION_TYPE_PUSH: dst = NavigatorType::PUSH; break;
         case ARK_NAVIGATION_TYPE_BACK: dst = NavigatorType::BACK; break;
         case ARK_NAVIGATION_TYPE_REPLACE: dst = NavigatorType::REPLACE; break;
-        default: {
-            dst = NavigatorType::PUSH;
-            LOGE("Unexpected enum value in Ark_NavigationType: %{public}d", src);
-        }
+        default: LOGE("Unexpected enum value in Ark_NavigationType: %{public}d", src);
     }
 }
 } // OHOS::Ace::NG::Converter
@@ -69,9 +66,7 @@ void SetNavigatorOptions0Impl(Ark_NativePointer node,
 }
 void SetNavigatorOptions1Impl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetType(frameNode, NavigatorType::PUSH);
+    // no sense to implement this due nothing arguments
 }
 } // NavigatorInterfaceModifier
 namespace NavigatorAttributeModifier {
