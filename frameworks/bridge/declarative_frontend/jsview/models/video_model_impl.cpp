@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,8 @@ void VideoModelImpl::Create(const RefPtr<VideoControllerV2>& videoController)
     stack->GetFlexItemComponent();
 }
 
-void VideoModelImpl::SetSrc(const std::string& src)
+void VideoModelImpl::SetSrc(const std::string& src, const std::string& /* bundleName */,
+    const std::string& /*moduleName */)
 {
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(videoComponent);

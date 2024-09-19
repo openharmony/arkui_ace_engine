@@ -68,8 +68,6 @@ constexpr Dimension IMAGE_WIDTH = 10.0_vp;
 constexpr Dimension IMAGE_HEIGHT = 10.0_vp;
 constexpr Dimension DEFAULT_IMAGE_WIDTH_V10 = 24.0_vp;
 constexpr Dimension DEFAULT_IMAGE_HEIGHT_V10 = 24.0_vp;
-constexpr int32_t PLATFORM_VERSION_9 = 9;
-constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr static int32_t TEST_VALUE = 12;
 constexpr float MAX_SIDE_BAR = 20.0f;
 constexpr float MIN_SIDE_BAR = -10.0f;
@@ -1020,20 +1018,19 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg033, TestSize.Level1)
      * @tc.steps: step2. Set platform version to 10, then execute GetControlImageSize.
      * @tc.expected: image's width is 24vp, and height is 24vp.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     Dimension width;
     Dimension height;
     pattern->GetControlImageSize(width, height);
     EXPECT_EQ(width, DEFAULT_IMAGE_WIDTH_V10);
     EXPECT_EQ(height, DEFAULT_IMAGE_HEIGHT_V10);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 
     /**
      * @tc.steps: step3. Set image's width and height to 10vp, then execute GetControlImageSize.
      * @tc.expected: image's width is 10vp, and height is 10vp.
      */
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_9);
     auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateControlButtonWidth(IMAGE_WIDTH);

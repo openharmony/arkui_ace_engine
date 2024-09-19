@@ -449,6 +449,8 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
 
@@ -800,6 +802,11 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
     return NG::MockPipelineContext::GetCurrent();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    return NG::MockPipelineContext::GetCurrent();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = NG::MockPipelineContext::GetCurrentContext();
@@ -913,5 +920,10 @@ bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>
 }
 
 void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+
+bool NG::PipelineContext::CheckThreadSafe()
+{
+    return false;
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

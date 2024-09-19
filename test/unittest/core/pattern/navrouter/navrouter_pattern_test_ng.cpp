@@ -550,32 +550,32 @@ HWTEST_F(NavrouterPatternTestNg, SetMenuItems001, TestSize.Level1)
     /**
      * @tc.steps: step2. Call SetMenuItems when UpdatePrevMenuIsCustom is true.
      */
-    titleBarNode->UpdatePrevMenuIsCustom(true);
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
     navDestinationModel.SetMenuItems(std::move(barItems));
-    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
 
     /**
      * @tc.steps: step3. Call SetMenuItems when UpdatePrevMenuIsCustom is false.
-     * and titleBarNode has no menu
+     * and navDestinationGroupNode has no menu
      */
-    titleBarNode->UpdatePrevMenuIsCustom(false);
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
     navDestinationModel.SetMenuItems(std::move(barItems));
-    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
 
     /**
      * @tc.steps: step4. Call SetMenuItems when UpdatePrevMenuIsCustom is false
-     * and titleBarNode has menu
+     * and navDestinationGroupNode has menu
      */
-    titleBarNode->UpdatePrevMenuIsCustom(false);
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, nodeId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(menuNode, nullptr);
-    titleBarNode->SetMenu(menuNode);
+    navDestinationGroupNode->SetMenu(menuNode);
     navDestinationModel.SetMenuItems(std::move(barItems));
-    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
 }
 
 /**
@@ -606,20 +606,20 @@ HWTEST_F(NavrouterPatternTestNg, SetCustomMenu001, TestSize.Level1)
      * @tc.steps: step2. Call SetCustomMenu when previous node is not custom.
      */
     navDestinationModel.SetCustomMenu(customNode);
-    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
+    EXPECT_TRUE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
 
     auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, 33, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(menuNode, nullptr);
-    titleBarNode->SetMenu(menuNode);
+    navDestinationGroupNode->SetMenu(menuNode);
 
     /**
      * @tc.steps: step3. Call SetMenuItems when previous menu exists.
      */
-    titleBarNode->SetMenu(menuNode);
+    navDestinationGroupNode->SetMenu(menuNode);
     navDestinationModel.SetCustomMenu(customNode);
-    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(titleBarNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+    EXPECT_TRUE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
 }
 
 /**

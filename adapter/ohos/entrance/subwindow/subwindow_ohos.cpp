@@ -120,7 +120,7 @@ Rosen::WindowType SubwindowOhos::GetToastRosenType(bool isSceneBoardEnable)
 {
     auto toastType = GetToastWindowType();
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
-        "GetToastRosenType windowType: %d, isSceneBoardEnable: %d",
+        "GetToastRosenType windowType: %{public}d, isSceneBoardEnable: %{public}d",
         toastType, isSceneBoardEnable);
     if (toastType == ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW) {
         if (!isSceneBoardEnable) {
@@ -145,6 +145,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
     windowOption->SetWindowType(toastWindowType);
     if (parentContainer->IsUIExtensionWindow()) {
         auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
         auto hostWindowId = parentPipeline->GetFocusWindowId();
         windowOption->SetExtensionTag(true);
         windowOption->SetParentId(hostWindowId);
@@ -302,25 +303,8 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
     subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
-    if (!parentPipeline->IsFollowSystem()) {
-        subPipelineContext->SetFontScale(1.0f);
-    }
-    SetAppFontScale();
+    subPipelineContext->SetFontScale(parentPipeline->GetFontScale());
     return true;
-}
-
-void SubwindowOhos::SetAppFontScale() const
-{
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
-    auto parentPipeline = parentContainer->GetPipelineContext();
-    CHECK_NULL_VOID(parentPipeline);
-    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext();
-    CHECK_NULL_VOID(subPipelineContext);
-    subPipelineContext->SetUseAppFontScale(parentPipeline->UseAppFontScale());
-    if (parentPipeline->UseAppFontScale()) {
-        subPipelineContext->SetAppFontScale(parentPipeline->GetAppFontScale());
-    }
 }
 
 RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
@@ -1339,8 +1323,10 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
 void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
-    if ((parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
-        parentContainerId_ < 0) {
+    auto isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
+    // for pa service
+    if ((isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
+        (!isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID) || parentContainerId_ < 0) {
         ShowToastForService(toastInfo, std::move(callback));
     } else {
         ShowToastForAbility(toastInfo, std::move(callback));

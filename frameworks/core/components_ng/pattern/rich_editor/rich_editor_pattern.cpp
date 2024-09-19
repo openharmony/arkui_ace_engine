@@ -187,10 +187,6 @@ void RichEditorPattern::ProcessStyledString()
         auto [spanStart, spanEnd] = span->interval;
         span->rangeStart = spanStart;
         span->position = spanEnd;
-
-        if (span && span->urlOnHover) {
-            InitUrlHoverEvent();
-        }
     }
     if (textForDisplay_ != textCache) {
         dataDetectorAdapter_->aiDetectInitialized_ = false;
@@ -544,9 +540,15 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
+    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         previewLongPress_ = false;
         editingLongPress_ = false;
+        if (moveCaretState_.isMoveCaret) {
+            isCursorAlwaysDisplayed_ = false;
+            StartTwinkling();
+        }
+        moveCaretState_.Reset();
         magnifierController_->RemoveMagnifierFrameNode();
     }
 }
@@ -2684,13 +2686,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         CloseSelectOverlay();
         ResetSelection();
     }
-
-    RectF textContentRect = contentRect_;
-    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
-    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
-    bool isClickOnSpan = false;
-    HandleSpanSingleClickEvent(info, textContentRect, isClickOnSpan);
-
     moveCaretState_.Reset();
     caretUpdateType_ = CaretUpdateType::PRESSED;
     CHECK_NULL_VOID(overlayMod_);
@@ -2714,11 +2709,6 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     if (IsShowSingleHandleByClick(info, lastCaretPosition, lastCaretRect, isCaretTwinkling)) {
         CreateAndShowSingleHandle();
     }
-}
-
-std::vector<RectF> RichEditorPattern::GetSelectedRects(int32_t start, int32_t end)
-{
-    return paragraphs_.GetRects(start, end);
 }
 
 Offset RichEditorPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffset)
@@ -3262,10 +3252,6 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     HandleDoubleClickOrLongPress(info);
     caretUpdateType_ = CaretUpdateType::NONE;
-
-    if (sourceType_ == SourceType::MOUSE) {
-        HandleUrlSpanOnPressEvent(info);
-    }
 }
 
 void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
@@ -6301,10 +6287,6 @@ void RichEditorPattern::InitTouchEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
-
-        if (pattern->sourceType_ == SourceType::MOUSE) {
-            pattern->HandleTouchUrlSpanEvent(info);
-        }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchListener_);
@@ -6739,13 +6721,11 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
-        SetDefaultMouseStyle(MouseFormat::DEFAULT);
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         currentMouseStyle_ = MouseFormat::DEFAULT;
         return;
     }
-    SetDefaultMouseStyle(MouseFormat::TEXT_CURSOR);
 
     caretUpdateType_ = CaretUpdateType::NONE;
     if (info.GetButton() == MouseButton::LEFT_BUTTON) {
@@ -10459,13 +10439,24 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
 bool RichEditorPattern::IsShowAIWrite()
 {
     CHECK_NULL_RETURN(!textSelector_.SelectNothing(), false);
-    auto textFieldTheme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, false);
-    auto bundleName = textFieldTheme->GetAIWriteBundleName();
-    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    auto theme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto bundleName = theme->GetAIWriteBundleName();
+    auto abilityName = theme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        return false;
+    }
     aiWriteAdapter_->SetBundleName(bundleName);
     aiWriteAdapter_->SetAbilityName(abilityName);
-    return aiWriteAdapter_->GetAISupportFromMetadata(bundleName, abilityName);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "BundleName: %{public}s, abilityName: %{public}s", bundleName.c_str(), abilityName.c_str());
+
+    auto isAISupport = false;
+    if (theme->GetAIWriteIsSupport() == "true") {
+        isAISupport = true;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isAISupport: %{public}d", isAISupport);
+    return isAISupport;
 }
 
 void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)

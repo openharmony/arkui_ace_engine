@@ -1456,6 +1456,7 @@ struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalInt barStyle;
     ArkUIOptionalDimensionType paddingStart;
     ArkUIOptionalDimensionType paddingEnd;
+    ArkUIOptionalBool enableHoverMode;
 };
 
 struct ArkUIBarItem {
@@ -4631,6 +4632,8 @@ struct ArkUIXComponentModifier {
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
     void (*initXComponent)(ArkUINodeHandle node);
+    void (*setXComponentEnableSecure)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetXComponentEnableSecure)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

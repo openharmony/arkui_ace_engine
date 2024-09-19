@@ -60,6 +60,7 @@ public:
 
     int32_t GetAnimatorRate();
     bool IsAnimatorStopped();
+    int32_t GetMonitorVsyncRate() const;
 
     UIDisplaySyncManager();
     ~UIDisplaySyncManager() noexcept override;
@@ -72,6 +73,7 @@ private:
     int32_t sourceVsyncRate_ = 0;
     int64_t vsyncPeriod_ = 0;
     int32_t refreshRateMode_ = 0;
+    int32_t monitorVsyncRate_ = 0;
     RefPtr<FrameRateRange> displaySyncRange_ = AceType::MakeRefPtr<FrameRateRange>();
 
     IdToDisplaySyncMap uiDisplaySyncMap_;

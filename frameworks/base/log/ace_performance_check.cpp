@@ -222,9 +222,10 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
             continue;
         }
         auto codeInfo = GetCodeInfo(1, 1);
-        if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
+        if (!codeInfo.sources.empty()) {
             continue;
         }
+        CheckIsRuleContainsPage("9902", codeInfo.sources);
         auto eventTime = GetCurrentTime();
         CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
         auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");

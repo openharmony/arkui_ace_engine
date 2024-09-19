@@ -250,7 +250,7 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     }
 }
 
-void FormPattern::HandleSnapshot(uint32_t delayTime)
+void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -259,8 +259,8 @@ void FormPattern::HandleSnapshot(uint32_t delayTime)
     snapshotTimestamp_ = GetCurrentTimestamp();
     if (isDynamic_) {
         if (formChildrenNodeMap_.find(FormChildNodeType::FORM_STATIC_IMAGE_NODE) != formChildrenNodeMap_.end()) {
-            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormSetNonTransparentAfterRecover");
-            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormDeleteImageNodeAfterRecover");
+            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
+            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
             RemoveFrsNode();
             ReleaseRenderer();
             UnregisterAccessibility();
@@ -786,10 +786,11 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             auto renderContext = host->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             auto opacity = renderContext->GetOpacityValue(NON_TRANSPARENT_VAL);
-            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d",
-                opacity, static_cast<int>(visible));
+            std::string nodeIdStr = std::to_string(host->GetId());
+            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
+                opacity, static_cast<int>(visible), nodeIdStr.c_str());
             if (visible == VisibleType::VISIBLE && opacity == NON_TRANSPARENT_VAL) {
-                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S);
+                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S, nodeIdStr);
             }
         }
     }
@@ -1350,7 +1351,10 @@ void FormPattern::InitFormManagerDelegate()
         ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleSnapshot(delayTime);
+        auto host = formPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        std::string nodeIdStr = std::to_string(host->GetId());
+        formPattern->HandleSnapshot(delayTime, nodeIdStr);
     });
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(
@@ -1497,7 +1501,7 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
+    std::string nodeIdStr = std::to_string(host->GetId());
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this)] {
@@ -1505,14 +1509,14 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
             CHECK_NULL_VOID(pattern);
             pattern->SetNonTransparentAfterRecover();
         },
-        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover");
+        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DeleteImageNodeAfterRecover(needHandleCachedClick);
         },
-        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
+        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
 }
 
 void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float borderWidth)

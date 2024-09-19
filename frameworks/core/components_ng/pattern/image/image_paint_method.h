@@ -58,7 +58,6 @@ public:
 private:
     void UpdatePaintConfig(PaintWrapper* paintWrapper);
     void UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxConfig& imageDfxConfig);
-    void UpdateSvgColorFilter();
 
     bool selected_ = false;
     bool sensitive_ = false;

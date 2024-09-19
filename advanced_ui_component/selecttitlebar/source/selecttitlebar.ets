@@ -38,7 +38,7 @@ const MIN_DIALOG = '216vp'
 
 @Component
 export struct SelectTitleBar {
-  @State selected: number = 0
+  @Prop selected: number = 0
 
   options: Array<SelectOption> = [];
   menuItems: Array<SelectTitleBarMenuItem> = [];

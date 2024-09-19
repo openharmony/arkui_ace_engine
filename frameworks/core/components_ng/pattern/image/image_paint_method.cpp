@@ -120,24 +120,6 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }
-    UpdateSvgColorFilter();
-}
-
-void ImagePaintMethod::UpdateSvgColorFilter()
-{
-    auto&& paintConfig = canvasImage_->GetPaintConfig();
-    auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
-    if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
-        svgCanvas->SetFillColor(paintConfig.svgFillColor_);
-        svgCanvas->SetSmoothEdge(paintConfig.smoothEdge_);
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
-            if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {
-                imageColorFilter = paintConfig.colorFilter_;
-            }
-            svgCanvas->SetColorFilter(imageColorFilter);
-        }
-    }
 }
 
 RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)

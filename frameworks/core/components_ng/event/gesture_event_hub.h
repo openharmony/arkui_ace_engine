@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -41,61 +42,11 @@ struct DragNotifyMsg;
 class UnifiedData;
 }
 
-enum class MenuPreviewMode {
-    NONE,
-    IMAGE,
-    CUSTOM,
-};
-
-enum class MenuBindingType {
-    LONG_PRESS,
-    RIGHT_CLICK,
-};
 namespace OHOS::Ace::NG {
-
-enum class HitTestMode {
-    /**
-     *  Both self and children respond to the hit test for touch events,
-     *  but block hit test of the other nodes which is masked by this node.
-     */
-    HTMDEFAULT = 0,
-
-    /**
-     * Self respond to the hit test for touch events,
-     * but block hit test of children and other nodes which is masked by this node.
-     */
-    HTMBLOCK,
-
-    /**
-     * Self and child respond to the hit test for touch events,
-     * and allow hit test of other nodes which is masked by this node.
-     */
-    HTMTRANSPARENT,
-
-    /**
-     * Self not respond to the hit test for touch events,
-     * but children respond to the hit test for touch events.
-     */
-    HTMNONE,
-
-    /**
-     * Self and child respond to the hit test for touch events,
-     * when self consumed allow hit test of other nodes which is masked by this node,
-     * when child consumed block hit test of other nodes.
-     */
-    HTMTRANSPARENT_SELF,
-};
-
 using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
-
-enum class TouchTestStrategy {
-    DEFAULT = 0,
-    FORWARD_COMPETITION,
-    FORWARD
-};
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -108,17 +59,6 @@ struct TouchTestInfo {
 struct TouchResult {
     TouchTestStrategy strategy;
     std::string id;
-};
-
-enum class HitTestResult {
-    // The touch point is located outside the current component area;
-    OUT_OF_REGION,
-    // node consumption events and prevent bubbling;
-    STOP_BUBBLING,
-    // node process events and bubble;
-    BUBBLING,
-    // node process events and bubble;
-    SELF_TRANSPARENT,
 };
 
 struct DragDropBaseInfo {
@@ -643,8 +583,8 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(
-        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
+        bool isCalculateInSubwindow = false) const;
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -726,6 +666,8 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    bool StartDragForCustomBuilderSync(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
     void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
         const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif

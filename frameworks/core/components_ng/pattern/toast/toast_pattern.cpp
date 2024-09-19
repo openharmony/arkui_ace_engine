@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/animation/animation_util.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
@@ -129,7 +130,19 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
         offset += displayWindowOffset;
     }
-    toastContext->UpdateOffset(offset);
+    auto func = [toastContext, offset]() { toastContext->UpdateOffset(offset); };
+    auto toastProp = DynamicCast<ToastLayoutProperty>(dirty->GetLayoutProperty());
+    CHECK_NULL_RETURN(toastProp, false);
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::TOP_MOST) {
+        auto keyboardAnimationConfig = context->GetKeyboardAnimationConfig();
+        auto safeAreaManager = context->GetSafeAreaManager();
+        auto keyboardHeight = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
+        context->Animate(option, option.GetCurve(), func);
+    } else {
+        func();
+    }
     return true;
 }
 

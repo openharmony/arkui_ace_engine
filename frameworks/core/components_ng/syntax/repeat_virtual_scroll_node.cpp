@@ -369,6 +369,16 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     return children_;
 }
 
+void RepeatVirtualScrollNode::UpdateChildrenFreezeState(bool isFreeze)
+{
+    const auto& allChildren = caches_.GetAllNodes();
+    for (auto& child : allChildren) {
+        if (child.second.item) {
+            child.second.item->SetFreeze(isFreeze);
+        }
+    }
+}
+
 void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT,

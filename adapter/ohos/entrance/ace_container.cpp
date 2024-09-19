@@ -2421,13 +2421,6 @@ void AceContainer::SetFontScaleAndWeightScale(
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
         return;
     }
-    if (pipelineContext_) {
-        bool useAppFontScale = !parsedConfig.appFontScale.empty();
-        pipelineContext_->SetUseAppFontScale(useAppFontScale);
-        if (useAppFontScale) {
-            pipelineContext_->SetAppFontScale(StringUtils::StringToFloat(parsedConfig.appFontScale));
-        }
-    }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);

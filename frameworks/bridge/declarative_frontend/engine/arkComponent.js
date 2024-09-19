@@ -25673,6 +25673,10 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentEnableAnalyzerModifier.identity, XComponentEnableAnalyzerModifier, value);
     return this;
   }
+  enableSecure(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.XComponent !== undefined) {
@@ -26067,6 +26071,23 @@ class XComponentEnableAnalyzerModifier extends ModifierWithKey {
   }
 }
 XComponentEnableAnalyzerModifier.identity = Symbol('xComponentEnableAnalyzer');
+class XComponentEnableSecureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableSecure(node);
+    }
+    else {
+      getUINativeModule().xComponent.setEnableSecure(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
