@@ -44,7 +44,6 @@ template("ace_core_components_theme_set") {
       "app_theme.cpp",
       "blur_style_theme.cpp",
       "icon_theme.cpp",
-      "shadow_theme.cpp",
       "theme_attributes.cpp",
       "theme_constants.cpp",
       "theme_manager_impl.cpp",
