@@ -382,6 +382,8 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
+    virtual void SetAccessibilitySelected(bool selected) = 0;
+    virtual void SetAccessibilityChecked(bool checked) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
