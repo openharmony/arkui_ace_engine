@@ -567,6 +567,7 @@ public:
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);

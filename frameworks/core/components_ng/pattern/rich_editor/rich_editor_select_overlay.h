@@ -56,7 +56,7 @@ public:
     void UpdateMenuOffset();
     bool IsBothHandlesShow();
     bool IsHandleShow();
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateSelectOverlayOnAreaChanged();
     void UpdateHandleOffset();
     void ToggleMenu();
@@ -83,6 +83,7 @@ private:
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
     bool handleIsHidden_ = true;
+    std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

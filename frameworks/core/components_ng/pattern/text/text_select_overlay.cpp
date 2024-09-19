@@ -190,10 +190,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
     textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     auto handleOffset = handleRect.GetOffset();
-    if (!selectTextUseTopHandle) {
-        bool isUseHandleTop = (isFirst != IsHandleReverse());
-        handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
-    }
+    handleOffset.SetY(handleOffset.GetY() + handleRect.Height() / 2.0f);
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -434,11 +431,15 @@ void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
 }
 
-void TextSelectOverlay::OnHandleMoveStart(bool isFirst)
+void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
-    BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
+    BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ChangeHandleHeight(event, isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
     manager->SetHandleCircleIsShow(isFirst, false);
     isDraggingFirstHandle_ = isFirst;
     hostPaintOffset_ = GetHotPaintOffset();
