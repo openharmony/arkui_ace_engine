@@ -1585,16 +1585,8 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     if (popupPattern->GetHasTransition()) {
         if (!popupNode->GetRenderContext()->HasDisappearTransition()) {
-            popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-            RemoveChildWithService(rootNode, popupNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-            CHECK_NULL_VOID(layoutProp);
-            auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-            if (isShowInSubWindow) {
-                auto subwindowMgr = SubwindowManager::GetInstance();
-                subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
+            if (finish) {
+                finish();
             }
         } else {
             popupPattern->StartExitingTransitionEffects(popupNode, finish);
