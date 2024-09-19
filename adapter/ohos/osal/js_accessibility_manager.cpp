@@ -65,6 +65,7 @@ constexpr int32_t ROOT_DECOR_BASE = 3100000;
 constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
+constexpr int32_t UEC_EVENT_TASK_DELAY_MILLISECOND = 200;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
@@ -5031,14 +5032,14 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
 
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
+    context->GetTaskExecutor()->PostDelayedTask(
         [weak = GetHandler(), splitElementId] {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
             ACE_SCOPED_TRACE("SendUecOnTreeEvent");
             jsAccessibilityManager->SendUecOnTreeEvent(splitElementId);
         },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendUecOnTreeEvent");
+        TaskExecutor::TaskType::UI, UEC_EVENT_TASK_DELAY_MILLISECOND, "ArkUIAccessibilitySendUecOnTreeEvent");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)
