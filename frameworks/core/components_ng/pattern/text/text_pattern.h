@@ -715,6 +715,10 @@ public:
     }
     bool HasContent();
 protected:
+    int32_t GetClickedSpanPosition()
+    {
+        return clickedSpanPosition_;
+    }
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
@@ -846,6 +850,7 @@ protected:
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    bool ShowShadow(const PointF& textOffset, const Color& color);
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -864,7 +869,6 @@ private:
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
     std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
-    bool ShowShadow(const PointF& textOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();
