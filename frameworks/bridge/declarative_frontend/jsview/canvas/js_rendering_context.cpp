@@ -23,6 +23,7 @@
 
 #include "base/error/error_code.h"
 #include "base/memory/referenced.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
@@ -50,6 +51,20 @@ JSRenderingContext::JSRenderingContext()
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+        auto OnAttach = [weakCtx = WeakClaim(this)]() {
+            auto ctx = weakCtx.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->OnAttachToCanvas();
+        };
+        auto OnDetach = [weakCtx = WeakClaim(this)]() {
+            auto ctx = weakCtx.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            ctx->OnDetachFromCanvas();
+        };
+        auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+        CHECK_NULL_VOID(canvasRenderingContext2DModel);
+        canvasRenderingContext2DModel->SetOnAttach(OnAttach);
+        canvasRenderingContext2DModel->SetOnDetach(OnDetach);
     } else {
         renderingContext2DModel_ = AceType::MakeRefPtr<Framework::CanvasRenderingContext2DModelImpl>();
     }
@@ -62,6 +77,10 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::Declare("CanvasRenderingContext2D");
 
     // Define all properties of the "CanvasRenderingContext2D"
+    JSClass<JSRenderingContext>::CustomMethod("onAttach", &JSRenderingContext::JsOnAttach);
+    JSClass<JSRenderingContext>::CustomMethod("onDetach", &JSRenderingContext::JsOnDetach);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "canvas", &JSRenderingContext::JsGetCanvas, &JSRenderingContext::JsSetCanvas);
     JSClass<JSRenderingContext>::CustomProperty(
         "width", &JSRenderingContext::JsGetWidth, &JSRenderingContext::JsSetWidth);
     JSClass<JSRenderingContext>::CustomProperty(
@@ -187,12 +206,84 @@ void JSRenderingContext::Destructor(JSRenderingContext* controller)
     }
 }
 
+void JSRenderingContext::OnAttachToCanvas()
+{
+    if (onAttach_) {
+        onAttach_();
+    }
+}
+
+void JSRenderingContext::OnDetachFromCanvas()
+{
+    if (onDetach_) {
+        onDetach_();
+    }
+    ResetPaintState();
+}
+
+void JSRenderingContext::JsOnAttach(const JSCallbackInfo& info)
+{
+    auto arg = info[0];
+    if (!arg->IsFunction()) {
+        return;
+    }
+    auto jsOnAttachFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(arg));
+    onAttach_ = [execCtx = info.GetExecutionContext(), func = jsOnAttachFunc]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("OnAttach Context2D");
+        func->Execute();
+    };
+}
+
+void JSRenderingContext::JsOnDetach(const JSCallbackInfo& info)
+{
+    auto arg = info[0];
+    if (!arg->IsFunction()) {
+        return;
+    }
+
+    auto jsOnAttachFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(arg));
+    onDetach_ = [execCtx = info.GetExecutionContext(), func = jsOnAttachFunc]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("OnDetach Context2D");
+        func->Execute();
+    };
+}
+
+void JSRenderingContext::JsGetCanvas(const JSCallbackInfo& info)
+{
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    auto nodeId = canvasRenderingContext2DModel->GetId();
+
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getFrameNodeByNodeId__"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    JSRef<JSVal> params[2];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(instanceId_));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+    auto returnPtr = jsFunc->ExecuteJS(2, params);
+    info.SetReturnValue(returnPtr);
+    return;
+}
+
+void JSRenderingContext::JsSetCanvas(const JSCallbackInfo& info)
+{
+    return;
+}
+
 void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->GetWidth(canvasPattern_, width);
+    canvasRenderingContext2DModel->GetWidth(width);
     double density = GetDensity();
     width /= density;
     auto returnValue = JSVal(ToJSValue(width));
@@ -215,7 +306,7 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
     double height = 0.0;
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->GetHeight(canvasPattern_, height);
+    canvasRenderingContext2DModel->GetHeight(height);
     double density = GetDensity();
     height /= density;
     auto returnValue = JSVal(ToJSValue(height));
@@ -251,11 +342,11 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = jsImage->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(canvasPattern_, pixelMap);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(pixelMap);
 #else
     auto imageData = jsImage->GetImageData();
     CHECK_NULL_VOID(imageData);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(canvasPattern_, imageData);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
 #endif
 }
 
@@ -356,7 +447,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
     isImageAnalyzing_ = true;
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StartImageAnalyzer(canvasPattern_, configNativeValue, onAnalyzed_);
+    canvasRenderingContext2DModel->StartImageAnalyzer(configNativeValue, onAnalyzed_);
     ReturnPromise(info, promise);
 }
 
@@ -365,6 +456,6 @@ void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
     ContainerScope scope(instanceId_);
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StopImageAnalyzer(canvasPattern_);
+    canvasRenderingContext2DModel->StopImageAnalyzer();
 }
 } // namespace OHOS::Ace::Framework

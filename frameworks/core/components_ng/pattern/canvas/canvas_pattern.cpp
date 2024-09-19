@@ -33,6 +33,40 @@ CanvasPattern::~CanvasPattern()
     }
 }
 
+void CanvasPattern::AttachRenderContext()
+{
+    FireOnContext2DAttach();
+}
+
+void CanvasPattern::DetachRenderContext()
+{
+    FireOnContext2DDetach();
+}
+
+void CanvasPattern::SetOnContext2DAttach(std::function<void()> callback)
+{
+    onContext2DAttach_ = callback;
+}
+
+void CanvasPattern::SetOnContext2DDetach(std::function<void()> callback)
+{
+    onContext2DDetach_ = callback;
+}
+
+void CanvasPattern::FireOnContext2DAttach()
+{
+    if (onContext2DAttach_) {
+        onContext2DAttach_();
+    }
+}
+
+void CanvasPattern::FireOnContext2DDetach()
+{
+    if (onContext2DDetach_) {
+        onContext2DDetach_();
+    }
+}
+
 void CanvasPattern::OnAttachToFrameNode()
 {
 #ifndef ACE_UNITTEST

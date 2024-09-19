@@ -33,7 +33,14 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSRenderingContext* controller);
 
+    void OnAttachToCanvas();
+    void OnDetachFromCanvas();
+
+    void JsOnAttach(const JSCallbackInfo& info);
+    void JsOnDetach(const JSCallbackInfo& info);
     void JsToDataUrl(const JSCallbackInfo& info);
+    void JsGetCanvas(const JSCallbackInfo& info);
+    void JsSetCanvas(const JSCallbackInfo& info);
     void JsGetWidth(const JSCallbackInfo& info);
     void JsGetHeight(const JSCallbackInfo& info);
     void JsSetHeight(const JSCallbackInfo& info);
@@ -44,6 +51,8 @@ public:
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContext);
 
+    std::function<void()> onAttach_;
+    std::function<void()> onDetach_;
 private:
     bool isImageAnalyzing_ = false;
 };
