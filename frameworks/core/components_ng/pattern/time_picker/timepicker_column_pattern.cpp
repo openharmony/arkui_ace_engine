@@ -1210,6 +1210,7 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
     HandleEventCallback(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
     return true;
 }
 
