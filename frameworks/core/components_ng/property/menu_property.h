@@ -82,6 +82,7 @@ struct MenuParam {
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
     std::optional<NG::BorderRadiusProperty> borderRadius;
+    std::optional<NG::MarginProperty> layoutRegionMargin;
 };
 
 } // namespace OHOS::Ace::NG

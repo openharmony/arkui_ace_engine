@@ -612,6 +612,9 @@ public:
     static void JsBackgroundFilter(const JSCallbackInfo& info);
     static void JsForegroundFilter(const JSCallbackInfo& info);
     static void JsCompositingFilter(const JSCallbackInfo& info);
+    static NG::PaddingProperty GetLocalizedPadding(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& start,
+        const std::optional<CalcDimension>& end);
     static NG::BorderColorProperty GetLocalizedBorderColor(const std::optional<Color>& colorStart,
         const std::optional<Color>& colorEnd, const std::optional<Color>& colorTop,
         const std::optional<Color>& colorBottom);
