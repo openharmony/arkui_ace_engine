@@ -25,8 +25,9 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
-
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -101,6 +102,56 @@ namespace OHOS::Ace::NG::Converter {
         dst.type = ARK_TAG_FLOAT32;
         dst.value = src;
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
+    }
+
+    inline void AssignArkValue(Ark_Number& dst, const Dimension& src)
+    {
+        auto value = static_cast<float>(src.ConvertToVp());
+        AssignArkValue(dst, value);
+    }
+
+    inline void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
+    {
+        dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
+        dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
+    }
+
+    inline void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src)
+    {
+        switch (src) {
+            case NestedScrollMode::SELF_ONLY: dst = ARK_NESTED_SCROLL_MODE_SELF_ONLY; break;
+            case NestedScrollMode::SELF_FIRST: dst = ARK_NESTED_SCROLL_MODE_SELF_FIRST; break;
+            case NestedScrollMode::PARENT_FIRST: dst = ARK_NESTED_SCROLL_MODE_PARENT_FIRST; break;
+            case NestedScrollMode::PARALLEL: dst = ARK_NESTED_SCROLL_MODE_PARALLEL; break;
+            default: {
+                dst = static_cast<Ark_NestedScrollMode>(-1);
+                LOGE("Unexpected enum value in NestedScrollMode: %{public}d", src);
+            }
+        }
+    }
+
+    inline void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src)
+    {
+        dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
+        dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
+    }
+
+    inline void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
+    {
+        dst.alwaysEnabled = src;
+    }
+
+    inline void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
+    {
+        switch (src) {
+            case ScrollState::IDLE: dst = ARK_SCROLL_STATE_IDLE; break;
+            case ScrollState::SCROLL: dst = ARK_SCROLL_STATE_SCROLL; break;
+            case ScrollState::FLING: dst = ARK_SCROLL_STATE_FLING; break;
+            default: {
+                dst = static_cast<Ark_ScrollState>(-1);
+                LOGE("Unexpected enum value in ScrollState: %{public}d", src);
+            }
+        }
     }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!

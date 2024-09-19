@@ -29,6 +29,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/image/image_source_info.h"
@@ -398,6 +399,18 @@ namespace OHOS::Ace::NG::Converter {
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
+    template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
+    template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
+    template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+
+    template<>
+    inline ItemDragInfo Convert(const Ark_ItemDragInfo& src)
+    {
+        ItemDragInfo itemDragInfo;
+        itemDragInfo.SetX(Convert<float>(src.x));
+        itemDragInfo.SetY(Convert<float>(src.y));
+        return itemDragInfo;
+    }
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_H
