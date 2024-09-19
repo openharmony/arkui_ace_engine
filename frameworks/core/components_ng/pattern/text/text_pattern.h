@@ -175,7 +175,7 @@ public:
         return textSelector_;
     }
 
-    std::string GetTextForDisplay() const
+    const std::string& GetTextForDisplay() const
     {
         return textForDisplay_;
     }
@@ -713,6 +713,7 @@ public:
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+    bool HasContent();
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
