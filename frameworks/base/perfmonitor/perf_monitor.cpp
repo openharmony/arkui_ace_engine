@@ -344,7 +344,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
             if ((it->second)->IsTimeOut(vsyncTime + duration)) {
                 CheckTimeOutOfExceptAnimatorStatus(it->second->sceneId);
                 delete it->second;
-                mRecords.erase(it++);
+                it = mRecords.erase(it);
                 continue;
             }
             if ((it->second)->IsFirstFrame()) {
@@ -625,8 +625,8 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
         sceneId == PerfConstants::APP_SWIPER_FLING ||
         sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
-            return true;
-        }
+        return true;
+    }
     return false;
 }
 

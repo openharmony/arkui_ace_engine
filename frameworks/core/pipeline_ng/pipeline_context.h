@@ -451,6 +451,7 @@ public:
     {
         return taskScheduler_->IsLayouting();
     }
+
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
     RectF GetRootRect()
@@ -593,6 +594,8 @@ public:
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
     void DeleteNavigationNode(const std::string& id);
 
+    void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
+
     void AddGestureTask(const DelayedTask& task)
     {
         delayedTasks_.emplace_back(task);
@@ -629,19 +632,11 @@ public:
         return windowSceneNode_.Upgrade();
     }
 
-    void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
+    // for frontend animation interface.
+    void OpenFrontendAnimation(
+        const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
+    void CloseFrontendAnimation();
 
-    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
-    {
-        activeNode_ = std::move(node);
-    }
-
-    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
-    {
-        return activeNode_;
-    }
-
-    std::string GetCurrentExtraInfo() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
 
     void SetCursor(int32_t cursorValue) override;
@@ -651,6 +646,11 @@ public:
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
 
+    void UpdateCurrentActiveNode(const WeakPtr<FrameNode>& node) override
+    {
+        activeNode_ = std::move(node);
+    }
+
     void OnTransformHintChanged(uint32_t transform) override;
 
     uint32_t GetTransformHint() const
@@ -658,15 +658,12 @@ public:
         return transform_;
     }
 
-    // for frontend animation interface.
-    void OpenFrontendAnimation(
-        const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
-    void CloseFrontendAnimation();
+    const WeakPtr<FrameNode>& GetCurrentActiveNode() const
+    {
+        return activeNode_;
+    }
 
-    bool IsDragging() const override;
-    void SetIsDragging(bool isDragging) override;
-
-    void ResetDragging() override;
+    std::string GetCurrentExtraInfo() override;
     const RefPtr<PostEventManager>& GetPostEventManager();
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
@@ -675,6 +672,10 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+    bool IsDragging() const override;
+    void SetIsDragging(bool isDragging) override;
+
+    void ResetDragging() override;
 
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
@@ -693,19 +694,6 @@ public:
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
-    void SetVsyncListener(VsyncCallbackFun vsync)
-    {
-        vsyncListener_ = std::move(vsync);
-    }
-
-    void SetOnceVsyncListener(VsyncCallbackFun vsync)
-    {
-        onceVsyncListener_ = std::move(vsync);
-    }
-
-    bool HasOnceVsyncListener() {
-        return onceVsyncListener_ != nullptr;
-    }
 
     const RefPtr<NavigationManager>& GetNavigationManager() const
     {
@@ -715,6 +703,15 @@ public:
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
     {
         return recycleManager_;
+    }
+
+    void SetOnceVsyncListener(VsyncCallbackFun vsync)
+    {
+        onceVsyncListener_ = std::move(vsync);
+    }
+
+    bool HasOnceVsyncListener() {
+        return onceVsyncListener_ != nullptr;
     }
 
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
@@ -742,24 +739,18 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    bool IsContainerModalVisible() override;
+
+    void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
+    {
+        isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
+    }
+
     void DetachNode(RefPtr<UINode> uiNode);
 
     void CheckNeedUpdateBackgroundColor(Color& color);
 
     bool CheckNeedDisableUpdateBackgroundImage();
-
-    void ChangeDarkModeBrightness() override;
-    void SetLocalColorMode(ColorMode colorMode)
-    {
-        auto localColorModeValue = static_cast<int32_t>(colorMode);
-        localColorMode_ = localColorModeValue;
-    }
-
-    ColorMode GetLocalColorMode() const
-    {
-        ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
-        return colorMode;
-    }
 
     void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     {
@@ -770,10 +761,19 @@ public:
     {
         return isFreezeFlushMessage_;
     }
-    bool IsContainerModalVisible() override;
-    void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
+
+    void ChangeDarkModeBrightness() override;
+
+    void SetLocalColorMode(ColorMode colorMode)
     {
-        isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
+        auto localColorModeValue = static_cast<int32_t>(colorMode);
+        localColorMode_ = localColorModeValue;
+    }
+
+    ColorMode GetLocalColorMode() const
+    {
+        ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
+        return colorMode;
     }
 
     void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) override;
@@ -787,12 +787,11 @@ public:
     void CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, AxisAction action) override;
 
     void CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) override;
-
-    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
-        int64_t delayMillis);
-
-    void FlushFrameCallback(uint64_t nanoTimestamp);
-    void TriggerIdleCallback(int64_t deadline);
+    
+    void SetVsyncListener(VsyncCallbackFun vsync)
+    {
+        vsyncListener_ = std::move(vsync);
+    }
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -807,6 +806,13 @@ public:
         predictNode_.Reset();
     }
 
+    void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
+        int64_t delayMillis);
+
+    void FlushFrameCallback(uint64_t nanoTimestamp);
+
+    void TriggerIdleCallback(int64_t deadline);
+
     void PreLayout(uint64_t nanoTimestamp, uint32_t frameCount);
 
     bool IsDensityChanged() const override
@@ -814,12 +820,17 @@ public:
         return isDensityChanged_;
     }
 
-    void GetInspectorTree();
-    void NotifyAllWebPattern(bool isRegister);
+
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
+
+    bool IsWindowFocused() const override
+    {
+        return isWindowHasFocused_ && GetOnFoucs();
+    }
+
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
     {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
@@ -837,20 +848,18 @@ public:
         return homePageConfig_;
     }
 
-    bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
+    void GetInspectorTree();
+    void NotifyAllWebPattern(bool isRegister);
 
-    bool IsWindowFocused() const override
-    {
-        return isWindowHasFocused_ && GetOnFoucs();
-    }
+    bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void StartWindowMaximizeAnimation(
-        int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void StartWindowMaximizeAnimation(int32_t width, int32_t height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
@@ -872,7 +881,6 @@ protected:
     {
         taskScheduler_->SetIsLayouting(layouting);
     }
-
     void AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
         const float safeHeight = 0.0f, const bool supportAvoidance = false);
     void OriginalAvoidanceLogic(
@@ -1038,6 +1046,7 @@ private:
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
+    std::unique_ptr<MouseEvent> lastMouseEvent_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
     bool isFreezeFlushMessage_ = false;
@@ -1049,8 +1058,6 @@ private:
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;
     std::optional<bool> windowShow_;
-
-    std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
@@ -1073,20 +1080,20 @@ private:
 
     RefPtr<FrameNode> predictNode_;
 
-    VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
+    VsyncCallbackFun vsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
-    std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
-    int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
+    int32_t lastAnimatorExpectedFrameRate_ = -1;
+    std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     bool isForceSplit_ = false;
     std::string homePageConfig_;
 

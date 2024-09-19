@@ -691,6 +691,7 @@ public:
 
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
+
     virtual void SetRenderFit(RenderFit renderFit) {}
 
 protected:
