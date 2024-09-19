@@ -533,9 +533,15 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
+    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         previewLongPress_ = false;
         editingLongPress_ = false;
+        if (moveCaretState_.isMoveCaret) {
+            isCursorAlwaysDisplayed_ = false;
+            StartTwinkling();
+        }
+        moveCaretState_.Reset();
         magnifierController_->RemoveMagnifierFrameNode();
     }
 }
