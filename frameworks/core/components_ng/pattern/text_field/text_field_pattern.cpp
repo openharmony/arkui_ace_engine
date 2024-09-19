@@ -164,6 +164,34 @@ constexpr double MINIMAL_OFFSET = 0.01f;
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 
+static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
+    { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
+    { AceAutoFillType::ACE_USER_NAME, TextInputType::USER_NAME },
+    { AceAutoFillType::ACE_NEW_PASSWORD, TextInputType::NEW_PASSWORD },
+    { AceAutoFillType::ACE_FULL_STREET_ADDRESS, TextInputType::TEXT },
+    { AceAutoFillType::ACE_HOUSE_NUMBER, TextInputType::TEXT },
+    { AceAutoFillType::ACE_DISTRICT_ADDRESS, TextInputType::TEXT },
+    { AceAutoFillType::ACE_CITY_ADDRESS, TextInputType::TEXT },
+    { AceAutoFillType::ACE_PROVINCE_ADDRESS, TextInputType::TEXT },
+    { AceAutoFillType::ACE_COUNTRY_ADDRESS, TextInputType::TEXT },
+    { AceAutoFillType::ACE_PERSON_FULL_NAME, TextInputType::TEXT },
+    { AceAutoFillType::ACE_PERSON_LAST_NAME, TextInputType::TEXT },
+    { AceAutoFillType::ACE_PERSON_FIRST_NAME, TextInputType::TEXT },
+    { AceAutoFillType::ACE_PHONE_NUMBER, TextInputType::PHONE },
+    { AceAutoFillType::ACE_PHONE_COUNTRY_CODE, TextInputType::PHONE },
+    { AceAutoFillType::ACE_FULL_PHONE_NUMBER, TextInputType::PHONE },
+    { AceAutoFillType::ACE_EMAIL_ADDRESS, TextInputType::EMAIL_ADDRESS },
+    { AceAutoFillType::ACE_BANK_CARD_NUMBER, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_ID_CARD_NUMBER, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_PRECISE_TIME, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_HOUR_AND_MINUTE, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_DATE, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_MONTH, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_YEAR, TextInputType::NUMBER },
+    { AceAutoFillType::ACE_NICKNAME, TextInputType::TEXT },
+    { AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, TextInputType::TEXT },
+    { AceAutoFillType::ACE_FORMAT_ADDRESS, TextInputType::TEXT }};
+
 static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::string>> contentTypeMap_ = {
     {TextContentType::VISIBLE_PASSWORD,
         std::make_pair(AceAutoFillType::ACE_PASSWORD, "TextContentType.VISIBLE_PASSWORD")},
@@ -2554,10 +2582,14 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     bool needToResetKeyboard = false;
     // check unspecified  for first time entrance
     if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard type %{public}d changed to %{public}d",
-            tmpHost->GetId(), (int)keyboard_, layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
-        keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
-        needToResetKeyboard = true;
+        auto autoFillType = GetAutoFillType(false);
+        if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::UNSPECIFIED ||
+            keyBoardMap_.find(autoFillType) == keyBoardMap_.end() || keyboard_ != keyBoardMap_[autoFillType]) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard type %{public}d changed to %{public}d",
+                tmpHost->GetId(), (int)keyboard_, layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+            keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+            needToResetKeyboard = true;
+        }
     }
     if (!needToResetKeyboard && action_ != TextInputAction::UNSPECIFIED) {
         needToResetKeyboard = action_ != GetTextInputActionValue(GetDefaultTextInputAction());
@@ -3524,35 +3556,10 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
         return;
     }
     auto autoFillType = GetAutoFillType(false);
-    static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap = {
-        { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
-        { AceAutoFillType::ACE_USER_NAME, TextInputType::USER_NAME },
-        { AceAutoFillType::ACE_NEW_PASSWORD, TextInputType::NEW_PASSWORD },
-        { AceAutoFillType::ACE_FULL_STREET_ADDRESS, TextInputType::TEXT },
-        { AceAutoFillType::ACE_HOUSE_NUMBER, TextInputType::TEXT },
-        { AceAutoFillType::ACE_DISTRICT_ADDRESS, TextInputType::TEXT },
-        { AceAutoFillType::ACE_CITY_ADDRESS, TextInputType::TEXT },
-        { AceAutoFillType::ACE_PROVINCE_ADDRESS, TextInputType::TEXT },
-        { AceAutoFillType::ACE_COUNTRY_ADDRESS, TextInputType::TEXT },
-        { AceAutoFillType::ACE_PERSON_FULL_NAME, TextInputType::TEXT },
-        { AceAutoFillType::ACE_PERSON_LAST_NAME, TextInputType::TEXT },
-        { AceAutoFillType::ACE_PERSON_FIRST_NAME, TextInputType::TEXT },
-        { AceAutoFillType::ACE_PHONE_NUMBER, TextInputType::PHONE },
-        { AceAutoFillType::ACE_PHONE_COUNTRY_CODE, TextInputType::PHONE },
-        { AceAutoFillType::ACE_FULL_PHONE_NUMBER, TextInputType::PHONE },
-        { AceAutoFillType::ACE_EMAIL_ADDRESS, TextInputType::EMAIL_ADDRESS },
-        { AceAutoFillType::ACE_BANK_CARD_NUMBER, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_ID_CARD_NUMBER, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_PRECISE_TIME, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_HOUR_AND_MINUTE, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_DATE, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_MONTH, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_YEAR, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_NICKNAME, TextInputType::TEXT },
-        { AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, TextInputType::TEXT },
-        { AceAutoFillType::ACE_FORMAT_ADDRESS, TextInputType::TEXT }};
-    if (keyBoardMap.find(autoFillType) != keyBoardMap.end()) {
-        keyboard_ = keyBoardMap[autoFillType];
+    if (keyBoardMap_.find(autoFillType) != keyBoardMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "Set InputType to %{public}d because of contentType", keyBoardMap_[autoFillType]);
+        keyboard_ = keyBoardMap_[autoFillType];
     }
 }
 
