@@ -83,7 +83,6 @@ private:
     void InitParameters();
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
-    void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();
     void InitOnKeyEvent();
