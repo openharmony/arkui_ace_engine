@@ -26,6 +26,9 @@ declare_args() {
   # Disable glfw window to build for PC preview scenario.
   enable_glfw_window = false
 
+  # Enable build for new ng pipeline, also will use new flutter
+  enable_ng_build = false
+
   # Enable metal in iOS or MacOS
   shell_enable_metal = false
 
@@ -114,13 +117,7 @@ if ("${current_os}_${current_cpu}" == "mac_arm64") {
 objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 
 if (is_ohos_standard_system) {
-  if (host_cpu == "arm64") {
-    objcopy_default =
-        "//prebuilts/clang/ohos/linux-aarch64/llvm/bin/llvm-objcopy"
-  } else {
-    objcopy_default =
-        "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
-  }
+  objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
 } else if (is_arkui_x) {
   if (host_os == "mac") {
     objcopy_default = objcopy_clang
@@ -193,6 +190,10 @@ if (enable_graphic_text_gine) {
   ace_common_defines += [ "USE_GRAPHIC_TEXT_GINE" ]
 }
 
+if (enable_ng_build) {
+  ace_common_defines += [ "NG_BUILD" ]
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.account_os_account)) {
   os_account_exists = true
@@ -242,6 +243,14 @@ if (!defined(global_parts_info) ||
   ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
 } else {
   security_component_enable = false
+}
+
+if (defined(global_parts_info) &&
+    defined(global_parts_info.resourceschedule_ffrt)) {
+  ace_common_defines += [ "FFRT_EXISTS" ]
+  resourceschedule_ffrt_support = true
+} else {
+  resourceschedule_ffrt_support = false
 }
 
 if (!defined(global_parts_info) ||
