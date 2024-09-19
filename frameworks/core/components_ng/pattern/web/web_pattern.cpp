@@ -1883,8 +1883,10 @@ void WebPattern::OnAreaChangedInner()
             return;
         }
     }
-    webOffset_ = offset;
-    UpdateTouchHandleForOverlay();
+    if (offset != webOffset_) {
+        webOffset_ = offset;
+        UpdateTouchHandleForOverlay();
+    }
     if (isInWindowDrag_)
         return;
     TAG_LOGD(AceLogTag::ACE_WEB, "Normal state, drawsize_ : %{public}s", drawSize_.ToString().c_str());
