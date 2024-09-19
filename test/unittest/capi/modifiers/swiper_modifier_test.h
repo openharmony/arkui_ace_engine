@@ -36,10 +36,7 @@ inline void AssignArkValue(Ark_SwiperAutoFill& dst, const Ark_VP& src)
 {
     dst.minSize = src;
 }
-} // namespace OHOS::Ace::NG::Converter
 
-
-namespace OHOS::Ace::NG::Converter {
 inline void AssignArkValue(Ark_Materialized &dst, const Ark_NativePointer &src)
 {
     dst.ptr = src;

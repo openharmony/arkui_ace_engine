@@ -423,7 +423,9 @@ namespace OHOS::Ace::NG::Converter {
         return options;
     }
 
-    inline void* Convert(const Ark_Materialized& src) {
+    template<>
+    inline Ark_NativePointer Convert(const Ark_Materialized& src)
+    {
         return src.ptr;
     }
 

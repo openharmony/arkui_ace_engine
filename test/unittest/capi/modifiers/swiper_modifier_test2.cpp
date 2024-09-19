@@ -61,7 +61,7 @@ HWTEST_F(SwiperModifierTest2, setSwiperOptionsTest, TestSize.Level1)
     // check initial state of invoke checker
     EXPECT_FALSE(checkInvoke);
 
-    // simulate the action from the external peer  
+    // simulate the action from the external peer
     peer.TriggerShowNext();
 
     // check the expected state of invoke checker

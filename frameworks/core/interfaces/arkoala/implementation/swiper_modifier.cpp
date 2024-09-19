@@ -204,13 +204,13 @@ void SetSwiperOptionsImpl(Ark_NativePointer node,
     auto internalSwiperController = SwiperModelNG::GetSwiperController(frameNode);
 
     // obtain the external SwiperController peer
-    auto peerPtrOpt = Converter::OptConvert<void *>(*controller);
-    CHECK_NULL_VOID(peerPtrOpt && *peerPtrOpt);
-    auto peerImpl = reinterpret_cast<GeneratedModifier::SwiperControllerPeerImpl *>(*peerPtrOpt);
-    CHECK_NULL_VOID(peerImpl);
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*controller);
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::SwiperControllerPeerImpl *>(*abstPeerPtrOpt);
+    CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
-    peerImpl->AddTargetController(internalSwiperController);
+    peerImplPtr->AddTargetController(internalSwiperController);
 }
 } // SwiperInterfaceModifier
 
