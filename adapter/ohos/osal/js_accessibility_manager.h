@@ -144,7 +144,7 @@ public:
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
 #ifdef WEB_SUPPORTED
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<NG::PipelineContext>& ngPipeline, const std::map<std::string, std::string>& actionArguments);
+        const RefPtr<NG::PipelineContext>& ngPipeline);
     void SetWebAccessibilityState(bool state);
     void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
         bool isFocus) override;
