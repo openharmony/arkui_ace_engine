@@ -1057,6 +1057,7 @@ public:
     {
         JSClass<JSWebResourceResponse>::Declare("WebResourceResponse");
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseData", &JSWebResourceResponse::GetResponseData);
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseDataEx", &JSWebResourceResponse::GetResponseDataEx);
         JSClass<JSWebResourceResponse>::CustomMethod(
             "getResponseEncoding", &JSWebResourceResponse::GetResponseEncoding);
         JSClass<JSWebResourceResponse>::CustomMethod(
@@ -1073,6 +1074,7 @@ public:
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseCode", &JSWebResourceResponse::SetResponseCode);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseHeader", &JSWebResourceResponse::SetResponseHeader);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseIsReady", &JSWebResourceResponse::SetResponseIsReady);
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseIsReady", &JSWebResourceResponse::GetResponseIsReady);
         JSClass<JSWebResourceResponse>::Bind(
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
     }
@@ -1088,6 +1090,18 @@ public:
     {
         auto data = JSVal(ToJSValue(response_->GetData()));
         auto descriptionRef = JSRef<JSVal>::Make(data);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetResponseDataEx(const JSCallbackInfo& args)
+    {
+        args.SetReturnValue(responseData_);
+    }
+
+    void GetResponseIsReady(const JSCallbackInfo& args)
+    {
+        auto status = JSVal(ToJSValue(response_->GetResponseStatus()));
+        auto descriptionRef = JSRef<JSVal>::Make(status);
         args.SetReturnValue(descriptionRef);
     }
 
@@ -1144,6 +1158,8 @@ public:
         if (args.Length() <= 0) {
             return;
         }
+
+        responseData_ = args[0];
         if (args[0]->IsNumber()) {
             auto fd = args[0]->ToNumber<int32_t>();
             response_->SetFileHandle(fd);
@@ -1263,6 +1279,7 @@ private:
     }
 
     RefPtr<WebResponse> response_;
+    JSRef<JSVal> responseData_;
 };
 
 class JSWebResourceRequest : public Referenced {
