@@ -1013,7 +1013,13 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
     auto overlayManager = weak.Upgrade();
     CHECK_NULL_VOID(menu && overlayManager);
     ContainerScope scope(instanceId);
-    overlayManager->FocusOverlayNode(menu);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuNode);
+    auto menuLayoutProp = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProp);
+    if (!menuLayoutProp->GetIsRectInTargetValue(false)) {
+        overlayManager->FocusOverlayNode(menu);
+    }
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     menuWrapperPattern->CallMenuAppearCallback();
     menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
@@ -5833,8 +5839,36 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
     const RectF& aiRect, const RefPtr<FrameNode>& targetNode)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show AI entity menu enter");
+    CHECK_NULL_RETURN(targetNode, false);
     auto menuWrapperNode = CreateAIEntityMenu(menuOptions, targetNode);
     CHECK_NULL_RETURN(menuWrapperNode, false);
+    menuWrapperNode->GetOrCreateFocusHub()->SetFocusable(false);
+    auto wrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    auto pipeline = targetNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    auto targetId = targetNode->GetId();
+    wrapperPattern->RegisterMenuAppearCallback([overlayWk = WeakClaim(this),
+        safeAreaWK = WeakClaim(RawPtr(safeAreaManager)), targetId, containerId = Container::CurrentId()]() {
+            ContainerScope scope(containerId);
+            auto safeAreaManager = safeAreaWK.Upgrade();
+            CHECK_NULL_VOID(safeAreaManager);
+            safeAreaManager->AddKeyboardChangeCallbackConsideringUIExt(targetId, [overlayWk, targetId, containerId]() {
+                    ContainerScope scope(containerId);
+                    auto overlayManager = overlayWk.Upgrade();
+                    CHECK_NULL_VOID(overlayManager);
+                    overlayManager->CloseAIEntityMenu(targetId);
+                });
+        });
+    wrapperPattern->RegisterMenuDisappearCallback(
+        [safeAreaWK = WeakClaim(RawPtr(safeAreaManager)), targetId, containerId = Container::CurrentId()]() {
+            ContainerScope scope(containerId);
+            auto safeAreaManager = safeAreaWK.Upgrade();
+            CHECK_NULL_VOID(safeAreaManager);
+            safeAreaManager->RemoveKeyboardChangeCallbackConsideringUIExt(targetId);
+        });
     auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -5842,12 +5876,9 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
     menuLayoutProperty->UpdateIsRectInTarget(true);
     menuLayoutProperty->UpdateTargetSize(aiRect.GetSize());
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
-    auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay) {
+    if (theme->GetExpandDisplay()) {
         MenuParam menuParam {};
         SubwindowManager::GetInstance()->ShowMenuNG(menuWrapperNode, menuParam, targetNode, aiRect.GetOffset());
     } else {
@@ -5858,7 +5889,7 @@ bool OverlayManager::ShowAIEntityMenu(const std::vector<std::pair<std::string, s
 
 void OverlayManager::CloseAIEntityMenu(int32_t targetId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);

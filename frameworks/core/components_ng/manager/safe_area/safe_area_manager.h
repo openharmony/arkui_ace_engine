@@ -197,6 +197,32 @@ public:
     bool IsSafeAreaValid() const;
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+
+    uint32_t GetkeyboardHeightConsideringUIExtension()
+    {
+        return keyboardHeightConsideringUIExtension_;
+    }
+    void SetkeyboardHeightConsideringUIExtension(uint32_t height)
+    {
+        if (keyboardHeightConsideringUIExtension_ != height) {
+            for (const auto& [nodeId, callback] : keyboardChangeCbsConsideringUIExt_) {
+                if (callback) {
+                    callback();
+                }
+            }
+            keyboardHeightConsideringUIExtension_ = height;
+        }
+    }
+    void AddKeyboardChangeCallbackConsideringUIExt(int32_t nodeId, const std::function<void()>& callback)
+    {
+        keyboardChangeCbsConsideringUIExt_[nodeId] = callback;
+    }
+    void RemoveKeyboardChangeCallbackConsideringUIExt(int32_t nodeId)
+    {
+        keyboardChangeCbsConsideringUIExt_.erase(nodeId);
+    }
+
 private:
     bool isAtomicService_ = false;
 
@@ -261,6 +287,9 @@ private:
     static constexpr float SAFE_AREA_DAMPING = 30.0f;
     RefPtr<InterpolatingSpring> safeAreaCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(
         SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
+
+    uint32_t keyboardHeightConsideringUIExtension_ = 0;
+    std::unordered_map<int32_t, std::function<void()>> keyboardChangeCbsConsideringUIExt_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };
