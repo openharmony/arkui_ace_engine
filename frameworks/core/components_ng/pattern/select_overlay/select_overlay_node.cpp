@@ -1513,6 +1513,7 @@ void SelectOverlayNode::ShowPaste(float maxWidth, float& allocatedSize, std::sha
         auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
             info->menuCallback.onPaste, GetId(), buttonWidth);
 #endif
+        CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
             allocatedSize += buttonWidth;
