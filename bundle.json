@@ -92,8 +92,7 @@
                 "skia",
                 "libuv",
                 "background_task_mgr",
-                "atomicservice_basic_engine",
-                "egl"
+                "atomicservice_basic_engine"
             ],
             "third_party": []
         },
