@@ -647,7 +647,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
+        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_) && IsStopEditWhenCloseKeyboard()) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -1717,6 +1717,12 @@ private:
     bool IsHandleDragging();
     void ReportEvent();
     void ResetPreviewTextState();
+    bool IsStopEditWhenCloseKeyboard()
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, true);
+        return !(context->GetIsFocusActive() && independentControlKeyboard_);
+    }
 
     RectF frameRect_;
     RectF textRect_;
