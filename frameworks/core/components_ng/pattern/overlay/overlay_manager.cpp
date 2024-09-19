@@ -1528,7 +1528,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show popup enter");
     popupMap_[targetId] = popupInfo;
-    if (!popupMap_[targetId].markNeedUpdate) {
+    if (!popupInfo.markNeedUpdate) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark need update failed");
         return;
     }
@@ -3963,7 +3963,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                              onHeightDidChange = std::move(onHeightDidChange),
                              onDetentsDidChange = std::move(onDetentsDidChange),
                              onWidthDidChange = std::move(onWidthDidChange),
-                             onTypeDidChange = std::move(onTypeDidChange),
+                             onTypeDidChange  = std::move(onTypeDidChange),
                              sheetSpringBack = std::move(sheetSpringBack),
                              targetNode, instanceId]() mutable {
         ContainerScope scope(instanceId);
@@ -6631,7 +6631,7 @@ bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
             continue;
         }
         for (auto childNode : child->GetChildren()) {
-            CHECK_NULL_RETURN(childNode, false);
+            CHECK_NULL_RETURN(child, false);
             if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
                 TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
                 child->AddChildBefore(node, childNode);
