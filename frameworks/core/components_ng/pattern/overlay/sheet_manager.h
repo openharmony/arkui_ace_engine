@@ -50,7 +50,7 @@ public:
         sheetDismissId_ = dismissId;
     }
 
-    int32_t GetDismissSheet()
+    int32_t GetDismissSheet() const
     {
         return sheetDismissId_;
     }
