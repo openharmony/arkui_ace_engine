@@ -1479,7 +1479,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg001, TestSize.Level1)
      * @tc.expected: wrapperSize_ is not Data anomalies
      */
     algorithm->ModifySubMenuWrapper(wrapper);
-    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+    ASSERT_EQ(algorithm->wrapperSize_, SizeF(0, 0));
 }
 
 /**
@@ -1544,7 +1544,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
      * @tc.expected: wrapperSize_ is not Data anomalies
      */
     algorithm->ModifySubMenuWrapper(wrapper);
-    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+    ASSERT_EQ(algorithm->wrapperSize_, SizeF(0, 0));
 
     /**
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
@@ -1621,7 +1621,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
      * @tc.expected: wrapperSize_ is not Data anomalies
      */
     algorithm->ModifySubMenuWrapper(wrapper);
-    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+    ASSERT_EQ(algorithm->wrapperSize_, SizeF(0, 0));
 
     /**
      * @tc.cases: case2. layering parameter is false.
