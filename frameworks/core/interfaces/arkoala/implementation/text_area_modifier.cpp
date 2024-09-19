@@ -230,6 +230,10 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
                            Ark_Boolean enable)
 {
 }
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean isEnabled)
+{
+}
 } // TextAreaAttributeModifier
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
 {
@@ -286,6 +290,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::OnDidDeleteImpl,
         TextAreaAttributeModifier::EditMenuOptionsImpl,
         TextAreaAttributeModifier::EnablePreviewTextImpl,
+        TextAreaAttributeModifier::EnableHapticFeedbackImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

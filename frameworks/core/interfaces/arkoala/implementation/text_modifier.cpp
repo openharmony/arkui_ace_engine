@@ -190,6 +190,10 @@ void HalfLeadingImpl(Ark_NativePointer node,
                      Ark_Boolean halfLeading)
 {
 }
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean isEnabled)
+{
+}
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()
 {
@@ -235,6 +239,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::TextSelectableImpl,
         TextAttributeModifier::EditMenuOptionsImpl,
         TextAttributeModifier::HalfLeadingImpl,
+        TextAttributeModifier::EnableHapticFeedbackImpl,
     };
     return &ArkUITextModifierImpl;
 }

@@ -23,7 +23,7 @@
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 99
+#define GENERATED_ARKUI_FULL_API_VERSION 101
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -4136,6 +4136,17 @@ typedef struct Opt_FunctionKey {
     enum Ark_Tag tag;
     enum  Ark_FunctionKey value;
 } Opt_FunctionKey;
+enum Ark_SheetKeyboardAvoidMode
+{
+    ARK_SHEET_KEYBOARD_AVOID_MODE_NONE = 0,
+    ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE = 1,
+    ARK_SHEET_KEYBOARD_AVOID_MODE_RESIZE_ONLY = 2,
+    ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_SCROLL = 3,
+};
+typedef struct Opt_SheetKeyboardAvoidMode {
+    enum Ark_Tag tag;
+    enum  Ark_SheetKeyboardAvoidMode value;
+} Opt_SheetKeyboardAvoidMode;
 enum Ark_ScrollSizeMode
 {
     ARK_SCROLL_SIZE_MODE_FOLLOW_DETENT = 0,
@@ -4270,6 +4281,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_Function onDisappear;
     Opt_Function aboutToAppear;
     Opt_Function aboutToDisappear;
+    Opt_Padding layoutRegionMargin;
     Opt_ContextMenuAnimationOptions previewAnimationOptions;
     Opt_ResourceColor backgroundColor;
     Opt_BlurStyle backgroundBlurStyle;
@@ -8830,6 +8842,7 @@ typedef struct Ark_SheetOptions {
     Opt_Function onTypeDidChange;
     Opt_Boolean expandSafeAreaInEmbeddedMode;
     Opt_CustomObject uiContext;
+    Opt_SheetKeyboardAvoidMode keyboardAvoidMode;
 } Ark_SheetOptions;
 typedef struct Opt_SheetOptions {
     enum Ark_Tag tag;
@@ -8871,6 +8884,7 @@ typedef struct Ark_MenuOptions {
     Opt_Function onDisappear;
     Opt_Function aboutToAppear;
     Opt_Function aboutToDisappear;
+    Opt_Padding layoutRegionMargin;
     Opt_ContextMenuAnimationOptions previewAnimationOptions;
     Opt_ResourceColor backgroundColor;
     Opt_BlurStyle backgroundBlurStyle;
@@ -11470,6 +11484,8 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
                                     const Opt_Array_LayoutSafeAreaEdge* edges);
     void (*setSystemBarStyle)(Ark_NativePointer node,
                               const Opt_CustomObject* style);
+    void (*setRecoverable)(Ark_NativePointer node,
+                           const Opt_Boolean* recoverable);
     void (*setSystemTransition)(Ark_NativePointer node,
                                 enum Ark_NavigationSystemTransitionType type);
 } GENERATED_ArkUINavDestinationModifier;
@@ -11543,6 +11559,8 @@ typedef struct GENERATED_ArkUINavigationModifier {
                                     const Opt_Array_LayoutSafeAreaEdge* edges);
     void (*setSystemBarStyle)(Ark_NativePointer node,
                               const Opt_CustomObject* style);
+    void (*setRecoverable)(Ark_NativePointer node,
+                           const Opt_Boolean* recoverable);
 } GENERATED_ArkUINavigationModifier;
 
 typedef struct GENERATED_ArkUINavigatorModifier {
@@ -11988,6 +12006,8 @@ typedef struct GENERATED_ArkUISearchModifier {
                                const Ark_Materialized* editMenu);
     void (*setEnablePreviewText)(Ark_NativePointer node,
                                  Ark_Boolean enable);
+    void (*setEnableHapticFeedback)(Ark_NativePointer node,
+                                    Ark_Boolean isEnabled);
 } GENERATED_ArkUISearchModifier;
 
 typedef struct GENERATED_ArkUISecurityComponentMethodModifier {
@@ -12491,6 +12511,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                const Ark_Materialized* editMenu);
     void (*setHalfLeading)(Ark_NativePointer node,
                            Ark_Boolean halfLeading);
+    void (*setEnableHapticFeedback)(Ark_NativePointer node,
+                                    Ark_Boolean isEnabled);
 } GENERATED_ArkUITextModifier;
 
 typedef struct GENERATED_ArkUITextAreaModifier {
@@ -12601,6 +12623,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                                const Ark_Materialized* editMenu);
     void (*setEnablePreviewText)(Ark_NativePointer node,
                                  Ark_Boolean enable);
+    void (*setEnableHapticFeedback)(Ark_NativePointer node,
+                                    Ark_Boolean isEnabled);
 } GENERATED_ArkUITextAreaModifier;
 
 typedef struct GENERATED_ArkUITextClockModifier {
@@ -12762,6 +12786,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
                                const Ark_Materialized* editMenu);
     void (*setEnablePreviewText)(Ark_NativePointer node,
                                  Ark_Boolean enable);
+    void (*setEnableHapticFeedback)(Ark_NativePointer node,
+                                    Ark_Boolean isEnabled);
 } GENERATED_ArkUITextInputModifier;
 
 typedef struct GENERATED_ArkUITextPickerModifier {
@@ -13955,6 +13981,7 @@ typedef struct GENERATED_ArkUIWebResourceResponseAccessor {
     Ark_NativePointer (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     void (*getResponseData)(WebResourceResponsePeer* peer);
+    void (*getResponseDataEx)(WebResourceResponsePeer* peer);
     void (*getResponseEncoding)(WebResourceResponsePeer* peer);
     void (*getResponseMimeType)(WebResourceResponsePeer* peer);
     void (*getReasonMessage)(WebResourceResponsePeer* peer);
@@ -13967,6 +13994,7 @@ typedef struct GENERATED_ArkUIWebResourceResponseAccessor {
     void (*setResponseHeader)(WebResourceResponsePeer* peer, const Array_Header* header);
     void (*setResponseCode)(WebResourceResponsePeer* peer, const Ark_Number* code);
     void (*setResponseIsReady)(WebResourceResponsePeer* peer, Ark_Boolean IsReady);
+    Ark_Boolean (*getResponseIsReady)(WebResourceResponsePeer* peer);
 } GENERATED_ArkUIWebResourceResponseAccessor;
 
 typedef struct FileSelectorResultPeer FileSelectorResultPeer;
@@ -14244,7 +14272,7 @@ typedef struct GENERATED_ArkUICommonMethodEventsReceiver {
     void (*onPreDrag)(Ark_Int32 nodeId,
                       const enum Ark_PreDragStatus data);
     void (*onVisibleAreaChange)(Ark_Int32 nodeId,
-                                const Ark_Boolean isVisible,
+                                const Ark_Boolean isExpanding,
                                 const Ark_Number currentRatio);
     void (*keyboardShortcut)(Ark_Int32 nodeId);
     void (*onGestureJudgeBegin)(Ark_Int32 nodeId,

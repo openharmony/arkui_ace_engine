@@ -182,6 +182,10 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
                            Ark_Boolean enable)
 {
 }
+void EnableHapticFeedbackImpl(Ark_NativePointer node,
+                              Ark_Boolean isEnabled)
+{
+}
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()
 {
@@ -226,6 +230,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::OnDidDeleteImpl,
         SearchAttributeModifier::EditMenuOptionsImpl,
         SearchAttributeModifier::EnablePreviewTextImpl,
+        SearchAttributeModifier::EnableHapticFeedbackImpl,
     };
     return &ArkUISearchModifierImpl;
 }
