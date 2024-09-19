@@ -39,6 +39,15 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
     }
 }
 
+void AbilityComponentPattern::OnAttachToFrameNode()
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    if (!container || !container->IsSceneBoardEnabled()) {
+        return;
+    }
+    WindowPattern::OnAttachToFrameNode();
+}
+
 void AbilityComponentPattern::OnModifyDone()
 {
     auto container = Container::Current();
