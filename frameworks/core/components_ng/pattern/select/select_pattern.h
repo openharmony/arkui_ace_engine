@@ -151,7 +151,8 @@ public:
         CHECK_NULL_RETURN(pipelineContext, focusPattern);
         auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
         CHECK_NULL_RETURN(selectTheme, focusPattern);
-        auto focusStyleType = static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetFocusStyleType()));
+        auto focusStyleType =
+            static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetSelectFocusStyleType_()));
         focusPattern.SetStyleType(focusStyleType);
         return focusPattern;
     }

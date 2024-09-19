@@ -132,7 +132,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(selectTheme, focusPattern);
+        auto focusStyleType =
+            static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetOptionFocusStyleType_()));
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     void UpdateNextNodeDivider(bool needDivider);

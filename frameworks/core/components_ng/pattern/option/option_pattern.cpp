@@ -208,6 +208,7 @@ void OptionPattern::OnSelectProcess()
     if (JsAction) {
         JsAction();
     }
+    ClearFocusStyle();
     auto onSelect = hub->GetOnSelect();
     if (onSelect) {
         onSelect(index_);
