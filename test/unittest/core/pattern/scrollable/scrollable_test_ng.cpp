@@ -2007,7 +2007,7 @@ HWTEST_F(ScrollableTestNg, SetEdgeEffect001, TestSize.Level1)
     scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
     auto scrollableEvent = scrollPn->GetScrollableEvent();
     auto scrollable = scrollableEvent->GetScrollable();
-    scrollable->isSpringAnimationStop_ = false;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
     EXPECT_TRUE(scrollable->IsSpringMotionRunning());
 
     /**
