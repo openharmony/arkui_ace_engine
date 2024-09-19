@@ -608,6 +608,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         auto iconNode = DynamicCast<FrameNode>(linearLayoutNode->GetFirstChild());
         auto iconPattern = iconNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(iconPattern);
+        iconPattern->SetSyncLoad(true);
         auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(iconLayoutProperty);
         auto iconLayoutDirection = iconLayoutProperty->GetNonAutoLayoutDirection();
