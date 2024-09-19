@@ -36,7 +36,10 @@ class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
     DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : NavDestinationNodeBase(tag, nodeId, pattern) {}
+        : NavDestinationNodeBase(tag, nodeId, pattern)
+    {
+        isNewToolbar_ = true;
+    }
     ~NavDestinationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;

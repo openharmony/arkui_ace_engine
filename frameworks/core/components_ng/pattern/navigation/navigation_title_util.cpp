@@ -31,6 +31,8 @@
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -43,8 +45,10 @@ constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
 constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 180;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
 }
-bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<NavigationBarTheme> theme,
-    RefPtr<TitleBarNode> titleBarNode, RefPtr<FrameNode> menuNode, std::vector<OptionParam>&& params)
+
+bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
+    const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
+    std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId)
 {
     auto barItemNode = CreateBarItemNode(isButtonEnabled);
     CHECK_NULL_RETURN(barItemNode, false);
@@ -55,7 +59,7 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<Navigatio
     menuParam.placement = Placement::BOTTOM_RIGHT;
     auto barMenuNode = MenuView::Create(
         std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
-    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, titleBarNode);
+    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
     InitTitleBarButtonEvent(menuItemNode, iconNode, true);
 
@@ -64,21 +68,21 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<Navigatio
     SetAccessibility(menuItemNode, message);
 
     // set navdestination titleBar "more" button inspectorId
-    SetInnerChildId(menuItemNode, NG::DES_FIELD, menuNode->GetTag(),
-        "More", titleBarNode->GetInnerParentId());
+    SetInnerChildId(menuItemNode, field, menuNode->GetTag(), "More", parentId);
 
     barItemNode->MountToParent(menuItemNode);
     barItemNode->MarkModifyDone();
     menuItemNode->MarkModifyDone();
     CHECK_NULL_RETURN(menuNode, false);
     menuNode->AddChild(menuItemNode);
-    CHECK_NULL_RETURN(titleBarNode, false);
-    titleBarNode->SetMoreMenuNode(barMenuNode);
+    CHECK_NULL_RETURN(nodeBase, false);
+    nodeBase->SetMenuNode(barMenuNode);
     return true;
 }
 
 RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
-    const std::vector<NG::BarItem>& menuItems, RefPtr<TitleBarNode> titleBarNode, bool isButtonEnabled)
+    const std::vector<NG::BarItem>& menuItems, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase,
+    bool isButtonEnabled, const std::string& field, const std::string& parentId)
 {
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -89,7 +93,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
     auto theme = NavigationGetTheme();
-    auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, titleBarNode);
+    auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, navDestinationNodeBase);
     bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
 
     int32_t count = 0;
@@ -106,12 +110,11 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
             auto menuItemNode = CreateMenuItemNode(theme, menuItem, isButtonEnabled);
             CHECK_NULL_RETURN(menuItemNode, nullptr);
 
-            // set navdestination titleBar menuitem inspectorId
+            // set titleBar menuitem inspectorId
             std::string menuItemId = menuItemNode->GetTag() + std::to_string(count);
-            NavigationTitleUtil::SetInnerChildId(menuItemNode, NG::DES_FIELD, menuNode->GetTag(),
-                menuItemId, titleBarNode->GetInnerParentId());
+            NavigationTitleUtil::SetInnerChildId(menuItemNode, field, menuNode->GetTag(), menuItemId, parentId);
 
-            // read navdestination menu button
+            // read menu button
             SetAccessibility(menuItemNode, menuItem.text.value_or(""));
             menuNode->AddChild(menuItemNode);
         }
@@ -119,7 +122,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
 
     // build more button
     if (needMoreButton) {
-        bool buildMoreButtonResult = BuildMoreButton(isButtonEnabled, theme, titleBarNode, menuNode, std::move(params));
+        bool buildMoreButtonResult = BuildMoreButton(
+            isButtonEnabled, theme, navDestinationNodeBase, menuNode, std::move(params), field, parentId);
         if (!buildMoreButtonResult) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "build more button node failed");
             return nullptr;
@@ -129,30 +133,29 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     return menuNode;
 }
 
-uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(RefPtr<NavigationBarTheme>& theme, RefPtr<TitleBarNode> titleBarNode)
+uint32_t NavigationTitleUtil::GetOrInitMaxMenuNums(
+    const RefPtr<NavigationBarTheme>& theme, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase)
 {
-    auto titleBarPattern = AceType::DynamicCast<TitleBarPattern>(titleBarNode->GetPattern());
-    CHECK_NULL_RETURN(titleBarPattern, 0);
-    auto navDesMaxNum = titleBarPattern->GetMaxMenuNum();
+    auto patternBase = navDestinationNodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_RETURN(patternBase, 0);
+    auto navDesMaxNum = patternBase->GetMaxMenuNum();
     auto mostMenuItemCount =
         navDesMaxNum < 0 ? theme->GetMostMenuItemCountInBar() : static_cast<uint32_t>(navDesMaxNum);
     mostMenuItemCount = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
                                                                                                  : mostMenuItemCount;
-    titleBarPattern->SetMaxMenuNum(mostMenuItemCount);
+    patternBase->SetMaxMenuNum(mostMenuItemCount);
     return mostMenuItemCount;
 }
 
 void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode,
-    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode,
-    const RefPtr<TitleBarNode>& titleBarNode)
+    const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode)
 {
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto context = PipelineContext::GetCurrentContext();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
-                             weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakTitleBarNode = WeakPtr<TitleBarNode>(titleBarNode)]() {
+                             weakMenu = WeakPtr<FrameNode>(barMenuNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
 
@@ -177,7 +180,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
 }
 
 RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemNode(
-    RefPtr<NavigationBarTheme> theme, const BarItem& menuItem, bool isButtonEnabled)
+    const RefPtr<NavigationBarTheme>& theme, const BarItem& menuItem, bool isButtonEnabled)
 {
     auto menuItemNode = CreateMenuItemButton(theme);
     CHECK_NULL_RETURN(menuItemNode, nullptr);
@@ -198,7 +201,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemNode(
     return menuItemNode;
 }
 
-RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(RefPtr<NavigationBarTheme> theme)
+RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<NavigationBarTheme>& theme)
 {
     auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
     CHECK_NULL_RETURN(buttonPattern, nullptr);
@@ -319,7 +322,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(const BarItem& barI
 }
 
 void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode,
-    const RefPtr<FrameNode>& iconNode, bool isMoreButton, const BarItem menuItem, bool isButtonEnabled)
+    const RefPtr<FrameNode>& iconNode, bool isMoreButton, const BarItem& menuItem, bool isButtonEnabled)
 {
     auto eventHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -392,7 +395,7 @@ void NavigationTitleUtil::UpdateBarItemNodeWithItem(
     barItemNode->MarkModifyDone();
 }
 
-void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled)
 {
     int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
@@ -420,7 +423,7 @@ void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool i
     barItemNode->MarkModifyDone();
 }
 
-void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled)
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
@@ -444,7 +447,7 @@ void BuildSymbolMoreItemNode(const RefPtr<BarItemNode>& barItemNode, const bool 
     barItemNode->MarkModifyDone();
 }
 
-void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
+void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled)
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         BuildSymbolMoreItemNode(barItemNode, isButtonEnabled);
@@ -453,7 +456,7 @@ void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNod
     }
 }
 
-RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEnabled)
+RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(bool isButtonEnabled)
 {
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
