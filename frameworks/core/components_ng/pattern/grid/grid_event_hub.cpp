@@ -199,6 +199,10 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
             TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart");
     };
     SnapshotParam param;
+    if (auto pixmap = ComponentSnapshot::CreateSync(customNode, param); pixmap) {
+        callback(pixmap, 0, nullptr);
+        return;
+    }
     param.delay = CREATE_PIXELMAP_TIME;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), true, param);
 #else
