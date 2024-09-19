@@ -585,10 +585,8 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     info.x = touchEvent.screenX;
     info.y = touchEvent.screenY;
     info.bundleName = bundleName;
-    if (!isRegistered_) {
-        auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
-        isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
-    }
+    auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
+    isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
     return Notify(info);
 }
 
