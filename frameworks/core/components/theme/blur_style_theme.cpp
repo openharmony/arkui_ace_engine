@@ -19,40 +19,46 @@
 
 namespace OHOS::Ace {
 
-const std::unordered_map<BlurStyle, std::string> BlurStyleTheme::validBlurStyles_ = {
-    { BlurStyle::THIN, "thin" },
-    { BlurStyle::REGULAR, "regular" },
-    { BlurStyle::THICK, "thick" },
-    { BlurStyle::BACKGROUND_THIN, "background_thin" },
-    { BlurStyle::BACKGROUND_REGULAR, "background_regular" },
-    { BlurStyle::BACKGROUND_THICK, "background_thick" },
-    { BlurStyle::BACKGROUND_ULTRA_THICK, "background_ultra_thick" },
-    { BlurStyle::COMPONENT_ULTRA_THIN, "component_ultra_thin" },
-    { BlurStyle::COMPONENT_THIN, "component_thin" },
-    { BlurStyle::COMPONENT_REGULAR, "component_regular" },
-    { BlurStyle::COMPONENT_THICK, "component_thick" },
-    { BlurStyle::COMPONENT_ULTRA_THICK, "component_ultra_thick" }
-};
-
 RefPtr<BlurStyleTheme> BlurStyleTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
-    RefPtr<BlurStyleTheme> theme = AceType::MakeRefPtr<BlurStyleTheme>();
+    RefPtr<BlurStyleTheme> theme = AceType::Claim(new BlurStyleTheme());
     CHECK_NULL_RETURN(themeConstants, theme);
     RefPtr<ThemeStyle> blurTheme = themeConstants->GetPatternByName(THEME_BLUR_STYLE_COMMON);
     if (!blurTheme) {
         TAG_LOGW(AceLogTag::ACE_THEME, "find pattern of blur style fail");
         return theme;
     }
-    theme->SetThemeStyle(blurTheme);
+    ParsePattern(blurTheme, theme);
     return theme;
 }
 
-void BlurStyleTheme::SetThemeStyle(const RefPtr<ThemeStyle>& themeStyle)
+void BlurStyleTheme::Builder::ParsePattern(
+    const RefPtr<ThemeStyle>& themeStyle, const RefPtr<BlurStyleTheme>& theme) const
 {
-    themeStyle_ = themeStyle;
+    const std::pair<std::string, BlurStyle> blurStyles[] = {
+        std::pair<std::string, BlurStyle> { "thin", BlurStyle::THIN },
+        std::pair<std::string, BlurStyle> { "regular", BlurStyle::REGULAR },
+        std::pair<std::string, BlurStyle> { "thick", BlurStyle::THICK },
+        std::pair<std::string, BlurStyle> { "background_thin", BlurStyle::BACKGROUND_THIN },
+        std::pair<std::string, BlurStyle> { "background_regular", BlurStyle::BACKGROUND_REGULAR },
+        std::pair<std::string, BlurStyle> { "background_thick", BlurStyle::BACKGROUND_THICK },
+        std::pair<std::string, BlurStyle> { "background_ultra_thick", BlurStyle::BACKGROUND_ULTRA_THICK },
+        std::pair<std::string, BlurStyle> { "component_ultra_thin", BlurStyle::COMPONENT_ULTRA_THIN },
+        std::pair<std::string, BlurStyle> { "component_thin", BlurStyle::COMPONENT_THIN },
+        std::pair<std::string, BlurStyle> { "component_regular", BlurStyle::COMPONENT_REGULAR },
+        std::pair<std::string, BlurStyle> { "component_thick", BlurStyle::COMPONENT_THICK },
+        std::pair<std::string, BlurStyle> { "component_ultra_thick", BlurStyle::COMPONENT_ULTRA_THICK },
+    };
+    const auto length = sizeof(blurStyles) / sizeof(std::pair<std::string, BlurStyle>);
+    for (size_t i = 0; i != length; ++i) {
+        auto blurParamLight = ParseBlurParam(themeStyle, blurStyles[i].first, false);
+        auto blurParamDark = ParseBlurParam(themeStyle, blurStyles[i].first, true);
+        theme->blurParams_.emplace(GetKeyOfBlurStyle(blurStyles[i].second, ThemeColorMode::LIGHT), blurParamLight);
+        theme->blurParams_.emplace(GetKeyOfBlurStyle(blurStyles[i].second, ThemeColorMode::DARK), blurParamDark);
+    }
 }
 
-BlurParameter BlurStyleTheme::ParseBlurParam(
+BlurParameter BlurStyleTheme::Builder::ParseBlurParam(
     const RefPtr<ThemeStyle>& themeStyle, const std::string& styleName, bool isDark) const
 {
     constexpr char prefix[] = "blur_style";
@@ -84,19 +90,10 @@ uint32_t BlurStyleTheme::GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode color
     return (static_cast<uint32_t>(colorMode) << 8) + static_cast<uint32_t>(style); // can hold 2^8 blurStyle enums
 }
 
-std::optional<BlurParameter> BlurStyleTheme::GetBlurParameter(BlurStyle style, ThemeColorMode colorMode)
+std::optional<BlurParameter> BlurStyleTheme::GetBlurParameter(BlurStyle style, ThemeColorMode colorMode) const
 {
     auto key = GetKeyOfBlurStyle(style, colorMode);
     auto iter = blurParams_.find(key);
-    if (iter != blurParams_.end()) {
-        return std::optional<BlurParameter>(iter->second);
-    }
-    auto blurIter = validBlurStyles_.find(style);
-    if (blurIter == validBlurStyles_.end()) {
-        return std::nullopt;
-    }
-    auto blur = ParseBlurParam(themeStyle_, blurIter->second, colorMode == ThemeColorMode::DARK);
-    blurParams_.emplace(key, blur);
-    return blur;
+    return iter != blurParams_.end() ? std::optional<BlurParameter>(iter->second) : std::nullopt;
 }
 } // namespace OHOS::Ace

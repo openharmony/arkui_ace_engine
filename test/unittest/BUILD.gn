@@ -136,7 +136,6 @@ ohos_source_set("ace_components_base") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",

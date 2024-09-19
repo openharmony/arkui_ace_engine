@@ -34,18 +34,19 @@ public:
         Builder() = default;
         ~Builder() = default;
         RefPtr<BlurStyleTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const;
+
+    private:
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<BlurStyleTheme>& theme) const;
+        BlurParameter ParseBlurParam(const RefPtr<ThemeStyle>& themeStyle, const std::string& name, bool isDark) const;
     };
-    BlurStyleTheme() = default;
     ~BlurStyleTheme() override = default;
-    std::optional<BlurParameter> GetBlurParameter(BlurStyle style, ThemeColorMode colorMode);
-    void SetThemeStyle(const RefPtr<ThemeStyle>& themeStyle);
+    std::optional<BlurParameter> GetBlurParameter(BlurStyle style, ThemeColorMode colorMode) const;
+
+protected:
+    BlurStyleTheme() = default;
 
 private:
     static uint32_t GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode colorMode);
-    BlurParameter ParseBlurParam(const RefPtr<ThemeStyle>& themeStyle, const std::string& name, bool isDark) const;
-
-    const static std::unordered_map<BlurStyle, std::string> validBlurStyles_;
-    RefPtr<ThemeStyle> themeStyle_;
     std::unordered_map<uint32_t, BlurParameter> blurParams_;
 };
 
