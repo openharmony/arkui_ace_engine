@@ -647,7 +647,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
+        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_) && IsStopEditWhenCloseKeyboard()) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -1482,6 +1482,9 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void HandleCloseKeyboard(bool forceClose);
+
+    bool independentControlKeyboard_ = false;
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1704,6 +1707,9 @@ private:
     void TwinklingByFocus();
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
+    bool GetIndependentControlKeyboard();
+    bool IsMoveFocusOutFromLeft(const KeyEvent& event);
+    bool IsMoveFocusOutFromRight(const KeyEvent& event);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options);
@@ -1711,6 +1717,12 @@ private:
     bool IsHandleDragging();
     void ReportEvent();
     void ResetPreviewTextState();
+    bool IsStopEditWhenCloseKeyboard()
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, true);
+        return !(context->GetIsFocusActive() && independentControlKeyboard_);
+    }
 
     RectF frameRect_;
     RectF textRect_;
@@ -1910,6 +1922,7 @@ private:
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
+    bool directionKeysMoveFocusOut_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -375,13 +375,21 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     if (PipelineBase::GetCurrentContext() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
-        needToRequestKeyboardOnFocus_ = true;
+        needToRequestKeyboardOnFocus_ = !GetIndependentControlKeyboard();
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
+}
+
+bool TextFieldPattern::GetIndependentControlKeyboard()
+{
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, false);
+    independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+    return independentControlKeyboard_;
 }
 
 TextFieldPattern::~TextFieldPattern()
@@ -911,7 +919,7 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(layoutProperty);
     auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
     if (isSelectAll && !contentController_->IsEmpty()) {
-        needSelectAll_ = true;
+        needSelectAll_ = !independentControlKeyboard_;
     }
     ProcessFocusStyle();
     RequestKeyboardByFocusSwitch();
@@ -1369,7 +1377,9 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(false);
+        if (!independentControlKeyboard_) {
+            HandleOnSelectAll(false);
+        }
     }
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1378,7 +1388,30 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         textFieldManager->GetImeShow()) {
         RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::ON_KEY_EVENT);
     }
+    // If independent control keyboard, press Enter to request keyboard.
+    if (event.code == KeyCode::KEY_ENTER && HasFocus() && independentControlKeyboard_) {
+        if (RequestKeyboard(false, true, true)) {
+            NotifyOnEditChanged(true);
+        }
+        return true;
+    }
+    if (directionKeysMoveFocusOut_ && (IsMoveFocusOutFromLeft(event) || IsMoveFocusOutFromRight(event))) {
+        TextInputClient::HandleKeyEvent(event);
+        return false;
+    }
     return TextInputClient::HandleKeyEvent(event);
+}
+
+bool TextFieldPattern::IsMoveFocusOutFromLeft(const KeyEvent& event)
+{
+    return (event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_DPAD_UP) &&
+     selectController_->GetCaretIndex() == 0;
+}
+
+bool TextFieldPattern::IsMoveFocusOutFromRight(const KeyEvent& event)
+{
+    return (event.code == KeyCode::KEY_DPAD_RIGHT || event.code == KeyCode::KEY_DPAD_DOWN) &&
+     selectController_->GetCaretIndex() == static_cast<int32_t>(contentController_->GetWideText().length());
 }
 
 bool TextFieldPattern::HandleOnEscape()
@@ -2780,6 +2813,7 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
+    directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
     InitTextFieldThemeColors(textFieldTheme);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -4648,7 +4682,12 @@ bool TextFieldPattern::CursorMoveEnd()
 
 bool TextFieldPattern::CursorMoveUpOperation()
 {
-    CHECK_NULL_RETURN(IsTextArea(), false);
+    if (!IsTextArea()) {
+        if (directionKeysMoveFocusOut_) {
+            return CursorMoveLineBegin();
+        }
+        return false;
+    }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 0.5f to convert to the grapheme center point of the previous line.
@@ -4671,7 +4710,12 @@ bool TextFieldPattern::CursorMoveUp()
 
 bool TextFieldPattern::CursorMoveDownOperation()
 {
-    CHECK_NULL_RETURN(IsTextArea(), false);
+    if (!IsTextArea()) {
+        if (directionKeysMoveFocusOut_) {
+            return CursorMoveLineEnd();
+        }
+        return false;
+    }
     auto originCaretPosition = selectController_->GetCaretIndex();
     auto offsetX = selectController_->GetCaretRect().GetX();
     // multiply by 1.5f to convert to the grapheme center point of the next line.
@@ -4800,8 +4844,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     // LostFocusToViewRoot may not cause current lost focus, only stop twinkling when it is truly lost focus,
     // which will call StopTwinkling on HandleBlurEvent method.
     if (textInputBlurOnSubmit_) {
-        CloseKeyboard(forceCloseKeyboard, false);
-        FocusHub::LostFocusToViewRoot();
+        HandleCloseKeyboard(forceCloseKeyboard);
     }
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Textfield.onSubmit");
@@ -5488,13 +5531,22 @@ bool TextFieldPattern::OnBackPressed()
     }
 
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    CloseKeyboard(true);
-    FocusHub::LostFocusToViewRoot();
+    HandleCloseKeyboard(true);
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
     return true;
 #endif
+}
+
+void TextFieldPattern::HandleCloseKeyboard(bool forceClose)
+{
+    if (independentControlKeyboard_) {
+        CloseKeyboard(true, false);
+    } else {
+        CloseKeyboard(forceClose);
+        FocusHub::LostFocusToViewRoot();
+    }
 }
 
 int32_t TextFieldPattern::GetNakedCharPosition() const
