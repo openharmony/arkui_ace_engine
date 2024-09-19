@@ -15,9 +15,14 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
+#include "base/i18n/localization.h"
+#include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/measure_util.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,6 +36,18 @@ constexpr float LIGHT_OFF_INTENSITY = 0.0f;
 constexpr float LIGHT_POSITION_Z = 40.0f;
 constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
 constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
+
+const Dimension MENU_ITEM_RADIUS = 12.0_vp;
+const Dimension MENU_ITEM_PADDING_H = 12.0_vp;
+const Dimension MENU_ITEM_PADDING_V = 8.0_vp;
+const Dimension MENU_PADDING = 4.0_vp;
+const Dimension MENU_GUTTER = 2.0_vp;
+const Dimension MENU_SAFETY_X = 8.0_vp;
+const Dimension MENU_SAFETY_Y = 96.0_vp;
+const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
+const int32_t MAX_MENU_ITEM_LEFT_SPLIT = 1;
+const int32_t MAX_MENU_ITEM_RIGHT_SPLIT = 2;
+const int32_t MAX_MENU_DEFAULT_NOT_CHANGE = 3;
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -43,7 +60,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(floatingTitleRow);
     bool isFocus_ = GetIsFocus();
     if (needUpdate) {
-        LOGI("title is need update, isFocus_: %{public}d", isFocus_);
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "title is need update, isFocus_: %{public}d", isFocus_);
         ChangeCustomTitle(isFocus_);
         ChangeControlButtons(isFocus_);
         return;
@@ -384,5 +401,171 @@ void ContainerModalPatternEnhance::UpdateLightIntensity()
             closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
         }
     });
+}
+
+RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
+{
+    MeasureContext textCtx;
+    textCtx.textContent = Localization::GetInstance()->GetEntryLetters("window.leftSide");
+    textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
+    auto textSize = MeasureUtil::MeasureTextSize(textCtx);
+    textWidth_ = textSize.Width();
+
+    if (!menuList_) {
+        auto menuList = FrameNode::CreateFrameNode(
+            V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+        auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
+        CHECK_NULL_RETURN(listLayoutProperty, nullptr);
+        listLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+        listLayoutProperty->UpdateLaneGutter(MENU_GUTTER);
+        menuList->AddChild(BuildLeftSplitMenuItem());
+        menuList->AddChild(BuildRightSplitMenuItem());
+        menuList_ = menuList;
+    }
+    auto menuLayoutProperty = menuList_->GetLayoutProperty<ListLayoutProperty>();
+    menuLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(GetMenuWidth()), std::nullopt));
+    CalculateMenuOffset(targetNode);
+
+    return menuList_;
+}
+
+RefPtr<FrameNode> ContainerModalPatternEnhance::BuildLeftSplitMenuItem()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+    auto leftSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "create leftsplit callback func failed,windowMannager is null!");
+            return;
+        }
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_LEFT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
+        windowManager->FireWindowSplitCallBack();
+    };
+    auto leftSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(leftSplitClickFunc));
+    auto screenLeftRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.leftSide"),
+        InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, leftSplitEvent, false);
+    screenLeftRow->UpdateInspectorId("EnhanceMenuScreenLeftRow");
+    return screenLeftRow;
+}
+
+RefPtr<FrameNode> ContainerModalPatternEnhance::BuildRightSplitMenuItem()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+    auto rightSplitClickFunc = [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+        auto windowManager = weak.Upgrade();
+        if (!windowManager) {
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "create rightSpiltBtn callback func failed, windowManager is null!");
+            return;
+        }
+        EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_RIGHT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
+        windowManager->FireWindowSplitCallBack(false);
+    };
+    auto rightSplitEvent = AceType::MakeRefPtr<ClickEvent>(std::move(rightSplitClickFunc));
+    auto screenRightRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.rightSide"),
+        InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, rightSplitEvent, false);
+    screenRightRow->UpdateInspectorId("EnhanceMenuScreenRightRow");
+    return screenRightRow;
+}
+
+RefPtr<FrameNode> ContainerModalPatternEnhance::BuildMenuItem(
+    std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+
+    auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    // setRadius 8vp
+    auto render = containerTitleRow->GetRenderContext();
+    BorderRadiusProperty borderRadiusProperty;
+    borderRadiusProperty.SetRadius(MENU_ITEM_RADIUS);
+    render->UpdateBorderRadius(borderRadiusProperty);
+
+    auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    PaddingProperty padding;
+    padding.SetEdges(CalcLength(MENU_ITEM_PADDING_H), CalcLength(MENU_ITEM_PADDING_H), CalcLength(MENU_ITEM_PADDING_V),
+        CalcLength(MENU_ITEM_PADDING_V));
+    layoutProperty->UpdatePadding(padding);
+
+    auto leftIcon = ContainerModalViewEnhance::BuildMenuItemIcon(resourceId);
+
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto titleLabel = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), textPattern);
+    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(title);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
+    textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    MarginProperty margin;
+    margin.left = CalcLength(MENU_ITEM_TEXT_PADDING);
+    margin.right = CalcLength(MENU_ITEM_TEXT_PADDING);
+    textLayoutProperty->UpdateMargin(margin);
+
+    // add icon and label
+    containerTitleRow->AddChild(leftIcon);
+    containerTitleRow->AddChild(titleLabel);
+    auto hub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(hub, nullptr);
+    hub->AddClickEvent(event);
+    ContainerModalViewEnhance::BondingMenuItemEvent(containerTitleRow);
+    return containerTitleRow;
+}
+
+Dimension ContainerModalPatternEnhance::GetMenuWidth()
+{
+    auto noneTextWidth = TITLE_ICON_SIZE + MENU_ITEM_PADDING_H * 2 + MENU_ITEM_TEXT_PADDING;
+    auto menuWidth = Dimension(textWidth_ + noneTextWidth.ConvertToPx());
+    return menuWidth;
+}
+
+OffsetF ContainerModalPatternEnhance::GetMenuOffset()
+{
+    return menuOffset_;
+}
+
+void ContainerModalPatternEnhance::CalculateMenuOffset(const RefPtr<FrameNode>& targetNode)
+{
+    auto pipeline = targetNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto windowOffset = pipeline->GetCurrentWindowRect().GetOffset();
+    auto nodeOffset = targetNode->GetPositionToWindowWithTransform();
+    float menuWidth = GetMenuWidth().ConvertToPx() + MENU_PADDING.ConvertToPx() * 2;
+    float buttonSize = TITLE_ICON_SIZE.ConvertToPx();
+    float offsetX = nodeOffset.GetX() + windowOffset.GetX() - menuWidth + buttonSize;
+    float offsetY = nodeOffset.GetY() + windowOffset.GetY() + buttonSize;
+
+    float screenWidth = SystemProperties::GetDevicePhysicalWidth();
+    float screenHeight = SystemProperties::GetDevicePhysicalHeight();
+    float titleHeight = GetCustomTitleHeight().ConvertToPx();
+    const Dimension MENU_CONTAINER_HEIGHT = 96.0_vp; // need to calculate from text, to be delete
+    float menuHeight = MENU_CONTAINER_HEIGHT.ConvertToPx() + 2 * CONTENT_PADDING.ConvertToPx();
+    if (offsetX < MENU_SAFETY_X.ConvertToPx()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen left");
+        offsetX = offsetX + menuWidth - buttonSize;
+    }
+    if (offsetX > screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen right");
+        offsetX = screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx();
+    }
+    if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
+        offsetY = offsetY - menuHeight - titleHeight;
+    }
+    menuOffset_ = { offsetX, offsetY };
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "ContainerModal ShowMaxMenu called menuOffset_ = %{public}s", menuOffset_.ToString().c_str());
 }
 } // namespace OHOS::Ace::NG
