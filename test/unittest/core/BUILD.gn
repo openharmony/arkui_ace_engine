@@ -87,6 +87,7 @@ group("linux_core_unittest") {
     "pattern/image:image_test_ng",
     "pattern/image_animator:image_animator_test_ng",
     "pattern/indexer:indexer_test_ng",
+    "pattern/linear_indicator:linear_indicator_test_ng",
     "pattern/linear_layout:linear_layout_test_ng",
     "pattern/linear_split:linear_split_test_ng",
     "pattern/list:list_test_ng",
