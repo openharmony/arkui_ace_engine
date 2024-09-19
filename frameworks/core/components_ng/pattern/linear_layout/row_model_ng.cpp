@@ -36,6 +36,8 @@ void RowModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
+    } else {
+        LOGE("Row: the space value is illegal due to space is less than zero");
     }
 }
 

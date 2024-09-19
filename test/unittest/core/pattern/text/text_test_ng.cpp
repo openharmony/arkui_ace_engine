@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include "text_base.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -151,7 +148,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
@@ -250,8 +247,8 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     textModelNG.SetTextSelection(frameNode, startIndex, endIndex);
     EXPECT_NE(textPattern->textSelector_.GetStart(), startIndex);
 
-    std::string EventValue;
-    auto onCopyResult = [&EventValue](const std::string& param) { EventValue = param; };
+    std::string eventValue;
+    auto onCopyResult = [&eventValue](const std::string& param) { eventValue = param; };
 
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     textModelNG.SetOnCopy(frameNode, onCopyResult);
@@ -494,7 +491,7 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     selectOverlayInfo.singleLineHeight = NODE_ID;
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
@@ -1066,6 +1063,22 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpInfo001
+ * @tc.desc: Test TextPattern DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DumpInfo001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->selectOverlayProxy_ = nullptr;
+    pattern->DumpInfo();
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
  * @tc.name: OnHandleMove001
  * @tc.desc: Test TextPattern OnHandleMove when SelectOverlayProxy is not nullptr.
  * @tc.type: FUNC
@@ -1087,7 +1100,7 @@ HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
     pattern->selectOverlayProxy_ = proxy;
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
@@ -1112,7 +1125,7 @@ HWTEST_F(TextTestNg, TextCreateParagraph002, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1199,7 +1212,6 @@ HWTEST_F(TextTestNg, TextLayoutTest001, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest002, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     EXPECT_CALL(*paragraph, Layout).Times(2);
@@ -1418,7 +1430,6 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     EXPECT_CALL(*paragraph, AddText).Times(2);
@@ -1528,8 +1539,6 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
 {
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -1769,29 +1778,6 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     textLayoutProperty->UpdateTextBaseline(TextBaseline::HANGING);
     auto json = std::make_unique<JsonValue>();
     textLayoutProperty->ToJsonValue(json, filter);
-}
-
-/**
- * @tc.name: ToJsonValue007
- * @tc.desc: Test textPattern ToJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ToJsonValue007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create("");
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    auto json = JsonUtil::Create(true);
-    /**
-     * @tc.steps: step2. expect default textDetectEnable_ false.
-     */
-    pattern->SetTextDetectEnable(true);
-    pattern->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("enableDataDetector"), "true");
 }
 
 /**
@@ -2204,126 +2190,6 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextContentModifier001
- * @tc.desc: test text_content_modifier.cpp onDraw function.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. call onDraw function.
-     * @tc.expected: The member variable value of textContentModifier is the value set above
-     */
-    auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContextRefPtr();
-    TextStyle textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
-    textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
-    SetContentModifier(textContentModifier);
-    auto pattern = textFrameNode->GetPattern<Pattern>();
-    ParagraphStyle paragraphStyle;
-    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    RefPtr<TextContentModifier> contentModifier =
-        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
-    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
-    // set pipelineContext nullptr
-    MockPipelineContext::TearDown();
-    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
-    MockPipelineContext::SetUp();
-    Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
-    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
-    // call onDraw function(textRacing_ = true)
-    textContentModifier.StartTextRace();
-    context.width = CONTEXT_LARGE_WIDTH_VALUE;
-    textContentModifier.onDraw(context);
-    // call onDraw function(textRacing_ = false)
-    textContentModifier.StopTextRace();
-    textContentModifier.onDraw(context);
-    EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
-    EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
-    textPattern->pManager_->Reset();
-}
-
-/**
- * @tc.name: TextContentModifier002
- * @tc.desc: test text_content_modifier.cpp ModifyTextStyle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. call ModifyTextStyle function.
-     * @tc.expected: The member variable value of textContentModifier is the value set above
-     */
-    auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContextRefPtr();
-    TextStyle textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
-    textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
-    SetContentModifier(textContentModifier);
-    auto pattern = textFrameNode->GetPattern<Pattern>();
-    ParagraphStyle paragraphStyle;
-    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    RefPtr<TextContentModifier> contentModifier =
-        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
-    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
-    // set pipelineContext nullptr
-    MockPipelineContext::TearDown();
-    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
-    MockPipelineContext::SetUp();
-    // set textDecorationAnimatable_ true
-    textContentModifier.textDecorationAnimatable_ = true;
-    textContentModifier.textDecoration_ = TextDecoration::UNDERLINE;
-    textContentModifier.SetTextDecoration(TextDecoration::NONE);
-    textContentModifier.ModifyTextStyle(textStyle);
-    // set textDecorationColorAlpha_ value
-    textContentModifier.textDecorationColorAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1000.0f);
-    textContentModifier.ModifyTextStyle(textStyle);
-    // set textDecorationAnimatable_ false
-    textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
-    textContentModifier.ModifyTextStyle(textStyle);
-    EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
-    EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
-    EXPECT_EQ(textStyle.GetFontSize().Value(), textContentModifier.fontSizeFloat_->Get());
-}
-
-/**
  * @tc.name: TextContentModifier003
  * @tc.desc: test text_content_modifier.cpp .
  * @tc.type: FUNC
@@ -2348,7 +2214,7 @@ HWTEST_F(TextTestNg, TextContentModifier003, TestSize.Level1)
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
     textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
     SetContentModifier(textContentModifier);
     auto pattern = textFrameNode->GetPattern<Pattern>();
@@ -2423,7 +2289,7 @@ HWTEST_F(TextTestNg, TextContentModifier005, TestSize.Level1)
     auto pipeline = frameNode->GetContextRefPtr();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)), textPattern);
     textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
     SetContentModifier(textContentModifier);
     auto pattern = textFrameNode->GetPattern<Pattern>();
@@ -2556,12 +2422,16 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textPattern, nullptr);
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
@@ -2632,100 +2502,6 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextLayoutAlgorithmTest008
- * @tc.desc: text_layout_algorithm.cpp:call AdaptMaxTextSize
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
-{
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(2);
-    EXPECT_CALL(*paragraph, AddText).Times(2);
-    EXPECT_CALL(*paragraph, Layout).Times(2);
-    EXPECT_CALL(*paragraph, Build).Times(2);
-    EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(2));
-    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
-
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-
-    auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContextRefPtr();
-    TextStyle textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    textStyle.SetAdaptFontSizeStep(ADAPT_FONT_SIZE_STEP_VALUE);
-
-    /**
-     * @tc.steps: step2. create textLayoutAlgorithm and call AdaptMaxTextSize.
-     * @tc.expected: when maxFontSize < minFontSize,The return value of AdaptMaxTextSize is false.
-     *               when create paragraph failed,The return value of AdaptMaxTextSize is false.
-     *               when increase font size,The return value of AdaptMaxTextSize is true.
-     *               when set NormalizeToPx false,The return value of AdaptMaxTextSize is false.
-     */
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-
-    // maxFontSize < minFontSize
-    textStyle.SetAdaptMaxFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
-    textStyle.SetAdaptMinFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
-    EXPECT_EQ(
-        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
-        true);
-
-    // create paragraph failed
-    MockParagraph::enabled_ = false;
-    textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
-    textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
-    EXPECT_EQ(
-        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
-        false);
-    MockParagraph::enabled_ = true;
-
-    // increase font size
-    EXPECT_EQ(
-        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
-        true);
-
-    // set NormalizeToPx false
-    textStyle.adaptFontSizeStep_.SetUnit(DimensionUnit::CALC);
-    // can not send expression Unit to backward function, this case is meaningless.
-}
-
-/**
- * @tc.name: TextSelectOverlayTestPreProcessOverlay001
- * @tc.desc: Verify PreProcessOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestPreProcessOverlay001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    OverlayRequest request;
-
-    textSelectOverlay->hostTextBase_ = nullptr;
-    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), false);
-    textSelectOverlay->hostTextBase_ = pattern;
-
-    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), true);
-}
-
-/**
  * @tc.name: TextSelectOverlayTestGetFirstHandleInfo001
  * @tc.desc: Verify GetFirstHandleInfo
  * @tc.type: FUNC
@@ -2765,7 +2541,7 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle001, TestSize.Leve
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-
+ 
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto textSelectOverlay = pattern->selectOverlay_;
@@ -2803,7 +2579,7 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestCheckAndAdjustHandle002, TestSize.Leve
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     pipeline->SetThemeManager(theme);
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-
+ 
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
@@ -3284,11 +3060,11 @@ HWTEST_F(TextTestNg, CreateImageSourceInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: create001
+ * @tc.name: Create001
  * @tc.desc: Test create with spanstring.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, create001, TestSize.Level1)
+HWTEST_F(TextTestNg, Create001, TestSize.Level1)
 {
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
@@ -3848,32 +3624,5 @@ HWTEST_F(TextTestNg, TextPattern018, TestSize.Level1)
 
     auto IsShowHandle = pattern->IsShowHandle();
     EXPECT_EQ(IsShowHandle, false);
-}
-
-/**
- * @tc.name: TextPattern019
- * @tc.desc: Test TextPattern OnFrameNodeChanged
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextPattern019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
-     */
-    auto [frameNode, pattern] = Init();
-    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
-
-    /**
-     * @tc.steps: step2. show selectoverlay.
-     */
-    pattern->ShowSelectOverlay();
-    EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
-
-    /**
-     * @tc.steps: step3. mark framnode changed.
-     */
-    frameNode->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
-    frameNode->ProcessFrameNodeChangeFlag();
-    EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
 }
 } // namespace OHOS::Ace::NG

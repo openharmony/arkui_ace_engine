@@ -136,7 +136,11 @@ class GaugeVauleModifier extends ModifierWithKey<number> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -151,7 +155,11 @@ class GaugeStartAngleModifier extends ModifierWithKey<number> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -166,7 +174,11 @@ class GaugeEndAngleModifier extends ModifierWithKey<number> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -181,7 +193,11 @@ class GaugeStrokeWidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -196,7 +212,11 @@ class GaugeTrackShadowModifier extends ModifierWithKey<GaugeShadowOptions> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 

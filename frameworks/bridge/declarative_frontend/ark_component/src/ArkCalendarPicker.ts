@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey<PickerTextStyle> {
-  constructor(value: PickerTextStyle) {
-    super(value);
-  }
   static identity: Symbol = Symbol('textStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -41,9 +38,6 @@ class TextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 }
 
 class EdgeAlignModifier extends ModifierWithKey<ArkEdgeAlign> {
-  constructor(value: ArkEdgeAlign) {
-    super(value);
-  }
   static identity: Symbol = Symbol('edgeAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -127,6 +121,92 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
   }
   onChange(callback: (value: Date) => void): this {
     throw new Error('Method not implemented.');
+  }
+  padding(value: Padding | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = (<Margin>value).top;
+        arkValue.right = (<Margin>value).right;
+        arkValue.bottom = (<Margin>value).bottom;
+        arkValue.left = (<Margin>value).left;
+      }
+      modifierWithKey(this._modifiersWithKeys, CalendarPickerPaddingModifier.identity,
+        CalendarPickerPaddingModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CalendarPickerPaddingModifier.identity,
+        CalendarPickerPaddingModifier, undefined);
+    }
+    return this;
+  }
+  border(value: BorderOptions): this {
+    let arkBorder = new ArkBorder();
+    if (isUndefined(value)) {
+      arkBorder = undefined;
+    }
+
+    if (!isUndefined(value?.width) && value?.width !== null) {
+      if (isNumber(value.width) || isString(value.width) || isResource(value.width)) {
+        arkBorder.arkWidth.left = value.width;
+        arkBorder.arkWidth.right = value.width;
+        arkBorder.arkWidth.top = value.width;
+        arkBorder.arkWidth.bottom = value.width;
+      } else {
+        arkBorder.arkWidth.left = (value.width as EdgeWidths).left;
+        arkBorder.arkWidth.right = (value.width as EdgeWidths).right;
+        arkBorder.arkWidth.top = (value.width as EdgeWidths).top;
+        arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
+      }
+    }
+    if (!isUndefined(value?.color) && value?.color !== null) {
+      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
+        arkBorder.arkColor.leftColor = value.color;
+        arkBorder.arkColor.rightColor = value.color;
+        arkBorder.arkColor.topColor = value.color;
+        arkBorder.arkColor.bottomColor = value.color;
+      } else {
+        arkBorder.arkColor.leftColor = (value.color as EdgeColors).left;
+        arkBorder.arkColor.rightColor = (value.color as EdgeColors).right;
+        arkBorder.arkColor.topColor = (value.color as EdgeColors).top;
+        arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom;
+      }
+    }
+    if (!isUndefined(value?.radius) && value?.radius !== null) {
+      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
+        arkBorder.arkRadius.topLeft = value.radius;
+        arkBorder.arkRadius.topRight = value.radius;
+        arkBorder.arkRadius.bottomLeft = value.radius;
+        arkBorder.arkRadius.bottomRight = value.radius;
+      } else {
+        arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+        arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
+        arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+        arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
+      }
+    }
+    if (!isUndefined(value?.style) && value?.style !== null) {
+      let arkBorderStyle = new ArkBorderStyle();
+      if (arkBorderStyle.parseBorderStyle(value.style)) {
+        if (!isUndefined(arkBorderStyle.style)) {
+          arkBorder.arkStyle.top = arkBorderStyle.style;
+          arkBorder.arkStyle.left = arkBorderStyle.style;
+          arkBorder.arkStyle.bottom = arkBorderStyle.style;
+          arkBorder.arkStyle.right = arkBorderStyle.style;
+        } else {
+          arkBorder.arkStyle.top = arkBorderStyle.top;
+          arkBorder.arkStyle.left = arkBorderStyle.left;
+          arkBorder.arkStyle.bottom = arkBorderStyle.bottom;
+          arkBorder.arkStyle.right = arkBorderStyle.right;
+        }
+      }
+    }
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderModifier.identity, CalendarPickerBorderModifier, arkBorder);
+    return this;
   }
   padding(value: Padding | Length): this {
     let arkValue = new ArkPadding();

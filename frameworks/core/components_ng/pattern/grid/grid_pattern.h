@@ -170,8 +170,7 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    void ScrollPage(bool reverse, bool smooth = false,
-        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
+    void ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
 
     bool UpdateStartIndex(int32_t index);
 
@@ -186,7 +185,8 @@ public:
 
     void OnAnimateStop() override;
 
-    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
+    void AnimateTo(
+        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true) override;
     void ScrollTo(float position) override;
 
@@ -201,8 +201,8 @@ public:
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO,
         std::optional<float> extraOffset = std::nullopt) override;
-    void AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
-    bool AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo);
+    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
 
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;

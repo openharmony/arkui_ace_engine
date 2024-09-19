@@ -79,6 +79,7 @@ struct SelectHandleInfo {
     bool isShow = true;
     bool needLayout = false;
     bool isPaintHandleWithPoints = false;
+    bool isCircleShow = true;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
@@ -271,13 +272,18 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchDown;
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
-    std::function<void(const GestureEvent&, bool isClickCaret)> onClick;
+    std::function<void(const GestureEvent&, bool isFirst)> onClick;
+    std::function<void(const MouseInfo&)> onMouseEvent;
 
     // handle move callback.
     std::function<void(bool isFirst)> onHandleMoveStart;
     std::function<void(const RectF&, bool isFirst)> onHandleMove;
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
+
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanMove;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanEnd;
+    std::function<OffsetF()> getDeltaHandleOffset;
 
     // menu info.
     SelectMenuInfo menuInfo;
@@ -290,6 +296,7 @@ struct SelectOverlayInfo {
     std::function<void(bool)> onClose;
 
     std::function<bool(const PointF&)> checkIsTouchInHostArea;
+    std::function<void()> onHandleIsHidden;
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
     std::optional<CallerFrameNodeInfo> callerNodeInfo;
@@ -302,6 +309,8 @@ struct SelectOverlayInfo {
     HandleLevelMode handleLevelMode = HandleLevelMode::OVERLAY;
     bool enableHandleLevel = false;
     VectorF scale = VectorF(1.0f, 1.0f);
+    bool clipHandleDrawRect = false;
+    std::optional<RectF> clipViewPort;
 
     std::string ToString() const
     {

@@ -161,7 +161,7 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
         }
         default: {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "Image source type not supported!  srcType: %{public}d, sourceInfo: %{public}s", srcType,
+                "Image source type not supported!  srcType: %{public}d, sourceInfo: %{private}s", srcType,
                 imageSourceInfo.ToString().c_str());
             return nullptr;
         }
@@ -325,7 +325,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     auto result = SkData::MakeFromFileName(realPath);
     if (!result) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "read data failed, filePath: %{public}s, realPath: %{public}s, src: %{public}s, fail reason: "
+            "read data failed, filePath: %{private}s, realPath: %{private}s, src: %{private}s, fail reason: "
             "%{public}s",
             filePath.c_str(), src.c_str(), realPath, strerror(errno));
     }
@@ -492,7 +492,7 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 
     // 2. if not found. download it.
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Download network image, uri=%{private}s", uri.c_str());
     }
 
 #ifndef OHOS_PLATFORM
@@ -573,7 +573,7 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{public}s", (int)base64Code.size(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{private}s", (int)base64Code.size(),
             imageSourceInfo.ToString().c_str());
     }
     return resData;
@@ -669,7 +669,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
         if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{private}s",
                 uri.c_str(), rawFile.c_str());
             return nullptr;
         }
@@ -699,7 +699,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     std::string resName;
     if (GetResourceName(uri, resName)) {
         if (!resourceWrapper->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{public}s",
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{private}s",
                 uri.c_str(), resName.c_str());
             return nullptr;
         }
@@ -755,7 +755,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("LoadDecodedImageData[%s]", src.ToString().c_str());
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
@@ -764,8 +764,9 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     CHECK_NULL_RETURN(pixmap, nullptr);
+    
     TAG_LOGI(AceLogTag::ACE_IMAGE,
-        "src=%{public}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
+        "src=%{private}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
         src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         pixmap->SavePixelMapToFile("_fromMedia_");
@@ -773,7 +774,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 
     auto cache = pipeline->GetImageCache();
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{private}s,Key=%{public}s", src.ToString().c_str(),
             src.GetKey().c_str());
     }
     if (cache) {
@@ -801,12 +802,12 @@ RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
     return nullptr;
 #else
     if (!imageSourceInfo.GetPixmap()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "no pixel map in imageSourceInfo, imageSourceInfo: %{public}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "no pixel map in imageSourceInfo, imageSourceInfo: %{private}s",
             imageSourceInfo.ToString().c_str());
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "src is pixmap %{public}s", imageSourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "src is pixmap %{private}s", imageSourceInfo.ToString().c_str());
     }
     return MakeRefPtr<NG::PixmapData>(imageSourceInfo.GetPixmap());
 #endif
@@ -833,7 +834,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         std::unique_lock<std::mutex> lock(mtx_);
         auto status = cv_.wait_for(lock, TIMEOUT_DURATION);
         if (status == std::cv_status::timeout) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "load SharedMemoryImage timeout! %{public}s", src.ToString().c_str());
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "load SharedMemoryImage timeout! %{private}s", src.ToString().c_str());
             return nullptr;
         }
     }
@@ -851,7 +852,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
 
 void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "SharedMemory image data is ready %{public}s", uri.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "SharedMemory image data is ready %{private}s", uri.c_str());
     {
         std::scoped_lock<std::mutex> lock(mtx_);
         data_ = memData;
@@ -888,13 +889,13 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     CHECK_NULL_RETURN(pixmap, nullptr);
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "src=%{public}s,astc pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
+            "src=%{private}s,astc pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
             src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
     }
 
     auto cache = pipeline->GetImageCache();
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "AstcImageLoader src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "AstcImageLoader src=%{private}s,Key=%{public}s", src.ToString().c_str(),
             src.GetKey().c_str());
     }
     if (cache) {

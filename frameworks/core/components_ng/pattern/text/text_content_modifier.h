@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +53,7 @@ public:
     void SetTextDecoration(const TextDecoration& value);
     void SetTextDecorationStyle(const TextDecorationStyle value);
     void SetTextDecorationColor(const Color& value);
-    void SetBaselineOffset(const Dimension& value);
+    void SetBaselineOffset(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
 
@@ -96,13 +97,11 @@ public:
     {
         imageNodeList_ = imageNodeList;
     }
-
 protected:
     OffsetF GetPaintOffset() const
     {
         return paintOffset_;
     }
-
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -116,7 +115,9 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
+
     float GetTextRacePercent();
+    TextDirection GetTextRaceDirection() const;
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);
@@ -183,7 +184,6 @@ private:
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
 
     WeakPtr<Pattern> pattern_;
-
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 

@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TabsLayoutProperty>();
@@ -142,7 +147,7 @@ public:
 
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
-    void HandleMaskAnimationByCreate(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
+    void UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
         const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
 
 private:

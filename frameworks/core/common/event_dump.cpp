@@ -56,27 +56,36 @@ TouchPointSnapshot::TouchPointSnapshot(const TouchEvent& event)
 void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
 {
     std::stringstream oss;
+#ifdef IS_RELEASE_VERSION
+    oss << "id: " << id << ", "
+        << "type: " << GestureSnapshot::TransTouchType(type) << ", "
+        << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
+        << "isInjected: " << isInjected;
+#else
     oss << "id: " << id << ", "
         << "point: " << point.ToString() << ", "
         << "screenPoint: " << screenPoint.ToString() << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
         << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
         << "isInjected: " << isInjected;
+#endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 
 void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
 {
-    if (!eventTreeList.empty() && eventTreeList.back().touchPoints.size() > MAX_EVENT_TREE_TOUCH_POINT_CNT) {
-        eventTreeList.pop_back();
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "EventTreeList last record touchPoint size is over limit! Last record is cleaned.");
-    }
-    if (!eventTreeList.empty() && event.type == Ace::TouchType::DOWN &&
-        eventTreeList.back().downFingerIds_.count(event.id) > 0) {
-        eventTreeList.pop_back();
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "EventTreeList last record receive DOWN event twice. Last record is cleaned.");
+    if (!eventTreeList.empty()) {
+        if (eventTreeList.back().touchPoints.size() > MAX_EVENT_TREE_TOUCH_POINT_CNT) {
+            eventTreeList.pop_back();
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "EventTreeList last record touchPoint size is over limit! Last record is cleaned.");
+        }
+        if (!eventTreeList.empty() && event.type == Ace::TouchType::DOWN &&
+            eventTreeList.back().downFingerIds_.count(event.id) > 0) {
+            eventTreeList.pop_back();
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "EventTreeList last record receive DOWN event twice. Last record is cleaned.");
+        }
     }
     TouchType type = event.type;
     if (type == Ace::TouchType::DOWN) {

@@ -34,9 +34,9 @@ public:
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD1(DoTextureExport, bool(uint64_t));
     MOCK_METHOD0(StopTextureExport, bool());
+    MOCK_METHOD1(SetSurfaceRotation, void(bool));
     MOCK_METHOD1(GetPointTransform, void(PointF&));
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
-    MOCK_METHOD1(SetSurfaceRotation, void(bool));
 
     void SetVisible(bool visible) override
     {

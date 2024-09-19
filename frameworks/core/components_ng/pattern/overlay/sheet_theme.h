@@ -49,7 +49,7 @@ constexpr Dimension SHEET_TARGET_SPACE = 8.0_vp;
 constexpr Dimension SHEET_DEVICE_WIDTH_BREAKPOINT = 600.0_vp;
 constexpr Dimension SHEET_PC_DEVICE_WIDTH_BREAKPOINT = 840.0_vp;
 constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 16.0_vp;
-constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
+constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_MARGIN = 4.0_vp;
 constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
 constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
 } // namespace
@@ -217,8 +217,8 @@ private:
     Color closeIconColor_;
     Color closeIconImageColor_;
     Color closeIconSymbolColor_;
-    std::string sheetType_;
     std::string sheetBottom_;
+    std::string sheetType_;
     int sheetBackgroundBlurStyle_;
     double sheetNormalScale_;
     double sheetMaxAgingScale_;

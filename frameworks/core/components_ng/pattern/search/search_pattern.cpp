@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -27,6 +28,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -42,6 +44,7 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t ERROR = -1;
 
@@ -223,12 +226,8 @@ void SearchPattern::OnModifyDone()
     auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
     isSearchButtonEnabled_ = searchButtonEvent->IsEnabled();
 
-    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
-    CHECK_NULL_VOID(cancelButtonFrameNode);
-    auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(cancelButtonLayoutProperty);
-    cancelButtonLayoutProperty->UpdateLabel("");
-    cancelButtonFrameNode->MarkModifyDone();
+    UpdateCancelButton();
+    UpdateDivider();
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
@@ -245,18 +244,40 @@ void SearchPattern::OnModifyDone()
     SetAccessibilityAction();
 }
 
+void SearchPattern::UpdateCancelButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_VOID(cancelButtonFrameNode);
+    auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(cancelButtonLayoutProperty);
+    cancelButtonLayoutProperty->UpdateLabel("");
+    cancelButtonFrameNode->MarkModifyDone();
+}
+
+void SearchPattern::UpdateDivider()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerLayoutProperty = dividerFrameNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    auto searchButton = layoutProperty->GetSearchButton();
+    dividerLayoutProperty->UpdateVisibility(searchButton.has_value() ? VisibleType::VISIBLE : VisibleType::GONE);
+    dividerFrameNode->MarkModifyDone();
+}
+
 void SearchPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
-    textAccessibilityProperty->SetActionSetSelection(
-        [weak = WeakClaim(this)](int32_t start, int32_t end, bool isForward) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
+    textAccessibilityProperty->SetActionSetSelection([host](int32_t start, int32_t end, bool isForward) {
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -285,11 +306,7 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    textFieldAccessibilityProperty->SetActionClick([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
+    textFieldAccessibilityProperty->SetActionClick([host]() {
         auto gesture = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);
         auto actuator = gesture->GetUserClickEventActuator();
@@ -301,11 +318,7 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
     });
 
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    textAccessibilityProperty->SetActionSetText([weak = WeakClaim(this)](const std::string& value) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
+    textAccessibilityProperty->SetActionSetText([host](const std::string& value) {
         auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
         CHECK_NULL_VOID(textFieldFrameNode);
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
@@ -313,7 +326,6 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
         textFieldPattern->InsertValue(value);
     });
 }
-
 
 void SearchPattern::HandleBackgroundColor()
 {
@@ -698,6 +710,7 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(!textFieldPattern->IsDragging());
     focusChoice_ = FocusChoice::SEARCH;
     textFieldPattern->InitEditingValueText("");
+    textFieldPattern->SetTextChangedAtCreation(true);
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
@@ -725,15 +738,6 @@ void SearchPattern::OnClickTextField()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
-
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFieldFrameNode);
-    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    auto textFiledFocusHub = textFieldPattern->GetFocusHub();
-    if (!textFiledFocusHub->IsCurrentFocus() && focusHub->IsFocusOnTouch().value_or(true)) {
-        textFiledFocusHub->RequestFocusImmediately();
-    }
     host->MarkModifyDone();
 }
 
@@ -1506,6 +1510,43 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     ToJsonValueForSearchButtonOption(json, filter);
 }
 
+void SearchPattern::UpdateDividerColorMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dividerFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(DIVIDER_INDEX));
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto pipeline = dividerFrameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto searchDividerColor = searchTheme->GetSearchDividerColor();
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(searchDividerColor);
+    dividerFrameNode->MarkModifyDone();
+    dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SearchPattern::UpdateCancelButtonColorMode()
+{
+    CHECK_NULL_VOID(cancelButtonNode_);
+    auto pipeline = cancelButtonNode_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto cancelButtonRenderContext = cancelButtonNode_->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonRenderContext);
+    cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonNode_->GetChildren().front());
+    CHECK_NULL_VOID(textFrameNode);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+    cancelButtonNode_->MarkModifyDone();
+    cancelButtonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void SearchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
@@ -1521,41 +1562,28 @@ void SearchPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    auto cancelButtonNode = cancelButtonNode_.Upgrade();
-    if (cancelButtonNode) {
-        auto cancelButtonRenderContext = cancelButtonNode->GetRenderContext();
-        CHECK_NULL_VOID(cancelButtonRenderContext);
-        cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonNode->GetChildren().front());
-        CHECK_NULL_VOID(textFrameNode);
-        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
-        cancelButtonNode->MarkModifyDone();
-        cancelButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-    auto buttonNode = buttonNode_.Upgrade();
-    if (buttonNode) {
-        auto buttonRenderContext = buttonNode->GetRenderContext();
+    UpdateCancelButtonColorMode();
+    if (buttonNode_) {
+        auto buttonRenderContext = buttonNode_->GetRenderContext();
         CHECK_NULL_VOID(buttonRenderContext);
         buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode_->GetChildren().front());
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
-        buttonNode->MarkModifyDone();
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        buttonNode_->MarkModifyDone();
+        buttonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    auto textField = textField_.Upgrade();
-    if (textField) {
-        auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (textField_) {
+        auto textFieldLayoutProperty = textField_->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(textFieldLayoutProperty);
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
-        textField->MarkModifyDone();
-        textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textField_->MarkModifyDone();
+        textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    UpdateDividerColorMode();
 }
 
 uint32_t SearchPattern::GetMaxLength() const

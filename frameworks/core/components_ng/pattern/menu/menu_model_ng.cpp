@@ -115,6 +115,11 @@ void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode);
 }
 
+void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
+}
+
 void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);

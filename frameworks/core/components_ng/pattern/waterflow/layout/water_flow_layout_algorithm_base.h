@@ -34,6 +34,8 @@ public:
 protected:
     void PreBuildItems(LayoutWrapper* layoutWrapper, const RefPtr<WaterFlowLayoutInfoBase>& info,
         const LayoutConstraintF& constraint, int32_t cachedCount);
+        
+    static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
 
 private:
     std::list<int32_t> LayoutCachedItem(

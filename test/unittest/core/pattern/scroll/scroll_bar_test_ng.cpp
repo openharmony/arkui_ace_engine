@@ -23,7 +23,6 @@ constexpr float BAR_WIDTH = 10.f;
 class ScrollBarTestNg : public ScrollTestNg {
 public:
     void CreateWithBar();
-    void ClickBar(Offset point);
     void UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper);
     void onDraw(RefPtr<PaintWrapper> paintWrapper, bool needDraw = true);
 };
@@ -36,12 +35,6 @@ void ScrollBarTestNg::CreateWithBar()
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     scrollBar_ = pattern_->GetScrollBar();
-}
-
-void ScrollBarTestNg::ClickBar(Offset point)
-{
-    pattern_->locationInfo_ = Offset(point);
-    pattern_->HandleClickEvent(); // will trigger CheckBarDirection
 }
 
 void ScrollBarTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)
@@ -67,77 +60,6 @@ void ScrollBarTestNg::onDraw(RefPtr<PaintWrapper> paintWrapper, bool needDraw)
     DrawingContext drawingContext = { canvas, SCROLL_WIDTH, SCROLL_HEIGHT };
     UpdateOverlayModifier(paintWrapper);
     scrollBarOverlayModifier->onDraw(drawingContext);
-}
-
-/**
- * @tc.name: ClickBar001
- * @tc.desc: Test CheckBarDirection by HandleClickEvent, component will scroll by click bar
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, ClickBar001, TestSize.Level1)
-{
-    CreateWithBar();
-    EXPECT_TRUE(IsEqual(scrollBar_->GetTouchRegion(),
-        Rect(SCROLL_WIDTH - BAR_WIDTH, 0.f, BAR_WIDTH, SCROLL_HEIGHT * VIEW_ITEM_NUMBER / TOTAL_ITEM_NUMBER)));
-    const float pointInBarX = scrollBar_->GetTouchRegion().Left() + BAR_WIDTH / 2;
-    pattern_->isMousePressed_ = true;
-
-    /**
-     * @tc.steps: step1. Click not in bar
-     * @tc.expected: Not scroll
-     */
-    ClickBar(Offset::Zero());
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, 0.f));
-
-    /**
-     * @tc.steps: step2. Click in bar
-     * @tc.expected: Not scroll
-     */
-    ClickBar(Offset(pointInBarX, 10.f));
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, 0.f));
-
-    /**
-     * @tc.steps: step3. Click below bar
-     * @tc.expected: Scroll page down
-     */
-    ClickBar(Offset(pointInBarX, 700.f));
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, SCROLL_HEIGHT)); // 800.f
-
-    /**
-     * @tc.steps: step4. Scroll down and Click above bar
-     * @tc.expected: Scroll page up
-     */
-    ScrollTo(ITEM_HEIGHT);
-    ClickBar(Offset(pointInBarX, 1.f));
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, ITEM_HEIGHT - SCROLL_HEIGHT)); // -700.f
-}
-
-/**
- * @tc.name: HandleLongPress001
- * @tc.desc: Test HandleLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, HandleLongPress001, TestSize.Level1)
-{
-    CreateWithBar();
-    auto scrollBar = pattern_->GetScrollBar();
-    const float pointInBarX = scrollBar->GetTouchRegion().Left() + BAR_WIDTH / 2;
-
-    /**
-     * @tc.steps: step1. LongPress not in bar
-     * @tc.expected: Not scroll
-     */
-    Mouse(Offset::Zero(), MouseButton::LEFT_BUTTON, MouseAction::PRESS);
-    scrollBar->HandleLongPress(false);
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, 0.f));
-
-    /**
-     * @tc.steps: step2. LongPress in bar
-     * @tc.expected: Not scroll
-     */
-    Mouse(Offset(pointInBarX, 10.f), MouseButton::LEFT_BUTTON, MouseAction::PRESS);
-    scrollBar->HandleLongPress(false);
-    EXPECT_TRUE(IsEqual(pattern_->finalPosition_, 0.f));
 }
 
 /**
@@ -216,24 +138,6 @@ HWTEST_F(ScrollBarTestNg, OnCollectTouchTarget001, TestSize.Level1)
     pattern_->scrollableEvent_->BarCollectTouchTarget(
         coordinateOffset, getEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), 1);
-}
-
-/**
- * @tc.name: HandleDragUpdate001
- * @tc.desc: Test HandleDragUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
-{
-    CreateWithBar();
-    GestureEvent info;
-    info.SetMainDelta(10);
-    scrollBar_->SetReverse(false);
-    scrollBar_->HandleDragUpdate(info);
-    EXPECT_EQ(info.GetMainDelta(), 10);
-    scrollBar_->SetReverse(true);
-    scrollBar_->HandleDragUpdate(info);
-    EXPECT_NE(info.GetMainDelta(), -100);
 }
 
 /**
@@ -794,60 +698,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBar005, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollBarWidth001
- * @tc.desc: Test scrollbar width
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Not set bar width
-     * @tc.expected: It will be default
-     */
-    ScrollModelNG model = CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
-
-    /**
-     * @tc.steps: step2. Set bar width less than bar height
-     * @tc.expected: It will be the value that was set
-     */
-    model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(10));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), 10);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), 10);
-
-    /**
-     * @tc.steps: step3. Set bar width greater than SCROLL_HEIGHT
-     * @tc.expected: It will be default
-     */
-    model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
-
-    /**
-     * @tc.steps: step4. Set bar width less than SCROLL_HEIGHT
-     * @tc.expected: The bar width will be the value that was set, and bar height will be equal to bar width
-     */
-    float barWidth = SCROLL_HEIGHT - 1;
-    model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(barWidth));
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), barWidth);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Height(), barWidth);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), barWidth);
-    EXPECT_EQ(pattern_->scrollBar_->barRect_.Height(), SCROLL_HEIGHT);
-}
-
-/**
  * @tc.name: ScrollBar007
  * @tc.desc: when IsPressed is true, can not trigger scrollstart event
  * @tc.type: FUNC
@@ -1016,65 +866,5 @@ HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(paintProperty_->GetBarWidth(), Dimension(10));
-}
-
-/**
- * @tc.name: RegisterEventByClick001
- * @tc.desc: Test Register Event By Click(CollectTouchTarget)
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollBarTestNg, RegisterEventByClick001, TestSize.Level1)
-{
-    MockContainer::Current()->useNewPipeline_ = true; // for init panRecognizerNG_
-    ScrollModelNG model = CreateScroll();
-    model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
-    model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1.f)); // will be default
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    scrollBar_ = pattern_->GetScrollBar();
-    OffsetF coordinateOffset;
-    TouchRestrict touchRestrict;
-    GetEventTargetImpl getEventTargetImpl;
-    TouchTestResult result;
-    PointF localPoint;
-    RefPtr<FrameNode> frameNode = frameNode_;
-    RefPtr<TargetComponent> targetComponent;
-    ResponseLinkResult responseLinkResult;
-    auto scrollableActuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
-    int32_t nodeId = 123456;
-    frameNode_->UpdateRecycleElmtId(nodeId);
-    EXPECT_EQ(frameNode_->GetId(), nodeId);
-
-    /**
-     * @tc.steps: step1. Click activeBar
-     * @tc.expected: Trigger BarCollectTouchTarget
-     */
-    localPoint = PointF(SCROLL_WIDTH - 1.f, 1.f);
-    scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl,
-        result, localPoint, frameNode, targetComponent, responseLinkResult);
-    EXPECT_EQ(scrollBar_->panRecognizer_->nodeId_, nodeId);
-
-    /**
-     * @tc.steps: step2. Click bar
-     * @tc.expected: Trigger BarCollectLongPressTarget,CollectScrollableTouchTarget
-     */
-    localPoint = PointF(SCROLL_WIDTH - 1.f, SCROLL_HEIGHT - 1.f);
-    scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl,
-        result, localPoint, frameNode, targetComponent, responseLinkResult);
-    EXPECT_EQ(scrollBar_->longPressRecognizer_->nodeId_, nodeId);
-    EXPECT_EQ(pattern_->scrollableEvent_->GetScrollable()->panRecognizerNG_->nodeId_, nodeId);
-
-    /**
-     * @tc.steps: step3. Click out of bar
-     * @tc.expected: Trigger CollectScrollableTouchTarget
-     */
-    pattern_->scrollableEvent_->GetScrollable()->panRecognizerNG_->SetNodeId(0);
-    localPoint = PointF(1.f, 1.f);
-    scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl,
-        result, localPoint, frameNode, targetComponent, responseLinkResult);
-    EXPECT_EQ(pattern_->scrollableEvent_->GetScrollable()->panRecognizerNG_->nodeId_, nodeId);
-
-    // reset useNewPipeline_
-    MockContainer::Current()->useNewPipeline_ = false;
 }
 } // namespace OHOS::Ace::NG

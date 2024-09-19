@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <cstring>
 #include "anr_thread.h"
 
 #include "core/common/task_runner_adapter.h"

@@ -294,11 +294,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    if (currentFingers_ < fingers_) {
-        return;
-    }
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+    }
+    if (currentFingers_ < fingers_) {
+        return;
     }
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
@@ -564,10 +564,7 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
 {
-    auto judgeDistance = distance_;
-    if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
-        judgeDistance = mouseDistance_;
-    }
+    auto judgeDistance = deviceType_ == SourceType::MOUSE ? mouseDistance_ : distance_;
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         double offset = averageDistance_.GetDistance();
         if (fabs(offset) < judgeDistance) {
@@ -627,8 +624,8 @@ Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
             rawLastPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
         return Offset(rawLastPoint.GetX(), rawLastPoint.GetY());
     }
-    NGGestureRecognizer::Transform(
-        localPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
+    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+        isPostEventResult_, postEventNodeId);
     return Offset(localPoint.GetX(), localPoint.GetY());
 }
 
@@ -678,9 +675,11 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetSourceTool(lastAxisEvent_.sourceTool);
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -689,11 +688,6 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
-    if (inputEventType_ == InputEventType::AXIS) {
-        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
-    } else {
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-    }
     return info;
 }
 
@@ -955,9 +949,10 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
     PointF windowTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
-    NGGestureRecognizer::Transform(
-        windowTouchPoint, GetAttachedNode(), false, isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
 

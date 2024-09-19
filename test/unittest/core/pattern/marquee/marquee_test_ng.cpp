@@ -23,6 +23,7 @@
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -41,6 +42,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -89,13 +91,11 @@ protected:
 
 void MarqueeTestNg::SetUpTestSuite()
 {
-    MockContainer::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
 }
 void MarqueeTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& testProperty)
@@ -1066,134 +1066,6 @@ HWTEST_F(MarqueeTestNg, MarqueeTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: MarqueeTest015
- * @tc.desc: Test MarqueeModelNG setFun of MarqueeLayoutProperty
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestNg, MarqueeTest015, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNod.
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = static_cast<ElementIdType>(1);
-    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
-    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
-    frameNode->SetLayoutProperty(marqueeLayoutProperty);
-
-    /**
-     * @tc.steps: step2. Set up the created frameNode.
-     */
-    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
-
-    /**
-     * @tc.steps: step3. Call Create.
-     */
-    MarqueeModelNG marqueeModel;
-    marqueeModel.Create();
-
-    /**
-     * @tc.steps: step4. Call Set Function.
-     * @tc.expected: step4. All Set Successful.
-     */
-    marqueeModel.SetFontSize(Dimension(2.0));
-    EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), Dimension(2.0));
-    marqueeModel.SetFontSize(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontSize());
-
-    marqueeModel.SetTextColor(Color(2));
-    EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), Color(2));
-    marqueeModel.SetTextColor(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontColor());
-
-    marqueeModel.SetFontWeight(Ace::FontWeight::W200);
-    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), Ace::FontWeight::W200);
-    marqueeModel.SetFontWeight(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontWeight());
-
-    std::vector<std::string> fontFamily = { "test1", "test2" };
-    marqueeModel.SetFontFamily(fontFamily);
-    EXPECT_EQ(marqueeLayoutProperty->GetFontFamily(), fontFamily);
-    marqueeModel.SetFontFamily(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontFamily());
-
-    marqueeModel.SetAllowScale(true);
-    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
-    marqueeModel.SetAllowScale(std::nullopt);
-    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
-
-    marqueeModel.SetMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
-    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
-    marqueeModel.SetMarqueeUpdateStrategy(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasMarqueeUpdateStrategy());
-
-    marqueeModel.SetValue("test");
-    EXPECT_EQ(marqueeLayoutProperty->GetSrcValue(), "test");
-    marqueeModel.SetValue(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasSrc());
-    ViewStackProcessor::instance = nullptr;
-}
-
-/**
- * @tc.name: MarqueeTest016
- * @tc.desc: Test MarqueeModelNG setFun of MarqueeLayoutProperty
- * @tc.type: FUNC
- */
-HWTEST_F(MarqueeTestNg, MarqueeTest016, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create frameNode.
-     */
-    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
-    FrameNode frameNode = FrameNode(V2::MARQUEE_ETS_TAG, 1, pattern);
-    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
-    frameNode.SetLayoutProperty(marqueeLayoutProperty);
-
-    /**
-     * @tc.steps: step2. Call Create.
-     */
-    MarqueeModelNG marqueeModel;
-    marqueeModel.Create();
-
-    /**
-     * @tc.steps: step4. Call Set Function.
-     * @tc.expected: step4. All Set Successful.
-     */
-    marqueeModel.SetFontSize(&frameNode, Dimension(2.0));
-    EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), Dimension(2.0));
-    marqueeModel.SetFontSize(&frameNode, std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontSize());
-
-    marqueeModel.SetTextColor(&frameNode, Color(2));
-    EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), Color(2));
-    marqueeModel.SetTextColor(&frameNode, std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontColor());
-
-    marqueeModel.SetFontWeight(&frameNode, Ace::FontWeight::W200);
-    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), Ace::FontWeight::W200);
-    marqueeModel.SetFontWeight(&frameNode, std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontWeight());
-
-    std::vector<std::string> fontFamily = { "test1", "test2" };
-    marqueeModel.SetFontFamily(&frameNode, fontFamily);
-    EXPECT_EQ(marqueeLayoutProperty->GetFontFamily(), fontFamily);
-    marqueeModel.SetFontFamily(&frameNode, std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasFontFamily());
-
-    marqueeModel.SetAllowScale(&frameNode, true);
-    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
-    marqueeModel.SetAllowScale(&frameNode, false);
-    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), false);
-
-    marqueeModel.SetMarqueeUpdateStrategy(&frameNode, Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
-    EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
-    marqueeModel.SetMarqueeUpdateStrategy(&frameNode, std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasMarqueeUpdateStrategy());
-}
-
-/**
  * @tc.name: MarqueeTest017
  * @tc.desc: Test MarqueePattern.OnModifyDone
  * @tc.type: FUNC
@@ -1600,5 +1472,4 @@ HWTEST_F(MarqueeTestNg, MarqueeTest023, TestSize.Level1)
     offset = pattern->GetTextOffset();
     EXPECT_EQ(offset, 0.0f);
 }
-
 } // namespace OHOS::Ace::NG

@@ -1544,11 +1544,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePi
     };
     auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(monthDaysPickerPattern, nullptr);
-    monthDaysPickerPattern->SetTextProperties(settingData.properties);
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
     monthDaysPickerPattern->SetShowTimeFlag(true);
+    monthDaysPickerPattern->SetTextProperties(settingData.properties);
     pickerPattern->SetShowTimeFlag(true);
     auto monthDaysLayoutProperty = monthDaysNode->GetLayoutProperty();
     CHECK_NULL_RETURN(monthDaysLayoutProperty, nullptr);

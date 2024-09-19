@@ -145,7 +145,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                              const std::string& param) {
+                                const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             PipelineContext::SetCallBackNode(node);
@@ -163,7 +163,7 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
-                           const std::string& param) {
+                            const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };

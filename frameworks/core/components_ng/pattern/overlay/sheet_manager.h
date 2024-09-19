@@ -45,6 +45,16 @@ public:
         targetIdMap_.erase(SheetContentKey(instanceId, sheetContentNodeId));
     }
 
+    void SetDismissSheet(int32_t dismissId)
+    {
+        sheetDismissId_ = dismissId;
+    }
+
+    int32_t GetDismissSheet()
+    {
+        return sheetDismissId_;
+    }
+
 private:
     struct SheetContentKey {
         SheetContentKey() {}
@@ -60,6 +70,7 @@ private:
         }
     };
 
+    int32_t sheetDismissId_ = -1;
     std::map<SheetContentKey, RefPtr<OverlayManager>> overlayManagerMap_;
     // Value:  The uniqueId of the FrameNode to which BindSheet is attached
     std::map<SheetContentKey, int32_t> targetIdMap_;

@@ -65,7 +65,12 @@ public:
         return OnGetTotalCount();
     }
 
-    int32_t GetTotalCountOfOriginalDataset(const std::list<V2::Operation>& DataOperations);
+    void UpdateHistoricalTotalCount(int32_t count)
+    {
+        historicalTotalCount_ = count;
+    }
+
+    int32_t GetTotalCountOfOriginalDataset();
 
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
@@ -92,7 +97,8 @@ public:
 
     bool OnDataMoved(size_t from, size_t to);
 
-    std::pair<int32_t, std::list<RefPtr<UINode>>> OnDatasetChange(std::list<V2::Operation> DataOperations);
+    std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> OnDatasetChange(
+        std::list<V2::Operation> DataOperations);
 
     void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
         std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
@@ -225,6 +231,7 @@ public:
     {
         ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
         int32_t count = GetTotalCount();
+        UpdateHistoricalTotalCount(count);
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
             if ((index < count) && ((start <= end && start <= index && end >= index) ||
@@ -550,6 +557,9 @@ public:
             node.second.second->SetJSViewActive(active, true);
         }
         for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
             node.second.second->SetJSViewActive(active, true);
         }
     }
@@ -628,6 +638,7 @@ private:
     int32_t cacheCount_ = 0;
     int32_t preBuildingIndex_ = -1;
     int32_t totalCountOfOriginalDataset_ = 0;
+    int32_t historicalTotalCount_ = 0;
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;

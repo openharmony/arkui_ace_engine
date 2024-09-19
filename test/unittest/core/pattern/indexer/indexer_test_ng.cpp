@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,45 @@
  * limitations under the License.
  */
 
-#include "indexer_test_ng.h"
+#include <optional>
+
+#include "gtest/gtest.h"
+
+#include "base/geometry/dimension.h"
+
+#define protected public
+#define private public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/unittest/core/pattern/test_ng.h"
+
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/common/container.h"
+#include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
+#include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
+using namespace testing;
+using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
     "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 std::vector<std::string> CREATE_ARRAY_1 = { "A", "B", "C", "D", "E", "F", "G", "H", "I"};
 std::vector<std::string> CREATE_ARRAY_2 = { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
-const float INDEXER_WIDTH = 40.0f;
+const float INDEXERWIDTH = 40.0f;
 std::vector<std::string> GetPopupData(int32_t)
 {
     return { "白", "别" };
@@ -35,6 +65,29 @@ std::vector<std::string> GetMorePopupData2(int32_t)
     return { "白", "别", "吧", "不", "被", "包", "毕" };
 }
 } // namespace
+
+class IndexerTestNg : public TestNG {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
+    void GetInstance();
+
+    void Create(const std::function<void(IndexerModelNG)>& callback = nullptr,
+        std::vector<std::string> arrayValue = CREATE_ARRAY, int32_t selected = 0);
+    float GetFirstChildOffsetY();
+    AssertionResult Selected(int32_t expectSelected);
+    void MoveIndex(GestureEvent gestureEvent);
+    AssertionResult Touch(TouchType touchType, float locationY, int32_t expectSelected);
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<IndexerPattern> pattern_;
+    RefPtr<IndexerEventHub> eventHub_;
+    RefPtr<IndexerLayoutProperty> layoutProperty_;
+    RefPtr<IndexerPaintProperty> paintProperty_;
+    RefPtr<IndexerAccessibilityProperty> accessibilityProperty_;
+};
 
 void IndexerTestNg::SetUpTestSuite()
 {
@@ -61,29 +114,38 @@ void IndexerTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes(); // Each testCase will create new list at begin
 }
 
-IndexerModelNG IndexerTestNg::CreateIndexer(std::vector<std::string> arrayValue, int32_t selected)
+void IndexerTestNg::GetInstance()
 {
-    ResetElmtId();
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-    IndexerModelNG model;
-    model.Create(arrayValue, selected);
-    model.SetAutoCollapse(false);
-    GetIndexer();
-    return model;
-}
-
-void IndexerTestNg::GetIndexer()
-{
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<IndexerPattern>();
     eventHub_ = frameNode_->GetEventHub<IndexerEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<IndexerLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<IndexerPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+}
+
+void IndexerTestNg::Create(
+    const std::function<void(IndexerModelNG)>& callback, std::vector<std::string> arrayValue, int32_t selected)
+{
+    IndexerModelNG model;
+    model.Create(arrayValue, selected);
+    model.SetAutoCollapse(false);
+    if (callback) {
+        callback(model);
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+}
+
+float IndexerTestNg::GetFirstChildOffsetY()
+{
+    if (pattern_->itemCount_ > 0) {
+        return GetChildRect(frameNode_, 0).GetY();
+    }
+    return 0.f;
 }
 
 AssertionResult IndexerTestNg::Selected(int32_t expectSelected)
@@ -101,10 +163,7 @@ void IndexerTestNg::MoveIndex(GestureEvent gestureEvent)
 
 AssertionResult IndexerTestNg::Touch(TouchType touchType, float locationY, int32_t expectSelected)
 {
-    float firstOffsetY = 0.f;
-    if (pattern_->itemCount_ > 0) {
-        firstOffsetY = GetChildY(frameNode_, 0);
-    }
+    float firstOffsetY = GetFirstChildOffsetY();
     TouchEventInfo touchEventInfo = CreateTouchEventInfo(touchType, Offset(0.f, locationY + firstOffsetY));
     auto touchFuc = pattern_->touchListener_->GetTouchEventCallback();
     touchFuc(touchEventInfo);
@@ -118,8 +177,7 @@ AssertionResult IndexerTestNg::Touch(TouchType touchType, float locationY, int32
  */
 HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
     ASSERT_NE(pattern_->panEvent_, nullptr);
     GestureEvent gestureEvent;
     gestureEvent.SetInputEventType(InputEventType::AXIS);
@@ -164,17 +222,17 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerMoveIndex002, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
     ASSERT_NE(pattern_->panEvent_, nullptr);
     GestureEvent gestureEvent;
     gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
+    float firstOffsetY = GetFirstChildOffsetY();
 
     /**
      * @tc.steps: step1. Location is (0, 50).
      * @tc.expected: Selected change to correct index.
      */
-    float locationY = 50.f + GetChildY(frameNode_, 0);
+    float locationY = 50.f + firstOffsetY;
     gestureEvent.SetLocalLocation(Offset(0.f, locationY));
     MoveIndex(gestureEvent);
 
@@ -197,9 +255,7 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
      * @tc.steps: step1. Test with empty array.
      * @tc.expected: Selected unchanged.
      */
-    IndexerModelNG model = CreateIndexer(std::vector<std::string>(), 0);
-    model.SetUsingPopup(true);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); }, std::vector<std::string>());
     ASSERT_NE(pattern_->panEvent_, nullptr);
     GestureEvent gestureEvent;
     gestureEvent.SetInputEventType(InputEventType::KEYBOARD);
@@ -211,13 +267,12 @@ HWTEST_F(IndexerTestNg, IndexerMoveIndex003, TestSize.Level1)
 /**
  * @tc.name: IndexerTouch001
  * @tc.desc: Test touchListener_ func with hover.
- * @tc.desc: and touchDown touchUp in different location.
+ * @tc.desc: and touchDown touchUp in differrnt location.
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
     ASSERT_NE(pattern_->touchListener_, nullptr);
 
     /**
@@ -228,7 +283,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
     EXPECT_TRUE(Touch(TouchType::DOWN, 50.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
 
     /**
-     * @tc.steps: step2. OnTouchUp, different location.
+     * @tc.steps: step2. OnTouchUp, differrnt location.
      * @tc.expected: Selected index is correct.
      */
     EXPECT_TRUE(Touch(TouchType::UP, 20.f, static_cast<int32_t>(50.f / pattern_->itemHeight_)));
@@ -242,8 +297,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerTouch002, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
     ASSERT_NE(pattern_->touchListener_, nullptr);
 
     /**
@@ -271,8 +325,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
      * @tc.steps: step1. TouchType::MOVE.
      * @tc.expected: Selected unchanged.
      */
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
     ASSERT_NE(pattern_->touchListener_, nullptr);
     EXPECT_TRUE(Touch(TouchType::MOVE, 20.f, 0));
 
@@ -280,9 +333,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
      * @tc.steps: step2. Empty array
      * @tc.expected: Selected unchanged.
      */
-    ClearOldNodes();
-    CreateIndexer(std::vector<std::string>(), 0);
-    CreateDone();
+    Create(nullptr, std::vector<std::string>());
     EXPECT_TRUE(Touch(TouchType::DOWN, 20.f, 0));
     EXPECT_TRUE(Touch(TouchType::UP, 20.f, 0));
 
@@ -290,9 +341,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
      * @tc.steps: step3. Touch -1.f
      * @tc.expected: Selected index 0.
      */
-    ClearOldNodes();
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create(nullptr);
     EXPECT_TRUE(Touch(TouchType::DOWN, -1.f, 0));
     EXPECT_TRUE(Touch(TouchType::UP, -1.f, 0));
 }
@@ -304,8 +353,7 @@ HWTEST_F(IndexerTestNg, IndexerTouch003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerKeyEvent001, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
 
     /**
      * @tc.steps: step1. UNKNOWN keyEvent.
@@ -357,8 +405,7 @@ HWTEST_F(IndexerTestNg, IndexerKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerKeyEvent002, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
 
     /**
      * @tc.steps: step1. IsCombinationKey && KEY_UNKNOWN.
@@ -428,9 +475,7 @@ HWTEST_F(IndexerTestNg, IndexerKeyEvent002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); });
 
     pattern_->OnChildHover(1, true);
     EXPECT_EQ(pattern_->childHoverIndex_, 1);
@@ -448,10 +493,7 @@ HWTEST_F(IndexerTestNg, IndexerHover001, TestSize.Level1)
      * @tc.steps: step1. Set empty arrayValue and trigger OnHover
      * @tc.expected: isHover_ is still be false
      */
-    ClearOldNodes();
-    model = CreateIndexer(std::vector<std::string>(), 0);
-    model.SetUsingPopup(true);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); }, std::vector<std::string>());
     pattern_->OnHover(true);
     EXPECT_FALSE(pattern_->isHover_);
 }
@@ -465,26 +507,35 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
 {
     IndexerModelNG IndexerModelNG;
     IndexerModelNG.Create(CREATE_ARRAY, 0);
-    GetIndexer();
+    GetInstance();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.skipMeasure = true;
     dirtySwapConfig.skipLayout = true;
-    EXPECT_FALSE(pattern_->OnDirtyLayoutWrapperSwap(frameNode_, dirtySwapConfig));
+    EXPECT_FALSE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
 
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = false;
-    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(frameNode_, dirtySwapConfig));
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
 
     dirtySwapConfig.skipMeasure = true;
     dirtySwapConfig.skipLayout = false;
-    pattern_->OnDirtyLayoutWrapperSwap(frameNode_, dirtySwapConfig);
-    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(frameNode_, dirtySwapConfig));
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
 
     dirtySwapConfig.skipMeasure = false;
     dirtySwapConfig.skipLayout = true;
-    pattern_->OnDirtyLayoutWrapperSwap(frameNode_, dirtySwapConfig);
-    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(frameNode_, dirtySwapConfig));
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_TRUE(pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
 }
 
 /**
@@ -494,12 +545,14 @@ HWTEST_F(IndexerTestNg, IndexerPattern001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetUsingPopup(true);
-    model.SetAlignStyle(0);
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetAlignStyle(0);
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
@@ -519,13 +572,15 @@ HWTEST_F(IndexerTestNg, IndexerPattern002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPattern003, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetUsingPopup(true);
-    model.SetPopupSelectedColor(Color(0x00000000));
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetPopupItemBackground(Color(0x00000000));
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetPopupSelectedColor(Color(0x00000000));
+            model.SetPopupUnselectedColor(Color(0x00000000));
+            model.SetPopupItemBackground(Color(0x00000000));
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
     pattern_->MoveIndexByStep(1);
     ASSERT_NE(pattern_->popupNode_, nullptr);
 
@@ -567,9 +622,7 @@ HWTEST_F(IndexerTestNg, IndexerPattern004, TestSize.Level1)
      */
     int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); });
     auto indexerRenderContext = frameNode_->GetRenderContext();
     auto indexerRadius = Dimension(INDEXER_DEFAULT_RADIUS, DimensionUnit::VP);
     BorderRadiusProperty expectValue = { indexerRadius, indexerRadius, indexerRadius, indexerRadius };
@@ -624,10 +677,10 @@ HWTEST_F(IndexerTestNg, IndexerPattern005, TestSize.Level1)
      */
     int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetMorePopupData2);
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetUsingPopup(true);
+        model.SetOnRequestPopupData(GetMorePopupData2);
+    });
     pattern_->MoveIndexByOffset(Offset(0, 10));
     FlushLayoutTask(frameNode_);
     auto listNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild()->GetFirstChild());
@@ -677,10 +730,10 @@ HWTEST_F(IndexerTestNg, IndexerPattern005, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetUsingPopup(true);
+        model.SetOnRequestPopupData(GetPopupData);
+    });
 
     /**
      * @tc.steps: step1. has popListData.
@@ -707,10 +760,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetUsingPopup(true);
+        model.SetOnRequestPopupData(GetPopupData);
+    });
 
     /**
      * @tc.steps: step1. childPressIndex_ less than 0.
@@ -737,10 +790,10 @@ HWTEST_F(IndexerTestNg, IndexerUpdateBubble002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerUpdateBubble003, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetMorePopupData); // GetMorePopupData.
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetUsingPopup(true);
+        model.SetOnRequestPopupData(GetMorePopupData); // GetMorePopupData.
+    });
 
     /**
      * @tc.steps: step1. has popListData and popListData size equal INDEXER_BUBBLE_MAXSIZE.
@@ -770,9 +823,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
     /**
      * @tc.steps: step1. ShowBubble
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    CreateDone(); // NeedShowPopupView is true.
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); }); // NeedShowPopupView is true.
     pattern_->MoveIndexByStep(1);                                    // ShowBubble
     ASSERT_NE(pattern_->popupNode_, nullptr);
     auto gesture = pattern_->popupNode_->GetOrCreateGestureEventHub();
@@ -784,7 +835,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
      */
     TouchEventInfo touchEventInfo = CreateTouchEventInfo(TouchType::DOWN, Offset());
     onPopupTouchDown(touchEventInfo); // trigger OnPopupTouchDown
-    EXPECT_TRUE(pattern_->isTouch_);
+    EXPECT_EQ(pattern_->isTouch_, true);
 
     /**
      * @tc.steps: step3. Create touchEventInfo, set TouchType::UP
@@ -792,7 +843,7 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
      */
     touchEventInfo = CreateTouchEventInfo(TouchType::UP, Offset());
     onPopupTouchDown(touchEventInfo);
-    EXPECT_FALSE(pattern_->isTouch_);
+    EXPECT_EQ(pattern_->isTouch_, false);
 }
 
 /**
@@ -803,12 +854,14 @@ HWTEST_F(IndexerTestNg, IndexerPopupTouchDown001, TestSize.Level1)
 HWTEST_F(IndexerTestNg, Event001, TestSize.Level1)
 {
     bool isTrigger = false;
-    OnPopupSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 2);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData);
-    model.SetOnPopupSelected(std::move(event));
-    CreateDone();
+    Create(
+        [&isTrigger](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+            OnPopupSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
+            model.SetOnPopupSelected(std::move(event));
+        },
+        CREATE_ARRAY, 2);
 
     /**
      * @tc.steps: step1. Trigger OnPopupSelected callback.
@@ -827,10 +880,10 @@ HWTEST_F(IndexerTestNg, Event001, TestSize.Level1)
 HWTEST_F(IndexerTestNg, Event002, TestSize.Level1)
 {
     bool isTrigger = false;
-    OnSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetOnSelected(std::move(event));
-    CreateDone();
+    Create([&isTrigger](IndexerModelNG model) {
+        OnSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
+        model.SetOnSelected(std::move(event));
+    });
 
     /**
      * @tc.steps: step1. Trigger OnSelected callback.
@@ -848,10 +901,10 @@ HWTEST_F(IndexerTestNg, Event002, TestSize.Level1)
 HWTEST_F(IndexerTestNg, Event003, TestSize.Level1)
 {
     bool isTrigger = false;
-    OnSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetChangeEvent(std::move(event));
-    CreateDone();
+    Create([&isTrigger](IndexerModelNG model) {
+        OnSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
+        model.SetChangeEvent(std::move(event));
+    });
 
     /**
      * @tc.steps: step1. Trigger OnSelected callback.
@@ -869,10 +922,10 @@ HWTEST_F(IndexerTestNg, Event003, TestSize.Level1)
 HWTEST_F(IndexerTestNg, Event004, TestSize.Level1)
 {
     bool isTrigger = false;
-    OnSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetCreatChangeEvent(std::move(event));
-    CreateDone();
+    Create([&isTrigger](IndexerModelNG model) {
+        OnSelectedEvent event = [&isTrigger](int32_t) { isTrigger = true; };
+        model.SetCreatChangeEvent(std::move(event));
+    });
 
     /**
      * @tc.steps: step1. Trigger OnSelected callback.
@@ -892,8 +945,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create with normal arg.
      */
-    CreateIndexer(CREATE_ARRAY, 5);
-    CreateDone();
+    Create(nullptr, CREATE_ARRAY, 5);
     EXPECT_EQ(layoutProperty_->GetArrayValueValue(), CREATE_ARRAY);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 5);
 
@@ -901,18 +953,14 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
      * @tc.steps: step2. Set selected < 0.
      * @tc.expected: The selected would be 0.
      */
-    ClearOldNodes();
-    CreateIndexer(CREATE_ARRAY, -1);
-    CreateDone();
+    Create(nullptr, CREATE_ARRAY, -1);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
 
     /**
      * @tc.steps: step3. Set selected > array size.
      * @tc.expected: The selected would be 0.
      */
-    ClearOldNodes();
-    CreateIndexer(CREATE_ARRAY, CREATE_ARRAY.size() + 11);
-    CreateDone();
+    Create(nullptr, CREATE_ARRAY, CREATE_ARRAY.size() + 1);
     EXPECT_EQ(layoutProperty_->GetSelectedValue(), 0);
 }
 
@@ -923,25 +971,25 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetSelectedColor(Color(0x00000000));
-    model.SetColor(Color(0x00000000));
-    model.SetPopupColor(Color(0x00000000));
-    model.SetSelectedBackgroundColor(Color(0x00000000));
-    model.SetPopupBackground(Color(0x00000000));
-    model.SetUsingPopup(true);
-    model.SetItemSize(Dimension(24));
-    model.SetAlignStyle(0);
-    model.SetPopupHorizontalSpace(Dimension(50));
-    model.SetSelected(0);
-    model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
-    model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
-    model.SetPopupItemBackground(Color(0x00000000));
-    model.SetPopupSelectedColor(Color(0x00000000));
-    model.SetPopupUnselectedColor(Color(0x00000000));
-    model.SetFontSize(Dimension(24));
-    model.SetFontWeight(FontWeight::MEDIUM);
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetSelectedColor(Color(0x00000000));
+        model.SetColor(Color(0x00000000));
+        model.SetPopupColor(Color(0x00000000));
+        model.SetSelectedBackgroundColor(Color(0x00000000));
+        model.SetPopupBackground(Color(0x00000000));
+        model.SetUsingPopup(true);
+        model.SetItemSize(Dimension(24));
+        model.SetAlignStyle(0);
+        model.SetPopupHorizontalSpace(Dimension(50));
+        model.SetSelected(0);
+        model.SetPopupPositionX(Dimension(-96.f, DimensionUnit::VP));
+        model.SetPopupPositionY(Dimension(48.f, DimensionUnit::VP));
+        model.SetPopupItemBackground(Color(0x00000000));
+        model.SetPopupSelectedColor(Color(0x00000000));
+        model.SetPopupUnselectedColor(Color(0x00000000));
+        model.SetFontSize(Dimension(24));
+        model.SetFontWeight(FontWeight::MEDIUM);
+    });
 
     /**
      * @tc.steps: step1. Get properties.
@@ -953,7 +1001,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetPopupColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color(0x00000000));
     EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color(0x00000000));
-    EXPECT_TRUE(layoutProperty_->GetUsingPopupValue());
+    EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
     EXPECT_EQ(layoutProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
@@ -966,7 +1014,6 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetFontSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetFontWeightValue(), FontWeight::MEDIUM);
     auto json = JsonUtil::Create(true);
-    InspectorFilter filter;
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
@@ -978,22 +1025,22 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerModelNGTest003, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetSelectedColor(std::nullopt);
-    model.SetColor(std::nullopt);
-    model.SetPopupColor(std::nullopt);
-    model.SetItemSize(Dimension(-1));
-    model.SetSelected(-1);
-    model.SetPopupPositionX(std::nullopt);
-    model.SetPopupPositionY(std::nullopt);
-    model.SetSelectedBackgroundColor(std::nullopt);
-    model.SetPopupBackground(std::nullopt);
-    model.SetPopupSelectedColor(std::nullopt);
-    model.SetPopupUnselectedColor(std::nullopt);
-    model.SetPopupItemBackground(std::nullopt);
-    model.SetPopupHorizontalSpace(Dimension(-1));
-    model.SetFontSize(Dimension());
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetSelectedColor(std::nullopt);
+        model.SetColor(std::nullopt);
+        model.SetPopupColor(std::nullopt);
+        model.SetItemSize(Dimension(-1));
+        model.SetSelected(-1);
+        model.SetPopupPositionX(std::nullopt);
+        model.SetPopupPositionY(std::nullopt);
+        model.SetSelectedBackgroundColor(std::nullopt);
+        model.SetPopupBackground(std::nullopt);
+        model.SetPopupSelectedColor(std::nullopt);
+        model.SetPopupUnselectedColor(std::nullopt);
+        model.SetPopupItemBackground(std::nullopt);
+        model.SetPopupHorizontalSpace(Dimension(-1));
+        model.SetFontSize(Dimension());
+    });
 
     /**
      * @tc.steps: step1. Get properties.
@@ -1024,14 +1071,14 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
 {
     BlurStyleOption indexerBlurStyle;
     indexerBlurStyle.blurStyle = BlurStyle::COMPONENT_REGULAR;
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetPopupItemBorderRadius(Dimension(24));
-    model.SetPopupBorderRadius(Dimension(28));
-    model.SetItemBorderRadius(Dimension(12));
-    model.SetIndexerBorderRadius(Dimension(16));
-    model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
-    model.SetPopupTitleBackground(Color(0x00000000));
-    CreateDone();
+    Create([&indexerBlurStyle](IndexerModelNG model) {
+        model.SetPopupItemBorderRadius(Dimension(24));
+        model.SetPopupBorderRadius(Dimension(28));
+        model.SetItemBorderRadius(Dimension(12));
+        model.SetIndexerBorderRadius(Dimension(16));
+        model.SetPopupBackgroundBlurStyle(indexerBlurStyle);
+        model.SetPopupTitleBackground(Color(0x00000000));
+    });
 
     /**
      * @tc.steps: step1. Get properties.
@@ -1052,9 +1099,9 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest004, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerModelNGTest005, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetPopupTitleBackground(std::nullopt);
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetPopupTitleBackground(std::nullopt);
+    });
 
     /**
      * @tc.steps: step1. Get properties.
@@ -1073,8 +1120,15 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    IndexerModelNG model;
+    model.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set Invalid value.
+     * @tc.expected: Properties are not set.
+     */
     model.SetFontSize(AceType::RawPtr(frameNode_), Dimension());
     model.SetPopupHorizontalSpace(AceType::RawPtr(frameNode_), Dimension(-1));
     model.SetPopupUnselectedColor(AceType::RawPtr(frameNode_), std::nullopt);
@@ -1117,8 +1171,15 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. create indexer.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    IndexerModelNG model;
+    model.Create(CREATE_ARRAY, 0);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. set valid value.
+     * @tc.expected: Properties are set.
+     */
     model.SetSelectedColor(AceType::RawPtr(frameNode_), Color::WHITE);
     model.SetColor(AceType::RawPtr(frameNode_), Color::WHITE);
     model.SetPopupColor(AceType::RawPtr(frameNode_), Color::WHITE);
@@ -1143,7 +1204,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest007, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetPopupColorValue(), Color::WHITE);
     EXPECT_EQ(paintProperty_->GetSelectedBackgroundColorValue(), Color::WHITE);
     EXPECT_EQ(paintProperty_->GetPopupBackgroundValue(), Color::WHITE);
-    EXPECT_TRUE(layoutProperty_->GetUsingPopupValue());
+    EXPECT_EQ(layoutProperty_->GetUsingPopupValue(), true);
     EXPECT_EQ(layoutProperty_->GetItemSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetAlignStyleValue(), AlignStyle::LEFT);
     EXPECT_EQ(layoutProperty_->GetPopupHorizontalSpaceValue(), Dimension(50));
@@ -1164,15 +1225,15 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest007, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerModelNGTest008, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetAdaptiveWidth(true);
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAdaptiveWidth(true);
+    });
 
     /**
      * @tc.steps: step1. Get properties.
      * @tc.expected: Properties are correct.
      */
-    EXPECT_TRUE(layoutProperty_->GetAdaptiveWidthValue());
+    EXPECT_EQ(layoutProperty_->GetAdaptiveWidthValue(), true);
 }
 
 /**
@@ -1182,9 +1243,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest008, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, OnModifyDone001, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); });
 
     /**
      * @tc.steps: step1. change UsingPopup
@@ -1197,37 +1256,50 @@ HWTEST_F(IndexerTestNg, OnModifyDone001, TestSize.Level1)
 
 /**
  * @tc.name: OnModifyDone002
- * @tc.desc: Test OnModifyDone when autoCollapse is close
+ * @tc.desc: Test OnModifyDone when autocollapse is close
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone002, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetAutoCollapse(false);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetAutoCollapse(false); }, CREATE_ARRAY, 0);
 
     pattern_->OnModifyDone();
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY.size());
     for (auto value : pattern_->arrayValue_) {
-        EXPECT_FALSE(value.second);
+        EXPECT_EQ(value.second, false);
     }
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
-    EXPECT_FALSE(pattern_->autoCollapse_);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
 }
 
 /**
  * @tc.name: OnModifyDone003
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and mode is 5+1
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and mode is 5+1
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone003, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    }, CREATE_ARRAY, 0);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 95.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -1240,7 +1312,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone003, TestSize.Level1)
     arrayValueRst.push_back(std::pair("T", true));
     arrayValueRst.push_back(std::pair("Z", false));
 
-    EXPECT_TRUE(pattern_->autoCollapse_);
+    EXPECT_EQ(pattern_->autoCollapse_, true);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), arrayValueRst.size());
     for (int32_t index = 0; index < arrayValueRst.size(); index++) {
@@ -1252,16 +1324,31 @@ HWTEST_F(IndexerTestNg, OnModifyDone003, TestSize.Level1)
 
 /**
  * @tc.name: OnModifyDone004
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and mode is 7+1
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and mode is 7+1
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(6, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 60.f;
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(16, DimensionUnit::VP));
+    }, CREATE_ARRAY, 0);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 95.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -1274,7 +1361,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
     arrayValueRst.push_back(std::pair("T", true));
     arrayValueRst.push_back(std::pair("Z", false));
 
-    EXPECT_TRUE(pattern_->autoCollapse_);
+    EXPECT_EQ(pattern_->autoCollapse_, true);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), arrayValueRst.size());
     for (int32_t index = 0; index < arrayValueRst.size(); index++) {
@@ -1286,16 +1373,31 @@ HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
 
 /**
  * @tc.name: OnModifyDone005
- * @tc.desc: Test OnModifyDone when autoCollapse is open, item size is larger than pattern height
+ * @tc.desc: Test OnModifyDone when autocollapse is open, item size is larger than pattern height
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone005, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(2000, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(2000, DimensionUnit::VP));
+    }, CREATE_ARRAY, 0);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 95.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
@@ -1308,7 +1410,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone005, TestSize.Level1)
     arrayValueRst.push_back(std::pair("T", true));
     arrayValueRst.push_back(std::pair("Z", false));
 
-    EXPECT_TRUE(pattern_->autoCollapse_);
+    EXPECT_EQ(pattern_->autoCollapse_, true);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), arrayValueRst.size());
     for (int32_t index = 0; index < arrayValueRst.size(); index++) {
@@ -1320,60 +1422,90 @@ HWTEST_F(IndexerTestNg, OnModifyDone005, TestSize.Level1)
 
 /**
  * @tc.name: OnModifyDone006
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and created arrayValue size is less than 9
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and created arrayValue size is less than 9
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone006, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_1, 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    }, CREATE_ARRAY_1, 0);
 
-    EXPECT_FALSE(pattern_->autoCollapse_);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
-        EXPECT_FALSE(value.second);
+        EXPECT_EQ(value.second, false);
     }
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
 }
 
 /**
  * @tc.name: OnModifyDone007
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and arrayValue size is more than 9,
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and arrayValue size is more than 9,
  *           pattern height is enough to contain all items
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone007, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_1, 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    }, CREATE_ARRAY_1, 0);
 
-    EXPECT_FALSE(pattern_->autoCollapse_);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 150.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
-        EXPECT_FALSE(value.second);
+        EXPECT_EQ(value.second, false);
     }
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
 }
 
 /**
  * @tc.name: OnModifyDone008
- * @tc.desc: Test OnModifyDone when autoCollapse is open, and arrayValue size is more than 9,
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and arrayValue size is more than 9,
  *           pattern height is not enough to contain all items
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, OnModifyDone008, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY_2, 0);
-    model.SetAutoCollapse(true);
-    model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    pattern_->maxContentHeight_ = 100.f;
-    CreateDone();
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    }, CREATE_ARRAY_2, 0);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemHeight_ = 24.f;
+    indexerLayoutAlgorithm->maxContentHeight_ = 100.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    pattern_->OnModifyDone();
 
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("#", false));
@@ -1387,7 +1519,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone008, TestSize.Level1)
     arrayValueRst.push_back(std::pair("J", true));
     arrayValueRst.push_back(std::pair("L", false));
 
-    EXPECT_TRUE(pattern_->autoCollapse_);
+    EXPECT_EQ(pattern_->autoCollapse_, true);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_2.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), arrayValueRst.size());
     for (int32_t index = 0; index < arrayValueRst.size(); index++) {
@@ -1407,63 +1539,73 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm001, TestSize.Level1)
     /**
      * @tc.case: case1: popup position is default.
      */
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(indexerLayoutAlgorithm, nullptr);
     auto indexerLayoutProperty1 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty1, nullptr);
     auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, 40);
     EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-96), Dimension(48)));
 
     /**
      * @tc.case: case2: popup position is custom.
      */
-    std::optional<Dimension> xOpt = Dimension(30);
-    std::optional<Dimension> yOpt = Dimension(20);
-    model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetUsingPopup(true);
-    model.SetPopupPositionX(xOpt);
-    model.SetPopupPositionY(yOpt);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            std::optional<Dimension> xOpt = Dimension(30);
+            std::optional<Dimension> yOpt = Dimension(20);
+            model.SetUsingPopup(true);
+            model.SetPopupPositionX(xOpt);
+            model.SetPopupPositionY(yOpt);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     auto indexerLayoutProperty2 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty2, nullptr);
     offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty2, 40);
     EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-66), Dimension(20)));
 
     /**
      * @tc.case: case3: popup horizontal space is custom.
      */
-    ClearOldNodes();
-    xOpt = Dimension(30);
-    yOpt = Dimension(20);
-    model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetPopupHorizontalSpace(Dimension(50));
-    model.SetUsingPopup(true);
-    model.SetPopupPositionX(xOpt);
-    model.SetPopupPositionY(yOpt);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            std::optional<Dimension> xOpt = Dimension(30);
+            std::optional<Dimension> yOpt = Dimension(20);
+            model.SetPopupHorizontalSpace(Dimension(50));
+            model.SetUsingPopup(true);
+            model.SetPopupPositionX(xOpt);
+            model.SetPopupPositionY(yOpt);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     auto indexerLayoutProperty3 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty3, nullptr);
     offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty3, 40);
     EXPECT_EQ(offset, OffsetT<Dimension>(Dimension(-106), Dimension(20)));
 
     /**
      * @tc.case: case4: align is left.
      */
-    ClearOldNodes();
-    xOpt = Dimension(30);
-    yOpt = Dimension(-20);
-    model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetAlignStyle(0);
-    model.SetUsingPopup(true);
-    model.SetPopupPositionX(xOpt);
-    model.SetPopupPositionY(yOpt);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            std::optional<Dimension> xOpt = Dimension(30);
+            std::optional<Dimension> yOpt = Dimension(-20);
+            model.SetAlignStyle(0);
+            model.SetUsingPopup(true);
+            model.SetPopupPositionX(xOpt);
+            model.SetPopupPositionY(yOpt);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     auto indexerLayoutProperty4 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
     ASSERT_NE(indexerLayoutProperty4, nullptr);
@@ -1478,30 +1620,34 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm002, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(indexerLayoutAlgorithm, nullptr);
     auto indexerLayoutProperty1 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty1, nullptr);
     auto userDefinePositionX = Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx();
-    auto userDefinePositionRightX = userDefinePositionX + INDEXER_WIDTH / 2;
+    auto userDefinePositionRightX = userDefinePositionX + INDEXERWIDTH / 2;
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto userDefinePositionLeftX = -userDefinePositionX + INDEXER_WIDTH / 2 - bubbleSize;
+    auto userDefinePositionLeftX = -userDefinePositionX + INDEXERWIDTH / 2 - bubbleSize;
 
     /**
      * case: case1: popup position is left.
      */
     indexerLayoutProperty1->UpdateAlignStyle(NG::AlignStyle::LEFT);
-    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
+    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
 
     /**
      * case: case2: popup position is right.
      */
     indexerLayoutProperty1->UpdateAlignStyle(NG::AlignStyle::RIGHT);
-    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionLeftX));
 }
 
@@ -1512,30 +1658,34 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm002, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm003, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-    model.SetUsingPopup(true);
-    model.SetOnRequestPopupData(GetPopupData);
-    CreateDone();
+    Create(
+        [](IndexerModelNG model) {
+            model.SetUsingPopup(true);
+            model.SetOnRequestPopupData(GetPopupData);
+        },
+        CREATE_ARRAY, 2);
 
     auto indexerLayoutAlgorithm = AceType::DynamicCast<IndexerLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(indexerLayoutAlgorithm, nullptr);
     auto indexerLayoutProperty1 = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty1, nullptr);
     auto userDefinePositionX = Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx();
-    auto userDefinePositionRightX = userDefinePositionX + INDEXER_WIDTH / 2;
+    auto userDefinePositionRightX = userDefinePositionX + INDEXERWIDTH / 2;
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto userDefinePositionLeftX = -userDefinePositionX + INDEXER_WIDTH / 2 - bubbleSize;
+    auto userDefinePositionLeftX = -userDefinePositionX + INDEXERWIDTH / 2 - bubbleSize;
     
     /**
      * case: case1: popup position is default(END) and layoutDirection is RTL
      */
     indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::RTL);
-    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
+    auto offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
 
     /**
      * case: case2: popup position is default(END) and layoutDirection is LTR
      */
     indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::LTR);
-    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionLeftX));
 
     /**
@@ -1543,14 +1693,14 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm003, TestSize.Level1)
      */
     indexerLayoutProperty1->UpdateAlignStyle(NG::AlignStyle::START);
     indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::RTL);
-    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionLeftX));
 
     /**
      * case: case4: popup position is START and layoutDirection is LTR
      */
     indexerLayoutProperty1->UpdateLayoutDirection(TextDirection::LTR);
-    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXER_WIDTH);
+    offset = indexerLayoutAlgorithm->GetPositionOfPopupNode(indexerLayoutProperty1, INDEXERWIDTH);
     EXPECT_EQ(offset.GetX(), Dimension(userDefinePositionRightX));
 }
 
@@ -1561,9 +1711,7 @@ HWTEST_F(IndexerTestNg, IndexerLayoutAlgorithm003, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
 {
-    IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 0);
-    model.SetUsingPopup(true);
-    CreateDone();
+    Create([](IndexerModelNG model) { model.SetUsingPopup(true); });
     pattern_->OnModifyDone();
 
     /**
@@ -1618,8 +1766,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, IndexerPatternCoverage002, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
 
     /**
      * @tc.steps: step1. Supplement OnPopupTouchDown branch,
@@ -1641,17 +1788,14 @@ HWTEST_F(IndexerTestNg, AccessibilityTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Test GetEndIndex, GetText func.
      */
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
+    Create();
     EXPECT_EQ(accessibilityProperty_->GetEndIndex(), CREATE_ARRAY.size() - 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), CREATE_ARRAY.at(0));
 
     /**
      * @tc.steps: step1. Create the arrayValue is empty
      */
-    ClearOldNodes();
-    CreateIndexer(std::vector<std::string>());
-    CreateDone();
+    Create(nullptr, std::vector<std::string>());
     EXPECT_EQ(accessibilityProperty_->GetEndIndex(), -1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "");
 }
@@ -1663,39 +1807,38 @@ HWTEST_F(IndexerTestNg, AccessibilityTest001, TestSize.Level1)
  */
 HWTEST_F(IndexerTestNg, PerformActionTest001, TestSize.Level1)
 {
-    CreateIndexer(CREATE_ARRAY, 0);
-    CreateDone();
-    auto thirdTextAccessibilityProperty = GetChildAccessibilityProperty<AccessibilityProperty>(frameNode_, 2);
-    auto fifthTextAccessibilityProperty = GetChildAccessibilityProperty<AccessibilityProperty>(frameNode_, 4);
+    Create();
+    auto thirdTextaccessibilityProperty = GetChildAccessibilityProperty<AccessibilityProperty>(frameNode_, 2);
+    auto fifthTextaccessibilityProperty = GetChildAccessibilityProperty<AccessibilityProperty>(frameNode_, 4);
 
     /**
      * @tc.steps: step1. select a text node
      */
-    thirdTextAccessibilityProperty->ActActionSelect();
+    thirdTextaccessibilityProperty->ActActionSelect();
     EXPECT_EQ(pattern_->GetSelected(), 2);
 
     /**
      * @tc.steps: step2. Clear select
      */
-    thirdTextAccessibilityProperty->ActActionClearSelection();
+    thirdTextaccessibilityProperty->ActActionClearSelection();
     EXPECT_EQ(pattern_->GetSelected(), 0);
 
     /**
      * @tc.steps: step3. Change select
      */
-    fifthTextAccessibilityProperty->ActActionSelect();
+    fifthTextaccessibilityProperty->ActActionSelect();
     EXPECT_EQ(pattern_->GetSelected(), 4);
 
     /**
      * @tc.steps: step4. Clear select
      */
-    fifthTextAccessibilityProperty->ActActionClearSelection();
+    fifthTextaccessibilityProperty->ActActionClearSelection();
     EXPECT_EQ(pattern_->GetSelected(), 0);
 
     /**
      * @tc.steps: step5. Clear select again
      */
-    fifthTextAccessibilityProperty->ActActionClearSelection();
+    fifthTextaccessibilityProperty->ActActionClearSelection();
     EXPECT_EQ(pattern_->GetSelected(), 0);
 }
 
@@ -1710,8 +1853,7 @@ HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback001, TestSize.Level1)
      * @tc.steps: step1. Test with empty array.
      * @tc.expected: Selected unchanged.
      */
-    CreateIndexer(std::vector<std::string>());
-    CreateDone();
+    Create([](IndexerModelNG model) { }, std::vector<std::string>());
     EXPECT_TRUE(pattern_->enableHapticFeedback_);
 }
 
@@ -1724,9 +1866,9 @@ HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback002, TestSize.Level1)
 {
     std::vector<bool> testValues = { false, true, true, false, false };
     for (auto testValue : testValues) {
-        IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-        model.SetEnableHapticFeedback(testValue);
-        CreateDone();
+        Create([&](IndexerModelNG model) {
+            model.SetEnableHapticFeedback(testValue);
+        }, CREATE_ARRAY, 2);
         ASSERT_NE(pattern_, nullptr);
         EXPECT_EQ(pattern_->enableHapticFeedback_, testValue);
     }
@@ -1741,9 +1883,9 @@ HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback003, TestSize.Level1)
 {
     std::vector<bool> testValues = { false, true, true, false, false };
     for (auto testValue : testValues) {
-        IndexerModelNG model = CreateIndexer(CREATE_ARRAY, 2);
-        model.SetEnableHapticFeedback(testValue);
-        CreateDone();
+        Create([&](IndexerModelNG model) {
+            model.SetEnableHapticFeedback(testValue);
+        }, CREATE_ARRAY, 2);
         ASSERT_NE(pattern_, nullptr);
         auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
         ASSERT_NE(indexerLayoutProperty, nullptr);

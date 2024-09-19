@@ -45,7 +45,11 @@ class FontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -81,7 +85,11 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -947,7 +955,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
   }
-  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
+  onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
     return this;

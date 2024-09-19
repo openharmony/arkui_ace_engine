@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
@@ -803,7 +804,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeight() - (height_ + sheetHeightUp_);
+    auto offset = pageHeight_ - (height_ + sheetHeightUp_);
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -889,7 +890,6 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             CHECK_NULL_VOID(overlayManager);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            overlayManager->FireAutoSave(host);
             overlayManager->DestroySheet(host, pattern->GetSheetKey());
             pattern->FireCallback("false");
         }
@@ -904,6 +904,9 @@ void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason di
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetDismissTarget(DismissTarget(sheetKey_));
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        SheetManager::GetInstance().SetDismissSheet(host->GetId());
         if (dismissReason == BindSheetDismissReason::SLIDE_DOWN) {
             ProcessColumnRect(height_);
             if (HasSheetSpringBack()) {
@@ -913,11 +916,6 @@ void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason di
                 SheetTransition(true);
             }
         }
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pipeOverlay = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(pipeOverlay);
-        pipeOverlay->SetDismissSheet(GetHost()->GetId());
         CallShouldDismiss();
         CallOnWillDismiss(static_cast<int32_t>(dismissReason));
     } else {
@@ -1140,7 +1138,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
                 layoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
                 titleLayoutProps->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
+                    CalcSize(std::nullopt,
+                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
         UpdateSheetTitle();
@@ -1606,7 +1605,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
     } else {
         host->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(
@@ -1713,7 +1712,7 @@ void SheetPresentationPattern::TranslateTo(float height)
 
 void SheetPresentationPattern::ScrollTo(float height)
 {
-    // height >= 0
+    // height = 0 or height > 0
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -2264,5 +2263,12 @@ void SheetPresentationPattern::OverlayDismissSheet()
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DismissSheet();
+}
+
+void SheetPresentationPattern::OverlaySheetSpringBack()
+{
+    auto overlayManager = GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SheetSpringBack();
 }
 } // namespace OHOS::Ace::NG

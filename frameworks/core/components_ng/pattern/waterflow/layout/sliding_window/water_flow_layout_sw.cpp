@@ -144,12 +144,9 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     }
     crossGaps_[0] = cross.second;
 
-    itemsCrossSize_.resize(1);
+    itemsCrossSize_ = std::vector<std::vector<float>>(1);
     for (const auto& len : cross.first) {
         itemsCrossSize_[0].push_back(static_cast<float>(len));
-    }
-    if (itemsCrossSize_.empty()) {
-        itemsCrossSize_[0].push_back(crossSize);
     }
     info_->lanes_[0].resize(itemsCrossSize_[0].size());
 }
@@ -171,7 +168,7 @@ bool WaterFlowLayoutSW::ItemHeightChanged() const
 
 void WaterFlowLayoutSW::CheckReset()
 {
-    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
@@ -425,11 +422,6 @@ void WaterFlowLayoutSW::ClearBack(float bound)
 {
     int32_t startIdx = info_->StartIndex();
     for (int32_t i = info_->EndIndex(); i > startIdx; --i) {
-        if (!info_->idxToLane_.count(i)) {
-            TAG_LOGW(ACE_WATERFLOW, "Inconsistent data found on item %{public}d. Current startIndex = %{public}d", i,
-                startIdx);
-            break;
-        }
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
         float itemStartPos = lane.endPos - lane.items_.back().mainSize;
@@ -448,11 +440,6 @@ void WaterFlowLayoutSW::ClearFront()
 {
     int32_t endIdx = info_->EndIndex();
     for (int32_t i = info_->StartIndex(); i < endIdx; ++i) {
-        if (!info_->idxToLane_.count(i)) {
-            TAG_LOGW(
-                ACE_WATERFLOW, "Inconsistent data found on item %{public}d. Current endIndex = %{public}d", i, endIdx);
-            break;
-        }
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
         float itemEndPos = lane.startPos + lane.items_.front().mainSize;

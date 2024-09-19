@@ -155,7 +155,6 @@ public:
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
-        layoutAlgorithm->SetLastFontScale(lastFontScale_);
         return layoutAlgorithm;
     }
 
@@ -451,20 +450,6 @@ public:
         clickEvents_.erase(tabBarId);
     }
 
-    std::optional<float> GetThirdLargeFontHeight()
-    {
-        return thirdLargeFontHeight_;
-    }
-
-    void SetThirdLargeFontHeight(std::optional<float> thirdLargeFontHeight)
-    {
-        if (thirdLargeFontHeight.has_value()) {
-            thirdLargeFontHeight_ = thirdLargeFontHeight;
-        } else {
-            thirdLargeFontHeight_.reset();
-        }
-    }
-
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -551,9 +536,11 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool CanScroll() const;
+    void TabBarSuitAging();
+    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
+    bool CanScroll() const;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -628,9 +615,9 @@ private:
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
+    MarginProperty marginLeftOrRight_;
+    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

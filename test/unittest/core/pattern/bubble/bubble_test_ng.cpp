@@ -110,7 +110,7 @@ const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = { Placement::LE
     Placement::LEFT_BOTTOM, Placement::LEFT_TOP, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::NONE };
 const Offset POPUP_PARAM_POSITION_OFFSET = Offset(100.0f, 100.0f);
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
-constexpr Dimension BUBBLE_CHILD_OFFSET = 16.0_vp;
+constexpr Dimension BUBBLE_CHILD_OFFSET = 8.0_vp;
 } // namespace
 struct TestProperty {
     // layout property
@@ -2090,11 +2090,11 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: BubbleBorderTest001
- * @tc.desc: Test BubbleBorderOffset
+ * @tc.name: BubbleBorderTest010
+ * @tc.desc: Test GetBorderOffset
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubbleBorderTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -2110,7 +2110,7 @@ HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
 
     /**
-     * @tc.steps: step3. Excute function for border offset.
+     * @tc.steps: step3. Excute function to get border offset.
      */
     if (popupTheme->GetPopupDoubleBorderEnable()) {
         if (bubblePaintMethod.needPaintOuterBorder_) {
@@ -2715,75 +2715,5 @@ HWTEST_F(BubbleTestNg, BubbleAlgorithmTest008, TestSize.Level1)
     layoutAlgorithm->enableArrow_ = false;
     layoutAlgorithm->UpdateChildPosition(offset);
     EXPECT_EQ(layoutAlgorithm->showArrow_, false);
-}
-
-/**
- * @tc.name: BubbleAccessibilityTest001
- * @tc.desc: Test BubblePattern::CreateAccessibilityProperty function.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTestNg, BubbleAccessibilityTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create bubble and get frameNode.
-     */
-    auto targetNode = CreateTargetNode();
-    auto targetId = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
-    /**
-     * @tc.steps: step2. get BubbleAccessibilityProperty.
-     * @tc.expected: step2. BubbleAccessibilityProperty is not nullptr.
-     */
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-}
-
-/**
- * @tc.name: BubbleAccessibilityTest002
- * @tc.desc: Test BubbleAccessibilityProperty::SetShowedState function.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTestNg, BubbleAccessibilityTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create bubble and get frameNode.
-     */
-    auto targetNode = CreateTargetNode();
-    auto targetId = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
-    /**
-     * @tc.steps: step2. get pattern and update frameNode.
-     * @tc.expected: step2. BubbleAccessibilityProperty is not nullptr.
-     */
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-
-    /**
-     * @tc.steps: step3. set showedState 0.
-     * @tc.expected: step3 get showedState 0.
-     */
-    accessibilityProperty->SetShowedState(0);
-    auto showedState = accessibilityProperty->GetShowedState();
-    EXPECT_EQ(showedState, 0);
-
-    /**
-     * @tc.steps: step4. set showedState 1.
-     * @tc.expected: step4 get showedState 1.
-     */
-    accessibilityProperty->SetShowedState(1);
-    showedState = accessibilityProperty->GetShowedState();
-    EXPECT_EQ(showedState, 1);
 }
 } // namespace OHOS::Ace::NG

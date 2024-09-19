@@ -132,11 +132,6 @@ class ObserveV2 {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
   }
 
-  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
-    const trackedKey = ObserveV2.OB_PREFIX + prop;
-    return (parentObj && typeof (parentObj) === 'object' && trackedKey in parentObj);
-  }
-
   public static getCurrentRecordedId(): number {
     const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
     return bound ? bound[0] : -1;
@@ -427,7 +422,7 @@ class ObserveV2 {
         .then(this.updateDirty.bind(this))
         .catch(error => {
           stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
-          throw error;
+          _arkUIUncaughtPromiseError(error);
         });
       }
 
@@ -674,7 +669,7 @@ class ObserveV2 {
     'setUTCMinutes', 'setUTCSeconds', 'setUTCMilliseconds']);
 
     public static readonly normalObjectHandlerDeepObserved = {
-      get(target: object, property: string | Symbol, receiver: any) {
+      get(target: object, property: string | Symbol, receiver: any): any {
         if (typeof property === 'symbol') {
           if (property === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
             return target;
@@ -774,7 +769,7 @@ class ObserveV2 {
         };
       } else if (key === 'forEach') {
         // to make ForEach Component and its Item can addref
-        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH)
+        ObserveV2.getObserve().addRef(refInfo, ObserveV2.OB_LENGTH);
         return function (callbackFn: (value: any, index: number, array: Array<any>) => void): any {
           const result = ret.call(target, (value: any, index: number, array: Array<any>) => {
             // Collections.Array will report BusinessError: The foreach cannot be bound if call "receiver".
@@ -782,10 +777,10 @@ class ObserveV2 {
             // so we must call "target" here to deal with the collections situations.
             // But we also need to addref for each index.
             receiver[index];
-            callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+            callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
           });
           return result;
-        }
+        };
       } else {
         return ret.bind(target);
       }
@@ -794,7 +789,7 @@ class ObserveV2 {
     set(target: any, key: string | symbol, value: any): boolean {
       return ObserveV2.commonHandlerSet(target, key, value);
     }
-  }
+  };
 
   public static readonly setMapHandlerDeepObserved = {
     get(target: any, key: string | symbol, receiver: any): any {
@@ -922,7 +917,7 @@ class ObserveV2 {
     set(target: any, key: string | symbol, value: any): boolean {
       return ObserveV2.commonHandlerSet(target, key, value);
     }
-  }
+  };
 
   public static readonly dateHandlerDeepObserved = {
     get(target: any, key: string | symbol, receiver: any): any {
@@ -955,7 +950,7 @@ class ObserveV2 {
     set(target: any, key: string | symbol, value: any): boolean {
       return ObserveV2.commonHandlerSet(target, key, value);
     }
-  }
+  };
 
   public static readonly arraySetMapProxy = {
     get(

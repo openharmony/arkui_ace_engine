@@ -58,7 +58,6 @@ constexpr float VALUE = 50.0f;
 constexpr float STEP = 1.0f;
 constexpr float MIN = 0.0f;
 constexpr float MAX = 100.0f;
-const Color TEST_COLOR = Color::BLUE;
 constexpr float MAX_WIDTH = 500.0f;
 constexpr float MAX_HEIGHT = 500.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
@@ -71,11 +70,6 @@ constexpr Dimension SLIDER_OUTSET_BLOCK_SIZE = Dimension(30.0);
 constexpr Dimension SLIDER_INSET_BLOCK_SIZE = Dimension(15.0);
 constexpr Dimension RADIUS = Dimension(10.0);
 constexpr float SLIDER_HEIGHT = 20.0f;
-constexpr float SLIDER_CONTENT_MODIFIER_TRACK_THICKNESS = 10.0f;
-constexpr float SLIDER_CONTENT_MODIFIER_TRACK_BORDER_RADIUS = 10.0f;
-constexpr float SLIDER_CONTENT_MODIFIER_SELECTED_BORDER_RADIUS = 10.0f;
-constexpr float SLIDER_CONTENT_MODIFIER_STEP_SIZE = 10.0f;
-constexpr float SLIDER_CONTENT_MODIFIER_STEP_RATIO = 10000.0f;
 constexpr float HALF = 0.5;
 constexpr float CONTAINER_WIDTH = 300.0f;
 constexpr float CONTAINER_HEIGHT = 300.0f;
@@ -115,7 +109,6 @@ public:
     static void TearDownTestSuite();
 
 private:
-    void SetSliderContentModifier(SliderContentModifier& sliderContentModifier);
     void MockCanvasFunction(Testing::MockCanvas& canvas);
     void MockTipsCanvasFunction(Testing::MockCanvas& canvas);
     void MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas);
@@ -136,24 +129,6 @@ void SliderPatternTestNg::TearDownTestSuite()
 void SliderPatternTestNg::TearDown()
 {
     MockParagraph::TearDown();
-}
-
-void SliderPatternTestNg::SetSliderContentModifier(SliderContentModifier& sliderContentModifier)
-{
-    sliderContentModifier.InitializeShapeProperty();
-    sliderContentModifier.SetTrackThickness(SLIDER_CONTENT_MODIFIER_TRACK_THICKNESS);
-    sliderContentModifier.SetTrackBorderRadius(SLIDER_CONTENT_MODIFIER_TRACK_BORDER_RADIUS);
-    sliderContentModifier.SetSelectedBorderRadius(SLIDER_CONTENT_MODIFIER_SELECTED_BORDER_RADIUS);
-    sliderContentModifier.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
-    sliderContentModifier.SetShowSteps(true);
-    sliderContentModifier.SetStepSize(SLIDER_CONTENT_MODIFIER_STEP_SIZE);
-    sliderContentModifier.SetStepColor(TEST_COLOR);
-    sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
-    sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(TEST_COLOR);
-    sliderContentModifier.SetBlockColor(TEST_COLOR);
-    SizeF blockSize;
-    sliderContentModifier.SetBlockSize(blockSize);
 }
 
 void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)

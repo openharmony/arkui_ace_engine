@@ -40,6 +40,10 @@
 namespace OHOS::Ace::NG {
 namespace {
 int64_t g_proxyId = 0;
+constexpr int32_t MAX_RETRY_TIMES = 3;
+constexpr int32_t MAX_RETRY_DURATION = 800;
+constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
+constexpr uint64_t MOVE_TIME_LIMIT = 6L;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 8.0_vp;
 constexpr Dimension PRESERVE_HEIGHT = 8.0_vp;
 constexpr float FIRST_PIXELMAP_OPACITY = 0.6f;
@@ -50,10 +54,6 @@ constexpr int32_t FIRST_GATHER_PIXEL_MAP = 1;
 constexpr int32_t SECOND_GATHER_PIXEL_MAP = 2;
 constexpr int32_t SQUARE_NUMBER = 2;
 constexpr float TOUCH_DRAG_PIXELMAP_SCALE = 1.05f;
-constexpr int32_t MAX_RETRY_TIMES = 3;
-constexpr int32_t MAX_RETRY_DURATION = 800;
-constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
-constexpr uint64_t MOVE_TIME_LIMIT = 6L;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE = 0.002f;
@@ -73,11 +73,11 @@ RefPtr<RenderContext> GetMenuRenderContextFromMenuWrapper(const RefPtr<FrameNode
 
 RefPtr<FrameNode> GetMenuWrapperNodeFromDrag()
 {
-    auto pipelineContext = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto mainDragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_RETURN(mainDragDropManager, nullptr);
-    return mainDragDropManager->GetMenuWrapperNode();
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, nullptr);
+    return dragDropManager->GetMenuWrapperNode();
 }
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -685,6 +685,10 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     SetIsWindowConsumed(false);
+    if (isDragFwkShow_) {
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(OffsetF(static_cast<float>(point.GetX()),
+            static_cast<float>(point.GetY())));
+    }
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
     auto dragFrameNode = FindDragFrameNodeByPosition(
@@ -783,8 +787,8 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     const RefPtr<FrameNode>& node)
 {
     Point point = pointerEvent.GetPoint();
-    dragDropPointerEvent_ = pointerEvent;
     DoDragReset();
+    dragDropPointerEvent_ = pointerEvent;
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -868,7 +872,6 @@ void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const
         event->SetIsGetDataSuccess(true);
     }
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
-
     OnDragDrop(event, dragFrameNode, pointerEvent);
 }
 
@@ -1533,6 +1536,52 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
     velocityTracker_.UpdateTrackerPoint(point.GetX(), point.GetY(), curTime, isEnd);
 }
 
+void DragDropManager::NotifyEnterTextEditorArea()
+{
+    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+        return;
+    }
+
+    hasNotifiedTransformation_ = true;
+}
+
+void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
+    DragEventType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameTag = frameNode->GetTag();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled()) || !isDragFwkShow_) {
+        return;
+    }
+
+    // When moving in an editable text component whithout animation, and has not notified msdp yet, notify msdp.
+    if (type == DragEventType::MOVE && IsEditableTextComponent(frameTag) && isDragFwkShow_ &&
+        !hasNotifiedTransformation_) {
+        NotifyEnterTextEditorArea();
+        return;
+    }
+    if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
+        return;
+    }
+
+    if (type == DragEventType::LEAVE) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "The current control has been dragged away.");
+        hasNotifiedTransformation_ = false;
+        return;
+    }
+
+    if (hasNotifiedTransformation_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Coordinates have been transformed.");
+        return;
+    }
+
+    NotifyEnterTextEditorArea();
+}
+
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
     DragPreviewInfo& dragPreviewInfo)
 {
@@ -1551,6 +1600,16 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
+    if (isDragWithContextMenu_) {
+        auto gestureHub = imageNode->GetOrCreateGestureEventHub();
+        if (gestureHub) {
+            auto menuPreviewScale = gestureHub->GetMenuPreviewScale();
+            // use menuPreviewScale only for 1.0f menu scale.
+            if (NearEqual(menuPreviewScale, 1.0f)) {
+                dragPreviewInfo.scale = menuPreviewScale;
+            }
+        }
+    }
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
     dragPreviewInfo.width = static_cast<double>(width);
     dragPreviewInfo.maxWidth = maxWidth;
@@ -1566,11 +1625,6 @@ bool DragDropManager::IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent)
     auto x = pointerEvent.GetPoint().GetX();
     auto y = pointerEvent.GetPoint().GetY();
     curPointerOffset_ = { x, y };
-    auto distanceToPrePointer = sqrt(pow(prePointerOffset_.GetX() - x, 2) + pow(prePointerOffset_.GetY() - y, 2));
-    if (distanceToPrePointer < MAX_DISTANCE_TO_PRE_POINTER) {
-        return false;
-    }
-    prePointerOffset_ = { x, y };
     return true;
 }
 
@@ -1767,7 +1821,6 @@ void DragDropManager::DoDragStartAnimation(
         static_cast<int32_t>(event.GetGlobalLocation().GetY()) };
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
-    prePointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     curPointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     currentAnimationCnt_ = 0;
     allAnimationCnt_ = 0;
@@ -1808,41 +1861,6 @@ void DragDropManager::DragStartAnimation(
             UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
-}
-
-void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
-    DragEventType type)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto frameTag = frameNode->GetTag();
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled())) {
-        return;
-    }
-
-    if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
-        return;
-    }
-
-    if (type == DragEventType::LEAVE) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "The current control has been dragged away.");
-        hasNotifiedTransformation_ = false;
-        return;
-    }
-
-    if (hasNotifiedTransformation_) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Coordinates have been transformed.");
-        return;
-    }
-
-    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
-        return;
-    }
-
-    hasNotifiedTransformation_ = true;
 }
 
 void DragDropManager::SetDragResult(

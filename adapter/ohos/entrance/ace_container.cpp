@@ -31,8 +31,6 @@
 #include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
-#include "root_scene.h"
-#include "ws_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -105,6 +103,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+std::mutex g_mutexFormRenderFontFamily;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -907,14 +906,6 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
-
-        if (type != WindowSizeChangeReason::ROTATION) {
-            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
-            context->RequestFrame();
-            return;
-        }
-        context->ResetSurfaceChangeMsg();
-
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -1477,7 +1468,7 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isEnableArrow = false;
     if (!isNative) {
         // web component will manually destroy the popup
-        customConfig.isAutoCancel = false;
+        customConfig.isAutoCancel = true;
     }
 }
 
@@ -1674,9 +1665,8 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
-    auto context = runtimeContext_.lock();
-    DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
-    DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
+    DumpLog::GetInstance().Print("bundleName:" + GetBundleName());
+    DumpLog::GetInstance().Print("moduleName:" + GetModuleName());
     result = DumpInfo(params);
     const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
     auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
@@ -1800,7 +1790,7 @@ void AceContainer::SetLocalStorage(
     NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     ContainerScope scope(instanceId_);
-    taskExecutor_->PostTask(
+    taskExecutor_->PostSyncTask(
         [frontend = WeakPtr<Frontend>(frontend_), storage,
             contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
             sharedRuntime = sharedRuntime_] {
@@ -2285,26 +2275,15 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
-Rect AceContainer::GetSessionAvoidAreaByType(uint32_t safeAreaType)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
 {
-    Rosen::WSRect avoidArea;
-    Rect sessionAvoidArea;
-    if (safeAreaType == NG::SAFE_AREA_TYPE_SYSTEM) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_SYSTEM, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
-    } else if (safeAreaType == NG::SAFE_AREA_TYPE_KEYBOARD) {
-        auto ret =
-            Rosen::RootScene::staticRootScene_->GetSessionRectByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
-        if (ret == Rosen::WMError::WM_OK) {
-            sessionAvoidArea.SetRect(avoidArea.posX_, avoidArea.posY_, avoidArea.width_, avoidArea.height_);
-        }
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return avoidArea;
     }
-    LOGI("GetSessionAvoidAreaByType safeAreaType: %{public}u, sessionAvoidArea; %{public}s", safeAreaType,
-        sessionAvoidArea.ToString().c_str());
-    return sessionAvoidArea;
+    return {};
 }
 
 NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
@@ -2314,17 +2293,6 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         return ConvertAvoidArea(avoidArea);
-    }
-    return {};
-}
-
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
-{
-    CHECK_NULL_RETURN(uiWindow_, {});
-    Rosen::AvoidArea avoidArea;
-    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
-    if (ret == Rosen::WMError::WM_OK) {
-        return avoidArea;
     }
     return {};
 }
@@ -2372,7 +2340,13 @@ void AceContainer::CheckAndSetFontFamily()
         return;
     }
     path = path.append(familyName);
-    fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    if (isFormRender_) {
+        // Resolve garbled characters caused by FRS multi-thread async
+        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    } else {
+        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+    }
 }
 
 bool AceContainer::IsFontFileExistInPath(std::string path)
@@ -2447,16 +2421,22 @@ void AceContainer::SetFontScaleAndWeightScale(
     }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
-        configurationChange.fontScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontSizeScale = StringUtils::StringToFloat(parsedConfig.fontScale);
+        if (fontSizeScale != pipelineContext_->GetFontScale()) {
+            SetFontScale(instanceId_, fontSizeScale);
+            configurationChange.fontScaleUpdate = true;
+        }
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
-        auto instanceId = instanceId_;
-        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
-        configurationChange.fontWeightScaleUpdate = true;
+        CHECK_NULL_VOID(pipelineContext_);
+        float fontWeightScale = StringUtils::StringToFloat(parsedConfig.fontWeightScale);
+        if (fontWeightScale != pipelineContext_->GetFontWeightScale()) {
+            SetFontWeightScale(instanceId_, fontWeightScale);
+            configurationChange.fontWeightScaleUpdate = true;
+        }
     }
 }
 

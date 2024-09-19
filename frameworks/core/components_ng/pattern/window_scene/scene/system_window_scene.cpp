@@ -92,8 +92,15 @@ void SystemWindowScene::OnAttachToFrameNode()
     session_->SetUINodeId(host->GetAccessibilityId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
-    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+
+    if (!session_->IsSystemInput()) {
+        context->SetRSNode(surfaceNode);
+        surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+    } else {
+        auto rsNode = Rosen::RSCanvasNode::Create();
+        context->SetRSNode(rsNode);
+        rsNode->SetBoundsChangedCallback(boundsChangedCallback_);
+    }
 
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     auto mouseCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](MouseInfo& info) {
@@ -232,11 +239,6 @@ void SystemWindowScene::RegisterResponseRegionCallback()
         session->SetTouchHotAreas(hotAreas);
     };
     gestureHub->SetResponseRegionFunc(responseRegionCallback);
-}
-
-uint32_t SystemWindowScene::GetWindowPatternType() const
-{
-    return static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
 }
 
 void SystemWindowScene::RegisterFocusCallback()

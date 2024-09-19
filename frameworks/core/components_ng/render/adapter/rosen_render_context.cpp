@@ -568,11 +568,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (isNeedAnimate_) {
-        SyncGeometryProperties(paintRect_);
-    } else {
-        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryProperties(paintRect_); });
-    }
+    SyncGeometryProperties(paintRect_);
     host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
@@ -624,10 +620,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (!isSynced_) {
         isSynced_ = true;
-        auto borderRadius = GetBorderRadius();
-        if (borderRadius.has_value()) {
-            OnBorderRadiusUpdate(borderRadius.value());
-        }
+    }
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        OnBorderRadiusUpdate(borderRadius.value());
     }
 
     if (firstTransitionIn_) {
@@ -938,22 +934,6 @@ void RosenRenderContext::SetBackBlurFilter()
     rsNode_->SetBackgroundFilter(backFilter);
 }
 
-void RosenRenderContext::UpdateWindowFocusState(bool isFocused)
-{
-    if (GetBackBlurStyle().has_value() &&
-        GetBackBlurStyle()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        auto blurStyle = GetBackBlurStyle().value();
-        blurStyle.isWindowFocused = isFocused;
-        UpdateBackBlurStyle(blurStyle);
-    }
-    if (GetBackgroundEffect().has_value() &&
-        GetBackgroundEffect()->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        auto effect = GetBackgroundEffect().value();
-        effect.isWindowFocused = isFocused;
-        UpdateBackgroundEffect(effect);
-    }
-}
-
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -981,38 +961,6 @@ void RosenRenderContext::SetFrontBlurFilter()
     rsNode_->SetFilter(frontFilter);
 }
 
-bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle)
-{
-    if (!bgBlurStyle.has_value()) {
-        return false;
-    }
-    bool blurEnable = bgBlurStyle->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
-        (bgBlurStyle->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && bgBlurStyle->isWindowFocused);
-    if (bgBlurStyle->isValidColor) {
-        if (blurEnable) {
-            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
-        } else {
-            rsNode_->SetBackgroundColor(bgBlurStyle->inactiveColor.GetValue());
-        }
-    }
-    return blurEnable;
-}
-
-bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption)
-{
-    bool blurEnable = efffectOption->policy == BlurStyleActivePolicy::ALWAYS_ACTIVE ||
-        (efffectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE && efffectOption->isWindowFocused);
-    if (efffectOption->isValidColor) {
-        if (blurEnable) {
-            rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
-        } else {
-            rsNode_->SetBackgroundColor(efffectOption->inactiveColor.GetValue());
-        }
-    }
-    return blurEnable;
-}
-
-
 void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -1030,11 +978,6 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
-
-    if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
-        rsNode_->SetBackgroundFilter(nullptr);
-        return;
-    }
     SetBackBlurFilter();
 }
 
@@ -1047,10 +990,6 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
     groupProperty->propEffectOption = effectOption;
     if (!effectOption.has_value()) {
-        return;
-    }
-    if (!UpdateBlurBackgroundColor(effectOption)) {
-        rsNode_->SetBackgroundFilter(nullptr);
         return;
     }
     auto context = PipelineBase::GetCurrentContext();
@@ -2407,7 +2346,6 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
 
@@ -4113,8 +4051,13 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
-    rsNode_->SetColorBlendMode(rsBlendMode);
+    if (blendMode == BlendMode::BACK_COMPAT_SOURCE_IN) {
+        rsNode_->SetBackgroundShader(nullptr);
+        rsNode_->SetColorBlendMode(Rosen::RSColorBlendMode::NONE);
+    } else {
+        auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+        rsNode_->SetColorBlendMode(rsBlendMode);
+    }
     RequestNextFrame();
 }
 
@@ -4454,6 +4397,13 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
 void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
 {
     CHECK_NULL_VOID(rsNode_);
+    // temporary code for back compat
+    auto& graphicProps = GetOrCreateGraphics();
+    if (graphicProps->GetBackBlendMode() == BlendMode::BACK_COMPAT_SOURCE_IN)
+    {
+        rsNode_->SetBackgroundShader(nullptr);
+        return;
+    }
     rsNode_->SetBackgroundShader(shader);
 }
 
@@ -4476,6 +4426,7 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
         rsNode_->AddModifier(gradientStyleModifier_);
     }
     gradientStyleModifier_->SetGradient(gradient);
+    gradientStyleModifier_->SetSizeF(frameSize);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
@@ -5185,6 +5136,15 @@ void RosenRenderContext::SetSurfaceRotation(bool isLock)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     if (rsSurfaceNode) {
         rsSurfaceNode->SetForceHardwareAndFixRotation(isLock);
+    }
+}
+
+void RosenRenderContext::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetFrameGravity(GetRosenGravity(renderFit));
     }
 }
 
@@ -6346,14 +6306,6 @@ void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkSuggestOpincNode(isOpincNode, isNeedCalculate);
-}
-
-void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect)
-{
-    CHECK_NULL_VOID(rsNode_);
-    Rosen::Vector2f destinationPoint(effect.destinationX.ConvertToPx(), effect.destinationY.ConvertToPx());
-    rsNode_->SetAttractionEffect(effect.fraction, destinationPoint);
-    RequestNextFrame();
 }
 
 PipelineContext* RosenRenderContext::GetPipelineContext() const

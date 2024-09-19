@@ -81,4 +81,34 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
+void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
+{
+    if (info.GetTouches().empty()) {
+        return;
+    }
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::UP) {
+        EndGestureSelection();
+        return;
+    }
+    if (touchType == TouchType::MOVE) {
+        DoTextSelectionTouchMove(info);
+    }
+}
+
+void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
+{
+    if (!isStarted_ || info.GetTouches().empty()) {
+        return;
+    }
+    auto localOffset = info.GetTouches().front().GetLocalLocation();
+    if (!isSelecting_ && LessOrEqual((localOffset - startOffset_).GetDistance(), minMoveDistance_.ConvertToPx())) {
+        return;
+    }
+    isSelecting_ = true;
+    auto index = GetTouchIndex({ localOffset.GetX(), localOffset.GetY() });
+    auto start = std::min(index, start_);
+    auto end = std::max(index, end_);
+    OnTextGestureSelectionUpdate(start, end, info);
+}
 }

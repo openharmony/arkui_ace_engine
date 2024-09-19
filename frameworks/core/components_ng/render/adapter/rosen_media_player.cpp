@@ -104,6 +104,12 @@ void RosenMediaPlayer::SetVolume(float leftVolume, float rightVolume)
     mediaPlayer_->SetVolume(leftVolume, rightVolume);
 }
 
+void RosenMediaPlayer::SetMediaMuted(int32_t type, bool isMuted)
+{
+    CHECK_NULL_VOID(mediaPlayer_);
+    mediaPlayer_->SetMediaMuted(static_cast<OHOS::Media::MediaType>(type), isMuted);
+}
+
 bool RosenMediaPlayer::SetSource(const std::string& src)
 {
     auto videoSrc = src;

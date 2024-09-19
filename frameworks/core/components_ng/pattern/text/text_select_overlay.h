@@ -20,6 +20,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_ng/pattern/text/text_base.h"
 
@@ -57,6 +58,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnHandleMoveStart(bool isFirst) override;
 
     void UpdateHandleGlobalOffset()
     {
@@ -69,16 +71,33 @@ public:
         return handleGlobalOffset_;
     }
 
+    bool IsRegisterTouchCallback() override
+    {
+        return true;
+    }
+    void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
     void UpdateTransformFlag() override
     {
         hasTransform_ = CheckHasTransformAttr();
     }
+    bool IsClipHandleWithViewPort() override
+    {
+        return !HasRenderTransform();
+    }
+    void UpdateClipHandleViewPort(RectF& rect) override;
     bool selectTextUseTopHandle = false;
 
 private:
+    const RefPtr<ScrollablePattern> FindScrollableParent();
+    void TriggerScrollableParentToScroll(
+        const RefPtr<ScrollablePattern> scrollableParent, const GestureEvent& event, bool isStopAutoScroll);
+    OffsetF GetHotPaintOffset();
     OffsetF handleGlobalOffset_;
+    bool isDraggingFirstHandle_ = true;
+    OffsetF hostPaintOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

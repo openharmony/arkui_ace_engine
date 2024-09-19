@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <optional>
 
-#include "base/error/error_code.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -72,6 +71,8 @@ constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
 constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
 constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr float PX_EPSILON = 0.01f;
@@ -195,7 +196,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
 void SwiperPattern::OnIndexChange()
 {
-    auto totalCount = RealTotalCount();
+    auto totalCount = TotalCount();
     if (NonPositive(totalCount)) {
         return;
     }
@@ -223,6 +224,7 @@ void SwiperPattern::StopAndResetSpringAnimation()
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnLoopChange()
@@ -457,7 +459,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
     auto oldIndex = GetLoopIndex(oldIndex_);
-    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != RealTotalCount()) {
+    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
         if (HasIndicatorNode()) {
             StopIndicatorAnimation();
@@ -472,6 +474,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         }
         StartAutoPlay();
         InitArrow();
+        if (IsLoop() && oldIndex != GetLoopIndex(currentIndex_)) {
+            currentIndex_ = oldIndex >= TotalCount() ? 0 : oldIndex;
+        }
     }
     int32_t maxValidIndex = IsLoop() ? RealTotalCount() : TotalCount() - GetDisplayCount() + 1;
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= maxValidIndex || GetDisplayCount() >= RealTotalCount()) {
@@ -1046,7 +1051,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     contentMainSize_ = algo->GetContentMainSize();
     crossMatchChild_ = algo->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
-    oldChildrenSize_ = RealTotalCount();
+    oldChildrenSize_ = TotalCount();
     needFireCustomAnimationEvent_ = true;
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
@@ -1202,6 +1207,9 @@ void SwiperPattern::FireAnimationEndEvent(
     CHECK_NULL_VOID(swiperEventHub);
     isInterrupt ? swiperEventHub->FireAnimationEndOnForceEvent(currentIndex, info)
                 : swiperEventHub->FireAnimationEndEvent(currentIndex, info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -2011,7 +2019,7 @@ void SwiperPattern::InitIndicator()
     }
     lastSwiperIndicatorType_ = GetIndicatorType();
     CHECK_NULL_VOID(indicatorNode);
-    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
     if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
@@ -3431,7 +3439,8 @@ void SwiperPattern::OnSpringAnimationFinish()
     }
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
     AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f", currentIndexOffset_);
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f",
+        currentIndexOffset_);
     ACE_SCOPED_TRACE_COMMERCIAL("%s finish spring animation, offset: %f",
         hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, currentIndexOffset_);
     springAnimationIsRunning_ = false;
@@ -4146,8 +4155,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             if (childrenSize <= 0 || displayCount <= 0 || swiper->itemPosition_.empty()) {
                 return;
             }
-            if (!swiper->IsLoop() &&
-                swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
+            if (!swiper->IsLoop() && swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
@@ -4522,7 +4530,6 @@ void SwiperPattern::OnTranslateFinish(
     if (NeedAutoPlay() && isUserFinish_ && !forceStop) {
         PostTranslateTask(delayTime);
     }
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     UpdateItemRenderGroup(false);
 }
 
@@ -5311,9 +5318,9 @@ void SwiperPattern::CleanScrollingListener()
 
 bool SwiperPattern::IsSwipeByGroup() const
 {
-    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(props, false);
-    return props->GetSwipeByGroup().value_or(false);
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetSwipeByGroup().value_or(false);
 }
 
 RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
@@ -5634,16 +5641,6 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
         needTurn_ = false;
     } else if (currentFirstIndex >= currentIndex) {
         gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-
-        if (!IsLoop() && currentFirstIndex == 0 && GreatOrEqual(mainDeltaSum_, 0.0f)) {
-            gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
-            needTurn_ = false;
-        }
-
-        if (!IsLoop() && currentFirstIndex == TotalCount() - 1 && LessOrEqual(mainDeltaSum_, 0.0f)) {
-            gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-            needTurn_ = false;
-        }
     } else if (currentFirstIndex < currentIndex) {
         gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
@@ -5918,12 +5915,6 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     if (filter.IsFastFilter()) {
         return;
     }
-
-    auto nestedScroll = GetNestedScroll().forward;
-    json->PutExtAttr("nestedScroll",
-        nestedScroll == NestedScrollMode::SELF_ONLY ? "SwiperNestedScrollMode.SELF_ONLY"
-                                                    : "SwiperNestedScrollMode.SELF_FIRST",
-        filter);
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
@@ -5972,7 +5963,7 @@ std::string SwiperPattern::GetDotIndicatorStyle() const
         swiperParameters_->selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
     jsonValue->Put(
         "color", swiperParameters_->colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
-    jsonValue->Put("mask", swiperParameters_->maskValue.value_or(false) ? "true" : "false");
+    jsonValue->Put("mask", swiperParameters_->maskValue ? "true" : "false");
     jsonValue->Put("maxDisplayCount",
         (swiperParameters_->maxDisplayCountVal.has_value()) ? swiperParameters_->maxDisplayCountVal.value() : 0);
     return jsonValue->ToString();

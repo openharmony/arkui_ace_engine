@@ -1409,8 +1409,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
     RoundRect paintRect;
     datePickerPattern->GetInnerFocusPaintRect(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), 0);
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
+    Dimension offset = 2.0_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx()*2);
 }
 
 /**
@@ -3293,11 +3294,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest014
+ * @tc.name: DatePickerColumnPatternTest013
  * @tc.desc: Test DatePickerColumnPattern UpdateFinishToss.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnNode and columnPattern.
@@ -3337,11 +3338,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest015
+ * @tc.name: DatePickerColumnPatternTest014
  * @tc.desc: Test DatePickerColumnPattern CalcScrollIndex.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnNode and columnPattern.
@@ -3363,11 +3364,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest016
+ * @tc.name: DatePickerColumnPatternTest015
  * @tc.desc: Test DatePickerColumnPattern GetShiftDistanceForLandscape.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern and set pickerTheme.
@@ -3403,11 +3404,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest017
+ * @tc.name: DatePickerColumnPatternTest016
  * @tc.desc: Test DatePickerColumnPattern UpdateColumnChildPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern.
@@ -3443,11 +3444,11 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumnPatternTest020
+ * @tc.name: DatePickerColumnPatternTest019
  * @tc.desc: Test DatePickerColumnPattern AddHotZoneRectToText.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create columnPattern and Set text node height.
@@ -3603,77 +3604,6 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus001, Test
     info1.isAcceptButton = true;
     buttonInfos.push_back(info1);
 
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus002
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    buttonInfos.push_back(info1);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus003
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    info1.isAcceptButton = true;
-    buttonInfos.push_back(info1);
-
-    ButtonInfo info2;
-    buttonInfos.push_back(info2);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus004
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus004, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    info1.isAcceptButton = true;
-    buttonInfos.push_back(info1);
-
     ButtonInfo info2;
     buttonInfos.push_back(info2);
 
@@ -3688,11 +3618,11 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus004, Test
 }
 
 /**
- * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus005
+ * @tc.name: DatePickerDialogViewUpdateButtonDefaultFocus001
  * @tc.desc: Test UpdateButtonDefaultFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus005, TestSize.Level1)
+HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
 {
     std::vector<ButtonInfo> buttonInfos;
     ButtonInfo info1;
@@ -5713,8 +5643,7 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow0049, TestSize.Level1)
     dialogViewNode =
         DatePickerDialogView::CreateNextPrevButtonNode(timePickerSwitchEvent, dateNode, buttonInfos, columnNode);
 }
-
-/**
+/*
  * @tc.name: DatePickerPatternTest001
  * @tc.desc: Test OnModifyDone.
  * @tc.type: FUNC

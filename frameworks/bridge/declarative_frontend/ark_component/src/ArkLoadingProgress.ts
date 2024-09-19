@@ -112,7 +112,7 @@ class LoadingProgressContentModifier extends ModifierWithKey<ContentModifier<Loa
     super(value);
   }
   static identity: Symbol = Symbol('loadingProgressContentModifier');
-  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent): void {
     let loadingProgressComponent = component as ArkLoadingProgressComponent;
     loadingProgressComponent.setContentModifier(this.value);
   }

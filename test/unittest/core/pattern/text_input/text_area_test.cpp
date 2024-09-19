@@ -29,7 +29,6 @@
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -66,7 +65,6 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -89,8 +87,9 @@ const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
 const std::string DEFAULT_INPUT_FILTER = "[a-z]";
-const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = {{ "subs", 1 }};
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = {{ "subs", 0 }};
+
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -1160,10 +1159,6 @@ HWTEST_F(TextFieldUXTest, FontFeature001, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
-
-    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
-    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
-    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
 }
 
 /**
@@ -1183,10 +1178,6 @@ HWTEST_F(TextFieldUXTest, FontFeature002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_1);
-    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
-
-    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
-    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
 }
 

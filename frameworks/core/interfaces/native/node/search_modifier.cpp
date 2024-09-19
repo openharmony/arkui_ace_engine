@@ -44,8 +44,8 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
-constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
+constexpr int32_t DEFAULT_CARET_POSITION = 0;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -287,6 +287,22 @@ void ResetSearchHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
+void SetSearchFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = value;
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
+void ResetSearchFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = "";
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
+}
+
 void SetSearchDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -335,21 +351,6 @@ void ResetSearchLineHeight(ArkUINodeHandle node)
     SearchModelNG::SetLineHeight(frameNode, value);
 }
 
-void SetSearchFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string strValue = value;
-    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
-}
-
-void ResetSearchFontFeature(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string strValue = "";
-    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
-}
 void SetSearchAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -429,70 +430,6 @@ void ResetSearchTextIndent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
-}
-
-void SetSearchValue(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<std::string> valueNG = value;
-
-    SearchModelNG::SetTextValue(frameNode, valueNG);
-}
-
-void ResetSearchValue(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetTextValue(frameNode, "");
-}
-
-void SetSearchPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr placeholder)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<std::string> placeholderNG = placeholder;
-
-    SearchModelNG::SetPlaceholder(frameNode, placeholderNG);
-}
-
-void ResetSearchPlaceholder(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetPlaceholder(frameNode, "");
-}
-
-void SetSearchIcon(ArkUINodeHandle node, ArkUI_CharPtr icon)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::optional<std::string> iconNG = icon;
-
-    SearchModelNG::SetIcon(frameNode, iconNG);
-}
-
-void ResetSearchIcon(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetIcon(frameNode, "");
-}
-
-void SetSearchCaretPosition(ArkUINodeHandle node, ArkUI_Int32 value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    SearchModelNG::SetCaretPosition(frameNode, value);
-}
-
-void ResetSearchCaretPosition(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    SearchModelNG::SetCaretPosition(frameNode, DEFAULT_CARET_POSITION);
 }
 
 void SetSearchMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -705,6 +642,54 @@ ArkUINodeHandle GetSearchController(ArkUINodeHandle node)
     return nodecontroller;
 }
 
+void SetSearchValue(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> valueNG = value;
+
+    SearchModelNG::SetTextValue(frameNode, valueNG);
+}
+
+void ResetSearchValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetTextValue(frameNode, "");
+}
+
+void SetSearchPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr placeholder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> placeholderNG = placeholder;
+
+    SearchModelNG::SetPlaceholder(frameNode, placeholderNG);
+}
+
+void ResetSearchPlaceholder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetPlaceholder(frameNode, "");
+}
+
+void SetSearchIcon(ArkUINodeHandle node, ArkUI_CharPtr icon)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<std::string> iconNG = icon;
+
+    SearchModelNG::SetIcon(frameNode, iconNG);
+}
+
+void ResetSearchIcon(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetIcon(frameNode, "");
+}
+
 void SetSearchOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -795,6 +780,22 @@ void ResetSearchEnablePreviewText(ArkUINodeHandle node)
     SearchModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
 }
 
+void SetSearchCaretPosition(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SearchModelNG::SetCaretPosition(frameNode, value);
+}
+
+void ResetSearchCaretPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SearchModelNG::SetCaretPosition(frameNode, DEFAULT_CARET_POSITION);
+}
+
 void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -803,11 +804,16 @@ void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallb
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+    } else {
+        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 
 void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
@@ -816,7 +822,8 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    SearchModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
 namespace NodeModifier {
@@ -829,21 +836,26 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
         SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
         ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
-        SetSearchDecoration, ResetSearchDecoration,
+        SetSearchFontFeature, ResetSearchFontFeature, SetSearchDecoration, ResetSearchDecoration,
         SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
-        SetSearchFontFeature, ResetSearchFontFeature, SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
-        SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize, SetSearchSelectedBackgroundColor,
-        ResetSearchSelectedBackgroundColor, SetSearchTextIndent, ResetSearchTextIndent, SetSearchValue,
+        SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
+        SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
+        SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
+        ResetSearchTextIndent,
+        SetSearchMaxLength, ResetSearchMaxLength, SetSearchType, ResetSearchType,
+        SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent, ResetSearchOnSubmitWithEvent,
+        SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
+        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange,
+        SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
+        SetSearchOnContentScroll, ResetSearchOnContentScroll,
+        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchValue,
         ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon,
-        SetSearchCaretPosition, ResetSearchCaretPosition, SetSearchMaxLength, ResetSearchMaxLength, SetSearchType,
-        ResetSearchType, SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent,
-        ResetSearchOnSubmitWithEvent, SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
-        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange, SetSearchOnTextSelectionChange,
-        ResetSearchOnTextSelectionChange, SetSearchOnContentScroll, ResetSearchOnContentScroll,
-        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchOnWillInsert,
-        ResetSearchOnWillInsert, SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete,
-        ResetSearchOnWillDelete, SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText,
-        ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions };
+        SetSearchOnWillInsert, ResetSearchOnWillInsert,
+        SetSearchOnDidInsert, ResetSearchOnDidInsert,
+        SetSearchOnWillDelete, ResetSearchOnWillDelete,
+        SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
+        SetSearchCaretPosition, ResetSearchCaretPosition,
+        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions };
     return &modifier;
 }
 

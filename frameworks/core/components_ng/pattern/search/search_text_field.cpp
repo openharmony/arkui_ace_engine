@@ -86,4 +86,9 @@ bool SearchTextFieldPattern::IsTextEditableForStylus() const
     }
     return true;
 }
+
+bool SearchTextFieldPattern::IsNeedProcessAutoFill()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

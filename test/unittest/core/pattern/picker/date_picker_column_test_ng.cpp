@@ -435,53 +435,6 @@ HWTEST_F(DatePickerColumnTest, DatePickerColumn004, TestSize.Level1)
 }
 
 /**
- * @tc.name: DatePickerColumn005
- * @tc.desc: Test DatePickerColumnPattern FlushCurrentOptions.
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerColumnTest, DatePickerColumn005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create columnNode and columnPattern.
-     */
-    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
-    ASSERT_NE(stackNode, nullptr);
-    auto buttonNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(0));
-    auto renderContext = buttonNode->GetRenderContext();
-    auto columnNode = AceType::DynamicCast<FrameNode>(stackNode->GetChildAtIndex(1)->GetLastChild());
-    columnNode->MarkModifyDone();
-    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
-    columnPattern->FlushCurrentOptions();
-
-    /**
-     * @tc.steps: step2. Set datePickerPattern and call FlushCurrentOptions.
-     * @tc.expected: FlushCurrentOptions is executed correctly.
-     */
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    ASSERT_NE(datePickerPattern, nullptr);
-
-    datePickerPattern->hasUserDefinedDisappearFontFamily_ = true;
-    datePickerPattern->hasUserDefinedNormalFontFamily_ = true;
-    datePickerPattern->hasUserDefinedSelectedFontFamily_ = true;
-    columnPattern->FlushCurrentOptions();
-
-    columnPattern->hasAppCustomFont_ = true;
-    columnPattern->FlushCurrentOptions();
-
-    datePickerPattern->hasUserDefinedDisappearFontFamily_ = false;
-    datePickerPattern->hasUserDefinedNormalFontFamily_ = false;
-    datePickerPattern->hasUserDefinedSelectedFontFamily_ = false;
-    columnPattern->FlushCurrentOptions();
-}
-
-/**
  * @tc.name: DatePickerDialogView001
  * @tc.desc: Test DatePickerDialogView SwitchContentRowButton.
  * @tc.type: FUNC

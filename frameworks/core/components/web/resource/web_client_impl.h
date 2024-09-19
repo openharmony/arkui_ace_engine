@@ -163,7 +163,6 @@ public:
     bool OnFocus(OHOS::NWeb::NWebFocusSource source) override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
-    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
@@ -257,6 +256,7 @@ public:
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
+
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
@@ -292,6 +292,8 @@ public:
     void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
 
     void OnCursorUpdate(double x, double y, double width, double height) override;
+
+    void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
 
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

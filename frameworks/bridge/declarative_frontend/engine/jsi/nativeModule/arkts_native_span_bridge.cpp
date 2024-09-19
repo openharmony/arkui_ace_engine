@@ -15,13 +15,13 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 
 #include <string>
-
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -252,7 +252,7 @@ ArkUINativeModuleValue SpanBridge::SetFontSize(ArkUIRuntimeCallInfo *runtimeCall
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(nativeNode, fontSize.Value(),
@@ -441,7 +441,7 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
+    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     fontInfo.fontSizeNumber = fontSize.Value();

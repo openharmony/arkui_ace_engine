@@ -52,6 +52,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterComponentChangeEventCallbackInner(data, reply, option);
             break;
         }
+        case REGISTER_WEB_UNFOCUS_EVENT: {
+            RegisterWebUnfocusEventCallbackInner(data, reply, option);
+            break;
+        }
         case UNREGISTER_CLICK_EVENT: {
             UnregisterClickEventCallbackInner(data, reply, option);
             break;

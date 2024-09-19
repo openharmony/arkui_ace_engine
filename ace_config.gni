@@ -58,9 +58,6 @@ declare_args() {
 
   # Enable split_mode support
   ace_engine_feature_enable_split_mode = false
-
-  # Enable navigation split mode support
-  ace_engine_feature_enable_nav_split_mode = false
 }
 
 enable_dump_drawcmd = false
@@ -88,6 +85,7 @@ if (!defined(aosp_libs_dir)) {
 libs_root = "${aosp_libs_dir}/sdk"
 
 ability_runtime_path = "//foundation/ability/ability_runtime"
+ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
@@ -177,6 +175,10 @@ if (enable_ace_instance_log) {
 
 if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
+}
+
+if (build_variant == "user") {
+  ace_common_defines += [ "IS_RELEASE_VERSION" ]
 }
 
 ace_use_new_skia = true
@@ -296,8 +298,4 @@ if ((defined(use_origin_scope) && use_origin_scope) ||
 
 if (ace_engine_feature_enable_split_mode) {
   ace_common_defines += [ "ENABLE_SPLIT_MODE" ]
-}
-
-if (ace_engine_feature_enable_nav_split_mode) {
-  ace_common_defines += [ "ENABLE_NAV_SPLIT_MODE" ]
 }

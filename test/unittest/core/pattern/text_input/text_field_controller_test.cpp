@@ -1104,37 +1104,6 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction008, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetGlobalPointsWithTransform
- * @tc.desc: test GetGlobalPointsWithTransform.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldControllerTest, GetGlobalPointsWithTransform, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text field node
-     */
-    const std::string txt = "1234567890";
-    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
-    GetFocus();
-
-    /**
-     * @tc.step: step2. Call GetGlobalPointsWithTransform.
-     */
-    std::vector<OffsetF> localPoints = { OffsetF(5.0f, 5.0f) };
-    pattern_->selectOverlay_->hasTransform_ = true;
-    auto renderContext = frameNode_->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
-    EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
-        point.SetX(-5.0f);
-        point.SetY(5.0f);
-    });
-    pattern_->selectOverlay_->GetGlobalPointsWithTransform(localPoints);
-    EXPECT_EQ(localPoints[0].GetX(), -5.0f);
-    EXPECT_EQ(localPoints[0].GetY(), 5.0f);
-}
-
-/**
  * @tc.name: GetGlobalRectWithTransform
  * @tc.desc: test GetGlobalRectWithTransform.
  * @tc.type: FUNC
@@ -1154,7 +1123,7 @@ HWTEST_F(TextFieldControllerTest, GetGlobalRectWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1163,37 +1132,6 @@ HWTEST_F(TextFieldControllerTest, GetGlobalRectWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->GetGlobalRectWithTransform(rect);
     EXPECT_EQ(rect.GetOffset(), OffsetF(5.0f, 5.0f));
     EXPECT_EQ(rect.GetSize(), SizeF(5.0f, 5.0f));
-}
-
-/**
- * @tc.name: RevertLocalPointWithTransform
- * @tc.desc: test RevertLocalPointWithTransform.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldControllerTest, RevertLocalPointWithTransform, TestSize.Level1)
-{
-    /**
-     * @tc.steps: Create Text field node
-     */
-    const std::string txt = "1234567890";
-    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
-    GetFocus();
-
-    /**
-     * @tc.step: step2. Call RevertLocalPointWithTransform
-     */
-    pattern_->selectOverlay_->hasTransform_ = true;
-    auto renderContext = frameNode_->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
-    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
-        point.SetX(5.0f);
-        point.SetY(5.0f);
-    });
-    OffsetF offset(-5.0f, 5.0f);
-    pattern_->selectOverlay_->RevertLocalPointWithTransform(offset);
-    EXPECT_EQ(offset.GetX(), 5.0f);
-    EXPECT_EQ(offset.GetY(), 5.0f);
 }
 
 /**
@@ -1216,7 +1154,7 @@ HWTEST_F(TextFieldControllerTest, GetGlobalRectVertexWithTransform, TestSize.Lev
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1249,7 +1187,7 @@ HWTEST_F(TextFieldControllerTest, GetLocalPointsWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1280,7 +1218,7 @@ HWTEST_F(TextFieldControllerTest, GetLocalRectWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());

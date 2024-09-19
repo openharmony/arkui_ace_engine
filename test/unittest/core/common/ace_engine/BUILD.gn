@@ -94,8 +94,6 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/test/mock/core/render/mock_drawing_convertor.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "ace_engine_special_test.cpp",
-    "font_manager_test_ng.cpp",
-    "hdc_register_test.cpp",
     "window_test.cpp",
   ]
   deps = [

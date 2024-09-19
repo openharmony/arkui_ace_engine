@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,14 +25,15 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
 class MenuFontModifier extends ModifierWithKey<Font> {
-  constructor(value: Font) {
-    super(value);
-  }
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset || !this.value) {
@@ -59,9 +57,6 @@ class MenuFontModifier extends ModifierWithKey<Font> {
 }
 
 class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
-  constructor(value: Dimension | BorderRadiuses) {
-    super(value);
-  }
   static identity: Symbol = Symbol('radius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -112,6 +107,74 @@ class MenuWidthModifier extends ModifierWithKey<Length> {
   }
 }
 
+class MenuItemDividerModifier extends ModifierWithKey<DividerStyleOptions> {
+  constructor(value: DividerStyleOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuItemDivider');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetMenuItemDivider(node);
+    } else {
+      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
+        (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
+        (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
+        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin);
+    } else {
+      return true;
+    }
+  }
+}
+
+class MenuItemGroupDividerModifier extends ModifierWithKey<DividerStyleOptions> {
+  constructor(value: DividerStyleOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuItemGroupDivider');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetMenuItemGroupDivider(node);
+    } else {
+      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
+        (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
+        (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
+        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin);
+    } else {
+      return true;
+    }
+  }
+}
+
+class SubMenuExpandingModeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('subMenuExpandingMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().menu.resetSubMenuExpandingMode(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandingMode(node, this.value);
+    }
+  }
+}
+
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -133,6 +196,18 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   }
   radius(value: any): this {
     modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
+    return this;
+  }
+  menuItemDivider(value: any): this {
+    modifierWithKey(this._modifiersWithKeys, MenuItemDividerModifier.identity, MenuItemDividerModifier, value);
+    return this;
+  }
+  menuItemGroupDivider(value: any): this {
+    modifierWithKey(this._modifiersWithKeys, MenuItemGroupDividerModifier.identity, MenuItemGroupDividerModifier, value);
+    return this;
+  }
+  subMenuExpandingMode(value: any): this {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
     return this;
   }
 }

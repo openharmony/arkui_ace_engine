@@ -55,6 +55,7 @@ constexpr char ETS_SUFFIX[] = ".ets";
 
 std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
 std::string AceScopedPerformanceCheck::currentPath_;
+std::vector<std::pair<int64_t, std::string>> AceScopedPerformanceCheck::records_;
 void AcePerformanceCheck::Start()
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
@@ -97,7 +98,8 @@ AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
     }
     if (AcePerformanceCheck::performanceInfo_) {
         // convert micro time to ms with 1000.
-        RecordFunctionTimeout(time, name_);
+        std::pair recordInfo { time, name_ };
+        records_.push_back(recordInfo);
     }
 }
 
@@ -189,6 +191,7 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(
             }
         }
     }
+    RecordFunctionTimeout();
     RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList, codeInfo);
     RecordForEachItemsCount(itemCount, foreachNodeMap, codeInfo);
     RecordFlexLayoutsCount(flexNodeList, codeInfo);
@@ -229,24 +232,30 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
     ruleJson->Put(pageJson);
 }
 
-void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::string& functionName)
+void AceScopedPerformanceCheck::RecordFunctionTimeout()
 {
-    if (time < AceChecker::GetFunctionTimeout()) {
-        return;
-    }
-    auto codeInfo = GetCodeInfo(1, 1);
-    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
-        return;
-    }
-    auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
-    auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
-    auto pageJson = JsonUtil::Create(true);
-    pageJson->Put("eventTime", eventTime.c_str());
-    pageJson->Put("pagePath", codeInfo.sources.c_str());
-    pageJson->Put("functionName", functionName.c_str());
-    pageJson->Put("costTime", time);
-    ruleJson->Put(pageJson);
+    if (records_.empty()) {
+        return;
+    }
+    for (const auto &record : records_) {
+        if (record.first < AceChecker::GetFunctionTimeout()) {
+            continue;
+        }
+        auto codeInfo = GetCodeInfo(1, 1);
+        if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
+            continue;
+        }
+        auto eventTime = GetCurrentTime();
+        auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
+        auto pageJson = JsonUtil::Create(true);
+        pageJson->Put("eventTime", eventTime.c_str());
+        pageJson->Put("pagePath", codeInfo.sources.c_str());
+        pageJson->Put("functionName", record.second.c_str());
+        pageJson->Put("costTime", record.first);
+        ruleJson->Put(pageJson);
+    }
+    records_.clear();
 }
 
 void AceScopedPerformanceCheck::RecordVsyncTimeout(

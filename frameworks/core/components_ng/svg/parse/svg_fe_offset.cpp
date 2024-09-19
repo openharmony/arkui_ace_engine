@@ -18,7 +18,7 @@
 #include "include/effects/SkImageFilters.h"
 
 #include "base/utils/utils.h"
-#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components/declaration/svg/svg_fe_offset_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -44,11 +44,11 @@ void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
 bool SvgFeOffset::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFeOffsetAttribute&)> attrs[] = {
-        { SVG_DX,
+        { DOM_SVG_DX,
             [](const std::string& val, SvgFeOffsetAttribute& attr) {
                 attr.dx = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_DY,
+        { DOM_SVG_DY,
             [](const std::string& val, SvgFeOffsetAttribute& attr) {
                 attr.dy = SvgAttributesParser::ParseDimension(val);
             } },

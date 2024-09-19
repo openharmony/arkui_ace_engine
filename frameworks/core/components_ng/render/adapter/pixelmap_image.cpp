@@ -328,60 +328,6 @@ void PixelMapImage::DrawToRSCanvas(
 #endif
 }
 
-void PixelMapImage::DrawToRSCanvasWithBrush(
-    RSCanvas& canvas, RSBrush& brush, const RSRect& srcRect, const RSRect& dstRect)
-{
-    auto pixmap = GetPixelMap();
-    CHECK_NULL_VOID(pixmap);
-    const auto& config = GetPaintConfig();
-
-#ifdef ENABLE_ROSEN_BACKEND
-#ifndef USE_ROSEN_DRAWING
-    if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
-        DrawImageNine(canvas, srcRect, dstRect, BorderRadiusArray())) {
-        return;
-    }
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_VOID(rsCanvas);
-    auto skCanvas = rsCanvas->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    SkPaint paint;
-
-    SkSamplingOptions options;
-    ImagePainterUtils::AddFilter(paint, options, config);
-    recordingCanvas->scale(config.scaleX_, config.scaleY_);
-
-    Rosen::RsImageInfo rsImageInfo(
-        static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
-    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
-#else
-    if (config.frameCount_ == 1 &&config.resizableSlice_.Valid() &&
-        DrawImageNine(canvas, srcRect, dstRect, BorderRadiusArray())) {
-        return;
-    }
-    RSSamplingOptions options;
-    ImagePainterUtils::AddFilter(brush, options, config);
-    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
-    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
-    CHECK_NULL_VOID(pixmap->GetPixelMapSharedPtr());
-    RSPoint pointRadius(0, 0);
-    Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
-        static_cast<int32_t>(config.imageRepeat_), { pointRadius, pointRadius, pointRadius, pointRadius },
-        1.0, 0, 0, 0 };
-    recordingCanvas.AttachBrush(brush);
-    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d",
-            config.sourceInfo_.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight());
-        pixmap->SavePixelMapToFile("_ToRS_");
-    }
-    recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
-    recordingCanvas.DetachBrush();
-#endif
-#endif
-}
-
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 {
 #ifndef USE_ROSEN_DRAWING
@@ -396,7 +342,6 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     SkSamplingOptions option;
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
-    CHECK_NULL_VOID(pixelMap_);
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
 #endif

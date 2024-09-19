@@ -20,24 +20,24 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/close_icon/close_icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
-#include "core/components_ng/pattern/panel/drag_bar_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -318,7 +318,6 @@ HWTEST_F(PanelTestNg, PanelTestNg003, TestSize.Level1)
     testProperty.fullHeight = std::make_optional(SLIDING_PANEL_FULL_HEIGHT);
     testProperty.isShow = std::make_optional(SLIDING_PANEL_SHOW);
     testProperty.showCloseIcon = std::make_optional(SLIDING_PANEL_SHOW_CLOSE_ICON_FALSE);
-
 
     /**
      * @tc.steps: step2. create frameNode to get layout properties.
@@ -858,8 +857,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0014, TestSize.Level1)
     panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     auto layoutProperty = frameNode->GetLayoutProperty();
-    RefPtr<LayoutWrapperNode> child =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> child = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     layoutWrapper->AppendChild(child);
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
@@ -1489,8 +1487,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0020, TestSize.Level1)
     auto child = AceType::MakeRefPtr<SlidingPanelNode>("child1", 1, pattern);
     ASSERT_NE(child, nullptr);
     slidingPanelNode.AddChildToGroup(child, 1);
-    EXPECT_NE(
-        slidingPanelNode.columnChildren_.find(child->GetId()), slidingPanelNode.columnChildren_.end());
+    EXPECT_NE(slidingPanelNode.columnChildren_.find(child->GetId()), slidingPanelNode.columnChildren_.end());
     /**
      * @tc.steps: step2. construct a UINode of children.
      * @tc.expected: check whether the value is correct.
@@ -1503,8 +1500,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0020, TestSize.Level1)
     slidingPanelNode.children_.push_back(child4);
     auto child2 = AceType::MakeRefPtr<SlidingPanelNode>("child2", 2, pattern);
     slidingPanelNode.AddChildToGroup(child2, 1);
-        EXPECT_NE(
-        slidingPanelNode.columnChildren_.find(child2->GetId()), slidingPanelNode.columnChildren_.end());
+    EXPECT_NE(slidingPanelNode.columnChildren_.find(child2->GetId()), slidingPanelNode.columnChildren_.end());
 }
 
 /**

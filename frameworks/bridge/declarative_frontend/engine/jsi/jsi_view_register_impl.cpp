@@ -188,7 +188,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
@@ -832,13 +831,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LayoutManager", JSLayoutManager::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
+    { "ContainerSpan",  JSContainerSpan::JSBind},
     { "SymbolGlyph", JSSymbol::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
-    { "ContainerSpan",  JSContainerSpan::JSBind},
+    { "__PathShape__", JSPathShape::JSBind },
     { "__RectShape__", JSRectShape::JSBind },
     { "__CircleShape__", JSCircleShape::JSBind },
     { "__EllipseShape__", JSEllipseShape::JSBind },
-    { "__PathShape__", JSPathShape::JSBind },
     { "ContentSlot", JSContentSlot::JSBind },
     { "ArkUINativeNodeContent", JSNodeContent::JSBind },
     { "GestureRecognizer", JSGestureRecognizer::JSBind },

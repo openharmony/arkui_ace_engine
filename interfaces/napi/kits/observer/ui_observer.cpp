@@ -48,7 +48,7 @@ std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedWillClickListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::willClickInfos_;
-
+ 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextDidClickListeners_;
 std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
@@ -165,12 +165,11 @@ void UIObserver::RegisterScrollEventCallback(const std::shared_ptr<UIObserverLis
 void UIObserver::RegisterScrollEventCallback(
     const std::string& id, const std::shared_ptr<UIObserverListener>& listener)
 {
-    auto iter = specifiedScrollEventListeners_.find(id);
-    if (iter == specifiedScrollEventListeners_.end()) {
-        specifiedScrollEventListeners_.emplace(id, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+    if (specifiedScrollEventListeners_.find(id) == specifiedScrollEventListeners_.end()) {
+        specifiedScrollEventListeners_[id] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedScrollEventListeners_[id];
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -465,13 +464,12 @@ void UIObserver::RegisterDensityCallback(
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    auto iter = specifiedDensityListeners_.find(uiContextInstanceId);
-    if (iter == specifiedDensityListeners_.end()) {
-        specifiedDensityListeners_.emplace(
-            uiContextInstanceId, std::list<std::shared_ptr<UIObserverListener>>({ listener }));
+    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
+        specifiedDensityListeners_[uiContextInstanceId] =
+            std::list<std::shared_ptr<UIObserverListener>>({ listener });
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -484,11 +482,10 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
     if (uiContextInstanceId == 0) {
         uiContextInstanceId = Container::CurrentId();
     }
-    auto iter = specifiedDensityListeners_.find(uiContextInstanceId);
-    if (iter == specifiedDensityListeners_.end()) {
+    if (specifiedDensityListeners_.find(uiContextInstanceId) == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedDensityListeners_[uiContextInstanceId];
     if (callback == nullptr) {
         holder.clear();
         return;
@@ -506,11 +503,10 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
 void UIObserver::HandleDensityChange(NG::AbilityContextInfo& info, double density)
 {
     auto currentId = Container::CurrentId();
-    auto iter = specifiedDensityListeners_.find(currentId);
-    if (iter == specifiedDensityListeners_.end()) {
+    if (specifiedDensityListeners_.find(currentId) == specifiedDensityListeners_.end()) {
         return;
     }
-    auto& holder = iter->second;
+    auto& holder = specifiedDensityListeners_[currentId];
     for (const auto& listener : holder) {
         listener->OnDensityChange(density);
     }
@@ -799,7 +795,7 @@ void UIObserver::RegisterWillClickCallback(
     willClickInfos_[newRef] = info;
     napi_close_handle_scope(env, scope);
 }
-
+ 
 void UIObserver::RegisterWillClickCallback(
     int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -818,7 +814,7 @@ void UIObserver::RegisterWillClickCallback(
     }
     holder.emplace_back(listener);
 }
-
+ 
 void UIObserver::UnRegisterWillClickCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
 {
     napi_handle_scope scope = nullptr;
@@ -855,7 +851,7 @@ void UIObserver::UnRegisterWillClickCallback(napi_env env, napi_value uiAbilityC
     }
     napi_close_handle_scope(env, scope);
 }
-
+ 
 void UIObserver::UnRegisterWillClickCallback(int32_t uiContextInstanceId, napi_value callback)
 {
     if (uiContextInstanceId == 0) {
@@ -879,7 +875,7 @@ void UIObserver::UnRegisterWillClickCallback(int32_t uiContextInstanceId, napi_v
             }),
         holder.end());
 }
-
+ 
 void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
     const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode)
 {
@@ -895,7 +891,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
         if (info.IsEqual(localInfo)) {
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
-
+ 
             auto& holder = abilityContextWillClickListeners_[ref];
             for (const auto& listener : holder) {
                 listener->OnWillClick(gestureEventInfo, clickInfo, frameNode);
@@ -903,7 +899,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
             break;
         }
     }
-
+ 
     auto currentId = Container::CurrentId();
     auto iter = specifiedWillClickListeners_.find(currentId);
     if (iter == specifiedWillClickListeners_.end()) {
@@ -916,7 +912,7 @@ void UIObserver::HandleWillClick(NG::AbilityContextInfo& info, const GestureEven
     }
     napi_close_handle_scope(env, scope);
 }
-
+ 
 void UIObserver::RegisterDidClickCallback(
     napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -947,7 +943,7 @@ void UIObserver::RegisterDidClickCallback(
     didClickInfos_[newRef] = info;
     napi_close_handle_scope(env, scope);
 }
-
+ 
 void UIObserver::RegisterDidClickCallback(
     int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
 {
@@ -966,7 +962,7 @@ void UIObserver::RegisterDidClickCallback(
     }
     holder.emplace_back(listener);
 }
-
+ 
 void UIObserver::UnRegisterDidClickCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
 {
     napi_handle_scope scope = nullptr;
@@ -1003,7 +999,7 @@ void UIObserver::UnRegisterDidClickCallback(napi_env env, napi_value uiAbilityCo
     }
     napi_close_handle_scope(env, scope);
 }
-
+ 
 void UIObserver::UnRegisterDidClickCallback(int32_t uiContextInstanceId, napi_value callback)
 {
     if (uiContextInstanceId == 0) {
@@ -1027,7 +1023,7 @@ void UIObserver::UnRegisterDidClickCallback(int32_t uiContextInstanceId, napi_va
             }),
         holder.end());
 }
-
+ 
 void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
     const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode)
 {
@@ -1043,7 +1039,7 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
         if (info.IsEqual(localInfo)) {
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
-
+ 
             auto& holder = abilityContextDidClickListeners_[ref];
             for (const auto& listener : holder) {
                 listener->OnDidClick(gestureEventInfo, clickInfo, frameNode);
@@ -1051,7 +1047,7 @@ void UIObserver::HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent
             break;
         }
     }
-
+ 
     auto currentId = Container::CurrentId();
     auto iter = specifiedDidClickListeners_.find(currentId);
     if (iter == specifiedDidClickListeners_.end()) {

@@ -122,7 +122,7 @@ class __RepeatDefaultKeyGen {
 
     private static funcImpl<T>(item: T) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item != 'object' && typeof item !== 'symbol') {
+        if (typeof item !== 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -174,7 +174,7 @@ class __Repeat<T> implements RepeatAPI<T> {
             new __RepeatItemPU(owningView as ViewPU, item, index);
 
         const isViewV2 = (this.config.owningView_ instanceof ViewV2);
-        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2: mkRepeatItemPU;
+        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2 : mkRepeatItemPU;
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {

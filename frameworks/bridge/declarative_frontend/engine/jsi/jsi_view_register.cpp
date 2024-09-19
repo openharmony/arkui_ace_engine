@@ -670,7 +670,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("container is null");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "container is nullptr");
         return panda::StringRef::NewFromUtf8(vm, "");
     }
     auto argc = runtimeCallInfo->GetArgsNumber();
@@ -698,13 +698,17 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
-    bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-    if (needThrow) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
-        return panda::StringRef::NewFromUtf8(vm, "");
+    if (container->IsUseNewPipeline()) {
+        bool needThrow = false;
+        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+        if (needThrow) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
+            return panda::StringRef::NewFromUtf8(vm, "");
+        }
+        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
     }
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector tree failed");
+    return panda::StringRef::NewFromUtf8(vm, "");
 }
 
 panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -714,7 +718,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("container is null");
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "container is nullptr");
         return panda::StringRef::NewFromUtf8(vm, "");
     }
 
@@ -766,13 +770,17 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
-    bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-    if (needThrow) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
-        return panda::StringRef::NewFromUtf8(vm, "");
+    if (container->IsUseNewPipeline()) {
+        bool needThrow = false;
+        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+        if (needThrow) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
+            return panda::StringRef::NewFromUtf8(vm, "");
+        }
+        return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
     }
-    return panda::StringRef::NewFromUtf8(vm, nodeInfos.c_str());
+    JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector tree failed");
+    return panda::StringRef::NewFromUtf8(vm, "");
 }
 
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -1265,6 +1273,25 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JSHandleUncaughtException(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    auto nativeEngine = engine->GetNativeEngine();
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+    CHECK_NULL_RETURN(arkNativeEngine, panda::JSValueRef::Undefined(vm));
+    NapiUncaughtExceptionCallback callback = arkNativeEngine->GetNapiUncaughtExceptionCallback();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> exception = firstArg->ToObject(vm);
+    callback(arkNativeEngine->ArkValueToNapiValue(reinterpret_cast<napi_env>(arkNativeEngine), exception));
+    return panda::JSValueRef::Undefined(vm);
+}
+
 #ifdef FORM_SUPPORTED
 void JsRegisterFormViews(
     BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload, void* nativeEngine)
@@ -1332,6 +1359,9 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm,
+        panda::StringRef::NewFromUtf8(vm, "_arkUIUncaughtPromiseError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSHandleUncaughtException));
 
     JsBindFormViews(globalObj, formModuleList, nativeEngine);
 
@@ -1510,6 +1540,9 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm,
+        panda::StringRef::NewFromUtf8(vm, "_arkUIUncaughtPromiseError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSHandleUncaughtException));
 
     BindingTarget focusControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),

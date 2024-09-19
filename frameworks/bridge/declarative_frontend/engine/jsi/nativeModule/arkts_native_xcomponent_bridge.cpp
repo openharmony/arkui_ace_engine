@@ -45,11 +45,6 @@ XComponentType XComponentBridge::ConvertToXComponentType(const std::string& type
     if (type == "node") {
         return XComponentType::NODE;
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type == "platform_view") {
-        return XComponentType::PLATFORM_VIEW;
-    }
-#endif
     return XComponentType::SURFACE;
 }
 
@@ -590,7 +585,7 @@ ArkUINativeModuleValue XComponentBridge::ResetBackgroundImage(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -616,13 +611,13 @@ ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo *runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::ResetOnLoad(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue XComponentBridge::ResetOnLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -643,15 +638,15 @@ ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo *runt
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::ResetOnDestroy(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue XComponentBridge::ResetOnDestroy(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::SetEnableAnalyzer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue XComponentBridge::SetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
@@ -665,9 +660,9 @@ ArkUINativeModuleValue XComponentBridge::SetEnableAnalyzer(ArkUIRuntimeCallInfo 
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue XComponentBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());

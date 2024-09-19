@@ -141,6 +141,11 @@ private:
     float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const;
 
     /**
+     * @brief Measure all items in view to check if any item's height changed.
+     */
+    bool ItemHeightChanged() const;
+
+    /**
      * @brief Layout a single section of items
      *
      * @param idx section index.
@@ -151,11 +156,6 @@ private:
      */
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
-
-    /**
-     * @brief Measure all items in view to check if any item's height changed.
-     */
-    bool ItemHeightChanged() const;
 
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;
