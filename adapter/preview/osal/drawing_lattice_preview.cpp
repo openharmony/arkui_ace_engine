@@ -24,32 +24,20 @@
 namespace OHOS::Ace {
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticePreview>(jsLattice->GetLattice());
-#endif
 }
 
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptrAddr)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* lattice = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::Lattice>*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticePreview>(*lattice);
-#endif
 }
 
 void* DrawingLatticePreview::GetDrawingLatticeSptrAddr()
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     return static_cast<void*>(&lattice_);
-#endif
 }
 } // namespace OHOS::Ace
