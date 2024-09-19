@@ -23,6 +23,9 @@ declare_args() {
   # show the instance id in logs.
   enable_ace_instance_log = true
 
+  # Disable glfw window to build for PC preview scenario.
+  enable_glfw_window = false
+
   # Enable metal in iOS or MacOS
   shell_enable_metal = false
 
@@ -157,6 +160,10 @@ ace_common_defines = [ "ACE_LOG_TAG=\"Ace\"" ]
 
 if (use_hilog) {
   ace_common_defines += [ "USE_HILOG" ]
+}
+
+if (enable_glfw_window) {
+  ace_common_defines += [ "USE_GLFW_WINDOW" ]
 }
 
 if (use_clang_coverage) {
