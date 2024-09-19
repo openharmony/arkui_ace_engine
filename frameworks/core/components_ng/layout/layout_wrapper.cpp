@@ -39,6 +39,8 @@ bool LayoutWrapper::SkipMeasureContent() const
 
 void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
 {
+    ACE_SCOPED_TRACE(
+        "ApplySafeArea: SafeAreaInsets: %s to constraint %s", insets.ToString().c_str(), constraint.ToString().c_str());
     constraint.MinusPadding(
         insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
 }
@@ -79,6 +81,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
         GetHostTag() == V2::OVERLAY_ETS_TAG) {
+        CHECK_NULL_RETURN(IsActive(), false);
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
@@ -212,6 +215,11 @@ void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->CustomizeExpandSafeArea()) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();

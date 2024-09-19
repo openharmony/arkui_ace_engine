@@ -287,6 +287,8 @@ public:
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
+    void AddDirtyFreezeNode(FrameNode* node);
+
     void AddPredictTask(PredictTask&& task);
 
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
@@ -307,6 +309,7 @@ public:
 
     void FlushOnceVsyncTask() override;
 
+    void FlushFreezeNode();
     void FlushDirtyNodeUpdate();
     void FlushSafeAreaPaddingProcess();
 
@@ -722,6 +725,8 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
 
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
+
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
@@ -898,6 +903,14 @@ public:
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+    bool CheckThreadSafe();
+
+    bool IsHoverModeChange() const
+    {
+        return isHoverModeChanged_;
+    }
+
+    void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1042,6 +1055,7 @@ private:
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
+    std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
@@ -1064,6 +1078,9 @@ private:
     RefPtr<FrameNode> rootNode_;
 
     int32_t curFocusNodeId_ = -1;
+
+    bool preIsHalfFoldHoverStatus_ = false;
+    bool isHoverModeChanged_ = false;
 
     std::set<WeakPtr<FrameNode>> needRenderNode_;
 
@@ -1179,6 +1196,8 @@ private:
     std::list<WeakPtr<FrameNode>> changedNodes_;
     bool isHalfFoldHoverStatus_ = false;
     CancelableCallback<void()> foldStatusDelayTask_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
 };
 } // namespace OHOS::Ace::NG
 

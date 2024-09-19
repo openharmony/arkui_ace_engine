@@ -616,6 +616,10 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
+    if (isFreeze_) {
+        auto parent = GetParent();
+        SetFreeze(parent ? parent->isFreeze_ : false);
+    }
 }
 
 [[deprecated]] void UINode::AttachToMainTree(bool recursive)
@@ -657,6 +661,28 @@ void UINode::DetachFromMainTree(bool recursive)
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
+}
+
+void UINode::SetFreeze(bool isFreeze)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
+    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+        isFreeze_ = isFreeze;
+        onFreezeStateChange();
+        UpdateChildrenFreezeState(isFreeze_);
+    }
+}
+
+void UINode::UpdateChildrenFreezeState(bool isFreeze)
+{
+    const auto& children = GetChildren(true);
+    for (const auto& child : children) {
+        if (child) {
+            child->SetFreeze(isFreeze);
+        }
+    }
 }
 
 void UINode::FireCustomDisappear()
@@ -826,6 +852,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     if (hasJson) {
         std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+        children->Put("childSize", static_cast<int32_t>(GetChildren().size()));
         children->Put("ID", nodeId_);
         children->Put("Depth", GetDepth());
         children->Put("InstanceId", instanceId_);
@@ -834,7 +861,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
             children->Put("IsDisappearing", IsDisappearing());
         }
         DumpInfo(children);
-        std::string key = isRoot_ ? tag_ : tag_ + std::to_string(nodeId_);
+        std::string key = isRoot_ ? tag_ : tag_ + "_" + std::to_string(nodeId_);
         json->Put(key.c_str(), children);
         std::string jsonstr = DumpLog::GetInstance().FormatDumpInfo(json->ToString(), depth);
         auto prefix = DumpLog::GetInstance().GetPrefix(depth);
@@ -905,6 +932,7 @@ bool UINode::DumpTreeById(int32_t depth, const std::string& id, bool hasJson)
         if ((id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
             std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
             std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
+            children->Put("childSize", static_cast<int32_t>(GetChildren().size()));
             children->Put("ID", nodeId_);
             children->Put("Depth", GetDepth());
             children->Put("IsDisappearing", IsDisappearing());

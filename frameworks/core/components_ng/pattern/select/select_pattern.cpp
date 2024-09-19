@@ -492,7 +492,6 @@ void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
 
 void SelectPattern::BuildChild()
 {
-    
     auto select = GetHost();
     CHECK_NULL_VOID(select);
     // get theme from SelectThemeManager

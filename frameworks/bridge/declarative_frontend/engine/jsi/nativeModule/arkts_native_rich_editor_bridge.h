@@ -87,6 +87,9 @@ public:
     static ArkUINativeModuleValue SetEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnterKeyType(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
+    static ArkUINativeModuleValue SetBarState(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBarState(ArkUIRuntimeCallInfo *runtimeCallInfo);
+
 private:
     static void ParseAIEntityColor(
         ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig);

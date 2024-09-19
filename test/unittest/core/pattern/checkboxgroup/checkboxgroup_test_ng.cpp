@@ -2012,4 +2012,31 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest030, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::CIRCULAR_STYLE);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: CheckBoxGroupNGTest031
+ * @tc.desc: Test SetCheckBoxName func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. SetCheckBoxName GroupName
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    CheckBoxGroupModelNG::SetCheckboxGroupName(node, "testGroupName");
+
+    /**
+     * @tc.steps: step3. assert GroupName
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
+}
 } // namespace OHOS::Ace::NG

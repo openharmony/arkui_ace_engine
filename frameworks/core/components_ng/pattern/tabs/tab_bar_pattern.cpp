@@ -144,6 +144,17 @@ void TabBarPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
+void TabBarPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (targetIndex_) {
+        targetIndex_ = GetLoopIndex(targetIndex_.value());
+    }
+}
+
 void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
 {
     CHECK_NULL_VOID(tabBarItem);
@@ -2238,8 +2249,9 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     if (GreatOrEqual(turnPageRate_, 1.0f)) {
         turnPageRate_ = 1.0f;
     }
-
-    if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (swiperStartIndex_ < 0 || swiperStartIndex_ >= totalCount ||
+        swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
         swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
         selectedModes_[swiperStartIndex_] != SelectedMode::INDICATOR ||
@@ -2248,7 +2260,8 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     }
 
     auto nextIndex = isTouchingSwiper_ ? swiperStartIndex_ + 1 : animationTargetIndex_.value_or(-1);
-    if (nextIndex < 0 || nextIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
+    if (nextIndex < 0 || nextIndex >= totalCount ||
+        nextIndex >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[nextIndex] != TabBarStyle::SUBTABBATSTYLE ||
         nextIndex >= static_cast<int32_t>(selectedModes_.size()) ||
         selectedModes_[nextIndex] != SelectedMode::INDICATOR ||
@@ -2919,6 +2932,17 @@ bool TabBarPattern::IsValidIndex(int32_t index)
         return false;
     }
     return true;
+}
+
+int32_t TabBarPattern::GetLoopIndex(int32_t originalIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, originalIndex);
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (totalCount <= 0) {
+        return originalIndex;
+    }
+    return originalIndex % totalCount;
 }
 
 void TabBarPattern::SetRegionInfo(std::unique_ptr<JsonValue>& json)

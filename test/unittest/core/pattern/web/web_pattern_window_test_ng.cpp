@@ -17,16 +17,15 @@
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
-#define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#define private public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#undef private
+
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;

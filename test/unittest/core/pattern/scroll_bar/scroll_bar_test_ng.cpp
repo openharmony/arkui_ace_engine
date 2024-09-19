@@ -241,4 +241,85 @@ HWTEST_F(ScrollBarTestNg, ScrollBarProxy001, TestSize.Level1)
     scrollBarProxy->ScrollPage(true, true);
     scrollBarProxy->SetScrollEnabled(true, nullptr);
 }
+
+/**
+ * @tc.name: IsNestScroller001
+ * @tc.desc: ScrollBarProxy IsNestScroller
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, IsNestScroller001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    ASSERT_EQ(pattern_->scrollBarProxy_->IsNestScroller(), true);
+    pattern_->SetEnableNestedSorll(false);
+    ASSERT_EQ(pattern_->scrollBarProxy_->IsNestScroller(), false);
+}
+
+/**
+ * @tc.name: GetScrollableNodeInfo001
+ * @tc.desc: ScrollBarProxy GetScrollableNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetScrollableNodeInfo001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    auto nestScroller = pattern_->scrollBarProxy_->GetScrollableNodeInfo();
+    ASSERT_NE(nestScroller.scrollableNode.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: setNestedScroll001
+ * @tc.desc: ScrollBarProxy SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetNestedScroll001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    auto scrollPnTest = scrollNode_->GetPattern<ScrollablePattern>();
+    scrollBarModel.SetNestedScroll(scrollNode_, scrollPnTest);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: setNestedScroll001
+ * @tc.desc: ScrollBarProxy SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UnSetNestedScroll001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    auto scrollPnTest = scrollNode_->GetPattern<ScrollablePattern>();
+    scrollBarModel.SetNestedScroll(scrollNode_, scrollPnTest);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    scrollBarModel.UnSetNestedScroll(scrollNode_, scrollPnTest);
+    ASSERT_EQ(scrollPnTest->nestScrollBarProxy_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

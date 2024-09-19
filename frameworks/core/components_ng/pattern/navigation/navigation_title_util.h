@@ -88,7 +88,20 @@ public:
     }
 
     static float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth);
-    
+
+    static void CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle);
+    static void CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+    static void CreateOrUpdateDestinationMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+    static void CreateOrUpdateDestinationSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+
+    static float CalculateTitlebarOffset(const RefPtr<UINode>& titleBarNode);
+    static void FoldStatusChangedAnimation(const RefPtr<FrameNode>& host);
+
+    static bool IsNeedHoverModeAction(const RefPtr<TitleBarNode>& titleBarNode);
 private:
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);

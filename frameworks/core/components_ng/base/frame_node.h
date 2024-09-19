@@ -47,6 +47,7 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -171,8 +172,9 @@ public:
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    void ProcessFreezeNode();
+
+    void onFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -498,19 +500,10 @@ public:
     bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
-    void PushDestroyCallback(std::function<void()>&& callback)
-    {
-        destroyCallbacks_.emplace_back(callback);
-    }
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
     {
         destroyCallbacksMap_[tag] = callback;
-    }
-
-    std::list<std::function<void()>> GetDestroyCallback() const
-    {
-        return destroyCallbacks_;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -772,7 +765,8 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
@@ -1087,12 +1081,13 @@ public:
 
 protected:
     void DumpInfo() override;
-    std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);

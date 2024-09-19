@@ -363,11 +363,25 @@ class RichEditorEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions>
     super(value);
   }
   static identity: Symbol = Symbol('richEditorEditMenuOptions');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().richEditor.resetEditMenuOptions(node);
     } else {
       getUINativeModule().richEditor.setEditMenuOptions(node, this.value);
+    }
+  }
+}
+
+class RichEditorBarStateModifier extends ModifierWithKey<BarState> {
+  constructor(value: BarState) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorBarState');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().richEditor.resetBarState(node);
+    } else {
+      getUINativeModule().richEditor.setBarState(node, this.value);
     }
   }
 }
@@ -486,7 +500,7 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     modifierWithKey(this._modifiersWithKeys, RichEditorEnablePreviewTextModifier.identity, RichEditorEnablePreviewTextModifier, value);
     return this;
   }
-  editMenuOptions(value: EditMenuOptions) {
+  editMenuOptions(value: EditMenuOptions): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorEditMenuOptionsModifier.identity, RichEditorEditMenuOptionsModifier, value);
     return this;
   }

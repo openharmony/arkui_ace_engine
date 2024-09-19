@@ -37,6 +37,7 @@ public:
     MOCK_METHOD1(GetPointTransform, void(PointF&));
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
     MOCK_METHOD1(SetSurfaceRotation, void(bool));
+    MOCK_METHOD1(SetRenderFit, void(RenderFit));
 
     void SetVisible(bool visible) override
     {

@@ -229,6 +229,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection001, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
     richEditorPattern->SetSelection(0, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
@@ -271,6 +272,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection101, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     richEditorPattern->SetSelection(0, 10);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
@@ -327,6 +329,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection002, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
     richEditorPattern->SetSelection(0, 1);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
@@ -382,6 +385,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection003, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Call SetSelection with no menu
@@ -433,6 +437,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection004, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Create a scene where the text menu has popped up.
@@ -493,6 +498,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection005, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Call SetSelection with no menu
@@ -529,6 +535,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection006, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Create a scene where the text menu has popped up.
@@ -574,6 +581,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection007, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Call SetSelection with no menu
@@ -672,6 +680,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection008, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Create a scene where the text menu has popped up.
@@ -1259,7 +1268,8 @@ HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
-	
+    richEditorPattern->isEditing_ = true;
+
     /**
      * @tc.step: step3. call SetSelection
      */

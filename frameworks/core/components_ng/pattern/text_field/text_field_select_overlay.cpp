@@ -21,7 +21,6 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
@@ -40,6 +39,7 @@ namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
+constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -101,7 +101,11 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     if (latestReqeust_->hideHandle) {
         manager->HideHandle();
     }
-    pattern->StopTwinkling();
+    auto selectOverlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo);
+    if (!selectOverlayInfo->isUsingMouse) {
+        pattern->StopTwinkling();
+    }
     manager->MarkInfoChange(DIRTY_SELECT_TEXT);
     latestReqeust_.reset();
 }
@@ -429,19 +433,13 @@ int32_t TextFieldSelectOverlay::GetCaretPositionOnHandleMove(const OffsetF& loca
     return GetTextInputCaretPosition(localOffset, isFirst);
 }
 
-void TextFieldSelectOverlay::StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex)
-{
-    if (currentIndex != preIndex) {
-        VibratorUtils::StartVibraFeedback("slide");
-    }
-}
-
 void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsOperation());
     auto localOffset = handleRect.GetOffset();
+    localOffset.SetY(localOffset.GetY() + handleRect.Height() / 2.0f);
     if (IsOverlayMode()) {
         localOffset = localOffset - GetPaintOffsetWithoutTransform();
     }
@@ -450,7 +448,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     int32_t startIndex = selectController->GetFirstHandleIndex();
     int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
-        auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
+        auto magnifierLocalOffsetY = localOffset.GetY();
         auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
         if (IsOverlayMode()) {
             GetLocalPointWithTransform(magnifierLocalOffset);
@@ -461,15 +459,15 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         pattern->ShowCaretAndStopTwinkling();
-        StartVibratorByCaretIndexChange(selectController->GetCaretIndex(), preIndex);
+        pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset, isFirst);
         if (isFirst) {
-            StartVibratorByCaretIndexChange(position, startIndex);
+            pattern->StartVibratorByIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
-            StartVibratorByCaretIndexChange(position, endIndex);
+            pattern->StartVibratorByIndexChange(position, endIndex);
             selectController->MoveSecondHandleToContentRect(position, false);
             UpdateFirstHandleOffset();
         }
@@ -582,9 +580,9 @@ void TextFieldSelectOverlay::OnHandleIsHidden()
     pattern->StartTwinkling();
 }
 
-void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
+void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
-    BaseTextSelectOverlay::OnHandleMoveStart(isFirst);
+    BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     auto pattern = GetPattern<TextFieldPattern>();
@@ -596,5 +594,27 @@ void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
             pattern->StartTwinkling();
         }
     }
+}
+
+void TextFieldSelectOverlay::OnHandleMarkInfoChange(
+    std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
+        auto textFieldPattern = GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        info->handlerColor = paintProperty->GetCursorColor();
+        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void TextFieldSelectOverlay::UpdateHandleColor()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
 }
 } // namespace OHOS::Ace::NG

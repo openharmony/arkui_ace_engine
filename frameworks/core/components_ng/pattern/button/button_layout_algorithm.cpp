@@ -19,7 +19,16 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+void checkNegativeBorderRadius(std::optional<Dimension>& radius, const float defaultHeight)
+{
+    int defaultDiv = 2;
+    // Change the borderRadius size of a negative number to the default.
+    if ((radius.has_value()) && LessNotEqual(radius.value().ConvertToPx(), 0.0)) {
+        radius = Dimension(defaultHeight / defaultDiv);
+    }
+}
+}
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
@@ -198,18 +207,20 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
         }
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2)));
         MeasureCircleButton(layoutWrapper);
-    }  else if (buttonType == ButtonType::CAPSULE) {
+    } else if (buttonType == ButtonType::CAPSULE) {
         renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
-    } else if (buttonLayoutProperty->HasBorderRadius() &&
-               (buttonType == ButtonType::NORMAL || buttonType == ButtonType::ROUNDED_RECTANGLE)) {
-        renderContext->UpdateBorderRadius(buttonLayoutProperty->GetBorderRadius().value());
+    } else if (buttonType == ButtonType::NORMAL) {
+        auto normalRadius = buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension()));
+        renderContext->UpdateBorderRadius(normalRadius);
     } else if (buttonType == ButtonType::ROUNDED_RECTANGLE) {
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         auto roundedRectRadius =
             buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension(defaultHeight / 2)));
+        checkNegativeBorderRadius(roundedRectRadius.radiusTopLeft, defaultHeight);
+        checkNegativeBorderRadius(roundedRectRadius.radiusTopRight, defaultHeight);
+        checkNegativeBorderRadius(roundedRectRadius.radiusBottomLeft, defaultHeight);
+        checkNegativeBorderRadius(roundedRectRadius.radiusBottomRight, defaultHeight);
         renderContext->UpdateBorderRadius(roundedRectRadius);
-    } else if (buttonType == ButtonType::NORMAL) {
-        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension()));
     }
 }
 
@@ -321,14 +332,12 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, 0.0);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, 0.0);
-    auto* context = host->GetContextWithCheck();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0);
+    auto* context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, 0.0);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, 0.0);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, 0.0);
     if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
         auto toggleTheme = context->GetTheme<ToggleTheme>();
         CHECK_NULL_RETURN(toggleTheme, 0.0);

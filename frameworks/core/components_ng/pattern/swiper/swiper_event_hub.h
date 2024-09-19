@@ -94,17 +94,17 @@ public:
         }
     }
 
-    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex)
     {
-        ACE_SCOPED_TRACE("Swiper FireChangeEvent, preIndex: %d currentIndex: %d eventSize: %zu",
-            preIndex, currentIndex, changeEvents_.size() + changeEventsWithPreIndex_.size());
-        if (!changeEvents_.empty()) {
-            std::for_each(
-                changeEvents_.begin(), changeEvents_.end(), [currentIndex](const ChangeEventPtr& changeEvent) {
-                    auto event = *changeEvent;
-                    event(currentIndex);
-                });
-        }
+        auto frameNode = GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireJSChangeEvent(currentIndex);
+        });
         if (!changeEventsWithPreIndex_.empty()) {
             std::for_each(changeEventsWithPreIndex_.begin(), changeEventsWithPreIndex_.end(),
                 [preIndex, currentIndex](const ChangeEventWithPreIndexPtr& changeEventWithPreIndex) {
@@ -187,6 +187,18 @@ public:
     }
 
 private:
+    void FireJSChangeEvent(int32_t index)
+    {
+        ACE_SCOPED_TRACE("Swiper FireChangeEvent, index: %d", index);
+        if (changeEvents_.empty()) {
+            return;
+        }
+        std::for_each(changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+            auto event = *changeEvent;
+            event(index);
+        });
+    }
+
     Direction direction_;
     std::list<ChangeEventPtr> changeEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;

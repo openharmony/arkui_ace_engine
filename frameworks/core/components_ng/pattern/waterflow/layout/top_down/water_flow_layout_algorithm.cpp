@@ -261,7 +261,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     layoutInfo_->firstIndex_ = firstIndex;
     layoutWrapper->SetActiveChildRange(layoutInfo_->NodeIdx(layoutInfo_->FirstIdx()),
-        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount);
+        layoutInfo_->NodeIdx(layoutInfo_->endIndex_), cachedCount, cachedCount,
+        layoutProperty->GetShowCachedItemsValue(false));
     PreloadItems(layoutWrapper, layoutInfo_, cachedCount);
 
     LayoutFooter(layoutWrapper, childFrameOffset, layoutProperty->IsReverse());
@@ -269,7 +270,10 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
 {
-    if (layoutInfo_->itemEnd_ && layoutInfo_->footerIndex_ >= 0) {
+    if (layoutInfo_->footerIndex_ < 0) {
+        return;
+    }
+    if (layoutInfo_->itemEnd_) {
         auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_->footerIndex_);
         CHECK_NULL_VOID(footer);
         auto footerOffset = childFrameOffset;
@@ -280,6 +284,10 @@ void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const 
         footerOffset += (axis_ == Axis::VERTICAL) ? OffsetF(0, mainOffset) : OffsetF(mainOffset, 0);
         footer->GetGeometryNode()->SetMarginFrameOffset(footerOffset);
         footer->Layout();
+    } else {
+        auto footer = layoutWrapper->GetChildByIndex(layoutInfo_->footerIndex_);
+        CHECK_NULL_VOID(footer);
+        footer->SetActive(false);
     }
 }
 

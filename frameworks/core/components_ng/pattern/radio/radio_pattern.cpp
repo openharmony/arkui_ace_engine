@@ -732,7 +732,7 @@ void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);  
+    CHECK_NULL_VOID(host);
     auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();

@@ -2808,6 +2808,8 @@ struct CJUIRichEditorModifier {
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    void (*setRichEditorBarState)(ArkUINodeHandle node, ArkUI_Uint32 barStateValue);
+    void (*resetRichEditorBarState)(ArkUINodeHandle node);
 };
 
 struct CJUIRichEditorControllerModifier {

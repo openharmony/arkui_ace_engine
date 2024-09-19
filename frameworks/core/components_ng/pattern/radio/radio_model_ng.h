@@ -68,7 +68,6 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
-    static void SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator);
     static bool GetChecked(FrameNode* frameNode);
     static Color GetCheckedBackgroundColor(FrameNode* frameNode);
     static Color GetUncheckedBorderColor(FrameNode* frameNode);
@@ -77,6 +76,8 @@ public:
     static std::string GetRadioValue(FrameNode* frameNode);
     static void SetRadioGroup(FrameNode* frameNode, const std::string& value);
     static std::string GetRadioGroup(FrameNode* frameNode);
+    static void SetRadioOptions(FrameNode* frameNode, const std::string& value,
+        const std::string& group, int32_t indicator);
 };
 } // namespace OHOS::Ace::NG
 

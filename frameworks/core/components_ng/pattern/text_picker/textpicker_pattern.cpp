@@ -219,6 +219,7 @@ void TextPickerPattern::SetButtonIdeaSize()
 
 void TextPickerPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     if (isFiredSelectsChange_) {
         isFiredSelectsChange_ = false;
         return;

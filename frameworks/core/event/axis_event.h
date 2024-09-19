@@ -173,10 +173,10 @@ struct AxisEvent final : public UIInputEvent {
                     result = Offset(-verticalAxis, -verticalAxis);
                 }
             }
-        } else {
-            // Axis event is made by others. Include touch-pad.
-            result = Offset(-horizontalAxis, -verticalAxis);
+            return result * (LINE_HEIGHT_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
         }
+        // Axis event is made by others. Include touch-pad.
+        result = Offset(-horizontalAxis, -verticalAxis);
         return result * (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
     }
 

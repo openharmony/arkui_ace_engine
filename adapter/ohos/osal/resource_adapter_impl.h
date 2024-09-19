@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,7 @@ public:
         const std::string& bundleName, const std::string& moduleName) override;
     void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
     bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const override;
+    bool CloseRawFileDescription(const std::string &rawfileName) const override;
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const override;
     uint32_t GetResourceLimitKeys() const override;
     uint32_t GetSymbolById(uint32_t resId) const override;

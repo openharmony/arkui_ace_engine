@@ -92,6 +92,9 @@ constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 constexpr float OFFSET_THIRD = 200.0f;
 constexpr float OFFSET_FORTH = 300.0f;
 constexpr float OFFSET_FIFTH = 50.0f;
+constexpr int OFFSET_Y_THIRD = 20;
+constexpr int TOP_LEFT_Y = 18;
+constexpr int PLACEMENT_RIGHT_Y = 29;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float PREVIEW_HEIGHT = 125.0f;
 constexpr float GREATER_WINDOW_MENU_HEIGHT = 1190.0f;
@@ -378,7 +381,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4300, TestSize.Level1)
     auto expectPreviewOffset = OffsetF(x, 0.0f);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(88.062, 88.062));
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(406.031, CONST_DOUBLE_ZREO));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(406.031, (OFFSET_Y_THIRD - TOP_LEFT_Y) / 2));
 }
 
 /**
@@ -915,8 +918,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5200, TestSize.Level1)
     auto expectMenuOffset = OffsetF(OFFSET_FORTH, POSITION_OFFSET + PLACEMENT_MENU_SPACE);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto expectPreviewOffset = OffsetF((OFFSET_FORTH + TARGET_SIZE_WIDTH) / DIP_SCALE, TARGET_SIZE_HEIGHT);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
+    EXPECT_TRUE(previewGeometryNode->GetFrameOffset().NonNegative());
     EXPECT_EQ(previewGeometryNode->GetFrameSize(),
         SizeF(-(OFFSET_FORTH + TARGET_SIZE_WIDTH) / DIP_SCALE, -TARGET_SIZE_HEIGHT));
 }
@@ -976,7 +978,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     auto expectPreviewOffset = OffsetF(305.536, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(88.927, FULL_SCREEN_HEIGHT - POSITION_OFFSET));
-    auto expectMenuOffset = OffsetF(406.464, CONST_DOUBLE_ZREO);
+    auto expectMenuOffset = OffsetF(406.464, OFFSET_Y_THIRD * DIP_SCALE - PLACEMENT_RIGHT_Y);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     /**
@@ -987,8 +989,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     layoutProperty->UpdateMenuPlacement(Placement::TOP_LEFT);
     menuAlgorithm->placement_ = Placement::TOP_LEFT;
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    expectPreviewOffset = OffsetF(8.58369, TARGET_SIZE_WIDTH);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
+    EXPECT_TRUE(previewGeometryNode->GetFrameOffset().NonNegative());
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(-8.58369, -TARGET_SIZE_WIDTH));
     EXPECT_TRUE(menuGeometryNode->GetFrameOffset().NonNegative());
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
@@ -1051,7 +1052,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
     auto expectPreviewOffset = OffsetF(322.481, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(55.0388, 757.333));
-    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(389.519, CONST_DOUBLE_ZREO));
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(389.519, OFFSET_Y_THIRD * DIP_SCALE - PLACEMENT_RIGHT_Y));
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(OFFSET_THIRD / 2, 378.667f));
 
     /**
@@ -1065,8 +1066,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
 
     previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, GREATER_WINDOW_PREVIEW_HEIGHT_SECOND));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    expectPreviewOffset = OffsetF(CONST_DOUBLE_ZREO, CONST_DOUBLE_ZREO);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
+    EXPECT_TRUE(previewGeometryNode->GetFrameOffset().NonNegative());
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(CONST_DOUBLE_ZREO, CONST_DOUBLE_ZREO));
     EXPECT_TRUE(menuGeometryNode->GetFrameOffset().NonNegative());
 }

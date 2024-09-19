@@ -712,11 +712,8 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
+    // can't enter the refreshing status when refresh updates scroll offset by animation source
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 } // namespace OHOS::Ace::NG

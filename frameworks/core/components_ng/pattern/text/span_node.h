@@ -150,7 +150,7 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -159,6 +159,7 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
     Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
+    Color paragraphTextColor = { Color::BLACK };
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -237,41 +238,11 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
-
-    // The function is only used for urlspan
-    void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
-    void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
-    void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
-    std::function<void(const std::string& address)> urlOnClick;
-    std::function<void(const std::string& address)> urlOnRelease;
-    std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
-    std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
-    void SetUrlAddress(const std::string& address)
+    std::function<void()> urlOnRelease;
+    void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
-        address_ = address;
+        urlOnRelease = std::move(onRelease);
     }
-    std::string GetUrlAddress()
-    {
-        return address_;
-    }
-    void SetUrlOnReleaseEvent(std::function<void(const std::string& address)>&& urlOnRelease_)
-    {
-        urlOnRelease = std::move(urlOnRelease_);
-    }
-    void SetUrlOnHoverEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem,
-        bool isHover, int32_t urlId)>&& urlOnHover_)
-    {
-        urlOnHover = std::move(urlOnHover_);
-    }
-    void SetUrlOnClickEvent(std::function<void(const std::string& address)>&& urlOnClick_)
-    {
-        urlOnClick = std::move(urlOnClick_);
-    }
-    void SetUrlOnPressEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem, bool isPress)>&& urlOnPress_)
-    {
-        urlOnPress = std::move(urlOnPress_);
-    }
-
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -335,11 +306,6 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
-    void SetDefaultMouseStyle(MouseFormat mouseStyle)
-    {
-        defaultMouseStyle_ = mouseStyle;
-    }
-
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -355,9 +321,6 @@ private:
     bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
-    Dimension radius_ = 2.0_vp;
-    std::string address_;
-    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     uint32_t symbolId_ = 0;
 };
 
@@ -458,6 +421,7 @@ public:
 
     void UpdateContent(const uint32_t& unicode)
     {
+        spanItem_->spanItemType = SpanItemType::SYMBOL;
         if (spanItem_->unicode == unicode) {
             return;
         }
@@ -565,6 +529,11 @@ public:
         propertyInfoContainer_.erase(value);
     }
 
+    void ResetPropertyInfo(PropertyInfo value)
+    {
+        propertyInfoContainer_.insert(value);
+    }
+
     void CleanPropertyInfo()
     {
         propertyInfoContainer_.clear();
@@ -588,6 +557,8 @@ public:
             return;
         }
         spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
         if (!spanItem_->UpdateSpanTextColor(color)) {
             RequestTextFlushDirty();
         }
@@ -614,7 +585,10 @@ public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
     PlaceholderRun run_;
-    PlaceholderSpanItem() = default;
+    PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::PLACEHOLDER;
+    }
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,

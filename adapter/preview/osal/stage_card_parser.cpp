@@ -25,6 +25,7 @@ void StageCardParser::Parse(const std::string& contents, const std::string& sele
 {
     auto rootJson = JsonUtil::ParseJsonString(contents);
     if (!rootJson || !rootJson->IsValid()) {
+        LOGE("the form config is illegal");
         return;
     }
     std::unique_ptr<JsonValue> formConfig;

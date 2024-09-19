@@ -30,15 +30,16 @@ public:
 
     static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
     RefPtr<SvgDomBase> GetSVGDom() const override;
-
+    std::string GetDumpInfo() override;
     RefPtr<ImageObject> Clone() override
     {
         return Claim(this);
     }
 
-private:
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+
+private:
     // return true if process is successful
     bool MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src);
     RefPtr<SvgDomBase> svgDomBase_;

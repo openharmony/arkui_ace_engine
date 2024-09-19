@@ -184,11 +184,12 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
     if (!callback->IsRegisterHandleCallback()) {
         return;
     }
-    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isFirst) {
-        auto overlayCallback = weakCallback.Upgrade();
-        CHECK_NULL_VOID(overlayCallback);
-        overlayCallback->OnHandleMoveStart(isFirst);
-    };
+    info.onHandleMoveStart =
+        [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isFirst) {
+            auto overlayCallback = weakCallback.Upgrade();
+            CHECK_NULL_VOID(overlayCallback);
+            overlayCallback->OnHandleMoveStart(event, isFirst);
+        };
     info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
@@ -238,6 +239,11 @@ void SelectContentOverlayManager::RegisterTouchCallback(SelectOverlayInfo& info)
         auto callback = weakCallback.Upgrade();
         CHECK_NULL_VOID(callback);
         callback->OnOverlayClick(event, isClickCaret);
+    };
+    info.onMouseEvent = [weakCallback = WeakClaim(AceType::RawPtr(callback))](const MouseInfo& event) {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
+        callback->OnHandleMouseEvent(event);
     };
 }
 
@@ -1027,5 +1033,14 @@ void SelectContentOverlayManager::SetIsHandleLineShow(bool isShow)
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->SetIsHandleLineShow(isShow);
+}
+
+void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
+{
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(flag);
 }
 } // namespace OHOS::Ace::NG

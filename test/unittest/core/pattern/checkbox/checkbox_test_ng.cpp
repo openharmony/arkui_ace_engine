@@ -66,6 +66,7 @@ const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr Dimension CHECK_MARK_SIZE = Dimension(10.0);
 constexpr Dimension CHECK_MARK_SIZE_INCORRECT_VALUE = Dimension(-1.0);
 constexpr Dimension CHECK_MARK_WIDTH = Dimension(5.0);
+constexpr int32_t MIRROR_FRAME_OFFSET_Y_ZERO = 0;
 const bool SELECT_STATE = true;
 RefPtr<PipelineContext> pipeline = nullptr;
 } // namespace
@@ -1069,6 +1070,43 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest030, TestSize.Level1)
     frameNode->MarkModifyDone();
     pattern->SetPreGroup(GROUP_NAME_CHANGE);
     frameNode->MarkModifyDone();
+}
+
+/**
+ * @tc.name: CheckBoxLayoutTest031
+ * @tc.desc: Test CheckBox Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxLayoutTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm = checkBoxPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. Test CheckBox Layout method
+     * @tc.expected: Check the CheckBox frame offset value
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    checkBoxLayoutAlgorithm->Layout(&layoutWrapper);
+    auto offsetVal = frameNode->GetGeometryNode()->GetFrameOffset();
+    EXPECT_EQ(offsetVal.GetY(), MIRROR_FRAME_OFFSET_Y_ZERO);
 }
 
 /**
@@ -2639,5 +2677,34 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0130, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     ASSERT_NE(childNode->GetRenderContext(), nullptr);
     EXPECT_EQ(childNode->GetRenderContext()->GetOpacityValue(), 0);
+}
+
+/**
+ * @tc.name: CheckBoxNGTest0131
+ * @tc.desc: Test SetCheckBoxName func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxNGTest0131, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    auto frameNode = CheckBoxModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. SetCheckBoxName testName and testGroupName
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    CheckBoxModelNG::SetCheckboxName(node, "testName");
+    CheckBoxModelNG::SetCheckboxGroup(node, "testGroupName");
+
+    /**
+     * @tc.steps: step3. assert Name and GroupName
+     */
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->GetName(), "testName");
+    EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
 }
 } // namespace OHOS::Ace::NG

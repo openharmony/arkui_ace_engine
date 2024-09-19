@@ -22,15 +22,10 @@
 
 
 namespace OHOS::Ace {
-
-std::unique_ptr<RepeatModel> RepeatModel::instance = nullptr;
-
 RepeatModel* RepeatModel::GetInstance()
 {
-    if (!instance) {
-        instance.reset(new NG::RepeatModelNG());
-    }
-    return instance.get();
+    static NG::RepeatModelNG instance;
+    return &instance;
 }
 } // namespace OHOS::Ace
 

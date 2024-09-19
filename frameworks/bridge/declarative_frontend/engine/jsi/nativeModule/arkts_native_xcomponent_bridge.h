@@ -74,6 +74,8 @@ public:
     static ArkUINativeModuleValue ResetOnDestroy(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAnalyzer(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetEnableSecure(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetEnableSecure(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static XComponentType ConvertToXComponentType(const std::string& type);

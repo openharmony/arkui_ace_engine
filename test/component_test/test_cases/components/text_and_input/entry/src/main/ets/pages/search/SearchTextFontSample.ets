@@ -33,8 +33,8 @@ struct SearchTextFontSample {
 
   aboutToAppear() {
     font.registerFont({
-      familyName: 'ITCBLKADRawFile',
-      familySrc: $rawfile('FZSTK.TTF')
+      familyName: 'TESTFONTRawFile',
+      familySrc: $rawfile('TESTFONT.TTF')
     })
     loadComponentTestEntry(searchTextFontTest)
   }
@@ -50,7 +50,7 @@ struct SearchTextFontSample {
           this.textFontType = {
             size: '10px',
             weight: '100',
-            family: 'ITCBLKADRawFile',
+            family: 'TESTFONTRawFile',
             style: FontStyle.Italic
           }
         })

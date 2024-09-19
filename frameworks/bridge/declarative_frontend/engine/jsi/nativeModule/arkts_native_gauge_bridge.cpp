@@ -172,6 +172,9 @@ void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, ArkUINod
             continue;
         }
         auto tempColors = panda::CopyableGlobal<panda::ArrayRef>(vm, jsValue);
+        if (tempColors.IsEmpty() || tempColors->IsUndefined() || tempColors->IsNull()) {
+            continue;
+        }
         // Get weight
         float weight = tempColors->GetValueAt(vm, jsValue, 1)->ToNumber(vm)->Value();
         if (NonPositive(weight)) {
@@ -205,6 +208,9 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
     auto jsColor = panda::CopyableGlobal<panda::ArrayRef>(vm, jsArg);
+    if (jsColor.IsEmpty() || jsColor->IsUndefined() || jsColor->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     size_t length = jsColor->Length(vm);
     auto colors = std::make_unique<uint32_t[]>(length);
     auto weights = std::make_unique<float[]>(length);

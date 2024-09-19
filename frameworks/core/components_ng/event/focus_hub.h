@@ -919,6 +919,10 @@ public:
     std::optional<std::string> GetInspectorKey() const;
 
     bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusStateToRenderContext();
+    void GetPaintColorFromBox(Color& paintColor);
+    void GetPaintWidthFromBox(Dimension& paintWidth);
+    void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
@@ -1074,6 +1078,8 @@ protected:
 private:
     friend class FocusView;
 
+    friend class FocusManager;
+
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1113,6 +1119,8 @@ private:
     void DumpFocusScopeTreeInJson(int32_t depth);
 
     bool IsComponentDirectionRtl();
+
+    bool SkipFocusMoveBeforeRemove();
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

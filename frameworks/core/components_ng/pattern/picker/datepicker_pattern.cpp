@@ -118,6 +118,7 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -175,9 +176,9 @@ void DatePickerPattern::UpdateConfirmButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -188,9 +189,9 @@ void DatePickerPattern::UpdateCancelButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
             ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);

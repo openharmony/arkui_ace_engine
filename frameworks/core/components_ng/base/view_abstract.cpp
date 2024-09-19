@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1908,7 +1909,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     // unable to use the subWindow in the Previewer.
     menuParam.type = MenuType::MENU;
 #endif
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter");
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -2099,6 +2100,7 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
 }
 
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
@@ -2107,6 +2109,7 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
 }
 
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
@@ -2115,6 +2118,7 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
 }
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
@@ -2526,8 +2530,15 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
             auto customNode = ViewStackProcessor::GetInstance()->Finish();
             return customNode;
         };
-        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-        CHECK_NULL_VOID(overlayNode);
+        auto node = buildNodeFunc();
+        auto overlayNode = AceType::DynamicCast<FrameNode>(node);
+        if (!overlayNode && node) {
+            auto* stack = ViewStackProcessor::GetInstance();
+            auto nodeId = stack->ClaimNodeId();
+            auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+            stackNode->AddChild(node);
+            overlayNode = stackNode;
+        }
         AddOverlayToFrameNode(overlayNode, align, offsetX, offsetY);
     } else {
         AddOverlayToFrameNode(nullptr, align, offsetX, offsetY);
@@ -2921,16 +2932,19 @@ void ViewAbstract::SetZIndex(FrameNode *frameNode, int32_t value)
 void ViewAbstract::SetLinearGradient(FrameNode *frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
 }
 
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)

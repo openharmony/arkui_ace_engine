@@ -38,9 +38,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Color TEXT_DEFAULT_FONT_COLOR = Color(0xFF007DFF);
-constexpr Color TEXT_DEFAULT_HOVER_BACKGROUND_COLOR = Color(0x0C182431);
-constexpr Color TEXT_DEFAULT_PRESS_BACKGROUND_COLOR = Color(0x19182431);
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -231,6 +228,10 @@ void SpanNode::DumpInfo()
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
     dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
+    if (spanItem_ && spanItem_->fontStyle) {
+        dumpLog.AddDesc(std::string("SpanTextColor: ")
+                            .append(spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString()));
+    }
     dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
     dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
@@ -254,8 +255,10 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, -1);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
     auto fontManager = pipelineContext->GetFontManager();
@@ -268,6 +271,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
+    CHECK_NULL_RETURN(frameNode, -1);
     auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProp && textLayoutProp->HasHalfLeading()) {
         textStyle.SetHalfLeading(textLayoutProp->GetHalfLeadingValue(false));
@@ -279,7 +283,15 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
-    if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
+    if (!fontStyle->HasTextColor() && urlOnRelease) {
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        if (eventHub && !eventHub->IsEnabled()) {
+            textStyle.SetTextColor(theme->GetUrlDisabledColor());
+        } else {
+            textStyle.SetTextColor(theme->GetUrlDefaultColor());
+        }
+        UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
+    } else if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         TextStyle aiSpanStyle = textStyle;
         pattern->ModifyAISpanStyle(aiSpanStyle);
         UpdateTextStyleForAISpan(spanContent, builder, textStyle, aiSpanStyle);
@@ -654,12 +666,9 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
         sameSpan->backgroundStyle = backgroundStyle;
     }
 
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
-    sameSpan->urlOnClick = urlOnClick;
-    sameSpan->urlOnRelease = urlOnRelease;
-    sameSpan->urlOnPress = urlOnPress;
-    sameSpan->urlOnHover = urlOnHover;
     return sameSpan;
 }
 
@@ -828,53 +837,6 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
 }
 
-void SpanItem::HandeUrlHoverEvent(bool isHover, int32_t urlId,
-    const RefPtr<SpanItem>& spanItem) const
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (isHover) {
-        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
-        TextBackgroundStyle backgroundStyle;
-        backgroundStyle.backgroundColor = (TEXT_DEFAULT_HOVER_BACKGROUND_COLOR);
-        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
-        spanItem->backgroundStyle = backgroundStyle;
-        pipelineContext->SetMouseStyleHoldNode(urlId);
-        pipelineContext->ChangeMouseStyle(urlId, MouseFormat::HAND_POINTING);
-    } else {
-        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
-        TextBackgroundStyle backgroundStyle;
-        backgroundStyle.backgroundColor = Color::TRANSPARENT;
-        spanItem->backgroundStyle = backgroundStyle;
-        pipelineContext->SetMouseStyleHoldNode(urlId);
-        pipelineContext->ChangeMouseStyle(urlId, defaultMouseStyle_);
-    }
-}
-
-void SpanItem::HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const
-{
-    if (isPress) {
-        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
-        TextBackgroundStyle backgroundStyle;
-        backgroundStyle.backgroundRadius = { radius_, radius_, radius_, radius_};
-        backgroundStyle.backgroundColor = (TEXT_DEFAULT_PRESS_BACKGROUND_COLOR);
-        spanItem->backgroundStyle = backgroundStyle;
-    } else {
-        spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
-        TextBackgroundStyle backgroundStyle;
-        backgroundStyle.backgroundColor = Color::TRANSPARENT;
-        spanItem->backgroundStyle = backgroundStyle;
-    }
-}
-
-void SpanItem::HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const
-{
-    spanItem->fontStyle->UpdateTextColor(TEXT_DEFAULT_FONT_COLOR);
-    TextBackgroundStyle backgroundStyle;
-    backgroundStyle.backgroundColor = Color::TRANSPARENT;
-    spanItem->backgroundStyle = backgroundStyle;
-}
-
 bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
 {
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
@@ -991,6 +953,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
+    textStyle.SetTextColor(placeholderStyle.paragraphTextColor);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;
@@ -1020,6 +983,7 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
     sameSpan->SetImageSpanOptions(options);
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     if (backgroundStyle.has_value()) {
@@ -1121,6 +1085,7 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     if (backgroundStyle.has_value()) {
@@ -1175,6 +1140,10 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());
     json->Put("LetterSpacing", textStyle->GetLetterSpacing().ToString().c_str());
     json->Put("TextColor", textStyle->GetTextColor().ColorToString().c_str());
+    if (spanItem_ && spanItem_->fontStyle) {
+        json->Put(
+            "SpanTextColor", spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString().c_str());
+    }
     json->Put("FontWeight", StringUtils::ToString(textStyle->GetFontWeight()).c_str());
     json->Put("FontStyle", StringUtils::ToString(textStyle->GetFontStyle()).c_str());
     json->Put("TextBaseline", StringUtils::ToString(textStyle->GetTextBaseline()).c_str());

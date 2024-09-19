@@ -58,6 +58,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     bool ShouldDelayChildPressedState() const override
     {
         return true;
@@ -619,6 +624,7 @@ public:
         return isTouchDownOnOverlong_;
     }
 
+    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -671,6 +677,7 @@ private:
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
+    void PropertyCancelAnimationFinish(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt);
 
     // Implement of swiper controller
 
@@ -693,7 +700,7 @@ private:
     void HandleSwiperCustomAnimation(float offset);
     void CalculateAndUpdateItemInfo(float offset);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
-    void UpdateTabIndexAndTabBarAnimationDuration(int32_t index);
+    void UpdateTabBarAnimationDuration(int32_t index);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -757,7 +764,6 @@ private:
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     void SetLazyForEachFlag() const;
-    void SetRepeatLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
@@ -930,7 +936,6 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
-    std::optional<RefPtr<UINode>> FindRepeatVirtualNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
@@ -1069,6 +1074,7 @@ private:
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
     bool usePropertyAnimation_ = false;
+    bool syncCancelAniIsFailed_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;

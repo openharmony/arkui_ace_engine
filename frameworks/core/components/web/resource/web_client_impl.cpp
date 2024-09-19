@@ -1270,4 +1270,11 @@ void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embedId, bo
     delegate->OnNativeEmbedVisibilityChange(embedId, visibility);
 }
 
+bool WebClientImpl::CloseImageOverlaySelection()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->CloseImageOverlaySelection();
+}
 } // namespace OHOS::Ace

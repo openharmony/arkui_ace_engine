@@ -1,0 +1,16 @@
+{
+  "float": [
+    {
+      "name": "contentOpacity",
+      "value": "0.8"
+    },
+    {
+      "name": "offset_min",
+      "value": "0.1"
+    },
+    {
+      "name": "offset_max",
+      "value": "0.8"
+    }
+  ]
+}

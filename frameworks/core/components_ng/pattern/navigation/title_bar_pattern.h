@@ -126,10 +126,8 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleDragStart(float offset);
-    void ProcessTitleDragUpdate(float offset);
 
-    void ProcessTitleDragEnd();
+    void ProcessTitleDragUpdate(float offset);
 
     void OnColorConfigurationUpdate() override;
 
@@ -221,10 +219,7 @@ public:
         currentTitleOffsetX_ = currentTitleOffsetX;
     }
 
-    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
-    {
-        currentTitleBarHeight_ = currentTitleBarHeight;
-    }
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
     {
@@ -329,6 +324,32 @@ public:
 
     void InitSideBarButtonUpdateCallbackIfNeeded();
 
+    void OnLanguageConfigurationUpdate() override;
+
+    void UpdateHalfFoldHoverChangedCallbackId(std::optional<int32_t> id)
+    {
+        halfFoldHoverChangedCallbackId_ = id;
+    }
+
+    bool HasHalfFoldHoverChangedCallbackId()
+    {
+        return halfFoldHoverChangedCallbackId_.has_value();
+    }
+
+    void InitFoldCreaseRegion();
+
+    std::vector<Rect> GetFoldCreaseRects()
+    {
+        return currentFoldCreaseRegion_;
+    }
+
+    void OnAttachToMainTree() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        InitFoldCreaseRegion();
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -338,7 +359,7 @@ private:
     float GetMappedOffset(float offset);
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
-    void AnimateTo(float offset);
+    void AnimateTo(float offset, bool isFullTitleMode = false);
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -464,6 +485,8 @@ private:
     bool needToAvoidSideBar_ = false;
     RectF controlButtonRect_;
     bool isScrolling_ = false;
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
+    std::vector<Rect> currentFoldCreaseRegion_;
 };
 
 } // namespace OHOS::Ace::NG

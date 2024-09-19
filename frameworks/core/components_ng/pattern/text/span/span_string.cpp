@@ -388,7 +388,7 @@ void SpanString::ChangeStartToCorrectNum(int32_t& start)
         return;
     }
     auto text = GetWideString();
-    auto textLen = text.length();
+    auto textLen = static_cast<int32_t>(text.length());
     if (textLen == 0) {
         return;
     }
@@ -413,7 +413,7 @@ void SpanString::ChangeStartToCorrectNum(int32_t& start)
 void SpanString::ChangeEndToCorrectNum(int32_t& end)
 {
     auto text = GetWideString();
-    auto textLen = text.length();
+    auto textLen = static_cast<int32_t>(text.length());
     if (textLen == 0) {
         return;
     }
@@ -519,10 +519,10 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<LineHeightSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
-        case SpanType::Url:
-            return MakeRefPtr<UrlSpan>();
         case SpanType::BackgroundColor:
             return MakeRefPtr<BackgroundColorSpan>();
+        case SpanType::Url:
+            return MakeRefPtr<UrlSpan>();
         default:
             return nullptr;
     }

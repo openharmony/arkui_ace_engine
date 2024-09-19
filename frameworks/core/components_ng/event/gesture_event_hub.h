@@ -643,8 +643,8 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(
-        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
+        bool isCalculateInSubwindow = false) const;
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -726,6 +726,8 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    bool StartDragForCustomBuilderSync(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
     void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
         const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
@@ -772,14 +774,15 @@ private:
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
-    void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
-        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset,
-        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
-    
-    void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
-        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset,
-        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
-        GesturePriority priority);
+    void ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+        int32_t& parallelIndex);
+
+    void ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
+        RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+        int32_t& exclusiveIndex);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

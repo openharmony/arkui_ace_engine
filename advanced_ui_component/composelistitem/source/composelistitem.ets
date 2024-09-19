@@ -593,7 +593,7 @@ struct OperateItemStruct {
   @Builder
   createTextArrow() {
     Button({ type: ButtonType.Normal }) {
-      if(this.parentDirection === FlexDirection.Column) {
+      if (this.parentDirection === FlexDirection.Column) {
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -609,6 +609,7 @@ struct OperateItemStruct {
             .fillColor($r('sys.color.ohos_id_color_fourth'))
             .focusable(false)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -630,6 +631,7 @@ struct OperateItemStruct {
             .fillColor($r('sys.color.ohos_id_color_fourth'))
             .focusable(false)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -947,6 +949,7 @@ export struct ComposeListItem {
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
+            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({

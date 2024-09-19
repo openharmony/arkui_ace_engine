@@ -97,6 +97,7 @@ public:
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
+    virtual void SetEnableHapticFeedback(bool state) = 0;
 
 private:
     static std::unique_ptr<SearchModel> instance_;

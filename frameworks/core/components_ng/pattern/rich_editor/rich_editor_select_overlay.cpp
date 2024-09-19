@@ -477,14 +477,16 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     BaseTextSelectOverlay::OnAncestorNodeChanged(changeFlag);
 }
 
-void RichEditorSelectOverlay::OnHandleMoveStart(bool isFirst)
+void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
     isHandleMoving_ = true;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
+    pattern->ChangeHandleHeight(event, isFirst);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
     manager->SetHandleCircleIsShow(isFirst, false);
     if (IsSingleHandle()) {
         pattern->ShowCaretWithoutTwinkling();
@@ -496,6 +498,9 @@ void RichEditorSelectOverlay::OnOverlayTouchDown(const TouchEventInfo& event)
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    if (event.GetSourceTool() == SourceTool::MOUSE && IsHandleShow()) {
+        pattern->CloseSelectOverlay();
+    }
     pattern->RequestFocusWhenSelected();
 }
 
@@ -564,6 +569,15 @@ void RichEditorSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isF
     pattern->HandleClickEvent(overlayEvent);
 }
 
+void RichEditorSelectOverlay::OnHandleMouseEvent(const MouseInfo& event)
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (event.GetAction() == MouseAction::PRESS && IsHandleShow()) {
+        pattern->CloseSelectOverlay();
+    }
+}
+
 void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 {
     handleIsHidden_ = false;
@@ -577,7 +591,11 @@ void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 float RichEditorSelectOverlay::GetHandleHotZoneRadius()
 {
     auto hotZoneRadius = 0.0f;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, hotZoneRadius);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, hotZoneRadius);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, hotZoneRadius);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, hotZoneRadius);

@@ -437,6 +437,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     onDeleteComplete(callback: () => void): RichEditorAttribute;
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
+    barState(value: BarState): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1031,13 +1032,15 @@ declare class ArkCheckboxComponent extends ArkComponent implements CheckboxAttri
 }
 declare class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    title(value: any, options?: NavigationTitleOptions): this;
-    menus(value: any): this;
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+        options?: NavigationTitleOptions): this;
+    menus(value: Array<NavigationMenuItem> | undefined): this;
     hideTitleBar(value: boolean): this;
     onShown(callback: () => void): this;
     onHidden(callback: () => void): this;
     onBackPressed(callback: () => boolean): this;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this;
+    recoverable(value: boolean | undefined): this;
 }
 declare class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1085,12 +1088,13 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     mode(value: number): NavigationAttribute;
     backButtonIcon(value: any): NavigationAttribute;
     hideNavBar(value: boolean): NavigationAttribute;
-    title(value: any, options?: NavigationTitleOptions): NavigationAttribute;
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+        options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;
     titleMode(value: NavigationTitleMode): NavigationAttribute;
-    menus(value: any): NavigationAttribute;
+    menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute;
     toolBar(value: any): NavigationAttribute;
     toolbarConfiguration(value: any): NavigationAttribute;
     hideToolBar(value: boolean): NavigationAttribute;
@@ -1099,6 +1103,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     onNavigationModeChange(callback: (mode: NavigationMode) => void): NavigationAttribute;
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
+    recoverable(value: boolean | undefined): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1457,15 +1462,6 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
         handler: SslErrorHandler;
         error: SslError;
     }) => void): this;
-    onSslErrorEvent(callback: (event: {
-        handler: SslErrorHandler;
-        error: SslError;
-        url: string;
-        originalUrl: string;
-        referrer: string;
-        isFatalError: boolean;
-        isMainFrame:boolean;
-    }) => void): this;
     onClientAuthenticationRequest(callback: (event: {
         handler: ClientAuthenticationHandler;
         host: string;
@@ -1717,6 +1713,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     onLoad(callback: (event?: object) => void): this;
     onDestroy(event: () => void): this;
+    enableSecure(value: boolean): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

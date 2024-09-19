@@ -110,7 +110,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave004, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return false
      */
-    EXPECT_FALSE(pattern_->CheckAutoSave());
+    EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
 

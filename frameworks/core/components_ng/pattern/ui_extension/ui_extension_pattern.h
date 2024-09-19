@@ -164,6 +164,8 @@ public:
         curPlaceholderType_ = type;
     }
     void OnAreaUpdated();
+    bool IsModalUec();
+    bool IsForeground();
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
     void SetModalFlag(bool isModal)

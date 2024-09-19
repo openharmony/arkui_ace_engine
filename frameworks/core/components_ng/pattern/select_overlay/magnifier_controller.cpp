@@ -77,14 +77,18 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         UpdateShowMagnifier();
         return false;
     }
+    auto screenHeight = SystemProperties::GetDeviceHeight();
+    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(screenHeight - menuHeight));
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
     CHECK_NULL_RETURN(rootGeometryNode, false);
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
-    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
     offsetY_ = std::clamp(magnifierY, 0.f, static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx()));
-    magnifierPaintOffset.SetY(magnifierY - offsetY_);
+    auto magnifierPaintOffsetY = magnifierY - offsetY_;
+    magnifierPaintOffsetY =
+        std::clamp(magnifierPaintOffsetY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
+    magnifierPaintOffset.SetY(magnifierPaintOffsetY);
     magnifierOffset.y = offsetY_;
     return true;
 }

@@ -647,6 +647,13 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    /*
+    * Judge whether a node's tag is default accessibility focusable.
+    * return: if a node's tag is default accessibility focusable, return true.
+    * param: {tag} should be not-null
+    */
+    static bool IsAccessibilityFocusableTag(const std::string &tag);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)

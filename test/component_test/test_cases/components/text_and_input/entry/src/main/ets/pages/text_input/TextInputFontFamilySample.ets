@@ -26,8 +26,8 @@ struct TextInputFontFamilySample {
 
   aboutToAppear() {
     font.registerFont({
-      familyName: 'ITCBLKADRawFile',
-      familySrc: $rawfile('FZSTK.TTF')
+      familyName: 'TESTFONTRawFile',
+      familySrc: $rawfile('TESTFONT.TTF')
     })
     loadComponentTestEntry(textInputFontFamilyTest)
   }
@@ -40,7 +40,7 @@ struct TextInputFontFamilySample {
         .id('textInputFontFamily')
       Button('TextInputFontFamily')
         .onClick(() => {
-          this.fontFamilyType = 'ITCBLKADRawFile'
+          this.fontFamilyType = 'TESTFONTRawFile'
         })
 
     }

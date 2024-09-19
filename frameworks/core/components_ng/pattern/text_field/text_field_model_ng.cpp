@@ -586,9 +586,7 @@ void TextFieldModelNG::SetShowUnit(std::function<void()>&& unitFunction)
         unitFunction();
         unitNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    if (unitNode) {
-        pattern->SetUnitNode(unitNode);
-    }
+    pattern->SetUnitNode(unitNode);
 }
 
 void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
@@ -1799,6 +1797,13 @@ void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
+void TextFieldModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
+
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
@@ -1975,14 +1980,24 @@ void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
-void TextFieldModelNG::SetSelectionMenuOptions(FrameNode* frameNode,
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void TextFieldModelNG::OnCreateMenuCallbackUpdate(
+    FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    textFieldPattern->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
 }
+
+void TextFieldModelNG::OnMenuItemClickCallbackUpdate(
+    FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+}
+
 void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)
 {
     CHECK_NULL_VOID(frameNode);

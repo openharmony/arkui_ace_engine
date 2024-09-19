@@ -586,10 +586,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (!isSynced_) {
         isSynced_ = true;
-        auto borderRadius = GetBorderRadius();
-        if (borderRadius.has_value()) {
-            OnBorderRadiusUpdate(borderRadius.value());
-        }
+    }
+    auto borderRadius = GetBorderRadius();
+    if (borderRadius.has_value()) {
+        OnBorderRadiusUpdate(borderRadius.value());
     }
 
     if (firstTransitionIn_) {
@@ -2245,6 +2245,8 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     }
 }
 
+// comparing to frameRect of geometryNode,
+// paint rect has position, offset, markAnchor, pixelGridRound and safeArea properties
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
     return paintRect_;
@@ -2373,7 +2375,6 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
 
@@ -4105,8 +4106,13 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
-    rsNode_->SetColorBlendMode(rsBlendMode);
+    if (blendMode == BlendMode::BACK_COMPAT_SOURCE_IN) {
+        rsNode_->SetBackgroundShader(nullptr);
+        rsNode_->SetColorBlendMode(Rosen::RSColorBlendMode::NONE);
+    } else {
+        auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+        rsNode_->SetColorBlendMode(rsBlendMode);
+    }
     RequestNextFrame();
 }
 
@@ -4454,6 +4460,13 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
 void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
 {
     CHECK_NULL_VOID(rsNode_);
+    // temporary code for back compat
+    auto& graphicProps = GetOrCreateGraphics();
+    if (graphicProps->GetBackBlendMode() == BlendMode::BACK_COMPAT_SOURCE_IN)
+    {
+        rsNode_->SetBackgroundShader(nullptr);
+        return;
+    }
     rsNode_->SetBackgroundShader(shader);
 }
 
@@ -4461,15 +4474,22 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
+    if (!gradientProperty->HasLastGradientType()) {
+        return;
+    }
     Gradient gradient;
-    if (gradientProperty->HasLinearGradient()) {
-        gradient = gradientProperty->GetLinearGradientValue();
-    }
-    if (gradientProperty->HasRadialGradient()) {
-        gradient = gradientProperty->GetRadialGradientValue();
-    }
-    if (gradientProperty->HasSweepGradient()) {
-        gradient = gradientProperty->GetSweepGradientValue();
+    switch (gradientProperty->GetLastGradientTypeValue()) {
+        case GradientType::LINEAR:
+            gradient = gradientProperty->GetLinearGradientValue();
+            break;
+        case GradientType::RADIAL:
+            gradient = gradientProperty->GetRadialGradientValue();
+            break;
+        case GradientType::SWEEP:
+            gradient = gradientProperty->GetSweepGradientValue();
+            break;
+        default:
+            return;
     }
     if (!gradientStyleModifier_) {
         gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
@@ -5140,6 +5160,14 @@ void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value, bool adju
     adjustRSFrameByContentRect_ = adjustRSFrameByContentRect;
 }
 
+void RosenRenderContext::SetSecurityLayer(bool isSecure)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSecurityLayer(isSecure);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5309,6 +5337,17 @@ void RosenRenderContext::DumpInfo()
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
             DumpLog::GetInstance().AddDesc(
                  std::string("backgroundEffect:").append(backgroundEffect));
+        }
+        auto && graphicProps = GetOrCreateGraphics();
+        if (graphicProps->propFgDynamicBrightnessOption.has_value()) {
+            auto fgDynamicBrightness = graphicProps->propFgDynamicBrightnessOption->GetJsonObject();
+            DumpLog::GetInstance().AddDesc(
+                std::string("foregroundBrightness:").append(fgDynamicBrightness->ToString().c_str()));
+        }
+        if (graphicProps->propBgDynamicBrightnessOption.has_value()) {
+            auto bgDynamicBrightness = graphicProps->propBgDynamicBrightnessOption->GetJsonObject();
+            DumpLog::GetInstance().AddDesc(
+                std::string("backgroundBrightnessInternal:").append(bgDynamicBrightness->ToString().c_str()));
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetCameraDistance())) {
             DumpLog::GetInstance().AddDesc(
