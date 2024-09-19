@@ -4723,6 +4723,10 @@ struct ArkUIFrameNodeModifier {
     void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
     void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getCustomPropertyCapiByKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*setCustomPropertyModiferByKey)(ArkUINodeHandle node, void* callback, void* getCallback);
+    void (*addCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value);
+    void (*removeCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
 };
 
 struct ArkUINodeContentEvent {
