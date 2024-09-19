@@ -88,6 +88,7 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
             }
             receiver_(&getIdevent);
         }
+        FlushDirtyPropertyNodes(child.second);
         return child;
     }
     ArkUINodeAdapterEvent getChildEvent {
@@ -98,7 +99,16 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
     if (getChildEvent.nodeSet) {
         child.second = Claim(reinterpret_cast<UINode*>(getChildEvent.handle));
     }
+    FlushDirtyPropertyNodes(child.second);
     return child;
+}
+
+void NativeLazyForEachBuilder::FlushDirtyPropertyNodes(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    context->FlushDirtyPropertyNodes();
 }
 
 void NativeLazyForEachBuilder::OnItemDeleted(UINode* node, const std::string& key)

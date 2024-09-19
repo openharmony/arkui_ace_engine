@@ -309,6 +309,19 @@ void PipelineContext::FlushFreezeNode()
     }
 }
 
+void PipelineContext::FlushDirtyPropertyNodes()
+{
+    // node api property diff before ets update.
+    if (!CheckThreadSafe()) {
+        LOGW("FlushDirtyNodeUpdate doesn't run on UI thread!");
+    }
+    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
+    dirtyPropertyNodes_.clear();
+    for (const auto& node : dirtyPropertyNodes) {
+        node->ProcessPropertyDiff();
+    }
+}
+
 void PipelineContext::FlushDirtyNodeUpdate()
 {
     CHECK_RUN_ON(UI);
@@ -320,15 +333,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     // freeze node unlock before build begin.
     FlushFreezeNode();
 
-    // node api property diff before ets update.
-    if (!CheckThreadSafe()) {
-        LOGW("FlushDirtyNodeUpdate doesn't run on UI thread!");
-    }
-    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
-    dirtyPropertyNodes_.clear();
-    for (const auto& node : dirtyPropertyNodes) {
-        node->ProcessPropertyDiff();
-    }
+    FlushDirtyPropertyNodes();
 
     if (!ViewStackProcessor::GetInstance()->IsEmpty() && !dirtyNodes_.empty()) {
         ACE_SCOPED_TRACE("Error update, node stack non-empty");
