@@ -2886,7 +2886,7 @@ void TextFieldPattern::OnModifyDone()
     }
     // The textRect position can't be changed by only redraw.
     if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()) && !HasInputOperation() &&
-        (!HasFocus() || !initTextRect_)) {
+        (!HasFocus() || !initTextRect_) && isTextChangedAtCreation_) {
         textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
         textRect_.SetTop(GetPaddingTop() + GetBorderTop());
         initTextRect_ = true;
