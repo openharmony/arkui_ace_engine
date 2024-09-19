@@ -626,7 +626,6 @@ public:
         return isTouchDownOnOverlong_;
     }
 
-    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -649,6 +648,7 @@ private:
     void HandleFocusInternal();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
