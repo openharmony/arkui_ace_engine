@@ -113,7 +113,12 @@ public:
         return 0;
     }
     
-    uint32_t WritePixels(const uint8_t *source, const uint64_t &bufferSize)
+    void* GetWritablePixels()
+    {
+        return nullptr;
+    }
+
+    int32_t GetByteCount()
     {
         return 0;
     }
