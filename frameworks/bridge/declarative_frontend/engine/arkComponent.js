@@ -22307,6 +22307,70 @@ class RadiusModifier extends ModifierWithKey {
   }
 }
 RadiusModifier.identity = Symbol('radius');
+class MenuItemDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetMenuItemDivider(node);
+    } else {
+      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+        this.stageValue.color === this.value.color &&
+        this.stageValue.startMargin === this.value.startMargin &&
+        this.stageValue.endMargin === this.value.endMargin);
+    } else {
+      return true;
+    }
+  }
+}
+MenuItemDividerModifier.identity = Symbol('menuItemDivider');
+class MenuItemGroupDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetMenuItemGroupDivider(node);
+    } else {
+      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+    }
+  }
+
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+        this.stageValue.color === this.value.color &&
+        this.stageValue.startMargin === this.value.startMargin &&
+        this.stageValue.endMargin === this.value.endMargin);
+    } else {
+      return true;
+    }
+  }
+}
+MenuItemGroupDividerModifier.identity = Symbol('menuItemGroupDivider');
+class SubMenuExpandingModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetSubMenuExpandingMode(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandingMode(node, this.value);
+    }
+  }
+}
+SubMenuExpandingModeModifier.identity = Symbol('subMenuExpandingMode');
 class ArkMenuComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -22328,6 +22392,18 @@ class ArkMenuComponent extends ArkComponent {
   }
   radius(value) {
     modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
+    return this;
+  }
+  menuItemDivider(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemDividerModifier.identity, MenuItemDividerModifier, value);
+    return this;
+  }
+  menuItemGroupDivider(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuItemGroupDividerModifier.identity, MenuItemGroupDividerModifier, value);
+    return this;
+  }
+  subMenuExpandingMode(value) {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
     return this;
   }
 }

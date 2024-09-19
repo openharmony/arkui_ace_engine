@@ -3756,6 +3756,18 @@ void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetWidth));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetWidth));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemGroupDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemGroupDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemGroupDivider));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubMenuExpandingMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandingMode));
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandingMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandingMode));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menu"), menu);
 }
 
