@@ -176,4 +176,32 @@ void MockNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
     }
     mockPathArray_[index].needBuildNewInstance = need;
 }
+
+void MockNavigationStack::SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo)
+{
+    std::vector<MockNavPathInfo> newPathArray;
+    for (auto recoveryInfo : navdestinationsInfo) {
+        MockNavPathInfo navPathInfo(recoveryInfo.name);
+        navPathInfo.mode = recoveryInfo.mode;
+        navPathInfo.fromRecovery = true;
+        newPathArray.push_back(navPathInfo);
+    }
+    mockPathArray_ = newPathArray;
+}
+
+void MockNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return;
+    }
+    mockPathArray_[index].fromRecovery = fromRecovery;
+}
+
+bool MockNavigationStack::IsFromRecovery(int32_t index)
+{
+    if (!CheckIndexValid(index, mockPathArray_.size())) {
+        return false;
+    }
+    return mockPathArray_[index].fromRecovery;
+}
 } // namespace OHOS::Ace::NG
