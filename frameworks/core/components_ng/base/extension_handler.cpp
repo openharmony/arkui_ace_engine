@@ -150,7 +150,7 @@ void ExtensionHandler::InvalidateRender()
     if (foreGroundRender_) {
         foreGroundRender_();
     }
-    if (node_ && !invalidateRender_ && !overlayRender_ && !foreGroundRender_) {
+    if (node_ && !(invalidateRender_ && overlayRender_ && foreGroundRender_)) {
         node_->MarkNeedRenderOnly();
     }
     needRender_ = true;
