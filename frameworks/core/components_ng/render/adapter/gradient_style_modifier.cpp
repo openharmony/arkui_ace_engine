@@ -124,19 +124,19 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
 
 void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors)
 {
-    auto paddingSize = colors_->Get().GetColors().size() - colors.GetColors().size();
-    if (paddingSize <= 0) {
+    if (colors_->Get().GetColors().size() <= colors.GetColors().size()) {
         return;
     }
+    size_t paddingSize = colors_->Get().GetColors().size() - colors.GetColors().size();
     colors.PaddingColors(paddingSize, Color::TRANSPARENT);
 }
 
 void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops)
 {
-    auto paddingSize = colorStops_->Get().GetColorStops().size() - colorStops.GetColorStops().size();
-    if (paddingSize <= 0) {
+    if (colorStops_->Get().GetColorStops().size() <= colorStops.GetColorStops().size()) {
         return;
     }
+    size_t paddingSize = colorStops_->Get().GetColorStops().size() - colorStops.GetColorStops().size();
     colorStops.PaddingColorStops(paddingSize, Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT));
 }
 
