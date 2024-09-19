@@ -1891,7 +1891,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
-    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex) % totalOptionCount);
+    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex - 1) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     currentIndex = pattern->GetCurrentIndex();
