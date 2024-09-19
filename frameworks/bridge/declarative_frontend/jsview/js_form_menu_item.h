@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 class JSFormMenuItem : public JSMenuItem {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void JsOnRegClick(const JSCallbackInfo& info);
+    static void JsOnRequestPublishFormWithSnapshot(const JSCallbackInfo& info);
     static void OnClickParameterCheck(const JSCallbackInfo& info, bool& retFlag);
 private:
     static void RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,

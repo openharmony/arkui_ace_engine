@@ -141,7 +141,8 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
             return std::make_pair(0, crossCount_);
         }
         int32_t crossStart = -1;
-        auto iter = options.irregularIndexes.upper_bound(itemIndex);
+        auto iter = std::find_if(options.irregularIndexes.begin(), options.irregularIndexes.end(),
+            [itemIndex](int32_t index) { return index > itemIndex; });
         auto crossCount = static_cast<int32_t>(crossCount_);
         if (iter == options.irregularIndexes.end()) {
             crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount;
@@ -165,7 +166,8 @@ static void JumpToLastIrregularItem(
         return;
     }
 
-    auto iter = irregularItemsPosition.lower_bound(targetIndex);
+    auto iter = std::find_if(irregularItemsPosition.begin(), irregularItemsPosition.end(),
+        [targetIndex](const std::pair<int32_t, int32_t>& item) { return item.first >= targetIndex; });
     if (iter == irregularItemsPosition.begin()) {
         return;
     }

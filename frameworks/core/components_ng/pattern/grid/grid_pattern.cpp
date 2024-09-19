@@ -330,8 +330,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    bool regular = !UseIrregularLayout();
     float mainGap = GetMainGap();
+    bool regular = !UseIrregularLayout();
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap, regular);
     if (gridLayoutInfo_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
@@ -1261,23 +1261,17 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
+void GridPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
 {
+    StopAnimate();
+    if (!isConfigScrollable_) {
+        return;
+    }
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    if (smooth) {
-        float position = -gridLayoutInfo_.currentHeight_ + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
-        return;
-    } else {
-        if (!isConfigScrollable_) {
-            return;
-        }
-        StopAnimate();
-        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-    }
+    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -1878,7 +1872,6 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
 void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 {
     if (UseIrregularLayout() && scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(LAST_ITEM, smooth);
         // for irregular layout, last item might not be at bottom
         gridLayoutInfo_.jumpIndex_ = JUMP_TO_BOTTOM_EDGE;
         auto host = GetHost();
@@ -1890,22 +1883,22 @@ void GridPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
 }
 
 // Turn on the scrolling animation
-void GridPattern::AnimateToTarget(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo)
+void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
     if (targetIndex_.has_value()) {
-        AnimateToTargetImpl(align, algo);
+        AnimateToTargetImp(align, layoutAlgorithmWrapper);
         targetIndex_.reset();
     }
 }
 
 // scroll to the item where the index is located
-bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgorithmWrapper>& algo)
+bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
-    const float mainGap = GetMainGap();
+    float mainGap = GetMainGap();
     float targetPos = 0.0f;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto&& extraOffset = GetExtraOffset();
+    auto extraOffset = GetExtraOffset();
     bool success = true;
     if (UseIrregularLayout()) {
         auto host = GetHost();
@@ -1916,27 +1909,30 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
             success = false;
         }
     } else {
-        auto gridScrollLayoutAlgorithm = DynamicCast<GridScrollLayoutAlgorithm>(algo->GetLayoutAlgorithm());
+        auto gridScrollLayoutAlgorithm =
+            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
         scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
         // Based on the index, align gets the position to scroll to
         success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
-            gridLayoutInfo_, *targetIndex_, align, mainGap, targetPos);
+            gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
     }
     if (!success) {
-        if (NearZero(extraOffset.value_or(0.0f))) {
+        if (extraOffset.has_value()) {
+            targetPos = GetTotalOffset();
+        } else {
             return false;
         }
-        targetPos = GetTotalOffset();
     }
 
     isSmoothScrolling_ = true;
     if (extraOffset.has_value()) {
-        ACE_SCOPED_TRACE(
-            "AnimateToTargetImpl, success:%u, targetPos:%f, extraOffset:%f", success, targetPos, *extraOffset);
-        targetPos += *extraOffset;
+        auto initPos = targetPos;
+        targetPos += extraOffset.value();
+        ACE_SCOPED_TRACE("AnimateToTargetImpl, success:%u, initPos:%f, extraOffset:%f, targetPos:%f", success, initPos,
+            extraOffset.value(), targetPos);
         ResetExtraOffset();
     } else {
-        ACE_SCOPED_TRACE("AnimateToTargetImpl, targetPos:%f", targetPos);
+        ACE_SCOPED_TRACE("AnimateToTargetImpl, extraOffset is null, targetPos:%f", targetPos);
     }
     AnimateTo(targetPos, -1, nullptr, true);
     return true;

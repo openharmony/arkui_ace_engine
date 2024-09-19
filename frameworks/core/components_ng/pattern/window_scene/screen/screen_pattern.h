@@ -37,16 +37,13 @@ public:
     {
         return screenSession_;
     }
-    uint32_t GetWindowPatternType() const override;
 
 protected:
     void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override;
 
 private:
     void UpdateDisplayInfo();
-    void UpdateRenderPivot(float pivotX, float pivotY);
     void DeduplicateDisplayInfo();
     void UpdateToInputManager(float rotation);
     void InputManagerUpdateDisplayInfo(RectF paintRect, MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo);

@@ -144,6 +144,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (!(layoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsUnspecifiedOrTextType())) {
         return;
     }
@@ -153,23 +154,26 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto responseArea = textFieldPattern->GetResponseArea();
-    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-    auto clearNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
-    responseAreaWidth += clearNodeResponseArea ? clearNodeResponseArea->GetAreaRect().Width() : 0.0f;
-    auto hasResponseArea = GreatNotEqual(responseAreaWidth, 0.0f);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     Point leftPoint, rightPoint;
-    if (isRTL) {
-        leftPoint.SetX(hasResponseArea ? 0.0 : contentRect.Left());
-        rightPoint.SetX(contentRect.Right());
-    } else {
+    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
+    if (layoutProperty->GetShowCounterValue(false)) {
         leftPoint.SetX(contentRect.Left());
-        rightPoint.SetX(hasResponseArea ? textFrameRect.Width() : contentRect.Right());
+        leftPoint.SetY(textFrameRect.Height());
+        rightPoint.SetX(contentRect.Right());
+        rightPoint.SetY(textFrameRect.Height());
+    } else {
+        if (isRTL) {
+            leftPoint.SetX(contentRect.Left() - responseAreaWidth);
+            leftPoint.SetY(textFrameRect.Height());
+            rightPoint.SetX(contentRect.Right());
+            rightPoint.SetY(textFrameRect.Height());
+        } else {
+            leftPoint.SetX(contentRect.Left());
+            leftPoint.SetY(textFrameRect.Height());
+            rightPoint.SetX(contentRect.Right() + responseAreaWidth);
+            rightPoint.SetY(textFrameRect.Height());
+        }
     }
-
-    leftPoint.SetY(textFrameRect.Height());
-    rightPoint.SetY(textFrameRect.Height());
-
     RSPen pen;
     pen.SetColor(ToRSColor(underlineColor_->Get()));
     pen.SetWidth(underlineWidth_->Get());
@@ -224,7 +228,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
             textBox.Right() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
             defaultStyle
                 ? (textBox.Bottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
-                         : textFieldPattern->GetFrameRect().Height()));
+                : textFieldPattern->GetFrameRect().Height()));
     }
     canvas.DetachBrush();
     canvas.Restore();
@@ -250,6 +254,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     pen.SetColor(ToRSColor(cursorColor_->Get()));
     canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
+    ACE_LAYOUT_SCOPED_TRACE("PaintCursor[offset:%f, %f]", paintOffset.GetX(), paintOffset.GetY());
     float clipRectHeight = 0.0f;
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),

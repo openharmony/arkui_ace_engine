@@ -53,6 +53,13 @@ void RichEditorBaseController::SetTypingStyle(std::optional<struct UpdateSpanSty
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
 }
 
+std::optional<struct UpdateSpanStyle> RichEditorBaseController::GetTypingStyle()
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(richEditorPattern, {});
+    return richEditorPattern->GetTypingStyle();
+}
+
 void RichEditorBaseController::CloseSelectionMenu()
 {
     auto richEditorPattern = pattern_.Upgrade();
@@ -75,11 +82,11 @@ void RichEditorBaseController::StopEditing()
 }
 
 void RichEditorBaseController::SetSelection(
-    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
+    richEditorPattern->SetSelection(selectionStart, selectionEnd, options);
 }
 
 const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const

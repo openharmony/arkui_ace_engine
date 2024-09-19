@@ -128,8 +128,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
             "decode to pixmap, src=%{private}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size "
             "= "
             "%{public}d x %{public}d",
-            obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
-            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
+            obj_->GetSourceInfo().ToString().c_str(),
+            GetResolutionQuality(imageQuality).c_str(),
+            desiredSize_.ToString().c_str(),
+            image->GetWidth(),
+            image->GetHeight());
     }
 
     return image;
@@ -168,32 +171,22 @@ std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RS
 }
 #endif
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkImage> ImageDecoder::ResizeSkImage()
-#else
 std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
-#endif
 {
-#ifndef USE_ROSEN_DRAWING
-    auto encodedImage = SkImage::MakeFromEncoded(data_);
-#else
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto rsSkiaData = data_->GetImpl<Rosen::Drawing::SkiaData>();
+    CHECK_NULL_RETURN(rsSkiaData, nullptr);
+    auto skData = rsSkiaData->GetSkData();
     auto encodedImage = std::make_shared<RSImage>();
     if (!encodedImage->MakeFromEncoded(data_)) {
         return nullptr;
     }
-#endif
     CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
 
-#ifndef USE_ROSEN_DRAWING
-    auto codec = SkCodec::MakeFromData(data_);
-#else
     auto codec = SkCodec::MakeFromData(skData);
-#endif
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
 
@@ -205,12 +198,8 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
     // this method would succeed even if the codec doesn't support that size.
     if (forceResize_) {
         info = info.makeWH(width, height);
-#ifndef USE_ROSEN_DRAWING
-        return ForceResizeImage(encodedImage, info);
-#else
         auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
         return ForceResizeImage(encodedImage, imageInfo);
-#endif
     }
 
     if ((info.width() > width && info.height() > height)) {
@@ -224,13 +213,6 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         }
 
         info = info.makeWH(idealSize.width(), idealSize.height());
-#ifndef USE_ROSEN_DRAWING
-        SkBitmap bitmap;
-        bitmap.allocPixels(info);
-        auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes());
-        CHECK_NULL_RETURN(res == SkCodec::kSuccess, encodedImage);
-        return SkImage::MakeFromBitmap(bitmap);
-#else
         auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
         RSBitmap bitmap;
         bitmap.Build(imageInfo);
@@ -239,7 +221,6 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         auto image = std::make_shared<RSImage>();
         image->BuildFromBitmap(bitmap);
         return image;
-#endif
     }
     return encodedImage;
 }
@@ -254,7 +235,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
     CHECK_NULL_RETURN(skiaImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{private}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     auto image = SkImage::MakeFromEncoded(data_);
@@ -263,7 +244,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto rosenImageData = AceType::DynamicCast<DrawingImageData>(cachedData);
     CHECK_NULL_RETURN(rosenImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(rosenImageData->GetRSData());
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{private}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     CHECK_NULL_RETURN(data_, {});

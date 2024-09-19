@@ -226,6 +226,7 @@ HWTEST_F(WebModelTestNg, SetOnLoadIntercept005, TestSize.Level1)
     webModelNG.SetFirstContentfulPaintId(std::move(firstContentfulPaintId));
     auto safeBrowsingCheckResultId = [](const std::shared_ptr<BaseEventInfo>& info) {};
     webModelNG.SetSafeBrowsingCheckResultId(std::move(safeBrowsingCheckResultId));
+    webModelNG.SetNativeVideoPlayerConfig(true, false);
 #endif
 }
 } // namespace OHOS::Ace::NG

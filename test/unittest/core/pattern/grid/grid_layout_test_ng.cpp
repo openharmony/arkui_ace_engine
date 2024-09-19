@@ -18,6 +18,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -394,6 +395,35 @@ HWTEST_F(GridLayoutTestNg, GetAverageHeight001, TestSize.Level1)
     CreateFixedItems(20);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetAverageHeight(), 50);
+}
+
+/**
+ * @tc.name: GridItemDisableEventTest001
+ * @tc.desc: GridItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get gridItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto renderContext = gridItemFrameNode->renderContext_;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+    gridItemEventHub->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+    gridItemEventHub->SetEnabled(true);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
 }
 
 /**
@@ -1933,4 +1963,33 @@ HWTEST_F(GridLayoutTestNg, Stretch008, TestSize.Level1)
     auto childRect2 = pattern_->GetItemRect(2);
     EXPECT_EQ(childRect2.Width(), 0);
 }
+
+/*
+ * @tc.name: GridItemDisableEventTest002
+ * @tc.desc: GirdItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateFixedItems(10, GridItemStyle::PLAIN);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemEventHub = GetChildEventHub<GridItemEventHub>(frameNode_, 0);
+    auto gridItemFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto renderContext = gridItemFrameNode->renderContext_;
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 1.0f);
+    gridItemEventHub->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+    gridItemPattern->InitDisableStyle();
+    EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+}
+
 } // namespace OHOS::Ace::NG

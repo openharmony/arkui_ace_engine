@@ -57,7 +57,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         spans_.push_back(std::move(spans));
     }
     AppendNewLineSpan();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{private}s", SpansToString().c_str());
 }
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
@@ -277,7 +277,21 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
     }
+
     return style;
+}
+
+RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetFirstTextSpanItem() const
+{
+    auto& spanGroup = GetSpans();
+    auto it = spanGroup.begin();
+    while (it != spanGroup.end()) {
+        if (!DynamicCast<PlaceholderSpanItem>(*it)) {
+            return *it;
+        }
+        ++it;
+    }
+    return *spanGroup.begin();
 }
 
 void RichEditorLayoutAlgorithm::GetSpanParagraphStyle(

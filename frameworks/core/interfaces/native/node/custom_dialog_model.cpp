@@ -156,8 +156,10 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     if (controllerHandler->onWillDismissCall) {
-        dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
-            return controllerHandler->onWillDismissCall(reason);
+        dialogProperties.onWillDismiss = [controllerHandler](int32_t reason) {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
+            (*(controllerHandler->onWillDismissCall))(reason);
         };
     }
 
@@ -206,7 +208,7 @@ ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle controllerHandler,
     ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    if (alignment < DEFAULT_DIALOG_ALIGNMENT || alignment > ARKUI_ALIGNMENT_BOTTOM_END_INDEX) {
+    if (alignment < DEFAULT_DIALOG_ALIGNMENT  || alignment > ARKUI_ALIGNMENT_BOTTOM_END_INDEX) {
         return ERROR_CODE_PARAM_INVALID;
     }
     controllerHandler->alignment = alignment;

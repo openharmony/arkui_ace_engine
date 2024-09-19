@@ -109,14 +109,14 @@ public:
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
-    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
-    void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
-    void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
+    void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
-    void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
+    void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
 };
 } // namespace OHOS::Ace::Framework

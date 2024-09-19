@@ -38,6 +38,7 @@ bool HapAssetProviderImpl::Initialize(
     CHECK_NULL_RETURN(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
+    LOGD("hapPath_:%{public}s", hapPath_.c_str());
     return true;
 }
 
@@ -59,6 +60,7 @@ bool HapAssetProviderImpl::IsValid() const
 std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::string& assetName) const
 {
     ACE_SCOPED_TRACE("GetAsMapping");
+    LOGD("assert name is: %{public}s :: %{public}s", hapPath_.c_str(), assetName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
 
     CHECK_NULL_RETURN(runtimeExtractor_, nullptr);
@@ -66,13 +68,16 @@ std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::stri
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
         if (!hasFile) {
+            LOGD("HasEntry failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
         std::ostringstream osstream;
         hasFile = runtimeExtractor_->GetFileBuffer(fileName, osstream);
         if (!hasFile) {
+            LOGD("GetFileBuffer failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
+        LOGD("GetFileBuffer Success: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
         return std::make_unique<HapAssetImplMapping>(osstream);
     }
     return nullptr;
@@ -129,10 +134,12 @@ void HapAssetProviderImpl::GetAssetList(const std::string& path, std::vector<std
         std::string assetPath = basePath + path;
         bool res = runtimeExtractor_->IsDirExist(assetPath);
         if (!res) {
+            LOGD("IsDirExist failed: %{public}s %{public}s", hapPath_.c_str(), assetPath.c_str());
             continue;
         }
         res = runtimeExtractor_->GetFileList(assetPath, assetList);
         if (!res) {
+            LOGD("GetAssetList failed: %{public}s %{public}s", hapPath_.c_str(), assetPath.c_str());
             continue;
         }
         return;

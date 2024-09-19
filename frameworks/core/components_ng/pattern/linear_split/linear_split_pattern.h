@@ -87,7 +87,6 @@ private:
     float GetMinPosFromIndex(std::size_t index);
     float GetMaxPosFromIndex(std::size_t index);
     void UpdateDragFRCSceneInfo(const GestureEvent& info, SceneStatus sceneStatus);
-    bool CheckChildrenConstrains();
 
     std::vector<OffsetF> childrenOffset_;
     float splitLength_ = 0.0f;

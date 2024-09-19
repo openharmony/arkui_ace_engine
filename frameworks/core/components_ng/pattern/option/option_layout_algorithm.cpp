@@ -22,8 +22,8 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 
@@ -63,10 +63,17 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto idealWidth = GetIdealWidth(layoutWrapper);
     if (idealWidth.has_value()) {
-        idealSize.SetWidth(idealWidth.value());
+        auto optionPaintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+        if (optionPaintProperty && (optionPaintProperty->GetIdealWidthForWeb() > 0) &&
+            (idealWidth.value() < optionPaintProperty->GetIdealWidthForWeb())) {
+            idealSize.SetWidth(optionPaintProperty->GetIdealWidthForWeb());
+        } else {
+            idealSize.SetWidth(idealWidth.value());
+        }
     }
+
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
-    
+
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);
@@ -82,6 +89,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         rowChild->Measure(childConstraint);
     }
+    LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }
 

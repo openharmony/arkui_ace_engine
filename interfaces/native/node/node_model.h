@@ -43,11 +43,11 @@ struct ArkUI_Node {
     void* alignRuleOption = nullptr;  
     void* userData = nullptr;
     void* swiperIndicator = nullptr;
-    void* imageFrameInfos = nullptr;
-    void* drawableDescriptor = nullptr;
     int32_t linearGradientDirection = -1;
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
+    void* drawableDescriptor = nullptr;
+    void* imageFrameInfos = nullptr;
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
     void* transitionOption = nullptr;
 };
@@ -56,6 +56,7 @@ struct ArkUI_Context {
     int32_t id;
 };
 
+constexpr int BASIC_COMPONENT_NUM = 20;
 struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;
@@ -101,9 +102,6 @@ struct ArkUI_AlignmentRuleOption {
     float biasHorizontal;
     float biasVertical;
 };
-
-constexpr int BASIC_COMPONENT_NUM = 20;
-
 #ifdef __cplusplus
 };
 #endif

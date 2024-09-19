@@ -90,6 +90,15 @@ public:
         lastFrameNode_ = node;
     }
 
+    void SaveCurrentFocusNodeSize(const RefPtr<NG::FrameNode>& currentFocusNode)
+    {
+        if (currentFocusNode->IsAccessibilityVirtualNode()) {
+            auto oldGeometryNode = currentFocusNode->GetGeometryNode();
+            CHECK_NULL_VOID(oldGeometryNode);
+            oldGeometrySize_ = oldGeometryNode->GetFrameSize();
+        }
+    }
+
     bool SubscribeToastObserver();
     bool UnsubscribeToastObserver();
     bool SubscribeStateObserver(int eventType);
@@ -135,7 +144,7 @@ public:
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
 #ifdef WEB_SUPPORTED
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<NG::PipelineContext>& ngPipeline, const std::map<std::string, std::string>& actionArguments);
+        const RefPtr<NG::PipelineContext>& ngPipeline);
     void SetWebAccessibilityState(bool state);
     void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
         bool isFocus) override;
@@ -377,6 +386,7 @@ private:
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;
+    NG::SizeF oldGeometrySize_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     int64_t parentElementId_ = INVALID_PARENT_ID;

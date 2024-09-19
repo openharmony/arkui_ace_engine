@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,54 +12,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __decorate = (this && this.__decorate) || function (f27, g27, h27, i27) {
-    var j27 = arguments.length,
-        k27 = j27 < 3 ? g27 : i27 === null ? i27 = Object.getOwnPropertyDescriptor(g27, h27) : i27, l27;
-    if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
-        k27 = Reflect.decorate(f27, g27, h27, i27);
-    else
-        for (var m27 = f27.length - 1; m27 >= 0; m27--)
-            if (l27 = f27[m27])
-                k27 = (j27 < 3 ? l27(k27) : j27 > 3 ? l27(g27, h27, k27) : l27(g27, h27)) || k27;
-    return j27 > 3 && k27 && Object.defineProperty(g27, h27, k27), k27;
+
+var t = (this && this.t) || function (f19, target, key, desc) {
+    var c = arguments.length,
+        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === 'object' && typeof Reflect.u3 === 'function') {
+        r = Reflect.u3(f19, target, key, desc);
+    } else {
+        for (var g19 = f19.length - 1; g19 >= 0; g19--) {
+            if (d = f19[g19]) {
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+            }
+        }
+    }
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
 }
-const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 
-const IMAGE_NODE_HEIGHT = 24;
-const IMAGE_NODE_WIDTH = 24;
-const ITEM_WIDTH = 0;
-const ITEM_HEIGHT = 48;
-const ITEM_HEIGHT_INPUT = 32;
-const BORDER_WIDTH_HAS = 2;
-const BORDER_WIDTH_NONE = 0;
-const NODE_HEIGHT = 48;
-const LIST_ITEM_HEIGHT_NONE = 0;
-const LIST_ITEM_HEIGHT = 48;
-const SHADOW_OFFSETY = 10;
-const FLAG_NUMBER = 2;
-const DRAG_OPACITY = 0.4;
-const DRAG_OPACITY_NONE = 1;
-const FLAG_LINE_HEIGHT = '1.0vp';
-const X_OFF_SET = '0vp';
-const Y_OFF_SET = '2.75vp';
-const Y_BOTTOM_OFF_SET = '-1.25vp';
-const Y_BASE_PLATE_OFF_SET = '1.5vp';
-const COLOR_IMAGE_ROW = '#00000000';
-const COLOR_IMAGE_EDIT = '#FFFFFF';
-const COLOR_SELECT = '#1A0A59F7';
-const SHADOW_COLOR = '#00001E';
-const GRAG_POP_UP_HEIGHT = '48';
-const FLOOR_MIN_WIDTH = '128vp';
-const FLOOR_MAX_WIDTH = '208vp';
-const TEXT_MIN_WIDTH = '80vp';
-const TEXT_MAX_WIDTH = '160vp';
-const MIN_WIDTH = '112vp';
-const MAX_WIDTH = '192vp';
-const TRANS_COLOR = '#00FFFFFF';
+const hilog = requireNapi('hilog');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const resourceManager = requireNapi('resourceManager');
+
+const u = 24;
+const a1 = 24;
+const b1 = 0;
+const c1 = 48;
+const d1 = 32;
+const e1 = 2;
+const f1 = 0;
+const g1 = 48;
+const h1 = 0;
+const i1 = 48;
+const j1 = 10;
+const l1 = 2;
+const m1 = 0.4;
+const n1 = 1;
+const o1 = 1;
+const q1 = 2;
+const s1 = '1.0vp';
+const t1 = '0vp';
+const u1 = '2.75vp';
+const v1 = '-1.25vp';
+const w1 = '1.5vp';
+const z1 = '#FFFFFF';
+const a2 = '#00000000';
+const b2 = '#1A0A59F7';
+const c2 = '#00001E';
+const d2 = '48';
+const e2 = '128vp';
+const f2 = '208vp';
+const g2 = '80vp';
+const h2 = '160vp';
+const i2 = '112vp';
+const j2 = '192vp';
+const l2 = '#00FFFFFF';
+const m2 = 100;
+const n2 = 12;
+const o2 = 8;
+const TAG = 'TreeView';
+const LOG_CODE = 0x3900;
 const ARROW_DOWN = {
     'id': -1,
     'type': 20000,
@@ -67,7 +81,7 @@ const ARROW_DOWN = {
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__',
 };
-const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
+const q2 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
     'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
     'wSFlzAAAOxAAADsQBlSsOGwAAAKVJREFUeNpjYBgFo2AU0Bww4pL4////diC1hZGRcSo+A4DqWIDUZCB+AVTbiC7PhEfvByCeAjQgn4Dhy4E' +
     '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
@@ -79,63 +93,110 @@ const ARROW_RIGHT = {
     'bundleName': '__harDefaultBundleName__',
     'moduleName': '__harDefaultModuleName__',
 };
-const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
+const s2 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
     'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
     'lwSFlzAAAOxAAADsQBlSsOGwAAAKFJREFUeNpjYBgFowAE/v//bwHEPOToZSJS3XIg3k6OJcRaUALEFuRYwkyMosbGxusNDQ3XgMwCIHYAsl' +
     'cDxX5RzQJKLGEmxbvkWMJEaqQxMjKuBVI5QGwDxOnUimR08AFK81DdAmAqArl8DhDfAOKpVLUAavh2IH4CxI7A4HpDMEgpMPwFUXFGS8NJCa' +
     'L55BgOAixEqqsB4oOkGj4KRggAAN4STB9zyhGzAAAAAElFTkSuQmCC';
 var Event;
-(function (d27) {
-    d27[d27['TOUCH_DOWN'] = 0] = 'TOUCH_DOWN';
-    d27[d27['TOUCH_UP'] = 1] = 'TOUCH_UP';
-    d27[d27['HOVER'] = 3] = 'HOVER';
-    d27[d27['HOVER_OVER'] = 4] = 'HOVER_OVER';
-    d27[d27['FOCUS'] = 5] = 'FOCUS';
-    d27[d27['BLUR'] = 6] = 'BLUR';
-    d27[d27['MOUSE_BUTTON_RIGHT'] = 7] = 'MOUSE_BUTTON_RIGHT';
-    d27[d27['DRAG'] = 8] = 'DRAG';
+(function (Event) {
+    Event[Event['TOUCH_DOWN'] = 0] = 'TOUCH_DOWN';
+    Event[Event['TOUCH_UP'] = 1] = 'TOUCH_UP';
+    Event[Event['HOVER'] = 3] = 'HOVER';
+    Event[Event['HOVER_OVER'] = 4] = 'HOVER_OVER';
+    Event[Event['FOCUS'] = 5] = 'FOCUS';
+    Event[Event['BLUR'] = 6] = 'BLUR';
+    Event[Event['MOUSE_BUTTON_RIGHT'] = 7] = 'MOUSE_BUTTON_RIGHT';
+    Event[Event['DRAG'] = 8] = 'DRAG';
 })(Event || (Event = {}));
-var MenuOperation;
-(function (c27) {
-    c27[c27['ADD_NODE'] = 0] = 'ADD_NODE';
-    c27[c27['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
-    c27[c27['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
-    c27[c27['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
-})(MenuOperation || (MenuOperation = {}));
-var PopUpType;
-(function (b27) {
-    b27[b27['HINTS'] = 0] = 'HINTS';
-    b27[b27['WARNINGS'] = 1] = 'WARNINGS';
-})(PopUpType || (PopUpType = {}));
-var InputError;
-(function (a27) {
-    a27[a27['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
-    a27[a27['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
-    a27[a27['NONE'] = 2] = 'NONE';
-})(InputError || (InputError = {}));
-var Flag;
-(function (z26) {
-    z26[z26['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
-    z26[z26['UP_FLAG'] = 1] = 'UP_FLAG';
-    z26[z26['NONE'] = 2] = 'NONE';
-})(Flag || (Flag = {}));
+var t2;
+(function (d19) {
+    d19[d19['ADD_NODE'] = 0] = 'ADD_NODE';
+    d19[d19['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
+    d19[d19['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
+    d19[d19['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
+})(t2 || (t2 = {}));
+var u2;
+(function (c19) {
+    c19[c19['HINTS'] = 0] = 'HINTS';
+    c19[c19['WARNINGS'] = 1] = 'WARNINGS';
+})(u2 || (u2 = {}));
+var v2;
+(function (b19) {
+    b19[b19['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
+    b19[b19['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
+    b19[b19['NONE'] = 2] = 'NONE';
+})(v2 || (v2 = {}));
+var w2;
+(function (a19) {
+    a19[a19['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
+    a19[a19['UP_FLAG'] = 1] = 'UP_FLAG';
+    a19[a19['NONE'] = 2] = 'NONE';
+})(w2 || (w2 = {}));
 
-export var NodeStatus;
-(function (y26) {
-    y26[y26['Expand'] = 0] = 'Expand';
-    y26[y26['Collapse'] = 1] = 'Collapse';
-})(NodeStatus || (NodeStatus = {}));
+export var z2;
+(function (z18) {
+    z18[z18['EXPAND'] = 0] = 'EXPAND';
+    z18[z18['COLLAPSE'] = 1] = 'COLLAPSE';
+})(z2 || (z2 = {}));
 
-export var InteractionStatus;
-(function (x26) {
-    x26[x26['Normal'] = 0] = 'Normal';
-    x26[x26['Selected'] = 1] = 'Selected';
-    x26[x26['Edit'] = 2] = 'Edit';
-    x26[x26['FinishEdit'] = 3] = 'FinishEdit';
-    x26[x26['DragInsert'] = 4] = 'DragInsert';
-    x26[x26['FinishDragInsert'] = 5] = 'FinishDragInsert';
-})(InteractionStatus || (InteractionStatus = {}));
-let emptyNodeInfo = {
+export var a3;
+(function (y18) {
+    y18[y18['NORMAL'] = 0] = 'NORMAL';
+    y18[y18['SELECTED'] = 1] = 'SELECTED';
+    y18[y18['EDIT'] = 2] = 'EDIT';
+    y18[y18['FINISH_EDIT'] = 3] = 'FINISH_EDIT';
+    y18[y18['DRAG_INSERT'] = 4] = 'DRAG_INSERT';
+    y18[y18['FINISH_DRAG_INSERT'] = 5] = 'FINISH_DRAG_INSERT';
+})(a3 || (a3 = {}));
+var b3;
+(function (x18) {
+    x18[x18['ARROW_DOWN'] = 0] = 'ARROW_DOWN';
+    x18[x18['ARROW_RIGHT'] = 1] = 'ARROW_RIGHT';
+    x18[x18['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
+    x18[x18['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
+})(b3 || (b3 = {}));
+
+class c3 {
+    constructor() {
+    }
+
+    static getInstance() {
+        if (!c3.instance) {
+            c3.instance = new c3();
+        }
+        return c3.instance;
+    }
+
+    createNode() {
+        return {
+            v3: undefined,
+            inputText: new t3(),
+            w3: new s3(''),
+            x3: undefined,
+            fontColor: undefined,
+        };
+    }
+
+    y3(nodeParam) {
+        let w18 = this.createNode();
+        if (nodeParam.icon) {
+            w18.v3 = new r3(nodeParam.icon, {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.ohos_id_alpha_content_fourth'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            }, u, a1, nodeParam.selectedIcon, nodeParam.editIcon);
+        }
+        if (nodeParam.primaryTitle) {
+            w18.w3 = new s3(nodeParam.primaryTitle);
+        }
+        return w18;
+    }
+}
+
+let d3 = {
     isFolder: true,
     icon: '',
     selectedIcon: '',
@@ -148,66 +209,66 @@ let emptyNodeInfo = {
     currentNodeId: -1,
 };
 
-class TreeViewTheme {
+class e3 {
     constructor() {
-        this.itemSelectedBgColor = '#1A0A59F7';
-        this.primaryTitleFontColor = {
+        this.z3 = '#1A0A59F7';
+        this.a4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_primary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.secondaryTitleFontColor = {
+        this.b4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_secondary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.primaryTitleActiveFontColor = {
+        this.c4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_text_primary_activated'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.itemPressedBgColor = {
+        this.d4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_click_effect'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.itemHoverBgColor = {
+        this.e4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_hover'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.borderFocusedColor = {
+        this.f4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_focused_outline'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.leftIconColor = {
+        this.g4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_secondary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.leftIconActiveColor = {
+        this.h4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_secondary'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.arrowIconColor = {
+        this.i4 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.icon_tertiary'],
@@ -215,53 +276,49 @@ class TreeViewTheme {
             'moduleName': '__harDefaultModuleName__',
         };
     }
+
+    static getInstance() {
+        if (!e3.instance) {
+            e3.instance = new e3();
+        }
+        return e3.instance;
+    }
 }
 
-let NodeInfo = class NodeInfo {
-    constructor(w26) {
-        this.imageSource = '';
-        this.borderWidth = { has: BORDER_WIDTH_HAS, none: BORDER_WIDTH_NONE };
-        this.canShowFlagLine = false;
-        this.isOverBorder = false;
-        this.canShowBottomFlagLine = false;
-        this.isHighLight = false;
-        this.isModify = false;
-        this.treeViewTheme = new TreeViewTheme();
+let f3 = class NodeInfo {
+    constructor(node, nodeParam) {
+        this.j4 = '';
+        this.borderWidth = { has: e1, l4: f1 };
+        this.m4 = false;
+        this.n4 = false;
+        this.o4 = false;
+        this.q4 = false;
+        this.r4 = false;
+        this.treeViewTheme = e3.getInstance();
         this.fontColor = '';
-        this.childNodeInfo = w26.getChildNodeInfo();
-        this.nodeItem = {
-            imageNode: undefined,
-            inputText: new InputText(),
-            mainTitleNode: w26.getNodeItem().mainTitleNode,
-            imageCollapse: undefined,
-            fontColor: undefined,
+        this.node = node;
+        this.nodeParam = nodeParam;
+        this.s4 = c3.getInstance().y3(nodeParam);
+        this.t4 = {
+            u4: false,
+            v4: false,
+            w4: undefined,
+            x4: '',
+            y4: undefined,
         };
-        this.popUpInfo = {
-            popUpIsShow: false,
-            popUpEnableArrow: false,
-            popUpColor: undefined,
-            popUpText: '',
-            popUpTextColor: undefined,
-        };
-        this.nodeItem.imageNode = w26.getNodeItem().imageNode;
-        this.nodeItem.imageCollapse = w26.getNodeItem().imageCollapse;
-        this.container = w26.container;
-        this.parentNodeId = w26.parentNodeId;
-        this.currentNodeId = w26.currentNodeId;
-        this.nodeHeight = NODE_HEIGHT;
-        this.nodeLevel = w26.nodeLevel;
-        this.nodeLeftPadding = w26.nodeLevel * 12 + 8;
-        this.nodeColor = {
+        this.z4 = g1;
+        this.a5 = node.b5 * n2 + o2;
+        this.c5 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_background'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.nodeIsShow = (this.nodeLevel > 0) ? false : true;
-        this.listItemHeight = (this.nodeLevel > 0) ? LIST_ITEM_HEIGHT_NONE : LIST_ITEM_HEIGHT;
-        this.isShowTitle = true;
-        this.isShowInputText = false;
+        this.d5 = (this.node.b5 > 0) ? false : true;
+        this.e5 = (this.node.b5 > 0) ? h1 : i1;
+        this.f5 = true;
+        this.g5 = false;
         this.isSelected = false;
         this.status = {
             normal: {
@@ -271,10 +328,10 @@ let NodeInfo = class NodeInfo {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             },
-            hover: this.treeViewTheme.itemHoverBgColor,
-            press: this.treeViewTheme.itemPressedBgColor,
-            selected: this.treeViewTheme.itemSelectedBgColor,
-            highLight: {
+            h5: this.treeViewTheme.e4,
+            i5: this.treeViewTheme.d4,
+            selected: this.treeViewTheme.z3,
+            j5: {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.ohos_id_color_activated'],
@@ -282,9 +339,9 @@ let NodeInfo = class NodeInfo {
                 'moduleName': '__harDefaultModuleName__',
             }
         };
-        this.nodeBorder = {
-            borderWidth: BORDER_WIDTH_NONE,
-            borderColor: this.treeViewTheme.borderFocusedColor,
+        this.k5 = {
+            borderWidth: f1,
+            borderColor: this.treeViewTheme.f4,
             borderRadius: {
                 'id': -1,
                 'type': 10002,
@@ -293,320 +350,304 @@ let NodeInfo = class NodeInfo {
                 'moduleName': '__harDefaultModuleName__',
             }
         };
-        this.flagLineLeftMargin = w26.nodeLevel * 12 + 8;
-        this.node = w26;
-        this.nodeParam = w26.data;
+        this.l5 = node.b5 * n2 + o2;
     }
 
-    setFontColor(v26) {
-        this.fontColor = v26;
+    m5(v18) {
+        if (v18) {
+            this.s4.x3 =
+                q3.n5(b3.ARROW_RIGHT);
+        } else {
+            this.s4.x3 = undefined;
+        }
     }
 
-    getFontColor() {
+    o5(color) {
+        this.fontColor = color;
+    }
+
+    p5() {
         return this.fontColor;
     }
 
-    getPopUpInfo() {
-        return this.popUpInfo;
+    q5() {
+        return this.t4;
     }
 
-    setPopUpIsShow(u26) {
-        this.popUpInfo.popUpIsShow = u26;
+    r5(isShow) {
+        this.t4.u4 = isShow;
     }
 
-    setPopUpEnableArrow(t26) {
-        this.popUpInfo.popUpEnableArrow = t26;
+    s5(u18) {
+        this.t4.v4 = u18;
     }
 
-    setPopUpColor(s26) {
-        this.popUpInfo.popUpColor = s26;
+    t5(color) {
+        this.t4.w4 = color;
     }
 
-    setPopUpText(r26) {
-        this.popUpInfo.popUpText = r26;
+    u5(text) {
+        this.t4.x4 = text;
     }
 
-    setPopUpTextColor(q26) {
-        this.popUpInfo.popUpTextColor = q26;
+    v5(t18) {
+        this.t4.y4 = t18;
     }
 
-    getIsShowTitle() {
-        return this.isShowTitle;
+    w5() {
+        return this.f5;
     }
 
-    getIsShowInputText() {
-        return this.isShowInputText;
+    x5() {
+        return this.g5;
     }
 
-    setTitleAndInputTextStatus(p26) {
-        if (p26) {
-            this.isShowTitle = false;
-            this.isShowInputText = true;
-        }
-        else {
-            this.isShowTitle = true;
-            this.isShowInputText = false;
-        }
-    }
-
-    handleImageCollapseAfterAddNode(o26) {
-        if (o26) {
-            this.nodeItem.imageCollapse = new ImageNode(ARROW_DOWN, {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.ohos_id_alpha_content_tertiary'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, undefined, undefined);
-            this.nodeItem.imageCollapse.itemRightMargin = ({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            });
-        }
-        else {
-            this.nodeItem.imageCollapse = undefined;
+    y5(s18) {
+        if (s18) {
+            this.f5 = false;
+            this.g5 = true;
+        } else {
+            this.f5 = true;
+            this.g5 = false;
         }
     }
 
-    setNodeColor(n26) {
-        if (n26 === undefined) {
+    z5(r18) {
+        if (r18) {
+            this.s4.x3 =
+                q3.n5(b3.ARROW_DOWN);
+        } else {
+            this.s4.x3 = undefined;
+        }
+    }
+
+    a6(q18) {
+        if (q18 === undefined) {
             return;
         }
-        this.nodeColor = n26;
+        this.c5 = q18;
     }
 
-    getNodeColor() {
-        return this.nodeColor;
+    b6() {
+        return this.c5;
     }
 
-    setListItemHeight(m26) {
-        this.listItemHeight = m26;
+    c6(p18) {
+        this.e5 = p18;
     }
 
-    getListItemHeight() {
-        return this.listItemHeight;
+    d6() {
+        return this.e5;
     }
 
-    getNodeCurrentNodeId() {
-        return this.currentNodeId;
+    e6() {
+        return this.node.currentNodeId;
     }
 
-    getNodeParentNodeId() {
-        return this.parentNodeId;
+    f6() {
+        return this.node.parentNodeId;
     }
 
-    getNodeLeftPadding() {
-        return this.nodeLeftPadding;
+    g6() {
+        return this.a5;
     }
 
-    getNodeHeight() {
-        return this.nodeHeight;
+    h6() {
+        return this.z4;
     }
 
-    setNodeIsShow(l26) {
-        this.nodeIsShow = l26;
+    i6(o18) {
+        this.d5 = o18;
     }
 
-    getNodeIsShow() {
-        return this.nodeIsShow;
+    j6() {
+        return this.d5;
     }
 
-    getNodeItem() {
-        return this.nodeItem;
+    k6() {
+        return this.s4;
     }
 
-    getNodeStatus() {
+    l6() {
         return this.status;
     }
 
-    getNodeBorder() {
-        return this.nodeBorder;
+    m6() {
+        return this.k5;
     }
 
-    setNodeBorder(k26) {
-        this.nodeBorder.borderWidth = k26 ? this.borderWidth.has : this.borderWidth.none;
+    n6(n18) {
+        this.k5.borderWidth = n18 ? this.borderWidth.has : this.borderWidth.l4;
     }
 
-    getChildNodeInfo() {
-        return this.childNodeInfo;
+    o6() {
+        return this.node.p6;
     }
 
-    getCurrentNodeId() {
-        return this.currentNodeId;
+    q6() {
+        return this.nodeParam.container;
     }
 
-    getMenu() {
-        return this.container;
+    r6(isSelected) {
+        this.isSelected = isSelected;
     }
 
-    setIsSelected(j26) {
-        this.isSelected = j26;
-    }
-
-    getIsSelected() {
+    s6() {
         return this.isSelected;
     }
 
-    getNodeInfoData() {
+    t6() {
         return this.nodeParam;
     }
 
-    getNodeInfoNode() {
+    u6() {
         return this.node;
     }
 
-    getIsFolder() {
+    v6() {
         return this.nodeParam.isFolder;
     }
 
-    setCanShowFlagLine(i26) {
-        this.canShowFlagLine = i26;
+    w6(m18) {
+        this.m4 = m18;
     }
 
-    getCanShowFlagLine() {
-        return this.canShowFlagLine;
+    x6() {
+        return this.m4;
     }
 
-    setFlagLineLeftMargin(h26) {
-        if (h26 === undefined) {
+    y6(l18) {
+        if (l18 === undefined) {
             return;
         }
-        this.flagLineLeftMargin = h26 * 12 + 8;
+        this.l5 = l18 * n2 + o2;
     }
 
-    getFlagLineLeftMargin() {
-        return this.flagLineLeftMargin;
+    z6() {
+        return this.l5;
     }
 
-    getNodeLevel() {
-        return this.nodeLevel;
+    a7() {
+        return this.node.b5;
     }
 
-    setIsOverBorder(g26) {
-        this.isOverBorder = g26;
+    b7(k18) {
+        this.n4 = k18;
     }
 
-    getIsOverBorder() {
-        return this.isOverBorder;
+    c7() {
+        return this.n4;
     }
 
-    setCanShowBottomFlagLine(f26) {
-        this.canShowBottomFlagLine = f26;
+    d7(j18) {
+        this.o4 = j18;
     }
 
-    getCanShowBottomFlagLine() {
-        return this.canShowBottomFlagLine;
+    e7() {
+        return this.o4;
     }
 
-    setIsHighLight(e26) {
-        this.isHighLight = e26;
+    f7(i18) {
+        this.q4 = i18;
     }
 
-    getIsHighLight() {
-        return this.isHighLight;
+    g7() {
+        return this.q4;
     }
 
-    setIsModify(d26) {
-        this.isModify = d26;
+    h7(h18) {
+        this.r4 = h18;
     }
 
-    getIsModify() {
-        return this.isModify;
+    i7() {
+        return this.r4;
     }
 };
-NodeInfo = __decorate([
+f3 = t([
     Observed
-], NodeInfo);
+], f3);
 
-export { NodeInfo };
+export { f3 };
 
 export var TreeListenType;
-(function (c26) {
-    c26['NODE_CLICK'] = 'NodeClick';
-    c26['NODE_ADD'] = 'NodeAdd';
-    c26['NODE_DELETE'] = 'NodeDelete';
-    c26['NODE_MODIFY'] = 'NodeModify';
-    c26['NODE_MOVE'] = 'NodeMove';
+(function (TreeListenType) {
+    TreeListenType['NODE_CLICK'] = 'NodeClick';
+    TreeListenType['NODE_ADD'] = 'NodeAdd';
+    TreeListenType['NODE_DELETE'] = 'NodeDelete';
+    TreeListenType['NODE_MODIFY'] = 'NodeModify';
+    TreeListenType['NODE_MOVE'] = 'NodeMove';
 })(TreeListenType || (TreeListenType = {}));
 
 export class TreeListener {
     constructor() {
-        this._events = [];
-        this._once_events = [];
+        this.j7 = [];
+        this.k7 = [];
     }
 
-    on(y25, z25) {
-        if (Array.isArray(y25)) {
-            for (let a26 = 0, b26 = y25.length; a26 < b26; a26++) {
-                this.on(y25[a26], z25);
+    on(type, callback) {
+        if (Array.isArray(type)) {
+            for (let g18 = 0, l = type.length; g18 < l; g18++) {
+                this.on(type[g18], callback);
+            }
+        } else {
+            (this.j7[type] || (this.j7[type] = [])).push(callback);
+        }
+    }
+
+    once(type, callback) {
+        if (Array.isArray(type)) {
+            this.off(type, callback);
+        } else {
+            (this.k7[type] || (this.k7[type] = [])).push(callback);
+        }
+    }
+
+    off(type, callback) {
+        if (type === null) {
+            this.j7 = [];
+        }
+        if (Array.isArray(type)) {
+            for (let f18 = 0, l = type.length; f18 < l; f18++) {
+                this.off(type[f18], callback);
             }
         }
-        else {
-            (this._events[y25] || (this._events[y25] = [])).push(z25);
-        }
-    }
-
-    once(w25, x25) {
-        if (Array.isArray(w25)) {
-            this.off(w25, x25);
-        }
-        else {
-            (this._once_events[w25] || (this._once_events[w25] = [])).push(x25);
-        }
-    }
-
-    off(p25, q25) {
-        if (p25 === null) {
-            this._events = [];
-        }
-        if (Array.isArray(p25)) {
-            for (let u25 = 0, v25 = p25.length; u25 < v25; u25++) {
-                this.off(p25[u25], q25);
-            }
-        }
-        let r25 = this._events[p25];
-        if (!r25) {
+        let c18 = this.j7[type];
+        if (!c18) {
             return;
         }
-        if (q25 === null) {
-            this._events[p25] = null;
+        if (callback === null) {
+            this.j7[type] = null;
         }
-        let s25 = r25.length;
-        while (s25--) {
-            let t25 = r25[s25];
-            if (t25 === q25) {
-                r25.splice(s25, 1);
+        let d18 = c18.length;
+        while (d18--) {
+            let e18 = c18[d18];
+            if (e18 === callback) {
+                c18.splice(d18, 1);
                 break;
             }
         }
     }
 
-    emit(f25, g25) {
-        if (this._once_events[f25]) {
-            let l25 = Array.from(this._once_events[f25]);
-            if (l25) {
-                for (let m25 = 0, n25 = l25.length; m25 < n25; m25++) {
+    emit(event, x17) {
+        if (this.k7[event]) {
+            let a18 = Array.from(this.k7[event]);
+            if (a18) {
+                for (let b18 = 0, l = a18.length; b18 < l; b18++) {
                     try {
-                        l25[m25](g25);
-                    }
-                    catch (o25) {
+                        a18[b18](x17);
+                    } catch (e) {
                         throw new Error('once function callbacks error.');
                     }
                 }
-                this._once_events[f25] = null;
+                this.k7[event] = null;
             }
-        }
-        else if (this._events[f25]) {
-            let h25 = Array.from(this._events[f25]);
-            if (h25) {
-                for (let i25 = 0, j25 = h25.length; i25 < j25; i25++) {
+        } else if (this.j7[event]) {
+            let y17 = Array.from(this.j7[event]);
+            if (y17) {
+                for (let z17 = 0, l = y17.length; z17 < l; z17++) {
                     try {
-                        h25[i25](g25);
-                    }
-                    catch (k25) {
+                        y17[z17](x17);
+                    } catch (e) {
                         throw new Error('on function callbacks error.');
                     }
                 }
@@ -631,30 +672,32 @@ export class TreeListenerManager {
         return this.appEventBus;
     }
 }
-TreeListenerManager.APP_KEY_EVENT_BUS = 'app_key_event_bus';
+TreeListenerManager.l7 = 'app_key_event_bus';
 
 export class TreeView extends ViewPU {
-    constructor(z24, a25, b25, c25 = -1, d25 = undefined, e25) {
-        super(z24, b25, c25, e25);
-        if (typeof d25 === 'function') {
-            this.paramsGenerator_ = d25;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === 'function') {
+            this.paramsGenerator_ = paramsLambda;
         }
         this.treeController = new TreeController();
-        this.__nodeList = new ObservedPropertyObjectPU([], this, 'nodeList');
-        this.listNodeDataSource = new ListNodeDataSource();
-        this.__item = new ObservedPropertyObjectPU(null, this, 'item');
-        this.__touchCount = new ObservedPropertySimplePU(0, this, 'touchCount');
-        this.__dropSelectedIndex = new ObservedPropertySimplePU(0, this, 'dropSelectedIndex');
-        this.__viewLastIndex = new ObservedPropertySimplePU(-1, this, 'viewLastIndex');
-        this.__listItemBgColor = new ObservedPropertyObjectPU({
+        this.m7 = new ObservedPropertyObjectPU([], this, 'nodeList');
+        this.listNodeDataSource = new h3();
+        this.n7 = new ObservedPropertyObjectPU(null, this, 'item');
+        this.o7 = new ObservedPropertySimplePU(0, this, 'touchCount');
+        this.p7 = new ObservedPropertySimplePU(0, this, 'dropSelectedIndex');
+        this.q7 = new ObservedPropertySimplePU(-1, this, 'viewLastIndex');
+        this.r7 = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
+        this.s7 = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
+        this.t7 = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         }, this, 'listItemBgColor');
-        this.__treeViewTheme = new ObservedPropertyObjectPU(new TreeViewTheme(), this, 'treeViewTheme');
-        this.addProvidedVar('treeViewTheme', this.__treeViewTheme, false);
+        this.u7 = new ObservedPropertyObjectPU(e3.getInstance(), this, 'treeViewTheme');
+        this.addProvidedVar('treeViewTheme', this.u7, false);
         this.listTreeViewMenu = this.NullBuilder;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -723,180 +766,218 @@ export class TreeView extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             }
         };
-        this.setInitiallyProvidedValue(a25);
+        this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(y24) {
-        if (y24.treeController !== undefined) {
-            this.treeController = y24.treeController;
+    setInitiallyProvidedValue(params) {
+        if (params.treeController !== undefined) {
+            this.treeController = params.treeController;
         }
-        if (y24.nodeList !== undefined) {
-            this.nodeList = y24.nodeList;
+        if (params.nodeList !== undefined) {
+            this.nodeList = params.nodeList;
         }
-        if (y24.listNodeDataSource !== undefined) {
-            this.listNodeDataSource = y24.listNodeDataSource;
+        if (params.listNodeDataSource !== undefined) {
+            this.listNodeDataSource = params.listNodeDataSource;
         }
-        if (y24.item !== undefined) {
-            this.item = y24.item;
+        if (params.item !== undefined) {
+            this.item = params.item;
         }
-        if (y24.touchCount !== undefined) {
-            this.touchCount = y24.touchCount;
+        if (params.touchCount !== undefined) {
+            this.touchCount = params.touchCount;
         }
-        if (y24.dropSelectedIndex !== undefined) {
-            this.dropSelectedIndex = y24.dropSelectedIndex;
+        if (params.dropSelectedIndex !== undefined) {
+            this.dropSelectedIndex = params.dropSelectedIndex;
         }
-        if (y24.viewLastIndex !== undefined) {
-            this.viewLastIndex = y24.viewLastIndex;
+        if (params.viewLastIndex !== undefined) {
+            this.viewLastIndex = params.viewLastIndex;
         }
-        if (y24.listItemBgColor !== undefined) {
-            this.listItemBgColor = y24.listItemBgColor;
+        if (params.followingSystemFontScale !== undefined) {
+            this.followingSystemFontScale = params.followingSystemFontScale;
         }
-        if (y24.treeViewTheme !== undefined) {
-            this.treeViewTheme = y24.treeViewTheme;
+        if (params.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = params.maxAppFontScale;
         }
-        if (y24.listTreeViewMenu !== undefined) {
-            this.listTreeViewMenu = y24.listTreeViewMenu;
+        if (params.listItemBgColor !== undefined) {
+            this.listItemBgColor = params.listItemBgColor;
         }
-        if (y24.MAX_CN_LENGTH !== undefined) {
-            this.MAX_CN_LENGTH = y24.MAX_CN_LENGTH;
+        if (params.treeViewTheme !== undefined) {
+            this.treeViewTheme = params.treeViewTheme;
         }
-        if (y24.MAX_EN_LENGTH !== undefined) {
-            this.MAX_EN_LENGTH = y24.MAX_EN_LENGTH;
+        if (params.listTreeViewMenu !== undefined) {
+            this.listTreeViewMenu = params.listTreeViewMenu;
         }
-        if (y24.INITIAL_INVALID_VALUE !== undefined) {
-            this.INITIAL_INVALID_VALUE = y24.INITIAL_INVALID_VALUE;
+        if (params.MAX_CN_LENGTH !== undefined) {
+            this.MAX_CN_LENGTH = params.MAX_CN_LENGTH;
         }
-        if (y24.MAX_TOUCH_DOWN_COUNT !== undefined) {
-            this.MAX_TOUCH_DOWN_COUNT = y24.MAX_TOUCH_DOWN_COUNT;
+        if (params.MAX_EN_LENGTH !== undefined) {
+            this.MAX_EN_LENGTH = params.MAX_EN_LENGTH;
         }
-        if (y24.isMultiPress !== undefined) {
-            this.isMultiPress = y24.isMultiPress;
+        if (params.INITIAL_INVALID_VALUE !== undefined) {
+            this.INITIAL_INVALID_VALUE = params.INITIAL_INVALID_VALUE;
         }
-        if (y24.touchDownCount !== undefined) {
-            this.touchDownCount = y24.touchDownCount;
+        if (params.MAX_TOUCH_DOWN_COUNT !== undefined) {
+            this.MAX_TOUCH_DOWN_COUNT = params.MAX_TOUCH_DOWN_COUNT;
         }
-        if (y24.appEventBus !== undefined) {
-            this.appEventBus = y24.appEventBus;
+        if (params.isMultiPress !== undefined) {
+            this.isMultiPress = params.isMultiPress;
         }
-        if (y24.itemPadding !== undefined) {
-            this.itemPadding = y24.itemPadding;
+        if (params.touchDownCount !== undefined) {
+            this.touchDownCount = params.touchDownCount;
         }
-        if (y24.textInputPadding !== undefined) {
-            this.textInputPadding = y24.textInputPadding;
+        if (params.appEventBus !== undefined) {
+            this.appEventBus = params.appEventBus;
+        }
+        if (params.itemPadding !== undefined) {
+            this.itemPadding = params.itemPadding;
+        }
+        if (params.textInputPadding !== undefined) {
+            this.textInputPadding = params.textInputPadding;
         }
     }
 
-    updateStateVars(x24) {
+    updateStateVars(params) {
     }
 
-    purgeVariableDependenciesOnElmtId(w24) {
-        this.__nodeList.purgeDependencyOnElmtId(w24);
-        this.__item.purgeDependencyOnElmtId(w24);
-        this.__touchCount.purgeDependencyOnElmtId(w24);
-        this.__dropSelectedIndex.purgeDependencyOnElmtId(w24);
-        this.__viewLastIndex.purgeDependencyOnElmtId(w24);
-        this.__listItemBgColor.purgeDependencyOnElmtId(w24);
-        this.__treeViewTheme.purgeDependencyOnElmtId(w24);
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.m7.purgeDependencyOnElmtId(rmElmtId);
+        this.n7.purgeDependencyOnElmtId(rmElmtId);
+        this.o7.purgeDependencyOnElmtId(rmElmtId);
+        this.p7.purgeDependencyOnElmtId(rmElmtId);
+        this.q7.purgeDependencyOnElmtId(rmElmtId);
+        this.r7.purgeDependencyOnElmtId(rmElmtId);
+        this.s7.purgeDependencyOnElmtId(rmElmtId);
+        this.t7.purgeDependencyOnElmtId(rmElmtId);
+        this.u7.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
-        this.__nodeList.aboutToBeDeleted();
-        this.__item.aboutToBeDeleted();
-        this.__touchCount.aboutToBeDeleted();
-        this.__dropSelectedIndex.aboutToBeDeleted();
-        this.__viewLastIndex.aboutToBeDeleted();
-        this.__listItemBgColor.aboutToBeDeleted();
-        this.__treeViewTheme.aboutToBeDeleted();
+        this.m7.aboutToBeDeleted();
+        this.n7.aboutToBeDeleted();
+        this.o7.aboutToBeDeleted();
+        this.p7.aboutToBeDeleted();
+        this.q7.aboutToBeDeleted();
+        this.r7.aboutToBeDeleted();
+        this.s7.aboutToBeDeleted();
+        this.t7.aboutToBeDeleted();
+        this.u7.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
     get nodeList() {
-        return this.__nodeList.get();
+        return this.m7.get();
     }
 
-    set nodeList(v24) {
-        this.__nodeList.set(v24);
+    set nodeList(newValue) {
+        this.m7.set(newValue);
     }
 
     get item() {
-        return this.__item.get();
+        return this.n7.get();
     }
 
-    set item(u24) {
-        this.__item.set(u24);
+    set item(newValue) {
+        this.n7.set(newValue);
     }
 
     get touchCount() {
-        return this.__touchCount.get();
+        return this.o7.get();
     }
 
-    set touchCount(t24) {
-        this.__touchCount.set(t24);
+    set touchCount(newValue) {
+        this.o7.set(newValue);
     }
 
     get dropSelectedIndex() {
-        return this.__dropSelectedIndex.get();
+        return this.p7.get();
     }
 
-    set dropSelectedIndex(s24) {
-        this.__dropSelectedIndex.set(s24);
+    set dropSelectedIndex(newValue) {
+        this.p7.set(newValue);
     }
 
     get viewLastIndex() {
-        return this.__viewLastIndex.get();
+        return this.q7.get();
     }
 
-    set viewLastIndex(r24) {
-        this.__viewLastIndex.set(r24);
+    set viewLastIndex(newValue) {
+        this.q7.set(newValue);
+    }
+
+    get followingSystemFontScale() {
+        return this.r7.get();
+    }
+
+    set followingSystemFontScale(newValue) {
+        this.r7.set(newValue);
+    }
+
+    get maxAppFontScale() {
+        return this.s7.get();
+    }
+
+    set maxAppFontScale(newValue) {
+        this.s7.set(newValue);
     }
 
     get listItemBgColor() {
-        return this.__listItemBgColor.get();
+        return this.t7.get();
     }
 
-    set listItemBgColor(q24) {
-        this.__listItemBgColor.set(q24);
+    set listItemBgColor(newValue) {
+        this.t7.set(newValue);
     }
 
     get treeViewTheme() {
-        return this.__treeViewTheme.get();
+        return this.u7.get();
     }
 
-    set treeViewTheme(p24) {
-        this.__treeViewTheme.set(p24);
+    set treeViewTheme(newValue) {
+        this.u7.set(newValue);
     }
 
-    NullBuilder(o24 = null) {
+    NullBuilder(parent = null) {
     }
 
-    onWillApplyTheme(n24) {
-        this.treeViewTheme.itemSelectedBgColor = n24.colors.interactiveSelect;
-        this.treeViewTheme.itemPressedBgColor = n24.colors.interactivePressed;
-        this.treeViewTheme.itemHoverBgColor = n24.colors.interactiveHover;
-        this.treeViewTheme.primaryTitleFontColor = n24.colors.fontPrimary;
-        this.treeViewTheme.secondaryTitleFontColor = n24.colors.fontSecondary;
-        this.treeViewTheme.primaryTitleActiveFontColor = n24.colors.interactiveActive;
-        this.treeViewTheme.borderFocusedColor = n24.colors.interactiveFocus;
-        this.treeViewTheme.leftIconColor = n24.colors.iconSecondary;
-        this.treeViewTheme.leftIconActiveColor = n24.colors.interactiveActive;
-        this.treeViewTheme.arrowIconColor = n24.colors.iconPrimary;
+    onWillApplyTheme(theme) {
+        this.treeViewTheme.z3 = theme.colors.interactiveSelect;
+        this.treeViewTheme.d4 = theme.colors.interactivePressed;
+        this.treeViewTheme.e4 = theme.colors.interactiveHover;
+        this.treeViewTheme.a4 = theme.colors.fontPrimary;
+        this.treeViewTheme.b4 = theme.colors.fontSecondary;
+        this.treeViewTheme.c4 = theme.colors.interactiveActive;
+        this.treeViewTheme.f4 = theme.colors.interactiveFocus;
+        this.treeViewTheme.g4 = theme.colors.iconSecondary;
+        this.treeViewTheme.h4 = theme.colors.interactiveActive;
+        this.treeViewTheme.i4 = theme.colors.iconPrimary;
         this.treeController.treeViewTheme = this.treeViewTheme;
     }
 
     aboutToAppear() {
         if (this.treeController !== null) {
-            this.listNodeDataSource = this.treeController.getListNodeDataSource();
-            this.nodeList = this.treeController.getListNodeDataSource().listNode;
-            this.item = this.treeController.getListNodeDataSource().listNode;
+            this.listNodeDataSource = this.treeController.v7();
+            this.nodeList = this.treeController.v7().w7;
+            this.item = this.treeController.v7().w7;
         }
+        let w17 = this.getUIContext();
+        this.followingSystemFontScale = w17.isFollowingSystemFontScale();
+        this.maxAppFontScale = w17.getMaxFontScale();
     }
 
-    popupForShowTitle(d24, e24, f24, g24 = null) {
-        this.observeComponentCreation2((l24, m24) => {
+    decideFontScale() {
+        let u17 = this.getUIContext();
+        let v17 = u17.getHostContext()?.config?.fontSizeScale ?? 1;
+        if (!this.followingSystemFontScale) {
+            return 1;
+        }
+        return Math.min(v17, this.maxAppFontScale, q1);
+    }
+
+    popupForShowTitle(text, backgroundColor, fontColor, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.backgroundColor(e24);
+            Row.backgroundColor(backgroundColor);
             Row.border({
                 radius: {
                     'id': -1,
@@ -937,8 +1018,8 @@ export class TreeView extends ViewPU {
                 },
             });
         }, Row);
-        this.observeComponentCreation2((j24, k24) => {
-            Text.create(d24);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(text);
             Text.fontSize({
                 'id': -1,
                 'type': 10002,
@@ -947,28 +1028,30 @@ export class TreeView extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             });
             Text.fontWeight('regular');
-            Text.fontColor(f24);
+            Text.fontColor(fontColor);
+            Text.minFontScale(o1);
+            Text.maxFontScale(this.decideFontScale());
         }, Text);
         Text.pop();
         Row.pop();
     }
 
-    builder(c24 = null) {
-        this.listTreeViewMenu.bind(this)(c24 ? c24 : this);
+    builder(parent = null) {
+        this.listTreeViewMenu.bind(this)();
     }
 
-    draggingPopup(b23, c23 = null) {
-        this.observeComponentCreation2((a24, b24) => {
+    draggingPopup(item, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.constraintSize({
-                minWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.minWidth,
-                maxWidth: this.listNodeDataSource.getDragPopupPara().floorConstraintSize.maxWidth,
+                minWidth: this.listNodeDataSource.x7().y7.minWidth,
+                maxWidth: this.listNodeDataSource.x7().y7.maxWidth,
             });
-            Row.height(this.listNodeDataSource.getDragPopupPara().height);
-            Row.backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor);
+            Row.height(this.listNodeDataSource.x7().height);
+            Row.backgroundColor(this.listNodeDataSource.x7().backgroundColor);
             Row.padding({
-                start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
-                end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right)
+                start: LengthMetrics.resource(this.listNodeDataSource.x7().padding.left),
+                end: LengthMetrics.resource(this.listNodeDataSource.x7().padding.right),
             });
             Row.shadow({
                 radius: {
@@ -978,69 +1061,67 @@ export class TreeView extends ViewPU {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__',
                 },
-                color: SHADOW_COLOR,
+                color: c2,
                 offsetY: 0,
             });
-            Row.borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius);
+            Row.borderRadius(this.listNodeDataSource.x7().borderRadius);
         }, Row);
-        this.observeComponentCreation2((q23, r23) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (b23.getNodeItem().imageNode) {
+            if (item.k6().v3) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((y23, z23) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.backgroundColor(COLOR_IMAGE_ROW);
-                        Row.margin({
-                            end: getLengthMetricsByResourceOrNumber(b23.getNodeItem().imageNode?.itemRightMargin)
-                        });
-                        Row.height(b23.getNodeItem().imageNode?.itemHeight);
-                        Row.width(b23.getNodeItem().imageNode?.itemWidth);
+                        Row.backgroundColor(a2);
+                        Row.margin({ end: o(item.k6().v3?.z7) });
+                        Row.height(item.k6().v3?.itemHeight);
+                        Row.width(item.k6().v3?.itemWidth);
                     }, Row);
-                    this.observeComponentCreation2((w23, x23) => {
-                        Image.create(b23.getNodeItem().imageNode?.normalSource);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Image.create(item.k6().v3?.a8);
                         Image.objectFit(ImageFit.Contain);
-                        Image.height(b23.getNodeItem().imageNode?.itemHeight);
-                        Image.width(b23.getNodeItem().imageNode?.itemWidth);
-                        Image.opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity);
-                        Image.matchTextDirection((b23.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || b23.getNodeItem()
-                            .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
+                        Image.height(item.k6().v3?.itemHeight);
+                        Image.width(item.k6().v3?.itemWidth);
+                        Image.opacity(this.listNodeDataSource.x7().b8);
+                        Image.matchTextDirection((item.k6().x3?.c8 === ARROW_RIGHT || item.k6().x3?.c8 === s2) ? true :
+                            false);
                     }, Image);
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((o23, p23) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.constraintSize({
-                minWidth: b23.getNodeItem().imageNode ?
-                this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth1 :
-                this.listNodeDataSource.getDragPopupPara().textConstraintSize.minWidth2,
-                maxWidth: b23.getNodeItem().imageNode ?
-                this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth1 :
-                this.listNodeDataSource.getDragPopupPara().textConstraintSize.maxWidth2
+                minWidth: item.k6().v3 ?
+                this.listNodeDataSource.x7().d8.e8 :
+                this.listNodeDataSource.x7().d8.f8,
+                maxWidth: item.k6().v3 ?
+                this.listNodeDataSource.x7().d8.g8 :
+                this.listNodeDataSource.x7().d8.h8,
             });
         }, Row);
-        this.observeComponentCreation2((h23, i23) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (b23.getNodeItem().mainTitleNode && b23.getIsShowTitle()) {
+            if (item.k6().w3 && item.w5()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m23, n23) => {
-                        Text.create(b23.getNodeItem().mainTitleNode?.title);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(item.k6().w3?.title);
                         Text.maxLines(1);
-                        Text.fontSize(b23.getNodeItem().mainTitleNode?.size);
-                        Text.fontColor(this.listNodeDataSource.getDragPopupPara().fontColor);
-                        Text.fontWeight(this.listNodeDataSource.getDragPopupPara().fontWeight);
+                        Text.minFontScale(o1);
+                        Text.maxFontScale(this.decideFontScale());
+                        Text.fontSize(item.k6().w3?.size);
+                        Text.fontColor(this.listNodeDataSource.x7().fontColor);
+                        Text.fontWeight(this.listNodeDataSource.x7().fontWeight);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     }, Text);
                     Text.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -1051,199 +1132,199 @@ export class TreeView extends ViewPU {
     }
 
     clearLastIndexColor() {
-        if (this.viewLastIndex === -1) {
+        if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
             return;
         }
-        this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
-        this.nodeList[this.viewLastIndex].setNodeColor({
+        this.setImageSources(this.viewLastIndex, a3.NORMAL);
+        this.nodeList[this.viewLastIndex].a6({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         });
-        this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
-        this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor({
+        this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
+        this.listNodeDataSource.w7[this.viewLastIndex].a6({
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_background_transparent'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         });
-        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
-        this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
-        this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.Normal);
+        this.listNodeDataSource.w7[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
+        this.listNodeDataSource.w7[this.viewLastIndex].r6(false);
+        this.listNodeDataSource.i8(this.viewLastIndex, a3.NORMAL);
     }
 
-    setImageSources(y22, z22) {
-        let a23 = this.nodeList[y22];
-        a23.setIsSelected(z22 === InteractionStatus.Selected ||
-            z22 === InteractionStatus.Edit || z22 === InteractionStatus.FinishEdit);
-        if (a23.getNodeItem().mainTitleNode !== null && z22 !== InteractionStatus.DragInsert &&
-            z22 !== InteractionStatus.FinishDragInsert) {
-            a23.getNodeItem().mainTitleNode?.setMainTitleSelected(z22 === InteractionStatus.Selected ||
-                z22 === InteractionStatus.FinishEdit);
+    setImageSources(index, f17) {
+        let g17 = this.nodeList[index];
+        g17.r6(f17 === a3.SELECTED ||
+            f17 === a3.EDIT || f17 === a3.FINISH_EDIT);
+        if (g17.k6().w3 !== null && f17 !== a3.DRAG_INSERT &&
+            f17 !== a3.FINISH_DRAG_INSERT) {
+            g17.k6().w3?.j8(f17 === a3.SELECTED ||
+                f17 === a3.FINISH_EDIT);
         }
-        if (a23.getNodeItem().imageNode !== null) {
-            a23.getNodeItem().imageNode?.setImageSource(z22);
+        if (g17.k6().v3 !== null) {
+            g17.k6().v3?.i8(f17);
         }
     }
 
     initialRender() {
-        this.observeComponentCreation2((m21, n21) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             List.create({});
-            List.onDragMove((p22, q22) => {
+            List.onDragMove((event, extraParams) => {
                 if (this.isMultiPress) {
-                    console.error('drag error, a item has been dragged');
+                    hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
                     return;
                 }
-                let r22 = LIST_ITEM_HEIGHT;
-                let s22 = Math.floor(p22.getY() / (r22 / FLAG_NUMBER)) % FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
-                let t22 = JSON.parse(q22).insertIndex;
-                let u22 = false;
-                if (t22 >= this.listNodeDataSource.totalCount()) {
-                    s22 = Flag.DOWN_FLAG;
-                    t22 = this.listNodeDataSource.totalCount() - 1;
-                    this.listNodeDataSource.getData(t22)?.setIsOverBorder(true);
-                    u22 = true;
+                let b17 = i1;
+                let flag = Math.floor(event.getY() /
+                    (b17 / l1)) % l1 ? w2.DOWN_FLAG : w2.UP_FLAG;
+                let index = JSON.parse(extraParams).insertIndex;
+                let c17 = false;
+                if (index >= this.listNodeDataSource.totalCount()) {
+                    flag = w2.DOWN_FLAG;
+                    index = this.listNodeDataSource.totalCount() - 1;
+                    this.listNodeDataSource.getData(index)?.b7(true);
+                    c17 = true;
+                } else {
+                    this.listNodeDataSource.getData(index)?.b7(false);
                 }
-                else {
-                    this.listNodeDataSource.getData(t22)?.setIsOverBorder(false);
-                }
-                let v22 = this.listNodeDataSource.getData(t22);
-                let w22 = v22?.getCurrentNodeId();
-                if (t22 !== this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
-                    let x22 = this.listNodeDataSource.getIsParentOfInsertNode(w22);
-                    if (x22) {
-                        this.listNodeDataSource.setPassIndex(t22);
-                        if (w22 !== undefined) {
-                            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(findCurrentNodeIndex(this.listNodeDataSource, w22));
+                let d17 = this.listNodeDataSource.getData(index);
+                let currentNodeId = d17?.e6();
+                if (index !== this.listNodeDataSource.k8() && this.listNodeDataSource.l8()) {
+                    let e17 = this.listNodeDataSource.m8(currentNodeId);
+                    if (e17) {
+                        this.listNodeDataSource.n8(index);
+                        if (currentNodeId !== undefined) {
+                            this.listNodeDataSource.o8(this.listNodeDataSource.findIndex(currentNodeId));
                         }
-                        this.listNodeDataSource.setFlag(Flag.NONE);
+                        this.listNodeDataSource.p8(w2.NONE);
                         return;
                     }
                 }
-                this.listNodeDataSource.setLastPassIndex(t22);
-                this.listNodeDataSource.setVisibility(s22, t22 - 1, u22);
-                if (w22 !== undefined && w22 !== this.listNodeDataSource.getDraggingCurrentNodeId()) {
-                    this.listNodeDataSource.delayHighLightAndExpandNode(findCurrentNodeIndex(this.listNodeDataSource, w22), w22, t22);
+                this.listNodeDataSource.q8(index);
+                this.listNodeDataSource.r8(flag, index - 1, c17);
+                if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.s8()) {
+                    this.listNodeDataSource.t8(this.listNodeDataSource.findIndex(currentNodeId), currentNodeId, index);
                 }
             });
-            List.onDragEnter((m22, n22) => {
-                if (this.listNodeDataSource.getIsInnerDrag()) {
-                    this.listNodeDataSource.setIsDrag(true);
-                    let o22 = DRAG_OPACITY;
-                    this.listNodeDataSource.setListItemOpacity(o22);
+            List.onDragEnter((event, extraParams) => {
+                if (this.listNodeDataSource.l8()) {
+                    this.listNodeDataSource.u8(true);
+                    let a17 = m1;
+                    this.listNodeDataSource.v8(a17);
                 }
             });
-            List.onDragLeave((j22, k22) => {
-                this.listNodeDataSource.hideLastLine();
-                this.listNodeDataSource.clearLastTimeoutHighLight();
-                this.listNodeDataSource.clearLastTimeoutExpand();
-                let l22 = DRAG_OPACITY_NONE;
-                this.listNodeDataSource.setListItemOpacity(l22);
-                this.listNodeDataSource.setIsDrag(false);
-                this.listNodeDataSource.notifyDataReload();
+            List.onDragLeave((event, extraParams) => {
+                this.listNodeDataSource.w8();
+                this.listNodeDataSource.x8();
+                this.listNodeDataSource.y8();
+                let z16 = n1;
+                this.listNodeDataSource.v8(z16);
+                this.listNodeDataSource.u8(false);
+                this.listNodeDataSource.z8();
             });
-            List.onDrop((s21, t21) => {
-                this.listNodeDataSource.clearLastTimeoutExpand();
-                let u21 = DRAG_OPACITY_NONE;
-                this.listNodeDataSource.setListItemOpacity(u21);
-                let v21 = JSON.parse(t21).insertIndex;
-                let w21 = this.dropSelectedIndex;
-                if (w21 - 1 > this.listNodeDataSource.totalCount() || w21 === undefined) {
-                    console.error('drag error, currentNodeIndex is not found');
-                    this.listNodeDataSource.setIsDrag(false);
+            List.onDrop((event, extraParams) => {
+                this.listNodeDataSource.y8();
+                let m16 = n1;
+                this.listNodeDataSource.v8(m16);
+                let n16 = JSON.parse(extraParams).insertIndex;
+                let o16 = this.dropSelectedIndex;
+                if (o16 - 1 > this.listNodeDataSource.totalCount() || o16 === undefined) {
+                    hilog.error(LOG_CODE, TAG, 'drag error, currentNodeIndex is not found');
+                    this.listNodeDataSource.u8(false);
                     return;
                 }
-                if (v21 === this.listNodeDataSource.totalCount()) {
-                    console.log('need to insert into the position of the last line, now insertNodeIndex = insertNodeIndex - 1');
-                    v21 -= 1;
+                if (n16 === this.listNodeDataSource.totalCount()) {
+                    hilog.info(LOG_CODE, TAG, 'need to insert into the position of the last line');
+                    n16 -= 1;
                 }
-                let x21 = this.listNodeDataSource.getData(v21);
-                if (x21 === undefined) {
+                let p16 = this.listNodeDataSource.getData(n16);
+                if (p16 === undefined) {
                     return;
                 }
-                let y21 = x21.getNodeCurrentNodeId();
-                if (!this.listNodeDataSource.getIsDrag() || !this.listNodeDataSource.getIsInnerDrag()) {
-                    this.listNodeDataSource.clearLastTimeoutHighLight();
-                    this.listNodeDataSource.setIsInnerDrag(false);
-                    this.listNodeDataSource.hideLastLine();
-                    this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
-                    this.listNodeDataSource.refreshSubtitle(y21);
-                    this.listNodeDataSource.notifyDataReload();
+                let q16 = p16.e6();
+                if (!this.listNodeDataSource.a9() || !this.listNodeDataSource.l8()) {
+                    this.listNodeDataSource.x8();
+                    this.listNodeDataSource.b9(false);
+                    this.listNodeDataSource.w8();
+                    this.listNodeDataSource.c9();
+                    this.listNodeDataSource.d9(q16);
+                    this.listNodeDataSource.z8();
                     return;
                 }
-                let z21 = this.listNodeDataSource.getCurrentNodeInfo();
-                let a22 = x21.getNodeParentNodeId();
-                let b22 = this.listNodeDataSource.getDraggingCurrentNodeId();
-                let c22 = this.listNodeDataSource.getDraggingParentNodeId();
-                let d22 = this.listNodeDataSource.getIsParentOfInsertNode(y21);
-                if (d22) {
-                    this.listNodeDataSource.clearLastTimeoutHighLight();
-                    this.listNodeDataSource.setIsInnerDrag(false);
-                    this.listNodeDataSource.hideLastLine();
-                    this.listNodeDataSource.notifyDataChange(v21);
-                    this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
-                    this.listNodeDataSource.setIsDrag(false);
-                    let i22 = findCurrentNodeIndex(this.listNodeDataSource, b22);
-                    this.listNodeDataSource.setClickIndex(i22);
-                    this.listNodeDataSource.handleEvent(Event.DRAG, i22);
+                let r16 = this.listNodeDataSource.e9();
+                let s16 = p16.f6();
+                let t16 = this.listNodeDataSource.s8();
+                let u16 = this.listNodeDataSource.f9();
+                let v16 = this.listNodeDataSource.m8(q16);
+                if (v16) {
+                    this.listNodeDataSource.x8();
+                    this.listNodeDataSource.b9(false);
+                    this.listNodeDataSource.w8();
+                    this.listNodeDataSource.g9(n16);
+                    this.listNodeDataSource.c9();
+                    this.listNodeDataSource.u8(false);
+                    let y16 = this.listNodeDataSource.findIndex(t16);
+                    this.listNodeDataSource.h9(y16);
+                    this.listNodeDataSource.i9(Event.DRAG, y16);
                     return;
                 }
-                if (this.listNodeDataSource.getExpandAndCollapseInfo(b22) === NodeStatus.Expand) {
-                    this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex(this.listNodeDataSource, b22));
+                if (this.listNodeDataSource.j9(t16) === z2.EXPAND) {
+                    this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(t16));
                 }
-                let e22 = false;
-                if (this.listNodeDataSource.getExpandAndCollapseInfo(y21) === NodeStatus.Collapse) {
-                    let h22 = findCurrentNodeIndex(this.listNodeDataSource, y21);
-                    if (this.listNodeDataSource.ListNode[h22].getIsHighLight()) {
-                        this.listNodeDataSource.expandAndCollapseNode(h22);
+                let flag = false;
+                if (this.listNodeDataSource.j9(q16) === z2.COLLAPSE) {
+                    let currentIndex = this.listNodeDataSource.findIndex(q16);
+                    if (this.listNodeDataSource.w7[currentIndex].g7()) {
+                        this.listNodeDataSource.k9(currentIndex);
                     }
-                    e22 = true;
+                    flag = true;
                 }
-                this.listNodeDataSource.setLastDelayHighLightId();
-                if (z21 !== null && b22 !== y21) {
-                    this.listNodeDataSource.alterDragNode(a22, y21, c22, b22, z21);
-                    this.listNodeDataSource.hideLastLine();
+                this.listNodeDataSource.l9();
+                if (r16 !== null && t16 !== q16) {
+                    this.listNodeDataSource.m9(s16, q16, u16, t16, r16);
+                    this.listNodeDataSource.w8();
+                } else {
+                    this.listNodeDataSource.w8();
+                    this.listNodeDataSource.n9(t16);
+                    this.listNodeDataSource.w8();
                 }
-                else {
-                    this.listNodeDataSource.hideLastLine();
-                    this.listNodeDataSource.setLastPassId(b22);
-                    this.listNodeDataSource.hideLastLine();
+                let w16 = this.listNodeDataSource.findIndex(this.listNodeDataSource.o9());
+                this.listNodeDataSource.p9(w16);
+                this.listNodeDataSource.x8();
+                this.listNodeDataSource.c9();
+                this.listNodeDataSource.u8(false);
+                let x16 = this.listNodeDataSource.findIndex(t16);
+                this.listNodeDataSource.h9(x16);
+                this.listNodeDataSource.i9(Event.DRAG, x16);
+                this.listNodeDataSource.b9(false);
+                this.listNodeDataSource.z8();
+                this.listNodeDataSource.w7[x16].fontColor = this.treeViewTheme.c4;
+                if (this.viewLastIndex !== -1 && o16 !== this.viewLastIndex) {
+                    this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                        .w3?.j8(false);
+                    this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                        .w3?.q9(false);
                 }
-                let f22 = findCurrentNodeIndex(this.listNodeDataSource, this.listNodeDataSource.getLastDelayHighLightId());
-                this.listNodeDataSource.setLastDelayHighLightIndex(f22);
-                this.listNodeDataSource.clearLastTimeoutHighLight();
-                this.listNodeDataSource.initialParameterAboutDelayHighLightAndExpandIndex();
-                this.listNodeDataSource.setIsDrag(false);
-                let g22 = findCurrentNodeIndex(this.listNodeDataSource, b22);
-                this.listNodeDataSource.setClickIndex(g22);
-                this.listNodeDataSource.handleEvent(Event.DRAG, g22);
-                this.listNodeDataSource.setIsInnerDrag(false);
-                this.listNodeDataSource.notifyDataReload();
-                this.listNodeDataSource.listNode[g22].fontColor = this.treeViewTheme.primaryTitleActiveFontColor;
-                if (this.viewLastIndex !== -1 && w21 !== this.viewLastIndex) {
-                    this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-                        .mainTitleNode?.setMainTitleSelected(false);
-                    this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-                        .mainTitleNode?.setMainTitleHighLight(false);
-                }
-                if (this.listNodeDataSource.listNode[this.viewLastIndex] !== null) {
-                    this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
+                if (this.listNodeDataSource.w7[this.viewLastIndex] !== null) {
+                    this.listNodeDataSource.w7[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
                 }
                 this.listNodeDataSource.lastIndex = this.viewLastIndex;
-                if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
-                    if (this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-                        .imageNode !== null) {
-                        this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-                            .imageNode?.setImageSource(InteractionStatus.Normal);
-                        this.listNodeDataSource.listNode[this.viewLastIndex].imageSource = this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-                            .imageNode?.source;
+                if (this.listNodeDataSource.w7[this.viewLastIndex]) {
+                    if (this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                        .v3 !== null) {
+                        this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                            .v3?.i8(a3.NORMAL);
+                        this.listNodeDataSource.w7[this.viewLastIndex].j4 =
+                            this.listNodeDataSource.w7[this.viewLastIndex].k6()
+                                .v3?.source;
                     }
                 }
-                if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
-                    this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor({
+                if (this.listNodeDataSource.w7[this.viewLastIndex]) {
+                    this.listNodeDataSource.w7[this.viewLastIndex].a6({
                         'id': -1,
                         'type': 10001,
                         params: ['sys.color.ohos_id_color_background_transparent'],
@@ -1251,116 +1332,115 @@ export class TreeView extends ViewPU {
                         'moduleName': '__harDefaultModuleName__',
                     });
                 }
-                this.listNodeDataSource.lastIndex = g22;
+                this.listNodeDataSource.lastIndex = x16;
             });
         }, List);
         {
-            const e20 = j20 => {
-                const k20 = j20;
+            const __lazyForEachItemGenFunction = _item => {
+                const u15 = _item;
                 {
-                    const l20 = (c21, d21) => {
+                    const itemCreation2 = (elmtId, isInitialRender) => {
                         ListItem.create(() => {
                         }, false);
                         ListItem.width('100%');
-                        ListItem.height(k20.getListItemHeight());
+                        ListItem.height(u15.d6());
                         ListItem.padding({
                             start: LengthMetrics.resource(this.itemPadding.left),
                             end: LengthMetrics.resource(this.itemPadding.right)
                         });
                         ListItem.align(Alignment.Start);
-                        ListItem.onDragStart((g21, h21) => {
-                            if (this.listNodeDataSource.getIsDrag() || this.listNodeDataSource.getIsInnerDrag() || this.isMultiPress) {
-                                console.error('drag error, a item has been dragged');
+                        ListItem.onDragStart((event, extraParams) => {
+                            if (this.listNodeDataSource.a9() || this.listNodeDataSource.l8() || this.isMultiPress) {
+                                hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
                                 return;
                             }
-                            this.dropSelectedIndex = JSON.parse(h21).selectedIndex;
-                            let i21 = JSON.parse(h21).selectedIndex;
-                            let j21 = this.listNodeDataSource.getData(i21);
-                            let k21 = k20.getNodeCurrentNodeId();
-                            if (i21 >= this.listNodeDataSource.totalCount() || i21 === undefined) {
-                                console.error('drag error, currentNodeIndex is not found in onDragStart');
+                            this.dropSelectedIndex = JSON.parse(extraParams).selectedIndex;
+                            let e16 = JSON.parse(extraParams).selectedIndex;
+                            let f16 = this.listNodeDataSource.getData(e16);
+                            let g16 = u15.e6();
+                            if (e16 >= this.listNodeDataSource.totalCount() || e16 === undefined) {
+                                hilog.error(LOG_CODE, TAG,
+                                    'drag error, currentNodeIndex is not found in onDragStart');
                                 return;
                             }
-                            this.listNodeDataSource.setIsInnerDrag(true);
-                            this.listNodeDataSource.setIsDrag(true);
-                            this.listNodeDataSource.setCurrentNodeInfo(j21);
-                            this.listNodeDataSource.setDraggingCurrentNodeId(j21?.getNodeCurrentNodeId());
-                            this.listNodeDataSource.setDraggingParentNodeId(j21?.getNodeParentNodeId());
-                            let l21 = DRAG_OPACITY;
-                            this.listNodeDataSource.setListItemOpacity(l21);
-                            this.listNodeDataSource.notifyDataChange(i21);
-                            if (k21 !== j21?.getNodeCurrentNodeId()) {
-                                console.error('drag is too fast,it attribute a fault to OH');
-                                this.listNodeDataSource.setIsDrag(false);
+                            this.listNodeDataSource.b9(true);
+                            this.listNodeDataSource.u8(true);
+                            this.listNodeDataSource.r9(f16);
+                            this.listNodeDataSource.s9(f16?.e6());
+                            this.listNodeDataSource.t9(f16?.f6());
+                            let h16 = m1;
+                            this.listNodeDataSource.v8(h16);
+                            this.listNodeDataSource.g9(e16);
+                            if (g16 !== f16?.e6()) {
+                                hilog.error(LOG_CODE, TAG, 'drag is too fast, it attribute a fault to OH');
+                                this.listNodeDataSource.u8(false);
                                 return;
                             }
-                            return { builder: () => {
-                                this.draggingPopup.call(this, j21);
-                            } };
+                            return {
+                                builder: () => {
+                                    this.draggingPopup.call(this, f16);
+                                }
+                            };
                         });
                     };
-                    const m20 = () => {
-                        this.observeComponentCreation2(l20, ListItem);
-                        this.observeComponentCreation2((x20, y20) => {
+                    const observedDeepRender = () => {
+                        this.observeComponentCreation2(itemCreation2, ListItem);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
                             Row.create();
-                            Row.onTouch((a21) => {
-                                this.viewLastIndex = this.listNodeDataSource.getLastIndex();
-                                let b21 = this.listNodeDataSource.findIndex(k20.getNodeCurrentNodeId());
-                                if (a21.type === TouchType.Down) {
-                                    if (b21 !== this.viewLastIndex) {
+                            Row.onTouch((event) => {
+                                this.viewLastIndex = this.listNodeDataSource.u9();
+                                let index = this.listNodeDataSource.findIndex(u15.e6());
+                                if (event.type === TouchType.Down) {
+                                    if (index !== this.viewLastIndex) {
                                         this.clearLastIndexColor();
-                                        this.listNodeDataSource.lastIndex = b21;
-                                        this.listNodeDataSource.setClickIndex(b21);
+                                        this.listNodeDataSource.lastIndex = index;
+                                        this.listNodeDataSource.h9(index);
                                     }
                                 }
-                                if (a21.type === TouchType.Up) {
-                                    this.listNodeDataSource.listNode[b21].setIsSelected(true);
-                                    this.listNodeDataSource.setImageSource(b21, InteractionStatus.Selected);
-                                    if (this.listNodeDataSource.listNode[b21].getNodeItem().imageNode !== null) {
-                                        this.listNodeDataSource.listNode[b21].imageSource = this.listNodeDataSource.listNode[b21]
-                                            .getNodeItem().imageNode?.source;
+                                if (event.type === TouchType.Up) {
+                                    this.listNodeDataSource.w7[index].r6(true);
+                                    this.listNodeDataSource.i8(index, a3.SELECTED);
+                                    if (this.listNodeDataSource.w7[index].k6().v3 !== null) {
+                                        this.listNodeDataSource.w7[index].j4 =
+                                            this.listNodeDataSource.w7[index].k6().v3?.source;
                                     }
-                                    if (b21 !== this.viewLastIndex) {
+                                    if (index !== this.viewLastIndex) {
                                         this.clearLastIndexColor();
-                                        this.listNodeDataSource.lastIndex = b21;
-                                        this.listNodeDataSource.setClickIndex(b21);
+                                        this.listNodeDataSource.lastIndex = index;
+                                        this.listNodeDataSource.h9(index);
                                     }
-                                    this.viewLastIndex = b21;
+                                    this.viewLastIndex = index;
                                 }
-                                if (this.listNodeDataSource.getLastIndex() !== -1 && b21 !== this.listNodeDataSource.getLastIndex()) {
-                                    this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
-                                    this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
+                                if (this.listNodeDataSource.u9() !== -1 && index !== this.listNodeDataSource.u9()) {
+                                    this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false,
+                                        this.listNodeDataSource.u9());
+                                    this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
                                 }
                             });
                         }, Row);
                         {
-                            this.observeComponentCreation2((r20, s20) => {
-                                if (s20) {
-                                    let t20 = new TreeViewInner(this, {
-                                        item: k20,
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                if (isInitialRender) {
+                                    let componentCall = new i3(this, {
+                                        item: u15,
                                         listNodeDataSource: this.listNodeDataSource,
-                                        index: this.listNodeDataSource.findIndex(k20.getNodeCurrentNodeId()),
+                                        index: this.listNodeDataSource.findIndex(u15.e6()),
                                         listTreeViewMenu: this.listTreeViewMenu,
-                                    }, undefined, r20, () => {
-                                    }, {
-                                        page: 'library/src/main/ets/components/mainpage/MainPage.ets',
-                                        line: 1044,
-                                        col: 13
-                                    });
-                                    ViewPU.create(t20);
-                                    let u20 = () => {
+                                    }, undefined, elmtId, () => {
+                                    }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1130, x9: 13 });
+                                    ViewPU.create(componentCall);
+                                    let paramsLambda = () => {
                                         return {
-                                            item: k20,
+                                            item: u15,
                                             listNodeDataSource: this.listNodeDataSource,
-                                            index: this.listNodeDataSource.findIndex(k20.getNodeCurrentNodeId()),
+                                            index: this.listNodeDataSource.findIndex(u15.e6()),
                                             listTreeViewMenu: this.listTreeViewMenu
                                         };
                                     };
-                                    t20.paramsGenerator_ = u20;
-                                }
-                                else {
-                                    this.updateStateVarsOfChildByElmtId(r20, {
-                                        item: k20
+                                    componentCall.paramsGenerator_ = paramsLambda;
+                                } else {
+                                    this.updateStateVarsOfChildByElmtId(elmtId, {
+                                        item: u15
                                     });
                                 }
                             }, { name: 'TreeViewInner' });
@@ -1368,11 +1448,12 @@ export class TreeView extends ViewPU {
                         Row.pop();
                         ListItem.pop();
                     };
-                    m20();
+                    observedDeepRender();
                 }
             };
-            const f20 = (i20) => JSON.stringify(i20);
-            LazyForEach.create('1', this, this.listNodeDataSource, e20, f20);
+            const __lazyForEachItemIdFunc = (item) => JSON.stringify(item);
+            LazyForEach.create('1', this, this.listNodeDataSource, __lazyForEachItemGenFunction,
+                __lazyForEachItemIdFunc);
             LazyForEach.pop();
         }
         List.pop();
@@ -1383,256 +1464,292 @@ export class TreeView extends ViewPU {
     }
 }
 
-function findCurrentNodeIndex(x19, y19) {
-    let z19 = 0;
-    x19.ListNode.forEach((b20, c20) => {
-        if (b20.getNodeCurrentNodeId() === y19) {
-            z19 = c20;
-        }
-    });
-    return z19;
-}
-
 export class TreeController {
     constructor() {
-        this.ROOT_NODE_ID = -1;
-        this.nodeIdList = [];
-        this.listNodeUtils = new ListNodeUtils();
-        this.listNodeDataSource = new ListNodeDataSource();
-        this.initBuild = true;
-        this.treeViewTheme = new TreeViewTheme();
+        this.y9 = -1;
+        this.z9 = [];
+        this.listNodeDataSource = new h3();
+        this.a10 = true;
+        this.treeViewTheme = e3.getInstance();
     }
 
-    getListNodeDataSource() {
+    v7() {
         return this.listNodeDataSource;
     }
 
-    getClickNodeChildrenInfo() {
-        let w19 = this.listNodeDataSource.getClickNodeId();
-        return this.listNodeUtils.getClickNodeChildrenInfo(w19);
+    b10() {
+        let q15 = this.listNodeDataSource.c10();
+        return this.listNodeDataSource.b10(q15);
     }
 
-    getChildrenId() {
-        let v19 = this.listNodeDataSource.getClickNodeId();
-        return this.listNodeUtils.getClickChildId(v19);
+    d10() {
+        let p15 = this.listNodeDataSource.c10();
+        return this.listNodeDataSource.e10(p15);
     }
 
     removeNode() {
-        let s19 = this.listNodeDataSource.getClickNodeId();
-        if (s19 < 0) {
+        let n15 = this.listNodeDataSource.c10();
+        if (n15 < 0) {
             return;
         }
-        let t19 = this.listNodeUtils.findParentNodeId(s19);
-        let u19 = this.listNodeUtils.removeNode(s19, t19);
-        this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.REMOVE_NODE, t19, u19);
-        this.nodeIdList.splice(this.nodeIdList.indexOf(s19), 1);
+        let parentNodeId = this.listNodeDataSource.f10(n15);
+        let o15 = this.listNodeDataSource.removeNode(n15, parentNodeId);
+        this.listNodeDataSource.g10(t2.REMOVE_NODE, parentNodeId, o15);
+        this.z9.splice(this.z9.indexOf(n15), 1);
         this.listNodeDataSource.lastIndex = -1;
     }
 
     modifyNode() {
-        let r19 = this.listNodeDataSource.getClickNodeId();
-        this.listNodeDataSource.setItemVisibilityOnEdit(r19, MenuOperation.MODIFY_NODE);
+        let m15 = this.listNodeDataSource.c10();
+        this.listNodeDataSource.w9(m15, t2.MODIFY_NODE);
     }
 
-    add() {
-        let n19 = this.listNodeDataSource.getClickNodeId();
-        if (n19 === this.listNodeDataSource.ROOT_NODE_ID || !this.listNodeDataSource.getIsFolder(n19)) {
+    add(g15) {
+        let h15 = this.listNodeDataSource.c10();
+        if (h15 === this.listNodeDataSource.y9 || !this.listNodeDataSource.v6(h15)) {
             return;
         }
-        let o19 = this.listNodeUtils.getNewNodeInfo(n19);
-        this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1] + 1);
-        let p19 = this.nodeIdList[this.nodeIdList.length - 1];
-        this.listNodeUtils.addNewNodeId = p19;
-        this.listNodeUtils.addNode(n19, p19, {
-            isFolder: o19.isFolder,
-            icon: o19.icon,
-            selectedIcon: o19.selectedIcon,
-            editIcon: o19.editIcon,
+        let i15 = this.listNodeDataSource.h10(h15);
+        this.z9.push(this.z9[this.z9.length - 1] + 1);
+        let j15 = this.z9[this.z9.length - 1];
+        let k15 = this.listNodeDataSource.addNode(h15, j15, {
+            isFolder: i15.isFolder,
+            icon: i15.icon,
+            selectedIcon: i15.selectedIcon,
+            editIcon: i15.editIcon,
             primaryTitle: '新建文件夹',
-            container: o19.container,
-            secondaryTitle: o19.secondaryTitle,
-        });
-        this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.ADD_NODE, n19, [p19]);
-        this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
-        this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
-        this.listNodeDataSource.listNode[this.listNodeDataSource.getLastIndex()]
-            .setFontColor(this.treeViewTheme.primaryTitleFontColor);
-        let q19 = findCurrentNodeIndex(this.listNodeDataSource, p19);
-        this.listNodeDataSource.setClickIndex(q19);
-        this.listNodeDataSource.handleEvent(Event.TOUCH_UP, q19);
+            container: i15.container,
+            secondaryTitle: i15.secondaryTitle,
+        }, g15);
+        if (!k15) {
+            return;
+        }
+        this.listNodeDataSource.g10(t2.ADD_NODE, h15, [j15]);
+        this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
+        this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
+        this.listNodeDataSource.w7[this.listNodeDataSource.u9()].o5(this.treeViewTheme.a4);
+        let l15 = this.listNodeDataSource.findIndex(j15);
+        this.listNodeDataSource.h9(l15);
+        this.listNodeDataSource.i9(Event.TOUCH_UP, l15);
     }
 
-    addNode(l19) {
-        if (l19 === undefined) {
-            this.add();
+    addNode(nodeParam) {
+        if (nodeParam === undefined) {
+            this.add(this.a10);
             return this;
-        }
-        else {
-            if (l19.primaryTitle !== undefined &&
-                !this.listNodeUtils.checkMainTitleIsValid(l19.primaryTitle.toString())) {
+        } else {
+            let e15 = false;
+            if (nodeParam.primaryTitle !== undefined &&
+                !this.listNodeDataSource.i10(nodeParam.primaryTitle.toString())) {
                 throw new Error('ListTreeNode[addNode]: ' +
                     'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
                 return this;
             }
-            if (l19.primaryTitle === null && l19.icon === null) {
+            if (nodeParam.primaryTitle === null && nodeParam.icon === null) {
                 throw new Error('ListTreeNode[addNode]: ' +
                     'The icon and directory name cannot be empty at the same time.');
                 return this;
             }
-            if (l19.currentNodeId === this.ROOT_NODE_ID || l19.currentNodeId === null) {
+            if (nodeParam.currentNodeId === this.y9 || nodeParam.currentNodeId === null) {
                 throw new Error('ListTreeNode[addNode]: currentNodeId can not be -1 or null.');
                 return this;
             }
-            if (l19.currentNodeId !== undefined) {
-                this.nodeIdList.push(l19.currentNodeId);
+            if (nodeParam.currentNodeId !== undefined) {
+                this.z9.push(nodeParam.currentNodeId);
             }
-            if (l19.parentNodeId !== undefined) {
-                if (l19.currentNodeId !== undefined) {
-                    this.listNodeUtils.addNode(l19.parentNodeId, l19.currentNodeId, l19);
+            if (nodeParam.parentNodeId !== undefined) {
+                if (nodeParam.currentNodeId !== undefined) {
+                    e15 =
+                        this.listNodeDataSource.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam,
+                            this.a10);
                 }
             }
-            if (!this.initBuild && l19.parentNodeId !== undefined) {
-                let m19 = this.nodeIdList[this.nodeIdList.length - 1];
-                this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.ADD_NODE, l19.parentNodeId, [m19]);
+            if (!e15) {
+                return this;
+            }
+            if (!this.a10 && nodeParam.parentNodeId !== undefined) {
+                let f15 = this.z9[this.z9.length - 1];
+                this.listNodeDataSource.g10(t2.ADD_NODE, nodeParam.parentNodeId, [f15]);
             }
             return this;
         }
     }
 
-    refreshNode(i19, j19, k19) {
-        this.listNodeDataSource.setNodeSubtitlePara(i19, j19, k19);
+    refreshNode(parentId, parentSubTitle, d15) {
+        this.listNodeDataSource.j10(parentId, parentSubTitle, d15);
     }
 
     buildDone() {
-        this.listNodeDataSource.init(this.listNodeUtils);
-        this.nodeIdList.sort((g19, h19) => g19 - h19);
-        this.initBuild = false;
+        this.listNodeDataSource.k10();
+        this.listNodeDataSource.l10();
+        this.listNodeDataSource.m10();
+        m(this.z9);
+        this.a10 = false;
     }
 }
 
-class BasicDataSource {
+class g3 {
     constructor() {
-        this.listeners = [];
+        this.n10 = [];
     }
 
     totalCount() {
         return 0;
     }
 
-    getData(e19) {
+    getData(index) {
         return undefined;
     }
 
-    registerDataChangeListener(d19) {
-        if (this.listeners.indexOf(d19) < 0) {
-            this.listeners.push(d19);
+    registerDataChangeListener(listener) {
+        if (this.n10.indexOf(listener) < 0) {
+            this.n10.push(listener);
         }
     }
 
-    unregisterDataChangeListener(b19) {
-        const c19 = this.listeners.indexOf(b19);
-        if (c19 >= 0) {
-            this.listeners.splice(c19, 1);
+    unregisterDataChangeListener(listener) {
+        const pos = this.n10.indexOf(listener);
+        if (pos >= 0) {
+            this.n10.splice(pos, 1);
         }
     }
 
-    notifyDataReload() {
-        this.listeners.forEach(a19 => {
-            a19.onDataReloaded();
+    z8() {
+        this.n10.forEach(listener => {
+            listener.onDataReloaded();
         });
     }
 
-    notifyDataAdd(w18) {
-        this.listeners.forEach(y18 => {
-            y18.onDataAdd(w18);
+    o10(index) {
+        this.n10.forEach(listener => {
+            listener.onDataAdd(index);
         });
     }
 
-    notifyDataChange(t18) {
-        if (t18 === undefined) {
+    g9(index) {
+        if (index === undefined) {
             return;
         }
-        this.listeners.forEach(v18 => {
-            v18.onDataChange(t18);
+        this.n10.forEach(listener => {
+            listener.onDataChange(index);
         });
     }
 
-    notifyDataDelete(q18) {
-        this.listeners.forEach(s18 => {
-            s18.onDataDelete(q18);
+    p10(index) {
+        this.n10.forEach(listener => {
+            listener.onDataDelete(index);
         });
     }
 
-    notifyDataMove(m18, n18) {
-        this.listeners.forEach(p18 => {
-            p18.onDataMove(m18, n18);
+    q10(from, to) {
+        this.n10.forEach(listener => {
+            listener.onDataMove(from, to);
         });
     }
 }
 
-class ListNodeDataSource extends BasicDataSource {
+function i(t14, count, u14, v14) {
+    let taskId = setTimeout(() => {
+        v14.forEach((parentNodeId) => {
+            j(parentNodeId, u14, t14, count);
+        });
+        clearTimeout(taskId);
+    }, m2);
+}
+
+function j(parentNodeId, q14, r14, count) {
+    let s14 = parentNodeId;
+    while (s14 >= 0) {
+        if (q14.has(s14)) {
+            let parent = q14.get(s14);
+            parent.o6().r10 =
+                r14 ? parent.o6().r10 + count : parent.o6().r10 - count;
+            s14 = parent.parentNodeId;
+        } else {
+            hilog.error(LOG_CODE, TAG, 'updateParentChildNumHandler: parent node not found');
+            break;
+        }
+    }
+}
+
+function m(n14) {
+    let taskId = setTimeout(() => {
+        n14.sort((a, b) => a - b);
+        clearTimeout(taskId);
+    }, m2);
+}
+
+class h3 extends g3 {
     constructor() {
-        super(...arguments);
-        this.ROOT_NODE_ID = -1;
-        this.listNodeUtils = new ListNodeUtils();
-        this.listNode = [];
+        super();
+        this.y9 = -1;
+        this.s10 = new j3(d3);
+        this.t10 = 50;
+        this.MAX_CN_LENGTH = 254;
+        this.MAX_EN_LENGTH = 255;
         this.INITIAL_INVALID_VALUE = -1;
+        this.w7 = [];
+        this.u10 = [];
+        this.v10 = new Map();
+        this.w10 = new Map();
         this.lastIndex = -1;
-        this.thisIndex = -1;
-        this.modifyNodeIndex = -1;
-        this.modifyNodeId = -1;
-        this.expandAndCollapseInfo = new Map();
-        this.loadedNodeIdAndIndexMap = new Map();
-        this.isTouchDown = false;
+        this.x10 = -1;
+        this.y10 = -1;
+        this.z10 = -1;
+        this.a11 = new Map();
+        this.b11 = new Map();
+        this.c11 = new Map();
+        this.d11 = false;
         this.appEventBus = TreeListenerManager.getInstance().getTreeListener();
-        this.isInnerDrag = false;
-        this.isDrag = false;
-        this.draggingCurrentNodeId = this.INITIAL_INVALID_VALUE;
-        this.draggingParentNodeId = this.INITIAL_INVALID_VALUE;
-        this.currentNodeInfo = null;
-        this.listItemOpacity = 1;
-        this.lastPassIndex = this.INITIAL_INVALID_VALUE;
-        this.lastPassId = this.INITIAL_INVALID_VALUE;
-        this.thisPassIndex = this.INITIAL_INVALID_VALUE;
-        this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
-        this.timeoutExpandId = this.INITIAL_INVALID_VALUE;
-        this.lastTimeoutExpandId = this.INITIAL_INVALID_VALUE;
-        this.clearTimeoutExpandId = this.INITIAL_INVALID_VALUE;
-        this.timeoutHighLightId = this.INITIAL_INVALID_VALUE;
-        this.lastTimeoutHighLightId = this.INITIAL_INVALID_VALUE;
-        this.clearTimeoutHighLightId = this.INITIAL_INVALID_VALUE;
-        this.lastDelayHighLightIndex = this.INITIAL_INVALID_VALUE;
-        this.lastDelayHighLightId = this.INITIAL_INVALID_VALUE;
-        this.nodeIdAndSubtitleMap = new Map();
-        this.flag = Flag.NONE;
-        this.selectedParentNodeId = this.INITIAL_INVALID_VALUE;
-        this.selectedParentNodeSubtitle = '';
-        this.insertNodeSubtitle = '';
-        this.currentFocusNodeId = this.INITIAL_INVALID_VALUE;
-        this.lastFocusNodeId = this.INITIAL_INVALID_VALUE;
-        this.addFocusNodeId = this.INITIAL_INVALID_VALUE;
-        this.treeViewTheme = new TreeViewTheme();
-        this.FLAG_LINE = {
-            flagLineHeight: FLAG_LINE_HEIGHT,
-            flagLineColor: {
+        this.e11 = false;
+        this.f11 = false;
+        this.g11 = this.INITIAL_INVALID_VALUE;
+        this.h11 = this.INITIAL_INVALID_VALUE;
+        this.i11 = null;
+        this.j11 = 1;
+        this.k11 = this.INITIAL_INVALID_VALUE;
+        this.l11 = this.INITIAL_INVALID_VALUE;
+        this.n11 = this.INITIAL_INVALID_VALUE;
+        this.o11 = this.INITIAL_INVALID_VALUE;
+        this.p11 = this.INITIAL_INVALID_VALUE;
+        this.q11 = this.INITIAL_INVALID_VALUE;
+        this.r11 = this.INITIAL_INVALID_VALUE;
+        this.s11 = this.INITIAL_INVALID_VALUE;
+        this.t11 = this.INITIAL_INVALID_VALUE;
+        this.u11 = this.INITIAL_INVALID_VALUE;
+        this.v11 = this.INITIAL_INVALID_VALUE;
+        this.w11 = this.INITIAL_INVALID_VALUE;
+        this.x11 = new Map();
+        this.flag = w2.NONE;
+        this.y11 = this.INITIAL_INVALID_VALUE;
+        this.z11 = '';
+        this.a12 = '';
+        this.b12 = this.INITIAL_INVALID_VALUE;
+        this.c12 = this.INITIAL_INVALID_VALUE;
+        this.d12 = this.INITIAL_INVALID_VALUE;
+        this.treeViewTheme = e3.getInstance();
+        this.e12 = [];
+        this.f12 = {
+            g12: s1,
+            h12: {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.ohos_id_color_emphasize'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             },
-            xOffset: X_OFF_SET,
-            yTopOffset: Y_OFF_SET,
-            yBottomOffset: Y_BOTTOM_OFF_SET,
-            yBasePlateOffset: Y_BASE_PLATE_OFF_SET,
+            xOffset: t1,
+            i12: u1,
+            j12: v1,
+            k12: w1,
         };
-        this.DRAG_POPUP = {
-            floorConstraintSize: { minWidth: FLOOR_MIN_WIDTH, maxWidth: FLOOR_MAX_WIDTH },
-            textConstraintSize: {
-                minWidth1: TEXT_MIN_WIDTH,
-                maxWidth1: TEXT_MAX_WIDTH,
-                minWidth2: MIN_WIDTH,
-                maxWidth2: MAX_WIDTH,
+        this.l12 = {
+            y7: { minWidth: e2, maxWidth: f2 },
+            d8: {
+                e8: g2,
+                g8: h2,
+                f8: i2,
+                h8: j2,
             },
             padding: {
                 left: {
@@ -1650,8 +1767,8 @@ class ListNodeDataSource extends BasicDataSource {
                     'moduleName': '__harDefaultModuleName__',
                 }
             },
-            backgroundColor: COLOR_IMAGE_EDIT,
-            height: GRAG_POP_UP_HEIGHT,
+            backgroundColor: z1,
+            height: d2,
             shadow: {
                 radius: {
                     'id': -1,
@@ -1660,9 +1777,9 @@ class ListNodeDataSource extends BasicDataSource {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__',
                 },
-                color: SHADOW_COLOR,
+                color: c2,
                 offsetX: 0,
-                offsetY: SHADOW_OFFSETY,
+                offsetY: j1,
             },
             borderRadius: {
                 'id': -1,
@@ -1671,7 +1788,7 @@ class ListNodeDataSource extends BasicDataSource {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             },
-            fontColor: this.treeViewTheme.primaryTitleFontColor,
+            fontColor: this.treeViewTheme.a4,
             fontSize: {
                 'id': -1,
                 'type': 10002,
@@ -1680,7 +1797,7 @@ class ListNodeDataSource extends BasicDataSource {
                 'moduleName': '__harDefaultModuleName__',
             },
             fontWeight: FontWeight.Regular,
-            imageOpacity: {
+            b8: {
                 'id': -1,
                 'type': 10002,
                 params: ['sys.float.ohos_id_alpha_content_fourth'],
@@ -1689,8 +1806,8 @@ class ListNodeDataSource extends BasicDataSource {
             }
         };
         this.subTitle = {
-            normalFontColor: this.treeViewTheme.secondaryTitleFontColor,
-            highLightFontColor: {
+            n12: this.treeViewTheme.b4,
+            o12: {
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.ohos_id_color_primary_contrary'],
@@ -1722,418 +1839,506 @@ class ListNodeDataSource extends BasicDataSource {
                 }
             }
         };
+        this.s10.b5 = -1;
+        this.v10.set(-1, this.s10);
+        this.w10.set(-1, d3);
     }
 
-    changeNodeColor(k18, l18) {
-        this.listNode[k18].setNodeColor(l18);
-        this.listNode[k18].setNodeBorder(false);
-    }
-
-    getNodeColor(j18) {
-        return this.listNode[j18].getNodeColor();
-    }
-
-    handleFocusEffect(h18, i18) {
-        if (this.listNode[h18].getNodeIsShow()) {
-            this.listNode[h18].setNodeBorder(i18);
-        }
-    }
-
-    setImageSource(e18, f18) {
-        let g18 = this.listNode[e18];
-        g18.setIsSelected(f18 === InteractionStatus.Selected ||
-            f18 === InteractionStatus.Edit || f18 === InteractionStatus.FinishEdit);
-        if (g18.getNodeItem().mainTitleNode !== null && f18 !== InteractionStatus.DragInsert &&
-            f18 !== InteractionStatus.FinishDragInsert) {
-            g18.getNodeItem().mainTitleNode?.setMainTitleSelected(f18 === InteractionStatus.Selected ||
-                f18 === InteractionStatus.FinishEdit);
-        }
-        if (g18.getNodeItem().imageNode !== null) {
-            g18.getNodeItem().imageNode?.setImageSource(f18);
-        }
-    }
-
-    setImageCollapseSource(b18, c18) {
-        let d18 = this.listNode[b18];
-        if (d18.getNodeItem().imageCollapse !== undefined) {
-            d18.getNodeItem().imageCollapse?.setImageCollapseSource(c18, this.expandAndCollapseInfo.get(d18.getCurrentNodeId()));
-        }
-    }
-
-    clearLastIndexStatus() {
-        if (this.lastIndex === -1) {
-            return;
-        }
-        this.setImageSource(this.lastIndex, InteractionStatus.Normal);
-        this.changeNodeColor(this.lastIndex, this.listNode[this.lastIndex].getNodeStatus().normal);
-        this.handleFocusEffect(this.lastIndex, false);
-        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[this.lastIndex].getCurrentNodeId()));
-    }
-
-    changeNodeStatus(x17) {
-        let y17 = x17;
-        let z17 = this.ListNode;
-        let a18 = z17[x17].getCurrentNodeId();
-        if (this.expandAndCollapseInfo.get(a18) === NodeStatus.Expand) {
-            this.expandAndCollapseInfo.set(a18, NodeStatus.Collapse);
-            z17[y17].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
-        }
-        else if (this.expandAndCollapseInfo.get(a18) === NodeStatus.Collapse) {
-            this.expandAndCollapseInfo.set(a18, NodeStatus.Expand);
-            z17[y17].getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
-        }
-    }
-
-    handleExpandAndCollapse(n17) {
-        let o17 = n17;
-        let p17 = this.ListNode;
-        let q17 = p17[o17].getCurrentNodeId();
-        if (!this.expandAndCollapseInfo.has(q17)) {
-            return;
-        }
-        let r17 = this.expandAndCollapseInfo.get(q17);
-        if (p17[o17].getChildNodeInfo().isHasChildNode && r17 === NodeStatus.Collapse) {
-            for (let w17 = 0; w17 < p17[o17].getChildNodeInfo().allChildNum; w17++) {
-                p17[o17 + 1 + w17].setNodeIsShow(false);
-                p17[o17 + 1 + w17].setListItemHeight(LIST_ITEM_HEIGHT_NONE);
-            }
-            this.notifyDataReload();
-            return;
-        }
-        let s17 = new Array(p17[o17].getChildNodeInfo().childNum);
-        s17[0] = o17 + 1;
-        let t17 = 1;
-        while (t17 < p17[o17].getChildNodeInfo().childNum) {
-            s17[t17] = s17[t17 - 1] + p17[s17[t17 - 1]].getChildNodeInfo().allChildNum + 1;
-            t17++;
-        }
-        if (r17 === NodeStatus.Expand) {
-            for (let u17 = 0; u17 < s17.length; u17++) {
-                p17[s17[u17]].setNodeIsShow(true);
-                p17[s17[u17]].setListItemHeight(LIST_ITEM_HEIGHT);
-                let v17 = p17[s17[u17]].getCurrentNodeId();
-                if (this.expandAndCollapseInfo.get(v17) === NodeStatus.Expand) {
-                    this.handleExpandAndCollapse(s17[u17]);
-                }
-            }
-        }
-        s17 = null;
-        this.notifyDataReload();
-    }
-
-    init(i17) {
-        let j17 = 0;
-        this.listNode = [];
-        this.listNodeUtils = i17;
-        this.loadedNodeIdAndIndexMap.clear();
-        this.listNodeUtils.traverseNodeDF((l17) => {
-            if (l17.currentNodeId >= 0) {
-                let m17 = new NodeInfo(l17);
-                this.listNode.push(m17);
-                if (m17.getChildNodeInfo().isHasChildNode) {
-                    this.expandAndCollapseInfo.set(m17.getCurrentNodeId(), NodeStatus.Collapse);
-                }
-                if (m17.getNodeIsShow()) {
-                    this.loadedNodeIdAndIndexMap.set(m17.getCurrentNodeId(), j17++);
-                }
-                if (m17.getIsFolder()) {
-                    if (m17.getNodeInfoData().secondaryTitle !== undefined) {
-                        this.nodeIdAndSubtitleMap.set(m17.getCurrentNodeId(), m17.getNodeInfoData().secondaryTitle);
-                    }
-                    else {
-                        this.nodeIdAndSubtitleMap.set(m17.getCurrentNodeId(), '');
-                    }
-                }
-            }
+    p12(index) {
+        if (index < 0 || index >= this.w7.length) {
+            hilog.error(LOG_CODE, TAG, 'check index fail');
             return false;
-        });
+        }
+        return true;
     }
 
-    refreshRemoveNodeData(w16, x16) {
-        let y16 = [];
-        for (let e17 = 0; e17 < w16.length; e17++) {
-            for (let f17 = 0; f17 < this.listNode.length; f17++) {
-                if (this.listNode[f17].getNodeCurrentNodeId() === w16[e17]) {
-                    let g17 = this.listNode[f17].getNodeCurrentNodeId();
-                    if (this.loadedNodeIdAndIndexMap.has(g17)) {
-                        y16.push(this.loadedNodeIdAndIndexMap.get(g17));
-                    }
-                    let h17 = this.listNode.splice(f17, 1);
-                    h17 = null;
-                    if (this.expandAndCollapseInfo.has(w16[e17])) {
-                        this.expandAndCollapseInfo.delete(w16[e17]);
-                    }
-                    break;
+    q12(index, color) {
+        if (!this.p12(index)) {
+            return;
+        }
+        this.w7[index].a6(color);
+        this.w7[index].n6(false);
+    }
+
+    b6(index) {
+        return this.w7[index].b6();
+    }
+
+    r12(index, m14) {
+        if (this.w7[index].j6()) {
+            this.w7[index].n6(m14);
+        }
+    }
+
+    i8(index, k14) {
+        if (!this.p12(index)) {
+            return;
+        }
+        let l14 = this.w7[index];
+        l14.r6(k14 === a3.SELECTED ||
+            k14 === a3.EDIT || k14 === a3.FINISH_EDIT);
+        if (l14.k6().w3 !== null && k14 !== a3.DRAG_INSERT &&
+            k14 !== a3.FINISH_DRAG_INSERT) {
+            l14.k6().w3?.j8(k14 === a3.SELECTED ||
+                k14 === a3.FINISH_EDIT);
+        }
+        if (l14.k6().v3 !== null) {
+            l14.k6().v3?.i8(k14);
+        }
+    }
+
+    s12(index, i14) {
+        let j14 = this.w7[index];
+        if (j14.k6().x3 !== undefined) {
+            j14.k6().x3 = q3.t12(i14, this.a11.get(j14.e6()), j14.k6().x3?.type);
+        }
+    }
+
+    u12() {
+        if (!this.p12(this.lastIndex)) {
+            return;
+        }
+        this.i8(this.lastIndex, a3.NORMAL);
+        this.q12(this.lastIndex, this.w7[this.lastIndex].l6().normal);
+        this.r12(this.lastIndex, false);
+        this.g9(this.b11.get(this.w7[this.lastIndex].e6()));
+    }
+
+    v12() {
+        let index = 0;
+        this.b11.clear();
+        this.c11.clear();
+        this.u10.splice(0, this.u10.length);
+        for (let h14 = 0; h14 < this.w7.length; h14++) {
+            this.c11.set(this.w7[h14].e6(), h14);
+            if (this.w7[h14].j6()) {
+                this.b11.set(this.w7[h14].e6(), index++);
+                this.u10.push(this.w7[h14]);
+            }
+        }
+    }
+
+    w12(e14) {
+        if (e14 >= this.w7.length) {
+            hilog.error(LOG_CODE, TAG, 'changeNodeStatus clickIndex error.');
+            return;
+        }
+        let f14 = e14;
+        let g14 = this.w7[e14].e6();
+        if (this.a11.get(g14) === z2.EXPAND) {
+            this.a11.set(g14, z2.COLLAPSE);
+            this.w7[f14].k6().x3 = q3.x12(z2.COLLAPSE, this.w7[f14].k6().x3?.y12);
+        } else if (this.a11.get(g14) === z2.COLLAPSE) {
+            this.a11.set(g14, z2.EXPAND);
+            this.w7[f14].k6().x3 = q3.x12(z2.EXPAND, this.w7[f14].k6().x3?.y12);
+        }
+    }
+
+    z12(v13, w13) {
+        if (v13 >= this.w7.length) {
+            hilog.error(LOG_CODE, TAG, 'handleExpandAndCollapse clickIndex error.');
+            return;
+        }
+        let x13 = v13;
+        let y13 = this.w7[x13].e6();
+        if (!this.a11.has(y13)) {
+            return;
+        }
+        let z13 = this.a11.get(y13);
+        if (this.w7[x13].o6().a13 && z13 === z2.COLLAPSE) {
+            for (let d14 = 0; d14 < this.w7[x13].o6().r10; d14++) {
+                this.w7[x13 + 1 + d14].i6(false);
+                this.w7[x13 + 1 + d14].c6(h1);
+            }
+            this.v12();
+            this.z8();
+            return;
+        }
+        let a14 = new Array(this.w7[x13].o6().b13);
+        a14[0] = x13 + 1;
+        let index = 1;
+        while (index < this.w7[x13].o6().b13) {
+            a14[index] = a14[index - 1] + this.w7[a14[index - 1]].o6().r10 + 1;
+            index++;
+        }
+        if (z13 === z2.EXPAND) {
+            for (let b14 = 0; b14 < a14.length; b14++) {
+                this.w7[a14[b14]].i6(true);
+                this.w7[a14[b14]].c6(i1);
+                let c14 = this.w7[a14[b14]].e6();
+                if (this.a11.get(c14) === z2.EXPAND) {
+                    this.z12(a14[b14], false);
                 }
             }
         }
-        y16.forEach((d17) => {
-            this.notifyDataDelete(d17);
-            this.notifyDataChange(d17);
+        a14 = null;
+        if (w13) {
+            this.v12();
+            this.z8();
+        }
+    }
+
+    m10() {
+        i(true, 1, this.v10, this.e12);
+    }
+
+    c13(u13) {
+        u13.splice(0, u13.length);
+        this.b11.clear();
+        this.u10.splice(0, this.u10.length);
+        this.c11.clear();
+        this.x11.clear();
+    }
+
+    d13(o13, p13, q13) {
+        let index = 0;
+        let r13 = 0;
+        this.c13(o13);
+        try {
+            this.e13((node) => {
+                if (node.f13() >= 0 && this.w10.has(node.f13())) {
+                    let t13 = new f3(node, this.w10.get(node.f13()));
+                    t13.m5(node.o6().a13);
+                    o13.push(t13);
+                    this.c11.set(t13.e6(), r13++);
+                    index = this.g13(t13, index);
+                }
+                return false;
+            }, this.s10, p13, q13);
+        } catch (err) {
+            hilog.error(LOG_CODE, TAG, 'traverseSectionNodeDF function callbacks error.');
+            this.c13(o13);
+        }
+    }
+
+    g13(n13, index) {
+        if (n13.o6().a13) {
+            this.a11.set(n13.e6(), z2.COLLAPSE);
+        }
+        if (n13.j6()) {
+            this.b11.set(n13.e6(), index++);
+            this.u10.push(n13);
+        }
+        if (n13.v6()) {
+            if (n13.t6().secondaryTitle !== undefined) {
+                this.x11.set(n13.e6(), n13.t6().secondaryTitle);
+            } else {
+                this.x11.set(n13.e6(), '');
+            }
+        }
+        return index;
+    }
+
+    l10() {
+        let j13 = setTimeout(() => {
+            let l13 = [];
+            this.d13(l13, 0);
+            this.w7.splice(0, this.w7.length);
+            this.w7.push(...l13);
+            this.w7.forEach((value, index) => {
+                this.p10(index);
+                this.o10(index);
+            });
+            clearTimeout(j13);
+        }, m2);
+    }
+
+    k10() {
+        this.d13(this.w7, 0, 1);
+    }
+
+    h13(b13, c13) {
+        let d13 = [];
+        if (b13.length === 0) {
+            return;
+        }
+        let startIndex = undefined;
+        for (let g13 = 0; g13 < b13.length; g13++) {
+            if (this.b11.has(b13[g13])) {
+                let i13 = this.b11.get(b13[g13]);
+                d13.push(i13);
+            }
+            if (startIndex === undefined && this.c11.has(b13[g13])) {
+                startIndex = this.c11.get(b13[g13]);
+            }
+            if (startIndex !== undefined) {
+                let h13 = this.w7.splice(startIndex, 1);
+                h13 = null;
+            }
+            if (this.a11.has(b13[g13])) {
+                this.a11.delete(b13[g13]);
+            }
+        }
+        d13.forEach((value) => {
+            this.p10(value);
+            this.g9(value);
         });
-        let z16 = 0;
-        for (let c17 = 0; c17 < this.listNode.length; c17++) {
-            if (this.listNode[c17].getNodeCurrentNodeId() === x16.getNodeCurrentNodeId()) {
-                if (x16.getNodeItem().imageCollapse === null) {
-                    this.listNode[c17].handleImageCollapseAfterAddNode(false);
-                    this.expandAndCollapseInfo.delete(x16.getNodeCurrentNodeId());
-                    this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[c17].getNodeCurrentNodeId()));
-                }
-                break;
+        if (c13.k6().x3 === null) {
+            if (this.c11.has(c13.e6())) {
+                let f13 = this.c11.get(c13.e6());
+                this.w7[f13]?.z5(false);
             }
+            this.a11.delete(c13.e6());
+            this.g9(this.b11.get(c13.e6()));
         }
-        let a17 = {
-            currentNodeId: x16.getNodeCurrentNodeId(),
-            parentNodeId: x16.getNodeParentNodeId(),
+        let callbackParam = {
+            currentNodeId: c13.e6(),
+            parentNodeId: c13.f6(),
         };
-        this.appEventBus.emit(TreeListenType.NODE_DELETE, a17);
+        this.v12();
+        this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
     }
 
-    refreshAddNodeData(q16) {
-        let r16 = new NodeInfo(new NodeItem(emptyNodeInfo));
-        this.listNodeUtils.traverseNodeDF((v16) => {
-            if (v16.currentNodeId === q16[0]) {
-                r16 = new NodeInfo(v16);
-                return true;
-            }
-            return false;
-        });
-        r16.setIsModify(true);
-        let s16 = 0;
-        for (let u16 = 0; u16 < this.listNode.length; u16++) {
-            if (this.listNode[u16].getNodeCurrentNodeId() === r16.getNodeParentNodeId()) {
-                s16 = u16;
-                if (this.listNode[u16].getNodeItem().imageCollapse === null) {
-                    this.listNode[u16].handleImageCollapseAfterAddNode(true);
-                    this.notifyDataChange(s16);
+    i13(y12) {
+        let z12 = new f3(new j3(d3), d3);
+        if (this.v10.has(y12[0])) {
+            let node = this.v10.get(y12[0]);
+            z12 = new f3(node, this.w10.get(y12[0]));
+            z12.m5(node.o6().a13);
+        }
+        z12.h7(true);
+        let index = 0;
+        for (let a13 = 0; a13 < this.w7.length; a13++) {
+            if (this.w7[a13].e6() === z12.f6()) {
+                index = a13;
+                if (this.w7[a13].k6().x3 === null) {
+                    this.w7[a13].z5(true);
+                    this.g9(index);
+                } else if (this.a11.get(this.w7[a13].e6()) === z2.COLLAPSE) {
+                    this.w12(index);
                 }
-                else if (this.expandAndCollapseInfo.get(this.listNode[u16].getNodeCurrentNodeId()) === NodeStatus.Collapse) {
-                    this.changeNodeStatus(s16);
-                }
-                this.listNode.splice(u16 + 1, 0, r16);
-                this.listNode[u16 + 1].setTitleAndInputTextStatus(true);
-                this.listNode[u16 + 1].setNodeIsShow(true);
-                this.listNode[u16 + 1].setListItemHeight(LIST_ITEM_HEIGHT);
-                this.setImageSource(u16 + 1, InteractionStatus.Edit);
-                this.currentOperation = MenuOperation.ADD_NODE;
-                this.notifyDataAdd(u16 + 1);
-                this.notificationNodeInfo(u16 + 1, this.currentOperation);
+                this.w7.splice(a13 + 1, 0, z12);
+                this.w7[a13 + 1].y5(true);
+                this.w7[a13 + 1].i6(true);
+                this.w7[a13 + 1].c6(i1);
+                this.c11.set(y12[0], a13 + 1);
+                this.i8(a13 + 1, a3.EDIT);
+                this.j13 = t2.ADD_NODE;
+                this.o10(a13 + 1);
+                this.k13(a13 + 1, this.j13);
                 break;
             }
         }
-        this.modifyNodeIndex = s16 + 1;
-        this.setClickIndex(s16);
-        this.lastIndex = s16;
-        this.expandAndCollapseInfo.set(r16.getNodeParentNodeId(), NodeStatus.Expand);
-        this.handleExpandAndCollapse(s16);
+        this.y10 = index + 1;
+        this.h9(index);
+        this.lastIndex = index;
+        this.a11.set(z12.f6(), z2.EXPAND);
+        this.z12(index, true);
     }
 
-    refreshData(j16, k16, l16, m16) {
-        let n16 = new NodeInfo(new NodeItem(emptyNodeInfo));
-        this.listNodeUtils = j16;
-        this.listNodeUtils.traverseNodeDF((p16) => {
-            if (p16.currentNodeId === l16) {
-                n16 = new NodeInfo(p16);
-                return true;
-            }
-            return false;
-        });
-        if (k16 === MenuOperation.REMOVE_NODE) {
-            this.nodeIdAndSubtitleMap.set(l16, this.selectedParentNodeSubtitle);
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(l16));
-            this.refreshRemoveNodeData(m16, n16);
+    g10(operation, parentNodeId, v12) {
+        let w12 = new f3(new j3(d3), d3);
+        if (this.v10.has(parentNodeId)) {
+            let x12 = this.v10.get(parentNodeId);
+            w12 = new f3(x12, this.w10.get(parentNodeId));
+            w12.m5(x12.o6().a13);
         }
-        if (k16 === MenuOperation.ADD_NODE) {
-            this.addFocusNodeId = m16[0];
-            this.nodeIdAndSubtitleMap.set(this.getClickNodeId(), this.selectedParentNodeSubtitle);
-            this.nodeIdAndSubtitleMap.set(m16[0], this.insertNodeSubtitle);
-            this.refreshAddNodeData(m16);
+        if (operation === t2.REMOVE_NODE) {
+            this.x11.set(parentNodeId, this.z11);
+            this.g9(this.b11.get(parentNodeId));
+            this.h13(v12, w12);
+        }
+        if (operation === t2.ADD_NODE) {
+            this.d12 = v12[0];
+            this.x11.set(this.c10(), this.z11);
+            this.x11.set(v12[0], this.a12);
+            this.i13(v12);
         }
     }
 
-    setClickIndex(i16) {
-        this.thisIndex = i16;
+    h9(index) {
+        this.x10 = index;
     }
 
-    getClickNodeId() {
-        if (this.thisIndex < 0 || this.thisIndex >= this.ListNode.length) {
+    c10() {
+        if (!this.p12(this.x10)) {
             return -1;
         }
-        return this.ListNode[this.thisIndex].getCurrentNodeId();
+        return this.w7[this.x10].e6();
     }
 
-    expandAndCollapseNode(h16) {
-        this.changeNodeStatus(h16);
-        this.handleExpandAndCollapse(h16);
+    k9(u12) {
+        this.w12(u12);
+        this.z12(u12, true);
     }
 
-    getIsTouchDown() {
-        return this.isTouchDown;
+    l13() {
+        return this.d11;
     }
 
-    getLastIndex() {
+    u9() {
         return this.lastIndex;
     }
 
-    findIndex(c16) {
-        let d16 = -1;
-        this.ListNode.forEach((f16, g16) => {
-            if (f16.getNodeCurrentNodeId() === c16) {
-                d16 = g16;
-            }
-        });
-        return d16;
+    findIndex(currentNodeId) {
+        let t12 = -1;
+        if (this.c11.has(currentNodeId)) {
+            t12 = this.c11.get(currentNodeId);
+        }
+        return t12;
     }
 
-    handleEventDrag(b16) {
-        this.setImageSource(b16, InteractionStatus.Normal);
-        this.changeNodeColor(b16, this.listNode[b16].getNodeStatus().normal);
-        this.handleFocusEffect(b16, false);
-        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.listNode[b16].getCurrentNodeId()));
-    }
-
-    handleEvent(w15, x15) {
-        if (this.isDrag) {
+    n13(index) {
+        if (!this.p12(index)) {
             return;
         }
-        if (w15 === Event.TOUCH_DOWN || w15 === Event.TOUCH_UP || w15 === Event.MOUSE_BUTTON_RIGHT) {
-            if (x15 !== this.lastIndex) {
-                this.clearLastIndexStatus();
+        this.i8(index, a3.NORMAL);
+        this.q12(index, this.w7[index].l6().normal);
+        this.r12(index, false);
+        this.g9(this.b11.get(this.w7[index].e6()));
+    }
+
+    i9(event, index) {
+        if (this.f11) {
+            return;
+        }
+        if (!this.p12(index)) {
+            return;
+        }
+        if (event === Event.TOUCH_DOWN || event === Event.TOUCH_UP || event === Event.MOUSE_BUTTON_RIGHT) {
+            if (index !== this.lastIndex) {
+                this.u12();
             }
         }
-        let y15 = this.loadedNodeIdAndIndexMap.get(this.listNode[x15].getCurrentNodeId());
-        switch (w15) {
+        this.o13(index, event);
+    }
+
+    o13(index, event) {
+        let r12 = this.b11.get(this.w7[index].e6());
+        switch (event) {
             case Event.TOUCH_DOWN:
-                this.isTouchDown = true;
-                this.changeNodeColor(x15, this.listNode[x15].getNodeStatus().press);
-                this.notifyDataChange(y15);
+                this.d11 = true;
+                this.q12(index, this.w7[index].l6().i5);
+                this.g9(r12);
                 break;
             case Event.TOUCH_UP: {
-                if (this.isInnerDrag) {
-                    this.isInnerDrag = false;
-                }
-                this.isTouchDown = false;
-                let a16 = this.listNode[x15];
-                this.setImageSource(x15, InteractionStatus.Selected);
-                a16.setFontColor(this.treeViewTheme.primaryTitleFontColor);
-                this.lastIndex = x15;
-                this.changeNodeColor(x15, a16.getNodeStatus().selected);
-                this.notifyDataChange(y15);
+                this.p13(index, r12);
                 break;
             }
             case Event.HOVER:
-                if (this.getNodeColor(x15) !== this.listNode[x15].getNodeStatus().selected) {
-                    this.changeNodeColor(x15, this.listNode[x15].getNodeStatus().hover);
-                    this.notifyDataChange(y15);
+                if (this.b6(index) !== this.w7[index].l6().selected) {
+                    this.q12(index, this.w7[index].l6().h5);
+                    this.g9(r12);
                 }
                 break;
             case Event.HOVER_OVER:
-                if (this.getNodeColor(x15) !== this.listNode[x15].getNodeStatus().selected) {
-                    this.changeNodeColor(x15, this.listNode[x15].getNodeStatus().normal);
-                    this.notifyDataChange(y15);
+                if (this.b6(index) !== this.w7[index].l6().selected) {
+                    this.q12(index, this.w7[index].l6().normal);
+                    this.g9(r12);
                 }
                 break;
             case Event.FOCUS:
-                this.handleFocusEffect(x15, true);
-                this.notifyDataChange(y15);
+                this.r12(index, true);
+                this.g9(r12);
                 break;
             case Event.BLUR:
-                this.handleFocusEffect(x15, false);
-                this.notifyDataChange(y15);
+                this.r12(index, false);
+                this.g9(r12);
                 break;
             case Event.MOUSE_BUTTON_RIGHT:
-                this.lastIndex = x15;
-                this.finishEditing();
+                this.lastIndex = index;
+                this.q13();
                 break;
             case Event.DRAG:
-                this.isTouchDown = false;
-                let z15 = this.listNode[x15];
-                this.setImageSource(x15, InteractionStatus.Selected);
-                this.lastIndex = x15;
-                this.changeNodeColor(x15, z15.getNodeStatus().selected);
-                this.notifyDataChange(y15);
+                this.d11 = false;
+                let s12 = this.w7[index];
+                this.i8(index, a3.SELECTED);
+                this.lastIndex = index;
+                this.q12(index, s12.l6().selected);
+                this.g9(r12);
                 break;
             default:
                 break;
         }
     }
 
-    notificationNodeInfo(n15, o15) {
-        if (o15 === MenuOperation.MODIFY_NODE) {
-            let u15 = this.listNode[this.modifyNodeIndex];
-            let v15 = {
-                currentNodeId: u15.getNodeCurrentNodeId(),
-                parentNodeId: u15.getNodeParentNodeId(),
-            };
-            this.appEventBus.emit(TreeListenType.NODE_MODIFY, v15);
+    p13(index, p12) {
+        if (this.e11) {
+            this.e11 = false;
         }
-        else if (o15 === MenuOperation.ADD_NODE) {
-            let p15 = this.listNode[n15];
-            if (p15 === undefined) {
+        this.d11 = false;
+        let q12 = this.w7[index];
+        this.i8(index, a3.SELECTED);
+        q12.o5(this.treeViewTheme.a4);
+        this.lastIndex = index;
+        this.q12(index, q12.l6().selected);
+        this.g9(p12);
+    }
+
+    k13(l12, operation) {
+        if (operation === t2.MODIFY_NODE) {
+            let n12 = this.w7[this.y10];
+            let o12 = {
+                currentNodeId: n12?.e6(),
+                parentNodeId: n12?.f6(),
+            };
+            this.appEventBus.emit(TreeListenType.NODE_MODIFY, o12);
+        } else if (operation === t2.ADD_NODE) {
+            let m12 = this.w7[l12];
+            if (m12 === undefined) {
                 return;
             }
-            let q15 = (p15.getNodeItem().imageNode !== undefined) ?
-                p15.getNodeItem().imageNode?.source : undefined;
-            let r15 = (p15.getNodeItem().imageNode !== undefined) ?
-                p15.getNodeItem().imageNode?.selectedSource : undefined;
-            let s15 = (p15.getNodeItem().imageNode !== undefined) ?
-                p15.getNodeItem().imageNode?.editSource : undefined;
-            let t15 = {
-                currentNodeId: p15.getNodeCurrentNodeId(),
-                parentNodeId: p15.getNodeParentNodeId(),
+            let icon = (m12.k6().v3 !== undefined) ?
+                m12.k6().v3?.source : undefined;
+            let selectedIcon = (m12.k6().v3 !== undefined) ?
+                m12.k6().v3?.r13 : undefined;
+            let editIcon = (m12.k6().v3 !== undefined) ?
+                m12.k6().v3?.s13 : undefined;
+            let callbackParam = {
+                currentNodeId: m12?.e6(),
+                parentNodeId: m12?.f6(),
             };
-            this.appEventBus.emit(TreeListenType.NODE_ADD, t15);
+            this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
         }
     }
 
-    finishEditing() {
-        if (this.modifyNodeIndex !== -1) {
-            this.setImageSource(this.modifyNodeIndex, InteractionStatus.FinishEdit);
-            this.setImageCollapseSource(this.modifyNodeIndex, InteractionStatus.FinishEdit);
-            this.listNode[this.modifyNodeIndex].setIsModify(false);
-            this.listNode[this.modifyNodeIndex].setTitleAndInputTextStatus(false);
-            this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
-            this.notifyDataChange(this.modifyNodeIndex);
+    q13() {
+        if (this.y10 !== -1) {
+            this.i8(this.y10, a3.FINISH_EDIT);
+            this.s12(this.y10, a3.FINISH_EDIT);
+            this.w7[this.y10].h7(false);
+            this.w7[this.y10].y5(false);
+            this.k13(this.y10, this.j13);
+            this.g9(this.y10);
         }
     }
 
-    setItemVisibilityOnEdit(h15, i15) {
-        let j15 = -1;
-        if (h15 === -1) {
+    w9(h12, operation) {
+        let index = -1;
+        if (h12 === -1) {
             return;
         }
-        if (i15 === MenuOperation.MODIFY_NODE) {
-            for (let m15 = 0; m15 < this.listNode.length; m15++) {
-                if (this.listNode[m15].getCurrentNodeId() === h15) {
-                    j15 = m15;
+        if (operation === t2.MODIFY_NODE) {
+            for (let k12 = 0; k12 < this.w7.length; k12++) {
+                if (this.w7[k12]?.e6() === h12) {
+                    index = k12;
                     break;
                 }
             }
-            let l15 = this.listNode[j15];
-            if (l15 === undefined) {
+            let j12 = this.w7[index];
+            if (j12 === undefined) {
                 return;
             }
-            l15.setIsModify(true);
-            if (l15.getNodeItem().mainTitleNode === null) {
+            j12.h7(true);
+            if (j12.k6().w3 === null) {
                 return;
             }
-            this.currentOperation = MenuOperation.MODIFY_NODE;
-            l15.setTitleAndInputTextStatus(true);
-            this.setImageSource(j15, InteractionStatus.Edit);
-            this.setImageCollapseSource(j15, InteractionStatus.Edit);
-            this.modifyNodeIndex = j15;
-            if (l15.getNodeItem().inputText) {
-                if (l15.getNodeItem().imageCollapse !== null) {
-                    l15.getNodeItem().inputText.rightMargin = {
+            this.j13 = t2.MODIFY_NODE;
+            j12.y5(true);
+            this.i8(index, a3.EDIT);
+            this.s12(index, a3.EDIT);
+            this.y10 = index;
+            if (j12.k6().inputText) {
+                if (j12.k6().x3 !== null) {
+                    j12.k6().inputText.rightMargin = {
                         'id': -1,
                         'type': 10002,
                         params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
                         'bundleName': '__harDefaultBundleName__',
                         'moduleName': '__harDefaultModuleName__',
                     };
-                }
-                else {
-                    l15.getNodeItem().inputText.rightMargin = {
+                } else {
+                    j12.k6().inputText.rightMargin = {
                         'id': -1,
                         'type': 10002,
                         params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
@@ -2142,69 +2347,69 @@ class ListNodeDataSource extends BasicDataSource {
                     };
                 }
             }
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(h15));
+            this.g9(this.b11.get(h12));
         }
-        j15 = h15;
-        if (i15 === MenuOperation.COMMIT_NODE) {
-            let k15 = this.listNode[j15];
-            if (k15 === undefined) {
+        index = h12;
+        if (operation === t2.COMMIT_NODE) {
+            let i12 = this.w7[index];
+            if (i12 === undefined) {
                 return;
             }
-            k15.setTitleAndInputTextStatus(false);
-            k15.setIsModify(false);
-            this.setImageSource(j15, InteractionStatus.FinishEdit);
-            this.setImageCollapseSource(j15, InteractionStatus.FinishEdit);
-            this.notificationNodeInfo(this.modifyNodeIndex, this.currentOperation);
-            this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(k15.getCurrentNodeId()));
+            i12.y5(false);
+            i12.h7(false);
+            this.i8(index, a3.FINISH_EDIT);
+            this.s12(index, a3.FINISH_EDIT);
+            this.k13(this.y10, this.j13);
+            this.g9(this.b11.get(i12?.e6()));
         }
     }
 
-    setPopUpInfo(b15, c15, d15, e15) {
-        let f15 = this.listNode[e15];
-        if (f15 === undefined) {
+    v9(d12, e12, isShow, index) {
+        if (!this.p12(index)) {
             return;
         }
-        f15.setPopUpIsShow(d15);
-        let g15 = this.loadedNodeIdAndIndexMap.get(f15.getCurrentNodeId());
-        if (!d15) {
-            this.notifyDataChange(g15);
+        let f12 = this.w7[index];
+        if (f12 === undefined) {
             return;
         }
-        if (b15 === PopUpType.HINTS) {
-            if (f15.getNodeItem().mainTitleNode !== null) {
-                f15.setPopUpText(f15.getNodeItem().mainTitleNode?.title);
+        f12.r5(isShow);
+        let g12 = this.b11.get(f12.e6());
+        if (!isShow) {
+            this.g9(g12);
+            return;
+        }
+        if (d12 === u2.HINTS) {
+            if (f12.k6().w3 !== null) {
+                f12.u5(f12.k6().w3?.title);
+            } else {
+                f12.u5('');
+                f12.r5(false);
             }
-            else {
-                f15.setPopUpText('');
-                f15.setPopUpIsShow(false);
-            }
-            f15.setPopUpEnableArrow(false);
-            f15.setPopUpColor({
+            f12.s5(false);
+            f12.t5({
                 'id': -1,
                 'type': 10001,
                 params: ['sys.color.ohos_id_color_background'],
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__',
             });
-            f15.setPopUpTextColor(this.treeViewTheme.secondaryTitleFontColor);
-        }
-        else if (b15 === PopUpType.WARNINGS) {
-            if (f15.getNodeItem().inputText !== null) {
-                if (c15 === InputError.INVALID_ERROR) {
-                    f15.setPopUpText('invalid error');
+            f12.v5(this.treeViewTheme.b4);
+        } else if (d12 === u2.WARNINGS) {
+            if (f12.k6().inputText !== null) {
+                if (e12 === v2.INVALID_ERROR) {
+                    f12.u5('invalid error');
+                } else if (e12 === v2.LENGTH_ERROR) {
+                    f12.u5('length error');
                 }
-                else if (c15 === InputError.LENGTH_ERROR) {
-                    f15.setPopUpText('length error');
-                }
-                f15.setPopUpEnableArrow(true);
-                f15.setPopUpColor({
+                f12.s5(true);
+                f12.t5({
                     'id': -1,
                     'type': 10001,
                     params: ['sys.color.ohos_id_color_help_tip_bg'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__',
                 });
-                f15.setPopUpTextColor({
+                f12.v5({
                     'id': -1,
                     'type': 10001,
                     params: ['sys.color.ohos_id_color_text_hint_contrary'],
@@ -2213,668 +2418,1014 @@ class ListNodeDataSource extends BasicDataSource {
                 });
             }
         }
-        this.notifyDataChange(g15);
+        this.g9(g12);
     }
 
-    setShowPopUpTimeout(y14, z14) {
-        if (this.listNode[z14].getNodeItem().mainTitleNode !== null) {
-            this.listNode[z14].getNodeItem().mainTitleNode.popUpTimeout = y14;
+    t13(timeout, index) {
+        if (!this.p12(index)) {
+            return;
         }
-        let a15 = this.loadedNodeIdAndIndexMap.get(this.listNode[z14].getCurrentNodeId());
-        this.notifyDataChange(a15);
-    }
-
-    setMainTitleNameOnEdit(w14, x14) {
-        this.modifyNodeIndex = w14;
-        if (this.listNode[w14].getNodeItem().mainTitleNode !== null) {
-            this.listNode[w14].getNodeItem().mainTitleNode.title = x14;
+        if (this.w7[index].k6().w3 !== null) {
+            this.w7[index].k6().w3.u13 = timeout;
         }
+        let c12 = this.b11.get(this.w7[index].e6());
+        this.g9(c12);
     }
 
-    get ListNode() {
-        return this.listNode;
+    v13(index, text) {
+        this.y10 = index;
+        if (this.w7[index].k6().w3 !== null) {
+            this.w7[index].k6().w3.title = text;
+        }
     }
 
     totalCount() {
-        let t14 = 0;
-        let u14 = 0;
-        this.loadedNodeIdAndIndexMap.clear();
-        for (let v14 = 0; v14 < this.listNode.length; v14++) {
-            if (this.listNode[v14].getNodeIsShow()) {
-                this.loadedNodeIdAndIndexMap.set(this.listNode[v14].getCurrentNodeId(), u14++);
-                t14++;
-            }
+        return this.b11.size;
+    }
+
+    getData(index) {
+        if (index < 0 || index >= this.u10.length) {
+            return undefined;
         }
-        return t14;
+        return this.u10[index];
     }
 
-    getData(q14) {
-        let r14 = 0;
-        for (let s14 = 0; s14 < this.listNode.length; s14++) {
-            if (this.listNode[s14].getNodeIsShow()) {
-                if (q14 === r14) {
-                    return this.listNode[s14];
-                }
-                r14++;
-            }
-        }
-        return undefined;
-    }
-
-    addData(o14, p14) {
-        this.listNode.splice(o14, 0, p14);
-        this.notifyDataAdd(o14);
-    }
-
-    pushData(n14) {
-        this.listNode.push(n14);
-        this.notifyDataAdd(this.listNode.length - 1);
-    }
-
-    setIsInnerDrag(m14) {
-        this.isInnerDrag = m14;
-    }
-
-    getIsInnerDrag() {
-        return this.isInnerDrag;
-    }
-
-    setIsDrag(l14) {
-        this.isDrag = l14;
-    }
-
-    getIsDrag() {
-        return this.isDrag;
-    }
-
-    setCurrentNodeInfo(k14) {
-        if (k14 === undefined) {
+    w13(index, data) {
+        if (!this.p12(index)) {
             return;
         }
-        this.currentNodeInfo = k14;
+        this.w7.splice(index, 0, data);
+        this.c11.set(data.e6(), index);
+        this.v12();
+        this.o10(index);
     }
 
-    getCurrentNodeInfo() {
-        return this.currentNodeInfo;
+    x13(data) {
+        this.w7.push(data);
+        this.c11.set(data.e6(), this.w7.length);
+        this.v12();
+        this.o10(this.w7.length - 1);
     }
 
-    setDraggingParentNodeId(j14) {
-        if (j14 === undefined) {
+    b9(b12) {
+        this.e11 = b12;
+    }
+
+    l8() {
+        return this.e11;
+    }
+
+    u8(a12) {
+        this.f11 = a12;
+    }
+
+    a9() {
+        return this.f11;
+    }
+
+    r9(z11) {
+        if (z11 === undefined) {
             return;
         }
-        this.draggingParentNodeId = j14;
+        this.i11 = z11;
     }
 
-    getDraggingParentNodeId() {
-        return this.draggingParentNodeId;
+    e9() {
+        return this.i11;
     }
 
-    getDraggingCurrentNodeId() {
-        return this.draggingCurrentNodeId;
-    }
-
-    setDraggingCurrentNodeId(i14) {
-        if (i14 === undefined) {
+    t9(y11) {
+        if (y11 === undefined) {
             return;
         }
-        this.draggingCurrentNodeId = i14;
+        this.h11 = y11;
     }
 
-    setListItemOpacity(h14) {
-        this.listItemOpacity = h14;
+    f9() {
+        return this.h11;
     }
 
-    getListItemOpacity(g14) {
-        return g14.getCurrentNodeId() === this.getDraggingCurrentNodeId() ? this.listItemOpacity : 1;
+    s8() {
+        return this.g11;
     }
 
-    getDragPopupPara() {
-        return this.DRAG_POPUP;
+    s9(x11) {
+        if (x11 === undefined) {
+            return;
+        }
+        this.g11 = x11;
     }
 
-    setLastPassIndex(f14) {
-        this.lastPassIndex = f14;
+    v8(w11) {
+        this.j11 = w11;
     }
 
-    getLastPassIndex() {
-        return this.lastPassIndex;
+    y13(item) {
+        return item.e6() === this.s8() ? this.j11 : 1;
     }
 
-    getIsParentOfInsertNode(z13) {
-        if (this.currentNodeInfo === null || z13 === undefined) {
+    x7() {
+        return this.l12;
+    }
+
+    q8(v11) {
+        this.k11 = v11;
+    }
+
+    k8() {
+        return this.k11;
+    }
+
+    m8(s11) {
+        if (this.i11 === null || s11 === undefined) {
             return false;
         }
-        let a14 = this.currentNodeInfo.getNodeInfoNode();
-        let b14 = false;
-        let c14 = (e14) => {
-            if (e14.currentNodeId === z13) {
-                b14 = true;
+        let t11 = this.i11.u6();
+        let parentId = t11.currentNodeId;
+        let u11 = this.v10.get(s11)?.parentNodeId;
+        while (u11 !== undefined && u11 !== -1) {
+            if (parentId === u11) {
                 return true;
+            } else {
+                u11 = this.v10.get(u11)?.parentNodeId;
             }
-            return false;
-        };
-        this.listNodeUtils.traverseNodeDF(c14, a14);
-        return b14;
+        }
+        return false;
     }
 
-    setPassIndex(y13) {
-        this.thisPassIndex = y13;
+    n8(r11) {
+        this.n11 = r11;
     }
 
-    getPassIndex() {
-        return this.thisPassIndex;
+    z13() {
+        return this.n11;
     }
 
-    clearTimeOutAboutDelayHighLightAndExpand(t13) {
-        if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
-            let v13 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
-            this.ListNode.forEach((x13) => {
-                if (x13.getNodeCurrentNodeId() === this.lastPassId) {
-                    x13.setCanShowFlagLine(false);
+    o8(currentIndex) {
+        if (this.l11 !== this.INITIAL_INVALID_VALUE && this.b11.has(this.l11)) {
+            let index = this.b11.get(this.l11);
+            this.w7.forEach((value) => {
+                if (value.e6() === this.l11) {
+                    value.w6(false);
+                    return;
                 }
             });
-            this.notifyDataChange(v13);
+            this.g9(index);
         }
-        if ((this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
-            this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
-            clearTimeout(this.lastTimeoutHighLightId);
-            if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
-                this.clearHighLight(this.lastDelayHighLightIndex);
-                let u13 = this.loadedNodeIdAndIndexMap
-                    .get(this.listNode[this.lastDelayHighLightIndex].getCurrentNodeId());
-                this.notifyDataChange(u13);
+        if ((this.t11 !== this.INITIAL_INVALID_VALUE &&
+            this.u11 !== this.t11)) {
+            clearTimeout(this.t11);
+            if (this.v11 !== this.INITIAL_INVALID_VALUE) {
+                this.a14(this.v11);
+                let index = this.b11
+                    .get(this.w7[this.v11].e6());
+                this.g9(index);
             }
-            this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
+            this.u11 = this.t11;
         }
-        this.lastTimeoutHighLightId = this.timeoutHighLightId;
-        this.lastDelayHighLightIndex = t13;
-        if ((this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
-            this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
-            clearTimeout(this.lastTimeoutExpandId);
-            this.clearTimeoutExpandId = this.lastTimeoutExpandId;
+        this.t11 = this.s11;
+        this.v11 = currentIndex;
+        if ((this.q11 !== this.INITIAL_INVALID_VALUE &&
+            this.r11 !== this.q11)) {
+            clearTimeout(this.q11);
+            this.r11 = this.q11;
         }
-        this.lastTimeoutExpandId = this.timeoutExpandId;
-        this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
+        this.q11 = this.p11;
+        this.o11 = this.INITIAL_INVALID_VALUE;
     }
 
-    clearHighLight(s13) {
-        this.changeNodeColor(s13, this.listNode[s13].getNodeStatus().normal);
-        this.changeNodeHighLightColor(s13, false);
-        this.setImageSource(s13, InteractionStatus.FinishDragInsert);
-        this.setImageCollapseSource(s13, InteractionStatus.FinishDragInsert);
-        this.listNode[s13].setIsHighLight(false);
+    a14(currentIndex) {
+        if (!this.p12(currentIndex)) {
+            return;
+        }
+        this.q12(currentIndex, this.w7[currentIndex].l6().normal);
+        this.b14(currentIndex, false);
+        this.i8(currentIndex, a3.FINISH_DRAG_INSERT);
+        this.s12(currentIndex, a3.FINISH_DRAG_INSERT);
+        this.w7[currentIndex].f7(false);
     }
 
-    changeNodeHighLightColor(q13, r13) {
-        if (this.listNode[q13].getNodeItem().mainTitleNode && this.listNode[q13].getIsShowTitle()) {
-            this.listNode[q13].getNodeItem().mainTitleNode?.setMainTitleHighLight(r13);
+    b14(index, p11) {
+        if (this.w7[index].k6().w3 && this.w7[index].w5()) {
+            this.w7[index].k6().w3?.q9(p11);
         }
     }
 
-    setVisibility(h13, i13, j13) {
-        let k13 = (this.thisPassIndex !== i13 || this.flag !== h13) ? true : false;
-        this.thisPassIndex = i13;
-        if ((k13 || j13) && this.isInnerDrag) {
-            this.flag = h13;
-            let l13 = this.getData(i13)?.getCurrentNodeId();
-            let m13 = this.getData(i13)?.getNodeLevel();
-            if (l13 !== undefined) {
-                m13 = (this.expandAndCollapseInfo.get(l13) === NodeStatus.Expand &&
-                    this.flag === Flag.DOWN_FLAG) ? (m13 ? m13 + 1 : undefined) : m13;
-                if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
-                    let n13 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
-                    this.ListNode.forEach((p13) => {
-                        if (p13.getNodeCurrentNodeId() === this.lastPassId) {
-                            p13.setCanShowFlagLine(false);
+    r8(flag, index, k11) {
+        let l11 = (this.n11 !== index || this.flag !== flag) ? true : false;
+        this.n11 = index;
+        if ((l11 || k11) && this.e11) {
+            this.flag = flag;
+            let currentNodeId = this.getData(index)?.e6();
+            let m11 = this.getData(index)?.a7();
+            if (currentNodeId !== undefined) {
+                m11 = (this.a11.get(currentNodeId) === z2.EXPAND &&
+                    this.flag === w2.DOWN_FLAG) ? (m11 ? m11 + 1 : undefined) : m11;
+                if (this.l11 !== this.INITIAL_INVALID_VALUE && this.b11.has(this.l11)) {
+                    let n11 = this.b11.get(this.l11);
+                    this.w7.forEach((value) => {
+                        if (value.e6() === this.l11) {
+                            value.w6(false);
                         }
                     });
-                    this.notifyDataChange(n13);
+                    this.g9(n11);
                 }
-                if (this.flag === Flag.DOWN_FLAG && i13 < this.totalCount() - 1) {
-                    this.getData(i13)?.setCanShowFlagLine(false);
-                    this.getData(i13 + 1)?.setCanShowFlagLine(true);
-                    this.getData(i13)?.setCanShowBottomFlagLine(false);
-                    this.getData(i13 + 1)?.setFlagLineLeftMargin(m13);
-                    this.notifyDataChange(i13);
-                    this.notifyDataChange(i13 + 1);
-                    this.lastPassId = this.getData(i13 + 1)?.getNodeCurrentNodeId();
-                }
-                else if (this.flag === Flag.UP_FLAG && i13 < this.totalCount() - 1) {
-                    this.getData(i13)?.setCanShowFlagLine(true);
-                    this.getData(i13 + 1)?.setCanShowFlagLine(false);
-                    this.getData(i13)?.setCanShowBottomFlagLine(false);
-                    this.getData(i13)?.setFlagLineLeftMargin(m13);
-                    this.notifyDataChange(i13);
-                    this.notifyDataChange(i13 + 1);
-                    this.lastPassId = this.getData(i13)?.getNodeCurrentNodeId();
-                }
-                else if (i13 >= this.totalCount() - 1) {
-                    if (this.flag === Flag.DOWN_FLAG) {
-                        this.getData(i13)?.setCanShowFlagLine(false);
-                        this.getData(i13)?.setCanShowBottomFlagLine(true);
+                if (this.flag === w2.DOWN_FLAG && index < this.totalCount() - 1) {
+                    this.getData(index)?.w6(false);
+                    this.getData(index + 1)?.w6(true);
+                    this.getData(index)?.d7(false);
+                    this.getData(index + 1)?.y6(m11);
+                    this.g9(index);
+                    this.g9(index + 1);
+                    this.l11 = this.getData(index + 1)?.e6();
+                } else if (this.flag === w2.UP_FLAG && index < this.totalCount() - 1) {
+                    this.getData(index)?.w6(true);
+                    this.getData(index + 1)?.w6(false);
+                    this.getData(index)?.d7(false);
+                    this.getData(index)?.y6(m11);
+                    this.g9(index);
+                    this.g9(index + 1);
+                    this.l11 = this.getData(index)?.e6();
+                } else if (index >= this.totalCount() - 1) {
+                    if (this.flag === w2.DOWN_FLAG) {
+                        this.getData(index)?.w6(false);
+                        this.getData(index)?.d7(true);
+                    } else {
+                        this.getData(index)?.w6(true);
+                        this.getData(index)?.d7(false);
                     }
-                    else {
-                        this.getData(i13)?.setCanShowFlagLine(true);
-                        this.getData(i13)?.setCanShowBottomFlagLine(false);
-                    }
-                    this.getData(i13)?.setFlagLineLeftMargin(m13);
-                    this.notifyDataChange(i13);
-                    this.lastPassId = this.getData(i13)?.getNodeCurrentNodeId();
+                    this.getData(index)?.y6(m11);
+                    this.g9(index);
+                    this.l11 = this.getData(index)?.e6();
                 }
             }
         }
     }
 
-    delayHighLightAndExpandNode(w12, x12, y12) {
-        let z12 = w12 !== this.lastDelayExpandIndex ? true : false;
-        let a13 = this.getData(y12)?.getIsOverBorder();
-        if (a13) {
-            this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
+    t8(currentIndex, currentNodeId, b11) {
+        let c11 = currentIndex !== this.o11 ? true : false;
+        let d11 = this.getData(b11)?.c7();
+        if (d11) {
+            this.o11 = this.INITIAL_INVALID_VALUE;
+        } else {
+            this.o11 = currentIndex;
         }
-        else {
-            this.lastDelayExpandIndex = w12;
-        }
-        if (a13 || z12) {
-            let b13 = !a13 && (!this.isInnerDrag ||
-                (this.expandAndCollapseInfo.get(x12) === NodeStatus.Collapse && this.isInnerDrag) ||
-                (!this.expandAndCollapseInfo.has(x12) && this.listNode[w12].getIsFolder()));
-            if (b13) {
-                this.changeNodeColor(w12, this.listNode[w12].getNodeStatus().hover);
-                this.notifyDataChange(y12);
-                let f13 = this.isInnerDrag ? 1000 : 0;
-                this.timeoutHighLightId = setTimeout(() => {
-                    this.delayHighLight(w12);
-                }, f13);
+        if (d11 || c11) {
+            let e11 = !d11 && (!this.e11 ||
+                (this.a11.get(currentNodeId) === z2.COLLAPSE && this.e11) ||
+                (!this.a11.has(currentNodeId) && this.w7[currentIndex].v6()));
+            if (e11) {
+                this.q12(currentIndex, this.w7[currentIndex].l6().h5);
+                this.g9(b11);
+                let i11 = this.e11 ? 1000 : 0;
+                this.s11 = setTimeout(() => {
+                    this.c14(currentIndex);
+                }, i11);
             }
-            if (a13 || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
-                this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId)) {
-                clearTimeout(this.lastTimeoutHighLightId);
-                if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
-                    this.clearHighLight(this.lastDelayHighLightIndex);
-                    this.notifyDataReload();
+            if (d11 || (this.t11 !== this.INITIAL_INVALID_VALUE &&
+                this.u11 !== this.t11)) {
+                clearTimeout(this.t11);
+                if (this.v11 !== this.INITIAL_INVALID_VALUE) {
+                    this.a14(this.v11);
+                    this.z8();
                 }
-                this.clearTimeoutHighLightId = this.lastTimeoutHighLightId;
+                this.u11 = this.t11;
             }
-            this.lastTimeoutHighLightId = this.timeoutHighLightId;
-            this.lastDelayHighLightIndex = w12;
-            if (!a13 && this.expandAndCollapseInfo.get(x12) === NodeStatus.Collapse) {
-                let c13 = this.getData(y12)?.getNodeInfoNode().children[0].currentNodeId;
-                let d13 = 2000;
-                this.timeoutExpandId = setTimeout(() => {
-                    this.clearHighLight(this.lastDelayHighLightIndex);
-                    if (c13 !== undefined) {
-                        this.alterFlagLineAndExpandNode(w12, c13);
+            this.t11 = this.s11;
+            this.v11 = currentIndex;
+            if (!d11 && this.a11.get(currentNodeId) === z2.COLLAPSE) {
+                let f11 = this.getData(b11)?.u6().children[0]?.currentNodeId;
+                let g11 = 2000;
+                this.p11 = setTimeout(() => {
+                    this.a14(this.v11);
+                    if (f11 !== undefined) {
+                        this.d14(currentIndex, f11);
                     }
-                }, d13);
+                }, g11);
             }
-            if (a13 || (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
-                this.clearTimeoutExpandId !== this.lastTimeoutExpandId)) {
-                clearTimeout(this.lastTimeoutExpandId);
-                this.clearTimeoutExpandId = this.lastTimeoutExpandId;
+            if (d11 || (this.q11 !== this.INITIAL_INVALID_VALUE &&
+                this.r11 !== this.q11)) {
+                clearTimeout(this.q11);
+                this.r11 = this.q11;
             }
-            this.lastTimeoutExpandId = this.timeoutExpandId;
+            this.q11 = this.p11;
         }
     }
 
-    delayHighLight(t12) {
-        this.ListNode.forEach((v12) => {
-            if (v12.getNodeCurrentNodeId() === this.lastPassId) {
-                v12.setCanShowFlagLine(false);
-                v12.setCanShowBottomFlagLine(false);
+    c14(currentIndex) {
+        this.w7.forEach((value) => {
+            if (value.e6() === this.l11) {
+                value.w6(false);
+                value.d7(false);
+                return;
             }
         });
-        this.changeNodeColor(t12, this.listNode[t12].getNodeStatus().highLight);
-        this.listNode[t12].setIsHighLight(true);
-        this.changeNodeHighLightColor(t12, true);
-        this.setImageSource(t12, InteractionStatus.DragInsert);
-        this.setImageCollapseSource(t12, InteractionStatus.DragInsert);
-        this.notifyDataReload();
+        this.q12(currentIndex, this.w7[currentIndex].l6().j5);
+        this.w7[currentIndex].f7(true);
+        this.b14(currentIndex, true);
+        this.i8(currentIndex, a3.DRAG_INSERT);
+        this.s12(currentIndex, a3.DRAG_INSERT);
+        this.z8();
     }
 
-    alterFlagLineAndExpandNode(n12, o12) {
-        this.ListNode.forEach((s12) => {
-            if (s12.getNodeCurrentNodeId() === this.lastPassId) {
-                s12.setCanShowFlagLine(false);
-                s12.setCanShowBottomFlagLine(false);
+    d14(currentIndex, x10) {
+        this.w7.forEach((value) => {
+            if (value.e6() === this.l11) {
+                value.w6(false);
+                value.d7(false);
             }
         });
-        this.ListNode.forEach((r12) => {
-            if (this.isInnerDrag && r12.getNodeCurrentNodeId() === o12) {
-                r12.setCanShowFlagLine(true);
+        this.w7.forEach((value) => {
+            if (this.e11 && value.e6() === x10) {
+                value.w6(true);
             }
         });
-        this.changeNodeStatus(n12);
-        this.handleExpandAndCollapse(n12);
-        this.lastPassId = o12;
+        this.w12(currentIndex);
+        this.z12(currentIndex, true);
+        this.l11 = x10;
     }
 
-    hideLastLine() {
-        if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId)) {
-            this.ListNode.forEach((m12) => {
-                if (m12.getNodeCurrentNodeId() === this.lastPassId) {
-                    m12.setCanShowFlagLine(false);
-                    m12.setCanShowBottomFlagLine(false);
+    w8() {
+        if (this.l11 !== this.INITIAL_INVALID_VALUE && this.b11.has(this.l11)) {
+            this.w7.forEach((value) => {
+                if (value.e6() === this.l11) {
+                    value.w6(false);
+                    value.d7(false);
+                    return;
                 }
             });
-            let k12 = this.loadedNodeIdAndIndexMap.get(this.lastPassId);
-            this.notifyDataChange(k12);
+            let index = this.b11.get(this.l11);
+            this.g9(index);
         }
     }
 
-    clearLastTimeoutHighLight() {
-        if (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
-            this.clearTimeoutHighLightId !== this.lastTimeoutHighLightId) {
-            clearTimeout(this.lastTimeoutHighLightId);
-            if (this.lastDelayHighLightIndex !== this.INITIAL_INVALID_VALUE) {
-                this.clearHighLight(this.lastDelayHighLightIndex);
+    x8() {
+        if (this.t11 !== this.INITIAL_INVALID_VALUE &&
+            this.u11 !== this.t11) {
+            clearTimeout(this.t11);
+            if (this.v11 !== this.INITIAL_INVALID_VALUE) {
+                this.a14(this.v11);
             }
         }
     }
 
-    clearLastTimeoutExpand() {
-        if (this.lastTimeoutExpandId !== this.INITIAL_INVALID_VALUE &&
-            this.clearTimeoutExpandId !== this.lastTimeoutExpandId) {
-            clearTimeout(this.lastTimeoutExpandId);
+    y8() {
+        if (this.q11 !== this.INITIAL_INVALID_VALUE &&
+            this.r11 !== this.q11) {
+            clearTimeout(this.q11);
         }
     }
 
-    getSubtitle(j12) {
-        if (this.nodeIdAndSubtitleMap.has(j12)) {
-            if (typeof this.nodeIdAndSubtitleMap.get(j12) === 'number') {
-                return this.nodeIdAndSubtitleMap.get(j12)?.toString();
+    e14(currentNodeId) {
+        if (this.x11.has(currentNodeId)) {
+            if (typeof this.x11.get(currentNodeId) === 'number') {
+                return this.x11.get(currentNodeId)?.toString();
+            } else {
+                return this.x11.get(currentNodeId);
             }
-            else {
-                return this.nodeIdAndSubtitleMap.get(j12);
-            }
-        }
-        else {
+        } else {
             return '';
         }
     }
 
-    hasSubtitle(i12) {
-        return this.nodeIdAndSubtitleMap.has(i12);
+    f14(currentNodeId) {
+        return this.x11.has(currentNodeId);
     }
 
-    initialParameterAboutDelayHighLightAndExpandIndex() {
-        this.lastDelayHighLightIndex = this.INITIAL_INVALID_VALUE;
-        this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
-        this.lastPassIndex = this.INITIAL_INVALID_VALUE;
-        this.draggingCurrentNodeId = this.INITIAL_INVALID_VALUE;
-        this.flag = Flag.NONE;
+    c9() {
+        this.v11 = this.INITIAL_INVALID_VALUE;
+        this.o11 = this.INITIAL_INVALID_VALUE;
+        this.k11 = this.INITIAL_INVALID_VALUE;
+        this.g11 = this.INITIAL_INVALID_VALUE;
+        this.flag = w2.NONE;
     }
 
-    refreshSubtitle(h12) {
-        this.nodeIdAndSubtitleMap.set(this.selectedParentNodeId, this.selectedParentNodeSubtitle);
-        this.nodeIdAndSubtitleMap.set(h12, this.insertNodeSubtitle);
-        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(this.selectedParentNodeId));
-        this.notifyDataChange(this.loadedNodeIdAndIndexMap.get(h12));
+    d9(v10) {
+        this.x11.set(this.y11, this.z11);
+        this.x11.set(v10, this.a12);
+        this.g9(this.b11.get(this.y11));
+        this.g9(this.b11.get(v10));
     }
 
-    setNodeSubtitlePara(e12, f12, g12) {
-        this.selectedParentNodeId = e12;
-        this.selectedParentNodeSubtitle = f12;
-        this.insertNodeSubtitle = g12;
+    j10(s10, t10, u10) {
+        this.y11 = s10;
+        this.z11 = t10;
+        this.a12 = u10;
     }
 
-    getInsertNodeSubtitle() {
-        return this.insertNodeSubtitle;
+    g14() {
+        return this.a12;
     }
 
-    getExpandAndCollapseInfo(d12) {
-        return this.expandAndCollapseInfo.get(d12);
+    j9(currentNodeId) {
+        return this.a11.get(currentNodeId);
     }
 
-    getLastDelayHighLightId() {
-        return this.lastDelayHighLightId;
+    o9() {
+        return this.w11;
     }
 
-    setLastDelayHighLightId() {
-        this.ListNode.forEach((b12, c12) => {
-            if (c12 === this.lastDelayHighLightIndex) {
-                this.lastDelayHighLightId = b12.getCurrentNodeId();
+    l9() {
+        this.w7.forEach((value, index) => {
+            if (index === this.v11) {
+                this.w11 = value.e6();
             }
         });
     }
 
-    setLastPassId(z11) {
-        this.lastPassId = z11;
+    n9(q10) {
+        this.l11 = q10;
     }
 
-    setLastDelayHighLightIndex(y11) {
-        this.lastDelayHighLightIndex = y11;
+    p9(p10) {
+        this.v11 = p10;
     }
 
-    alterDragNode(t10, u10, v10, w10, x10) {
-        let y10 = [];
-        let z10 = t10;
-        let a11 = w10;
-        let b11 = x10.getNodeInfoData();
-        let c11 = null;
-        let d11 = x10.getNodeInfoNode();
-        let e11 = false;
-        let f11 = this.INITIAL_INVALID_VALUE;
-        let g11 = this.INITIAL_INVALID_VALUE;
-        let h11 = this.flag === Flag.DOWN_FLAG ? true : false;
-        g11 = this.getChildIndex(v10, w10);
-        f11 = this.getChildIndex(t10, u10) + 1;
-        if (t10 !== v10) {
-            f11 = h11 ? f11 + 1 : f11;
-        }
-        else {
-            if (f11 > g11) {
-                f11 = h11 ? f11 : f11 - 1;
-            }
-            else {
-                f11 = h11 ? f11 + 1 : f11;
+    m9(r9, s9, t9, u9, v9) {
+        let w9 = [];
+        let parentNodeId = r9;
+        let currentNodeId = u9;
+        let nodeParam = v9.t6();
+        let x9 = null;
+        let y9 = v9.u6();
+        let z9 = false;
+        let a10 = this.INITIAL_INVALID_VALUE;
+        let b10 = this.INITIAL_INVALID_VALUE;
+        let c10 = this.flag === w2.DOWN_FLAG ? true : false;
+        b10 = this.h14(t9, u9);
+        a10 = this.h14(r9, s9) + 1;
+        if (r9 !== t9) {
+            a10 = c10 ? a10 + 1 : a10;
+        } else {
+            if (a10 > b10) {
+                a10 = c10 ? a10 : a10 - 1;
+            } else {
+                a10 = c10 ? a10 + 1 : a10;
             }
         }
-        for (let x11 = 0; x11 < this.listNode.length; x11++) {
-            if (this.listNode[x11].getCurrentNodeId() === u10) {
-                e11 = this.listNode[x11].getIsHighLight();
-                if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(u10) === NodeStatus.Expand) {
-                    z10 = u10;
-                    f11 = 0;
-                }
-                else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(u10) === NodeStatus.Expand
-                    && this.listNode[x11].getCanShowFlagLine() === false) {
-                    z10 = u10;
-                    f11 = 0;
-                }
-                else if (e11) {
-                    z10 = u10;
-                    f11 = 0;
+        for (let o10 = 0; o10 < this.w7.length; o10++) {
+            if (this.w7[o10].e6() === s9) {
+                z9 = this.w7[o10].g7();
+                if (this.flag === w2.DOWN_FLAG && this.a11.get(s9) === z2.EXPAND) {
+                    parentNodeId = s9;
+                    a10 = 0;
+                } else if (this.flag === w2.UP_FLAG && this.a11.get(s9) ===
+                z2.EXPAND &&
+                    this.w7[o10].x6() === false) {
+                    parentNodeId = s9;
+                    a10 = 0;
+                } else if (z9) {
+                    parentNodeId = s9;
+                    a10 = 0;
                 }
                 break;
             }
         }
-        let i11 = {
-            currentNodeId: a11,
-            parentNodeId: z10,
-            childIndex: f11,
+        let callbackParam = {
+            currentNodeId: currentNodeId,
+            parentNodeId: parentNodeId,
+            childIndex: a10,
         };
-        this.appEventBus.emit(TreeListenType.NODE_MOVE, i11);
-        y10.push({ parentId: z10, currentId: a11, data: b11 });
-        let j11 = null;
-        let k11 = (t11, u11) => {
-            if (t11) {
-                j11 = t11;
-                z10 = j11.parentNodeId;
-                a11 = j11.currentNodeId;
-                for (let w11 = 0; w11 < u11.length; w11++) {
-                    if (u11[w11].getNodeCurrentNodeId() === a11) {
-                        c11 = u11[w11];
+        this.appEventBus.emit(TreeListenType.NODE_MOVE, callbackParam);
+        w9.push({ parentId: parentNodeId, i14: currentNodeId, data: nodeParam });
+        let callback = (node, m10) => {
+            if (node) {
+                parentNodeId = node.parentNodeId;
+                currentNodeId = node.currentNodeId;
+                for (let n10 = 0; n10 < m10.length; n10++) {
+                    if (m10[n10].e6() === currentNodeId) {
+                        x9 = m10[n10];
                         break;
                     }
                 }
-                if (c11 === null) {
+                if (x9 === null) {
                     return false;
                 }
-                let v11 = c11.getNodeInfoData();
-                if (z10 !== v10) {
-                    y10.push({ parentId: z10, currentId: a11, data: v11 });
+                let nodeParam = x9.t6();
+                if (parentNodeId !== t9) {
+                    w9.push({ parentId: parentNodeId, i14: currentNodeId, data: nodeParam });
                 }
                 return false;
             }
             return false;
         };
-        this.listNodeUtils.dragTraverseNodeDF(k11, d11, this.listNode);
-        this.listNodeUtils.removeNode(w10, v10);
-        let l11 = u10;
-        let m11 = h11;
-        if (this.expandAndCollapseInfo.get(u10) === NodeStatus.Expand) {
-            m11 = false;
-            this.listNode.forEach((s11) => {
-                if (s11.getCurrentNodeId() === u10 && s11.getCanShowFlagLine() === false) {
-                    if (s11.getNodeInfoNode().children.length) {
-                        l11 = s11.getNodeInfoNode().children[0].currentNodeId;
-                    }
-                    else {
-                        l11 = this.INITIAL_INVALID_VALUE;
+        this.j14(callback, y9, this.w7);
+        let d10 = this.removeNode(u9, t9);
+        if (d10.length === 0) {
+            return;
+        }
+        let e10 = s9;
+        let isAfter = c10;
+        if (this.a11.get(s9) === z2.EXPAND) {
+            isAfter = false;
+            this.w7.forEach((value) => {
+                if (value.e6() === s9 && value.x6() === false) {
+                    if (value.u6().children.length) {
+                        e10 = value.u6().children[0].currentNodeId;
+                    } else {
+                        e10 = this.INITIAL_INVALID_VALUE;
                     }
                 }
             });
+        } else if (!this.a11.get(s9) && z9) {
+            this.a11.set(s9, z2.EXPAND);
         }
-        else if (!this.expandAndCollapseInfo.get(u10) && e11) {
-            this.expandAndCollapseInfo.set(u10, NodeStatus.Expand);
+        let f10 = this.k14(w9[0].parentId, w9[0].i14, e10, isAfter, w9[0].data);
+        if (!f10) {
+            return;
         }
-        this.listNodeUtils.addDragNode(y10[0].parentId, y10[0].currentId, l11, m11, y10[0].data);
-        for (let q11 = 1; q11 < y10.length; q11++) {
-            this.listNodeUtils.addNode(y10[q11].parentId, y10[q11].currentId, y10[q11].data);
+        for (let j10 = 1; j10 < w9.length; j10++) {
+            let k10 = this.addNode(w9[j10].parentId, w9[j10].i14, w9[j10].data, false);
+            if (!k10) {
+                return;
+            }
         }
-        for (let p11 = 0; p11 < this.listNode.length; p11++) {
-            if (this.listNode[p11].getCurrentNodeId() === v10) {
-                if (this.listNode[p11].getNodeInfoNode().getNodeItem().imageCollapse === null) {
-                    this.listNode[p11].handleImageCollapseAfterAddNode(false);
-                    this.expandAndCollapseInfo.delete(v10);
+        for (let i10 = 0; i10 < this.w7.length; i10++) {
+            if (this.w7[i10].e6() === t9) {
+                if (this.w7[i10].k6().x3 === null) {
+                    this.w7[i10].z5(false);
+                    this.a11.delete(t9);
                     break;
                 }
             }
         }
-        let n11 = [...this.listNode];
-        this.reloadListNode(this.listNodeUtils, n11);
+        let g10 = [...this.w7];
+        this.l14(g10);
     }
 
-    reloadListNode(m10, n10) {
-        let o10 = 0;
-        this.listNode = [];
-        this.listNodeUtils = m10;
-        this.loadedNodeIdAndIndexMap.clear();
-        this.listNodeUtils.traverseNodeDF((q10) => {
-            if (q10.currentNodeId >= 0) {
-                let r10 = new NodeInfo(q10);
-                this.listNode.push(r10);
-                if (this.expandAndCollapseInfo.get(q10.currentNodeId) === NodeStatus.Expand) {
-                    r10.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Expand);
-                }
-                else if (this.expandAndCollapseInfo.get(q10.currentNodeId) === NodeStatus.Collapse) {
-                    r10.getNodeItem().imageCollapse?.changeImageCollapseSource(NodeStatus.Collapse);
-                }
-                for (let s10 = 0; s10 < n10.length; s10++) {
-                    if (n10[s10].getCurrentNodeId() === r10.getCurrentNodeId()) {
-                        r10.setNodeIsShow(n10[s10].getNodeIsShow());
-                        r10.setListItemHeight(n10[s10].getListItemHeight());
-                        if (r10.getNodeItem().mainTitleNode && r10.getIsShowTitle()) {
-                            r10.getNodeItem().mainTitleNode.title = n10[s10].getNodeItem().mainTitleNode?.title;
-                        }
-                        break;
+    l14(m9) {
+        let index = 0;
+        let n9 = 0;
+        this.w7.splice(0, this.w7.length);
+        this.b11.clear();
+        this.u10.splice(0, this.u10.length);
+        this.n14((node) => {
+            let currentNodeId = node.currentNodeId;
+            if (currentNodeId >= 0) {
+                if (this.w10.has(currentNodeId)) {
+                    let p9 = new f3(node, this.w10.get(currentNodeId));
+                    p9.m5(node.o6().a13);
+                    this.w7.push(p9);
+                    this.c11.set(p9.e6(), n9++);
+                    if (this.a11.get(currentNodeId) === z2.EXPAND) {
+                        p9.k6().x3 = q3.x12(z2.EXPAND, p9.k6().x3?.y12);
+                    } else if (this.a11.get(currentNodeId) === z2.COLLAPSE) {
+                        p9.k6().x3 = q3.x12(z2.COLLAPSE, p9.k6().x3?.y12);
                     }
-                }
-                if (r10.getNodeIsShow()) {
-                    this.loadedNodeIdAndIndexMap.set(r10.getCurrentNodeId(), o10++);
+                    for (let q9 = 0; q9 < m9.length; q9++) {
+                        if (m9[q9].e6() === p9.e6()) {
+                            p9.i6(m9[q9].j6());
+                            p9.c6(m9[q9].d6());
+                            if (p9.k6().w3 && p9.w5()) {
+                                p9.k6().w3.title = m9[q9].k6().w3?.title;
+                            }
+                            break;
+                        }
+                    }
+                    if (p9.j6()) {
+                        this.b11.set(p9.e6(), index++);
+                        this.u10.push(p9);
+                    }
                 }
             }
             return false;
         });
     }
 
-    getFlagLine() {
-        return this.FLAG_LINE;
+    o14() {
+        return this.f12;
     }
 
-    getVisibility(j10) {
-        let k10 = this.loadedNodeIdAndIndexMap.get(j10.getCurrentNodeId()) - 1;
-        if (k10 > this.INITIAL_INVALID_VALUE) {
-            let l10 = this.getData(k10);
-            return (j10.getCanShowFlagLine() === true && !j10.getIsHighLight() && !l10?.getIsHighLight()) ?
+    p14(j9) {
+        let k9 = this.b11.get(j9.e6()) - 1;
+        if (k9 > this.INITIAL_INVALID_VALUE) {
+            let l9 = this.getData(k9);
+            return (j9.x6() === true && !j9.g7() && !l9?.g7()) ?
             Visibility.Visible : Visibility.Hidden;
-        }
-        else {
-            return (j10.getCanShowFlagLine() === true && !j10.getIsHighLight()) ?
+        } else {
+            return (j9.x6() === true && !j9.g7()) ?
             Visibility.Visible : Visibility.Hidden;
         }
     }
 
-    getSubTitlePara() {
+    q14() {
         return this.subTitle;
     }
 
-    getIsFolder(i10) {
-        if (this.loadedNodeIdAndIndexMap.has(i10)) {
-            return this.getData(this.loadedNodeIdAndIndexMap.get(i10))?.getIsFolder();
+    v6(i9) {
+        if (this.b11.has(i9)) {
+            return this.getData(this.b11.get(i9))?.v6();
         }
         return false;
     }
 
-    getSubTitleFontColor(h10) {
-        return h10 ? this.subTitle.highLightFontColor : this.treeViewTheme.secondaryTitleFontColor;
+    r14(h9) {
+        return h9 ? this.subTitle.o12 : this.treeViewTheme.b4;
     }
 
-    getChildIndex(z9, a10) {
-        let b10 = this.INITIAL_INVALID_VALUE;
-        this.listNodeUtils.traverseNodeBF((d10) => {
-            if (d10.getCurrentNodeId() === z9) {
-                d10.children.forEach((f10, g10) => {
-                    if (f10.getCurrentNodeId() === a10) {
-                        b10 = g10;
+    h14(d9, e9) {
+        let f9 = this.INITIAL_INVALID_VALUE;
+        if (this.v10.has(d9)) {
+            let node = this.v10.get(d9);
+            if (node.f13() === d9) {
+                node.children.forEach((value, index) => {
+                    if (value.f13() === e9) {
+                        f9 = index;
+                        return;
                     }
                 });
-                return true;
             }
+        }
+        return f9;
+    }
+
+    s14(c9) {
+        this.b12 = c9;
+    }
+
+    t14() {
+        return this.b12;
+    }
+
+    u14(b9) {
+        this.c12 = b9;
+    }
+
+    v14() {
+        return this.c12;
+    }
+
+    w14() {
+        return this.d12;
+    }
+
+    p8(flag) {
+        this.flag = flag;
+    }
+
+    n14(callback, root = this.s10) {
+        let stack = [];
+        let z8 = false;
+        stack.unshift(root);
+        let a9 = stack.shift();
+        while (!z8 && a9) {
+            z8 = callback(a9) === true;
+            if (!z8) {
+                stack.unshift(...a9.children);
+                a9 = stack.shift();
+            }
+        }
+    }
+
+    e13(callback, root = this.s10, u8, v8) {
+        let stack = [];
+        let w8 = false;
+        let x8 = false;
+        stack.unshift(root);
+        let y8 = stack.shift();
+        while (!w8 && y8) {
+            try {
+                if (u8 !== undefined && y8.b5 < u8) {
+                    x8 = true;
+                }
+                if (v8 !== undefined && y8.b5 > v8) {
+                    x8 = true;
+                }
+                if (!x8) {
+                    w8 = callback(y8);
+                }
+            } catch (err) {
+                throw new Error('traverseSectionNodeDF function callbacks error');
+            }
+            if (!w8) {
+                stack.unshift(...y8.children);
+                y8 = stack.shift();
+                x8 = false;
+            }
+        }
+    }
+
+    x14(s8, t8, count) {
+        let parentNodeId = s8.parentNodeId;
+        while (parentNodeId >= 0) {
+            if (this.v10.has(parentNodeId)) {
+                let parent = this.v10.get(parentNodeId);
+                parent.o6().r10 =
+                    t8 ? parent.o6().r10 + count : parent.o6().r10 - count;
+                parentNodeId = parent.parentNodeId;
+            } else {
+                hilog.error(LOG_CODE, TAG, 'updateParentChildNum: parent node not found.');
+                break;
+            }
+        }
+    }
+
+    f10(currentNodeId) {
+        let current = new j3(d3);
+        if (this.v10.has(currentNodeId)) {
+            current = this.v10.get(currentNodeId);
+        }
+        return current.parentNodeId;
+    }
+
+    addNode(parentNodeId, currentNodeId, data, p8) {
+        if (this.s10 === null) {
+            this.s10 = new j3(d3);
+            this.s10.b5 = -1;
+            this.v10.set(-1, this.s10);
+            this.w10.set(-1, d3);
+        }
+        if (this.v10.has(parentNodeId)) {
+            let parent = this.v10.get(parentNodeId);
+            let q8 = new j3(data);
+            if (parent.b5 > this.t10) {
+                hilog.error(LOG_CODE, TAG,
+                    'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
+                return false;
+            }
+            q8.b5 = parent.b5 + 1;
+            q8.parentNodeId = parentNodeId;
+            q8.currentNodeId = currentNodeId;
+            q8.y14 = parent.children.length;
+            data.parentNodeId = parentNodeId;
+            data.currentNodeId = currentNodeId;
+            parent.children.push(q8);
+            parent.o6().a13 = true;
+            parent.o6().b13 = parent.children.length;
+            parent.o6().r10 += 1;
+            if (p8) {
+                this.e12.push(parent.parentNodeId);
+            } else {
+                let r8 = [];
+                r8.push(parent.parentNodeId);
+                i(true, 1, this.v10, r8);
+            }
+            this.w10.set(currentNodeId, data);
+            this.v10.set(currentNodeId, q8);
+            return true;
+        } else {
+            hilog.error(LOG_CODE, TAG, 'ListDataSource[addNode]: Parent node not found.');
             return false;
+        }
+    }
+
+    z14(k8, l8) {
+        let m8 = [];
+        let callback = (node) => {
+            m8.push(node);
+            return false;
+        };
+        this.n14(callback, k8);
+        m8.forEach((value) => {
+            l8.push(value.f13());
+            this.v10.delete(value.f13());
+            this.w10.delete(value.f13());
+            value = new j3(d3);
         });
-        return b10;
     }
 
-    setCurrentFocusNodeId(y9) {
-        this.currentFocusNodeId = y9;
+    removeNode(currentNodeId, parentNodeId) {
+        if (this.v10.has(parentNodeId) && this.v10.has(currentNodeId)) {
+            let parent = this.v10.get(parentNodeId);
+            let current = this.v10.get(currentNodeId);
+            let f8 = [];
+            let index = current.y14;
+            let g8 = 0;
+            if (index < 0) {
+                hilog.error(LOG_CODE, TAG, 'node does not exist.');
+                return [];
+            } else {
+                g8 = parent.children[index].o6().r10 + 1;
+                this.z14(parent.children[index], f8);
+                for (let j8 = index; j8 < parent.children.length; j8++) {
+                    parent.children[j8].y14 -= 1;
+                }
+                let node = parent.children.splice(index, 1);
+                node = null;
+                if (parent.children.length === 0) {
+                    if (this.c11.has(parentNodeId)) {
+                        let i8 = this.c11.get(parentNodeId);
+                        this.w7[i8]?.m5(false);
+                    }
+                }
+            }
+            parent.o6().b13 = parent.children.length;
+            parent.o6().r10 -= (g8);
+            let h8 = [];
+            h8.push(parent.parentNodeId);
+            i(false, g8, this.v10, h8);
+            return f8;
+        } else {
+            hilog.error(LOG_CODE, TAG, 'parent does not exist.');
+            return [];
+        }
     }
 
-    getCurrentFocusNodeId() {
-        return this.currentFocusNodeId;
+    a15(e8) {
+        if (e8?.currentNodeId === undefined) {
+            hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: currentId is undefined');
+            return new f3(new j3(d3), d3);
+        }
+        if (!this.c11.has(e8.currentNodeId)) {
+            hilog.error(LOG_CODE, TAG, 'getNodeInfoByNodeItem: not has nodeItem.');
+            return new f3(new j3(d3), d3);
+        }
+        let index = this.c11.get(e8.currentNodeId);
+        return this.w7[index];
     }
 
-    setLastFocusNodeId(x9) {
-        this.lastFocusNodeId = x9;
+    h10(a8) {
+        let parent = new j3(d3);
+        if (this.v10.has(a8)) {
+            parent = this.v10.get(a8);
+        }
+        let b8 = d3;
+        if (parent) {
+            let c8 = this.a15(parent);
+            if (parent.children.length === 0) {
+                if (c8.k6().v3 !== undefined) {
+                    b8.icon = c8.k6().v3?.a8;
+                    b8.selectedIcon = c8.k6().v3?.r13;
+                    b8.editIcon = c8.k6().v3?.s13;
+                    b8.container = c8.q6();
+                } else {
+                    b8.icon = undefined;
+                    b8.selectedIcon = undefined;
+                    b8.editIcon = undefined;
+                    b8.container = c8.q6();
+                }
+            } else if (parent.children.length > 0) {
+                let d8 = this.a15(parent.children[0]);
+                if (c8.k6().v3 !== null) {
+                    b8.icon = (d8.k6().v3 !== undefined) ?
+                        d8.k6().v3?.a8 : undefined;
+                    b8.selectedIcon = (d8.k6().v3 !== undefined) ?
+                        d8.k6().v3?.r13 : undefined;
+                    b8.editIcon = (d8.k6().v3 !== undefined) ?
+                        d8.k6().v3?.s13 : undefined;
+                    b8.container = d8.q6();
+                } else {
+                    b8.icon = undefined;
+                    b8.selectedIcon = undefined;
+                    b8.editIcon = undefined;
+                    b8.container = d8.q6();
+                }
+            }
+        }
+        return b8;
     }
 
-    getLastFocusNodeId() {
-        return this.lastFocusNodeId;
+    e10(w7) {
+        let parent = new j3(d3);
+        if (this.v10.has(w7)) {
+            parent = this.v10.get(w7);
+        }
+        if (parent) {
+            if (parent.children.length === 0) {
+                return [];
+            } else if (parent.children.length > 0) {
+                let x7 = new Array(parent.children.length);
+                for (let z7 = 0; z7 < x7.length; z7++) {
+                    x7[z7] = 0;
+                }
+                for (let y7 = 0; y7 < parent.children.length && y7 < x7.length; y7++) {
+                    x7[y7] = parent.children[y7].currentNodeId;
+                }
+                return x7;
+            }
+        }
+        return [];
     }
 
-    getAddFocusNodeId() {
-        return this.addFocusNodeId;
+    b10(r7) {
+        let parent = new j3(d3);
+        if (this.v10.has(r7)) {
+            parent = this.v10.get(r7);
+        }
+        if (parent) {
+            if (parent.children.length === 0) {
+                return [];
+            } else if (parent.children.length > 0) {
+                let s7 = new Array(parent.children.length);
+                for (let v7 = 0; v7 < s7.length; v7++) {
+                    s7[v7] = {};
+                }
+                for (let t7 = 0; t7 < parent.children.length && t7 < s7.length; t7++) {
+                    s7[t7].itemId = parent.children[t7].currentNodeId;
+                    let u7 = this.a15(parent.children[t7]);
+                    if (u7.k6().v3) {
+                        s7[t7].b15 = u7.k6().v3?.source;
+                    }
+                    if (u7.k6().w3) {
+                        s7[t7].c15 = u7.k6().w3?.title;
+                    }
+                    s7[t7].isFolder = u7.v6();
+                }
+                return s7;
+            }
+        }
+        return [];
     }
 
-    setFlag(w9) {
-        this.flag = w9;
+    i10(title) {
+        if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
+            return false;
+        }
+        if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_CN_LENGTH) ||
+            (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(title) && title.length > this.MAX_EN_LENGTH)) {
+            return false;
+        }
+        return true;
+    }
+
+    j14(callback, root = this.s10, o7) {
+        let stack = [];
+        let p7 = false;
+        stack.unshift(root);
+        let q7 = stack.shift();
+        while (!p7 && q7) {
+            p7 = callback(q7, o7) === true;
+            if (!p7) {
+                stack.unshift(...q7.children);
+                q7 = stack.shift();
+            }
+        }
+    }
+
+    d15(insertIndex, parent) {
+        for (let n7 = insertIndex; n7 < parent.children.length; n7++) {
+            parent.children[n7].y14 += 1;
+        }
+    }
+
+    k14(parentNodeId, currentNodeId, k7, isAfter, data) {
+        if (this.s10 === null) {
+            this.s10 = new j3(d3);
+            this.s10.b5 = this.INITIAL_INVALID_VALUE;
+        }
+        if (this.v10.has(parentNodeId)) {
+            let parent = this.v10.get(parentNodeId);
+            let l7 = new j3(data);
+            if (parent.b5 > this.t10) {
+                hilog.error(LOG_CODE, TAG, 'addDragNode: The level of the tree view cannot exceed 50.');
+                return false;
+            }
+            l7.b5 = parent.b5 + 1;
+            l7.parentNodeId = parentNodeId;
+            l7.currentNodeId = currentNodeId;
+            data.parentNodeId = parentNodeId;
+            data.currentNodeId = currentNodeId;
+            let insertIndex = this.INITIAL_INVALID_VALUE;
+            if (parent.children.length) {
+                for (let m7 = 0; m7 < parent.children.length; m7++) {
+                    if (parent.children[m7].f13() === k7) {
+                        insertIndex = m7;
+                        break;
+                    }
+                }
+                if (isAfter) {
+                    l7.y14 = insertIndex + 1;
+                    this.d15(l7.y14, parent);
+                    parent.children.splice(insertIndex + 1, 0, l7);
+                } else {
+                    l7.y14 = insertIndex < 0 ? parent.children.length + insertIndex : insertIndex;
+                    this.d15(l7.y14, parent);
+                    parent.children.splice(insertIndex, 0, l7);
+                }
+            } else {
+                l7.y14 = parent.children.length;
+                parent.children.push(l7);
+            }
+            parent.o6().a13 = true;
+            parent.o6().b13 = parent.children.length;
+            parent.o6().r10 += 1;
+            this.x14(parent, true, 1);
+            this.v10.set(currentNodeId, l7);
+            this.w10.set(currentNodeId, data);
+            return true;
+        } else {
+            hilog.error(LOG_CODE, TAG, 'addDragNode: Parent node not found.');
+            return false;
+        }
     }
 }
 
-export class TreeViewInner extends ViewPU {
-    constructor(q9, r9, s9, t9 = -1, u9 = undefined, v9) {
-        super(q9, s9, t9, v9);
-        if (typeof u9 === 'function') {
-            this.paramsGenerator_ = u9;
+export class i3 extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === 'function') {
+            this.paramsGenerator_ = paramsLambda;
         }
-        this.__item = new SynchedPropertyNesedObjectPU(r9.item, this, 'item');
-        this.listNodeDataSource = new ListNodeDataSource();
-        this.__columnWidth = new ObservedPropertySimplePU(0, this, 'columnWidth');
-        this.__isFocused = new ObservedPropertySimplePU(false, this, 'isFocused');
-        this.__index = new ObservedPropertySimplePU(-1, this, 'index');
-        this.__lastIndex = new ObservedPropertySimplePU(-1, this, 'lastIndex');
-        this.__count = new ObservedPropertySimplePU(0, this, 'count');
-        this.__treeViewTheme = this.initializeConsume('treeViewTheme', 'treeViewTheme');
+        this.n7 = new SynchedPropertyNesedObjectPU(params.item, this, 'item');
+        this.listNodeDataSource = new h3();
+        this.e15 = new ObservedPropertySimplePU(0, this, 'columnWidth');
+        this.f15 = new ObservedPropertySimplePU(false, this, 'isFocused');
+        this.g15 = new ObservedPropertySimplePU(-1, this, 'index');
+        this.h15 = new ObservedPropertySimplePU(-1, this, 'lastIndex');
+        this.i15 = new ObservedPropertySimplePU(0, this, 'count');
+        this.r7 = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
+        this.s7 = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
+        this.u7 = this.initializeConsume('treeViewTheme', 'treeViewTheme');
         this.listTreeViewMenu = undefined;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -2943,158 +3494,221 @@ export class TreeViewInner extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             }
         };
-        this.setInitiallyProvidedValue(r9);
+        this.inputFontSize = resourceManager.getSystemResourceManager().getNumberByName('ohos_id_text_size_body1');
+        this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(p9) {
-        this.__item.set(p9.item);
-        if (p9.listNodeDataSource !== undefined) {
-            this.listNodeDataSource = p9.listNodeDataSource;
+    setInitiallyProvidedValue(params) {
+        this.n7.set(params.item);
+        if (params.listNodeDataSource !== undefined) {
+            this.listNodeDataSource = params.listNodeDataSource;
         }
-        if (p9.columnWidth !== undefined) {
-            this.columnWidth = p9.columnWidth;
+        if (params.columnWidth !== undefined) {
+            this.columnWidth = params.columnWidth;
         }
-        if (p9.isFocused !== undefined) {
-            this.isFocused = p9.isFocused;
+        if (params.isFocused !== undefined) {
+            this.isFocused = params.isFocused;
         }
-        if (p9.index !== undefined) {
-            this.index = p9.index;
+        if (params.index !== undefined) {
+            this.index = params.index;
         }
-        if (p9.lastIndex !== undefined) {
-            this.lastIndex = p9.lastIndex;
+        if (params.lastIndex !== undefined) {
+            this.lastIndex = params.lastIndex;
         }
-        if (p9.count !== undefined) {
-            this.count = p9.count;
+        if (params.count !== undefined) {
+            this.count = params.count;
         }
-        if (p9.listTreeViewMenu !== undefined) {
-            this.listTreeViewMenu = p9.listTreeViewMenu;
+        if (params.followingSystemFontScale !== undefined) {
+            this.followingSystemFontScale = params.followingSystemFontScale;
         }
-        if (p9.MAX_CN_LENGTH !== undefined) {
-            this.MAX_CN_LENGTH = p9.MAX_CN_LENGTH;
+        if (params.maxAppFontScale !== undefined) {
+            this.maxAppFontScale = params.maxAppFontScale;
         }
-        if (p9.MAX_EN_LENGTH !== undefined) {
-            this.MAX_EN_LENGTH = p9.MAX_EN_LENGTH;
+        if (params.listTreeViewMenu !== undefined) {
+            this.listTreeViewMenu = params.listTreeViewMenu;
         }
-        if (p9.INITIAL_INVALID_VALUE !== undefined) {
-            this.INITIAL_INVALID_VALUE = p9.INITIAL_INVALID_VALUE;
+        if (params.MAX_CN_LENGTH !== undefined) {
+            this.MAX_CN_LENGTH = params.MAX_CN_LENGTH;
         }
-        if (p9.MAX_TOUCH_DOWN_COUNT !== undefined) {
-            this.MAX_TOUCH_DOWN_COUNT = p9.MAX_TOUCH_DOWN_COUNT;
+        if (params.MAX_EN_LENGTH !== undefined) {
+            this.MAX_EN_LENGTH = params.MAX_EN_LENGTH;
         }
-        if (p9.isMultiPress !== undefined) {
-            this.isMultiPress = p9.isMultiPress;
+        if (params.INITIAL_INVALID_VALUE !== undefined) {
+            this.INITIAL_INVALID_VALUE = params.INITIAL_INVALID_VALUE;
         }
-        if (p9.touchDownCount !== undefined) {
-            this.touchDownCount = p9.touchDownCount;
+        if (params.MAX_TOUCH_DOWN_COUNT !== undefined) {
+            this.MAX_TOUCH_DOWN_COUNT = params.MAX_TOUCH_DOWN_COUNT;
         }
-        if (p9.appEventBus !== undefined) {
-            this.appEventBus = p9.appEventBus;
+        if (params.isMultiPress !== undefined) {
+            this.isMultiPress = params.isMultiPress;
         }
-        if (p9.itemPadding !== undefined) {
-            this.itemPadding = p9.itemPadding;
+        if (params.touchDownCount !== undefined) {
+            this.touchDownCount = params.touchDownCount;
         }
-        if (p9.textInputPadding !== undefined) {
-            this.textInputPadding = p9.textInputPadding;
+        if (params.appEventBus !== undefined) {
+            this.appEventBus = params.appEventBus;
+        }
+        if (params.itemPadding !== undefined) {
+            this.itemPadding = params.itemPadding;
+        }
+        if (params.textInputPadding !== undefined) {
+            this.textInputPadding = params.textInputPadding;
+        }
+        if (params.inputFontSize !== undefined) {
+            this.inputFontSize = params.inputFontSize;
         }
     }
 
-    updateStateVars(o9) {
-        this.__item.set(o9.item);
+    updateStateVars(params) {
+        this.n7.set(params.item);
     }
 
-    purgeVariableDependenciesOnElmtId(n9) {
-        this.__item.purgeDependencyOnElmtId(n9);
-        this.__columnWidth.purgeDependencyOnElmtId(n9);
-        this.__isFocused.purgeDependencyOnElmtId(n9);
-        this.__index.purgeDependencyOnElmtId(n9);
-        this.__lastIndex.purgeDependencyOnElmtId(n9);
-        this.__count.purgeDependencyOnElmtId(n9);
-        this.__treeViewTheme.purgeDependencyOnElmtId(n9);
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.n7.purgeDependencyOnElmtId(rmElmtId);
+        this.e15.purgeDependencyOnElmtId(rmElmtId);
+        this.f15.purgeDependencyOnElmtId(rmElmtId);
+        this.g15.purgeDependencyOnElmtId(rmElmtId);
+        this.h15.purgeDependencyOnElmtId(rmElmtId);
+        this.i15.purgeDependencyOnElmtId(rmElmtId);
+        this.r7.purgeDependencyOnElmtId(rmElmtId);
+        this.s7.purgeDependencyOnElmtId(rmElmtId);
+        this.u7.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
-        this.__item.aboutToBeDeleted();
-        this.__columnWidth.aboutToBeDeleted();
-        this.__isFocused.aboutToBeDeleted();
-        this.__index.aboutToBeDeleted();
-        this.__lastIndex.aboutToBeDeleted();
-        this.__count.aboutToBeDeleted();
-        this.__treeViewTheme.aboutToBeDeleted();
+        this.n7.aboutToBeDeleted();
+        this.e15.aboutToBeDeleted();
+        this.f15.aboutToBeDeleted();
+        this.g15.aboutToBeDeleted();
+        this.h15.aboutToBeDeleted();
+        this.i15.aboutToBeDeleted();
+        this.r7.aboutToBeDeleted();
+        this.s7.aboutToBeDeleted();
+        this.u7.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
 
     get item() {
-        return this.__item.get();
+        return this.n7.get();
     }
 
     get columnWidth() {
-        return this.__columnWidth.get();
+        return this.e15.get();
     }
 
-    set columnWidth(m9) {
-        this.__columnWidth.set(m9);
+    set columnWidth(newValue) {
+        this.e15.set(newValue);
     }
 
     get isFocused() {
-        return this.__isFocused.get();
+        return this.f15.get();
     }
 
-    set isFocused(l9) {
-        this.__isFocused.set(l9);
+    set isFocused(newValue) {
+        this.f15.set(newValue);
     }
 
     get index() {
-        return this.__index.get();
+        return this.g15.get();
     }
 
-    set index(k9) {
-        this.__index.set(k9);
+    set index(newValue) {
+        this.g15.set(newValue);
     }
 
     get lastIndex() {
-        return this.__lastIndex.get();
+        return this.h15.get();
     }
 
-    set lastIndex(j9) {
-        this.__lastIndex.set(j9);
+    set lastIndex(newValue) {
+        this.h15.set(newValue);
     }
 
     get count() {
-        return this.__count.get();
+        return this.i15.get();
     }
 
-    set count(i9) {
-        this.__count.set(i9);
+    set count(newValue) {
+        this.i15.set(newValue);
+    }
+
+    get followingSystemFontScale() {
+        return this.r7.get();
+    }
+
+    set followingSystemFontScale(newValue) {
+        this.r7.set(newValue);
+    }
+
+    get maxAppFontScale() {
+        return this.s7.get();
+    }
+
+    set maxAppFontScale(newValue) {
+        this.s7.set(newValue);
     }
 
     get treeViewTheme() {
-        return this.__treeViewTheme.get();
+        return this.u7.get();
     }
 
-    set treeViewTheme(h9) {
-        this.__treeViewTheme.set(h9);
+    set treeViewTheme(newValue) {
+        this.u7.set(newValue);
     }
 
     aboutToAppear() {
-        if (this.item.getNodeItem().imageNode) {
-            this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+        if (this.item.k6().v3) {
+            this.item.j4 = this.item.k6().v3?.source;
+        }
+        let j7 = this.getUIContext();
+        this.followingSystemFontScale = j7.isFollowingSystemFontScale();
+        this.maxAppFontScale = j7.getMaxFontScale();
+    }
+
+    decideFontScale() {
+        let h7 = this.getUIContext();
+        let i7 = h7.getHostContext()?.config?.fontSizeScale ?? 1;
+        if (!this.followingSystemFontScale) {
+            return 1;
+        }
+        return Math.min(i7, this.maxAppFontScale, q1);
+    }
+
+    getInputTextMaxFontSize() {
+        let g7 = this.decideFontScale() * this.inputFontSize + 'vp';
+        return g7;
+    }
+
+    getLeftIconColor() {
+        if (this.item.i7()) {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.icon_on_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else if (this.item.s6()) {
+            return this.treeViewTheme.h4;
+        } else {
+            return this.treeViewTheme.g4;
         }
     }
 
-    checkInvalidPattern(g9) {
-        return new RegExp('/[\\\/:*?"<>|]/').test(g9);
+    checkInvalidPattern(title) {
+        return new RegExp('/[\\\/:*?"<>|]/').test(title);
     }
 
-    checkIsAllCN(f9) {
-        return new RegExp('/^[\u4e00-\u9fa5]+$/').test(f9);
+    checkIsAllCN(title) {
+        return new RegExp('/^[\u4e00-\u9fa5]+$/').test(title);
     }
 
-    popupForShowTitle(v8, w8, x8, y8 = null) {
-        this.observeComponentCreation2((d9, e9) => {
+    popupForShowTitle(text, backgroundColor, fontColor, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.backgroundColor(w8);
+            Row.backgroundColor(backgroundColor);
             Row.border({
                 radius: {
                     'id': -1,
@@ -3135,8 +3749,8 @@ export class TreeViewInner extends ViewPU {
                 },
             });
         }, Row);
-        this.observeComponentCreation2((b9, c9) => {
-            Text.create(v8);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(text);
             Text.fontSize({
                 'id': -1,
                 'type': 10002,
@@ -3145,21 +3759,22 @@ export class TreeViewInner extends ViewPU {
                 'moduleName': '__harDefaultModuleName__',
             });
             Text.fontWeight('regular');
-            Text.fontColor(x8);
+            Text.fontColor(fontColor);
+            Text.minFontScale(o1);
+            Text.maxFontScale(this.decideFontScale());
         }, Text);
         Text.pop();
         Row.pop();
     }
 
-    builder(p8 = null) {
-        this.observeComponentCreation2((r8, s8) => {
+    builder(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.listTreeViewMenu) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.listTreeViewMenu.bind(this)(p8 ? p8 : this);
+                    this.listTreeViewMenu.bind(this)();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -3168,11 +3783,11 @@ export class TreeViewInner extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((o4, p4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.item.getNodeIsShow()) {
+            if (this.item.j6()) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((n8, o8) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         ViewStackProcessor.visualState('focused');
                         Stack.border({
@@ -3183,9 +3798,9 @@ export class TreeViewInner extends ViewPU {
                                 'bundleName': '__harDefaultBundleName__',
                                 'moduleName': '__harDefaultModuleName__',
                             },
-                            width: FLAG_NUMBER,
-                            color: this.treeViewTheme.borderFocusedColor,
-                            style: BorderStyle.Solid
+                            width: l1,
+                            color: this.treeViewTheme.f4,
+                            style: BorderStyle.Solid,
                         });
                         ViewStackProcessor.visualState('normal');
                         Stack.border({
@@ -3196,19 +3811,18 @@ export class TreeViewInner extends ViewPU {
                                 'bundleName': '__harDefaultBundleName__',
                                 'moduleName': '__harDefaultModuleName__',
                             },
-                            width: 0
+                            width: 0,
                         });
                         ViewStackProcessor.visualState();
                     }, Stack);
-                    this.observeComponentCreation2((x7, y7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.opacity(this.listNodeDataSource.getListItemOpacity(ObservedObject.GetRawObject(this.item)));
-                        Column.onHover((m8) => {
-                            if (m8) {
-                                this.item.setNodeColor(this.treeViewTheme.itemHoverBgColor);
-                            }
-                            else {
-                                this.item.setNodeColor({
+                        Column.opacity(this.listNodeDataSource.y13(ObservedObject.GetRawObject(this.item)));
+                        Column.onHover((isHover) => {
+                            if (isHover) {
+                                this.item.a6(this.treeViewTheme.e4);
+                            } else {
+                                this.item.a6({
                                     'id': -1,
                                     'type': 10001,
                                     params: ['sys.color.ohos_id_color_background_transparent'],
@@ -3217,193 +3831,193 @@ export class TreeViewInner extends ViewPU {
                                 });
                             }
                         });
-                        Column.onTouch((i8) => {
+                        Column.onTouch((event) => {
                             this.count++;
                             if (this.count > 1) {
                                 this.count--;
                                 return;
                             }
-                            let j8 = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId());
-                            this.listNodeDataSource.setClickIndex(this.index);
-                            let k8 = this.item.getNodeCurrentNodeId();
-                            if (i8.type === TouchType.Down) {
-                                this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
-                            }
-                            else if (i8.type === TouchType.Up) {
-                                if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
-                                    this.item.setNodeColor(COLOR_SELECT);
+                            this.index = this.listNodeDataSource.findIndex(this.item.e6());
+                            this.listNodeDataSource.h9(this.index);
+                            let z6 = this.item.e6();
+                            if (event.type === TouchType.Down) {
+                                this.item.a6(this.treeViewTheme.d4);
+                            } else if (event.type === TouchType.Up) {
+                                if (!(typeof this.treeViewTheme.z3 === 'string')) {
+                                    this.item.a6(b2);
+                                } else {
+                                    this.item.a6(this.treeViewTheme.z3);
                                 }
-                                else {
-                                    this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+                                if (this.item.k6().v3 !== null) {
+                                    this.item.k6().v3?.i8(a3.SELECTED);
+                                    this.listNodeDataSource.i8(this.index, a3.SELECTED);
+                                    this.item.j4 = this.item.k6().v3?.source;
                                 }
-                                if (this.item.getNodeItem().imageNode !== null) {
-                                    this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
-                                    this.item.imageSource = this.item.getNodeItem().imageNode?.source;
-                                }
-                                this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-                                let l8 = { currentNodeId: k8 };
-                                this.appEventBus.emit(TreeListenType.NODE_CLICK, l8);
+                                this.item.k6().w3?.j8(true);
+                                let a7 = { currentNodeId: z6 };
+                                this.appEventBus.emit(TreeListenType.NODE_CLICK, a7);
                             }
-                            if (this.listNodeDataSource.getLastIndex() !== -1 && j8 !== this.listNodeDataSource.getLastIndex()) {
-                                this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
-                                this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
+                            if (this.listNodeDataSource.u9() !== -1 && this.index !== this.listNodeDataSource.u9()) {
+                                this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
+                                this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
                             }
-                            this.lastIndex = j8;
+                            this.lastIndex = this.index;
                             this.count--;
                         });
-                        Column.backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
-                        this.item.getIsShowInputText()) ? this.item.getNodeItem().inputText?.editColor : this.item.getNodeColor());
+                        Column.backgroundColor((this.item.k6().w3 && this.item.k6().inputText &&
+                        this.item.x5()) ? this.item.k6().inputText?.j15 : this.item.b6());
                         Column.border({
-                            width: this.item.getNodeBorder().borderWidth,
-                            color: this.item.getNodeBorder().borderColor,
-                            radius: this.item.getNodeBorder().borderRadius,
+                            width: this.item.m6().borderWidth,
+                            color: this.item.m6().borderColor,
+                            radius: this.item.m6().borderRadius,
                         });
-                        Column.height(LIST_ITEM_HEIGHT);
+                        Column.height(i1);
                         Column.focusable(true);
-                        Column.onMouse((g8) => {
-                            let h8 = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
-                            if (g8.button === MouseButton.Right) {
-                                this.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT, findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
-                                this.listTreeViewMenu = this.item.getMenu();
-                                this.listNodeDataSource.setClickIndex(h8);
-                                clearTimeout(this.item.getNodeItem().mainTitleNode?.popUpTimeout);
+                        Column.onMouse((event) => {
+                            let y6 = this.listNodeDataSource.findIndex(this.item.e6());
+                            if (event.button === MouseButton.Right) {
+                                this.listNodeDataSource.i9(Event.MOUSE_BUTTON_RIGHT,
+                                    this.listNodeDataSource.findIndex(this.item.e6()));
+                                this.listTreeViewMenu = this.item.q6();
+                                this.listNodeDataSource.h9(y6);
+                                clearTimeout(this.item.k6().w3?.u13);
                             }
-                            g8.stopPropagation();
+                            event.stopPropagation();
                         });
                         Column.padding({ top: 0, bottom: 0 });
-                        Column.bindPopup(this.item.getPopUpInfo().popUpIsShow, {
-                            builder: { builder: () => {
-                                this.popupForShowTitle.call(this, this.item.getPopUpInfo().popUpText, this.item.getPopUpInfo().popUpColor, this.item.getPopUpInfo().popUpTextColor);
-                            } },
+                        Column.bindPopup(this.item.q5().u4, {
+                            builder: {
+                                builder: () => {
+                                    this.popupForShowTitle.call(this, this.item.q5().x4, this.item.q5().w4,
+                                        this.item.q5().y4);
+                                }
+                            },
                             placement: Placement.BottomLeft,
                             placementOnTop: false,
-                            popupColor: this.item.getPopUpInfo().popUpColor,
+                            popupColor: this.item.q5().w4,
                             autoCancel: true,
-                            enableArrow: this.item.getPopUpInfo().popUpEnableArrow
+                            enableArrow: this.item.q5().v4
                         });
-                        Column.onAreaChange((d8, e8) => {
-                            let f8 = Number.parseInt(e8.width.toString());
-                            this.columnWidth = f8;
+                        Column.onAreaChange((oldValue, newValue) => {
+                            let x6 = Number.parseInt(newValue.width.toString());
+                            this.columnWidth = x6;
                         });
                     }, Column);
-                    this.observeComponentCreation2((v7, w7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create({ alignContent: Alignment.Bottom });
                         Stack.focusable(true);
                     }, Stack);
-                    this.observeComponentCreation2((t7, u7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Divider.create();
-                        Divider.height(this.listNodeDataSource.getFlagLine().flagLineHeight);
-                        Divider.color(this.listNodeDataSource.getFlagLine().flagLineColor);
-                        Divider.visibility(this.listNodeDataSource.getVisibility(ObservedObject.GetRawObject(this.item)));
+                        Divider.height(this.listNodeDataSource.o14().g12);
+                        Divider.color(this.listNodeDataSource.o14().h12);
+                        Divider.visibility(this.listNodeDataSource.p14(ObservedObject.GetRawObject(this.item)));
                         Divider.lineCap(LineCapStyle.Round);
-                        Divider.margin({ start: LengthMetrics.vp(this.item.getFlagLineLeftMargin()) });
+                        Divider.margin({ start: LengthMetrics.vp(this.item.z6()) });
                         Divider.focusable(true);
                     }, Divider);
-                    this.observeComponentCreation2((p7, q7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create({});
                         Row.focusable(true);
                         Row.width('100%');
                         Gesture.create(GesturePriority.Low);
                         TapGesture.create({ count: 2 });
-                        TapGesture.onAction((s7) => {
-                            this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
+                        TapGesture.onAction((event) => {
+                            this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(this.item.e6()));
                         });
                         TapGesture.pop();
                         Gesture.pop();
-                        Row.height(this.item.getNodeHeight());
-                        Row.padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) });
+                        Row.height(this.item.h6());
+                        Row.padding({ start: LengthMetrics.vp(this.item.g6()) });
                         Row.bindContextMenu({ builder: this.builder.bind(this) }, ResponseType.RightClick);
                     }, Row);
-                    this.observeComponentCreation2((f7, g7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.getNodeItem().imageNode) {
+                        if (this.item.k6().v3) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((n7, o7) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
                                     Row.focusable(true);
-                                    Row.backgroundColor(COLOR_IMAGE_ROW);
+                                    Row.backgroundColor(a2);
                                     Row.margin({
-                                        end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
+                                        end: o(this.item.k6().v3?.z7)
                                     });
-                                    Row.height(this.item.getNodeItem().imageNode?.itemHeight);
-                                    Row.width(this.item.getNodeItem().imageNode?.itemWidth);
+                                    Row.height(this.item.k6().v3?.itemHeight);
+                                    Row.width(this.item.k6().v3?.itemWidth);
                                 }, Row);
-                                this.observeComponentCreation2((l7, m7) => {
-                                    Image.create(this.item.imageSource);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Image.create(this.item.j4);
                                     Image.objectFit(ImageFit.Contain);
-                                    Image.height(this.item.getNodeItem().imageNode?.itemHeight);
-                                    Image.width(this.item.getNodeItem().imageNode?.itemWidth);
-                                    Image.opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                                        this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity);
-                                    Image.focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true);
-                                    Image.fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                                    this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor);
-                                    Image.matchTextDirection((this.item.getNodeItem()
-                                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
-                                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
+                                    Image.height(this.item.k6().v3?.itemHeight);
+                                    Image.width(this.item.k6().v3?.itemWidth);
+                                    Image.opacity(!this.item.s6() && !this.item.g7() ?
+                                        this.item.k6().v3?.opacity : this.item.k6().v3?.k15);
+                                    Image.focusable(this.item.k6().w3 !== null ? false : true);
+                                    Image.fillColor(this.getLeftIconColor());
+                                    Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT ||
+                                        this.item.k6().x3?.c8 === s2) ? true : false);
                                 }, Image);
                                 Row.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((d7, e7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.layoutWeight(1);
                         Row.focusable(true);
                     }, Row);
-                    this.observeComponentCreation2((w6, x6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
+                        if (this.item.k6().w3 && this.item.w5()) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b7, c7) => {
-                                    Text.create(this.item.getNodeItem().mainTitleNode?.title);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create(this.item.k6().w3?.title);
+                                    Text.minFontScale(o1);
+                                    Text.maxFontScale(this.decideFontScale());
                                     Text.maxLines(1);
-                                    Text.fontSize(this.item.getNodeItem().mainTitleNode?.size);
-                                    Text.fontColor(this.item.getIsSelected() ?
-                                    this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor);
+                                    Text.fontSize(this.item.k6().w3?.size);
+                                    Text.fontColor(this.item.s6() ?
+                                    this.treeViewTheme.c4 : this.treeViewTheme.a4);
                                     Text.margin({
-                                        end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
-                                            .mainTitleNode?.itemRightMargin)
+                                        end: o(this.item.k6().w3?.z7)
                                     });
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                                    Text.fontWeight(this.item.getNodeItem().mainTitleNode?.weight);
+                                    Text.fontWeight(this.item.k6().w3?.weight);
                                     Text.focusable(true);
                                 }, Text);
                                 Text.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((c6, d6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
-                        this.item.getIsShowInputText()) {
+                        if (this.item.k6().w3 && this.item.k6().inputText &&
+                        this.item.x5()) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((u6, v6) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
-                                    Row.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor);
-                                    Row.borderRadius(this.item.getNodeItem().inputText?.borderRadius);
+                                    Row.backgroundColor(this.item.k6().inputText?.backgroundColor);
+                                    Row.borderRadius(this.item.k6().inputText?.borderRadius);
                                     Row.margin({
-                                        end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
-                                            .inputText?.itemRightMargin)
+                                        end: o(this.item.k6()
+                                            .inputText?.z7)
                                     });
                                 }, Row);
-                                this.observeComponentCreation2((i6, j6) => {
-                                    TextInput.create({ text: this.item.getNodeItem().mainTitleNode?.title });
-                                    TextInput.height(this.item.getNodeItem().inputText?.itemHeight);
-                                    TextInput.fontSize(this.item.getNodeItem().inputText?.size);
-                                    TextInput.fontColor(this.item.getNodeItem().inputText?.color);
-                                    TextInput.borderRadius(this.item.getNodeItem().inputText?.borderRadius);
-                                    TextInput.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    TextInput.create({ text: this.item.k6().w3?.title });
+                                    TextInput.height(this.item.k6().inputText?.itemHeight);
+                                    TextInput.fontSize(this.getInputTextMaxFontSize());
+                                    TextInput.fontColor(this.item.k6().inputText?.color);
+                                    TextInput.borderRadius(this.item.k6().inputText?.borderRadius);
+                                    TextInput.backgroundColor(this.item.k6().inputText?.backgroundColor);
                                     TextInput.enterKeyType(EnterKeyType.Done);
                                     TextInput.focusable(true);
                                     TextInput.padding({
@@ -3412,136 +4026,131 @@ export class TreeViewInner extends ViewPU {
                                         top: LengthMetrics.resource(this.textInputPadding.top),
                                         bottom: LengthMetrics.resource(this.textInputPadding.bottom),
                                     });
-                                    TextInput.onChange((o6) => {
-                                        let p6 = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
-                                        let q6 = '';
-                                        let r6 = false;
-                                        let s6 = false;
-                                        if (this.checkInvalidPattern(o6)) {
-                                            for (let t6 = 0; t6 < o6.length; t6++) {
-                                                if (!this.checkInvalidPattern(o6[t6])) {
-                                                    q6 += o6[t6];
+                                    TextInput.onChange((value) => {
+                                        let g6 = this.listNodeDataSource.findIndex(this.item.e6());
+                                        let h6 = '';
+                                        let i6 = false;
+                                        let j6 = false;
+                                        if (this.checkInvalidPattern(value)) {
+                                            for (let k6 = 0; k6 < value.length; k6++) {
+                                                if (!this.checkInvalidPattern(value[k6])) {
+                                                    h6 += value[k6];
                                                 }
                                             }
-                                            r6 = true;
-                                            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.INVALID_ERROR, true, p6);
+                                            i6 = true;
+                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.INVALID_ERROR, true, g6);
+                                        } else {
+                                            h6 = value;
+                                            i6 = false;
                                         }
-                                        else {
-                                            q6 = o6;
-                                            r6 = false;
+                                        if ((this.checkIsAllCN(h6) && h6.length > this.MAX_CN_LENGTH) ||
+                                            (!this.checkIsAllCN(h6) && h6.length > this.MAX_EN_LENGTH)) {
+                                            h6 = this.checkIsAllCN(h6) ?
+                                            h6.substr(0, this.MAX_CN_LENGTH) : h6.substr(0, this.MAX_EN_LENGTH);
+                                            j6 = true;
+                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.LENGTH_ERROR, true, g6);
+                                        } else {
+                                            j6 = false;
                                         }
-                                        if ((this.checkIsAllCN(q6) && q6.length > this.MAX_CN_LENGTH) ||
-                                            (!this.checkIsAllCN(q6) && q6.length > this.MAX_EN_LENGTH)) {
-                                            q6 = this.checkIsAllCN(q6) ?
-                                            q6.substr(0, this.MAX_CN_LENGTH) : q6.substr(0, this.MAX_EN_LENGTH);
-                                            s6 = true;
-                                            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.LENGTH_ERROR, true, p6);
-                                        }
-                                        else {
-                                            s6 = false;
-                                        }
-                                        if (!s6 && !r6) {
-                                            this.listNodeDataSource.setMainTitleNameOnEdit(p6, q6);
+                                        if (!j6 && !i6) {
+                                            this.listNodeDataSource.v13(g6, h6);
                                         }
                                     });
-                                    TextInput.onSubmit((m6) => {
-                                        let n6 = findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId());
-                                        this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, n6);
-                                        this.listNodeDataSource.setItemVisibilityOnEdit(n6, MenuOperation.COMMIT_NODE);
+                                    TextInput.onSubmit((enterKey) => {
+                                        let f6 = this.listNodeDataSource.findIndex(this.item.e6());
+                                        this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, f6);
+                                        this.listNodeDataSource.w9(f6, t2.COMMIT_NODE);
                                     });
                                 }, TextInput);
                                 Row.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((a6, b6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Blank.create();
                     }, Blank);
                     Blank.pop();
                     Row.pop();
-                    this.observeComponentCreation2((q5, r5) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.listNodeDataSource.hasSubtitle(this.item.getCurrentNodeId())) {
+                        if (this.listNodeDataSource.f14(this.item.e6())) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((y5, z5) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
                                     Row.focusable(true);
                                     Row.margin({
-                                        start: LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.left),
-                                        end: this.item.getNodeItem().imageCollapse ?
+                                        start: LengthMetrics.resource(this.listNodeDataSource.q14().margin.left),
+                                        end: this.item.k6().x3 ?
                                         LengthMetrics.resource({
                                             'id': -1,
                                             'type': 10002,
                                             params: ['sys.float.padding_level0'],
                                             'bundleName': '__harDefaultBundleName__',
                                             'moduleName': '__harDefaultModuleName__',
-                                        }) : LengthMetrics.resource(this.listNodeDataSource.getSubTitlePara().margin.right)
+                                        }) : LengthMetrics.resource(this.listNodeDataSource.q14().margin.right)
                                     });
                                 }, Row);
-                                this.observeComponentCreation2((w5, x5) => {
-                                    Text.create(this.listNodeDataSource.getSubtitle(this.item.getCurrentNodeId()));
-                                    Text.fontSize(this.listNodeDataSource.getSubTitlePara().fontSize);
-                                    Text.fontColor(this.item.getIsHighLight() || this.item.getIsModify() ? {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Text.create(this.listNodeDataSource.e14(this.item.e6()));
+                                    Text.minFontScale(o1);
+                                    Text.maxFontScale(this.decideFontScale());
+                                    Text.fontSize(this.listNodeDataSource.q14().fontSize);
+                                    Text.fontColor(this.item.g7() || this.item.i7() ? {
                                         'id': -1,
                                         'type': 10001,
                                         params: ['sys.color.ohos_id_color_primary_contrary'],
                                         'bundleName': '__harDefaultBundleName__',
                                         'moduleName': '__harDefaultModuleName__',
-                                    } : this.treeViewTheme.secondaryTitleFontColor);
-                                    Text.fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight);
+                                    } : this.treeViewTheme.b4);
+                                    Text.fontWeight(this.listNodeDataSource.q14().fontWeight);
                                 }, Text);
                                 Text.pop();
                                 Row.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((e5, f5) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.getNodeItem().imageCollapse) {
+                        if (this.item.k6().x3) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((o5, p5) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
                                     Row.focusable(true);
-                                    Row.height(this.item.getNodeItem().imageCollapse?.itemHeight);
-                                    Row.width(this.item.getNodeItem().imageCollapse?.itemWidth);
+                                    Row.height(this.item.k6().x3?.itemHeight);
+                                    Row.width(this.item.k6().x3?.itemWidth);
                                 }, Row);
-                                this.observeComponentCreation2((k5, l5) => {
-                                    Image.create(this.item.getNodeItem().imageCollapse?.collapseSource);
-                                    Image.fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ?
-                                    this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Image.create(this.item.k6().x3?.c8);
+                                    Image.fillColor(this.item.k6().x3?.y12 ?
+                                    this.treeViewTheme.i4 : z1);
                                     Image.align(Alignment.End);
                                     Image.objectFit(ImageFit.Contain);
-                                    Image.height(this.item.getNodeItem().imageCollapse?.itemHeight);
-                                    Image.width(this.item.getNodeItem().imageCollapse?.itemWidth);
-                                    Image.opacity(!this.item.getIsHighLight() ?
-                                        this.item.getNodeItem().imageCollapse?.opacity : this.item.getNodeItem().imageCollapse?.noOpacity);
-                                    Image.onTouch((n5) => {
-                                        if (n5.type === TouchType.Down) {
-                                            this.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex(this.listNodeDataSource,
-                                                this.item.getNodeCurrentNodeId()));
-                                            this.listNodeDataSource.setCurrentFocusNodeId(this.item.getCurrentNodeId());
+                                    Image.height(this.item.k6().x3?.itemHeight);
+                                    Image.width(this.item.k6().x3?.itemWidth);
+                                    Image.opacity(!this.item.g7() ?
+                                        this.item.k6().x3?.opacity : this.item.k6().x3?.k15);
+                                    Image.onTouch((event) => {
+                                        if (event.type === TouchType.Down) {
+                                            this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(this.item.e6()));
+                                            this.listNodeDataSource.s14(this.item.e6());
                                         }
-                                        n5.stopPropagation();
+                                        event.stopPropagation();
                                     });
                                     Image.focusable(true);
-                                    Image.matchTextDirection((this.item.getNodeItem()
-                                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
-                                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false);
+                                    Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT ||
+                                        this.item.k6().x3?.c8 === s2) ? true : false);
                                 }, Image);
                                 Row.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                             });
                         }
@@ -3552,8 +4161,7 @@ export class TreeViewInner extends ViewPU {
                     Column.pop();
                     Stack.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -3566,113 +4174,64 @@ export class TreeViewInner extends ViewPU {
     }
 }
 
-export class NodeItem {
-    constructor(m4) {
-        this.data = m4;
-        this.nodeLevel = -1;
-        this.parentNodeId = -1;
-        this.currentNodeId = -1;
-        this.nodeItem = {
-            imageNode: undefined,
-            inputText: new InputText(),
-            mainTitleNode: new MainTitleNode(''),
-            imageCollapse: undefined,
-            fontColor: undefined,
-        };
-        this.childNodeInfo = { isHasChildNode: false, childNum: 0, allChildNum: 0 };
-        this.container = m4.container;
-        if (m4.icon) {
-            this.nodeItem.imageNode = new ImageNode(m4.icon, {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.ohos_id_alpha_content_fourth'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, m4.selectedIcon, m4.editIcon);
-        }
-        if (m4.primaryTitle) {
-            this.nodeItem.mainTitleNode = new MainTitleNode(m4.primaryTitle);
-        }
+export class j3 {
+    constructor(nodeParam) {
+        this.currentNodeId = nodeParam.currentNodeId ?? -1;
+        this.parentNodeId = nodeParam.parentNodeId ?? -1;
+        this.isFolder = nodeParam.isFolder;
+        this.b5 = -1;
+        this.y14 = -1;
+        this.p6 = { a13: false, b13: 0, r10: 0 };
         this.children = [];
     }
 
-    addImageCollapse(l4) {
-        if (l4) {
-            this.nodeItem.imageCollapse = new ImageNode(ARROW_RIGHT, {
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.ohos_id_alpha_content_tertiary'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            }, IMAGE_NODE_HEIGHT, IMAGE_NODE_WIDTH, undefined, undefined);
-            this.nodeItem.imageCollapse.itemRightMargin = ({
-                'id': -1,
-                'type': 10002,
-                params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__',
-            });
-        }
-        else {
-            this.nodeItem.imageCollapse = undefined;
-        }
+    o6() {
+        return this.p6;
     }
 
-    getNodeItem() {
-        return this.nodeItem;
-    }
-
-    getChildNodeInfo() {
-        return this.childNodeInfo;
-    }
-
-    getMenu() {
-        return this.container;
-    }
-
-    getCurrentNodeId() {
+    f13() {
         return this.currentNodeId;
     }
 
-    getIsFolder() {
-        return this.data.isFolder;
+    v6() {
+        return this.isFolder;
     }
 }
 
-class NodeBaseInfo {
+class l3 {
     constructor() {
         this.rightMargin = -1;
         this.width = -1;
         this.height = -1;
     }
 
-    set itemWidth(k4) {
-        this.width = k4;
+    set itemWidth(width) {
+        this.width = width;
     }
 
     get itemWidth() {
         return this.width;
     }
 
-    set itemHeight(j4) {
-        this.height = j4;
+    set itemHeight(height) {
+        this.height = height;
     }
 
     get itemHeight() {
         return this.height;
     }
 
-    set itemRightMargin(i4) {
-        this.rightMargin = i4;
+    set z7(rightMargin) {
+        this.rightMargin = rightMargin;
     }
 
-    get itemRightMargin() {
+    get z7() {
         return this.rightMargin;
     }
 }
 
-export class ImageNode extends NodeBaseInfo {
-    constructor(c4, d4, e4, f4, g4, h4) {
+export class m3 extends l3 {
+    constructor(w4, x4, itemWidth, itemHeight, y4, z4, a5) {
         super();
         this.rightMargin = {
             'id': -1,
@@ -3681,114 +4240,254 @@ export class ImageNode extends NodeBaseInfo {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.imageSource = c4;
-        this.imageNormalSource = c4;
-        if (g4 !== undefined) {
-            this.imageSelectedSource = g4;
-        }
-        else {
-            this.imageSelectedSource = this.imageNormalSource;
-        }
-        if (h4 !== undefined) {
-            this.imageEditSource = h4;
-        }
-        else {
-            this.imageEditSource = this.imageNormalSource;
-        }
-        this.imageOpacity = d4;
-        this.itemWidth = e4;
-        this.itemHeight = f4;
-        this.imageCollapseSource = c4;
-        this.imageCollapseDownSource = ARROW_DOWN;
-        this.imageCollapseRightSource = ARROW_RIGHT;
-        this.isImageCollapse = true;
-        this.currentInteractionStatus = InteractionStatus.Normal;
+        this.j4 = w4;
+        this.rightMargin = y4;
+        this.b8 = x4;
+        this.itemWidth = itemWidth;
+        this.itemHeight = itemHeight;
+        this.l15 = w4;
+        this.m15 = z4;
+        this.n15 = a5;
     }
 
     get source() {
-        return this.imageSource;
-    }
-
-    get normalSource() {
-        return this.imageNormalSource;
-    }
-
-    get selectedSource() {
-        return this.imageSelectedSource;
-    }
-
-    get editSource() {
-        return this.imageEditSource;
+        return this.j4;
     }
 
     get opacity() {
-        return this.imageOpacity;
+        return this.b8;
     }
 
-    get noOpacity() {
+    get k15() {
         return 1;
     }
 
-    get collapseSource() {
-        return this.imageCollapseSource;
+    get c8() {
+        return this.l15;
     }
 
-    get isCollapse() {
-        return this.isImageCollapse;
+    get y12() {
+        return this.m15;
     }
 
-    changeImageCollapseSource(b4) {
-        if (b4 === NodeStatus.Expand) {
-            this.imageCollapseSource = this.imageCollapseDownSource;
-        }
-        else if (b4 === NodeStatus.Collapse) {
-            this.imageCollapseSource = this.imageCollapseRightSource;
-        }
+    get type() {
+        return this.n15;
+    }
+}
+
+class n3 {
+    constructor() {
     }
 
-    setImageCollapseSource(z3, a4) {
-        if (z3 === InteractionStatus.Edit || z3 === InteractionStatus.DragInsert) {
-            this.imageCollapseDownSource = ARROW_DOWN_WITHE;
-            this.imageCollapseRightSource = ARROW_RIGHT_WITHE;
-            this.isImageCollapse = false;
+    static getInstance() {
+        if (!n3.instance) {
+            n3.instance = new n3();
         }
-        else if (z3 === InteractionStatus.FinishEdit ||
-            z3 === InteractionStatus.FinishDragInsert) {
-            this.imageCollapseDownSource = ARROW_DOWN;
-            this.imageCollapseRightSource = ARROW_RIGHT;
-            this.isImageCollapse = true;
-        }
-        this.imageCollapseSource = (a4 === NodeStatus.Collapse) ?
-        this.imageCollapseRightSource : this.imageCollapseDownSource;
+        return n3.instance;
     }
 
-    setImageSource(y3) {
-        switch (y3) {
-            case InteractionStatus.Normal:
-                this.imageSource = this.imageNormalSource;
-                this.currentInteractionStatus = y3;
+    o15(type) {
+        let v4;
+        switch (type) {
+            case b3.ARROW_RIGHT_WHITE:
+                v4 = s2;
                 break;
-            case InteractionStatus.Selected:
-                if (this.currentInteractionStatus !== InteractionStatus.Edit) {
-                    this.imageSource = this.imageSelectedSource;
-                    this.currentInteractionStatus = y3;
+            case b3.ARROW_RIGHT:
+                v4 = ARROW_RIGHT;
+                break;
+            case b3.ARROW_DOWN_WHITE:
+                v4 = q2;
+                break;
+            default:
+                v4 = ARROW_DOWN;
+        }
+        return new m3(v4, {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_alpha_content_tertiary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        }, u, a1, {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_text_paragraph_margin_xs'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        }, (type === b3.ARROW_RIGHT_WHITE || type === b3.ARROW_DOWN_WHITE) ? false : true, type);
+    }
+}
+
+class q3 {
+    static n5(type) {
+        let node = q3.p15.get(type);
+        if (node === undefined) {
+            node = n3.getInstance().o15(type);
+            q3.p15.set(type, node);
+        }
+        return node;
+    }
+
+    static t12(s4, t4, u4) {
+        if (u4 === undefined) {
+            return undefined;
+        }
+        let type = u4;
+        if (s4 == a3.EDIT ||
+            s4 === a3.DRAG_INSERT) {
+            if (t4 === z2.COLLAPSE) {
+                type = b3.ARROW_RIGHT_WHITE;
+            } else {
+                type = b3.ARROW_DOWN_WHITE;
+            }
+        } else if (s4 === a3.FINISH_EDIT ||
+            s4 === a3.FINISH_DRAG_INSERT) {
+            if (t4 === z2.COLLAPSE) {
+                type = b3.ARROW_RIGHT;
+            } else {
+                type = b3.ARROW_DOWN;
+            }
+        }
+        return q3.n5(type);
+    }
+
+    static x12(q4, r4) {
+        if (r4 === undefined) {
+            return undefined;
+        }
+        let type;
+        if (!r4) {
+            if (q4 === z2.COLLAPSE) {
+                type = b3.ARROW_RIGHT_WHITE;
+            } else {
+                type = b3.ARROW_DOWN_WHITE;
+            }
+        } else {
+            if (q4 === z2.COLLAPSE) {
+                type = b3.ARROW_RIGHT;
+            } else {
+                type = b3.ARROW_DOWN;
+            }
+        }
+        return q3.n5(type);
+    }
+}
+
+q3.p15 = new Map();
+
+export class r3 extends l3 {
+    constructor(m4, n4, itemWidth, itemHeight, o4, p4) {
+        super();
+        this.rightMargin = {
+            'id': -1,
+            'type': 10002,
+            params: ['sys.float.ohos_id_elements_margin_horizontal_m'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__',
+        };
+        this.j4 = m4;
+        this.q15 = m4;
+        if (o4 !== undefined) {
+            this.r15 = o4;
+        } else {
+            this.r15 = this.q15;
+        }
+        if (p4 !== undefined) {
+            this.s15 = p4;
+        } else {
+            this.s15 = this.q15;
+        }
+        this.b8 = n4;
+        this.itemWidth = itemWidth;
+        this.itemHeight = itemHeight;
+        this.l15 = m4;
+        this.t15 = ARROW_DOWN;
+        this.u15 = ARROW_RIGHT;
+        this.m15 = true;
+        this.v15 = a3.NORMAL;
+    }
+
+    get source() {
+        return this.j4;
+    }
+
+    get a8() {
+        return this.q15;
+    }
+
+    get r13() {
+        return this.r15;
+    }
+
+    get s13() {
+        return this.s15;
+    }
+
+    get opacity() {
+        return this.b8;
+    }
+
+    get k15() {
+        return 1;
+    }
+
+    get c8() {
+        return this.l15;
+    }
+
+    get y12() {
+        return this.m15;
+    }
+
+    x12(l4) {
+        if (l4 === z2.EXPAND) {
+            this.l15 = this.t15;
+        } else if (l4 === z2.COLLAPSE) {
+            this.l15 = this.u15;
+        }
+    }
+
+    s12(j4, k4) {
+        if (j4 === a3.EDIT || j4 === a3.DRAG_INSERT) {
+            this.t15 = q2;
+            this.u15 = s2;
+            this.m15 = false;
+        } else if (j4 === a3.FINISH_EDIT ||
+            j4 === a3.FINISH_DRAG_INSERT) {
+            this.t15 = ARROW_DOWN;
+            this.u15 = ARROW_RIGHT;
+            this.m15 = true;
+        }
+        this.l15 = (k4 === z2.COLLAPSE) ?
+        this.u15 : this.t15;
+    }
+
+    i8(i4) {
+        switch (i4) {
+            case a3.NORMAL:
+                this.j4 = this.q15;
+                this.v15 = i4;
+                break;
+            case a3.SELECTED:
+                if (this.v15 !== a3.EDIT) {
+                    this.j4 = this.r15;
+                    this.v15 = i4;
                 }
                 break;
-            case InteractionStatus.Edit:
-                this.imageSource = this.imageEditSource;
-                this.currentInteractionStatus = y3;
+            case a3.EDIT:
+                this.j4 = this.s15;
+                this.v15 = i4;
                 break;
-            case InteractionStatus.FinishEdit:
-                this.imageSource = this.imageSelectedSource;
-                this.currentInteractionStatus = y3;
+            case a3.FINISH_EDIT:
+                this.j4 = this.r15;
+                this.v15 = i4;
                 break;
-            case InteractionStatus.DragInsert:
-                this.imageSource = this.imageEditSource;
-                this.currentInteractionStatus = y3;
+            case a3.DRAG_INSERT:
+                this.j4 = this.s15;
+                this.v15 = i4;
                 break;
-            case InteractionStatus.FinishDragInsert:
-                this.imageSource = this.imageNormalSource;
-                this.currentInteractionStatus = y3;
+            case a3.FINISH_DRAG_INSERT:
+                this.j4 = this.q15;
+                this.v15 = i4;
                 break;
             default:
                 break;
@@ -3796,13 +4495,13 @@ export class ImageNode extends NodeBaseInfo {
     }
 }
 
-class MainTitleNode extends NodeBaseInfo {
-    constructor(x3) {
+class s3 extends l3 {
+    constructor(h4) {
         super();
-        this.treeViewTheme = new TreeViewTheme();
-        this.mainTitleName = x3;
-        this.itemWidth = ITEM_WIDTH;
-        this.itemHeight = ITEM_HEIGHT;
+        this.treeViewTheme = e3.getInstance();
+        this.w15 = h4;
+        this.itemWidth = b1;
+        this.itemHeight = c1;
         this.rightMargin = {
             'id': -1,
             'type': 10002,
@@ -3810,8 +4509,8 @@ class MainTitleNode extends NodeBaseInfo {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.mainTitleSetting = {
-            fontColor: this.treeViewTheme.primaryTitleFontColor,
+        this.x15 = {
+            fontColor: this.treeViewTheme.a4,
             fontSize: {
                 'id': -1,
                 'type': 10002,
@@ -3821,13 +4520,13 @@ class MainTitleNode extends NodeBaseInfo {
             },
             fontWeight: FontWeight.Normal,
         };
-        this.showPopUpTimeout = 0;
+        this.y15 = 0;
     }
 
-    setMainTitleSelected(w3) {
-        if (w3) {
-            this.mainTitleSetting = {
-                fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
+    j8(isSelected) {
+        if (isSelected) {
+            this.x15 = {
+                fontColor: this.treeViewTheme.c4,
                 fontSize: {
                     'id': -1,
                     'type': 10002,
@@ -3837,10 +4536,9 @@ class MainTitleNode extends NodeBaseInfo {
                 },
                 fontWeight: FontWeight.Regular,
             };
-        }
-        else {
-            this.mainTitleSetting = {
-                fontColor: this.treeViewTheme.primaryTitleFontColor,
+        } else {
+            this.x15 = {
+                fontColor: this.treeViewTheme.a4,
                 fontSize: {
                     'id': -1,
                     'type': 10002,
@@ -3853,38 +4551,38 @@ class MainTitleNode extends NodeBaseInfo {
         }
     }
 
-    set title(v3) {
-        this.mainTitleName = v3;
+    set title(text) {
+        this.w15 = text;
     }
 
     get title() {
-        return this.mainTitleName;
+        return this.w15;
     }
 
-    set popUpTimeout(u3) {
-        this.showPopUpTimeout = u3;
+    set u13(g4) {
+        this.y15 = g4;
     }
 
-    get popUpTimeout() {
-        return this.showPopUpTimeout;
+    get u13() {
+        return this.y15;
     }
 
     get color() {
-        return this.mainTitleSetting.fontColor;
+        return this.x15.fontColor;
     }
 
     get size() {
-        return this.mainTitleSetting.fontSize;
+        return this.x15.fontSize;
     }
 
     get weight() {
-        return this.mainTitleSetting.fontWeight;
+        return this.x15.fontWeight;
     }
 
-    setMainTitleHighLight(t3) {
-        if (t3) {
-            this.mainTitleSetting = {
-                fontColor: this.treeViewTheme.primaryTitleActiveFontColor,
+    q9(f4) {
+        if (f4) {
+            this.x15 = {
+                fontColor: this.treeViewTheme.c4,
                 fontSize: {
                     'id': -1,
                     'type': 10002,
@@ -3894,10 +4592,9 @@ class MainTitleNode extends NodeBaseInfo {
                 },
                 fontWeight: FontWeight.Regular,
             };
-        }
-        else {
-            this.mainTitleSetting = {
-                fontColor: this.treeViewTheme.primaryTitleFontColor,
+        } else {
+            this.x15 = {
+                fontColor: this.treeViewTheme.a4,
                 fontSize: {
                     'id': -1,
                     'type': 10002,
@@ -3911,18 +4608,18 @@ class MainTitleNode extends NodeBaseInfo {
     }
 }
 
-export class InputText extends NodeBaseInfo {
+export class t3 extends l3 {
     constructor() {
         super();
         this.status = undefined;
-        this.statusColor = {
+        this.z15 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_background'],
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.editItemColor = {
+        this.a16 = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_emphasize'],
@@ -3936,9 +4633,9 @@ export class InputText extends NodeBaseInfo {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.treeViewTheme = new TreeViewTheme();
-        this.itemWidth = ITEM_WIDTH;
-        this.itemHeight = ITEM_HEIGHT_INPUT;
+        this.treeViewTheme = e3.getInstance();
+        this.itemWidth = b1;
+        this.itemHeight = d1;
         this.rightMargin = {
             'id': -1,
             'type': 10002,
@@ -3946,8 +4643,8 @@ export class InputText extends NodeBaseInfo {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__',
         };
-        this.inputTextSetting = {
-            fontColor: this.treeViewTheme.primaryTitleFontColor,
+        this.b16 = {
+            fontColor: this.treeViewTheme.a4,
             fontSize: {
                 'id': -1,
                 'type': 10002,
@@ -3960,15 +4657,15 @@ export class InputText extends NodeBaseInfo {
     }
 
     get color() {
-        return this.inputTextSetting.fontColor;
+        return this.b16.fontColor;
     }
 
     get size() {
-        return this.inputTextSetting.fontSize;
+        return this.b16.fontSize;
     }
 
     get weight() {
-        return this.inputTextSetting.fontWeight;
+        return this.b16.fontWeight;
     }
 
     get borderRadius() {
@@ -3976,395 +4673,25 @@ export class InputText extends NodeBaseInfo {
     }
 
     get backgroundColor() {
-        return this.statusColor;
+        return this.z15;
     }
 
-    get editColor() {
-        return this.editItemColor;
+    get j15() {
+        return this.a16;
     }
 
-    get textInputStatusColor() {
+    get c16() {
         return this.status;
     }
 }
 
-export class ListNodeUtils {
-    constructor() {
-        this.MaxNodeLevel = 50;
-        this.MAX_CN_LENGTH = 254;
-        this.MAX_EN_LENGTH = 255;
-        this.INITIAL_INVALID_VALUE = -1;
-        this._root = new NodeItem(emptyNodeInfo);
-        this._root.nodeLevel = -1;
-        this._root.parentNodeId = -1;
-        this._root.currentNodeId = -1;
-        this.addNewNodeId = -1;
-    }
-
-    getNewNodeId() {
-        return this.addNewNodeId;
-    }
-
-    traverseNodeDF(o3, p3 = this._root) {
-        let q3 = [], r3 = false;
-        q3.unshift(p3);
-        let s3 = q3.shift();
-        while (!r3 && s3) {
-            r3 = o3(s3) === true;
-            if (!r3) {
-                q3.unshift(...s3.children);
-                s3 = q3.shift();
-            }
-        }
-    }
-
-    traverseNodeBF(j3) {
-        let k3 = [];
-        let l3 = false;
-        k3.push(this._root);
-        let m3 = k3.shift();
-        while (!l3 && m3) {
-            try {
-                l3 = j3(m3);
-            }
-            catch (n3) {
-                throw new Error('traverseNodeBF function callbacks error.');
-            }
-            if (!l3) {
-                k3.push(...m3.children);
-                m3 = k3.shift();
-            }
-        }
-    }
-
-    contains(h3, i3) {
-        i3(h3);
-    }
-
-    updateParentChildNum(b3, c3, d3) {
-        let e3 = b3.parentNodeId;
-        while (e3 >= 0) {
-            this.traverseNodeDF((g3) => {
-                if (g3.currentNodeId === e3) {
-                    g3.getChildNodeInfo().allChildNum =
-                        c3 ? g3.getChildNodeInfo().allChildNum + d3 : g3.getChildNodeInfo().allChildNum - d3;
-                    e3 = g3.parentNodeId;
-                    return false;
-                }
-                return false;
-            });
-        }
-    }
-
-    findParentNodeId(w2) {
-        let x2 = new NodeItem(emptyNodeInfo);
-        let y2 = (a3) => {
-            if (a3.currentNodeId === w2) {
-                x2 = a3;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(y2);
-        return x2.parentNodeId;
-    }
-
-    addNode(o2, p2, q2) {
-        if (this._root === null) {
-            this._root = new NodeItem(emptyNodeInfo);
-            this._root.nodeLevel = -1;
-            this._root.parentNodeId = -1;
-            this._root.currentNodeId = -1;
-        }
-        let r2 = new NodeItem(emptyNodeInfo);
-        let s2 = (v2) => {
-            if (v2.currentNodeId === o2) {
-                r2 = v2;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(s2);
-        if (r2) {
-            let u2 = new NodeItem(q2);
-            if (r2.nodeLevel > this.MaxNodeLevel) {
-                throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
-            }
-            u2.nodeLevel = r2.nodeLevel + 1;
-            u2.parentNodeId = o2;
-            u2.currentNodeId = p2;
-            r2.children.push(u2);
-            r2.getChildNodeInfo().isHasChildNode = true;
-            r2.getChildNodeInfo().childNum = r2.children.length;
-            r2.getChildNodeInfo().allChildNum += 1;
-            r2.addImageCollapse(r2.getChildNodeInfo().isHasChildNode);
-            this.updateParentChildNum(r2, true, 1);
-            return this;
-        }
-        else {
-            throw new Error('ListNodeUtils[addNode]: Parent node not found.');
-        }
-    }
-
-    findNodeIndex(j2, k2) {
-        let l2 = this.INITIAL_INVALID_VALUE;
-        for (let m2 = 0, n2 = j2.length; m2 < n2; m2++) {
-            if (j2[m2].currentNodeId === k2) {
-                l2 = m2;
-                break;
-            }
-        }
-        return l2;
-    }
-
-    freeNodeMemory(b2, c2) {
-        let d2 = [];
-        let e2 = (i2) => {
-            d2.push(i2);
-            return false;
-        };
-        this.traverseNodeDF(e2, b2);
-        d2.forEach((h2) => {
-            c2.push(h2.currentNodeId);
-            h2 = new NodeItem(emptyNodeInfo);
-        });
-    }
-
-    removeNode(r1, s1) {
-        let t1 = new NodeItem(emptyNodeInfo);
-        let u1 = (a2) => {
-            if (a2.currentNodeId === s1) {
-                t1 = a2;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(u1);
-        if (t1) {
-            let w1 = [];
-            let x1 = this.findNodeIndex(t1.children, r1);
-            let y1 = 0;
-            if (x1 < 0) {
-                throw new Error('Node does not exist.');
-            }
-            else {
-                y1 = t1.children[x1].getChildNodeInfo().allChildNum + 1;
-                this.freeNodeMemory(t1.children[x1], w1);
-                let z1 = t1.children.splice(x1, 1);
-                z1 = null;
-                if (t1.children.length === 0) {
-                    t1.addImageCollapse(false);
-                }
-            }
-            t1.getChildNodeInfo().childNum = t1.children.length;
-            t1.getChildNodeInfo().allChildNum -= (y1);
-            this.updateParentChildNum(t1, false, y1);
-            return w1;
-        }
-        else {
-            throw new Error('Parent does not exist.');
-        }
-    }
-
-    getNewNodeInfo(l1) {
-        let m1 = new NodeItem(emptyNodeInfo);
-        let n1 = (q1) => {
-            if (q1.currentNodeId === l1) {
-                m1 = q1;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(n1);
-        let o1 = emptyNodeInfo;
-        if (m1) {
-            if (m1.children.length === 0) {
-                if (m1.getNodeItem().imageNode !== undefined) {
-                    o1.icon = m1.getNodeItem().imageNode?.normalSource;
-                    o1.selectedIcon = m1.getNodeItem().imageNode?.selectedSource;
-                    o1.editIcon = m1.getNodeItem().imageNode?.editSource;
-                    o1.container = m1.getMenu();
-                }
-                else {
-                    o1.icon = undefined;
-                    o1.selectedIcon = undefined;
-                    o1.editIcon = undefined;
-                    o1.container = m1.getMenu();
-                }
-            }
-            else if (m1.children.length > 0) {
-                if (m1.getNodeItem().imageNode !== null) {
-                    o1.icon = (m1.children[0].getNodeItem().imageNode !== undefined) ?
-                        m1.children[0].getNodeItem().imageNode?.normalSource : undefined;
-                    o1.selectedIcon = (m1.children[0].getNodeItem().imageNode !== undefined) ?
-                        m1.children[0].getNodeItem().imageNode?.selectedSource : undefined;
-                    o1.editIcon = (m1.children[0].getNodeItem().imageNode !== undefined) ?
-                        m1.children[0].getNodeItem().imageNode?.editSource : undefined;
-                    o1.container = m1.children[0].getMenu();
-                }
-                else {
-                    o1.icon = undefined;
-                    o1.selectedIcon = undefined;
-                    o1.editIcon = undefined;
-                    o1.container = m1.children[0].getMenu();
-                }
-            }
-        }
-        return o1;
-    }
-
-    getClickChildId(c1) {
-        let d1 = new NodeItem(emptyNodeInfo);
-        let e1 = (k1) => {
-            if (k1.currentNodeId === c1) {
-                d1 = k1;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(e1);
-        if (d1) {
-            if (d1.children.length === 0) {
-                return [];
-            }
-            else if (d1.children.length > 0) {
-                let g1 = { itemId: undefined, itemIcon: undefined, itemTitle: undefined };
-                let h1 = new Array(d1.children.length);
-                for (let j1 = 0; j1 < h1.length; j1++) {
-                    h1[j1] = 0;
-                }
-                for (let i1 = 0; i1 < d1.children.length && i1 < h1.length; i1++) {
-                    h1[i1] = d1.children[i1].currentNodeId;
-                }
-                return h1;
-            }
-        }
-        return [];
-    }
-
-    getClickNodeChildrenInfo(u) {
-        let v = new NodeItem(emptyNodeInfo);
-        let w = (b1) => {
-            if (b1.currentNodeId === u) {
-                v = b1;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(w);
-        if (v) {
-            if (v.children.length === 0) {
-                return [];
-            }
-            else if (v.children.length > 0) {
-                let y = new Array(v.children.length);
-                for (let a1 = 0; a1 < y.length; a1++) {
-                    y[a1] = {};
-                }
-                for (let z = 0; z < v.children.length && z < y.length; z++) {
-                    y[z].itemId = v.children[z].currentNodeId;
-                    if (v.children[z].getNodeItem().imageNode) {
-                        y[z].itemIcon = v.children[z].getNodeItem().imageNode?.source;
-                    }
-                    if (v.children[z].getNodeItem().mainTitleNode) {
-                        y[z].itemTitle = v.children[z].getNodeItem().mainTitleNode?.title;
-                    }
-                    y[z].isFolder = v.children[z].getIsFolder();
-                }
-                return y;
-            }
-        }
-        return [];
-    }
-
-    checkMainTitleIsValid(t) {
-        if (new RegExp('/[\\\/:*?"<>|]/').test(t)) {
-            return false;
-        }
-        if ((new RegExp('/^[\u4e00-\u9fa5]+$/').test(t) && t.length > this.MAX_CN_LENGTH) ||
-            (!new RegExp('/^[\u4e00-\u9fa5]+$/').test(t) && t.length > this.MAX_EN_LENGTH)) {
-            return false;
-        }
-        return true;
-    }
-
-    dragTraverseNodeDF(n, o = this._root, p) {
-        let q = [], r = false;
-        q.unshift(o);
-        let s = q.shift();
-        while (!r && s) {
-            r = n(s, p) === true;
-            if (!r) {
-                q.unshift(...s.children);
-                s = q.shift();
-            }
-        }
-    }
-
-    addDragNode(b, c, d, e, f) {
-        if (this._root === null) {
-            this._root = new NodeItem(emptyNodeInfo);
-            this._root.nodeLevel = this.INITIAL_INVALID_VALUE;
-            this._root.parentNodeId = this.INITIAL_INVALID_VALUE;
-            this._root.currentNodeId = this.INITIAL_INVALID_VALUE;
-        }
-        let g = new NodeItem(emptyNodeInfo);
-        let h = (m) => {
-            if (m.currentNodeId === b) {
-                g = m;
-                return true;
-            }
-            return false;
-        };
-        this.traverseNodeBF(h);
-        if (g) {
-            let j = new NodeItem(f);
-            if (g.nodeLevel > this.MaxNodeLevel) {
-                throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
-            }
-            j.nodeLevel = g.nodeLevel + 1;
-            j.parentNodeId = b;
-            j.currentNodeId = c;
-            let k = this.INITIAL_INVALID_VALUE;
-            if (g.children.length) {
-                for (let l = 0; l < g.children.length; l++) {
-                    if (g.children[l].getCurrentNodeId() === d) {
-                        k = l;
-                        break;
-                    }
-                }
-                if (e) {
-                    g.children.splice(k + 1, 0, j);
-                }
-                else {
-                    g.children.splice(k, 0, j);
-                }
-            }
-            else {
-                g.children.push(j);
-            }
-            g.getChildNodeInfo().isHasChildNode = true;
-            g.getChildNodeInfo().childNum = g.children.length;
-            g.getChildNodeInfo().allChildNum += 1;
-            g.addImageCollapse(g.getChildNodeInfo().isHasChildNode);
-            this.updateParentChildNum(g, true, 1);
-            return this;
-        }
-        else {
-            throw new Error('ListNodeUtils[addNode]: Parent node not found.');
-        }
-    }
-}
-
-function getLengthMetricsByResourceOrNumber(a) {
-    if (!a) {
+function o(e4) {
+    if (!e4) {
         return LengthMetrics.vp(0);
-    }
-    else if (typeof a === 'number') {
-        return LengthMetrics.vp(a);
-    }
-    else {
-        return LengthMetrics.resource(a);
+    } else if (typeof e4 === 'number') {
+        return LengthMetrics.vp(e4);
+    } else {
+        return LengthMetrics.resource(e4);
     }
 }
 

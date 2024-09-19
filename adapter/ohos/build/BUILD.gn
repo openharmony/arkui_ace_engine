@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 # Install packages
 group("ace_packages") {
@@ -32,7 +33,7 @@ group("ace_packages") {
     "$ace_root/interfaces/native:ace_packages_ndk",
   ]
 
-  if (is_asan) {
+  if (is_asan || !ace_engine_feature_enable_libace) {
     deps -= [ "$ace_root/build:libace" ]
   }
 }

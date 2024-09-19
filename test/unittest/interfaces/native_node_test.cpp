@@ -2240,11 +2240,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest019, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
     value[0].i32 = ARKUI_XCOMPONENT_TYPE_TEXTURE;
     nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
-
+    value[0].f32 = 10.0f;
+    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_ID), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_TYPE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -5191,25 +5194,5 @@ HWTEST_F(NativeNodeTest, NativeNodeTest079, TestSize.Level1)
     mixEvent.mixedEvent.subKind = ArkUIEventSubKind::ON_TEXT_AREA_WILL_INSERT;
     event.origin = &mixEvent;
     EXPECT_EQ(OH_ArkUI_NodeEvent_SetReturnNumberValue(&event, value, size), ARKUI_ERROR_CODE_NO_ERROR);
-}
-
-/**
- * @tc.name: NativeNodeTest080
- * @tc.desc: Test customSpanNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeNodeTest, NativeNodeTest080, TestSize.Level1)
-{
-    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = new ArkUI_Node({ARKUI_NODE_CUSTOM_SPAN, nullptr});
-
-    EXPECT_EQ(nodeAPI->registerNodeCustomEvent(
-        rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, 0, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(nodeAPI->registerNodeCustomEvent(
-        rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW, 1, nullptr), ARKUI_ERROR_CODE_NO_ERROR);
-    nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE);
-    nodeAPI->unregisterNodeCustomEvent(rootNode, ARKUI_NODE_CUSTOM_EVENT_ON_DRAW);
-    nodeAPI->disposeNode(rootNode);
 }
 } // namespace OHOS::Ace

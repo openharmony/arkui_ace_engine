@@ -22,9 +22,9 @@
 #include <sstream>
 
 #include "base/log/ace_trace.h"
-#include "base/log/jank_frame_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/log/jank_frame_report.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -164,7 +164,32 @@ bool GetAnyContextIsLayouting(const RefPtr<PipelineBase>& currentPipeline)
     return isLayouting;
 }
 
-void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
+void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
+    JSRef<JSFunc> jsAnimateToFunc, int32_t triggerId)
+{
+    pipelineContext->StartImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    auto previousOption = pipelineContext->GetSyncAnimationOption();
+    pipelineContext->SetSyncAnimationOption(option);
+    // Execute the function.
+    jsAnimateToFunc->Call(jsAnimateToFunc);
+    pipelineContext->FlushOnceVsyncTask();
+    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
+        if (!CheckContainer(container)) {
+            return;
+        }
+        auto context = container->GetPipelineContext();
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
+        if (context->GetInstanceId() == triggerId) {
+            return;
+        }
+        context->PrepareCloseImplicitAnimation();
+    });
+    pipelineContext->CloseImplicitAnimation();
+    pipelineContext->SetSyncAnimationOption(previousOption);
+}
+
+void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
     auto triggerId = pipelineContext->GetInstanceId();
@@ -190,26 +215,12 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
         }
         context->PrepareOpenImplicitAnimation();
     });
-    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
-    auto previousOption = pipelineContext->GetSyncAnimationOption();
-    pipelineContext->SetSyncAnimationOption(option);
-    // Execute the function.
-    jsAnimateToFunc->Call(jsAnimateToFunc);
-    pipelineContext->FlushOnceVsyncTask();
-    AceEngine::Get().NotifyContainersOrderly([triggerId](const RefPtr<Container>& container) {
-        if (!CheckContainer(container)) {
-            return;
-        }
-        auto context = container->GetPipelineContext();
-        ContainerScope scope(container->GetInstanceId());
-        context->FlushBuild();
-        if (context->GetInstanceId() == triggerId) {
-            return;
-        }
-        context->PrepareCloseImplicitAnimation();
-    });
-    pipelineContext->CloseImplicitAnimation();
-    pipelineContext->SetSyncAnimationOption(previousOption);
+    pipelineContext->PrepareOpenImplicitAnimation();
+    if (!pipelineContext->CatchInteractiveAnimations([pipelineContext, option, jsAnimateToFunc, triggerId]() {
+        AnimateToForStageMode(pipelineContext, option, jsAnimateToFunc, triggerId);
+    })) {
+        AnimateToForStageMode(pipelineContext, option, jsAnimateToFunc, triggerId);
+    }
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
     if (immediately) {
         pipelineContext->FlushModifier();
@@ -219,7 +230,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     }
 }
 
-void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
+void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
     ACE_SCOPED_TRACE("%s, instanceId:%d, finish cnt:%d", option.ToString().c_str(), pipelineContext->GetInstanceId(),
@@ -658,14 +669,14 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                         CHECK_NULL_VOID(container);
                         auto pipelineContext = container->GetPipelineContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        AnimateToForStageMode(pipelineContext, option, func, count, immediately);
+                        StartAnimationForStageMode(pipelineContext, option, func, count, immediately);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode", PriorityType::IMMEDIATE);
                 return;
             }
-            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
+            StartAnimationForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
         } else {
-            AnimateToForFaMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
+            StartAnimateToForFaMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), count, immediately);
         }
     } else {
         pipelineContext->FlushBuild();

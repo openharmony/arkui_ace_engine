@@ -16,7 +16,6 @@
 
 #include <utility>
 
-#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -130,9 +129,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
-    }
+
     UpdateBackgroundStyle(renderContext, dialogProperties);
 }
 
@@ -195,27 +192,6 @@ void CalendarDialogView::SetTitleIdealSize(
     }
 }
 
-void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode,
-    RefPtr<FrameNode>& leftDayArrowNode, RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode)
-{
-    CHECK_NULL_VOID(leftYearArrowNode);
-    auto leftYearProperty = leftYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(leftYearProperty);
-    leftYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_year"));
-    CHECK_NULL_VOID(leftDayArrowNode);
-    auto leftDayProperty = leftDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(leftDayProperty);
-    leftDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_month"));
-    CHECK_NULL_VOID(rightDayArrowNode);
-    auto rightDayProperty = rightDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(rightDayProperty);
-    rightDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_month"));
-    CHECK_NULL_VOID(rightYearArrowNode);
-    auto rightYearProperty = rightYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(rightYearProperty);
-    rightYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_year"));
-}
-
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
 {
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -276,7 +252,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     auto rightYearArrowNode =
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
-    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode);
+
     return titleRow;
 }
 
@@ -362,7 +338,6 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(calendarNode, nullptr);
 
     InitCalendarProperty(calendarNode);
-
     auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     if (settingData.entryNode.Upgrade() != nullptr) {
         auto entryNode = settingData.entryNode.Upgrade();
@@ -408,7 +383,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
 
 void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarNode)
 {
-    auto pipelineContext = calendarNode->GetContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
@@ -908,6 +883,10 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
 void CalendarDialogView::UpdateBackgroundStyle(
     const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties)
 {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    }
+
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(

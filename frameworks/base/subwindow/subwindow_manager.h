@@ -51,7 +51,11 @@ public:
 
     // Get the subwindow of instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
-    const RefPtr<Subwindow> GetOrCreateSubwindow(int32_t instanceId);
+
+    void HideCurrentSubwindow();
+
+    void SetCurrentSubwindowName(const std::string& currentSubwindow);
+    std::string GetCurrentSubWindowName();
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
@@ -69,10 +73,10 @@ public:
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,
         bool isRedragStart = false);
-    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
-        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void UpdatePreviewPosition();
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
+    void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
+        const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -94,14 +98,6 @@ public:
     void HideSubWindowNG();
     void HideDialogSubWindow(int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId = -1, int32_t instanceId = -1);
-    int32_t GetDialogSubWindowId()
-    {
-        return dialogSubWindowId_;
-    }
-    void SetDialogSubWindowId(int32_t dialogSubWindowId)
-    {
-        dialogSubWindowId_ = dialogSubWindowId;
-    }
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
     int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
@@ -111,9 +107,7 @@ public:
     void DeleteHotAreas(int32_t subwindowId, int32_t nodeId);
 
     void ClearToastInSubwindow();
-    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
-    void CloseToast(
-        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
+    void ShowToast(const NG::ToastInfo& toastInfo);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
@@ -130,6 +124,7 @@ public:
     bool GetShown();
     void ResizeWindowForFoldStatus(int32_t parentContainerId);
     void MarkDirtyDialogSafeArea();
+    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void HideSystemTopMostWindow();
     RefPtr<Subwindow> GetSystemToastWindow()
     {
@@ -140,7 +135,7 @@ public:
         systemToastWindow_ = systemToastWindow;
     }
     void ClearToastInSystemSubwindow();
-    void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
 
     RefPtr<NG::FrameNode> GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node);
 
@@ -160,8 +155,8 @@ private:
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
     SubwindowMap subwindowMap_;
-    int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
+    std::string currentSubwindowName_;
 
     RefPtr<Subwindow> currentSubwindow_;
 
@@ -170,8 +165,8 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    RefPtr<Subwindow> systemToastWindow_;
     Rect uiExtensionWindowRect_;
+    RefPtr<Subwindow> systemToastWindow_;
 };
 
 } // namespace OHOS::Ace

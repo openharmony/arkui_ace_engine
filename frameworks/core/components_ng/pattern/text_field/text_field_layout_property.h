@@ -126,10 +126,10 @@ public:
         json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
             GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
-        json->PutExtAttr("wordBreak",
-            V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
-        json->PutExtAttr("textOverflow",
-            V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
+        json->Put("wordBreak",
+            V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str());
+        json->Put("textOverflow",
+            V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     }
 
@@ -264,6 +264,7 @@ protected:
         value->propShowPasswordText_ = CloneShowPasswordText();
         value->propCleanNodeStyle_ = CloneCleanNodeStyle();
         value->propIconSize_ = CloneIconSize();
+        value->propIconSrc_ = CloneIconSrc();
         value->propIconColor_ = CloneIconColor();
         value->propSelectAllValue_ = CloneSelectAllValue();
         value->propSetCounter_ = CloneSetCounter();

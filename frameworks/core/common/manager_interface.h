@@ -36,9 +36,8 @@ public:
     virtual void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) {}
     virtual void SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement) {}
     virtual void RemovePageId(int32_t pageId) {}
-    virtual bool GetImeShow() const { return false; } // exclude uiExtension
+    virtual bool GetImeShow() const { return false; }
     virtual void SetUIExtensionImeShow(bool imeShow) {}
-    virtual bool HasKeyboard() const { return false; } // include uiExtension
     virtual bool GetNeedToRequestKeyboard() {return true;}
     virtual void SetNeedToRequestKeyboard(bool val) {}
 };

@@ -279,13 +279,14 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGI("The old want is %{private}s.", sessionWrapper_->GetWant()->ToString().c_str());
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        host->RemoveChild(contentNode_);
+        host->RemoveChildAtIndex(0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
+    usage_ = uIExtensionUsage;
     UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
@@ -349,21 +350,21 @@ void UIExtensionPattern::OnConnect()
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
-    surfaceNode->SetForeground(isModal_);
+    surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
-    if (isModal_ && focusHub) {
+    if ((usage_ == UIExtensionUsage::MODAL) && focusHub) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     DispatchFollowHostDensity(GetDensityDpi());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
-    if (isFocused || isModal_) {
+    if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
     InitializeAccessibility();
@@ -390,7 +391,7 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     UIEXT_LOGI("The session is disconnected and the current state is '%{public}s'.", ToString(state_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChild(contentNode_);
+    host->RemoveChildAtIndex(0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -642,6 +643,7 @@ void UIExtensionPattern::HandleBlurEvent()
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
+        UIEXT_LOGE("The source type is not TOUCH.");
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
@@ -753,8 +755,14 @@ void UIExtensionPattern::DispatchFocusState(bool focusState)
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(pointerEvent);
-    CHECK_NULL_VOID(sessionWrapper_);
+    if (!pointerEvent) {
+        UIEXT_LOGE("DispatchPointerEvent pointerEvent is null.");
+        return;
+    }
+    if (!sessionWrapper_) {
+        UIEXT_LOGE("DispatchPointerEvent sessionWrapper is null.");
+        return;
+    }
     sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
 }
 
@@ -875,6 +883,13 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     state_ = AbilityState::NONE;
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        if (!isShowPlaceholder_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChildAtIndex(0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        sessionWrapper_->NotifyDestroy(false);
         sessionWrapper_->DestroySession();
     }
     if (onErrorCallback_) {

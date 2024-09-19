@@ -299,8 +299,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     }
 
     if (jsValue->IsString(vm) && (jsValue->ToString(vm)->ToString(vm).empty() ||
-        !StringUtils::StringToDimensionWithUnitNG(
-        jsValue->ToString(vm)->ToString(vm), strokeWidth))) {
+        !StringUtils::StringToDimensionWithUnitNG(jsValue->ToString(vm)->ToString(vm), strokeWidth))) {
         strokeWidth = theme->GetThickness();
     }
 

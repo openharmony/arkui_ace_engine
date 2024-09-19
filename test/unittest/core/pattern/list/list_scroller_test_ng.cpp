@@ -510,9 +510,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex014, TestSize.Level1)
     /**
      * @tc.steps: step2. scroll to the group(index:0).
      * @tc.cases: jumpIndex < StartIndex
-     * @tc.expected: pattern_->GetTotalOffset() == 620.
-     *     GroupHight = Header(50) + footer(50) + (item(100) + space(10))*count(8) - space(10) = 970
-     *     Offset = GroupHight(970) - (ListHeight(400) - ContentEndOffset(50)) = 620
+     * @tc.expected: pattern_->GetTotalOffset() == 190.f.
      */
     ScrollToIndex(0, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->GetTotalOffset(), 620.f);
@@ -522,8 +520,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex014, TestSize.Level1)
     /**
      * @tc.steps: step2. scroll to group(index:1).
      * @tc.cases: jumpIndex < StartIndex
-     * @tc.expected: pattern_->GetTotalOffset() == 920.f.
-     *     Offset = GroupHight(970) - ContentStartOffset(50) = 920
+     * @tc.expected: pattern_->GetTotalOffset() == 490.f.
      */
     ScrollToIndex(1, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->GetTotalOffset(), 920.f);
@@ -1143,7 +1140,7 @@ HWTEST_F(ListScrollerTestNg, PositionController001, TestSize.Level1)
     controller->ScrollPage(false, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * VIEW_ITEM_NUMBER);
-    controller->ScrollPage(true, false);
+    controller->ScrollPage(true, true);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 
@@ -1901,38 +1898,22 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern017
- * @tc.desc: Test UpdateCurrentOffset
+ * @tc.name: ListPattern_UpdateScrollSnap001
+ * @tc.desc: Test UpdateScrollSnap.
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerTestNg, Pattern017, TestSize.Level1)
+HWTEST_F(ListScrollerTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
 {
     CreateList();
-    CreateListItems(16);
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 0);
-    EXPECT_EQ(pattern_->endIndex_, 3);
-    EXPECT_EQ(pattern_->currentOffset_, 0);
+    pattern_->AnimateTo(1, 0, nullptr, true);
+    pattern_->UpdateScrollSnap();
+    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
 
-    pattern_->ScrollPage(false, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 4);
-    EXPECT_EQ(pattern_->endIndex_, 7);
-    EXPECT_EQ(pattern_->currentOffset_, 400);
-
-    pattern_->ScrollPage(true, false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->startIndex_, 0);
-    EXPECT_EQ(pattern_->endIndex_, 3);
-    EXPECT_EQ(pattern_->currentOffset_, 0);
-
-    pattern_->ScrollPage(false, true);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->finalPosition_, 400);
-
-    pattern_->ScrollPage(true, true);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->finalPosition_, -400);
+    pattern_->StopAnimate();
+    pattern_->UpdateScrollSnap();
+    EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
 }
 
 /**

@@ -305,6 +305,7 @@ public:
     }
 
     virtual void StopAnimate();
+
     bool AnimateRunning() const
     {
         return (animator_ && animator_->IsRunning()) || !isAnimationStop_;
@@ -334,8 +335,8 @@ public:
     {
         scrollAbort_ = abort;
     }
-    void PlaySpringAnimation(
-        float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
+    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
+                            bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
     {
@@ -349,7 +350,7 @@ public:
     virtual void OnAnimateStop() {}
     virtual void ScrollTo(float position);
     virtual void AnimateTo(
-        float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
+        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true);
     virtual bool CanOverScroll(int32_t source)
     {
@@ -441,7 +442,7 @@ public:
         extraOffset_ = extraOffset;
     }
 
-    const std::optional<float>& GetExtraOffset() const
+    std::optional<float> GetExtraOffset() const
     {
         return extraOffset_;
     }
@@ -555,11 +556,9 @@ public:
         return children;
     }
     void InitScrollBarGestureEvent();
-    virtual void InitScrollBarClickEvent();
-    void HandleClickEvent();
-    void InitScrollBarMouseEvent();
-    virtual void ScrollPage(
+    void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
@@ -619,11 +618,20 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
-    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
-
     virtual void SetAccessibilityAction();
+
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
+    }
+
+    bool GetNestedScrolling() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetNestedScrolling();
+    }
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -882,11 +890,6 @@ private:
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
-    void AddHotZoneSenceInterface(SceneStatus scene);
-    RefPtr<InputEvent> mouseEvent_;
-    bool isMousePressed_ = false;
-    RefPtr<ClickRecognizer> clickRecognizer_;
-    Offset locationInfo_;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

@@ -28,15 +28,15 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     throw new Error('Method not implemented.');
   }
   vertical(value: boolean): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, TabsVerticalModifier.identity, TabsVerticalModifier, value);
+    modifier(this._modifiers, TabsVerticalModifier, value);
     return this;
   }
   barPosition(value: BarPosition): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, value);
+    modifier(this._modifiers, BarPositionModifier, value);
     return this;
   }
   scrollable(value: boolean): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, ScrollableModifier.identity, ScrollableModifier, value);
+    modifier(this._modifiers, ScrollableModifier, value);
     return this;
   }
   barMode(value: BarMode, options?: ScrollableBarModeOptions | undefined): TabsAttribute {
@@ -62,7 +62,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   animationDuration(value: number): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
+    modifier(this._modifiers, AnimationDurationModifier, value);
     return this;
   }
   animationMode(value: AnimationMode): TabsAttribute {
@@ -76,7 +76,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     throw new Error('Method not implemented.');
   }
   fadingEdge(value: boolean): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
+    modifier(this._modifiers, FadingEdgeModifier, value);
     return this;
   }
   divider(value: DividerStyle | null): TabsAttribute {
@@ -84,7 +84,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barOverlap(value: boolean): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, BarOverlapModifier.identity, BarOverlapModifier, value);
+    modifier(this._modifiers, BarOverlapModifier, value);
     return this;
   }
   barBackgroundColor(value: ResourceColor): TabsAttribute {
@@ -114,9 +114,6 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
 }
 
 class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
-  constructor(value: BarGridColumnOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('barGridAlign');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -161,9 +158,6 @@ class TabsDividerModifier extends ModifierWithKey<DividerStyle> {
 }
 
 class BarWidthModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('barWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -175,7 +169,11 @@ class BarWidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -195,9 +193,6 @@ class BarAdaptiveHeightModifier extends ModifierWithKey<boolean> {
 }
 
 class BarHeightModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('barHeight');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -209,14 +204,15 @@ class BarHeightModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
-class BarOverlapModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class BarOverlapModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('barOverlap');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -228,10 +224,7 @@ class BarOverlapModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TabsVerticalModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class TabsVerticalModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('vertical');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -243,10 +236,7 @@ class TabsVerticalModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class AnimationDurationModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class AnimationDurationModifier extends Modifier<number> {
   static identity: Symbol = Symbol('animationduration');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -257,7 +247,6 @@ class AnimationDurationModifier extends ModifierWithKey<number> {
     }
   }
 }
-
 
 class AnimationModeModifier extends ModifierWithKey<AnimationMode> {
   constructor(value: AnimationMode) {
@@ -278,10 +267,7 @@ class AnimationModeModifier extends ModifierWithKey<AnimationMode> {
   }
 }
 
-class ScrollableModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class ScrollableModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('scrollable');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -322,10 +308,7 @@ class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
   }
 }
 
-class BarPositionModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
+class BarPositionModifier extends Modifier<number> {
   static identity: Symbol = Symbol('barPosition');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -353,9 +336,6 @@ class TabsHideTitleBarModifier extends ModifierWithKey<string> {
 }
 
 class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
-  constructor(value: ResourceColor) {
-    super(value);
-  }
   static identity: Symbol = Symbol('barbackgroundcolor');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -367,7 +347,11 @@ class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
@@ -390,10 +374,7 @@ class BarBackgroundBlurStyleModifier extends ModifierWithKey<BlurStyle> {
   }
 }
 
-class FadingEdgeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
+class FadingEdgeModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('fadingedge');
 
   applyPeer(node: KNode, reset: boolean): void {

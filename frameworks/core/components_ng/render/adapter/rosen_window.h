@@ -114,10 +114,9 @@ public:
     {
         return rsUIDirector_->GetAnimateExpectedRate();
     }
+    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
-    
-    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
 
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
@@ -125,6 +124,7 @@ private:
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
+    bool isFirstRequestVsync_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };

@@ -21,8 +21,6 @@
 
 namespace OHOS::Ace::Napi {
 napi_value JSPromptShowToast(napi_env env, napi_callback_info info);
-napi_value JSPromptOpenToast(napi_env env, napi_callback_info info);
-napi_value JSPromptCloseToast(napi_env env, napi_callback_info info);
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info);
 napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info);
 napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info);

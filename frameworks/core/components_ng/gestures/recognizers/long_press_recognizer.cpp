@@ -214,6 +214,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -367,6 +368,7 @@ void LongPressRecognizer::SendCallbackMsg(
         }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPointerEvent(lastPointEvent_);
+        Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;

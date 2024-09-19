@@ -127,7 +127,7 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         return;
     }
     if (dvsyncSwitch) {
-        ACE_SCOPED_TRACE("enale dvsync");
+        ACE_SCOPED_TRACE("enable dvsync");
     } else {
         ACE_SCOPED_TRACE("disable dvsync");
     }
@@ -142,6 +142,10 @@ void RosenWindow::RequestFrame()
     auto taskExecutor = taskExecutor_.Upgrade();
     if (rsWindow_) {
         isRequestVsync_ = true;
+        if (isFirstRequestVsync_) {
+            isFirstRequestVsync_ = false;
+            LOGI("ArkUI requests first Vsync.");
+        }
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifdef VSYNC_TIMEOUT_CHECK
@@ -155,7 +159,7 @@ void RosenWindow::RequestFrame()
             taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::JS,
                 VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
-#endif
+    #endif
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(

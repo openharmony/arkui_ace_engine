@@ -50,7 +50,6 @@ function uiNodeCleanUpIdleTask(): void {
     stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 
 class UINodeRegisterProxy {

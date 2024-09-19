@@ -107,8 +107,6 @@ enum class AccessibilityEventType : size_t {
     ACCESSIBILITY_FOCUS_CLEARED = 0x00010000,
     TEXT_MOVE_UNIT = 0x00020000,
     SCROLL_START = 0x01000000,
-    PAGE_CLOSE = 0x08000000,
-    PAGE_OPEN = 0x20000000,
     UNKNOWN,
 };
 

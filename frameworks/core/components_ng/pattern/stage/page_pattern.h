@@ -41,6 +41,7 @@ using DynamicPageSizeCallback = std::function<void(const SizeF& size)>;
  */
 using PageVisibilityChangeCallback = std::function<void(bool)>;
 
+
 enum class RouterPageState {
     ABOUT_TO_APPEAR = 0,
     ABOUT_TO_DISAPPEAR = 1,
@@ -98,9 +99,9 @@ public:
         onPageHide_ = std::move(onPageHide);
     }
 
-    void SetOnBackPressed(std::function<bool()>&& OnBackPressed)
+    void SetOnBackPressed(std::function<bool()>&& onBackPressed)
     {
-        onBackPressed_ = std::move(OnBackPressed);
+        onBackPressed_ = std::move(onBackPressed);
     }
 
     void SetPageTransitionFunc(std::function<void()>&& pageTransitionFunc)

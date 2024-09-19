@@ -70,7 +70,7 @@ public:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
-
+    void OnWindowHide() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */) override;
 
@@ -277,8 +277,6 @@ public:
     void UpdateContextRect(
         const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
 
-    void OnNavBarStateChange(bool modeChange);
-
     bool GetNavigationModeChange() const
     {
         return navigationModeChange_;
@@ -311,13 +309,19 @@ public:
 
     void OnNavigationModeChange(bool modeChange);
 
-    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
+    void OnNavBarStateChange(bool modeChange);
 
     static void FireNavigationChange(const RefPtr<UINode>& node, bool isShow, bool isFirst);
 
     static void FireNavigationInner(const RefPtr<UINode>& node, bool isShow);
 
+    static void FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow);
+
     static void FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle);
+
+    static bool CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode);
+
+    static bool CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode);
 
     static void NotifyPerfMonitorPageMsg(const std::string& pageName);
 
@@ -325,6 +329,8 @@ public:
     void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
+
+    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
 
     void SetIsCustomAnimation(bool isCustom)
     {
@@ -359,7 +365,7 @@ public:
     void RemoveFromDumpManager();
 
     void NotifyDestinationLifecycle(const RefPtr<UINode>& destinationNode,
-        NavDestinationLifecycle lifecycle, bool isNavigationChanged);
+        NavDestinationLifecycle lifecycle);
     void AbortAnimation(RefPtr<NavigationGroupNode>& hostNode);
 
     void SetParentCustomNode(const RefPtr<UINode>& parentNode)
@@ -388,6 +394,11 @@ public:
     bool IsFinishInteractiveAnimation() const
     {
         return isFinishInteractiveAnimation_;
+    }
+
+    const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
+    {
+        return currentProxy_;
     }
 
     bool IsCurTopNewInstance() const
@@ -463,19 +474,21 @@ private:
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
     void ProcessAutoSave(const RefPtr<FrameNode>& node);
-    void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RefreshFocusToDestination();
+
+    void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
     void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
-        bool isPopPage, bool isNeedInVisible = false);
+        bool isPopPage, bool isNeedInVisible);
     bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
         NavigationTransition navigationTransition);
+    bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -509,10 +522,7 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
-#if defined(ENABLE_NAV_SPLIT_MODE)
-    bool isBackPage_ = false;
-#endif
-    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
+    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
     bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;

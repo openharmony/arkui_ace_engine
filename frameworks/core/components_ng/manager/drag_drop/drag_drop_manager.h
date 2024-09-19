@@ -149,8 +149,9 @@ public:
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
+    void NotifyEnterTextEditorArea();
     void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
-    void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEven,
+    void FireOnDragLeave(const RefPtr<FrameNode>& preTargetFrameNode_, const PointerEvent& pointerEvent,
         const std::string& extraInfo);
 
     bool IsWindowConsumed() const
@@ -334,6 +335,16 @@ public:
         info_ = DragPreviewInfo();
     }
 
+    void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
+    {
+        isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
+    }
+
+    bool IsPullMoveReceivedForCurrentDrag() const
+    {
+        return isPullMoveReceivedForCurrentDrag_;
+    }
+
     void SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode)
     {
         prepareDragFrameNode_ = prepareDragFrameNode;
@@ -354,16 +365,6 @@ public:
         return preDragStatus_;
     }
 
-    void ResetPullMoveReceivedForCurrentDrag(bool isPullMoveReceivedForCurrentDrag = false)
-    {
-        isPullMoveReceivedForCurrentDrag_ = isPullMoveReceivedForCurrentDrag;
-    }
-
-    bool IsPullMoveReceivedForCurrentDrag() const
-    {
-        return isPullMoveReceivedForCurrentDrag_;
-    }
-
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
@@ -371,7 +372,8 @@ public:
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
     double CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayManager>& overlayManager, int32_t x, int32_t y);
 
-    void SetPixelMapOffset(OffsetF pixelMapOffset) {
+    void SetPixelMapOffset(OffsetF pixelMapOffset)
+    {
         pixelMapOffset_ = pixelMapOffset;
     }
     bool IsNeedDisplayInSubwindow();
@@ -412,6 +414,11 @@ public:
         return isShowBadgeAnimation_;
     }
 
+    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
+    {
+        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
+    }
+
     void SetBadgeNumber(int32_t badgeNumber)
     {
         badgeNumber_ = badgeNumber;
@@ -420,11 +427,6 @@ public:
     int32_t GetBadgeNumber() const
     {
         return badgeNumber_;
-    }
-    
-    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
-    {
-        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
     }
 
     bool IsDragWithContextMenu() const
@@ -478,6 +480,8 @@ public:
 
     float GetCurrentDistance(float x, float y);
 
+    static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
+
     uint32_t GetDampingOverflowCount() const
     {
         return dampingOverflowCount_;
@@ -487,7 +491,6 @@ public:
     {
         dampingOverflowCount_++;
     }
-    static double GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline);
 
     RefPtr<FrameNode> GetMenuWrapperNode()
     {
@@ -578,14 +581,13 @@ private:
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
     VelocityTracker velocityTracker_;
-    DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
     Rect previewRect_ { -1, -1, -1, -1 };
+    DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     DragPreviewInfo info_;
     PointerEvent dragDropPointerEvent_;
-    bool isDragFwkShow_ { false };
+    bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
-    OffsetF prePointerOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
@@ -600,10 +602,11 @@ private:
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
-    uint32_t dampingOverflowCount_ = 0;
-    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     RefPtr<GridColumnInfo> columnInfo_;
+    uint32_t dampingOverflowCount_ = 0;
     WeakPtr<FrameNode> menuWrapperNode_;
+    std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
+
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
 } // namespace OHOS::Ace::NG

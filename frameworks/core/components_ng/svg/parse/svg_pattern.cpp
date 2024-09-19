@@ -17,7 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components/declaration/svg/svg_pattern_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,19 +46,19 @@ void SvgPattern::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, co
 bool SvgPattern::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgPatternAttribute&)> attrs[] = {
-        { SVG_HEIGHT,
+        { DOM_SVG_HEIGHT,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_PATTERN_CONTENT_UNITS,
+        { DOM_SVG_PATTERN_CONTENT_UNITS,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.patternContentUnits = val;
             } },
-        { SVG_PATTERN_UNITS,
+        { DOM_SVG_PATTERN_UNITS,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.patternUnits = val;
             } },
-        { SVG_VIEW_BOX,
+        { DOM_SVG_VIEW_BOX,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 if (val.empty()) {
                     return;
@@ -69,15 +69,15 @@ bool SvgPattern::ParseAndSetSpecializedAttr(const std::string& name, const std::
                     attr.viewBox = Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]);
                 }
             } },
-        { SVG_WIDTH,
+        { DOM_SVG_WIDTH,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.width = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_X,
+        { DOM_SVG_X,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.x = SvgAttributesParser::ParseDimension(val);
             } },
-        { SVG_Y,
+        { DOM_SVG_Y,
             [](const std::string& val, SvgPatternAttribute& attr) {
                 attr.y = SvgAttributesParser::ParseDimension(val);
             } },

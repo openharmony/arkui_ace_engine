@@ -125,7 +125,7 @@ void ScrollableController::Fling(double flingVelocity)
     pattern->Fling(flingVelocity);
 }
 
-void ScrollableController::ScrollPage(bool reverse, bool smooth)
+void ScrollableController::ScrollPage(bool reverse, bool /* smooth */)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -134,18 +134,11 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
     }
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    pattern->StopAnimate();
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
-    if (smooth) {
-        auto position = pattern->GetTotalOffset() - offset;
-        ACE_SCOPED_TRACE("ScrollPage with animation, position:%f, id:%d, tag:%s", position,
-            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        pattern->AnimateTo(position, -1, nullptr, true, false, false);
-    } else {
-        pattern->StopAnimate();
-        ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
-            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
-    }
+    ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
+        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
 }
 
 bool ScrollableController::IsAtEnd() const

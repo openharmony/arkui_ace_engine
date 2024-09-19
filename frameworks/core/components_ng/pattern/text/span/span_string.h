@@ -62,6 +62,9 @@ public:
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
+    void ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end);
+    void ChangeStartToCorrectNum(int32_t& start);
+    void ChangeEndToCorrectNum(int32_t& end);
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
@@ -73,7 +76,7 @@ protected:
     bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
     static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
-    void AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type);
+    void AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int32_t start);
     int32_t GetStepsByPosition(int32_t pos);
     void UpdateSpansWithOffset(int32_t start, int32_t offset);
     void UpdateSpanMapWithOffset(int32_t start, int32_t offset);

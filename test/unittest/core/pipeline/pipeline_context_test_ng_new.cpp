@@ -1431,7 +1431,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     auto frameNode = FrameNode::GetOrCreateFrameNode("test", 5, nullptr);
     pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::RECOVER);
     pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::FULL_TO_FLOATING);
-    pipeline->CheckVirtualKeyboardHeight();
     pipeline->AvoidanceLogic(0.0);
     EXPECT_EQ(pipeline->finishFunctions_.size(), 0);
     auto listenerWrapper = [](const std::vector<std::string>& params) {};

@@ -159,7 +159,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetLayoutWeight(TEN);
     ViewAbstract::SetLayoutWeight(AceType::RawPtr(FRAME_NODE_REGISTER), TEN);
     ViewAbstract::SetBias(biasPair);
-    ViewAbstract::SetBias(nullptr, biasPair);
     ViewAbstract::SetOuterBorderRadius(ZERO);
     ViewAbstract::SetOuterBorderRadius(nullptr, ZERO);
     NG::BorderRadiusProperty borderRadius;
@@ -196,13 +195,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetBackgroundBlurStyle(AceType::RawPtr(FRAME_NODE_REGISTER), blurStyleOption);
     CalcDimension dimensionRadius(0.0);
     ViewAbstract::SetLightPosition(dimensionRadius, dimensionRadius, dimensionRadius);
-    ViewAbstract::SetLightPosition(nullptr, dimensionRadius, dimensionRadius, dimensionRadius);
     ViewAbstract::SetLightIntensity(RATIO);
-    ViewAbstract::SetLightIntensity(nullptr, RATIO);
     ViewAbstract::SetIlluminatedBorderWidth(ZERO);
-    ViewAbstract::SetIlluminatedBorderWidth(nullptr, ZERO);
     ViewAbstract::SetBloom(RATIO);
-    ViewAbstract::SetBloom(nullptr, RATIO);
     std::map<AlignDirection, AlignRule> alignRules;
     ViewAbstract::SetAlignRules(alignRules);
     ViewAbstract::SetAlignRules(AceType::RawPtr(FRAME_NODE_REGISTER), alignRules);
@@ -250,7 +245,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
     ViewAbstract::SetChainStyle(chainInfo);
     ViewAbstract::SetChainStyle(AceType::RawPtr(FRAME_NODE_REGISTER), chainInfo);
     ViewAbstract::SetBias(biasPair);
-    ViewAbstract::SetBias(nullptr, biasPair);
     ViewAbstract::SetOuterBorderRadius(ZERO);
     ViewAbstract::SetOuterBorderRadius(nullptr, ZERO);
     NG::BorderRadiusProperty borderRadius;
@@ -293,16 +287,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
     ViewAbstract::SetLayoutDirection(direction);
     CalcDimension dimensionRadius(0.0);
     ViewAbstract::SetLightPosition(dimensionRadius, dimensionRadius, dimensionRadius);
-    ViewAbstract::SetLightPosition(nullptr, dimensionRadius, dimensionRadius, dimensionRadius);
     ViewAbstract::SetLightIntensity(RATIO);
-    ViewAbstract::SetLightIntensity(nullptr, RATIO);
-    Color color = Color::TRANSPARENT;
-    ViewAbstract::SetLightColor(color);
-    ViewAbstract::SetLightColor(nullptr, color);
     ViewAbstract::SetIlluminatedBorderWidth(ZERO);
-    ViewAbstract::SetIlluminatedBorderWidth(nullptr, ZERO);
     ViewAbstract::SetBloom(RATIO);
-    ViewAbstract::SetBloom(nullptr, RATIO);
 
     /**
      * @tc.expected: Return expected results.
@@ -334,7 +321,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest005, TestSize.Level1)
     ViewAbstract::SetFlexGrow(RATIO);
     ViewAbstract::SetFlexBasis(WIDTH);
     ViewAbstract::SetDisplayIndex(INDEX);
-    ViewAbstract::SetDisplayIndex(nullptr, INDEX);
 
     ViewAbstract::SetPadding(NG::CalcLength(WIDTH));
     ViewAbstract::SetMargin(NG::CalcLength(WIDTH));
@@ -373,7 +359,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest006, TestSize.Level1)
     ViewAbstract::SetFlexGrow(AceType::RawPtr(FRAME_NODE_REGISTER), RATIO);
     ViewAbstract::SetFlexBasis(WIDTH);
     ViewAbstract::SetDisplayIndex(INDEX);
-    ViewAbstract::SetDisplayIndex(nullptr, INDEX);
 
     ViewAbstract::SetPadding(NG::CalcLength(WIDTH));
     ViewAbstract::SetMargin(NG::CalcLength(WIDTH));
@@ -885,7 +870,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
     ViewAbstract::SetRadialGradient(std::move(gradient));
     ViewAbstract::SetRadialGradient(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(gradient));
     ViewAbstract::SetSystemBarEffect(false);
-    ViewAbstract::SetSystemBarEffect(nullptr, false);
     ViewAbstract::SetFreeze(false);
     ViewAbstract::SetUseShadowBatching(false);
     ViewAbstract::SetUseShadowBatching(AceType::RawPtr(FRAME_NODE_REGISTER), false);
@@ -930,13 +914,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     ViewAbstract::SetSweepGradient(std::move(gradient));
     ViewAbstract::SetRadialGradient(std::move(gradient));
     ViewAbstract::SetSystemBarEffect(false);
-    ViewAbstract::SetSystemBarEffect(nullptr, false);
     ViewAbstract::SetFreeze(false);
     ViewAbstract::SetUseShadowBatching(false);
-    ImageResizableSlice slice;
-    ViewAbstract::SetBackgroundImageResizableSlice(slice);
-    ViewAbstract::SetBackgroundImageResizableSlice(nullptr, slice);
-
     /**
      * @tc.expected: Return expected results.
      */
@@ -972,16 +951,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest017, TestSize.Level1)
     ViewAbstract::SetMask(std::move(basicShape));
     ViewAbstract::SetClipEdge(false);
     ViewAbstract::SetGrayScale(RADIUS);
-    ViewAbstract::SetGrayScale(nullptr, RADIUS);
-    OHOS::Rosen::VisualEffect* visualEffect;
-    ViewAbstract::SetVisualEffect(visualEffect);
-    OHOS::Rosen::Filter* backgroundFilter;
-    ViewAbstract::SetBackgroundFilter(backgroundFilter);
-    OHOS::Rosen::Filter* foregroundFilter;
-    ViewAbstract::SetForegroundFilter(foregroundFilter);
-    OHOS::Rosen::Filter* compositingFilter;
-    ViewAbstract::SetCompositingFilter(compositingFilter);
-    ViewAbstract::SetDynamicDim(1.0f);
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSaturate(nullptr, RADIUS);
@@ -1024,15 +993,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest018, TestSize.Level1)
     ViewAbstract::SetClipEdge(false);
     ViewAbstract::SetClipEdge(nullptr, false);
     ViewAbstract::SetGrayScale(RADIUS);
-    ViewAbstract::SetGrayScale(nullptr, RADIUS);
-    OHOS::Rosen::VisualEffect* visualEffect;
-    ViewAbstract::SetVisualEffect(visualEffect);
-    OHOS::Rosen::Filter* backgroundFilter;
-    ViewAbstract::SetBackgroundFilter(backgroundFilter);
-    OHOS::Rosen::Filter* foregroundFilter;
-    ViewAbstract::SetForegroundFilter(foregroundFilter);
-    OHOS::Rosen::Filter* compositingFilter;
-    ViewAbstract::SetCompositingFilter(compositingFilter);
     ViewAbstract::SetContrast(RADIUS);
     ViewAbstract::SetSaturate(RADIUS);
     ViewAbstract::SetSepia(RADIUS);
@@ -1533,7 +1493,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetChainStyle(chainInfo);
     ViewAbstract::SetChainStyle(AceType::RawPtr(FRAME_NODE_REGISTER), chainInfo);
     ViewAbstract::SetBias(biasPair);
-    ViewAbstract::SetBias(nullptr, biasPair);
     ViewAbstract::SetOuterBorderRadius(ZERO);
     ViewAbstract::SetOuterBorderRadius(nullptr, ZERO);
     NG::BorderRadiusProperty borderRadius;

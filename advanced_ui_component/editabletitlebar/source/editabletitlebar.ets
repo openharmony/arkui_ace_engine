@@ -21,6 +21,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
+import { Context } from '@ohos.arkui.UIContext';
 
 export enum EditableLeftIconType {
   Back,
@@ -87,6 +88,35 @@ class EditableTitleBarTheme {
   public subTitleColor: ResourceColor = $r('sys.color.titlebar_subheader_color');
 }
 
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
+
 @Component
 export struct EditableTitleBar {
   leftIconStyle: EditableLeftIconType = EditableLeftIconType.Back;
@@ -120,6 +150,9 @@ export struct EditableTitleBar {
     (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_MAIN_TITLE_PERCENT;
   private static readonly maxSubTitleHeight =
     (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_SUB_TITLE_PERCENT;
+  private isFollowingSystemFontScale: boolean = false;
+  private maxFontScale: number = 1;
+  private systemFontScale?: number = 1;
   @Provide editableTitleBarTheme: EditableTitleBarTheme = new EditableTitleBarTheme();
   @Prop contentMargin?: LocalizedMargin;
   @State titleBarMargin: LocalizedMargin = {
@@ -136,6 +169,27 @@ export struct EditableTitleBar {
     this.editableTitleBarTheme.iconBackgroundPressedColor = theme.colors.interactivePressed;
     this.editableTitleBarTheme.iconBackgroundHoverColor = theme.colors.interactiveHover;
     this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = theme.colors.interactiveFocus;
+  }
+
+  aboutToAppear(): void {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${code}, message: ${message}`);
+    }
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
   build() {
@@ -284,6 +338,7 @@ export struct EditableTitleBar {
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
     let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    this.fontSize = this.decideFontScale();
     children.forEach((child) => {
       result.height = child.measure(constraint).height;
       result.width = Number(constraint.maxWidth);
@@ -343,7 +398,7 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
-  @Prop fontSize: number = 1;
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
@@ -361,7 +416,8 @@ struct ImageMenuItem {
     maskColor: Color.Transparent,
     isModal: true,
     customStyle: true,
-  })
+  });
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   private textDialog(): ResourceStr {
     if (this.item.value === PUBLIC_OK) {
@@ -373,6 +429,10 @@ struct ImageMenuItem {
     } else {
       return this.item.label ? this.item.label : '';
     }
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
   }
 
   @Styles
@@ -456,17 +516,6 @@ struct ImageMenuItem {
     .onClick(() => {
       this.item.isEnabled && this.item.action && this.item.action()
     })
-    .gesture(
-      LongPressGesture({ repeat: false, duration: this.longPressTime })
-        .onAction((event: GestureEvent) => {
-          let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-          this.fontSize = context.config?.fontSizeScale ?? 1;
-          if (event) {
-            if (this.fontSize >= this.minFontSize) {
-              this.dialogController?.open()
-            }
-          }
-        }))
   }
 
   @Styles
@@ -497,17 +546,31 @@ struct ImageMenuItem {
     }
   }
 
+  private getAccessibilityReadText(): Resource | undefined {
+    if (this.item.value === PUBLIC_OK) {
+      return $r('sys.string.icon_save');
+    } else if (this.item.value === PUBLIC_CANCEL) {
+      return $r('sys.string.icon_cancel');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return $r('sys.string.icon_back');
+    } else if (this.item.label) {
+      return this.item.label as Resource;
+    }
+    return undefined;
+  }
+
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       Image(this.item.value)
+        .fillColor(this.editableTitleBarTheme.iconColor)
+        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .width($r('sys.float.titlebar_icon_width'))
         .height($r('sys.float.titlebar_icon_height'))
-        .fillColor(this.editableTitleBarTheme.iconColor)
         .focusable(this.item.isEnabled)
         .enabled(this.item.isEnabled)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
         .draggable(false)
+        .accessibilityText(this.getAccessibilityReadText())
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
@@ -520,6 +583,7 @@ struct ImageMenuItem {
     .backgroundColor(this.getBgColor())
     .buttonStateStyles()
     .buttonEventStyle()
+    .gestureModifier(this.buttonGestureModifier)
   }
 
   @Builder
@@ -539,6 +603,7 @@ struct ImageMenuItem {
         .backgroundColor(EditableTitleBar.noneColor)
         .buttonStateStyles()
         .buttonEventStyle()
+        .gestureModifier(this.buttonGestureModifier)
     }
     .margin({
       start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),

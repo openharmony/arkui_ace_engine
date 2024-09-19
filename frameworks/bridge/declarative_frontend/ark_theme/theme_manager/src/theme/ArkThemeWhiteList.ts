@@ -36,7 +36,7 @@ class ArkThemeWhiteList {
         'Progress',
         'QRCode',
         'Radio',
-        'Scroll',
+        "Scroll",
         'Search',
         'Select',
         'Slider',
@@ -72,4 +72,3 @@ class ArkThemeWhiteList {
         return false;
     }
 }
-

@@ -1439,48 +1439,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern061, TestSize.Level0)
 }
 
 /**
- * @tc.name: TextPattern062
- * @tc.desc: test testInput text HandleCursorOnDragEnded
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTest, TextPattern062, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    ASSERT_NE(notifyDragEvent, nullptr);
-    pattern->HandleCursorOnDragEnded(notifyDragEvent);
-}
-
-/**
- * @tc.name: TextPattern063
- * @tc.desc: test testInput text HandleOnDragStatusCallback
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTest, TextPattern063, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField();
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    ASSERT_NE(notifyDragEvent, nullptr);
-    pattern->HandleOnDragStatusCallback(DragEventType::START, notifyDragEvent);
-}
-
-/**
  * @tc.name: TextPattern064
  * @tc.desc: test testInput text GetAvoidSoftKeyboardOffset
  * @tc.type: FUNC
@@ -1958,12 +1916,12 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     
     pattern->isMoveCaretAnywhere_ = false;
     pattern->ProcessOverlay();
-    pattern->isTouchCaret_ = true;
+    pattern->moveCaretState_.isTouchCaret = true;
     pattern->selectOverlay_->isUsingMouse_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
 
     pattern->ProcessOverlay();
-    pattern->isTouchCaret_ = false;
+    pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchEvent(touchEventInfo);
 }
 
@@ -1990,7 +1948,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern083, TestSize.Level0)
     pattern->isMousePressed_ = true;
     pattern->HandleTouchDown(offset);
     pattern->isMousePressed_ = false;
-    pattern->isTouchCaret_ = false;
+    pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchDown(offset);
 }
 
@@ -2040,7 +1998,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern085, TestSize.Level0)
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
-    pattern->isTouchCaret_ = true;
+    pattern->moveCaretState_.isTouchCaret = true;
     pattern->hasPreviewText_ = true;
     pattern->HandleTouchMove(touchEventInfo);
     pattern->hasPreviewText_ = false;

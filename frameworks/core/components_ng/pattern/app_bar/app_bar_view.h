@@ -27,11 +27,13 @@ namespace OHOS::Ace::NG {
  * The structure of Atomic Service (install free):
  * |--AtomicService(Column)
  *   |--Stage
+ *   |--ModalPage(normal)
  *   |--MenuBarRow
  *     |--MenuBar
  *       |--menuButton
  *       |--divider
  *       |--closeButton
+ * |--ModalPage(UEC)
  */
 
 class ACE_FORCE_EXPORT AppBarView : public Referenced {

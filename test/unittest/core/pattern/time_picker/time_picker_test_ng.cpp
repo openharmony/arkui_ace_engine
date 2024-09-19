@@ -24,8 +24,8 @@
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
@@ -1389,11 +1389,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern012
+ * @tc.name: TimePickerColumnPattern011
  * @tc.desc: Test ScrollOption function
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern011, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1434,11 +1434,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern013
+ * @tc.name: TimePickerColumnPattern012
  * @tc.desc: Test SetDividerHeight function
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1465,11 +1465,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern014
+ * @tc.name: TimePickerColumnPattern013
  * @tc.desc: Test UpdateColumnChildPosition function abnormal situation
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1494,11 +1494,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 }
 
 /**
- * @tc.name: TimePickerColumnPattern015
+ * @tc.name: TimePickerColumnPattern014
  * @tc.desc: Test OnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 {
     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
@@ -1922,9 +1922,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     RoundRect paintRect;
     getInnerFocusRectFunc(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), 0);
+    Dimension offset = 2.0_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
     EXPECT_EQ(rect.GetY(), centerY);
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
     EXPECT_EQ(rect.Height(), dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2);
 
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
@@ -2852,77 +2853,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow003, TestSize.Level1)
     auto dialogNode = TimePickerDialogView::Show(
         dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_NE(dialogNode, nullptr);
-}
-
-/**
- * @tc.name: TimePickerDialogViewUpdateButtonDefaultFocus001
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus001, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    info1.isAcceptButton = true;
-    buttonInfos.push_back(info1);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: TimePickerDialogViewUpdateButtonDefaultFocus002
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus002, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    buttonInfos.push_back(info1);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, false);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
-}
-
-/**
- * @tc.name: TimePickerDialogViewUpdateButtonDefaultFocus003
- * @tc.desc: Test UpdateButtonDefaultFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewUpdateButtonDefaultFocus003, TestSize.Level1)
-{
-    std::vector<ButtonInfo> buttonInfos;
-    ButtonInfo info1;
-    info1.isPrimary = true;
-    info1.isAcceptButton = true;
-    buttonInfos.push_back(info1);
-
-    ButtonInfo info2;
-    buttonInfos.push_back(info2);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-
-    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
 }
 
 /**

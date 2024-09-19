@@ -206,7 +206,6 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding.bottom.value_or(0.0);
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
@@ -288,12 +287,14 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, 0.0);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(buttonTheme, 0.0);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, 0.0);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, 0.0);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, 0.0);
     if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
-        auto toggleTheme = PipelineBase::GetCurrentContext()->GetTheme<ToggleTheme>();
+        auto toggleTheme = context->GetTheme<ToggleTheme>();
         CHECK_NULL_RETURN(toggleTheme, 0.0);
         return static_cast<float>(toggleTheme->GetButtonHeight().ConvertToPx());
     }

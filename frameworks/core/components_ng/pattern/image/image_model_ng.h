@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
+
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
 
@@ -31,18 +32,18 @@ public:
     void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
-    void SetAlt(const ImageSourceInfo &src) override;
-    void SetBorder(const Border &border) override;
+    void SetAlt(const ImageSourceInfo& src) override;
+    void SetBorder(const Border& border) override;
     void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
-    void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) override;
-    void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) override;
-    void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) override;
-    void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) override;
-    void SetImageFill(const Color &color) override;
+    void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
+    void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
+    void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
+    void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
+    void SetImageFill(const Color& color) override;
     void SetImageInterpolation(ImageInterpolation interpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
@@ -72,6 +73,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
+    static void SetDraggableForFrameNode(RefPtr<FrameNode> frameNode);
     static void ResetImage(FrameNode* frameNode);
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);
@@ -113,14 +115,14 @@ public:
     static void SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
     static void ResetResizableLattice(FrameNode *frameNode);
-    static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
-    static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
-    static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
-    static bool GetFitOriginalSize(FrameNode* frameNode);
-    static uint32_t GetFillColor(FrameNode* frameNode);
+    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
+    static bool GetFitOriginalSize(FrameNode *frameNode);
+    static uint32_t GetFillColor(FrameNode *frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
     static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
     static void SetResource(FrameNode* frameNode, void* resource);
+    static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
     static void EnableAnalyzer(FrameNode* frameNode, bool isEnableAnalyzer);
     static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
     static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
@@ -128,8 +130,10 @@ public:
     static void ResetImageAlt(FrameNode* frameNode);
     static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
     static void SetAltResource(FrameNode* frameNode, void* resource);
+
 private:
     ImagePattern* GetImagePattern();
 };
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

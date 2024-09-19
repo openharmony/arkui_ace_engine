@@ -18,6 +18,7 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/base/image/pixel_map.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -25,6 +26,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
+#include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_manager.h"
 #include "frameworks/core/common/resource/resource_object.h"
 #include "frameworks/core/common/resource/resource_wrapper.h"
@@ -32,6 +34,21 @@
 #include "frameworks/core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string GetBundleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetBundleName();
+}
+
+std::string GetModuleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
+}
+}
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -65,7 +82,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    NONE = 40000
 };
 
 uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
@@ -417,7 +435,7 @@ void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     auto resId = jsObj->Get(vm,
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
-    ResourceType resType;
+    ResourceType resType = ResourceType::NONE;
     std::string targetModule;
     std::string resName;
     if (resId->IsString(vm)) {
@@ -438,6 +456,22 @@ void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
             CompleteResourceObjectFromParams(vm, jsObj, targetModule, resType, resName);
         }
     }
+
+    std::string bundleName;
+    std::string moduleName;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, jsObj, bundleName, moduleName);
+    if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
+        bundleName = GetBundleNameFromContainer();
+        jsObj->Set(vm,
+            panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)),
+            panda::StringRef::NewFromUtf8(vm, bundleName.c_str()));
+    }
+    if (moduleName == DEFAULT_HAR_MODULE_NAME) {
+        moduleName = GetModuleNameFromContainer();
+        jsObj->Set(vm,
+            panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
+            panda::StringRef::NewFromUtf8(vm, moduleName.c_str()));
+    }
 }
 
 
@@ -449,6 +483,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, jsObj);
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
     if (!resourceWrapper) {
@@ -498,6 +533,7 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, jsObj);
 
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
@@ -545,6 +581,7 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, jsObj);
 
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
@@ -657,6 +694,7 @@ bool ArkTSUtils::ParseJsIntegerWithResource(const EcmaVM* vm, const Local<JSValu
     resourceType = type->Int32Value(vm);
     auto resIdNum = id->Int32Value(vm);
 
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsValue);
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     CHECK_NULL_RETURN(resourceWrapper, false);
@@ -704,11 +742,10 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
     if (jsObj->IsNull() || !GetResourceIdAndType(vm, jsObj, resId, resType)) {
         return false;
     }
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsObj);
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
-    if (!resourceWrapper) {
-        return false;
-    }
+    CHECK_NULL_RETURN(resourceWrapper, false);
     if (resId == -1) {
         if (!IsGetResourceByName(vm, jsObj)) {
             return false;
@@ -922,6 +959,7 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(
         return false;
     }
 
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsValue);
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     if (!resourceWrapper) {
@@ -1190,6 +1228,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         return false;
     }
 
+    CompleteResourceObject(vm, obj);
     auto resourceObject = GetResourceObject(vm, obj);
     auto resourceWrapper = CreateResourceWrapper(vm, obj, resourceObject);
     if (!resourceWrapper) {
@@ -1234,6 +1273,7 @@ bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, jsObj);
     auto resourceObject = GetResourceObject(vm, jsValue);
     auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
     CHECK_NULL_RETURN(resourceWrapper, false);
@@ -1772,95 +1812,6 @@ ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSVal
     return size;
 }
 
-bool ArkTSUtils::CheckKeysPressed(
-    const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
-{
-    auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
-        auto it = std::find(pressedKeyCodes.begin(), pressedKeyCodes.end(), keyCode);
-        return it != pressedKeyCodes.end();
-    };
-    for (auto& checkKeyCode : checkKeyCodes) {
-        if (checkKeyCode == "ctrl") {
-            if (!hasKeyCode(KeyCode::KEY_CTRL_LEFT) && !hasKeyCode(KeyCode::KEY_CTRL_RIGHT)) {
-                return false;
-            }
-        } else if (checkKeyCode == "shift") {
-            if (!hasKeyCode(KeyCode::KEY_SHIFT_LEFT) && !hasKeyCode(KeyCode::KEY_SHIFT_RIGHT)) {
-                return false;
-            }
-        } else if (checkKeyCode == "alt") {
-            if (!hasKeyCode(KeyCode::KEY_ALT_LEFT) && !hasKeyCode(KeyCode::KEY_ALT_RIGHT)) {
-                return false;
-            }
-        } else if (checkKeyCode == "fn") {
-            if (!hasKeyCode(KeyCode::KEY_FN)) {
-                return false;
-            }
-        } else {
-            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
-            return false;
-        }
-    }
-    return true;
-}
-
-void ArkTSUtils::ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code)
-{
-    auto errorVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, msg.c_str()));
-    auto codeVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, std::to_string(code).c_str()));
-    Local<panda::StringRef> codeKey = panda::StringRef::NewFromUtf8(vm, "code");
-    Local<panda::ObjectRef> errorObj(errorVal);
-    errorObj->Set(vm, codeKey, codeVal);
-    panda::JSNApi::ThrowException(vm, errorObj);
-}
-
-Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
-    ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes)
-{
-    auto vm = info->GetVM();
-    auto param = info->GetCallArgRef(0);
-    if (!param->IsArray(vm)) {
-        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
-        return JSValueRef::Undefined(vm);
-    }
-    std::vector<std::string> checkKeyCodes;
-    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
-    auto paramArray = panda::Local<panda::ArrayRef>(param);
-    auto length = paramArray->Length(vm);
-    for (size_t i = 0; i < length; i++) {
-        auto value = panda::ArrayRef::GetValueAt(vm, paramArray, i);
-        auto code = value->ToString(vm)->ToString(vm);
-        std::transform(code.begin(), code.end(), code.begin(), [](char& c) { return std::tolower(c); });
-        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code.c_str());
-        if (it == validKeyCodes.end()) {
-            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
-            return JSValueRef::Undefined(info->GetVM());
-        } else {
-            checkKeyCodes.emplace_back(code);
-        }
-    }
-    if (checkKeyCodes.empty()) {
-        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
-        return JSValueRef::Undefined(vm);
-    }
-    if (ArkTSUtils::CheckKeysPressed(vm, pressedKeyCodes, checkKeyCodes)) {
-        return panda::BooleanRef::New(vm, true);
-    } else {
-        return panda::BooleanRef::New(vm, false);
-    }
-}
-
-Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
-{
-    Local<JSValueRef> thisObj = info->GetThisRef();
-    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
-        info->GetVM(), 0));
-    if (!eventInfo) {
-        return JSValueRef::Undefined(info->GetVM());
-    }
-    auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
-    return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
-}
 bool ArkTSUtils::IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (!jsValue->IsObject(vm)) {
@@ -2123,4 +2074,94 @@ Local<panda::ObjectRef> ArkTSUtils::CreateJsTextRange(const EcmaVM* vm, const NG
         panda::NumberRef::New(vm, menuItemParam.end) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
+bool ArkTSUtils::CheckKeysPressed(
+    const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
+{
+    auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
+        auto it = std::find(pressedKeyCodes.begin(), pressedKeyCodes.end(), keyCode);
+        return it != pressedKeyCodes.end();
+    };
+    for (auto& checkKeyCode : checkKeyCodes) {
+        if (checkKeyCode == "ctrl") {
+            if (!hasKeyCode(KeyCode::KEY_CTRL_LEFT) && !hasKeyCode(KeyCode::KEY_CTRL_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "shift") {
+            if (!hasKeyCode(KeyCode::KEY_SHIFT_LEFT) && !hasKeyCode(KeyCode::KEY_SHIFT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "alt") {
+            if (!hasKeyCode(KeyCode::KEY_ALT_LEFT) && !hasKeyCode(KeyCode::KEY_ALT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "fn") {
+            if (!hasKeyCode(KeyCode::KEY_FN)) {
+                return false;
+            }
+        } else {
+            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+    }
+    return true;
+}
+
+void ArkTSUtils::ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code)
+{
+    auto errorVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, msg.c_str()));
+    auto codeVal = panda::Exception::Error(vm, panda::StringRef::NewFromUtf8(vm, std::to_string(code).c_str()));
+    Local<panda::StringRef> codeKey = panda::StringRef::NewFromUtf8(vm, "code");
+    Local<panda::ObjectRef> errorObj(errorVal);
+    errorObj->Set(vm, codeKey, codeVal);
+    panda::JSNApi::ThrowException(vm, errorObj);
+}
+
+Local<JSValueRef> ArkTSUtils::GetModifierKeyState(
+    ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes)
+{
+    auto vm = info->GetVM();
+    auto param = info->GetCallArgRef(0);
+    if (!param->IsArray(vm)) {
+        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return JSValueRef::Undefined(vm);
+    }
+    std::vector<std::string> checkKeyCodes;
+    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    auto paramArray = panda::Local<panda::ArrayRef>(param);
+    auto length = paramArray->Length(vm);
+    for (size_t i = 0; i < length; i++) {
+        auto value = panda::ArrayRef::GetValueAt(vm, paramArray, i);
+        auto code = value->ToString(vm)->ToString(vm);
+        std::transform(code.begin(), code.end(), code.begin(), [](char& c) { return std::tolower(c); });
+        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code.c_str());
+        if (it == validKeyCodes.end()) {
+            ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+            return JSValueRef::Undefined(info->GetVM());
+        } else {
+            checkKeyCodes.emplace_back(code);
+        }
+    }
+    if (checkKeyCodes.empty()) {
+        ThrowError(vm, "indicate the keys are illegal", ERROR_CODE_PARAM_INVALID);
+        return JSValueRef::Undefined(vm);
+    }
+    if (ArkTSUtils::CheckKeysPressed(vm, pressedKeyCodes, checkKeyCodes)) {
+        return panda::BooleanRef::New(vm, true);
+    } else {
+        return panda::BooleanRef::New(vm, false);
+    }
+}
+
+Local<JSValueRef> ArkTSUtils::JsGetModifierKeyState(ArkUIRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto pressedKeyCodes = eventInfo->GetPressedKeyCodes();
+    return ArkTSUtils::GetModifierKeyState(info, pressedKeyCodes);
+}
+
 } // namespace OHOS::Ace::NG

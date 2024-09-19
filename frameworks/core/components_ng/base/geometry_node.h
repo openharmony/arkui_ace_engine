@@ -36,7 +36,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-using ExpandEdges = PaddingPropertyF;
+
 // GeometryNode acts as a physical property of the size and position of the component
 class ACE_EXPORT GeometryNode : public AceType {
     DECLARE_ACE_TYPE(GeometryNode, AceType)
@@ -140,14 +140,14 @@ public:
         frame_.rect_.SetSize(size);
     }
 
-    void SetFrameWidth(int32_t width)
-    {
-        frame_.rect_.SetWidth(width);
-    }
-
-    void SetFrameHeight(int32_t height)
+    void SetFrameHeight(const float height)
     {
         frame_.rect_.SetHeight(height);
+    }
+
+    void SetFrameWidth(const float width)
+    {
+        frame_.rect_.SetWidth(width);
     }
 
     void SetMarginFrameOffsetX(int32_t offsetX)
@@ -378,21 +378,10 @@ public:
         return baselineDistance_.value_or(frame_.rect_.GetY());
     }
 
-    void SetAccumulatedSafeAreaEdges(const ExpandEdges& safeAreaPadding);
-    const std::unique_ptr<ExpandEdges>& GetAccumulatedSafeAreaExpand() const;
-    std::optional<RectF> ConvertExpandCacheToAdjustRect() const;
-    void ResetAccumulatedSafeAreaPadding();
-    // once get resolved, value shou not be changed before reset
-    void SetResolvedSingleSafeAreaPadding(const PaddingPropertyF& safeAreaPadding);
-    const std::unique_ptr<PaddingPropertyF>& GetResolvedSingleSafeAreaPadding() const;
-    void ResetResolvedSelfSafeAreaPadding();
-
     RectF GetParentAdjust() const;
     void SetParentAdjust(RectF parentAdjust);
     RectF GetSelfAdjust() const;
     void SetSelfAdjust(RectF selfAdjust);
-    RectF GetFrameRectWithoutSafeArea() const;
-    RectF GetFrameRectWithSafeArea() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
@@ -410,10 +399,6 @@ private:
     std::unique_ptr<MarginPropertyF> padding_;
     // the size of content rect in current node local coordinate.
     std::unique_ptr<GeometryProperty> content_;
-    // all parent safeArea paddings that can be concatenated to expand
-    std::unique_ptr<ExpandEdges> accumulatedSafeAreaExpand_;
-    // value converted from dimension to float to avoid duplicate calculation
-    std::unique_ptr<PaddingPropertyF> resolvedSingleSafeAreaPadding_;
 
     RectF parentAdjust_;
     RectF selfAdjust_;

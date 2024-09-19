@@ -155,10 +155,6 @@ public:
 
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
-    virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -182,7 +178,7 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
     RefPtr<FrameNode> GetTopDestination();
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
+    void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
@@ -205,7 +201,11 @@ public:
     float CheckLanguageDirection();
 
     void RemoveDialogDestination();
-
+    void AddDestinationNode(const RefPtr<UINode>& parent);
+    WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
+    {
+        return parentDestinationNode_;
+    }
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
         navigationPathInfo_ = pagePath;
@@ -227,10 +227,6 @@ public:
         return hideNodes_;
     }
 
-protected:
-    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
-
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
@@ -251,6 +247,7 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    WeakPtr<NavDestinationGroupNode> parentDestinationNode_;
     // dialog hideNodes, if is true, nodes need remove
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
@@ -261,6 +258,8 @@ private:
     bool needSetInvisible_ { false };
     bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
 };

@@ -1087,8 +1087,8 @@ HWTEST_F(ProgressTestNg, ProgressPatternTest000, TestSize.Level1)
 HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create the frameNode_.
-     * @tc.expected: step1. Check the frameNode_ was created successfully.
+     * @tc.steps: step1. Create the frameNode.
+     * @tc.expected: step1. Check the frameNode was created successfully.
      */
     ProgressModelNG progressModelNG;
     progressModelNG.Create(5.0, 10.0, 10.0, 20.0, PROGRESS_TYPE_CAPSULE);
@@ -1104,6 +1104,7 @@ HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
     pattern->OnSensitiveStyleChange(false);
     EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), false);
     EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);

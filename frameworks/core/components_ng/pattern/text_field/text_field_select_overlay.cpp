@@ -243,7 +243,7 @@ void TextFieldSelectOverlay::CloseMagnifier()
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetMagnifierController()->GetShowMagnifier()) {
-        pattern->GetMagnifierController()->UpdateShowMagnifier();
+        pattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
 }
 
@@ -288,6 +288,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textFieldPattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
@@ -429,12 +430,6 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     }
     auto selectController = pattern->GetTextSelectController();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
-        auto movingCaretOffset =
-            selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-        if (IsOverlayMode()) {
-            GetLocalPointWithTransform(movingCaretOffset);
-        }
-        pattern->SetMovingCaretOffset(movingCaretOffset);
         auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
         auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
         if (IsOverlayMode()) {
@@ -444,6 +439,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     }
     if (IsSingleHandle()) {
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        pattern->ShowCaretAndStopTwinkling();
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
@@ -487,9 +483,14 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
             overlayManager->MarkInfoChange(DIRTY_DOUBLE_HANDLE | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT);
         }
     } else {
+        pattern->StopTwinkling();
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->ShowOptionMenu();
+    overlayManager->SetHandleCircleIsShow(isFirst, true);
+    if (IsSingleHandle()) {
+        overlayManager->SetIsHandleLineShow(true);
+    }
     pattern->ScheduleDisappearDelayTask();
     pattern->UpdateCaretInfoToController();
     auto tmpHost = pattern->GetHost();
@@ -524,7 +525,7 @@ void TextFieldSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
     BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
 }
 
-void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isClickCaret)
+void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
@@ -536,8 +537,30 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isCl
         overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());
         overlayEvent.SetGlobalLocation(recognizer->GetBeginGlobalLocation());
         pattern->HandleClickEvent(overlayEvent);
+    } else if (!IsSingleHandle()) {
+        auto selectController = pattern->GetTextSelectController();
+        auto index = isFirst ? selectController->GetFirstHandleIndex() : selectController->GetSecondHandleIndex();
+        pattern->HandleSetSelection(index, index, false);
+        pattern->StartTwinkling();
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick");
+    }
+}
+
+void TextFieldSelectOverlay::OnHandleIsHidden()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->StartTwinkling();
+}
+
+void TextFieldSelectOverlay::OnHandleMoveStart(bool isFirst)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->SetHandleCircleIsShow(isFirst, false);
+    if (IsSingleHandle()) {
+        manager->SetIsHandleLineShow(false);
     }
 }
 } // namespace OHOS::Ace::NG

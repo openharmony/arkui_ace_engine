@@ -20,7 +20,6 @@
 
 #include "ability_context.h"
 #include "ability_info.h"
-#include "base/memory/referenced.h"
 #include "configuration.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -31,6 +30,7 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -114,6 +114,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr int32_t AVOID_DELAY_TIME = 20;
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -136,6 +137,18 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
             mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
 
+void AddSetAppColorModeToResConfig(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
+{
+    CHECK_NULL_VOID(context);
+    auto config = context->GetConfiguration();
+    CHECK_NULL_VOID(config);
+    auto colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+    if (!colorModeIsSetByApp.empty()) {
+        aceResCfg.SetColorModeIsSetByApp(true);
+    }
+}
+
 void AddResConfigInfo(
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
 {
@@ -155,27 +168,16 @@ void AddResConfigInfo(
         aceResCfg.SetPreferredScript(preferredLocaleInfo->getScript());
     }
 }
-
-void AddSetAppColorModeToResConfig(
-    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
-{
-    CHECK_NULL_VOID(context);
-    auto config = context->GetConfiguration();
-    CHECK_NULL_VOID(config);
-    auto colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
-    if (!colorModeIsSetByApp.empty()) {
-        aceResCfg.SetColorModeIsSetByApp(true);
-    }
-}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
-const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
+const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
+const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const int32_t REQUEST_CODE = -1;
 constexpr uint32_t TIMEOUT_LIMIT = 5;
 constexpr int32_t COUNT_LIMIT = 3;
@@ -287,14 +289,13 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
     {
         auto rect = info->rect_;
-        auto type = info->type_;
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
              "instanceId_ %{public}d",
-            keyboardRect.ToString().c_str(), type, positionY, height, instanceId_);
-        if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
+            keyboardRect.ToString().c_str(), info->type_, positionY, height, instanceId_);
+        if (info->type_ == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
@@ -321,12 +322,17 @@ public:
             auto curWindow = context->GetCurrentWindowRect();
             positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
-            taskExecutor->PostTask(
-                [context, keyboardRect, rsTransaction, positionY, height] {
+            if (NearZero(keyboardRect.Height())) {
+                taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
+                        CHECK_NULL_VOID(context);
+                        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
+                }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+            } else {
+                taskExecutor->PostDelayedTask([context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
+                }, TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
+            }
         }
     }
 
@@ -360,9 +366,14 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+        LOGI("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d, instanceId %{public}d",
+            type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
+            (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
+            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_, instanceId_);
+        ACE_SCOPED_TRACE("Avoid area changed, type:%d, topRect: avoidArea:x:%d, y:%d, width:%d, height%d; bottomRect: "
+                         "avoidArea:x:%d, y:%d, width:%d, height%d, instanceId %d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
             (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
             (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_, instanceId_);
@@ -543,7 +554,7 @@ public:
 
     void OnTouchOutside() const
     {
-        TAG_LOGI(AceLogTag::ACE_MENU, "window is touching outside. instance id is %{public}d", instanceId_);
+        LOGI("window is touching outside. instance id is %{public}d", instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
@@ -571,6 +582,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     auto hapModuleInfo = context->GetHapModuleInfo();
     CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    StoreConfiguration(context->GetConfiguration());
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -596,6 +608,9 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
+    auto context = context_.lock();
+    CHECK_NULL_VOID(context);
+    StoreConfiguration(context->GetConfiguration());
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -1177,6 +1192,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (isFormRender_) {
         Platform::AceViewOhos::SurfaceChanged(aceView, round(formWidth_), round(formHeight_),
             deviceHeight >= deviceWidth ? 0 : 1);
+        container->CheckAndSetFontFamily();
         SetFontScaleAndWeightScale(container, instanceId_);
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
@@ -1217,6 +1233,7 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
     auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
     auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
     auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
+
     CHECK_NULL_VOID(context);
     auto isFollowSystem = followSystem == "followSystem";
     if (!followSystem.empty()) {
@@ -1240,16 +1257,8 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         return;
     }
 
-    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    if (!colorMode.empty()) {
-        if (colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
-    }
 
     if (!deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -1264,6 +1273,39 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         if (!language.empty() || !script.empty() || !region.empty()) {
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
+    }
+    StoreConfiguration(config);
+}
+
+void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (config == nullptr) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
+    auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorMode.empty()) {
+        if (colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+        }
+    }
+
+    auto string2float = [](const std::string& str) {
+        try {
+            return std::stof(str);
+        } catch (...) {
+            return (float)1.0;
+        }
+    };
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        SystemProperties::SetFontScale(string2float(fontScale));
+    }
+    auto fontWeightScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    if (!fontWeightScale.empty()) {
+        SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
 }
 
@@ -1769,7 +1811,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     // setLogFunc of current app
     AddAlarmLogFunc();
-    // set get inspector tree function for ui session manager
     auto callback = [weakContext = WeakPtr(pipeline)]() {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         if (pipeline == nullptr) {
@@ -1886,6 +1927,8 @@ void UIContentImpl::Background()
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
+    // stop performance check and output json file
+    AcePerformanceCheck::Stop();
 }
 
 void UIContentImpl::ReloadForm(const std::string& url)
@@ -1918,20 +1961,12 @@ void UIContentImpl::Focus()
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
-    auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
 }
 
 void UIContentImpl::UnFocus()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window unfocus", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     Platform::AceContainer::OnInactive(instanceId_);
-    auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
 }
 
 void UIContentImpl::Destroy()
@@ -1940,17 +1975,17 @@ void UIContentImpl::Destroy()
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
     SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
-    SystemProperties::RemoveWatchSystemParameter(
         ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::RemoveWatchSystemParameter(
+        ENABLE_PERFORMANCE_MONITOR_KEY, this, EnableSystemParameterPerformanceMonitorCallback);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    // stop performance check and output json file
-    AcePerformanceCheck::Stop();
     if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
@@ -2109,7 +2144,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 {
     TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{public}d, "
+        "keyEvent info: keyCode is %{private}d, "
         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
         touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -2138,6 +2173,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         return;
     }
 
+    StoreConfiguration(config);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
@@ -2197,10 +2233,33 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_]() {
+    auto updateDensityTask = [container, modifyConfig]() {
+        auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
+        CHECK_NULL_VOID(aceView);
+        Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
+    };
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        updateDensityTask(); // ensure density has been updated before load first page
+    } else {
+        taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+    }
+    RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        safeAreaManager = context->GetSafeAreaManager();
+    }
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
+            if (safeAreaManager) {
+                uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
+                safeAreaManager->UpdateCutoutSafeArea(
+                    container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
+                    NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+            }
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
@@ -2219,16 +2278,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         }
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
-        Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
-        if (pipelineContext) {
-            // KeyboardInset and cutoutInset depend on rootHeight, need calculate again
-            pipelineContext->CheckAndUpdateKeyboardInset();
-            pipelineContext->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-        }
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
@@ -2278,6 +2331,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowMode: %{public}d, hasDeco: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDeco);
+
     UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
 }
 
@@ -2513,6 +2567,18 @@ void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callbac
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddPersistAfterLayoutTask(std::move(callback));
     LOGI("[%{public}s][%{public}s][%{public}d]: SetFrameLayoutFinishCallback", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_);
+}
+
+void UIContentImpl::SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddLatestFrameLayoutFinishTask(std::move(callback));
+    LOGI("[%{public}s][%{public}s][%{public}d]: SetLatestFrameLayoutFinishCallback", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_);
 }
 
@@ -2977,6 +3043,7 @@ void UIContentImpl::HandleAccessibilityHoverEvent(float pointX, float pointY, in
 
 std::string UIContentImpl::RecycleForm()
 {
+    LOGD("UIContentImpl: RecycleForm");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     std::string statusData;
     CHECK_NULL_RETURN(container, statusData);
@@ -2987,6 +3054,7 @@ std::string UIContentImpl::RecycleForm()
 
 void UIContentImpl::RecoverForm(const std::string& statusData)
 {
+    LOGD("UIContentImpl: RecoverForm");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
@@ -3322,13 +3390,6 @@ void UIContentImpl::EnableSystemParameterTraceLayoutCallback(const char* key, co
     }
 }
 
-void UIContentImpl::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
-{
-    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
-        SystemProperties::SetInputEventTraceEnabled(strcmp(value, "true") == 0);
-    }
-}
-
 void UIContentImpl::EnableSystemParameterSecurityDevelopermodeCallback(
     const char* key, const char* value, void* context)
 {
@@ -3352,17 +3413,34 @@ void UIContentImpl::EnableSystemParameterDebugBoundaryCallback(const char* key, 
     that->RenderLayoutBoundary(isDebugBoundary);
 }
 
+void UIContentImpl::EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetInputEventTraceEnabled(strcmp(value, "true") == 0);
+    }
+}
+
+void UIContentImpl::EnableSystemParameterPerformanceMonitorCallback(
+    const char* key, const char* value, void* context)
+{
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
+        SystemProperties::SetPerformanceMonitorEnabled(strcmp(value, "true") == 0);
+    }
+}
+
 void UIContentImpl::AddWatchSystemParameter()
 {
     SystemProperties::AddWatchSystemParameter(ENABLE_TRACE_LAYOUT_KEY, this, EnableSystemParameterTraceLayoutCallback);
-    SystemProperties::AddWatchSystemParameter(
-        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
     SystemProperties::AddWatchSystemParameter(
         ENABLE_SECURITY_DEVELOPERMODE_KEY, this, EnableSystemParameterSecurityDevelopermodeCallback);
     SystemProperties::AddWatchSystemParameter(
         ENABLE_DEBUG_STATEMGR_KEY, this, EnableSystemParameterDebugStatemgrCallback);
     SystemProperties::AddWatchSystemParameter(
         ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_TRACE_INPUTEVENT_KEY, this, EnableSystemParameterTraceInputEventCallback);
+    SystemProperties::AddWatchSystemParameter(
+        ENABLE_PERFORMANCE_MONITOR_KEY, this, EnableSystemParameterPerformanceMonitorCallback);
 }
 
 std::vector<Ace::RectF> UIContentImpl::GetOverlayNodePositions() const

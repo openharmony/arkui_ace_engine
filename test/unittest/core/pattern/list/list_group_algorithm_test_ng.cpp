@@ -229,113 +229,6 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
 }
 
 /**
- * @tc.name: ListLayoutAlgorithmTest001
- * @tc.desc: Test the list layout from right to left
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ListGroupAlgTestNg, ListLayoutAlgorithmTest001, TestSize.Level1)
-{
-    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
-    ASSERT_NE(listPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listPattern);
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    /**
-     * @tc.steps: step2. call Layout function.
-     */
-    // set reverse true
-    auto listLayoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
-    listLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listLayoutProperty);
-    ASSERT_NE(layoutWrapper, nullptr);
-    ListLayoutAlgorithm listLayoutAlgorithm;
-    LayoutConstraintF layoutConstraint;
-    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
-    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
-    struct ListItemInfo listItemInfo1;
-    listItemInfo1.startPos = 0.0f;
-    listItemInfo1.endPos = 180.0f;
-    listLayoutAlgorithm.contentMainSize_ = 720.0f;
-    listLayoutAlgorithm.itemPosition_.emplace(std::make_pair(0, listItemInfo1));
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(listLayoutAlgorithm.itemPosition_.begin()->first);
-    auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-    float crossSize = 300.0f;
-    int32_t startIndex = 0;
-    listLayoutAlgorithm.LayoutItem(wrapper, 0, listLayoutAlgorithm.itemPosition_.begin()->second,
-        startIndex, crossSize);
-    float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width());
-    auto offset = OffsetF(crossSize - crossOffset - size.Width(), listItemInfo1.startPos);
-    EXPECT_EQ(0.f, crossOffset);
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    EXPECT_EQ(layoutDirection, TextDirection::RTL);
-}
-
-/**
- * @tc.name: ListItemLayoutAlgorithmTest001
- * @tc.desc: Test the listitem layout from right to left
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ListGroupAlgTestNg, ListItemLayoutAlgorithmTest001, TestSize.Level1)
-{
-    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
-    ASSERT_NE(listItemPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listItemPattern);
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    /**
-     * @tc.steps: step2. call Layout function.
-     */
-    // set reverse true
-    auto listItemLayoutProperty = frameNode->GetLayoutProperty<ListItemLayoutProperty>();
-    listItemLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listItemLayoutProperty);
-    ASSERT_NE(layoutWrapper, nullptr);
-    ListItemLayoutAlgorithm listItemLayoutAlgorithm(0, 0, 0);
-    LayoutConstraintF layoutConstraint;
-    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
-    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
-    listItemLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
-    listItemLayoutAlgorithm.Layout(AceType::RawPtr(layoutWrapper));
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    EXPECT_EQ(layoutDirection, TextDirection::RTL);
-}
-
-/**
- * @tc.name: ListItemLayoutAlgorithmTest002
- * @tc.desc: Test the listitem layout from right to left
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ListGroupAlgTestNg, ListItemLayoutAlgorithmTest002, TestSize.Level1)
-{
-    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
-    ASSERT_NE(listItemPattern, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listItemPattern);
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    /**
-     * @tc.steps: step2. call Layout function.
-     */
-    // set reverse true
-    auto listItemLayoutProperty = frameNode->GetLayoutProperty<ListItemLayoutProperty>();
-    listItemLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listItemLayoutProperty);
-    ASSERT_NE(layoutWrapper, nullptr);
-    ListItemLayoutAlgorithm listItemLayoutAlgorithm(0, 0, 0);
-    LayoutConstraintF layoutConstraint;
-    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
-    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
-    listItemLayoutAlgorithm.Measure(AceType::RawPtr(layoutWrapper));
-    bool value = listItemLayoutAlgorithm.IsRTLAndVertical(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(value, true);
-}
-
-/**
  * @tc.name: ListItemGroupLayout001
  * @tc.desc: Test ListItemGroup rect and itemPosition with V2::ListItemGroupStyle::NONE
  * @tc.type: FUNC
@@ -840,6 +733,138 @@ HWTEST_F(ListGroupAlgTestNg, ListItemAlign002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Space001
+ * @tc.desc: test space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Space001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Normal space
+     * @tc.expected: There is space between listItems
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(SPACE));
+    CreateListItems(GROUP_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + SPACE);
+
+    /**
+     * @tc.steps: step2. Set invalid space
+     * @tc.expected: Space reset to 0
+     */
+    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    groupProperty->UpdateSpace(Dimension(-1.f));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Set space > groupHeight
+     * @tc.expected: Space reset to 0
+     */
+    groupProperty->UpdateSpace(Dimension(LIST_HEIGHT));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: Divider001
+ * @tc.desc: test divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Divider001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Normal divider
+     * @tc.expected: There is divider between listItems
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetDivider(ITEM_DIVIDER);
+    CreateListItems(GROUP_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + STROKE_WIDTH);
+
+    /**
+     * @tc.steps: step2. Set invalid strokeWidth
+     * @tc.expected: StrokeWidth reset to 0
+     */
+    auto divider = ITEM_DIVIDER;
+    divider.strokeWidth = Dimension(-1.f);
+    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    groupProperty->UpdateDivider(divider);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Set strokeWidth > groupHeight
+     * @tc.expected: StrokeWidth reset to 0
+     */
+    divider.strokeWidth = Dimension(LIST_HEIGHT);
+    groupProperty->UpdateDivider(divider);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: SpaceDivider001
+ * @tc.desc: test space and divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, SpaceDivider001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Normal space and divider, SPACE > strokeWidth
+     * @tc.expected: There is interval between listItems and equal to SPACE
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(SPACE));
+    groupModel.SetDivider(ITEM_DIVIDER);
+    CreateListItems(GROUP_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + SPACE);
+
+    /**
+     * @tc.steps: step2. Set SPACE < strokeWidth
+     * @tc.expected: The interval is strokeWidth
+     */
+    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    groupProperty->UpdateSpace(Dimension(1.f));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + STROKE_WIDTH);
+}
+
+/**
+ * @tc.name: InfinityCrossSize001
+ * @tc.desc: test Infinity crossSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, InfinityCrossSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Group Infinity crossSize
+     * @tc.expected: crossSize equal to child size
+     */
+    CreateList();
+    CreateListItemGroup();
+    ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
+    CreateListItem();
+    ViewAbstract::SetWidth(CalcLength(150.f));
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 150.f);
+}
+
+/**
  * @tc.name: ListGroupRepeatCacheCount001
  * @tc.desc: ListItemGroup cacheCount
  * @tc.type: FUNC
@@ -1024,138 +1049,6 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount003, TestSize.Level1)
     EXPECT_EQ(g2item0->IsActive(), false);
     auto g2item1 = groupNode2->GetChildByIndex(1 + 1)->GetHostNode();
     EXPECT_EQ(g2item1->IsActive(), false);
-}
-
-/**
- * @tc.name: Space001
- * @tc.desc: test space
- * @tc.type: FUNC
- */
-HWTEST_F(ListGroupAlgTestNg, Space001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set Normal space
-     * @tc.expected: There is space between listItems
-     */
-    CreateList();
-    ListItemGroupModelNG groupModel = CreateListItemGroup();
-    groupModel.SetSpace(Dimension(SPACE));
-    CreateListItems(GROUP_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + SPACE);
-
-    /**
-     * @tc.steps: step2. Set invalid space
-     * @tc.expected: Space reset to 0
-     */
-    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
-    groupProperty->UpdateSpace(Dimension(-1.f));
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
-
-    /**
-     * @tc.steps: step3. Set space > groupHeight
-     * @tc.expected: Space reset to 0
-     */
-    groupProperty->UpdateSpace(Dimension(LIST_HEIGHT));
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
-}
-
-/**
- * @tc.name: Divider001
- * @tc.desc: test divider
- * @tc.type: FUNC
- */
-HWTEST_F(ListGroupAlgTestNg, Divider001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set Normal divider
-     * @tc.expected: There is divider between listItems
-     */
-    CreateList();
-    ListItemGroupModelNG groupModel = CreateListItemGroup();
-    groupModel.SetDivider(ITEM_DIVIDER);
-    CreateListItems(GROUP_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + STROKE_WIDTH);
-
-    /**
-     * @tc.steps: step2. Set invalid strokeWidth
-     * @tc.expected: StrokeWidth reset to 0
-     */
-    auto divider = ITEM_DIVIDER;
-    divider.strokeWidth = Dimension(-1.f);
-    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
-    groupProperty->UpdateDivider(divider);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
-
-    /**
-     * @tc.steps: step3. Set strokeWidth > groupHeight
-     * @tc.expected: StrokeWidth reset to 0
-     */
-    divider.strokeWidth = Dimension(LIST_HEIGHT);
-    groupProperty->UpdateDivider(divider);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
-}
-
-/**
- * @tc.name: SpaceDivider001
- * @tc.desc: test space and divider
- * @tc.type: FUNC
- */
-HWTEST_F(ListGroupAlgTestNg, SpaceDivider001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set Normal space and divider, SPACE > strokeWidth
-     * @tc.expected: There is interval between listItems and equal to SPACE
-     */
-    CreateList();
-    ListItemGroupModelNG groupModel = CreateListItemGroup();
-    groupModel.SetSpace(Dimension(SPACE));
-    groupModel.SetDivider(ITEM_DIVIDER);
-    CreateListItems(GROUP_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + SPACE);
-
-    /**
-     * @tc.steps: step2. Set SPACE < strokeWidth
-     * @tc.expected: The interval is strokeWidth
-     */
-    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
-    groupProperty->UpdateSpace(Dimension(1.f));
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + STROKE_WIDTH);
-}
-
-/**
- * @tc.name: InfinityCrossSize001
- * @tc.desc: test Infinity crossSize
- * @tc.type: FUNC
- */
-HWTEST_F(ListGroupAlgTestNg, InfinityCrossSize001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set Group Infinity crossSize
-     * @tc.expected: crossSize equal to child size
-     */
-    CreateList();
-    CreateListItemGroup();
-    ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
-    CreateListItem();
-    ViewAbstract::SetWidth(CalcLength(150.f));
-    CreateDone(frameNode_);
-    EXPECT_EQ(GetChildWidth(frameNode_, 0), 150.f);
 }
 
 /**

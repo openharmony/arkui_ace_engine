@@ -32,6 +32,7 @@
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -176,10 +177,10 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
         ImageModel::GetInstance()->SetImageFit(ImageFit::COVER);
         return;
     }
-    int32_t parseRes = 2;
+    int32_t parseRes = static_cast<int32_t>(ImageFit::COVER);
     ParseJsInteger(args[0], parseRes);
     if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
-        parseRes = 2;
+        parseRes = static_cast<int32_t>(ImageFit::COVER);
     }
     auto fit = static_cast<ImageFit>(parseRes);
     ImageModel::GetInstance()->SetImageFit(fit);
@@ -335,19 +336,23 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
 
     if (info.Length() > 1) {
-        auto options = info[1];
-        if (!options->IsObject()) {
-            return;
-        }
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        panda::Local<JsiValue> value = options.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
+        ParseImageAIOptions(info[1]);
     }
+}
+
+void JSImage::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
