@@ -44,6 +44,7 @@ protected:
 
 private:
     void UpdateDisplayInfo();
+    void UpdateRenderPivot(float pivotX, float pivotY);
     void DeduplicateDisplayInfo();
     void UpdateToInputManager(float rotation);
     void InputManagerUpdateDisplayInfo(RectF paintRect, MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo);
