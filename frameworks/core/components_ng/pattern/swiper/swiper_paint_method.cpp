@@ -44,6 +44,8 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<SwiperPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
+    auto geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
 
     // TODO use theme.
     constexpr float FADE_MAX_DISTANCE = 2000.0f;
@@ -53,7 +55,7 @@ void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) 
     constexpr float FADE_SCALE_RATE = 0.2f;
 
     bool isVertical = (axis_ == Axis::VERTICAL);
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto frameSize = geometryNode->GetFrameSize();
     float width = frameSize.Width();
     float height = frameSize.Height();
     float centerX = 0.0;
@@ -120,10 +122,11 @@ CanvasDrawFunction SwiperPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
 void SwiperPaintMethod::ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const
 {
-    if (!needClipPadding_) {
+    if (!needClipPadding_ || !paintWrapper) {
         return;
     }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();

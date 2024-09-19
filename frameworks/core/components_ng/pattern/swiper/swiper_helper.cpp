@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
 {
+    CHECK_NULL_VOID(controller);
     controller->SetSwipeToImpl([weak](int32_t index, bool reverse) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -376,6 +377,7 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
 {
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(jsonValue, "");
     jsonValue->Put("left", params->dimLeft.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("top", params->dimTop.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("right", params->dimRight.value_or(0.0_vp).ToString().c_str());
@@ -397,6 +399,7 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
 {
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(jsonValue, "");
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
