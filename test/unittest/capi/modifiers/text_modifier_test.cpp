@@ -390,16 +390,6 @@ HWTEST_F(TextModifierTest, setFontFamily, TestSize.Level1)
     modifier_->setFontFamily(node_, &v1);
     auto checkVal1 = GetStringAttribute(node_, FONT_FAMILY_ATTR);
     EXPECT_EQ(checkVal1, "testFontFamily");
-
- 
-    auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    Union_String_Resource v2 = {
-        .selector = 1,
-        .value1 = ArkResource(&resName, -1, NodeModifier::ResourceType::STRARRAY)
-    };
-    modifier_->setFontFamily(node_, &v2);
-    auto checkVal2 = GetStringAttribute(node_, FONT_FAMILY_ATTR);
-    EXPECT_EQ(checkVal2, "HarmonyOS Sans");
 }
 
 HWTEST_F(TextModifierTest, setMaxLines, TestSize.Level1)

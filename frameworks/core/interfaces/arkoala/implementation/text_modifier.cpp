@@ -42,8 +42,6 @@ inline FontSettingOptions Convert(const Ark_FontSettingOptions& src)
 }
 
 namespace GeneratedModifier {
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
-
 namespace TextInterfaceModifier {
 void SetTextOptionsImpl(Ark_NativePointer node,
                         const Opt_Type_TextInterface_setTextOptions_Arg0* content,
