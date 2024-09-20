@@ -17,6 +17,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
+#include "core/components_ng/pattern/shape/path_layout_algorithm.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
@@ -35,6 +36,12 @@ RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
 std::optional<NG::SizeF> NG::ShapeContainerLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
+{
+    return {};
+}
+
+std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     return {};
 }

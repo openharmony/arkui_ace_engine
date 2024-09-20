@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
@@ -762,7 +763,10 @@ void* createPasteButtonNode(ArkUI_Int32 nodeId)
 
 void* createPathNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PathModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
