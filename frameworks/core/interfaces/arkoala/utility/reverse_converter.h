@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
@@ -119,6 +120,13 @@ namespace OHOS::Ace::NG::Converter {
         dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
     }
 
+    inline void AssignArkValue(Ark_Length& dst, const Dimension& src)
+    {
+        dst.type = ARK_TAG_FLOAT32;
+        dst.value = src.Value();
+        dst.unit = static_cast<int32_t>(src.Unit());
+    }
+
     inline void AssignArkValue(Ark_Number& dst, const Dimension& src)
     {
         auto value = static_cast<float>(src.ConvertToVp());
@@ -169,9 +177,22 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
+    inline void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
+    {
+        switch (src) {
+            case NavigationMode::STACK: dst = ARK_NAVIGATION_MODE_STACK; break;
+            case NavigationMode::SPLIT: dst = ARK_NAVIGATION_MODE_SPLIT; break;
+            case NavigationMode::AUTO: dst = ARK_NAVIGATION_MODE_AUTO; break;
+            default: {
+                dst = static_cast<Ark_NavigationMode>(-1);
+                LOGE("Unexpected enum value in NavigationMode: %{public}d", src);
+            }
+        }
+    }
+
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
-    
+
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 
     // Handle enum types
