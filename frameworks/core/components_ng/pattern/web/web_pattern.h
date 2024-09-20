@@ -1003,6 +1003,7 @@ private:
     int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;
+    int32_t mouseEventDeviceId_ = -1;
     int64_t tooltipTimestamp_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
