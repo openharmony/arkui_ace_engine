@@ -60,6 +60,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/text/text_emoji_processor.h"
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -2853,6 +2854,11 @@ void TextFieldPattern::OnModifyDone()
     CheckIfNeedToResetKeyboard();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto textFieldPaintProperty = host->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    if (textFieldPaintProperty && textFieldPaintProperty->HasBorderColorFlagByUser()) {
+        textFieldPaintProperty->UpdateBorderColorFlagByUser(
+            renderContext->GetBorderColorValue(BorderColorProperty {}));
+    }
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
     ApplyNormalTheme();
     ApplyUnderlineTheme();
