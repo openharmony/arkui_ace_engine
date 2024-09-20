@@ -246,6 +246,7 @@ std::string GetWebDebugBackGroundColor()
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
+constexpr int32_t TRIPLE_CLICK_NUM = 3;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
@@ -1065,11 +1066,9 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
-
-    if (!HandleDoubleClickEvent(info)) {
-        delegate_->OnMouseEvent(
-            localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
-    }
+    int32_t clickNum = HandleMouseClickEvent(info);
+    delegate_->OnMouseEvent(
+        localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), clickNum);
 
     if (info.GetAction() == MouseAction::MOVE) {
         mouseHoveredX_ = localLocation.GetX();
@@ -1132,6 +1131,45 @@ SizeF WebPattern::GetDragPixelMapSize() const
     return pixelMapSize;
 }
 
+int32_t WebPattern::HandleMouseClickEvent(const MouseInfo& info)
+{
+    if (info.GetButton() != MouseButton::LEFT_BUTTON || info.GetAction() != MouseAction::PRESS) {
+        return SINGLE_CLICK_NUM;
+    }
+    auto localLocation = info.GetLocalLocation();
+    MouseClickInfo clickInfo;
+    clickInfo.x = localLocation.GetX();
+    clickInfo.y = localLocation.GetY();
+    clickInfo.start = info.GetTimeStamp();
+    if (mouseClickQueue_.empty()) {
+        mouseClickQueue_.push(clickInfo);
+        return SINGLE_CLICK_NUM;
+    }
+    std::chrono::duration<float> timeout_ = clickInfo.start - mouseClickQueue_.back().start;
+    double offsetX = clickInfo.x - mouseClickQueue_.back().x;
+    double offsetY = clickInfo.y - mouseClickQueue_.back().y;
+    double offset = sqrt(offsetX * offsetX + offsetY * offsetY);
+    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL && offset < DEFAULT_DBCLICK_OFFSET) {
+        if (mouseClickQueue_.size() == SINGLE_CLICK_NUM) {
+            mouseClickQueue_.push(clickInfo);
+            return DOUBLE_CLICK_NUM;
+        } else if (mouseClickQueue_.size() == DOUBLE_CLICK_NUM) {
+            mouseClickQueue_.push(clickInfo);
+            return TRIPLE_CLICK_NUM;
+        } else if (mouseClickQueue_.size() == TRIPLE_CLICK_NUM) {
+            mouseClickQueue_.pop();
+            mouseClickQueue_.push(clickInfo);
+            return TRIPLE_CLICK_NUM;
+        }
+    }
+    if (mouseClickQueue_.size()) {
+        std::queue<MouseClickInfo> empty;
+        swap(empty, mouseClickQueue_);
+        mouseClickQueue_.push(clickInfo);
+    }
+    return SINGLE_CLICK_NUM;
+}
+
 bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON || info.GetAction() != MouseAction::PRESS) {
@@ -1142,26 +1180,26 @@ bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
     clickInfo.x = localLocation.GetX();
     clickInfo.y = localLocation.GetY();
     clickInfo.start = info.GetTimeStamp();
-    if (doubleClickQueue_.empty()) {
-        doubleClickQueue_.push(clickInfo);
+    if (mouseClickQueue_.empty()) {
+        mouseClickQueue_.push(clickInfo);
         return false;
     }
-    std::chrono::duration<float> timeout_ = clickInfo.start - doubleClickQueue_.back().start;
-    double offsetX = clickInfo.x - doubleClickQueue_.back().x;
-    double offsetY = clickInfo.y - doubleClickQueue_.back().y;
+    std::chrono::duration<float> timeout_ = clickInfo.start - mouseClickQueue_.back().start;
+    double offsetX = clickInfo.x - mouseClickQueue_.back().x;
+    double offsetY = clickInfo.y - mouseClickQueue_.back().y;
     double offset = sqrt(offsetX * offsetX + offsetY * offsetY);
     if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL && offset < DEFAULT_DBCLICK_OFFSET) {
         SendDoubleClickEvent(clickInfo);
         std::queue<MouseClickInfo> empty;
-        swap(empty, doubleClickQueue_);
+        swap(empty, mouseClickQueue_);
         return true;
     }
-    if (doubleClickQueue_.size() == 1) {
-        doubleClickQueue_.push(clickInfo);
+    if (mouseClickQueue_.size() == 1) {
+        mouseClickQueue_.push(clickInfo);
         return false;
     }
-    doubleClickQueue_.pop();
-    doubleClickQueue_.push(clickInfo);
+    mouseClickQueue_.pop();
+    mouseClickQueue_.push(clickInfo);
     return false;
 }
 
