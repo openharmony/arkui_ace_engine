@@ -4516,6 +4516,9 @@ void WebPattern::OnTooltip(const std::string& tooltip)
 void WebPattern::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(renderContextForPopupSurface_);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "Web %{public}d popup window resize to (x:%{public}d, y:%{public}d, width:%{public}d, height:%{public}d)",
+        GetWebId(), x, y, width, height);
     renderContextForPopupSurface_->SetBounds(x, y, width, height);
 }
 
@@ -4525,7 +4528,8 @@ void WebPattern::OnPopupShow(bool show)
         CHECK_NULL_VOID(renderContextForPopupSurface_);
         renderContextForPopupSurface_->SetBounds(0, 0, 0, 0);
     }
-
+    
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web %{public}d show popup window %{public}d", GetWebId(), show);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
